@@ -1,0 +1,98 @@
+<div class="parameter">
+  <h4>{{toolName}}</h4>
+  <div [formGroup]='form'>
+      <mat-grid-list cols="4" rowHeight="70px">
+          <mat-grid-tile [colspan]="1">
+              <svg width="50px" height="50px">
+                  <circle cy="25px" cx="25px" [attr.r]="strokeWidthValue/2" />
+              </svg>
+          </mat-grid-tile>
+          <mat-grid-tile [colspan]="3">
+              <mat-form-field>
+                  <mat-label>Epaisseur de la ligne</mat-label>
+                  <input matInput formControlName='strokeWidth' type="number" placeholder="Diametre de points" min="1"
+                      oninput="validity.valid||(value='');" onblur="validity.valid||(value='');">
+              </mat-form-field>
+          </mat-grid-tile>
+        <mat-grid-tile [colspan]="1">
+              <svg width='50' height='50'>
+                  <circle cy="25px" cx="25px" [attr.r]="diameter/2" />
+              </svg>
+          </mat-grid-tile>
+          <mat-grid-tile [colspan]="3">
+              <mat-form-field>
+                  <mat-label>Diametre du point </mat-label>
+                  <input matInput formControlName='diameter' type="number" placeholder="Epaisseur de la ligne" min="1"
+                      oninput="validity.valid||(value='');" onblur="validity.valid||(value='');">
+              </mat-form-field>
+          </mat-grid-tile>
+      </mat-grid-list>
+  </div>
+</div>
+
+<div class="parameter">
+<div [formGroup]='form'>
+  <div>
+  </div>
+  <div>
+    <mat-label>Motif de la ligne</mat-label>
+    <mat-button-toggle-group [(value)]="currentStyleMotif" #group="matButtonToggleGroup">
+      <mat-button-toggle mat-icon-button [matTooltip]="motif[0].tooltip" [value]="motif[0].id"
+        (click)="selectStyleMotif(motif[0].id)">
+        <svg width=26 height=26>
+          <polyline points='3 3, 20 20' stroke="black" stroke-width="5"></polyline>
+        </svg>
+      </mat-button-toggle>
+      <mat-button-toggle mat-icon-button [matTooltip]="motif[1].tooltip" [value]="motif[1].id"
+        (click)="selectStyleMotif(motif[1].id)">
+        <svg width=26 height=26>
+          <polyline points='3 3, 20 20' stroke="black" stroke-width="5" stroke-dasharray='10 4'></polyline>
+        </svg>
+      </mat-button-toggle>
+      <mat-button-toggle mat-icon-button [matTooltip]="motif[2].tooltip" [value]="motif[2].id"
+        (click)="selectStyleMotif(motif[2].id)">
+        <svg width=26 height=26>
+          <polyline points='3 3, 20 20' stroke="black" stroke-width="5" stroke-dasharray='5'></polyline>
+        </svg>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+</div>
+</div>
+
+<div class="parameter">
+<div [formGroup]='formJonctionLigne'>
+  <div>
+  </div>
+  <div>
+    <mat-label>Type de jonction</mat-label>
+    <mat-button-toggle-group [(value)]="currentStyleJonction" #group="matButtonToggleGroup">
+      <mat-button-toggle mat-icon-button [matTooltip]="jonction[0].tooltip" [value]="jonction[0].id"
+        (click)="selectStyleJonction(jonction[0].id)">
+        <svg width=26 height=26>
+          <polyline points='3 20, 3 3, 20 3' fill='none' stroke="black" stroke-width="5" stroke-linecap='round' stroke-linejoin='round'></polyline>
+        </svg>
+      </mat-button-toggle>
+      <mat-button-toggle mat-icon-button [matTooltip]="jonction[1].tooltip" [value]="jonction[1].id"
+        (click)="selectStyleJonction(jonction[1].id)">
+        <svg width=26 height=26>
+          <polyline points='3 20, 3 3, 20 3' fill='none' stroke="black" stroke-width="5" stroke-linecap='square'></polyline>
+        </svg>
+      </mat-button-toggle>
+      <mat-button-toggle mat-icon-button [matTooltip]="jonction[2].tooltip" [value]="jonction[2].id"
+        (click)="selectStyleJonction(jonction[2].id)">
+        <svg width=26 height=26>
+          <defs>
+            <marker id="m" viewBox="0 0 15 15" refX="5" refY="5">
+              <circle cx="5" cy="5" r="5">
+              </circle>
+            </marker>
+          </defs>
+          <polyline points='5 20, 5 5, 20 5' fill='none' stroke="black" stroke-width="5" marker-start='url(#m)' marker-mid='url(#m)' marker-end='url(#m)'>
+          </polyline>
+        </svg>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+</div>
+</div>

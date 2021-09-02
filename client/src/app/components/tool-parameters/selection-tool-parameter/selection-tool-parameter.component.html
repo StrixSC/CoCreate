@@ -1,0 +1,9 @@
+<div class="parameter">
+    <h4>{{toolName}}</h4>
+    <button mat-flat-button id='cut' matTooltip="Couper la sélection" (click)="cut()" [disabled]='!hasSelection'>Couper</button>
+    <button mat-flat-button id='copy' matTooltip="Copier la sélection" (click)="copy()" [disabled]='!hasSelection'>Copier</button>
+    <button mat-flat-button id='paste' matTooltip="Coller les éléments copier" (click)="paste()" [disabled]='!hasClipboardObject'>Coller</button>
+    <button mat-flat-button id='duplicate' matTooltip="Dupliquer la sélection" (click)="duplicate()" [disabled]='!hasSelection'>Dupliquer</button>
+    <button mat-flat-button id='deleteSelection' matTooltip="Supprime la sélection" (click)="deleteSelection()" [disabled]='!hasSelection'>Supprimer la sélection</button>
+    <button mat-flat-button id='selectAll' matTooltip="Tout selectionner" (click)="selectAll()">Tout sélectionner</button>
+</div>

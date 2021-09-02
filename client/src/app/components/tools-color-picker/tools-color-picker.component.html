@@ -1,0 +1,14 @@
+<form [formGroup]="form">
+    <div mat-dialog-content>
+        <app-color-picker></app-color-picker>
+        <div class="square-space">
+            <div *ngFor="let color of lastColors;" class="ripple-color mat-elevation-z4"
+                [style.background-color]="rgba2rgbaString(color)" (click)="selectLastColor(color)" matRipplez>
+            </div>
+        </div>
+    </div>
+    <div mat-dialog-actions align="end">
+        <button mat-raised-button color=primary [mat-dialog-close]="data" [disabled]="form.invalid">Choisir</button>
+        <button mat-raised-button color="accent" (click)='close()'>Annuler</button>
+    </div>
+</form>

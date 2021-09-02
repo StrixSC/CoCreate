@@ -1,0 +1,32 @@
+mat-sidenav-container{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+}
+
+mat-sidenav{
+  background-color: yellow// rgb(48, 46, 64);
+}
+
+div{
+  display: flex;
+
+
+  //width:100 vh;
+  //height: 1000 vh;
+  //overflow:hidden;
+}
+
+app-sidenav{
+  flex: 1 1 auto;
+  overflow:auto;
+}
+
+.container{
+  height:100%;
+  width:100%;
+  //display:flex;
+  //background-color:black;
+  //flex-direction: row;
+}

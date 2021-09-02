@@ -1,0 +1,24 @@
+<div class="parameter">
+    <h4>{{toolName}}</h4>
+    <div [formGroup]='form'>
+        <div>
+            <mat-form-field>
+                <mat-label>Émission de jet par seconde</mat-label>
+                <input matInput formControlName='emissionPerSecond' type="number"
+                    placeholder="Émission de jet par seconde" min="1" oninput="validity.valid||(value='1');"
+                    onblur="validity.valid||(value='1');">
+            </mat-form-field>
+
+            <mat-form-field>
+                <mat-label>Diamètre</mat-label>
+                <input matInput formControlName='diameter' type="number" placeholder="Diamètre" min="1"
+                    oninput="validity.valid||(value='1');" onblur="validity.valid||(value='1');">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>Taille des points de vaporisation</mat-label>
+                <input matInput formControlName='circleRadius' type="number" placeholder="Taille" min="1"
+                    oninput="validity.valid||(value='1');" onblur="validity.valid||(value='1');">
+            </mat-form-field>
+        </div>
+    </div>
+</div>

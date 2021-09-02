@@ -1,0 +1,9 @@
+<h1 mat-dialog-title>{{data.title}}</h1>
+<div mat-dialog-content>
+    <h3 class="mat-h3">{{data.description}}
+    </h3>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-raised-button color="primary" [mat-dialog-close]="true">Accepter</button>
+    <button mat-raised-button color="accent" [mat-dialog-close]="false">Annuler</button>
+</div>

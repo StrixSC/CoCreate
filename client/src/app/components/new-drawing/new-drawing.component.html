@@ -1,0 +1,16 @@
+<h1 mat-dialog-title>Nouveau Dessin</h1>
+
+<form [formGroup]="form" (ngSubmit)="onAccept(form.value)">
+    <div mat-dialog-content>
+        <app-new-drawing-form [sizeForm]="sizeForm">
+        </app-new-drawing-form>
+        <h2 class="mat-h2">Couleur de fond :</h2>
+        <app-color-picker style="text-align: center">
+        </app-color-picker>
+        <mat-divider></mat-divider>
+    </div>
+    <mat-dialog-actions align="end">
+        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Créer</button>
+        <button mat-raised-button color="accent" type="button" (click)="onCancel()">Annuler</button>
+    </mat-dialog-actions>
+</form>

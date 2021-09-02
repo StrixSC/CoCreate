@@ -1,0 +1,121 @@
+<div class="parameter">
+  <h4>{{toolName}}</h4>
+  <div [formGroup]='form'>
+    <mat-grid-list cols="4" rowHeight="70px">
+      <mat-grid-tile [colspan]="3">
+        <mat-form-field>
+          <mat-label>Taille des carrés</mat-label>
+          <input matInput formControlName='sizeCell' type="number" placeholder="Taille des carrés" min="1"
+            oninput="validity.valid||(value='100');" onblur="validity.valid||(value='100');">
+        </mat-form-field>
+      </mat-grid-tile>
+    </mat-grid-list>
+    <div>
+      <mat-label>Transparence</mat-label>
+      <mat-slider formControlName='transparence' type="number" min="0.1" max="1" step="0.01"
+        oninput="validity.valid||(value='');" onblur="validity.valid||(value='');"></mat-slider>
+    </div>
+    <mat-label>Couleur de la grille</mat-label>
+    <mat-button-toggle-group #group="matButtonToggleGroup" (change)="changeColor($event)">
+      <mat-button-toggle mat-icon-button [matTooltip]="styles[0].tooltip" [value]="styles[0].id">
+        <svg width=26 height=26>
+          <rect x=3 y=3 width=20 height=20 fill="black" stroke="black" stroke-width="3"></rect>
+        </svg>
+      </mat-button-toggle>
+      <mat-button-toggle mat-icon-button [matTooltip]="styles[1].tooltip" [value]="styles[1].id">
+        <svg width=26 height=26>
+          <rect x=3 y=3 width=20 height=20 fill="white" stroke="black" stroke-width="1"></rect>
+        </svg>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+    <div>
+      <p></p>
+    </div>
+    <div>
+      <mat-checkbox id='showGrid' formControlName='activateGrid' (change)="onSelection($event)">Activer la grille
+      </mat-checkbox>
+    </div>
+    <div>
+      <mat-checkbox id='activateMagnetism' formControlName='activateMagnetism'
+        (onChange)="onMagnetismSelection($event)">Activer le magnétisme
+      </mat-checkbox>
+    </div>
+  </div>
+</div>
+<p>Point d'ancrage<p>
+  <div class="anchor">
+    <mat-button-toggle-group #group="matButtonToggleGroup" (change)="changeAnchor($event)">
+
+     <mat-button-toggle  [value]="FIRST_ANCHOR"> 
+        <svg width =30 height=30>
+          <circle cx=15 cy=15 r=5 fill="black" stroke="black" stroke-width="1"></circle> 
+          <line x1=15 y1=20 x2=15 y2=35 stroke="black" stroke-width="1"> </line>
+          <line x1=20 y1=15 x2=35 y2=15 stroke="black" stroke-width="1"> </line>
+        </svg>
+      </mat-button-toggle>
+
+      <mat-button-toggle  [value]="SECOND_ANCHOR"> 
+        <svg width =30 height=30>
+          <circle cx=15 cy=15 r=5 fill="red" stroke="red" stroke-width="1"></circle> 
+          <line x1=0 y1=15 x2=10 y2=15 stroke="black" stroke-width="1"> </line>
+          <line x1=20 y1=15 x2=35 y2=15 stroke="black" stroke-width="1"> </line>
+        </svg>
+      </mat-button-toggle>
+
+      <mat-button-toggle  [value]="THIRD_ANCHOR">
+        <svg width =30 height=30>
+          <circle cx=15 cy=15 r=5 fill="blue" stroke="blue" stroke-width="1"></circle> 
+          <line x1=0 y1=15 x2=10 y2=15 stroke="black" stroke-width="1"> </line>
+          <line x1=15 y1=20 x2=15 y2=35 stroke="black" stroke-width="1"> </line>
+        </svg>
+      </mat-button-toggle>
+
+      <mat-button-toggle  [value]="EIGTH_ANCHOR">
+        <svg width =30 height=30>
+          <circle cx=15 cy=15 r=5 fill="yellow" stroke="yellow" stroke-width="1"></circle> 
+          <line x1=15 y1=0 x2=15 y2=10 stroke="black" stroke-width="1"> </line>
+          <line x1=15 y1=20 x2=15 y2=35 stroke="black" stroke-width="1"> </line>
+        </svg>
+      </mat-button-toggle>
+
+      <mat-button-toggle  [value]="NINETH_ANCHOR">
+        <svg width =30 height=30>
+          <circle cx=15 cy=15 r=5 fill="green" stroke="green" stroke-width="1"></circle> 
+        </svg>
+      </mat-button-toggle>
+
+      <mat-button-toggle  [value]="FOURTH_ANCHOR">
+        <svg width =30 height=30>
+          <circle cx=15 cy=15 r=5 fill="purple" stroke="purple" stroke-width="1"></circle> 
+          <line x1=15 y1=0 x2=15 y2=10 stroke="black" stroke-width="1"> </line>
+          <line x1=15 y1=20 x2=15 y2=35 stroke="black" stroke-width="1"> </line>
+        </svg>
+      </mat-button-toggle>
+    
+      <mat-button-toggle  [value]="SEVENTH_ANCHOR">
+        <svg width =30 height=30>
+          <circle cx=15 cy=15 r=5 fill="grey" stroke="grey" stroke-width="1"></circle> 
+          <line x1=20 y1=15 x2=35 y2=15 stroke="black" stroke-width="1"> </line>
+          <line x1=15 y1=0 x2=15 y2=10 stroke="black" stroke-width="1"> </line>
+        </svg>
+      </mat-button-toggle> 
+
+      <mat-button-toggle  [value]="SIXTH_ANCHOR">
+        <svg width =30 height=30>
+          <circle cx=15 cy=15 r=5 fill="orange" stroke="orange" stroke-width="1"></circle> 
+          <line x1=0 y1=15 x2=10 y2=15 stroke="black" stroke-width="1"> </line>
+          <line x1=20 y1=15 x2=35 y2=15 stroke="black" stroke-width="1"> </line>
+        </svg>
+      </mat-button-toggle>
+
+      <mat-button-toggle  [value]="FIFTH_ANCHOR">
+        <svg width =30 height=30>
+          <circle cx=15 cy=15 r=5 fill="pink" stroke="pink" stroke-width="1"></circle> 
+          <line x1=0 y1=15 x2=10 y2=15 stroke="black" stroke-width="1"> </line>
+          <line x1=15 y1=0 x2=15 y2=10 stroke="black" stroke-width="1"> </line>
+        </svg>
+      </mat-button-toggle>  
+    </mat-button-toggle-group>   
+  </div>
+
+  

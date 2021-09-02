@@ -1,0 +1,14 @@
+<div class="parameter">
+    <h4>{{toolName}}</h4>
+    <div [formGroup]='form'>
+        <mat-grid-list cols="4" rowHeight="70px">
+            <mat-grid-tile [colspan]="4">
+                <mat-form-field>
+                    <mat-label>Tolérance</mat-label>
+                    <input matInput formControlName='tolerance' type="number" placeholder="Tolérance" min="0" max="100"
+                        step="1" oninput="validity.valid||(value='0');" onblur="validity.valid||(value='0');">
+                </mat-form-field>
+            </mat-grid-tile>
+        </mat-grid-list>
+    </div>
+</div>

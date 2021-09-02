@@ -1,0 +1,23 @@
+<div class="row">
+    <svg [attr.width]="width" [attr.height]="height">
+        <rect [attr.width]="secondarySize.width" [attr.height]="secondarySize.height" [attr.fill]="secondaryColor"
+            [attr.fill-opacity]="secondaryAlpha" class="color-selector" (click)="clickSecondary($event)"
+            matTooltip="Couleur secondaire" />
+        <rect [attr.x]="primarySize.x" [attr.y]="primarySize.y" [attr.width]="primarySize.width"
+            [attr.height]="primarySize.height" [attr.fill]="primaryColor" [attr.fill-opacity]="primaryAlpha"
+            class="color-selector" (click)="clickPrimary($event)" matTooltip="Couleur primaire" />
+    </svg>
+</div>
+<div class="row">
+    <button mat-icon-button matTooltip="Inverser les couleurs" (click)="switchColor()">
+        <mat-icon>invert_colors</mat-icon>
+    </button>
+</div>
+<div class="row">
+    <h4>Fond:</h4>
+    <svg [attr.width]="backgroundSize.width" [attr.height]="backgroundSize.height">
+        <rect [attr.x]="1" [attr.y]="1" [attr.width]="backgroundSize.width-2" [attr.height]="backgroundSize.height-2"
+            [attr.fill]="backgroundColor" [attr.fill-opacity]="backgroundAlpha" class="color-selector"
+            (click)="clickBackground($event)" matTooltip="Couleur de fond" />
+    </svg>
+</div>

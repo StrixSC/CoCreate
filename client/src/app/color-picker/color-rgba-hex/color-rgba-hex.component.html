@@ -1,0 +1,21 @@
+<div class="row" [formGroup]='rgb'>
+    <span>
+        <mat-form-field class="rgbfield">
+            <input matInput placeholder="R" formControlName="r" type="number" min=0 max=255>
+        </mat-form-field>
+        <mat-form-field class="rgbfield">
+            <input matInput placeholder="G" formControlName="g" type="number" min=0 max=255>
+        </mat-form-field>
+        <mat-form-field class="rgbfield">
+            <input matInput placeholder="B" formControlName="b" type="number" min=0 max=255>
+        </mat-form-field>
+    </span>
+</div>
+<div class="row" [formGroup]='colorForm'>
+    <mat-form-field class="hexfield">
+        <input matInput placeholder="HEX" formControlName="hex" pattern="#([a-fA-F0-9]{1,6})">
+    </mat-form-field>
+    <mat-form-field class="alphafield">
+        <input matInput placeholder="A" formControlName="a" type="number" min=0 max=1 step=0.1>
+    </mat-form-field>
+</div>

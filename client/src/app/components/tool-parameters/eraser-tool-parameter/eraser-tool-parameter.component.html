@@ -1,0 +1,22 @@
+<div class="parameter">
+  <h4>{{toolName}}</h4>
+  <div [formGroup]='form'>
+    <mat-grid-list cols="4" rowHeight="70px" class="row-field">
+      <mat-grid-tile [colspan]="1">
+        <svg width="50px" height="50px" class="brush-size">
+          <rect [attr.x]="24 - eraserWidth/2" [attr.y]="24 - eraserWidth/2" [attr.width]="eraserWidth"
+            [attr.height]="eraserWidth" stroke="black" fill="white" />
+        </svg>
+      </mat-grid-tile>
+      <mat-grid-tile [colspan]="3">
+        <mat-form-field>
+          <mat-label>Largeur de l'efface</mat-label>
+          <input id="eraserSize" matInput matTextareaAutosize formControlName='eraserSize' type="number"
+            placeholder="Largeur de l'efface" min="1" oninput="validity.valid||(value='1');"
+            onblur="validity.valid||(value='1');">
+        </mat-form-field>
+      </mat-grid-tile>
+
+    </mat-grid-list>
+  </div>
+</div>

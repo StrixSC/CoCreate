@@ -1,0 +1,82 @@
+<h1 mat-dialog-title>Ouvrir un dessin</h1>
+<mat-dialog-content>
+    <mat-tab-group #tabGroup [selectedIndex]="selectedTab.value" (selectedIndexChange)="selectedTab.setValue($event)">
+        <mat-tab label="En Ligne">
+            <mat-form-field class="tag-list">
+                <mat-chip-list #chipList aria-label="Sélection d'étiquette">
+                    <mat-chip *ngFor="let tag of selectedTags" [selectable]="selectable" [removable]="removable"
+                        (removed)="remove(tag)">
+                        {{tag}}
+                        <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+                    </mat-chip>
+                    <input placeholder="Étiquette(s)..." #tagInput [formControl]="tagCtrl" [matAutocomplete]="auto"
+                        [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                        [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="add($event)">
+                </mat-chip-list>
+                <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+                    <mat-option *ngFor="let tag of filteredTags | async" [value]="tag">
+                        {{tag}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-paginator [length]="numPages" [pageSize]="3" [pageIndex]="pageIndex" (page)="pageEvent = $event;">
+            </mat-paginator>
+            <div style="grid-column: 1;
+                grid-row: 1;" *ngIf="!isLoaded">
+                <mat-progress-spinner class="example-margin" color="primary" mode="indeterminate">
+                </mat-progress-spinner>
+            </div>
+            <div *ngIf="isLoaded" class="drawing-list">
+                <div *ngIf="dataObs.value.length !== 0">
+                    <div *ngFor="let drawing of dataObs | async" style="margin: 10px;">
+                        <mat-card class="drawing-card" (click)="selectDrawing(drawing)"
+                            [style.backgroundColor]='getBackgroundSelected(drawing)' matRipple
+                            [matRippleCentered]="false" [matRippleDisabled]="false" [matRippleUnbounded]="false">
+                            <mat-card-header>
+                                <mat-card-title>{{drawing.name}}</mat-card-title>
+                                <mat-card-subtitle>
+                                    {{isOneWeekOld(drawing.createdAt) ? (drawing.createdAt | date:'short') : (drawing.createdAt | amTimeAgo)}}
+                                </mat-card-subtitle>
+                                <div fxFlex></div>
+                                <div fxLayoutAlign="center center">
+                                    <button mat-icon-button color="accent" aria-label="Suprimer"
+                                        (click)="deleteDrawing($event, drawing)">
+                                        <mat-icon>delete_forever</mat-icon>
+                                    </button>
+                                </div>
+                            </mat-card-header>
+                            <div [id]=drawing.path class="thumbnail">
+                                <img [src]="drawing.path" [width]='100' [height]='100'>
+                            </div>
+                            <mat-card-content>
+                                Tags :
+                                <p>
+                                    {{tagsToStringList(drawing.tags)}}
+                                </p>
+                            </mat-card-content>
+                        </mat-card>
+                    </div>
+                </div>
+                <div *ngIf="dataObs.value.length === 0">
+                    <h4>Aucun dessin ne correspond aux filtrage demandé</h4>
+                </div>
+            </div>
+        </mat-tab>
+        <mat-tab label="En Local">
+            <p>Téléverser un fichier</p>
+            <input #fileUpload color="primary" (change)="handleFile($event)" id="fileInput" name="file" type="file">
+            <div id="localFileThumbnail" class="local-thumbnail">
+                <svg width="100%" height="100%">
+                    {{getLocalThumbnail()}}
+                </svg>
+            </div>
+            <p> {{errorOpenFile}} </p>
+        </mat-tab>
+    </mat-tab-group>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-raised-button color="primary" (click)="accept()" [disabled]="!selectedDrawing">Ouvrir</button>
+    <button mat-raised-button color="accent" (click)="close()">Annuler</button>
+</mat-dialog-actions>

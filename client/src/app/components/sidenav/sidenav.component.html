@@ -1,0 +1,43 @@
+<mat-sidenav-container class="container">
+  <mat-sidenav mode="side" fixedInViewport=true fxFlexFill disableClose=true opened>
+    <div class="iconsGroup menu-button">
+      <button mat-icon-button matTooltip="Menu" (click)="openControlMenu()" >
+        <mat-icon>menu</mat-icon>
+      </button>
+    </div>
+    <mat-divider></mat-divider>
+    <div>
+      <button mat-icon-button (click)="open()" *ngIf="!isOpened">
+        <mat-icon>keyboard_arrow_right</mat-icon>
+      </button>
+      <button mat-icon-button (click)="close()" *ngIf="isOpened">
+        <mat-icon>keyboard_arrow_left</mat-icon>
+      </button>
+    </div>
+    <div>
+      <mat-button-toggle-group class="iconsGroup" #group="matButtonToggleGroup" [value]="currentToolId"
+        [vertical]="true">
+        <mat-button-toggle mat-icon-button *ngFor="let tool of toolList | keyvalue;" [matTooltip]="tool.value.toolName"
+          [value]="tool.value.id" (click)="open()" (change)="selectionChanged($event)">
+          <fa-icon [icon]="tool.value.faIcon"></fa-icon>
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+    
+    <mat-divider></mat-divider>
+    <div class="iconsGroup grid-button">
+      <button mat-icon-button matTooltip="Grille" (click)="openGridMenu()">
+        <mat-icon>border_all</mat-icon>
+      </button>
+    </div>
+
+    <mat-divider></mat-divider>
+    <div>
+      <app-tools-color></app-tools-color>
+    </div>
+
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <app-parameter-menu [selectId]="selectedParameter"></app-parameter-menu>
+  </mat-sidenav-content>
+</mat-sidenav-container>

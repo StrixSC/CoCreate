@@ -1,0 +1,12 @@
+@import "../tool-parameter.constant.scss";
+
+.anchor mat-button-toggle-group{
+    display: flex;
+    flex-wrap: wrap;
+    margin: 13.5px;
+    align-items: "center";
+}
+
+.anchor mat-button-toggle {
+    border: 1px solid grey
+}

@@ -1,0 +1,5 @@
+<mat-drawer-container class="workspace">
+  <mat-drawer-content #workspaceEnv (mousedown)="onMouseDown($event)" (contextmenu)="onRightClick($event)">
+    <app-canvas></app-canvas>
+  </mat-drawer-content>
+</mat-drawer-container>

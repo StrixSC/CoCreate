@@ -1,0 +1,8 @@
+<mat-drawer-container>
+  <mat-drawer mode="side" class="mat-elevation-z4" [style.width]="width" [opened]="isOpened" class="parameter">
+    <ng-template #dynamicComponent appParameter></ng-template>
+  </mat-drawer>
+  <mat-drawer-content>
+    <app-workspace></app-workspace>
+  </mat-drawer-content>
+</mat-drawer-container>

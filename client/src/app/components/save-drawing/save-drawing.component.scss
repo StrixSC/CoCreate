@@ -1,0 +1,21 @@
+.tag-list {
+    width: 100%;
+}
+
+.tumbnail {
+    text-align: center;
+    width: auto;
+    height: auto;
+    border: 2px;
+    border-color: black;
+}
+
+#tab-group{
+  height: 100%;
+}
+mat-tab-body {
+  flex-grow: 1;
+}
+.mat-dialog-actions{
+  margin-bottom: 0  
+}

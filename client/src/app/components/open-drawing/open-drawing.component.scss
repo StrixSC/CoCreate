@@ -1,0 +1,43 @@
+.wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.overlay {
+  position: absolute;
+  z-index: 1002;
+  width: 100%;
+  height: 100%;
+}
+
+.spinner-wrapper {
+  display: flex;
+  justify-content: center;
+  justify-items: center;
+}
+
+.local-thumbnail {
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  width: 200px;
+}
+
+.drawing-card {
+  cursor: pointer;
+  float: left;
+  width: 150px;
+}
+
+.drawing-list {
+  height: 300px;
+  width: 100%;
+}
+
+.tag-list {
+  width: 90%;
+}
+
+.mat-dialog-content {
+  height: 400px;
+}

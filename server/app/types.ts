@@ -1,0 +1,16 @@
+export default {
+    Server: Symbol('Server'),
+    Application: Symbol('Application'),
+    IndexController: Symbol('IndexController'),
+    IndexService: Symbol('IndexService'),
+    DrawingController: Symbol('DrawingController'),
+    DrawingService: Symbol('DrawingService'),
+    TagService: Symbol('TagService'),
+    TagController: Symbol('TagController'),
+    ApiEndpointService: Symbol('ApiEndpointService'),
+    ApiEndpointController: Symbol('ApiEndpointController'),
+    MongoDbConnectionService: Symbol('MongoDbConnectionService'),
+    MulterProviderService: Symbol('MulterProviderService'),
+    CloudStorageService: Symbol('CloudStorageService'),
+    TimestampLogService: Symbol('TimestampLogService'),
+};

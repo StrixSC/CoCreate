@@ -1,0 +1,18 @@
+<h2 class="mat-h2">Dimension :</h2>
+<div [formGroup]='sizeForm'>
+    <mat-form-field>
+        <mat-label>Largeur</mat-label>
+        <input matInput formControlName='width' type="number" placeholder="Largeur" [min]="minDimension" required>
+    </mat-form-field>
+    <span class="space-between-forms-input">
+        <svg [attr.height]="xSize.height" [attr.width]="xSize.width">
+            <line [attr.x1]="xSize.x" [attr.y1]="xSize.x" [attr.x2]="xSize.y" [attr.y2]="xSize.y" class="x-style" />
+            <line [attr.x1]="xSize.y" [attr.y1]="xSize.x" [attr.x2]="xSize.x" [attr.y2]="xSize.y" class="x-style" />
+        </svg>
+    </span>
+    <mat-form-field>
+        <mat-label>Hauteur</mat-label>
+        <input matInput formControlName='height' type="number" placeholder="Hauteur" [min]="minDimension"
+            oninput="validity.valid || '';" required>
+    </mat-form-field>
+</div>

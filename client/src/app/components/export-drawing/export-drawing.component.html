@@ -1,0 +1,32 @@
+<h1 mat-dialog-title>Exporter le dessin</h1>
+
+
+<div mat-dialog-content class="wrapper">
+    <div>
+        <div >
+
+            <div>
+                <mat-label>Nom du fichier</mat-label>
+            </div>
+            <mat-radio-group [(ngModel)]="selection" #radioGroup="matRadioGroup">
+
+                <mat-radio-button *ngFor="let option of exportOptions" [value]="option">{{option}}
+                </mat-radio-button>
+      
+            </mat-radio-group>
+        </div>
+    </div>
+
+
+
+        <div class="tumbnail">
+            <svg #svg height="150" width="150">
+            </svg>
+        </div>
+
+</div>
+    <div mat-dialog-actions align="end" >
+    <button mat-raised-button color=primary (click)="export()"
+        [disabled]="isExportButtonEnabled">Exporter</button>
+    <button mat-raised-button color="accent" (click)="close()">Annuler</button>
+</div>

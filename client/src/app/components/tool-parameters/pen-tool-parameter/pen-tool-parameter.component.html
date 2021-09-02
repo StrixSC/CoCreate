@@ -1,0 +1,25 @@
+<div class="parameter">
+    <h4>{{toolName}}</h4>
+    <div [formGroup]='form'>
+        <mat-grid-list cols="4" rowHeight="70px">
+
+            <mat-grid-tile [colspan]="4">
+                <mat-form-field>
+                    <mat-label>Épaisseur maximum du trait</mat-label>
+                    <input matInput formControlName='maxStrokeWidth' type="number"
+                        placeholder="Épaisseur maximum du trait" min={{minStrokeWidthValue}}
+                        oninput="validity.valid||(value='8');" onblur="validity.valid||(value='8');">
+                </mat-form-field>
+            </mat-grid-tile>
+
+            <mat-grid-tile [colspan]="4">
+                <mat-form-field>
+                    <mat-label>Épaisseur minimum du trait</mat-label>
+                    <input matInput formControlName='minStrokeWidth' type="number"
+                        placeholder="Épaisseur minimum du trait" min="1" max={{maxStrokeWidthValue}}
+                        oninput="validity.valid||(value='1');" onblur="validity.valid||(value='1');">
+                </mat-form-field>
+            </mat-grid-tile>
+        </mat-grid-list>
+    </div>
+</div>

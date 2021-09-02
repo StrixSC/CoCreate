@@ -1,0 +1,24 @@
+<div class="parameter">
+    <h4>{{toolName}}</h4>
+    <div [formGroup]='form'>
+        <mat-grid-list cols="4" rowHeight="70px">
+
+            <mat-grid-tile [colspan]="4">
+                <mat-form-field>
+                    <mat-label>Longueur de ligne</mat-label>
+                    <input matInput formControlName='strokeWidth' type="number" placeholder="Longueur de ligne" min="1" 
+                        oninput="validity.valid||(value='8');" onblur="validity.valid||(value='8');">
+                </mat-form-field>
+            </mat-grid-tile>
+
+            <mat-grid-tile [colspan]="4">
+                <mat-form-field>
+                    <mat-label>Angle d'orientation (0-360)</mat-label>
+                    <input matInput formControlName='rotationAngle' type="number"
+                        placeholder="Angle d'orientation (0-360)" min="0" max="360"
+                        oninput="validity.valid||(value='0');" onblur="validity.valid||(value='0');">
+                </mat-form-field>
+            </mat-grid-tile>
+        </mat-grid-list>
+    </div>
+</div>

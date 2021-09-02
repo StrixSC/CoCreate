@@ -1,0 +1,20 @@
+<div>
+    <h4>Menu:</h4>
+    <button mat-flat-button id='welcome' matTooltip="Page Accueil" (click)="openWelcomeMessage()">Page
+        d'accueil</button>
+    <button mat-flat-button id='help' matTooltip="Aide" (click)="openHelp()"> Aide</button>
+    <button mat-flat-button id='drawing' matTooltip="Nouveau Dessin (CTRL+O)" (click)="openNewDrawing()">Nouveau
+        dessin</button>
+    <button mat-flat-button id='openDrawing' matTooltip="Ouvrir (CTRL+G)" (click)="openOpenDrawing()">Ouvrir</button>
+
+    <button mat-flat-button id='save' matTooltip="Sauvegarder (CTRL+S)" (click)="openSaveDrawing()"
+        [disabled]="isSaved">Sauvegarder</button>
+
+    <button mat-flat-button id='openExport' matTooltip="Exporter (CTRL+E)" (click)="openExportMenu()"
+        [disabled]='!isCreated'>Exporter</button>
+    <mat-divider></mat-divider>
+    <button mat-flat-button id='undo' matTooltip="Retour à l'arrière (CTRL+Z)" (click)="undo()"
+        [disabled]='!canUndo'>Retour à l'arrière</button>
+    <button mat-flat-button id='redo' matTooltip="Retour à l'avant (CTRL+SHIFT+Z)" (click)="redo()"
+        [disabled]='!canRedo'>Retour à l'avant</button>
+</div>

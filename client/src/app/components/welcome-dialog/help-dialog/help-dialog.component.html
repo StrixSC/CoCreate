@@ -1,0 +1,159 @@
+<h2 mat-dialog-title>Guide d'instruction</h2>
+<mat-dialog-content>
+    <mat-tab-group>
+        <mat-tab label=Outil>
+
+            <h2>Instruction sur les outils</h2>
+            <p>
+                <p>
+                    <b>Sélection:</b> Avec cet outil, l’utilisateur peut sélectionner un ou plusieurs objets de la
+                    surface
+                    de dessin. Il lui est ensuite possible de les déplacer, de changer leurs dimensions ou de les
+                    faire
+                    pivoter. <br>
+                </p>
+
+                <p>
+                    <b>Efface:</b> Cet outil permet de supprimer des objets de la surface de dessin. Tout objet se
+                    trouvant
+                    en contact avec l’efface lors d’un clic gauche est effacé. Pour se servir de l’outil comme d’une
+                    brosse,
+                    il suffit de maintenir le bouton gauche enfoncé et de déplacer la souris. <br>
+                </p>
+
+                <h4>Outil de tracage</h4>
+                <p style="margin-left: 40px">
+                    <b>Crayon:</b> Le crayon ne sert qu’à faire de simples traits sans texture particulière.<br>
+
+                    <b>Pinceau:</b> Cet outil est similaire au crayon. Il n’en diffère que par la texture du trait.
+                    Il y
+                    a 5
+                    textures différentes. <br>
+
+                    <b>Plume:</b> Cet outil ressemble lui aussi au crayon. Sa différence est dans la forme de sa
+                    pointe
+                    qui
+                    doit être une mince ligne plutôt que d’être ronde. Les angles sont de 0, 45, 90 et 135 degrés.
+                    <br>
+
+                    <b>Stylo: </b>La particularité de cet outil est que le trait laissé sur la surface de dessin
+                    s’amincit
+                    en fonction de la vitesse de déplacement de la souris. Plus la vitesse est grande, plus le trait
+                    est
+                    mince. <br>
+                </p>
+
+                <h4>Formes</h4>
+                <p style="margin-left: 40px">
+                    <b>Rectangle:</b> Cet outil permet de dessiner des rectangles. Toutefois, si la touche SHIFT est
+                    maintenue appuyée
+                    lors du traçage, la forme sera plutôt un carré. <br>
+
+                    <b>Ellipse:</b> Cet outil permet de dessiner des ellipses. Toutefois, si la touche SHIFT est
+                    maintenue
+                    appuyée
+                    lors du traçage, la forme sera plutôt un cercle. <br>
+
+                    <b>Polygone: </b> Cet outil permet de dessiner des polygone. Il permet à
+                    l’utilisateur de spécifier le nombre de côtés de la forme à dessiner. <br>
+                </p>
+
+                <p>
+                    <b>Ligne:</b> Cet outil permet de tracer une ligne d’un ou plusieurs segments. Un premier clic
+                    définit
+                    la position de départ de la ligne. Ensuite, chaque clic qui suit « connecte » avec le clic qui
+                    le
+                    précède pour former un segment de la ligne. Un double-clic indique la fin de la ligne.<br>
+                    Si la touche SHIFT est enfoncée au moment du double-clic, le début et la fin de la ligne sont
+                    relié
+                    par
+                    un nouveau segment.<br>
+                    Si la touche RETOUR ARRIÈRE est enfoncé lors du traçage d'une ligne, le dernier segment de la
+                    ligne
+                    est
+                    alors supprimer.<br>
+                    Si la touche ÉCHAPP est enfoncé lors du traçage, la ligne est complètement supprimer.<br>
+                </p>
+
+                <p>
+                    <b>Étampe:</b> L’étampe est une petite image que l’on peut apposer sur le dessin. Pour appliquer
+                    une
+                    étampe, il suffit d’un simple clic du bouton gauche à l’endroit désiré. On peut faire varier
+                    l'angle
+                    de
+                    l'étampe à l'aide de la roulette de la souris. <br>
+                </p>
+
+                <p>
+                    <b>Aérosol:</b> Cet outil simule un effet de peinture en aérosol. Dès que le bouton est enfoncé,
+                    un
+                    jet
+                    de peinture est vaporisé sous le pointeur de la souris. L’outil continu ensuite d’émettre de la
+                    peinture
+                    à intervalle régulier jusqu’à ce que le bouton soit relâché. <br>
+                </p>
+
+                <p>
+                    <b>Texte:</b> Cet outil permet d’écrire des chaines de caractères sur la surface de dessin. Pour
+                    l’utiliser, il suffit de cliquer à l’endroit où l’on veut écrire. Il n’y a pas de retour à la
+                    ligne
+                    automatique, l’utilisateur doit appuyer sur la touche RETOUR. Il est possible de modifier
+                    la taille, la police les mutateurs et l'alignement du texte<br>
+                </p>
+
+                <p>
+                    <b>Applicateur de couleur:</b> Cet outil permet de changer la couleur d’un objet simplement en
+                    cliquant
+                    dessus. Un clic gauche de la souris sur un
+                    objet fera changer sa couleur pour la couleur principale. Un clic droit sur un objet fera
+                    changer la couleur de bordure, s’il en a une, pour la couleur principale. <br>
+                </p>
+
+                <p>
+                    <b>Sceau de peinture:</b> Le sceau de peinture a pour effet de dupliquer une certaine région
+                    d'objet
+                    d'une
+                    couleur quelconque. <br>
+                </p>
+
+                <p>
+                    <b>Pipette:</b> Cet outil est utilisé pour saisir la couleur sous le pointeur de la souris. Un
+                    clic
+                    gauche
+                    de la souris assigne la couleur saisie à la couleur principale. Un clic droit l'assigne à la
+                    couleur
+                    secondaire.
+                    <br>
+                </p>
+        </mat-tab>
+        <mat-tab label=Racourcis>
+            <h2>Racourcis de clavier</h2>
+            <h4>Options de fichier:</h4>
+            <div *ngIf="this.messageShortcut  && this.messageShortcut.value; else notShow ">
+
+                {{messageShortcut.value.O}}<br>{{messageShortcut.value.S}}<br>{{messageShortcut.value.G}}<br>{{messageShortcut.value.E}}
+                <h4>Manipulations de sélection:</h4>
+                {{messageShortcut.value.X}}<br>{{messageShortcut.value.C}}<br>{{messageShortcut.value.V}}<br>{{messageShortcut.value.D}}<br>
+                {{messageShortcut.value.Sup}}<br>{{messageShortcut.value.A}}<br>{{messageShortcut.value.Z}}<br>{{messageShortcut.value.ShiftZ}}
+                <h4>Choisir un outil:</h4>
+                {{messageShortcut.value.Cray}}<br>{{messageShortcut.value.W}}<br>{{messageShortcut.value.P}}<br>{{messageShortcut.value.Y}}<br>
+                {{messageShortcut.value.Aer}}<br>{{messageShortcut.value.Rec}}<br>{{messageShortcut.value.Ell}}<br>{{messageShortcut.value.Poly}}<br>
+                {{messageShortcut.value.L}}<br>{{messageShortcut.value.T}}<br>{{messageShortcut.value.R}}<br>{{messageShortcut.value.B}}<br>
+                {{messageShortcut.value.Eff}}<br>{{messageShortcut.value.I}}<br>{{messageShortcut.value.Sel}}
+                <h4>Options de zone de travail: </h4>
+                {{messageShortcut.value.Gri}}<br>{{messageShortcut.value.M}}<br>{{messageShortcut.value.Aug}}<br>{{messageShortcut.value.Dim}}
+            </div>
+
+            <ng-template #notShow>
+                <p>
+                    Les ressources sur le serveur ne sont pas disponibles.
+                </p>
+            </ng-template>
+        </mat-tab>
+    </mat-tab-group>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-raised-button color="accent" (click)="close()">Annuler
+
+    </button>
+</mat-dialog-actions>

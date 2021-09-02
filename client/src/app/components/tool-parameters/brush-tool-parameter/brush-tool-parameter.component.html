@@ -1,0 +1,34 @@
+<div class="parameter">
+    <h4>{{toolName}}</h4>
+    <div [formGroup]='form'>
+        <mat-grid-list cols="4" rowHeight="70px" class="row-field">
+            <mat-grid-tile [colspan]="1">
+                <svg width="50px" height="50px" class="brush-size">
+                    <circle cy="25px" cx="25px" [attr.r]="strokeWidthValue/2" stroke="null" fill="black" />
+                </svg>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="3">
+                <mat-form-field class="stroke-width-form">
+                    <mat-label>Largeur de trait</mat-label>
+                    <input matInput formControlName='strokeWidth' type="number" placeholder="Largeur de trait" min="1"
+                        oninput="validity.valid||(value='1');" onblur="validity.valid||(value='1');">
+                </mat-form-field>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="1">
+                <svg width="50px" height="50px" #textureSvg>
+                    <rect [attr.fill]="selectedTextureId" width=" 100%" height="100%" />
+                </svg>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="3">
+                <mat-form-field>
+                    <mat-label>Texture</mat-label>
+                    <mat-select formControlName="texture">
+                        <mat-option *ngFor="let texture of listTexture" [value]="texture.value">
+                            {{texture.viewValue}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </mat-grid-tile>
+        </mat-grid-list>
+    </div>
+</div>

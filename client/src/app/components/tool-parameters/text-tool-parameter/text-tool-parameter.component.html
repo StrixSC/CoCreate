@@ -1,0 +1,60 @@
+<div class="parameter">
+  <h4>{{toolName}}</h4>
+  <div [formGroup]='form'>
+    <mat-grid-list cols="4" rowHeight="70px">
+      <mat-grid-tile [colspan]="1">
+        <mat-icon>text_fields</mat-icon>
+      </mat-grid-tile>
+      <mat-grid-tile [colspan]="3">
+        <mat-form-field>
+          <mat-label>Taille de la police </mat-label>
+          <input matInput formControlName='fontSize' type="number" placeholder="Taille de la police" min="1"
+            oninput="validity.valid||(value='');" onblur="validity.valid||(value='1');">
+        </mat-form-field>
+      </mat-grid-tile>
+    </mat-grid-list>
+    <mat-label>Alignement de la ligne</mat-label>
+    <mat-button-toggle-group [(value)]="currentAlignment" #group="matButtonToggleGroup">
+      <mat-button-toggle mat-icon-button [matTooltip]="alignment[0].tooltip" [value]="alignment[0].id"
+        (click)="selectAlignment(alignment[0].id)">
+        <mat-icon>format_align_left</mat-icon>
+      </mat-button-toggle>
+      <mat-button-toggle mat-icon-button [matTooltip]="alignment[1].tooltip" [value]="alignment[1].id"
+        (click)="selectAlignment(alignment[1].id)">
+        <mat-icon>format_align_center</mat-icon>
+      </mat-button-toggle>
+      <mat-button-toggle mat-icon-button [matTooltip]="alignment[2].tooltip" [value]="alignment[2].id"
+        (click)="selectAlignment(alignment[2].id)">
+        <mat-icon>format_align_right</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+  <div [formGroup]='form'>
+    <mat-label>Type de style</mat-label>
+    <mat-button-toggle-group [(value)]="currentStyle" #group="matButtonToggleGroup">
+      <mat-button-toggle mat-icon-button [matTooltip]="style[0].tooltip" [value]="style[0].id"
+        (click)="selectStyle(style[0].id)">
+        <mat-icon>format_clear</mat-icon>
+        <!-- <img class="normal" src="assets/svg-icon/type.svg" alt="normal"> -->
+      </mat-button-toggle>
+      <mat-button-toggle mat-icon-button [matTooltip]="style[1].tooltip" [value]="style[1].id"
+        (click)="selectStyle(style[1].id)">
+        <mat-icon>format_bold</mat-icon>
+      </mat-button-toggle>
+      <mat-button-toggle mat-icon-button [matTooltip]="style[2].tooltip" [value]="style[2].id"
+        (click)="selectStyle(style[2].id)">
+        <mat-icon>format_italic</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+  <div [formGroup]='form'>
+    <mat-form-field>
+      <mat-label>Choisir une police</mat-label>
+      <mat-select formControlName="fontFamily">
+        <mat-option *ngFor="let police of polices" [value]="police.name">
+          {{police.showName}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>
