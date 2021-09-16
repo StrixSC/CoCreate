@@ -1,6 +1,7 @@
 {
   "name": "client",
   "version": "0.0.0",
+  "main":"src/main.js",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --open --host 0.0.0.0",
@@ -9,7 +10,8 @@
     "fast-coverage": "ng test --code-coverage --browsers=ChromeHeadless --sourceMap=true",
     "test-ci": "ng test --browsers=ChromeHeadless",
     "coverage": "ng test --code-coverage --sourceMap=true",
-    "lint": "ng lint --type-check --format stylish"
+    "lint": "ng lint --type-check --format stylish",
+    "start:electron": "ng build --base-href ./ && electron ."
   },
   "private": true,
   "dependencies": {
