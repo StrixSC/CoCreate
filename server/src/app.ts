@@ -21,11 +21,12 @@ app.use(
     }),
 );
 
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
 app.use(cors(corsOptions));
 
 app.use(routes.default);
 
-
 app.listen(PORT, () => {
-    console.log(`Listning in port ${PORT}`);
+    console.log(`Listening in port ${PORT}`);
 });
