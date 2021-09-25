@@ -1,7 +1,7 @@
 import cors from 'cors';
 import express, { Application } from 'express';
 import session from 'express-session';
-
+import * as routes from './routes';
 
 const corsOptions = {
     optionsSuccessStatus: 200,
@@ -11,6 +11,7 @@ const corsOptions = {
     exposedHeaders: 'Location',
 };
 const app: Application = express();
+const PORT = process.env.PORT || 8000;
 
 app.use(
     session({
@@ -22,9 +23,8 @@ app.use(
 
 app.use(cors(corsOptions));
 
-app.use(require('./routes').default);
+app.use(routes.default);
 
-const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {
     console.log(`Listning in port ${PORT}`);

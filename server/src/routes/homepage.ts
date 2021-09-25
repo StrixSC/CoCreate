@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
-import * as Constants from '../constants/responses';
-
+import { StatusCodes } from 'http-status-codes';
 
 
 export const WelcomeMessage = (req: Request, res: Response) => {
-    res.status(Constants.OK).send({
+    res.status(StatusCodes.OK).send({
         'message': 'New Welcome Message!'
     })
 }
