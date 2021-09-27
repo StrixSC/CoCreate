@@ -1,9 +1,11 @@
-image: docker:latest
+image: docker:stable
 services:
   - docker:dind
 
 variables:
   DOCKER_DRIVER: overlay
+  HEROKU_APP_NAME: colorimage-109-3900
+  HEROKU_REGISTRY_IMAGE: registry.heroku.com/${HEROKU_APP_NAME}/api
 
 stages:
   - build
@@ -11,11 +13,12 @@ stages:
 docker-build:
   stage: build
   script:
-  - docker build -f Dockerfile --iidfile imageid.txt -t registry.heroku.com/colorimage-109-3900/api .
-  - docker login -u _ -p $HEROKU_API_KEY registry.heroku.com
-  - docker push registry.heroku.com/colorimage-109-3900/api
-  - apk add --no-cache curl
-  - echo "Docker Image ID is $(cat imageid.txt)"
-  - |-
-    curl -X PATCH https://api.heroku.com/apps/colorimage-109-3900/formation --header "Content-Type: application/json" --header "Accept: application/vnd.heroku+json; version=3.docker-releases" --header "Authorization: Bearer ${HEROKU_API_KEY}" --data '{ "updates": [ { "type": "web", "docker_image": "'$(cat imageid.txt)'" } ] }'
-
+    - apk add --no-cache curl
+    - docker build
+        --tag $HEROKU_REGISTRY_IMAGE
+        --file ./Dockerfile
+        "."
+    - docker login -u _ -p $HEROKU_API_KEY registry.heroku.com
+    - docker push $HEROKU_REGISTRY_IMAGE
+    - chmod +x ./release.sh
+    - ./release.sh
