@@ -1,6 +1,6 @@
 build:
   docker:
-    api: Dockerfile.prod
+    api: Dockerfile
   config:
     NODE_ENV: production
 run:
