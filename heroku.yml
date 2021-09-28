@@ -4,4 +4,4 @@ build:
   config:
     NODE_ENV: production
 run:
-  api: npm run 
+  api: npm run start
