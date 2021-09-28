@@ -1,5 +1,7 @@
 build:
   docker:
-    api: Dockerfile
+    web: Dockerfile
+  config:
+    NODE_ENV: production
 run:
-  api: bundle exec puma -C config/puma.rb
+  web: npm run start
