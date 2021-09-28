@@ -1,5 +1,7 @@
 build:
   docker:
     api: Dockerfile.prod
+  config:
+    NODE_ENV: production
 run:
-  api: bundle exec puma -C config/puma.rb
+  api: npm run 
