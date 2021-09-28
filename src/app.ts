@@ -11,7 +11,7 @@ const corsOptions = {
     exposedHeaders: 'Location',
 };
 const app: Application = express();
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 8000;
 
 app.use(
     session({
