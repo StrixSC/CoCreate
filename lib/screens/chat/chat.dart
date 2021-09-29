@@ -124,6 +124,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final _username;
   final List<ChatMessage> _messages = [];
   final _textController = TextEditingController();
+  bool _validate = false;
   final FocusNode _focusNode = FocusNode();
 
   _ChatScreenState(this._username);
@@ -170,8 +171,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 style: TextStyle(fontSize: 30),
                 controller: _textController,
                 onSubmitted: _handleSubmitted,
-                decoration: const InputDecoration.collapsed(
-                    hintText: 'Envoyer un message'),
+                onChanged: _handleChange,
+                decoration: InputDecoration(
+                  hintText: 'Envoyer un message',
+                  errorText: _validate ? 'Value Can\'t Be Empty' : null,
+                ),
                 focusNode: _focusNode,
               ),
             ),
@@ -179,7 +183,14 @@ class _ChatScreenState extends State<ChatScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 4.0),
               child: IconButton(
                   icon: const Icon(Icons.send),
-                  onPressed: () => _handleSubmitted(_textController.text)),
+                  onPressed: () {
+                    setState(() {
+                      _validate = _textController.text.isEmpty;
+                    });
+                    if (!_validate) {
+                      _handleSubmitted(_textController.text);
+                    }
+                  }),
             )
           ],
         ),
@@ -197,5 +208,13 @@ class _ChatScreenState extends State<ChatScreen> {
       _messages.insert(0, message);
     });
     _focusNode.requestFocus();
+  }
+
+  void _handleChange(String text) {
+    if (_validate) {
+      setState(() {
+        _validate = _textController.text.isEmpty;
+      });
+    }
   }
 }
