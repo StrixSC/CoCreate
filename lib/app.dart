@@ -25,7 +25,7 @@ class App extends StatelessWidget {
           break;
         case ChatRoute:
           final arguments = settings.arguments as Map<String, dynamic>;
-          screen = Chat(arguments['username'], arguments['ipAddress']);
+          screen = ChatScreen(arguments['username'], arguments['ipAddress']);
           break;
         default:
           return null;
