@@ -31,7 +31,7 @@ class _LoginState extends State<Login> {
   final usernameField = TextFormField(
     style: TextStyle(fontSize: _fontSize),
     controller: userController,
-    maxLines: null,
+    maxLines: 1,
     autofocus: false,
     decoration: InputDecoration(
       errorStyle: TextStyle(fontSize: _fontSize),
@@ -53,7 +53,7 @@ class _LoginState extends State<Login> {
   final ipField = TextFormField(
     style: TextStyle(fontSize: _fontSize),
     controller: ipController,
-    maxLines: null,
+    maxLines: 1,
     autofocus: false,
     decoration: InputDecoration(
       errorStyle: TextStyle(fontSize: _fontSize),
