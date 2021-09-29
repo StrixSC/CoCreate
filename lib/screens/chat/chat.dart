@@ -174,7 +174,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 onChanged: _handleChange,
                 decoration: InputDecoration(
                   hintText: 'Envoyer un message',
-                  errorText: _validate ? 'Value Can\'t Be Empty' : null,
+                  errorText: _validate ? 'Le message ne peut pas être vide' : null,
                 ),
                 focusNode: _focusNode,
               ),
@@ -184,12 +184,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: IconButton(
                   icon: const Icon(Icons.send),
                   onPressed: () {
-                    setState(() {
-                      _validate = _textController.text.isEmpty;
-                    });
-                    if (!_validate) {
-                      _handleSubmitted(_textController.text);
-                    }
+                    _handleSubmitted(_textController.text);
                   }),
             )
           ],
@@ -199,15 +194,20 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _handleSubmitted(String text) {
-    _textController.clear();
-    var message = ChatMessage(
-      text: text,
-      username: this._username,
-    );
     setState(() {
-      _messages.insert(0, message);
+      _validate = _textController.text.isEmpty || _textController.text.trim().isEmpty;
     });
-    _focusNode.requestFocus();
+    if (!_validate) {
+      _textController.clear();
+      var message = ChatMessage(
+        text: text,
+        username: this._username,
+      );
+      setState(() {
+        _messages.insert(0, message);
+      });
+      _focusNode.requestFocus();
+    }
   }
 
   void _handleChange(String text) {
