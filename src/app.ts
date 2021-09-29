@@ -20,6 +20,7 @@ const corsOptions = {
     credentials: true,
     allowedHeaders: 'Authorization,Uid,Access-Control-Allow-Origin,Origin,X-Requested-With,Content-Type,Accept',
     exposedHeaders: 'Location',
+    origin: ["http://localhost:4200", "http://localhost:5500", "http://localhost:5555"]
 }
 
 const io = new Server(httpServer, {
@@ -44,6 +45,7 @@ let users: { [key: string]: IUser } = {};
 
 io.on("connection", (socket: Socket) => {
     socket.on('join-channel', (user: IUser) => {
+	console.log(users);
         const allUsers = Object.keys(users);
         allUsers.forEach((id) => {
             if (users[id].username === user.username)
@@ -58,13 +60,13 @@ io.on("connection", (socket: Socket) => {
     });
 
     socket.on('send-message', (payload: ISendMessagePayload) => {
-        socket.broadcast.emit('receive-message', 
+        socket.emit('receive-message', 
         { 
             message: payload.message,
             username: users[socket.id].username,
             timestamp: new Date().toDateString()
         } as IReceiveMessagePayload)
-    })
+    });
 
     socket.on('disconnect', () => {
         socket.broadcast.emit('user-disconnect', users[socket.id].username);
@@ -73,7 +75,11 @@ io.on("connection", (socket: Socket) => {
         } catch(e) {
             console.error(e);
         }
-    })
+    });
+
+    socket.on("connect_error", (err) => {
+        console.log(`connect_error due to ${err.message}`);
+    });
 });
 
 
