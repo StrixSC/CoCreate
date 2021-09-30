@@ -11,12 +11,13 @@ import corsOptions from './cors';
 import index from './routes/index';
 import auth from './routes/auth';
 
-const connectionString = process.env.NODE_ENV === 'production'
-  ? process.env.POSTGRESQL_PROD_URL
-  : process.env.POSTGRESQL_DEV_URL
+const connectionString =
+    process.env.NODE_ENV === 'production'
+      ? process.env.POSTGRESQL_PROD_URL
+      : process.env.POSTGRESQL_DEV_URL;
 
 const db = new Pool({
-  connectionString
+  connectionString,
 });
 
 const app = express();

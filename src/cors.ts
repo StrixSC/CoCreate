@@ -3,7 +3,7 @@ const corsOptions = {
   methods: [ 'GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS' ],
   credentials: true,
   allowedHeaders:
-    'Authorization,Uid,Access-Control-Allow-Origin,Origin,X-Requested-With,Content-Type,Accept',
+        'Authorization,Uid,Access-Control-Allow-Origin,Origin,X-Requested-With,Content-Type,Accept',
   exposedHeaders: 'Location',
   origin: '*',
 };

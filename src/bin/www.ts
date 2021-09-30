@@ -8,6 +8,7 @@ import corsOptions from '../cors';
 
 // Events
 import chatHandler from '../events/chatHandler';
+import { usernameCheck } from '../middlewares/usernameCheck';
 
 const normalizePort = (val: string) => {
   const port = parseInt(val, 10);
@@ -56,14 +57,13 @@ const io = new Server(server, {
 });
 
 const onConnection = (socket: Socket) => {
-  console.log(socket);
   chatHandler(io, socket);
-
   socket.on('connect_error', (err: any) => {
-		console.log(`connect_error due to ${err.message}`);
-	});
-}
+    console.log(`connect_error due to ${err.message}`);
+  });
+};
 
+io.use(usernameCheck);
 io.on('connection', onConnection);
 
 server.listen(port);
