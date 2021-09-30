@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_3.dart';
+// import 'package:intl/intl.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatMessage extends StatelessWidget {
-  const ChatMessage({required this.text, required this.username});
+  const ChatMessage(
+      {required this.text,
+      required this.username,
+      required this.message_username});
   final String text;
   final String username;
+  final String message_username;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +23,7 @@ class ChatMessage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             (() {
-              if (this.username == 'Sender') {
+              if (this.username == this.message_username) {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -50,6 +56,7 @@ class ChatMessage extends StatelessWidget {
                               ),
                             ),
                           ),
+                          // Text(DateFormat('hh:mm:ss').format(DateTime.now())),
                         ]),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -114,20 +121,41 @@ class ChatMessage extends StatelessWidget {
 
 class ChatScreen extends StatefulWidget {
   final String _username;
-  final String _ipAddress;
-  ChatScreen(this._username, this._ipAddress);
+  final IO.Socket _socket;
+  ChatScreen(this._username, this._socket);
   @override
-  _ChatScreenState createState() => _ChatScreenState(this._username);
+  _ChatScreenState createState() =>
+      _ChatScreenState(this._username, this._socket);
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final _username;
+  final String _username;
+  final IO.Socket _socket;
+  _ChatScreenState(this._username, this._socket);
   final List<ChatMessage> _messages = [];
   final _textController = TextEditingController();
   bool _validate = false;
   final FocusNode _focusNode = FocusNode();
 
-  _ChatScreenState(this._username);
+  @override
+  @override
+  void initState() {
+    super.initState();
+
+    _socket.on('receive-message', (data) {
+      print(data);
+
+      var message = ChatMessage(
+        text: data['message'],
+        username: this._username,
+        message_username: data['username'],
+      );
+      setState(() {
+        _messages.insert(0, message);
+      });
+      _focusNode.requestFocus();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +202,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 onChanged: _handleChange,
                 decoration: InputDecoration(
                   hintText: 'Envoyer un message',
-                  errorText: _validate ? 'Le message ne peut pas être vide' : null,
+                  errorText:
+                      _validate ? 'Le message ne peut pas être vide' : null,
                 ),
                 focusNode: _focusNode,
               ),
@@ -195,18 +224,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _handleSubmitted(String text) {
     setState(() {
-      _validate = _textController.text.isEmpty || _textController.text.trim().isEmpty;
+      _validate =
+          _textController.text.isEmpty || _textController.text.trim().isEmpty;
     });
     if (!_validate) {
       _textController.clear();
-      var message = ChatMessage(
-        text: text,
-        username: this._username,
-      );
-      setState(() {
-        _messages.insert(0, message);
-      });
-      _focusNode.requestFocus();
+      this._socket.emit('send-message', {'message': text});
     }
   }
 

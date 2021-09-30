@@ -19,18 +19,19 @@ class _LoginState extends State<Login> {
   @override
   void initState() {
     super.initState();
-    initSocket();
+    // initSocket();
   }
 
   void initSocket() {
     IO.Socket socket = IO.io(
-        'http://localhost:3000',
-        IO.OptionBuilder().setTransports(['websocket']) // for Flutter or Dart VM
+        'https://colorimage-109-3900.herokuapp.com/',
+        IO.OptionBuilder()
+            .setTransports(['websocket']) // for Flutter or Dart VM
             .build());
-    socket.onConnect((_) {
+    socket.on('connect', (_) {
       print('connect');
     });
-    socket.onDisconnect((_) => print('disconnect'));
+    socket.on('disconnect', (_) => print('disconnect'));
   }
 
   final logo = Hero(
@@ -133,7 +134,24 @@ class _LoginState extends State<Login> {
   }
 
   _onSubmitTap(BuildContext context, String username, String ip) {
+    // Initialize socket connection with server
+    IO.Socket socket = IO.io(
+        'http://localhost:3000/',
+        IO.OptionBuilder()
+            .setTransports(['websocket']) // for Flutter or Dart VM
+            .build());
+
+    socket.on('connect', (_) {
+      print(username);
+    });
+
+    // socket.on('user-connection', (username) => {print(username)});
+    // socket.on('exception', (exception) => {print(exception['message'])});
+
+    // Join chat channel
+    socket.emit('join-channel', {'username': username});
+
     Navigator.pushNamed(context, ChatRoute,
-        arguments: {'username': username, 'ipAddress': ip});
+        arguments: {'username': username, 'socket': socket});
   }
 }
