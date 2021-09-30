@@ -13,7 +13,11 @@ export = (io: Server, socket: Socket) => {
     } as IUser;
     users[socket.data.username] = user;
     socket.emit('get-users', getUsers());
-    socket.broadcast.emit('user-connection', user);
+    socket.broadcast.emit('user-connection', {
+      username: "Système",
+      message: `${socket.data.username} s'est connecté! 😀`,
+      timestamp: moment().format("H:MM:SS"),
+    });
   };
 
   const sendMessage = (messagePayload: ISendMessagePayload) => {
@@ -26,9 +30,10 @@ export = (io: Server, socket: Socket) => {
 
   const userDisconnect = () => {
     socket.broadcast.emit('user-disconnect', {
-      username: socket.data.username,
-      userId: socket.id,
-    } as IUser);
+      username: "Système",
+      message: `${socket.data.username} s'est déconnecté... 😭`,
+      timestamp: moment().format("H:MM:SS"),
+    } as IReceiveMessagePayload);
 
     try {
       delete users[socket.data.username];
