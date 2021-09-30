@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../app.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-TextEditingController userController = new TextEditingController();
-TextEditingController ipController = new TextEditingController();
-Color PrimaryColor =
-    new Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
+TextEditingController userController = TextEditingController();
+TextEditingController ipController = TextEditingController();
+Color primaryColor =
+    Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -14,6 +15,23 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    initSocket();
+  }
+
+  void initSocket() {
+    IO.Socket socket = IO.io(
+        'http://localhost:3000',
+        OptionBuilder().setTransports(['websocket']) // for Flutter or Dart VM
+            .build());
+    socket.onConnect((_) {
+      print('connect');
+    });
+    socket.onDisconnect((_) => print('disconnect'));
+  }
 
   final logo = Hero(
     tag: 'hero',
@@ -29,17 +47,17 @@ class _LoginState extends State<Login> {
 
   // The username field text box
   final usernameField = TextFormField(
-    style: TextStyle(fontSize: _fontSize),
+    style: const TextStyle(fontSize: _fontSize),
     controller: userController,
     maxLines: 1,
     autofocus: false,
     decoration: InputDecoration(
-      errorStyle: TextStyle(fontSize: _fontSize),
+      errorStyle: const TextStyle(fontSize: _fontSize),
       hintText: "Nom d'utilisateur",
-      hintStyle: new TextStyle(
+      hintStyle: const TextStyle(
         fontSize: _fontSize,
       ),
-      contentPadding: EdgeInsets.all(padding),
+      contentPadding: const EdgeInsets.all(padding),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
     ),
     validator: (String? value) {
@@ -51,7 +69,7 @@ class _LoginState extends State<Login> {
   );
 
   final ipField = TextFormField(
-    style: TextStyle(fontSize: _fontSize),
+    style: const TextStyle(fontSize: _fontSize),
     controller: ipController,
     maxLines: 1,
     autofocus: false,
@@ -88,7 +106,7 @@ class _LoginState extends State<Login> {
                     style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 40.0,
-                        color: PrimaryColor)),
+                        color: primaryColor)),
                 SizedBox(height: 24.0),
                 usernameField,
                 SizedBox(height: 24.0),
