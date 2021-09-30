@@ -1,7 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { EMPTY, of, Subscription } from 'rxjs';
-import { ChatService } from './services/chat-service.service';
-import { mergeMap } from 'rxjs/operators';
+import { IUser } from './models/IUser.model';
+import { SocketService } from './services/socket.service';
+import { Component, OnDestroy } from '@angular/core';
+import { Subscription, merge } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ChatService } from './services/chat.service';
+import { IReceiveMessagePayload } from './models/IReceiveMessagePayload.model';
+import { IChannel } from './models/IChannel.model';
 
 @Component({
   selector: 'app-root',
@@ -10,40 +14,47 @@ import { mergeMap } from 'rxjs/operators';
 })
 export class AppComponent implements OnDestroy {
   title = 'prototype-v2';
-  messageListener: any;
+  messageListener = new Subscription();
   currentValue: string;
+  users: IUser[];
+  channels: IChannel[];
   messages: string[];
+  username: string;
 
-  constructor(public chatService: ChatService) {
-    const username = prompt("What is your username?") as string;
-    this.chatService.joinChannel(username);
-    this.messages = [];
+  constructor(public chatService: ChatService, private socketService: SocketService) {
+    this.username = "";
+    this.socketService.setupSocketConnection();
     this.currentValue = "";
+    this.messages = [];
+    this.users = [];
+    this.channels = [];
   }
 
   ngOnInit(): void {
-    this.chatService.userConnection()
-    .subscribe((username) => {
-        this.messages.push(`${username} has connected.`);
+
+
+
+    this.chatService.getUsers().subscribe((users) => {
+      this.users = users.sort((a) => {
+        if (a.userId !== this.socketService.socket.id) return -1
+        else return 1;
       });
-
-    this.chatService.userDisconnect()
-    .subscribe((username) => {
-      this.messages.push(`${username} has disconnected.`);
-    })
-
-    this.chatService.receiveMessage()
-    .subscribe((response) => {
-      console.log(response);
-      this.messages.push(`${response.username} said: ${ response.message } @ ${ response.timestamp}`);
-    })
-
-    this.currentValue = "";
+      
+      this.users = users;
+      console.log(users);
+    });
   
+    this.chatService.getChannels().subscribe((channels: IChannel[]) => {
+      this.channels = channels;
+      console.log(channels);
+    })
+
+    
   }
 
   ngOnDestroy(): void {
-    this.messageListener?.unsubscribe();
+    this.messageListener.unsubscribe();
+    this.socketService.disconnect();
   }
 
   sendMessage(): void {

@@ -1,0 +1,55 @@
+<div class="main-page-container">
+	<div class="main-chat-container">
+		<div class="messages-container">
+			<div *ngFor="let message of messages">
+				<div class="main-message-container" [class.my-message]="message.username === this.socketService.username">
+					<div class="message-wrapper">
+						{{ message.message }}
+					</div>
+					<small>{{message.timestamp}}</small>
+				</div>
+			</div>
+		</div>
+		<div class="chat-footer-container">
+			<input id="message-field" class="primary-input full-width" placeholder="Message" type="text"
+				[(ngModel)]="message" (keyup)="$event.keyCode == 13 && sendMessage()">
+			<button mat-fab color="secondary" aria-label="Send button" (click)="sendMessage()">
+			<mat-icon aria-hidden="false" aria-label="Send icon" [ngStyle]="{'color':'#378DDD'}">send</mat-icon>
+			</button>
+		</div>
+	</div>
+
+	
+</div>
+
+<div class="flex-container">
+	<button (click)="disconnect()" class="button-primary clickable">
+		Déconnexion
+	</button>
+</div>
+
+<style>
+	.main-chat-container {
+		border: 1px solid #C8C8C8;
+		width: 80%;
+		height: 700px;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding: 1rem;
+	}
+
+	.chat-footer-container {
+		display: flex;
+		justify-content: space-around;
+		gap: 0.5rem;
+	}
+
+	.primary-input {
+		width: 80%;
+	}
+
+	.button-primary {
+		max-width: 300px;
+	}
+</style>

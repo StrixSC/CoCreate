@@ -2,3 +2,82 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.primary-input {
+	width: 350px;
+	height: 60px;
+	background-color: #e5e5e5;
+	border: 1px;
+	border-radius: 10px;
+}
+
+.primary-input::placeholder {
+	color: rgba(0, 0, 0, 30%);
+	font-family: 'Roboto';
+	font-size: 20px;
+	font-weight: 500;
+}
+
+.primary-input[type='text'] {
+	font-size: 20px;
+	padding: 0rem 1rem;
+}
+
+
+.header-container {
+	display: flex;
+	justify-items: flex-start;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.header {
+	text-align: left;
+	font-family: Roboto;
+	font-size: 32;
+	font-weight: 700;
+	color: #3FA3FF
+}
+
+.clickable {
+	cursor: pointer;
+}
+
+.main-page-container {
+	margin: 25% auto;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.flex-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.button-primary {
+	background: #3FA3FF;
+	width: 100%;
+	height: 70px;
+	font-weight: 500;
+	font-size: 32px;
+	font-family: Roboto;
+	border: none;
+	color: white;
+	transition: 0.3s all;	
+}
+
+.button-primary:hover {
+	background: #378DDD;
+	transition: 0.3s all;	
+}
+
+.error-field {
+	padding: 0.5rem 0.25rem;
+	color: #D96262;
+	font-weight: 500;
+	font-family: 'Roboto';
+	font-style: normal;
+	font-size: 16px;
+}
