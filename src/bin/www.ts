@@ -2,7 +2,12 @@
 
 import Debug from 'debug';
 import http from 'http';
-import app from '../app';
+import { app } from '../app';
+import { Server, Socket } from 'socket.io';
+import corsOptions from '../cors';
+
+// Events
+import chatHandler from '../events/chatHandler';
 
 const normalizePort = (val: string) => {
   const port = parseInt(val, 10);
@@ -18,6 +23,7 @@ const normalizePort = (val: string) => {
 const debug = Debug('Colorimage API');
 const port = normalizePort(process.env.PORT || '3000');
 const server = http.createServer(app);
+
 
 const onError = (error: any) => {
   if (error.syscall !== 'listen') {
@@ -45,8 +51,23 @@ const onListening = () => {
   debug(`Listening on ${bind}`);
 };
 
+const io = new Server(server, {
+  cors: corsOptions,
+});
+
+const onConnection = (socket: Socket) => {
+  console.log(socket);
+  chatHandler(io, socket);
+
+  socket.on('connect_error', (err: any) => {
+		console.log(`connect_error due to ${err.message}`);
+	});
+}
+
+io.on('connection', onConnection);
+
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
-export { server };
+export { io };
