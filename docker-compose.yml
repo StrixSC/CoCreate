@@ -4,8 +4,10 @@ services:
     container_name: colorimage-server
     restart: always
     build: .
+    env_file:
+      - .env
     environment:
-      POSTGRESQL_PROD_URL: elephantsql
+      POSTGRESQL_PROD_URL: ${POSTGRESQL_PROD_URL}
       POSTGRESQL_DEV_URL: postgres://postgres:password@postgres:5432/api
       NODE_ENV: development
       POSTGRESQL_USERNAME: postgres
@@ -18,6 +20,8 @@ services:
       - '3000:3000'
     depends_on:
       - postgres
+    volumes:
+      - ./src/:/usr/src/app/src/
   postgres:
     container_name: postgres
     image: postgres:10.4
@@ -25,7 +29,7 @@ services:
       - "5432:5432"
     volumes: 
       - ./postgresdata:/var/lib/postgresql/data
-      - ./src/migrations/dbinit.sql:/docker-entrypoint-initdb.d/dbinit.sql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: always
     environment:
       POSTGRES_USER: postgres
