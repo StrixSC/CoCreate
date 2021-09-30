@@ -60,7 +60,7 @@ io.on("connection", (socket: Socket) => {
     });
 
     socket.on('send-message', (payload: ISendMessagePayload) => {
-        socket.emit('receive-message', 
+        io.sockets.emit('receive-message', 
         { 
             message: payload.message,
             username: users[socket.id].username,
