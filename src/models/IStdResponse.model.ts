@@ -1,4 +1,4 @@
 export interface IStdResponse {
-    message: string,
-    status: number
+  message: string;
+  status: number;
 }

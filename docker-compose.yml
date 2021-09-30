@@ -6,9 +6,14 @@ services:
     build: .
     environment:
       POSTGRESQL_PROD_URL: elephantsql
-      POSTGRESQL_DEV_URL: postgres://postgres:password@postgres:5432/colorimage
+      POSTGRESQL_DEV_URL: postgres://postgres:password@postgres:5432/api
       NODE_ENV: development
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_DB: api
+      POSTGRESQL_PASSWD: password
+      POSTGRESQL_PORT: 5432
       PORT: 3000
+      SECRET: 'secret'
     ports:
       - '3000:3000'
     depends_on:
@@ -25,7 +30,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: colorimage
+      POSTGRES_DB: api
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4:4.18

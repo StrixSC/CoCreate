@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import * as HomePage from './homepage';
-
 
 const router = Router();
 
-// All API Requests listed below. Follow the example.
-router.get('/', HomePage.WelcomeMessage);
+router.get('/', (req, res) => {
+  return res.json({
+    message: 'OK!',
+  });
+});
 
 export default router;

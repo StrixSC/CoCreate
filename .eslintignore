@@ -1,4 +1,4 @@
+postgresdata/
 node_modules/
-lib/
 out/
-sql/
+dist/
