@@ -8,7 +8,10 @@ Color primaryColor =
     Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
+  const Login({Key? key})
+      : super(
+          key: key,
+        );
   @override
   _LoginState createState() => _LoginState();
 }
@@ -16,6 +19,8 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  bool usernameTaken = false;
+  bool usernameEmpty = false;
   @override
   void initState() {
     super.initState();
@@ -46,8 +51,8 @@ class _LoginState extends State<Login> {
   static const _fontSize = 25.0;
   static const padding = 30.0;
 
-  // The username field text box
   final usernameField = TextFormField(
+    onChanged: (text) {},
     style: const TextStyle(fontSize: _fontSize),
     controller: userController,
     maxLines: 1,
@@ -62,9 +67,9 @@ class _LoginState extends State<Login> {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
     ),
     validator: (String? value) {
-      if (value == null || value.isEmpty) {
-        return "Veuillez entrer un nom d'utilisateur";
-      }
+      // if (value == null || value.isEmpty) {
+      //   return "Veuillez entrer un nom d'utilisateur";
+      // }
       return null;
     },
   );
@@ -110,6 +115,19 @@ class _LoginState extends State<Login> {
                         color: primaryColor)),
                 SizedBox(height: 24.0),
                 usernameField,
+                usernameTaken
+                    ? Padding(
+                        padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
+                        child: Text("Le nom d'utilisateur est déjà pris",
+                            style: new TextStyle(
+                                color: Colors.red, fontSize: 25.0)))
+                    : usernameEmpty
+                        ? Padding(
+                            padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
+                            child: Text("Veuillez entrer un nom d'utilisateur",
+                                style: new TextStyle(
+                                    color: Colors.red, fontSize: 25.0)))
+                        : Text(""),
                 SizedBox(height: 24.0),
                 ipField,
                 SizedBox(height: 24.0),
@@ -138,20 +156,42 @@ class _LoginState extends State<Login> {
     IO.Socket socket = IO.io(
         'http://localhost:3000/',
         IO.OptionBuilder()
+            .disableAutoConnect()
             .setTransports(['websocket']) // for Flutter or Dart VM
             .build());
 
+    socket.auth = {'username': username};
+    socket.connect();
+    print('Connecting..');
+
+    socket.on('error', (err) {
+      if (err['message'] == 'Username not defined') {
+        print('username not defined');
+        setState(() {
+          usernameEmpty = true;
+          usernameTaken = false;
+        });
+      } else if (err['message'] == 'Username is already taken') {
+        print('username taken');
+        setState(() {
+          usernameEmpty = false;
+          usernameTaken = true;
+        });
+      }
+    });
+
     socket.on('connect', (_) {
       print(username);
+      setState(() {
+        usernameEmpty = false;
+        usernameTaken = false;
+      });
+      socket.emit('join-channel', {'username': username});
+      Navigator.pushNamed(context, ChatRoute,
+          arguments: {'username': username, 'socket': socket});
     });
 
     // socket.on('user-connection', (username) => {print(username)});
     // socket.on('exception', (exception) => {print(exception['message'])});
-
-    // Join chat channel
-    socket.emit('join-channel', {'username': username});
-
-    Navigator.pushNamed(context, ChatRoute,
-        arguments: {'username': username, 'socket': socket});
   }
 }

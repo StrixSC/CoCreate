@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_3.dart';
-// import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatMessage extends StatelessWidget {
-  const ChatMessage(
-      {required this.text,
-      required this.username,
-      required this.message_username});
+  const ChatMessage({
+    required this.text,
+    required this.username,
+    required this.message_username,
+    required this.timestamp,
+  });
   final String text;
   final String username;
   final String message_username;
+  final String timestamp;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +58,9 @@ class ChatMessage extends StatelessWidget {
                               ),
                             ),
                           ),
-                          // Text(DateFormat('hh:mm:ss').format(DateTime.now())),
+                          Padding(
+                              padding: EdgeInsets.fromLTRB(0, 10, 25, 0),
+                              child: Text(this.timestamp)),
                         ]),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -109,6 +113,9 @@ class ChatMessage extends StatelessWidget {
                               ),
                             ),
                           ),
+                          Padding(
+                              padding: EdgeInsets.fromLTRB(25, 10, 0, 0),
+                              child: Text(this.timestamp)),
                         ]),
                   ],
                 );
@@ -138,7 +145,6 @@ class _ChatScreenState extends State<ChatScreen> {
   final FocusNode _focusNode = FocusNode();
 
   @override
-  @override
   void initState() {
     super.initState();
 
@@ -146,10 +152,10 @@ class _ChatScreenState extends State<ChatScreen> {
       print(data);
 
       var message = ChatMessage(
-        text: data['message'],
-        username: this._username,
-        message_username: data['username'],
-      );
+          text: data['message'],
+          username: this._username,
+          message_username: data['username'],
+          timestamp: data['timestamp']);
       setState(() {
         _messages.insert(0, message);
       });
@@ -162,7 +168,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Public Chat',
+          'Chat Publique',
           style: TextStyle(fontSize: 35),
         ),
       ),
