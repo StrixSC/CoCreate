@@ -25,7 +25,7 @@ class _LoginState extends State<Login> {
   void initSocket() {
     IO.Socket socket = IO.io(
         'http://localhost:3000',
-        OptionBuilder().setTransports(['websocket']) // for Flutter or Dart VM
+        IO.OptionBuilder().setTransports(['websocket']) // for Flutter or Dart VM
             .build());
     socket.onConnect((_) {
       print('connect');
