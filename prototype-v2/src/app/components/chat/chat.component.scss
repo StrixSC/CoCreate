@@ -6,6 +6,7 @@
 	flex-direction: column;
 	justify-content: space-between;
 	padding: 1rem;
+	border-radius: 10px;
 }
 
 .chat-footer-container {
@@ -99,5 +100,10 @@
 	
 	.timestamp {
 		text-align: right;
+	}
+
+	.message-wrapper {
+		background-color: #4e71ce;
+		color: white;
 	}
 }
