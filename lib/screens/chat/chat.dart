@@ -265,10 +265,19 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Chat Publique',
-          style: TextStyle(fontSize: 35),
+        leading: IconButton(
+          icon: Tooltip(
+              message: 'Se déconnecter',
+              child: new Icon(Icons.arrow_back_ios,
+                  color: Colors.black, size: 30)),
+          onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Colors.white,
+        title: Center(
+            child: Text(
+          'Chat Publique',
+          style: TextStyle(fontSize: 35, color: Colors.blue),
+        )),
       ),
       body: Column(
         children: [
