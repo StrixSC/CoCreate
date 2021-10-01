@@ -90,7 +90,7 @@ class ChatMessage extends StatelessWidget {
                         children: [
                           Padding(
                               padding: EdgeInsets.fromLTRB(15, 0, 0, 0),
-                              child: Text(this.username,
+                              child: Text(this.message_username,
                                   style:
                                       Theme.of(context).textTheme.headline6)),
                           ChatBubble(
