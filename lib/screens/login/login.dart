@@ -61,12 +61,12 @@ class _LoginState extends State<Login> {
     socket.auth = {'username': username};
 
     socket.on('error', (err) {
-      if (err['message'] == 'Username not defined') {
+      if (err['message'] == "Vous devez fournir un nom d'utilisateur!") {
         setState(() {
           usernameEmpty = true;
           usernameTaken = false;
         });
-      } else if (err['message'] == 'Username is already taken') {
+      } else if (err['message'] == "Ce nom d'utilisateur est déjà utilisé, choisissez-en en autre!") {
         setState(() {
           usernameEmpty = false;
           usernameTaken = true;
