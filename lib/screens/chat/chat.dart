@@ -149,8 +149,6 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
 
     _socket.on('receive-message', (data) {
-      print(data);
-
       var message = ChatMessage(
           text: data['message'],
           username: this._username,
@@ -164,32 +162,28 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Chat Publique',
-          style: TextStyle(fontSize: 35),
-        ),
-      ),
-      body: Column(
-        children: [
-          Flexible(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(8.0),
-              reverse: true,
-              itemBuilder: (_, index) => _messages[index],
-              itemCount: _messages.length,
-            ),
-          ),
-          const Divider(height: 1.0),
-          Container(
-            decoration: BoxDecoration(color: Theme.of(context).cardColor),
-            child: _buildTextComposer(),
-          ),
-        ],
-      ),
-    );
+  void dispose() {
+    _socket.dispose();
+    super.dispose();
+  }
+
+  void _handleSubmitted(String text) {
+    setState(() {
+      _validate =
+          _textController.text.isEmpty || _textController.text.trim().isEmpty;
+    });
+    if (!_validate) {
+      _textController.clear();
+      this._socket.emit('send-message', {'message': text});
+    }
+  }
+
+  void _handleChange(String text) {
+    if (_validate) {
+      setState(() {
+        _validate = _textController.text.isEmpty;
+      });
+    }
   }
 
   Widget _buildTextComposer() {
@@ -228,22 +222,32 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _handleSubmitted(String text) {
-    setState(() {
-      _validate =
-          _textController.text.isEmpty || _textController.text.trim().isEmpty;
-    });
-    if (!_validate) {
-      _textController.clear();
-      this._socket.emit('send-message', {'message': text});
-    }
-  }
-
-  void _handleChange(String text) {
-    if (_validate) {
-      setState(() {
-        _validate = _textController.text.isEmpty;
-      });
-    }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Chat Publique',
+          style: TextStyle(fontSize: 35),
+        ),
+      ),
+      body: Column(
+        children: [
+          Flexible(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              reverse: true,
+              itemBuilder: (_, index) => _messages[index],
+              itemCount: _messages.length,
+            ),
+          ),
+          const Divider(height: 1.0),
+          Container(
+            decoration: BoxDecoration(color: Theme.of(context).cardColor),
+            child: _buildTextComposer(),
+          ),
+        ],
+      ),
+    );
   }
 }
