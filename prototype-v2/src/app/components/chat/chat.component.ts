@@ -2,7 +2,7 @@ import { IReceiveMessagePayload } from './../../models/IReceiveMessagePayload.mo
 import { merge, Subscription } from 'rxjs';
 import { SocketService } from './../../services/socket.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { ChatService } from 'src/app/services/chat.service';
 
 @Component({
@@ -13,6 +13,8 @@ import { ChatService } from 'src/app/services/chat.service';
 export class ChatComponent implements OnInit {
 
   @ViewChild('messageContainer') messageContainer!: ElementRef;
+  @ViewChildren("messagesList") messagesList!: QueryList<ElementRef>
+  
   messages: IReceiveMessagePayload[];
   message: string;
   errorListener: Subscription;
@@ -33,32 +35,45 @@ export class ChatComponent implements OnInit {
   ngOnInit(): void {
     this.errorListener = this.socketService.onError().subscribe((err: any) => {
       this.router.navigateByUrl("login");
-      this.socketService.error = err.message;
+
+      // Clean this up for the implementation of the chat feature
+      if (err.message === 'xhr poll error') {
+        this.socketService.error = "Oops, nous n'avons pas pû nous connecter au Serveur... Réessayez plus tard!"
+      } else this.socketService.error = err.message;
+
       this.socketService.disconnect();
     });
+
+
 
     this.messageListener = merge(
       this.chatService.userConnection(),
       this.chatService.userDisconnect(),
       this.chatService.receiveMessage(),
     ).subscribe((data: IReceiveMessagePayload) => {
-        this.messages.push(data);
-        this.scrollToBottom();
-      });
+      this.messages.push(data);
+      this.scrollToBottom();
+    });
     this.connectWithUsername();
   }
 
-  ngOnDestroy() : void {
+  ngAfterViewInit(): void {
+    this.messagesList.changes.subscribe((list: QueryList<ElementRef>) => {
+      this.scrollToBottom();
+    });
+  }
+
+  ngOnDestroy(): void {
     this.errorListener.unsubscribe();
     this.messageListener.unsubscribe();
   }
 
   connectWithUsername() {
     const username = this.route.snapshot.queryParamMap.get("username")
-    
-    if(!username) {
+
+    if (!username) {
       this.socketService.error = "Nom d'utilisateur invalide",
-      this.router.navigateByUrl("login");
+        this.router.navigateByUrl("login");
       return;
     }
 
@@ -83,8 +98,8 @@ export class ChatComponent implements OnInit {
 
   scrollToBottom(): void {
     try {
-        this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
-    } catch(err) { }                 
-}
+      this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
+    } catch (err) { }
+  }
 
 }

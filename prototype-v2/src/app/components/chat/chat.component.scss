@@ -1,5 +1,5 @@
 .main-chat-container {
-	border: 1px solid #C8C8C8;
+	border: 1px solid #c8c8c8;
 	width: 80%;
 	height: 700px;
 	display: flex;
@@ -30,7 +30,7 @@
 
 .system-message-container {
 	text-align: center;
-	font-family: 'Roboto';
+	font-family: "Roboto";
 	font-size: 16px;
 }
 
@@ -39,9 +39,9 @@
 	height: 100%;
 	justify-content: flex-start;
 	flex-direction: column;
-	overflow-y: scroll;
 	padding: 1rem;
 	gap: 1rem;
+	overflow-y: scroll;
 }
 
 .my-message {
@@ -51,12 +51,12 @@
 	align-items: flex-end;
 }
 
-
 .message-wrapper {
 	display: inline-block;
 	background-color: #e9e9eb;
-	padding: 0.5rem 1rem;
+	padding: 1rem 1.5rem;
 	border-radius: 10px;
+	font-size: 24px;	
 }
 
 .username {
@@ -66,13 +66,12 @@
 
 .my-username {
 	display: none;
-
 }
 
 .timestamp {
-	font-size: 12px;
-	font-family: 'Roboto';
-	padding: 0 0.25rem;
+	font-size: 16px;
+	font-family: "Roboto";
+	padding: 0.25rem;
 	text-align: left;
 }
 
@@ -84,11 +83,12 @@
 
 .user-avatar {
 	background-color: #4e71ce;
-	min-width: 30px;
-	min-height: 30px;
+	min-width: 50px;
+	min-height: 50px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	font-size: 24px;
 	border-radius: 100%;
 	color: white;
 }
@@ -97,7 +97,7 @@
 	.user-avatar {
 		display: none;
 	}
-	
+
 	.timestamp {
 		text-align: right;
 	}

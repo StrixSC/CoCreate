@@ -1,10 +1,10 @@
 <div class="main-page-container">
 	<div class="login-form-container">
 		<div class="header-container">
-			<h1 class="header">
+			<div class="header">
 				Connexion
-			</h1>
-			<input id="username-field" class="primary-input" placeholder="Nom d'utilisateur" type="text" [(ngModel)]="username">
+			</div>
+			<input (keyup)="$event.keyCode == 13 && onSubmit()"  id="username-field" class="primary-input" placeholder="Nom d'utilisateur" type="text" [(ngModel)]="username">
 			<label *ngIf="socketService.error" class="error-field" for="username-field"> {{socketService.error}} </label>
 		</div>
 		<button type="submit" (click)="onSubmit()" class="clickable button-primary">Se connecter</button>

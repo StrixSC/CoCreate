@@ -4,11 +4,13 @@ html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .primary-input {
-	width: 350px;
+	width: 100%;
+	font-size: 20px;
 	height: 60px;
-	background-color: #e5e5e5;
-	border: 1px;
+	border: 1px solid #e5e5e5;
 	border-radius: 10px;
+	padding-left: 25px;
+	max-width: calc(100% - 25px);
 }
 
 .primary-input::placeholder {
@@ -18,33 +20,13 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 	font-weight: 500;
 }
 
-.primary-input[type='text'] {
-	font-size: 20px;
-	padding: 0rem 1rem;
-}
-
-
-.header-container {
-	display: flex;
-	justify-items: flex-start;
-	flex-direction: column;
-	gap: 0.25rem;
-}
-
-.header {
-	text-align: left;
-	font-family: Roboto;
-	font-size: 32;
-	font-weight: 700;
-	color: #3FA3FF
-}
 
 .clickable {
 	cursor: pointer;
 }
 
 .main-page-container {
-	margin-top: 10%;
+	margin-top: 5%;
 	display: flex;
 	justify-content: center;
 	align-items: center;

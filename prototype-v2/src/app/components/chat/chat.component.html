@@ -1,11 +1,7 @@
 <div class="main-page-container">
 	<div class="main-chat-container">
 		<div #messageContainer class="messages-container">
-			<div *ngFor="let message of messages">
-		
-				<style>
-
-				</style>
+			<div #messagesList *ngFor="let message of messages; index as i">
 				<div class="main-message-container"
 					[class.my-message]="message.username === socketService.username">
 					<div *ngIf="message.username !== systemUsername" class="message-content-container"
