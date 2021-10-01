@@ -3,7 +3,6 @@ import '../../app.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 TextEditingController userController = TextEditingController();
-TextEditingController ipController = TextEditingController();
 Color primaryColor =
     Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
 
@@ -21,23 +20,6 @@ class _LoginState extends State<Login> {
 
   bool usernameTaken = false;
   bool usernameEmpty = false;
-  @override
-  void initState() {
-    super.initState();
-    // initSocket();
-  }
-
-  void initSocket() {
-    IO.Socket socket = IO.io(
-        'https://colorimage-109-3900.herokuapp.com/',
-        IO.OptionBuilder()
-            .setTransports(['websocket']) // for Flutter or Dart VM
-            .build());
-    socket.on('connect', (_) {
-      print('connect');
-    });
-    socket.on('disconnect', (_) => print('disconnect'));
-  }
 
   final logo = Hero(
     tag: 'hero',
@@ -52,7 +34,6 @@ class _LoginState extends State<Login> {
   static const padding = 30.0;
 
   final usernameField = TextFormField(
-    onChanged: (text) {},
     style: const TextStyle(fontSize: _fontSize),
     controller: userController,
     maxLines: 1,
@@ -66,35 +47,45 @@ class _LoginState extends State<Login> {
       contentPadding: const EdgeInsets.all(padding),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
     ),
-    validator: (String? value) {
-      // if (value == null || value.isEmpty) {
-      //   return "Veuillez entrer un nom d'utilisateur";
-      // }
-      return null;
-    },
   );
 
-  final ipField = TextFormField(
-    style: const TextStyle(fontSize: _fontSize),
-    controller: ipController,
-    maxLines: 1,
-    autofocus: false,
-    decoration: InputDecoration(
-      errorStyle: TextStyle(fontSize: _fontSize),
-      hintText: "Adresse IP (e.g. 192.168.2.1)",
-      hintStyle: new TextStyle(
-        fontSize: _fontSize,
-      ),
-      contentPadding: EdgeInsets.all(padding),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
-    ),
-    validator: (String? value) {
-      if (value == null || value.isEmpty) {
-        return null;
+  _onSubmitTap(BuildContext context, String username) {
+    // Initialize socket connection with server
+    IO.Socket socket = IO.io(
+        'http://localhost:3000/',
+        IO.OptionBuilder()
+            .disableAutoConnect()
+            .setTransports(['websocket']) // for Flutter or Dart VM
+            .build());
+
+    socket.auth = {'username': username};
+
+    socket.on('error', (err) {
+      if (err['message'] == 'Username not defined') {
+        setState(() {
+          usernameEmpty = true;
+          usernameTaken = false;
+        });
+      } else if (err['message'] == 'Username is already taken') {
+        setState(() {
+          usernameEmpty = false;
+          usernameTaken = true;
+        });
       }
-      return null;
-    },
-  );
+    });
+
+    socket.connect();
+
+    socket.on('connect', (_) {
+      setState(() {
+        usernameEmpty = false;
+        usernameTaken = false;
+      });
+      socket.emit('join-channel', {'username': username});
+      Navigator.pushNamed(context, ChatRoute,
+          arguments: {'username': username, 'socket': socket});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,15 +120,13 @@ class _LoginState extends State<Login> {
                                     color: Colors.red, fontSize: 25.0)))
                         : Text(""),
                 SizedBox(height: 24.0),
-                ipField,
-                SizedBox(height: 24.0),
                 ElevatedButton(
                   onPressed: () {
                     // Validate will return true if the form is valid, or false if
                     // the form is invalid.
                     if (_formKey.currentState!.validate()) {
                       _onSubmitTap(
-                          context, userController.text, ipController.text);
+                          context, userController.text);
                     }
                   },
                   style:
@@ -149,49 +138,5 @@ class _LoginState extends State<Login> {
             ),
           ),
         ]));
-  }
-
-  _onSubmitTap(BuildContext context, String username, String ip) {
-    // Initialize socket connection with server
-    IO.Socket socket = IO.io(
-        'http://localhost:3000/',
-        IO.OptionBuilder()
-            .disableAutoConnect()
-            .setTransports(['websocket']) // for Flutter or Dart VM
-            .build());
-
-    socket.auth = {'username': username};
-    socket.connect();
-    print('Connecting..');
-
-    socket.on('error', (err) {
-      if (err['message'] == 'Username not defined') {
-        print('username not defined');
-        setState(() {
-          usernameEmpty = true;
-          usernameTaken = false;
-        });
-      } else if (err['message'] == 'Username is already taken') {
-        print('username taken');
-        setState(() {
-          usernameEmpty = false;
-          usernameTaken = true;
-        });
-      }
-    });
-
-    socket.on('connect', (_) {
-      print(username);
-      setState(() {
-        usernameEmpty = false;
-        usernameTaken = false;
-      });
-      socket.emit('join-channel', {'username': username});
-      Navigator.pushNamed(context, ChatRoute,
-          arguments: {'username': username, 'socket': socket});
-    });
-
-    // socket.on('user-connection', (username) => {print(username)});
-    // socket.on('exception', (exception) => {print(exception['message'])});
   }
 }
