@@ -15,12 +15,16 @@ export = (io: Server, socket: Socket) => {
     socket.emit('get-users', getUsers());
     socket.broadcast.emit('user-connection', {
       username: "Système",
-      message: `${socket.data.username} s'est connecté! 😀`,
+      message: `${socket.data.username} s'est connecté! 😄`,
       timestamp: moment().format("H:MM:SS"),
     });
   };
 
   const sendMessage = (messagePayload: ISendMessagePayload) => {
+    if(messagePayload.message.length === 0) {
+      return;
+    }
+
     io.sockets.emit('receive-message', {
       message: messagePayload.message,
       username: socket.data.username,
