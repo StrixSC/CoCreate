@@ -1,0 +1,54 @@
+version: '3'
+services:
+  app:
+    container_name: colorimage-server
+    restart: always
+    build: .
+    env_file:
+      - .env
+    environment:
+      POSTGRESQL_PROD_URL: ${POSTGRESQL_PROD_URL}
+      POSTGRESQL_DEV_URL: postgres://postgres:password@postgres:5432/api
+      NODE_ENV: development
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_DB: api
+      POSTGRESQL_PASSWD: password
+      POSTGRESQL_PORT: 5432
+      PORT: 3000
+      SECRET: 'secret'
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+    volumes:
+      - ./src/:/usr/src/app/src/
+  postgres:
+    container_name: postgres
+    image: postgres:10.4
+    ports:
+      - "5432:5432"
+    volumes: 
+      - ./postgresdata:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: api
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:4.18
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@colorimage.com
+      PGADMIN_DEFAULT_PASSWORD: secret
+      PGADMIN_LISTEN_PORT: 8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+volumes:
+  db-data:
+  pgadmin-data:
