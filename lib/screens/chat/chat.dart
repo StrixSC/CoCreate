@@ -41,12 +41,13 @@ class ChatMessage extends StatelessWidget {
                           ChatBubble(
                             clipper:
                                 ChatBubbleClipper3(type: BubbleType.sendBubble),
-                            shadowColor: null,
-                            elevation: null,
+                            shadowColor: Colors.white,
+                            elevation: 0,
                             alignment: Alignment.topRight,
                             margin: EdgeInsets.only(top: 10),
-                            backGroundColor: Colors.blue,
+                            backGroundColor: Colors.indigo.shade400,
                             child: Container(
+                              color: Color(0xFF5D72CC),
                               constraints: BoxConstraints(
                                 maxWidth:
                                     MediaQuery.of(context).size.width * 0.9,
@@ -82,7 +83,7 @@ class ChatMessage extends StatelessWidget {
                       children: [
                         Padding(
                             padding: EdgeInsets.fromLTRB(0, 45, 0, 0),
-                            child: CircleAvatar(child: Text(this.username[0])))
+                            child: CircleAvatar(backgroundColor: Color(0xFF5D72CC), child: Text(this.message_username[0], style: TextStyle(color:Colors.white),)))
                       ],
                     ),
                     Column(
@@ -90,17 +91,17 @@ class ChatMessage extends StatelessWidget {
                         children: [
                           Padding(
                               padding: EdgeInsets.fromLTRB(15, 0, 0, 0),
-                              child: Text(this.username,
+                              child: Text(this.message_username,
                                   style:
                                       Theme.of(context).textTheme.headline6)),
                           ChatBubble(
                             clipper: ChatBubbleClipper3(
-                                type: BubbleType.receiverBubble, radius: 20),
-                            shadowColor: null,
-                            elevation: null,
+                                type: BubbleType.receiverBubble, radius: 15),
+                            shadowColor: Colors.white,
+                            elevation: 0,
                             alignment: Alignment.topRight,
                             margin: EdgeInsets.only(top: 10),
-                            backGroundColor: Colors.grey,
+                            backGroundColor: Colors.grey.shade300,
                             child: Container(
                               constraints: BoxConstraints(
                                 maxWidth:
@@ -109,7 +110,7 @@ class ChatMessage extends StatelessWidget {
                               child: Text(
                                 text,
                                 style: TextStyle(
-                                    color: Colors.white, fontSize: 30),
+                                    color: Colors.black, fontSize: 30),
                               ),
                             ),
                           ),
@@ -226,7 +227,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildTextComposer() {
     return IconTheme(
-      data: IconThemeData(color: Theme.of(context).colorScheme.secondary),
+      data: IconThemeData(color:Color(0xFF5D72CC)),
       child: Container(
         height: 75,
         margin: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -251,6 +252,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: IconButton(
                   iconSize: 34,
                   icon: const Icon(Icons.send),
+                  color: Colors.indigo.shade400,
                   onPressed: () {
                     _handleSubmitted(_textController.text);
                   }),
@@ -264,20 +266,20 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
           icon: Tooltip(
               message: 'Se déconnecter',
-              child: new Icon(Icons.arrow_back_ios,
+              child: new Icon(Icons.arrow_back,
                   color: Colors.black, size: 30)),
           onPressed: () => Navigator.of(context).pop(),
         ),
         backgroundColor: Colors.white,
-        title: Center(
-            child: Text(
-          'Chat Publique',
-          style: TextStyle(fontSize: 35, color: Colors.blue),
-        )),
+        title:  Text(
+          '',
+          style: TextStyle(fontSize: 25, color: Colors.blue),
+        ),
       ),
       body: Column(
         children: [
