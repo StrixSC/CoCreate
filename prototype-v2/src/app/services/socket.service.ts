@@ -21,6 +21,7 @@ export class SocketService {
 
   connect(): void {
     this.socket.connect();
+    this.socket.sendBuffer = [];
   }
 
   disconnect(): void {
@@ -52,7 +53,6 @@ export class SocketService {
   onError(): Observable<any> {
     return new Observable((observer) => {
       this.socket.on('connect_error', (err) => {
-        console.log(err);
         observer.next(err);
       })
     })

@@ -16,6 +16,7 @@ export class ChatComponent implements OnInit {
   messages: IReceiveMessagePayload[];
   message: string;
   errorListener: Subscription;
+  public readonly systemUsername = "Système"
   messageListener: Subscription;
   constructor(
     private router: Router,
@@ -31,10 +32,9 @@ export class ChatComponent implements OnInit {
 
   ngOnInit(): void {
     this.errorListener = this.socketService.onError().subscribe((err: any) => {
-      console.log(err.message);
       this.router.navigateByUrl("login");
+      this.socketService.error = err.message;
       this.socketService.disconnect();
-      this.socketService.error = "Username invalide";
     });
 
     this.messageListener = merge(
@@ -51,7 +51,6 @@ export class ChatComponent implements OnInit {
   ngOnDestroy() : void {
     this.errorListener.unsubscribe();
     this.messageListener.unsubscribe();
-    this.disconnect();
   }
 
   connectWithUsername() {
@@ -77,6 +76,7 @@ export class ChatComponent implements OnInit {
   }
 
   disconnect(): void {
+    this.socketService.error = "";
     this.socketService.disconnect();
     this.router.navigateByUrl("login");
   }

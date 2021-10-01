@@ -28,7 +28,7 @@ export class ChatService {
   }
 
   userDisconnect(): Observable<IReceiveMessagePayload> {
-    return this.socket.on('disconnect');
+    return this.socket.on('user-disconnect');
   }
 
   joinChannel(): void {
