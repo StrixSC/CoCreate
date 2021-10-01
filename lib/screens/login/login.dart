@@ -33,22 +33,6 @@ class _LoginState extends State<Login> {
   static const _fontSize = 25.0;
   static const padding = 30.0;
 
-  final usernameField = TextFormField(
-    style: const TextStyle(fontSize: _fontSize),
-    controller: userController,
-    maxLines: 1,
-    autofocus: false,
-    decoration: InputDecoration(
-      errorStyle: const TextStyle(fontSize: _fontSize),
-      hintText: "Nom d'utilisateur",
-      hintStyle: const TextStyle(
-        fontSize: _fontSize,
-      ),
-      contentPadding: const EdgeInsets.all(padding),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
-    ),
-  );
-
   _onSubmitTap(BuildContext context, String username) {
     // Initialize socket connection with server
     IO.Socket socket = IO.io(
@@ -110,7 +94,28 @@ class _LoginState extends State<Login> {
                         fontSize: 40.0,
                         color: primaryColor)),
                 SizedBox(height: 24.0),
-                usernameField,
+          TextFormField(
+              style: const TextStyle(fontSize: _fontSize),
+              controller: userController,
+              maxLines: 1,
+              autofocus: false,
+              decoration: InputDecoration(
+                errorStyle: const TextStyle(fontSize: _fontSize),
+                hintText: "Nom d'utilisateur",
+                hintStyle: const TextStyle(
+                  fontSize: _fontSize,
+                ),
+                contentPadding: const EdgeInsets.all(padding),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+              ),
+              autovalidate: true,
+              onFieldSubmitted: (value) {
+                if (_formKey.currentState!.validate()) {
+                  _onSubmitTap(
+                      context, userController.text);
+                }
+              },
+          ),
                 usernameTaken
                     ? Padding(
                         padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
