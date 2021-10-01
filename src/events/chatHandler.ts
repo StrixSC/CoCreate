@@ -16,7 +16,7 @@ export = (io: Server, socket: Socket) => {
     socket.broadcast.emit('user-connection', {
       username: "Système",
       message: `${socket.data.username} s'est connecté! 😄`,
-      timestamp: moment().format("HH:MM:SS"),
+      timestamp: moment().format("HH:mm:ss"),
     });
   };
 
@@ -28,7 +28,7 @@ export = (io: Server, socket: Socket) => {
     io.sockets.emit('receive-message', {
       message: messagePayload.message,
       username: socket.data.username,
-      timestamp: moment().format('HH:MM:SS')
+      timestamp: moment().format('HH:mm:ss')
     } as IReceiveMessagePayload);
   };
 
@@ -36,7 +36,7 @@ export = (io: Server, socket: Socket) => {
     socket.broadcast.emit('user-disconnect', {
       username: "Système",
       message: `${socket.data.username} s'est déconnecté... 😭`,
-      timestamp: moment().format("H:MM:SS"),
+      timestamp: moment().format("HH:mm:ss"),
     } as IReceiveMessagePayload);
 
     try {
