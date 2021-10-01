@@ -139,7 +139,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final String _username;
   final IO.Socket _socket;
   _ChatScreenState(this._username, this._socket);
-  final List<ChatMessage> _messages = [];
+  final List<dynamic> _messages = [];
   final _textController = TextEditingController();
   bool _validate = false;
   final FocusNode _focusNode = FocusNode();
@@ -161,16 +161,44 @@ class _ChatScreenState extends State<ChatScreen> {
       });
       _focusNode.requestFocus();
     });
+
+    _socket.on('user-connection', (user) {
+      print('Someone connected');
+      print(user);
+      var newConnection = Container(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Center(
+              child: Text(user['message'], style: TextStyle(fontSize: 25)),
+            )
+          ],
+        ),
+      );
+      setState(() {
+        _messages.insert(0, newConnection);
+      });
+      _focusNode.requestFocus();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Chat Publique',
-          style: TextStyle(fontSize: 35),
+        leading: IconButton(
+          icon: Tooltip(
+              message: 'Se déconnecter',
+              child: new Icon(Icons.arrow_back_ios,
+                  color: Colors.black, size: 30)),
+          onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: Colors.white,
+        title: Center(
+            child: Text(
+          'Chat Publique',
+          style: TextStyle(fontSize: 35, color: Colors.blue),
+        )),
       ),
       body: Column(
         children: [
@@ -202,7 +230,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Flexible(
               child: TextField(
-                style: TextStyle(fontSize: 30),
+                style: TextStyle(fontSize: 25),
                 controller: _textController,
                 onSubmitted: _handleSubmitted,
                 onChanged: _handleChange,
@@ -217,6 +245,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 4.0),
               child: IconButton(
+                  iconSize: 34,
                   icon: const Icon(Icons.send),
                   onPressed: () {
                     _handleSubmitted(_textController.text);
