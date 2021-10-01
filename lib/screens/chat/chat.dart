@@ -178,6 +178,25 @@ class _ChatScreenState extends State<ChatScreen> {
       });
       _focusNode.requestFocus();
     });
+
+    _socket.on('user-disconnect', (user) {
+      print('Someone disconnected');
+      print(user);
+      var newConnection = Container(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Center(
+              child: Text(user['message'], style: TextStyle(fontSize: 25)),
+            )
+          ],
+        ),
+      );
+      setState(() {
+        _messages.insert(0, newConnection);
+      });
+      _focusNode.requestFocus();
+    });
   }
 
   @override
