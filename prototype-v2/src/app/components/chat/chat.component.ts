@@ -2,9 +2,8 @@ import { IReceiveMessagePayload } from './../../models/IReceiveMessagePayload.mo
 import { merge, Subscription } from 'rxjs';
 import { SocketService } from './../../services/socket.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ChatService } from 'src/app/services/chat.service';
-import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-chat',
@@ -13,6 +12,7 @@ import { map } from 'rxjs/operators';
 })
 export class ChatComponent implements OnInit {
 
+  @ViewChild('messageContainer') messageContainer!: ElementRef;
   messages: IReceiveMessagePayload[];
   message: string;
   errorListener: Subscription;
@@ -31,9 +31,10 @@ export class ChatComponent implements OnInit {
 
   ngOnInit(): void {
     this.errorListener = this.socketService.onError().subscribe((err: any) => {
-      this.socketService.error = err.message;
+      console.log(err.message);
       this.router.navigateByUrl("login");
       this.socketService.disconnect();
+      this.socketService.error = "Username invalide";
     });
 
     this.messageListener = merge(
@@ -42,6 +43,7 @@ export class ChatComponent implements OnInit {
       this.chatService.receiveMessage(),
     ).subscribe((data: IReceiveMessagePayload) => {
         this.messages.push(data);
+        this.scrollToBottom();
       });
     this.connectWithUsername();
   }
@@ -75,9 +77,14 @@ export class ChatComponent implements OnInit {
   }
 
   disconnect(): void {
-    this.socketService.error = "";
     this.socketService.disconnect();
     this.router.navigateByUrl("login");
   }
+
+  scrollToBottom(): void {
+    try {
+        this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
+    } catch(err) { }                 
+}
 
 }

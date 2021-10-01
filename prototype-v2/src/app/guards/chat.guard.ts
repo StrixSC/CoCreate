@@ -15,5 +15,4 @@ export class ChatGuard implements CanActivate {
 
 		return true;
 	}
-
 }
