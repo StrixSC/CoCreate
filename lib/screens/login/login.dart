@@ -53,6 +53,7 @@ class _LoginState extends State<Login> {
     // Initialize socket connection with server
     IO.Socket socket = IO.io(
         'http://localhost:3000/',
+        // 'https://colorimage-109-3900.herokuapp.com/',
         IO.OptionBuilder()
             .disableAutoConnect()
             .setTransports(['websocket']) // for Flutter or Dart VM
@@ -66,12 +67,16 @@ class _LoginState extends State<Login> {
           usernameEmpty = true;
           usernameTaken = false;
         });
+
+
       } else if (err['message'] == "Ce nom d'utilisateur est déjà utilisé, choisissez-en en autre!") {
         setState(() {
           usernameEmpty = false;
           usernameTaken = true;
         });
       }
+
+      socket.dispose();
     });
 
     socket.connect();
