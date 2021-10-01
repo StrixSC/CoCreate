@@ -16,7 +16,7 @@ export class SocketService {
   }
 
   setupSocketConnection(ip?: string): void {
-    this.socket = io(ip || environment.WS_URL || "127.0.0.1", { autoConnect: false }) as Socket;
+    this.socket = io(environment.WS_URL || "http://localhost:3000", { autoConnect: false }) as Socket;
   }
 
   connect(): void {

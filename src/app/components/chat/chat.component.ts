@@ -38,7 +38,7 @@ export class ChatComponent implements OnInit {
 
       // Clean this up for the implementation of the chat feature
       if (err.message === 'xhr poll error') {
-        this.socketService.error = "Oops, nous n'avons pas pû nous connecter au Serveur... Réessayez plus tard!"
+        this.socketService.error = "Oups, nous n'avons pas pu vous connecter au serveur... Essayez à nouveau plus tard !"
       } else this.socketService.error = err.message;
 
       this.socketService.disconnect();
