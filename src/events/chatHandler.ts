@@ -16,7 +16,7 @@ export = (io: Server, socket: Socket) => {
     socket.broadcast.emit('user-connection', {
       username: "Système",
       message: `${socket.data.username} s'est connecté! 😄`,
-      timestamp: moment().format("H:MM:SS"),
+      timestamp: moment().format("HH:MM:SS"),
     });
   };
 
@@ -28,7 +28,7 @@ export = (io: Server, socket: Socket) => {
     io.sockets.emit('receive-message', {
       message: messagePayload.message,
       username: socket.data.username,
-      timestamp: moment().format('H:MM:SS')
+      timestamp: moment().format('HH:MM:SS')
     } as IReceiveMessagePayload);
   };
 
