@@ -36,7 +36,7 @@ class _LoginState extends State<Login> {
   _onSubmitTap(BuildContext context, String username) {
     // Initialize socket connection with server
     IO.Socket socket = IO.io(
-        'http://10.200.24.176:5300/',
+        'https://colorimage-109-3900.herokuapp.com/',
         IO.OptionBuilder()
             .disableAutoConnect()
             .setTransports(['websocket']) // for Flutter or Dart VM
