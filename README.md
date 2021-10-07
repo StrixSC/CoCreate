@@ -18,6 +18,18 @@ ou
 npm run docker
 ```
 
+# External Services
+
+The server uses these services:
+
+- PostgreSQL for persistent hard storage.
+- Redis for caching and persistent key-value store if the need occurred.
+- PgAdmin4 for a GUI management tool to the PostgreSQL instance.
+
+The easiest way to deploy and use them is to use docker. See docker section.
+
+Another way to utilize the services is to install them separately and run them on your local machine. You will have to provide the psql database url in a .env variable (see example.env file for examples).
+
 # Deploiment
 
 Requirements:

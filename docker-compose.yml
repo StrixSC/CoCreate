@@ -7,36 +7,33 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRESQL_PROD_URL: ${POSTGRESQL_PROD_URL}
-      POSTGRESQL_DEV_URL: postgres://admin:admin@postgres:3001/colorimage
-      NODE_ENV: development
-      POSTGRESQL_USERNAME: admin
-      POSTGRESQL_DB: colorimage
-      POSTGRESQL_PASSWD: admin
-      POSTGRESQL_PORT: 3001
-      PORT: 3000
-      SECRET: 'secret'
+      PSQL_URL: 'postgres://admin:admin@postgres:5432/colorimage' 
     ports:
       - '3000:3000'
     depends_on:
       - postgres
     volumes:
       - ./src/:/usr/src/app/src/
+    networks:
+      - postgres
+    command: ["./wait-for-it.sh", "postgres:5432", "--", "npm", "run", "docker-dev"]
   postgres:
     container_name: postgres
     image: postgres:10.4
     ports:
       - "3001:5432"
-    volumes: 
+    volumes:
       - ./postgresdata:/var/lib/postgresql/data
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: always
     networks:
         - postgres
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: colorimage
+      POSTGRES_USER: ${PSQL_USER:-admin}
+      POSTGRES_PASSWORD: ${PSQL_PASS:-admin}
+      POSTGRES_DB: ${PSQL_DB:-colorimage}
       command: "postgres -c config_file=./postgresdata/postgresql.conf log_statement=all"
   pgadmin:
     container_name: pgadmin
@@ -53,6 +50,13 @@ services:
     volumes:
       - pg-data:/var/lib/pgadmin
     depends_on:
+      - postgres
+  redis:
+    image: redis
+    container_name: redis-container
+    ports:
+      - "3003:3003"
+    networks:
       - postgres
 volumes:
   db-data:

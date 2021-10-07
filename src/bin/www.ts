@@ -5,6 +5,7 @@ import http from 'http';
 import { app } from '../app';
 import { Server, Socket } from 'socket.io';
 import corsOptions from '../cors';
+import { initDB } from '../db';
 
 // Events
 import chatHandler from '../events/chatHandler';
@@ -35,9 +36,11 @@ const onError = (error: any) => {
   case 'EACCES':
     console.error(`${bind} requires elevated privileges`);
     process.exit(1);
+    break;
   case 'EADDRINUSE':
     console.error(`${bind} is already in use`);
     process.exit(1);
+    break;
   default:
     throw error;
   }
@@ -63,11 +66,13 @@ const onConnection = (socket: Socket) => {
   });
 };
 
-io.use(usernameCheck);
-io.on('connection', onConnection);
+initDB().then(() => {
+    io.use(usernameCheck);
+    io.on('connection', onConnection);
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+    server.listen(port);
+    server.on('error', onError);
+    server.on('listening', onListening);
+});
 
 export { io };
