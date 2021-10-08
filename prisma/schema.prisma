@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  user_id String @unique @id @default(uuid())
+  email   String   @unique
+  password String @unique
+  profile Profile?
+  stats Stats?
+  logs Log[]
+  account Account?
+}
+
+model Profile {
+  profile_id String @unique @id @default(uuid())
+  username String @unique
+  avatarUrl String
+  user User @relation(fields: [user_id], references: [user_id])
+  user_id  String @unique
+}
+
+model Account { 
+  account_id String @unique @id @default(uuid())
+  user User @relation(fields: [user_id], references: [user_id])
+  user_id String @unique
+  first_name String
+  last_name String
+}
+
+model Stats {
+  stats_id String @unique @id @default(uuid())
+  user_id String @unique
+  user User @relation(fields: [user_id], references: [user_id])
+  collaboration_count Int
+  author_count Int
+  active_team_count Int
+  average_collaboration_time Float
+  total_collaboration_time Float
+}
+
+model Log {
+  log_id String @unique @id @default(uuid())
+  user_id String @unique
+  user User @relation(fields: [user_id], references: [user_id])
+  type LogType
+  created_at DateTime
+  drawing_id String? @unique
+}
+
+enum LogType {
+  Connection
+  Disconnection
+  DrawingUpdate
+}
