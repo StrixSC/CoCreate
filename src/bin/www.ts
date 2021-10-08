@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-
+import "reflect-metadata";
 import Debug from 'debug';
 import http from 'http';
 import { app } from '../app';
 import { Server, Socket } from 'socket.io';
 import corsOptions from '../cors';
-import { initDB, initializeCache } from '../db';
+import { initializeCache } from '../db';
 
 // Events
 import chatHandler from '../events/chatHandler';
@@ -22,8 +22,8 @@ export const normalizePort = (val: string) => {
   return false;
 };
 
-const debug = Debug('Colorimage API');
-const port = normalizePort(process.env.PORT || '3000');
+const debug = Debug('Colorimage');
+const port = normalizePort('3000');
 const server = http.createServer(app);
 
 
@@ -51,7 +51,8 @@ const onListening = () => {
   const bind =
     typeof addr === 'string'
       ? `pipe ${addr}`
-      : `port ${addr ? addr.port : 'ERR: Address is null'}`;
+      : `port ${addr ? addr.port : 'ERR: Address is null'}`
+
   debug(`Listening on ${bind}`);
 };
 
@@ -66,18 +67,13 @@ const onConnection = (socket: Socket) => {
   });
 };
 
-initDB().then(() => {
-  const redisPort = Number(process.env.CACHE_REDIS_PORT || '3003');
-  initializeCache(redisPort);
-  io.use(usernameCheck);
-  io.on('connection', onConnection);
+const redisPort = Number(process.env.CACHE_REDIS_PORT || '3003');
+initializeCache(redisPort);
+io.use(usernameCheck);
+io.on('connection', onConnection);
 
-  server.listen(port);
-  server.on('error', onError);
-  server.on('listening', onListening);
-})
-.catch((e) => {
-  console.error(e);
-});
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
 
 export { io };

@@ -7,8 +7,9 @@ import cookieParser from 'cookie-parser';
 import corsOptions from './cors';
 
 // Routes
-import index from './routes/index';
-import auth from './routes/auth';
+import indexRouter from './routes/index';
+import authRouter from './routes/auth';
+import usersRouter from './routes/users';
 
 const app = express();
 
@@ -26,7 +27,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 app.use(cookieParser());
 
-app.use('/', index);
-app.use('/auth', auth);
+app.use('/', indexRouter);
+app.use('/auth', authRouter);
+app.use('/users', usersRouter);
 
 export { app };

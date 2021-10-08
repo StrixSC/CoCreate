@@ -7,7 +7,8 @@ services:
     env_file:
       - .env
     environment:
-      PSQL_URL: 'postgres://admin:admin@postgres:5432/colorimage' 
+      DATABASE_URL: 'postgres://admin:admin@postgres:5432/colorimage'
+      CACHE_REDIS_URL: 'redis://redis:6379/0'
     ports:
       - '3000:3000'
     depends_on:
@@ -15,9 +16,7 @@ services:
       - redis
     volumes:
       - ./src/:/usr/src/app/src/
-    networks:
-      - postgres
-    command: "wait-for-it postgres:5432 -- npm run docker-dev"
+    command: "./wait-for-it.sh postgres:5432 -- npm run docker-dev"
   postgres:
     container_name: postgres
     image: postgres:10.4
@@ -25,10 +24,7 @@ services:
       - "3001:5432"
     volumes:
       - ./postgresdata:/var/lib/postgresql/data
-      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: always
-    networks:
-        - postgres
     env_file:
       - .env
     environment:
@@ -40,8 +36,6 @@ services:
     container_name: pgadmin
     image: dpage/pgadmin4:4.18
     restart: always
-    networks:
-        - postgres
     environment:
       PGADMIN_DEFAULT_EMAIL: admin
       PGADMIN_DEFAULT_PASSWORD: admin
@@ -57,11 +51,6 @@ services:
     container_name: redis
     ports:
       - "3003:6379"
-    networks:
-      - postgres
 volumes:
   db-data:
   pg-data:
-networks:
-    postgres:
-        driver: bridge

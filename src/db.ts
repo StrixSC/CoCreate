@@ -1,20 +1,13 @@
-import "reflect-metadata";
-import { createConnection, Connection, ConnectionOptions } from "typeorm";
 import { Tedis } from "tedis";
+import { PrismaClient } from "@prisma/client";
+
+export const db = new PrismaClient();
 
 export function initializeCache(port: number | undefined) : unknown {
   const tedis = new Tedis({
     port: port,
-    host: process.env.CACHE_REDIS_HOST || 'redis',
+    host: process.env.CACHE_REDIS_HOST || 'localhost',
   });
   return tedis;
  }
 
-export async function initDB(): Promise<Connection> {
-  return await createConnection(
-      {
-          type: "postgres",
-          url: process.env.PSQL_URL
-      }
-  );
-}
