@@ -5,13 +5,13 @@ import http from 'http';
 import { app } from '../app';
 import { Server, Socket } from 'socket.io';
 import corsOptions from '../cors';
-import { initDB } from '../db';
+import { initDB, initializeCache } from '../db';
 
 // Events
 import chatHandler from '../events/chatHandler';
 import { usernameCheck } from '../middlewares/usernameCheck';
 
-const normalizePort = (val: string) => {
+export const normalizePort = (val: string) => {
   const port = parseInt(val, 10);
   if (Number.isNaN(port)) {
     return val;
@@ -33,16 +33,16 @@ const onError = (error: any) => {
   }
   const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`;
   switch (error.code) {
-  case 'EACCES':
-    console.error(`${bind} requires elevated privileges`);
-    process.exit(1);
-    break;
-  case 'EADDRINUSE':
-    console.error(`${bind} is already in use`);
-    process.exit(1);
-    break;
-  default:
-    throw error;
+    case 'EACCES':
+      console.error(`${bind} requires elevated privileges`);
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(`${bind} is already in use`);
+      process.exit(1);
+      break;
+    default:
+      throw error;
   }
 };
 
@@ -67,12 +67,17 @@ const onConnection = (socket: Socket) => {
 };
 
 initDB().then(() => {
-    io.use(usernameCheck);
-    io.on('connection', onConnection);
+  const redisPort = Number(process.env.CACHE_REDIS_PORT || '3003');
+  initializeCache(redisPort);
+  io.use(usernameCheck);
+  io.on('connection', onConnection);
 
-    server.listen(port);
-    server.on('error', onError);
-    server.on('listening', onListening);
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+})
+.catch((e) => {
+  console.error(e);
 });
 
 export { io };

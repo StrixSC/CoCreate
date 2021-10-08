@@ -12,11 +12,12 @@ services:
       - '3000:3000'
     depends_on:
       - postgres
+      - redis
     volumes:
       - ./src/:/usr/src/app/src/
     networks:
       - postgres
-    command: ["./wait-for-it.sh", "postgres:5432", "--", "npm", "run", "docker-dev"]
+    command: "wait-for-it postgres:5432 -- npm run docker-dev"
   postgres:
     container_name: postgres
     image: postgres:10.4
@@ -53,9 +54,9 @@ services:
       - postgres
   redis:
     image: redis
-    container_name: redis-container
+    container_name: redis
     ports:
-      - "3003:3003"
+      - "3003:6379"
     networks:
       - postgres
 volumes:
