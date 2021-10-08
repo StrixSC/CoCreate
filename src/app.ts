@@ -9,7 +9,6 @@ import corsOptions from './cors';
 // Routes
 import indexRouter from './routes/index';
 import authRouter from './routes/auth';
-import usersRouter from './routes/users';
 
 const app = express();
 
@@ -29,6 +28,5 @@ app.use(cookieParser());
 
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
-app.use('/users', usersRouter);
 
 export { app };

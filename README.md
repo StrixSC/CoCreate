@@ -47,6 +47,7 @@ Another way to utilize the services is to install them separately and run them o
 - Database models are defined in the `src/prisma/scheme.prisma` file.
 - Middlewares are defined in the `src/middlewares` folder
 - Socket events are implemented in the `src/events` folder and triggers are defined inside of the `src/bin/www.ts` file 
+- Messages & Errors are defined in the `src/utils/errors.ts` & `src/utils/message.ts` folder respectively
 
 To update a model in the database, run:
 

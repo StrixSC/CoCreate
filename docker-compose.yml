@@ -8,7 +8,10 @@ services:
       - .env
     environment:
       DATABASE_URL: 'postgres://admin:admin@postgres:5432/colorimage'
-      CACHE_REDIS_URL: 'redis://redis:6379/0'
+      CACHE_REDIS_HOST: 'redis'
+      CACHE_REDIS_PORT: 6379
+      NODE_ENV: development
+      PORT: 3000
     ports:
       - '3000:3000'
     depends_on:
