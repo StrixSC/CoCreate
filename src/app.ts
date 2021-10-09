@@ -7,8 +7,10 @@ import cookieParser from 'cookie-parser';
 import corsOptions from './cors';
 
 // Routes
-import indexRouter from './routes/index';
-import authRouter from './routes/auth';
+import indexRouter from './routes/index.route';
+import authRouter from './routes/auth.route';
+import passport from 'passport';
+import create from 'http-errors';
 
 const app = express();
 
@@ -25,6 +27,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 app.use(cookieParser());
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use( async (req, res, next) => {
+  next(new create.NotFound('404'));
+})
 
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
