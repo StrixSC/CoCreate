@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import "reflect-metadata";
+import 'reflect-metadata';
 import Debug from 'debug';
 import http from 'http';
 import { app } from '../app';
@@ -33,16 +33,16 @@ const onError = (error: any) => {
   }
   const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`;
   switch (error.code) {
-    case 'EACCES':
-      console.error(`${bind} requires elevated privileges`);
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(`${bind} is already in use`);
-      process.exit(1);
-      break;
-    default:
-      throw error;
+  case 'EACCES':
+    console.error(`${bind} requires elevated privileges`);
+    process.exit(1);
+    break;
+  case 'EADDRINUSE':
+    console.error(`${bind} is already in use`);
+    process.exit(1);
+    break;
+  default:
+    throw error;
   }
 };
 
@@ -51,7 +51,7 @@ const onListening = () => {
   const bind =
     typeof addr === 'string'
       ? `pipe ${addr}`
-      : `port ${addr ? addr.port : 'ERR: Address is null'}`
+      : `port ${addr ? addr.port : 'ERR: Address is null'}`;
 
   debug(`Listening on ${bind}`);
 };

@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { register, login } from '../controllers/auth.controller';
+import { registerController, loginController } from '../controllers/auth.controller';
 
 const router = Router();
 
-router.post('/login', (req, res) => login(req, res));
+router.post('/login', async (req, res, next) => await loginController(req, res, next));
 
-router.post('/register', async (req, res) => register(req, res));
+router.post('/register', async (req, res, next) => await registerController(req, res, next));
 
 export default router;

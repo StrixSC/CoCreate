@@ -30,11 +30,12 @@ app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use( async (req, res, next) => {
-  next(new create.NotFound('404'));
-})
 
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
+
+app.use(async (req, res, next) => {
+  next(new create.NotFound('404'));
+})
 
 export { app };
