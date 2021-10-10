@@ -4,13 +4,14 @@ import { db } from '../db';
 import { signToken } from '../utils/jwt';
 import { validateEmail, validatePassword } from '../utils/auth';
 import { Prisma } from '.prisma/client';
+import { ISignedJWTPayload } from '../models/ISignedJWTPayload.model';
 
 const authErrorRouters: { [key: string]: HttpError } = {
     'P2001': new create.Unauthorized("Unauthorized"),
     'P2002': new create.Conflict("Email already in use")
 };
 
-export const login = async (email: string, password: string): Promise<string> => {
+export const login = async (email: string, password: string): Promise<ISignedJWTPayload> => {
     const user = await db.user.findUnique({
         where: { email }
     });
@@ -21,10 +22,10 @@ export const login = async (email: string, password: string): Promise<string> =>
     const checkPassword = compareSync(password, user.password);
     if (!checkPassword) throw new create.Unauthorized("Invalid email address or password.");
 
-    return signToken({ userId: user.user_id, email: user.email });
+    return signToken(user);
 }
 
-export const register = async (email: string, password: string): Promise<string> => {
+export const register = async (email: string, password: string): Promise<ISignedJWTPayload> => {
 
     if (!validateEmail(email) || !validatePassword(password))
         throw new create.BadRequest("Invalid user information");
@@ -42,8 +43,7 @@ export const register = async (email: string, password: string): Promise<string>
 
         if (!user) throw new create.InternalServerError("Internal Server Error");
 
-        const jwt = signToken({ email: user.email, userId: user.user_id });
-        return jwt;
+        return signToken(user);
     } catch (e: any) {
         if (e instanceof Prisma.PrismaClientKnownRequestError) {
             throw authErrorRouters[e.code] || new create.InternalServerError("Internal Server Error");
