@@ -41,13 +41,16 @@ Another way to utilize the services is to install them separately and run them o
 
 # Development
 
-- Routes are defined in the `src/routes/` folder
-- Controllers are not defined in a separte folder, they are defined inline with the route.
-- Interfaces are defined inside of the `src/models/` folder
+- Routes are defined in the `src/routes/` folder and the filename.
+- Controllers are defined in the `src/controllers` folder and the filename should end with `.controller.ts`.
+- Interfaces are defined inside of the `src/models/` folder and the filename should end with `.model.ts`.
+- Services are defined inside of the `src/services/` folder and the filename should end with `.service.ts`.
 - Database models are defined in the `src/prisma/scheme.prisma` file.
-- Middlewares are defined in the `src/middlewares` folder
+- Middlewares are defined in the `src/middlewares` folder and the filename suffix should end with .middleware.ts
+- Utilitary functions are defined inside separte files in the `src/utils/` folder.
 - Socket events are implemented in the `src/events` folder and triggers are defined inside of the `src/bin/www.ts` file 
-- Messages & Errors are defined in the `src/utils/errors.ts` & `src/utils/message.ts` folder respectively
+
+The database instance (The prisma client) can be found in `src/db.ts`. To query a table, simply import it and use one of its many functions.
 
 To update a model in the database, run:
 

@@ -2,7 +2,6 @@ import cors from 'cors';
 import express from 'express';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
-import * as config from './passport';
 import corsOptions from './cors';
 
 // Routes
