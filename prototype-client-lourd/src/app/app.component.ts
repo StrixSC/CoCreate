@@ -1,11 +1,11 @@
-import { IUser } from '../../model/IUser.model';
-import { SocketService } from '../../services/chat/socket.service';
+import { IUser } from './models/IUser.model';
+import { SocketService } from './services/socket.service';
 import { Component, OnDestroy } from '@angular/core';
-import { Subscription/*, merge*/ } from 'rxjs';
-//import { map } from 'rxjs/operators';
-import { ChatService } from '../../services/chat/chat.service';
-//import { IReceiveMessagePayload } from '../../model/IReceiveMessagePayload.model';
-import { IChannel } from '../../model/IChannel.model';
+import { Subscription, merge } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ChatService } from './services/chat.service';
+import { IReceiveMessagePayload } from './models/IReceiveMessagePayload.model';
+import { IChannel } from './models/IChannel.model';
 
 @Component({
   selector: 'app-root',
@@ -34,7 +34,7 @@ export class AppComponent implements OnDestroy {
 
 
 
-    this.chatService.getUsers().subscribe((users: any[]) => {
+    this.chatService.getUsers().subscribe((users) => {
       this.users = users.sort((a) => {
         if (a.userId !== this.socketService.socket.id) return -1
         else return 1;
