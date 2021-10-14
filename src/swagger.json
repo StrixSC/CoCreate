@@ -8,14 +8,15 @@
   "servers": [
     {
       "url": "https://colorimage-109-3900.herokuapp.com/"
+    },
+    {
+      "url": "http://localhost:3000"
     }
   ],
   "paths": {
-    "/login": {
+    "/auth/login": {
       "post": {
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "summary": "Log user in.",
         "operationId": "login",
         "requestBody": {
@@ -73,11 +74,9 @@
         }
       }
     },
-    "/register": {
+    "/auth/register": {
       "post": {
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "summary": "Registers the user with the given email and password if the email is not already in use.",
         "operationId": "register",
         "requestBody": {
