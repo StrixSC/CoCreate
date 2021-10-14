@@ -1,0 +1,28 @@
+image: node:latest
+
+variables:
+  DOCKER_DRIVER: overlay
+
+stages:
+  - build
+  - migrate
+
+build:
+  image: docker:latest
+  stage: build
+  services:
+    - docker:dind
+  script:
+    - docker build -f Dockerfile.prod --iidfile imageid.txt -t registry.heroku.com/colorimage-109-3900/web .
+    - docker login -u "${HEROKU_USERNAME}" -p "${HEROKU_TOKEN}" registry.heroku.com
+    - docker push registry.heroku.com/colorimage-109-3900/web
+    - apk add --no-cache curl
+    - echo "Docker Image ID is $(cat imageid.txt)"
+    - |-
+      curl -X PATCH https://api.heroku.com/apps/colorimage-109-3900/formation --header "Content-Type: application/json" --header "Accept: application/vnd.heroku+json; version=3.docker-releases" --header "Authorization: Bearer ${HEROKU_TOKEN}" --data '{ "updates": [ { "type": "web", "docker_image": "'$(cat imageid.txt)'" } ] }'
+
+prisma:
+  stage: migrate
+  script:
+    - npm install -g prisma
+    - DATABASE_URL="${DATABASE_URL}" prisma migrate deploy
