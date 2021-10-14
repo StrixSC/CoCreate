@@ -1,11 +1,11 @@
 import { JwtPayload, sign } from "jsonwebtoken";
 import create from "http-errors";
 import { User } from ".prisma/client";
-import { ISignedJWTPayload } from "../models/ISignedJWTPayload.model";
+import { ISignedJWTResponse } from "../models/ISignedJWTPayload.model";
 
 const secret = process.env.ACCESS_TOKEN_SECRET;
 
-export const signToken = (user: User): ISignedJWTPayload => {
+export const signToken = (user: User): ISignedJWTResponse => {
     try {
 
         const payload: JwtPayload = {

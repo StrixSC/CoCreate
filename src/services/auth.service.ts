@@ -4,20 +4,20 @@ import { db } from '../db';
 import { signToken } from '../utils/jwt';
 import { validateEmail, validatePassword } from '../utils/auth';
 import { Prisma } from '.prisma/client';
-import { ISignedJWTPayload } from '../models/ISignedJWTPayload.model';
+import { ISignedJWTResponse } from '../models/ISignedJWTPayload.model';
 
 const authErrorRouters: { [key: string]: HttpError } = {
     'P2001': new create.Unauthorized("Unauthorized"),
     'P2002': new create.Conflict("Email already in use")
 };
 
-export const login = async (email: string, password: string): Promise<ISignedJWTPayload> => {
+export const login = async (email: string, password: string): Promise<ISignedJWTResponse> => {
     const user = await db.user.findUnique({
         where: { email }
     });
 
     if (!user)
-        throw new create.NotFound("User was not found");
+        throw new create.Unauthorized("User was not found");
 
     const checkPassword = compareSync(password, user.password);
     if (!checkPassword) throw new create.Unauthorized("Invalid email address or password.");
@@ -25,10 +25,10 @@ export const login = async (email: string, password: string): Promise<ISignedJWT
     return signToken(user);
 }
 
-export const register = async (email: string, password: string): Promise<ISignedJWTPayload> => {
+export const register = async (email: string, password: string): Promise<ISignedJWTResponse> => {
 
     if (!validateEmail(email) || !validatePassword(password))
-        throw new create.BadRequest("Invalid user information");
+        throw new create.BadRequest("Invalid format of email or password");
 
     const lowercaseEmail = (email as string).toLowerCase();
     const hashedPassword = hashSync(password, 10);

@@ -1,4 +1,4 @@
-export interface ISignedJWTPayload {
+export interface ISignedJWTResponse {
     token: string,
     expires: string
 }
