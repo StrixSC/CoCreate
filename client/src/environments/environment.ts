@@ -8,6 +8,8 @@ export const environment: IEnvironment = {
   production: false,
   serverURL: 'http://localhost:3000/api',
   serverRawURL: 'http://localhost:3000',
+  
+  WS_URL: "https://colorimage-109-3900.herokuapp.com/"
 };
 
 /*

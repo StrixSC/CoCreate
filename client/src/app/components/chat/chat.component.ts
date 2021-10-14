@@ -12,7 +12,7 @@ import { ChatService } from 'src/app/services/chat/chat.service';
 })
 export class ChatComponent implements OnInit {
 
-  @ViewChild('messageContainer') messageContainer!: ElementRef;
+  @ViewChild('messageContainer', { static: true }) messageContainer!: ElementRef;
   @ViewChildren("messagesList") messagesList!: QueryList<ElementRef>
   
   messages: IReceiveMessagePayload[];
