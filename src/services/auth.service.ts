@@ -2,13 +2,14 @@ import create, { HttpError } from 'http-errors';
 import { compareSync, hashSync } from 'bcrypt';
 import { db } from '../db';
 import { signToken } from '../utils/jwt';
-import { validateEmail, validatePassword } from '../utils/auth';
+import { validateRegistration } from '../utils/auth';
 import { Prisma } from '.prisma/client';
 import { ISignedJWTResponse } from '../models/ISignedJWTPayload.model';
+import { IRegistrationPayload } from '../models/IRegistrationModel';
 
 const authErrorRouters: { [key: string]: HttpError } = {
   'P2001': new create.Unauthorized('Unauthorized'),
-  'P2002': new create.Conflict('Email already in use')
+  'P2002': new create.Conflict('Username or email already in use')
 };
 
 export const login = async (email: string, password: string): Promise<ISignedJWTResponse> => {
@@ -25,19 +26,37 @@ export const login = async (email: string, password: string): Promise<ISignedJWT
   return signToken(user);
 };
 
-export const register = async (email: string, password: string): Promise<ISignedJWTResponse> => {
+export const register = async (payload: IRegistrationPayload): Promise<ISignedJWTResponse> => {
 
-  if (!validateEmail(email) || !validatePassword(password))
-    throw new create.BadRequest('Invalid format of email or password');
 
-  const lowercaseEmail = (email as string).toLowerCase();
+  if (!validateRegistration(payload))
+    throw new create.BadRequest("Invalid or missing inputs");
+
+  let { email, password, username, firstName, lastName } = payload;
+
   const hashedPassword = hashSync(password, 10);
+  email = email.toLowerCase();
+  firstName = firstName.normalize();
+  lastName = lastName.normalize();
 
   try {
     const user = await db.user.create({
       data: {
-        email: lowercaseEmail,
-        password: hashedPassword
+        email: email,
+        password: hashedPassword,
+        profile: {
+          create:
+          {
+            username: username,
+            avatarUrl: "",
+          }
+        },
+        account: {
+          create: {
+            first_name: firstName,
+            last_name: lastName
+          }
+        }
       }
     });
 
@@ -45,6 +64,7 @@ export const register = async (email: string, password: string): Promise<ISigned
 
     return signToken(user);
   } catch (e: any) {
+    console.log(e);
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       throw authErrorRouters[e.code] || new create.InternalServerError('Internal Server Error');
     }

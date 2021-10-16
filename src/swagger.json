@@ -3,7 +3,7 @@
   "info": {
     "title": "Colorimage API",
     "description": "Official documentation of the Colorimage API.",
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "servers": [
     {
@@ -16,7 +16,9 @@
   "paths": {
     "/auth/login": {
       "post": {
-        "tags": ["Authentication"],
+        "tags": [
+          "Authentication"
+        ],
         "summary": "Log user in.",
         "operationId": "login",
         "requestBody": {
@@ -76,15 +78,17 @@
     },
     "/auth/register": {
       "post": {
-        "tags": ["Authentication"],
-        "summary": "Registers the user with the given email and password if the email is not already in use.",
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Registers the user using the provided information, if the email or username are not in use.",
         "operationId": "register",
         "requestBody": {
           "description": "Requires the email and the password of the user.",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/IAuthPayload"
+                "$ref": "#/components/schemas/IRegistrationPayload"
               }
             }
           },
@@ -100,7 +104,7 @@
                 },
                 "example": {
                   "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-                  "expiry": "1d"
+                  "expires": "1d"
                 }
               }
             }
@@ -132,14 +136,14 @@
             }
           },
           "409": {
-            "description": "Conflict. Email already in use.",
+            "description": "Conflict. Username or email already in use.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
                 "example": {
-                  "message": "Email already in use"
+                  "message": "Username or email already in use"
                 }
               }
             }
@@ -174,13 +178,34 @@
           }
         }
       },
+      "IRegistrationPayload": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "email@provider.com"
+          },
+          "password": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          }
+        }
+      },
       "ISignedJWTResponse": {
         "type": "object",
         "properties": {
-          "jwt": {
+          "token": {
             "type": "string"
           },
-          "expiry": {
+          "expires": {
             "type": "string"
           }
         }
@@ -194,5 +219,10 @@
         }
       }
     }
-  }
+  },
+  "security": [
+    {
+      "securityRequirement": []
+    }
+  ]
 }

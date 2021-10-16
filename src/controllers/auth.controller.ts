@@ -18,8 +18,8 @@ export const loginController = async (req: Request, res: Response, next: NextFun
       });
     });
     
-    const jwt = await login(req.body.email, req.body.password);
-    return res.status(StatusCodes.OK).json(jwt);
+    const token = await login(req.body.email, req.body.password);
+    return res.status(StatusCodes.OK).json(token);
   } catch (e: any) {
     next(create(e.status, e.message));
   }
@@ -27,8 +27,14 @@ export const loginController = async (req: Request, res: Response, next: NextFun
 
 export const registerController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const jwt = await register(req.body.email, req.body.password);
-    res.status(StatusCodes.CREATED).json({ token: jwt });
+    const token = await register({
+      username: req.body.username,
+      email: req.body.email,
+      password: req.body.password,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName
+    });
+    res.status(StatusCodes.CREATED).json(token);
   } catch (e: any) {
     next(create(e.status, e.message));
   }
