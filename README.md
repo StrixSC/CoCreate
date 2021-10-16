@@ -52,21 +52,28 @@ Another way to utilize the services is to install them separately and run them o
 
 The database instance (The prisma client) can be found in `src/db.ts`. To query a table, simply import it and use one of its many functions.
 
-To update a model in the database, run:
+To generate the prisma client, run:
 
 ```
 npx prisma generate
 ```
 
-This will generate the code necessary for the migration. Migrations must be done every time the models are updated. Run migrations afterwards, but make sure you have access to the database.
+This will generate the code to be used to access, create, update or delete objects in the database. 
 
-Migrations can be run as so:
+To run migrations, which means creating newly defined models into the database, run the following command:
 
 ```
 npx prisma migrate dev
 ```
 
-# Deploiment
+Migrations must be done every time the models are updated. Run migrations afterwards, but make sure you have access to the database.
+
+
+# OBSOLETE - Deploiment
+
+This section is obsolete, deployment is done automatically on pushes to the main branch.
+
+--- 
 
 Requirements:
 
@@ -85,5 +92,10 @@ To deploy run these commands:
 git checkout main
 git push heroku main
 ```
+
+# Automatic Deployment
+
+On pushes to the main branch, the pipeline will automatically build and push the latest docker image to the heroku registry. This will prompt the deployment. 
+The prisma migrations will also deploy to the database defined in the `DATABASE_URL` env. variable.
 
 Currently live [here!](https://colorimage-109-3900.herokuapp.com/)
