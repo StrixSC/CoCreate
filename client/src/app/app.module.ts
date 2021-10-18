@@ -35,6 +35,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ChatComponent } from './components/chat/chat.component';
+import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
 
 @NgModule({
   declarations: [
@@ -61,6 +62,7 @@ import { ChatComponent } from './components/chat/chat.component';
     ExportDrawingComponent,
     LoginPageComponent,
     ChatComponent,
+    DrawingPageComponent
   ],
   imports: [
     BrowserModule,

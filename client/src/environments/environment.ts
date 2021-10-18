@@ -6,10 +6,10 @@ import { IEnvironment } from './IEnvironment';
 
 export const environment: IEnvironment = {
   production: false,
-  serverURL: 'http://localhost:3000/api',
+  serverURL: 'http://localhost:3000',
   serverRawURL: 'http://localhost:3000',
   
-  WS_URL: "https://colorimage-109-3900.herokuapp.com/"
+  WS_URL: 'http://localhost:3000'
 };
 
 /*

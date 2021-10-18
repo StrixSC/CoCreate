@@ -15,7 +15,7 @@ export class LoginPageComponent {
   }
 
   onSubmit(): void {
-    this.router.navigate(['/chat'], { queryParams: { username: this.username } });
+    this.router.navigate(['/drawing'], { queryParams: { username: this.username } });
   }
 
 }
