@@ -22,7 +22,6 @@ app.use(cookieParser());
 
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
-
 app.use('/docs', serve, setup(swaggerDoc));
 
 app.use(async (req, res, next) => {
