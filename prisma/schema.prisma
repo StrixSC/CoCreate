@@ -61,29 +61,3 @@ enum LogType {
   Disconnection
   DrawingUpdate
 }
-
-model Channel {
-    channel_id String @unique @id @default(uuid())
-    name String @unique
-    created_at DateTime
-    created_by User @relation(fields:[creator_id], references: [user_id])
-    creator_id String @unique
-    updated_at DateTime
-    messages Message[]
-    members User[]
-}
-
-model ChannelMember {
-   channel_id 
-   channel Channel @relation(fields:)
-   user_id
-   isAuthor boolean
-}
-
-model Message {
-    message_id String @unique @id @default(uuid())
-    author_id String @unique
-    author User @relation(fields:[author_id], references: [user_id])
-    message_content String
-    created_at DateTime
-}
