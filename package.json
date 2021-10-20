@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/bin/www.js",
-    "dev": "@powershell -Command $env:DEBUG='Colorimage'; nodemon src/bin/www.ts",
+    "dev": "@powershell -Command $env:DEBUG='Colorimage'; powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./killport.ps1 3000; nodemon src/bin/www.ts",
     "dev-unix": "sudo kill $(lsof -t -i:3000); DEBUG=Colorimage nodemon src/bin/www.ts",
     "docker-dev": "DEBUG=Colorimage nodemon -L src/bin/www.ts",
     "build": "tsc -p .",
