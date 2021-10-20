@@ -7,8 +7,8 @@ import { Server, Socket } from 'socket.io';
 import corsOptions from '../cors';
 
 // Events
-import chatHandler from '../events/chatHandler';
-import { usernameCheck } from '../middlewares/usernameCheck';
+import chatHandler from '../events/chat.events';
+import { usernameCheck } from '../middlewares/checkUsername.middleware';
 
 export const normalizePort = (val: string) => {
   const port = parseInt(val, 10);

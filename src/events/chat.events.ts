@@ -1,5 +1,5 @@
-import { ISendMessagePayload } from './../models/ISendMessagePayload.model';
-import { IUser } from './../models/IUser.model';
+import { ISendMessagePayload } from '../models/ISendMessagePayload.model';
+import { IUser } from '../models/IUser.model';
 import { Server, Socket } from 'socket.io';
 import { IReceiveMessagePayload } from '../models/IReceiveMessagePayload.model';
 import { users, getUsers } from '../utils/chat';
