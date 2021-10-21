@@ -4,13 +4,13 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 TextEditingController userController = TextEditingController();
 Color primaryColor =
-Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
+    Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
 
 class Login extends StatefulWidget {
   const Login({Key? key})
       : super(
-    key: key,
-  );
+          key: key,
+        );
 
   @override
   _LoginState createState() => _LoginState();
@@ -117,17 +117,17 @@ class _LoginState extends State<Login> {
                 ),
                 usernameTaken
                     ? Padding(
-                    padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
-                    child: Text("Le nom d'utilisateur est déjà pris",
-                        style: new TextStyle(
-                            color: Colors.red, fontSize: 25.0)))
+                        padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
+                        child: Text("Le nom d'utilisateur est déjà pris",
+                            style: new TextStyle(
+                                color: Colors.red, fontSize: 25.0)))
                     : usernameEmpty
-                    ? Padding(
-                    padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
-                    child: Text("Veuillez entrer un nom d'utilisateur",
-                        style: new TextStyle(
-                            color: Colors.red, fontSize: 25.0)))
-                    : Text(""),
+                        ? Padding(
+                            padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
+                            child: Text("Veuillez entrer un nom d'utilisateur",
+                                style: new TextStyle(
+                                    color: Colors.red, fontSize: 25.0)))
+                        : Text(""),
                 SizedBox(height: 24.0),
                 ElevatedButton(
                   onPressed: () {
@@ -138,7 +138,7 @@ class _LoginState extends State<Login> {
                     }
                   },
                   style:
-                  ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
+                      ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
                   child: Text('Se connecter au chat',
                       style: new TextStyle(fontSize: 30.0)),
                 ),
@@ -148,7 +148,7 @@ class _LoginState extends State<Login> {
                     Navigator.pushNamed(context, DrawingRoute);
                   },
                   style:
-                  ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
+                      ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
                   child: Text('Dessiner sans connexion',
                       style: new TextStyle(fontSize: 30.0)),
                 ),
