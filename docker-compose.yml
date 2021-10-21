@@ -7,7 +7,7 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: 'postgres://admin:admin@postgres:5432/colorimage'
+      DATABASE_URL: 'postgres://admin:admin@postgres:3001/colorimage'
       CACHE_REDIS_HOST: 'redis'
       CACHE_REDIS_PORT: 6379
       NODE_ENV: development

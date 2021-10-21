@@ -39,11 +39,10 @@ export const localStrategy = new LocalStrategy(
 export const jwtStrategy = new JWTStrategy(
   opts,
   async (payload: any, done: VerifiedCallback) => {
-    console.log(payload);
     try {
       const user = await db.user.findUnique({
         where: {
-          user_id: payload.sub,
+          user_id: payload.sub
         },
       });
       if (!user)
