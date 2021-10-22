@@ -27,6 +27,9 @@ import { WelcomeDialogModule } from './components/welcome-dialog/welcome-dialog.
 import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { ErrorMessageComponent } from './components/error-message/error-message.component';
 import { ToolParameterModule } from './components/tool-parameters/tool-parameter.module';
+import { WelcomePageComponent } from './components/welcome-page/welcome-page.component';
+import { SignUpPageComponent } from './components/sign-up-page/sign-up-page.component';
+import { AppRoutingModule } from './app-routing.module';
 
 @NgModule({
   declarations: [
@@ -51,6 +54,8 @@ import { ToolParameterModule } from './components/tool-parameters/tool-parameter
     ErrorMessageComponent,
     AlertMessageComponent,
     ExportDrawingComponent,
+    WelcomePageComponent,
+    SignUpPageComponent,
   ],
   imports: [
     BrowserModule,
@@ -64,8 +69,9 @@ import { ToolParameterModule } from './components/tool-parameters/tool-parameter
     FontAwesomeModule,
     ToolParameterModule,
     MomentModule,
+    AppRoutingModule,
   ],
-  exports: [
+  exports: [AppRoutingModule,
   ],
   entryComponents: [
     NewDrawingAlertComponent,
