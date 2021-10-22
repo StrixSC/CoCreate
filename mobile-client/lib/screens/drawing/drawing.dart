@@ -40,7 +40,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text('Select a color'),
+                    title: const Text('Select a color'),
                     content: SingleChildScrollView(
                       child: BlockPicker(
                         pickerColor: currentColor,
@@ -146,6 +146,7 @@ class Painter extends CustomPainter {
   String drawType;
   Path path;
   Offset endPoint = const Offset(-1, -1);
+  List<int> selectId = <int>[];
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -158,18 +159,12 @@ class Painter extends CustomPainter {
     List<PathMetric> pathMetrics;
 
     pathMetrics = path.computeMetrics().toList();
-    for (var i = 0; i < paintList.length; i++) {
-      PathMetric pathMetric = pathMetrics.elementAt(i);
-      canvas.drawPath(
-          pathMetric.extractPath(0, pathMetric.length), paintList.elementAt(i));
-    }
 
     if (drawType == "line") {
       for (var i = 0; i < offsets.length - 1; i++) {
         if (offsets[i] != endPoint && offsets[i + 1] != endPoint) {
           canvas.drawLine(offsets[i], offsets[i + 1], paint);
         } else if (offsets[i] != endPoint) {
-          // canvas.drawPoints(PointMode.points, [offsets[i]], paint);
           offsets.removeLast();
           paintList.add(paint);
           path.moveTo(offsets.first.dx, offsets.first.dy);
@@ -182,26 +177,51 @@ class Painter extends CustomPainter {
     }
 
     if (drawType == "select") {
-      pathMetrics.forEach((pathMetric) {
-        path;
-      });
-      // if (path.contains(offsets.first) && !offsets.contains(endPoint)) {
-      //   for (var i = 0; i < paintList.length; i++) {
-      //     PathMetric pathMetric = pathMetrics.elementAt(i);
-      //     Path pathElement = pathMetric.extractPath(0, pathMetric.length);
-      //     if (pathElement.contains(offsets.first)) {
-      //       Path dragPath = pathElement.shift(Offset(
-      //           offsets.last.dx - offsets.first.dx,
-      //           offsets.last.dy - offsets.first.dy));
-      //       Paint paintCopy = paintList.elementAt(i);
-      //       canvas.drawPath(dragPath, paintCopy);
-      //     } else {
-      //       canvas.drawPath(pathElement, paintList.elementAt(i));
-      //     }
-      //   }
-      // } else {
-      //   offsets.clear();
-      // }
+      for (var i = 0; i < pathMetrics.length; i++) {
+        for (var j = 0; j < pathMetrics.elementAt(i).length; j++) {
+          Tangent? tangent =
+              pathMetrics.elementAt(i).getTangentForOffset(j.toDouble());
+          if ((tangent!.position - offsets.first).distance.toInt() <=
+              paintList.elementAt(0).strokeWidth / 2) {
+            if (offsets.last != endPoint) {
+              Path dragPath = pathMetrics
+                  .elementAt(i)
+                  .extractPath(0, pathMetrics.elementAt(i).length)
+                  .shift(Offset(offsets.last.dx - offsets.first.dx,
+                      offsets.last.dy - offsets.first.dy));
+              canvas.drawPath(getCorner(dragPath), paintList.elementAt(i));
+              canvas.drawPath(dragPath, paintList.elementAt(i));
+              selectId.add(i);
+              break;
+            } else {
+              offsets.removeLast();
+              Path dragPath = pathMetrics
+                  .elementAt(i)
+                  .extractPath(0, pathMetrics.elementAt(i).length)
+                  .shift(Offset(offsets.last.dx - offsets.first.dx,
+                      offsets.last.dy - offsets.first.dy));
+              Paint paintCopy = paintList.removeAt(i);
+              paintList.add(paintCopy);
+              pathMetrics.removeAt(i);
+              path.reset();
+              for (var element in pathMetrics) {
+                path.addPath(
+                    element.extractPath(0, element.length), const Offset(0, 0));
+              }
+              path.addPath(dragPath, const Offset(0, 0));
+              offsets.add(endPoint);
+              selectId.add(i);
+              break;
+            }
+          }
+        }
+        if (selectId.isNotEmpty) {
+          break;
+        }
+      }
+      if (offsets.last == endPoint) {
+        offsets.clear();
+      }
     }
 
     if (drawType == "cercle" || drawType == "rect") {
@@ -230,10 +250,44 @@ class Painter extends CustomPainter {
 
     pathMetrics = path.computeMetrics().toList();
     for (var i = 0; i < paintList.length; i++) {
-      PathMetric pathMetric = pathMetrics.elementAt(i);
-      canvas.drawPath(
-          pathMetric.extractPath(0, pathMetric.length), paintList.elementAt(i));
+      if (selectId.isNotEmpty && offsets.isNotEmpty) {
+        if (selectId.elementAt(0) == i) {
+          //Don't draw the selected shape because it is already draw while
+          // shifting
+        } else {
+          PathMetric pathMetric = pathMetrics.elementAt(i);
+          canvas.drawPath(pathMetric.extractPath(0, pathMetric.length),
+              paintList.elementAt(i));
+        }
+      } else {
+        PathMetric pathMetric = pathMetrics.elementAt(i);
+        canvas.drawPath(pathMetric.extractPath(0, pathMetric.length),
+            paintList.elementAt(i));
+      }
     }
+  }
+
+  Path getCorner(Path dragPath) {
+    Rect bounds = dragPath.getBounds();
+    var pathCorner = Path();
+
+    pathCorner.moveTo(bounds.topLeft.dx + 5, bounds.topLeft.dy - 5);
+    pathCorner.lineTo(bounds.topLeft.dx - 5, bounds.topLeft.dy - 5);
+    pathCorner.lineTo(bounds.topLeft.dx - 5, bounds.topLeft.dy + 5);
+
+    pathCorner.moveTo(bounds.topRight.dx - 5, bounds.topRight.dy - 5);
+    pathCorner.lineTo(bounds.topRight.dx + 5, bounds.topRight.dy - 5);
+    pathCorner.lineTo(bounds.topRight.dx + 5, bounds.topRight.dy + 5);
+
+    pathCorner.moveTo(bounds.bottomLeft.dx - 5, bounds.bottomLeft.dy - 5);
+    pathCorner.lineTo(bounds.bottomLeft.dx - 5, bounds.bottomLeft.dy + 5);
+    pathCorner.lineTo(bounds.bottomLeft.dx + 5, bounds.bottomLeft.dy + 5);
+
+    pathCorner.moveTo(bounds.bottomRight.dx + 5, bounds.bottomRight.dy - 5);
+    pathCorner.lineTo(bounds.bottomRight.dx + 5, bounds.bottomRight.dy + 5);
+    pathCorner.lineTo(bounds.bottomRight.dx - 5, bounds.bottomRight.dy + 5);
+
+    return pathCorner;
   }
 
   @override

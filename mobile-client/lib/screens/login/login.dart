@@ -70,7 +70,7 @@ class _LoginState extends State<Login> {
         usernameTaken = false;
       });
       socket.emit('join-channel', {'username': username});
-      Navigator.pushNamed(context, ChatRoute,
+      Navigator.pushNamed(context, chatRoute,
           arguments: {'username': username, 'socket': socket});
     });
   }
@@ -145,7 +145,7 @@ class _LoginState extends State<Login> {
                 SizedBox(height: 24.0),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, DrawingRoute);
+                    Navigator.pushNamed(context, drawingRoute);
                   },
                   style:
                       ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
