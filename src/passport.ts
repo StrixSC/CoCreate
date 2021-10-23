@@ -27,20 +27,9 @@ export const checkPreviousSessions = async (uid: string) => {
     const keys = await keysAsync('sess:*'); // TODO: Extract prefix to variable
     keys.forEach(async (key: string) => {
         const val = (await getAsync(key)) as string;
-        // let jsonVal;
         if (val.includes(uid)) {
             redisClient.del(key);
         }
-
-        // try {
-        // jsonVal = JSON.parse(val) as Express.Session;
-        // } catch (e) {
-        // throw new create.InternalServerError();
-        // }
-        //
-        // if (uid === jsonVal.passport.user) {
-        // redisClient.del(key);
-        // }
     });
 };
 
