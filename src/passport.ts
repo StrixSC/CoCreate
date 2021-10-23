@@ -1,68 +1,38 @@
-import {
-  Strategy as JWTStrategy,
-  ExtractJwt,
-  VerifiedCallback,
-} from 'passport-jwt';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { db } from './db';
 import create from 'http-errors';
-import { login } from './services/auth.service';
+import { login, findUserById } from './services/auth.service';
 import passport from 'passport';
+import { User as PrismaUser } from '@prisma/client';
 
-const opts = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_AUTH_TOKEN_SECRET || 'secret',
-};
+declare global {
+    namespace Express {
+        interface User extends PrismaUser {}
+    }
+}
 
 export const localStrategy = new LocalStrategy(
-  { usernameField: 'email', passwordField: 'password' },
-  (email: string, password: string, done) => {
-    try {
-      const jwt = login(email, password);
-      if (!jwt)
-        return done(
-          null,
-          false,
-          new create.Unauthorized('Invalid email or password')
-        );
-      return done(null, jwt);
-    } catch (e: any) {
-      return done(
-        e,
-        null,
-        new create.InternalServerError('Internal server error')
-      );
+    { usernameField: 'email', passwordField: 'password' },
+    async (email: string, password: string, done) => {
+        try {
+            const user = await login(email, password);
+            if (!user) return done(null, false, new create.Unauthorized('Invalid email or password'));
+            return done(null, user);
+        } catch (e: any) {
+            return done(e, null, new create.InternalServerError('Internal server error'));
+        }
     }
-  }
-);
-
-export const jwtStrategy = new JWTStrategy(
-  opts,
-  async (payload: any, done: VerifiedCallback) => {
-    try {
-      const user = await db.user.findUnique({
-        where: {
-          user_id: payload.sub
-        },
-      });
-      if (!user)
-        return done(
-          null,
-          false,
-          new create.BadRequest('Invalid or missing token')
-        );
-      return done(null, user);
-    } catch (e: any) {
-      return done(
-        e,
-        null,
-        new create.InternalServerError('Internal Server Error')
-      );
-    }
-  }
 );
 
 passport.use(localStrategy);
-passport.use(jwtStrategy);
+passport.serializeUser((user: Express.User, done: (err: any, id: any) => void) => done(null, user.user_id));
+passport.deserializeUser(async (id: string, done: (err: any, user: any) => void) => {
+    try {
+        const user = await findUserById(id);
+        if (!user) done(null, false);
+        done(null, user);
+    } catch (e: any) {
+        done(e, null);
+    }
+});
 
 export default passport;

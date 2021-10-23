@@ -10,14 +10,18 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Notes:
+// Index is used for ordering for cursors and pagination
+
 model User {
+  index Int @unique @default(autoincrement())
   user_id String @unique @id @default(uuid())
   email   String   @unique
-  password String @unique
+  password String
   profile Profile?
   stats Stats?
   logs Log[]
-  account Account?
+  account Account? 
 }
 
 model Profile {
@@ -37,8 +41,9 @@ model Account {
 }
 
 model Stats {
+  index Int @unique @default(autoincrement())
   stats_id String @unique @id @default(uuid())
-  user_id String @unique
+  user_id String
   user User @relation(fields: [user_id], references: [user_id])
   collaboration_count Int
   author_count Int
@@ -48,12 +53,13 @@ model Stats {
 }
 
 model Log {
+  index Int @unique @default(autoincrement())
   log_id String @unique @id @default(uuid())
-  user_id String @unique
+  user_id String
   user User @relation(fields: [user_id], references: [user_id])
   type LogType
-  created_at DateTime
-  drawing_id String? @unique
+  created_at DateTime @default(now())
+  drawing_id String?
 }
 
 enum LogType {

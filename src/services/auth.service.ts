@@ -1,36 +1,45 @@
 import create, { HttpError } from 'http-errors';
 import { compareSync, hashSync } from 'bcrypt';
 import { db } from '../db';
-import { signToken } from '../utils/jwt';
 import { validateRegistration } from '../utils/auth';
-import { Prisma } from '.prisma/client';
-import { ISignedJWTResponse } from '../models/ISignedJWTPayload.model';
+import { Prisma, User } from '.prisma/client';
 import { IRegistrationPayload } from '../models/IRegistrationModel';
 
 const authErrorRouters: { [key: string]: HttpError } = {
-  'P2001': new create.Unauthorized('Unauthorized'),
-  'P2002': new create.Conflict('Username or email already in use')
+  P2001: new create.Unauthorized('Unauthorized'),
+  P2002: new create.Conflict('Username or email already in use'),
 };
 
-export const login = async (email: string, password: string): Promise<ISignedJWTResponse> => {
+export const findUserById = async (id: string): Promise<User | null> => {
   const user = await db.user.findUnique({
-    where: { email }
+    where: {
+      user_id: id,
+    },
   });
+  return user;
+};
 
+export const login = async (email: string, password: string): Promise<User> => {
+  const user = await db.user.findUnique({
+    where: {
+      email: email,
+    },
+  });
   if (!user)
-    throw new create.Unauthorized('User was not found');
+    throw new create.Unauthorized(
+      'User was not found or user is already logged in on another client.'
+    );
 
   const checkPassword = compareSync(password, user.password);
-  if (!checkPassword) throw new create.Unauthorized('Invalid email address or password.');
+  if (!checkPassword)
+    throw new create.Unauthorized('Invalid email address or password.');
 
-  return signToken(user);
+  return user;
 };
 
-export const register = async (payload: IRegistrationPayload): Promise<ISignedJWTResponse> => {
-
-
+export const register = async (payload: IRegistrationPayload): Promise<boolean> => {
   if (!validateRegistration(payload))
-    throw new create.BadRequest("Invalid or missing inputs");
+    throw new create.BadRequest('Invalid or missing inputs');
 
   let { email, password, username, firstName, lastName } = payload;
 
@@ -45,28 +54,31 @@ export const register = async (payload: IRegistrationPayload): Promise<ISignedJW
         email: email,
         password: hashedPassword,
         profile: {
-          create:
-          {
+          create: {
             username: username,
-            avatarUrl: "",
-          }
+            avatarUrl: '',
+          },
         },
         account: {
           create: {
             first_name: firstName,
-            last_name: lastName
-          }
-        }
-      }
+            last_name: lastName,
+          },
+        },
+      },
     });
 
-    if (!user) throw new create.InternalServerError('Internal Server Error');
+    if (!user)
+      throw new create.InternalServerError('Internal Server Error');
 
-    return signToken(user);
+    return true;
   } catch (e: any) {
     console.log(e);
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
-      throw authErrorRouters[e.code] || new create.InternalServerError('Internal Server Error');
+      throw (
+        authErrorRouters[e.code] ||
+                new create.InternalServerError('Internal Server Error')
+      );
     }
     throw e;
   }
