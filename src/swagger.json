@@ -2,7 +2,7 @@
     "openapi": "3.0.1",
     "info": {
         "title": "Colorimage API",
-        "description": "Official documentation of the Colorimage API.",
+        "description": "Official documentation of the Colorimage API.\n\n **The `Users` routes have not been implemented yet.**",
         "version": "1.0.1"
     },
     "servers": [
@@ -17,7 +17,7 @@
         "/auth/login": {
             "post": {
                 "tags": ["Authentication"],
-                "summary": "Log user in.",
+                "summary": "Log user in",
                 "operationId": "login",
                 "requestBody": {
                     "description": "Requires the email and the password of the user.",
@@ -32,15 +32,25 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Success. User was logged in successfully. Returns a JWT token with an expiry time.",
+                        "description": "Success. User was logged in successfully.\n\nThis will remove any other sessions opened by a user with this email.\n\nThe session ID is returned in a cookie named `connect.sid`. You need to include this cookie in subsequent requests.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ISignedJWTResponse"
+                                    "$ref": "#/components/schemas/IUser"
                                 },
                                 "example": {
-                                    "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-                                    "expiry": "1d"
+                                    "userId": "48bffc61-a8ef-55e3-aa6b-fb5640a90eab",
+                                    "email": "demo@colorimage.com",
+                                    "username": "demo",
+                                    "avatarUrl": "https://storage.googleapis.com/1ccd570e-fed0-5049-9143-7e98b240a574.jpg"
+                                }
+                            }
+                        },
+                        "headers": {
+                            "Set-Cookie": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "connect.sid={...}; Path=/; HttpOnly; Expires=Sun, 24 Oct 2021 20:53:30 GMT;"
                                 }
                             }
                         }
@@ -50,7 +60,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Error"
+                                    "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
                                     "message": "Invalid email address or password"
@@ -59,11 +69,65 @@
                         }
                     },
                     "500": {
-                        "description": "Unexpected internal server error. This could be due to a problem during JWT token generation.",
+                        "description": "Internal server error.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Error"
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "Cookie Auth": []
+                    }
+                ],
+                "tags": ["Authentication"],
+                "summary": "Log user out",
+                "operationId": "logout",
+                "description": "The user's `connect.sid` cookie must be attached to the request. This request deletes the session from the database. This wil remove any persistent data on the server.",
+                "responses": {
+                    "200": {
+                        "description": "Success. User was logged out successfully.\n\nThis will remove any other sessions opened by a user with this email.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "OK"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. No user logged in.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
                                     "message": "Internal Server Error"
@@ -77,8 +141,9 @@
         "/auth/register": {
             "post": {
                 "tags": ["Authentication"],
-                "summary": "Registers the user using the provided information, if the email or username are not in use.",
+                "summary": "Registers the user using the provided information",
                 "operationId": "register",
+                "description": "Registers the user using the provided information, if the email or username are not in use.",
                 "requestBody": {
                     "description": "Requires the email and the password of the user.",
                     "content": {
@@ -92,15 +157,14 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Created. User was created and JWT token was signed and returned successfully.",
+                        "description": "Created. User was created successfully.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ISignedJWTResponse"
+                                    "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
-                                    "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-                                    "expires": "1d"
+                                    "message": "User created successfully."
                                 }
                             }
                         }
@@ -110,7 +174,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Error"
+                                    "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
                                     "message": "Invalid format of email or password"
@@ -123,10 +187,23 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Error"
+                                    "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
                                     "message": "Invalid email address or password"
+                                }
+                            }
+                        }
+                    },
+                    "406": {
+                        "description": "Not acceptable. A user is already logged in, log user out first.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "User is already authentified. To logout, use /auth/logout"
                                 }
                             }
                         }
@@ -136,7 +213,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Error"
+                                    "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
                                     "message": "Username or email already in use"
@@ -149,7 +226,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Error"
+                                    "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
                                     "message": "Internal Server Error"
@@ -160,10 +237,48 @@
                 }
             }
         },
-        "/users": {
+        "/api/users/:id": {
+            "get": {
+                "parameters": [
+                    {
+                        "required": true,
+                        "name": "userId",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": ["Users"],
+                "summary": "Fetch all information of the user with the given id",
+                "security": [
+                    {
+                        "Cookie Auth": []
+                    }
+                ],
+                "operationId": "complete user",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns a JSON with the user's complete information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IUserComplete"
+                                },
+                                "example": {
+                                    "username": "demoUser1",
+                                    "avatarUrl": "http://storage.googleapis.com/f0c9aac4-1d2a-5e41-88a8-8c2e0174d392.jpg"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/profile": {
             "get": {
                 "tags": ["Users"],
-                "summary": "Fetch all users",
+                "summary": "Fetch all public profiles",
                 "operationId": "users",
                 "responses": {
                     "200": {
@@ -174,8 +289,59 @@
                                     "$ref": "#/components/schemas/IAllUsersResponse"
                                 },
                                 "example": {
-                                    "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-                                    "expiry": "1d"
+                                    "users": [
+                                        {
+                                            "username": "demoUser1",
+                                            "avatarUrl": "http://storage.googleapis.com/f0c9aac4-1d2a-5e41-88a8-8c2e0174d392.jpg"
+                                        },
+                                        {
+                                            "username": "demoUser2",
+                                            "avatarUrl": "http://storage.googleapis.com/d6831468-3247-5085-ac77-17830b9ca857.jpg"
+                                        },
+                                        {
+                                            "username": "demoUser3",
+                                            "avatarUrl": "http://storage.googleapis.com/46f15fdd-2a5c-59fa-9489-ae07b9e3aab2.jpg"
+                                        },
+                                        "..."
+                                    ],
+                                    "paginationInfo": {
+                                        "cursor": 32,
+                                        "limit": 50,
+                                        "skipFirst": true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/profile/:username": {
+            "get": {
+                "parameters": [
+                    {
+                        "required": true,
+                        "name": "username",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": ["Users"],
+                "summary": "Fetch public profile of a specific user",
+                "operationId": "single user",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns a JSON with the user's public information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IUserPublicProfile"
+                                },
+                                "example": {
+                                    "username": "demoUser1",
+                                    "avatarUrl": "http://storage.googleapis.com/f0c9aac4-1d2a-5e41-88a8-8c2e0174d392.jpg"
                                 }
                             }
                         }
@@ -185,6 +351,13 @@
         }
     },
     "components": {
+        "securitySchemes": {
+            "Cookie Auth": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "connect.sid"
+            }
+        },
         "schemas": {
             "IAuthPayload": {
                 "type": "object",
@@ -222,19 +395,6 @@
                     }
                 }
             },
-            "ISignedJWTResponse": {
-                "type": "object",
-                "properties": {
-                    "token": {
-                        "type": "string",
-                        "description": "JWT Token containing the necessary information to authorize user on further queries"
-                    },
-                    "expires": {
-                        "type": "string",
-                        "description": "Expiry time of the JWT Token"
-                    }
-                }
-            },
             "IAllUsersResponse": {
                 "type": "object",
                 "properties": {
@@ -267,6 +427,105 @@
                     }
                 }
             },
+            "IUser": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "description": "Username (Pseudonyme) of the user"
+                    },
+                    "avatarUrl": {
+                        "type": "string",
+                        "description": "URL pointing to the location of the avatar of the user."
+                    },
+                    "email": {
+                        "type": "string",
+                        "description": "Email of the requesting user"
+                    },
+                    "userId": {
+                        "type": "string",
+                        "description": "User id of the requesting user"
+                    }
+                }
+            },
+            "IUserComplete": {
+                "type": "object",
+                "properties": {
+                    "profile": {
+                        "type": "object",
+                        "description": "Username (Pseudonyme) of the user",
+                        "properties": {
+                            "username": {
+                                "type": "string",
+                                "example": "AlejandroGordon123"
+                            },
+                            "avatarUrl": {
+                                "type": "string",
+                                "description": "URL pointing to the location of the avatar of the user.",
+                                "example": "https://storage.googleapis.com/efb5f957-bd28-5f61-beb4-a82c6dce4fe5.jpg"
+                            }
+                        }
+                    },
+                    "account": {
+                        "type": "object",
+                        "properties": {
+                            "firstName": {
+                                "type": "string",
+                                "example": "Alejandro"
+                            },
+                            "lastName": {
+                                "type": "string",
+                                "example": "Gordon"
+                            }
+                        }
+                    },
+                    "stats": {
+                        "type": "object",
+                        "properties": {
+                            "collaboration_count": {
+                                "type": "string",
+                                "description": "Number of collaborations the user has been a part of."
+                            },
+                            "authorCount": {
+                                "type": "integer",
+                                "description": "Number of authored drawings."
+                            },
+                            "active_team_count": {
+                                "type": "string",
+                                "description": "Total team count of the user."
+                            },
+                            "average_collaboration_time": {
+                                "type": "string",
+                                "description": "Average drawing collaboration time of the user."
+                            },
+                            "total_collaboration_time": {
+                                "type": "string",
+                                "description": "Total drawing collaboration time of the user."
+                            }
+                        }
+                    },
+                    "logs": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "description": "Type of the log.\n\nPossible values:\n\n- Connection\n\n- Disconnection\n\n- DrawingUpdate"
+                                },
+                                "created_at": {
+                                    "type": "string",
+                                    "description": "Timestamp of the log"
+                                },
+                                "drawing_id": {
+                                    "type": "string",
+                                    "description": "[OPTIONAL] If the log type is 'DrawingUpdate', then a drawing id will be present, this can be used to redirect the user to the updated drawing."
+                                }              
+                            }
+                        }
+                    }
+                }
+            },
             "IUserPublicProfile": {
                 "type": "object",
                 "properties": {
@@ -280,7 +539,7 @@
                     }
                 }
             },
-            "Error": {
+            "IMessage": {
                 "type": "object",
                 "properties": {
                     "message": {
@@ -289,10 +548,5 @@
                 }
             }
         }
-    },
-    "security": [
-        {
-            "securityRequirement": []
-        }
-    ]
+    }
 }

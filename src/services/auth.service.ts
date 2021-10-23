@@ -1,14 +1,10 @@
-import create, { HttpError } from 'http-errors';
+import create from 'http-errors';
 import { compareSync, hashSync } from 'bcrypt';
 import { db } from '../db';
 import { validateRegistration } from '../utils/auth';
 import { Prisma, User } from '.prisma/client';
 import { IRegistrationPayload } from '../models/IRegistrationModel';
-
-const authErrorRouters: { [key: string]: HttpError } = {
-    P2001: new create.Unauthorized('Unauthorized'),
-    P2002: new create.Conflict('Username or email already in use')
-};
+import { authErrorRouters } from '../utils/auth';
 
 export const findUserById = async (id: string): Promise<User | null> => {
     const user = await db.user.findUnique({
@@ -19,19 +15,19 @@ export const findUserById = async (id: string): Promise<User | null> => {
     return user;
 };
 
-export const login = async (email: string, password: string): Promise<User> => {
+export const login = async (email: string, password: string): Promise<User | null> => {
     const user = await db.user.findUnique({
         where: {
             email: email
+        },
+        include: {
+            profile: true
         }
     });
-    if (!user)
-        throw new create.Unauthorized(
-            'User was not found or user is already logged in on another client.'
-        );
+    if (!user) return null;
 
     const checkPassword = compareSync(password, user.password);
-    if (!checkPassword) throw new create.Unauthorized('Invalid email address or password.');
+    if (!checkPassword) return null;
 
     return user;
 };

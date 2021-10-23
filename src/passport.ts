@@ -2,13 +2,16 @@ import { Request } from 'express';
 import { Strategy as LocalStrategy } from 'passport-local';
 import create from 'http-errors';
 import { login, findUserById } from './services/auth.service';
-import passport from 'passport';
-import { User as PrismaUser } from '@prisma/client';
+import passport, { use } from 'passport';
+import { User as PrismaUser, Profile as PrismaProfile } from '@prisma/client';
 import { getAsync, keysAsync, redisClient } from './app';
 
 declare global {
     namespace Express {
-        interface User extends PrismaUser {}
+        interface User extends PrismaUser {
+            profile: PrismaProfile;
+        }
+
         interface Session {
             cookie: {
                 originalMaxAge: number;
@@ -38,9 +41,8 @@ export const localStrategy = new LocalStrategy(
     async (req: Request, email: string, password: string, done) => {
         try {
             const user = await login(email, password);
-            if (!user) {
+            if (!user)
                 return done(null, false, new create.Unauthorized('Invalid email or password'));
-            }
 
             await checkPreviousSessions(user.user_id);
             return done(null, user);
