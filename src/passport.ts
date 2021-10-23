@@ -47,7 +47,7 @@ export const localStrategy = new LocalStrategy(
             await checkPreviousSessions(user.user_id);
             return done(null, user);
         } catch (e: any) {
-            return done(e, null, new create.InternalServerError('Internal server error'));
+            return done(e, null, new create.InternalServerError('Internal Server Error'));
         }
     }
 );
