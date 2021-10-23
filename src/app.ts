@@ -13,13 +13,18 @@ import swaggerDoc from './swagger.json';
 import redis from 'redis';
 import session from 'express-session';
 import connect from 'connect-redis';
+import { promisify } from 'util';
 
-const REDIS_URL = process.env.NODE_ENV === 'production' ? process.env.REDIS_URL : '//127.0.0.1:3003';
+const REDIS_URL =
+    process.env.NODE_ENV === 'production' ? process.env.REDIS_URL : '//127.0.0.1:3003';
 const RedisStore = connect(session);
 const redisClient = redis.createClient({
   url: REDIS_URL,
   password: process.env.REDIS_PASSWORD || 'secret'
 });
+const getAsync = promisify(redisClient.get).bind(redisClient);
+const keysAsync = promisify(redisClient.keys).bind(redisClient);
+const setAsync = promisify(redisClient.set).bind(redisClient);
 
 const app = express();
 
@@ -31,9 +36,9 @@ app.use(
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
     saveUninitialized: false,
-    store: new RedisStore({ client: redisClient, prefix: '', ttl: 86400 }),
+    store: new RedisStore({ client: redisClient, ttl: 86400000 }),
     cookie: {
-      maxAge: 86400
+      maxAge: 86400000
     }
   })
 );
@@ -63,4 +68,4 @@ app.use((error: HttpError, req: Request, res: Response, next: NextFunction) => {
   res.json(error);
 });
 
-export { app, redisClient };
+export { app, redisClient, getAsync, keysAsync, setAsync };
