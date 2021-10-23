@@ -1,228 +1,298 @@
 {
-  "openapi": "3.0.1",
-  "info": {
-    "title": "Colorimage API",
-    "description": "Official documentation of the Colorimage API.",
-    "version": "1.0.1"
-  },
-  "servers": [
-    {
-      "url": "https://colorimage-109-3900.herokuapp.com/"
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Colorimage API",
+        "description": "Official documentation of the Colorimage API.",
+        "version": "1.0.1"
     },
-    {
-      "url": "http://localhost:3000"
-    }
-  ],
-  "paths": {
-    "/auth/login": {
-      "post": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Log user in.",
-        "operationId": "login",
-        "requestBody": {
-          "description": "Requires the email and the password of the user.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IAuthPayload"
-              }
-            }
-          },
-          "required": true
+    "servers": [
+        {
+            "url": "https://colorimage-109-3900.herokuapp.com/"
         },
-        "responses": {
-          "200": {
-            "description": "Success. User was logged in successfully. Returns a JWT token with an expiry time.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ISignedJWTResponse"
-                },
-                "example": {
-                  "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-                  "expiry": "1d"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized. Invalid email or password (No user was found).",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "message": "Invalid email address or password"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Unexpected internal server error. This could be due to a problem during JWT token generation.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "message": "Internal Server Error"
-                }
-              }
-            }
-          }
+        {
+            "url": "http://localhost:3000"
         }
-      }
+    ],
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "tags": ["Authentication"],
+                "summary": "Log user in.",
+                "operationId": "login",
+                "requestBody": {
+                    "description": "Requires the email and the password of the user.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IAuthPayload"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success. User was logged in successfully. Returns a JWT token with an expiry time.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ISignedJWTResponse"
+                                },
+                                "example": {
+                                    "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                                    "expiry": "1d"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Invalid email or password (No user was found).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "message": "Invalid email address or password"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected internal server error. This could be due to a problem during JWT token generation.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "tags": ["Authentication"],
+                "summary": "Registers the user using the provided information, if the email or username are not in use.",
+                "operationId": "register",
+                "requestBody": {
+                    "description": "Requires the email and the password of the user.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IRegistrationPayload"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created. User was created and JWT token was signed and returned successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ISignedJWTResponse"
+                                },
+                                "example": {
+                                    "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                                    "expires": "1d"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request. Invalid format of email or password.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "message": "Invalid format of email or password"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Invalid email or password (No user was found).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "message": "Invalid email address or password"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict. Username or email already in use.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "message": "Username or email already in use"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected internal server error. This could be due to a problem during JWT token generation.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "tags": ["Users"],
+                "summary": "Fetch all users",
+                "operationId": "users",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns a JSON with all the users and their respective public information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IAllUsersResponse"
+                                },
+                                "example": {
+                                    "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                                    "expiry": "1d"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     },
-    "/auth/register": {
-      "post": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Registers the user using the provided information, if the email or username are not in use.",
-        "operationId": "register",
-        "requestBody": {
-          "description": "Requires the email and the password of the user.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IRegistrationPayload"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Created. User was created and JWT token was signed and returned successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ISignedJWTResponse"
-                },
-                "example": {
-                  "token": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-                  "expires": "1d"
+    "components": {
+        "schemas": {
+            "IAuthPayload": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
                 }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request. Invalid format of email or password.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "message": "Invalid format of email or password"
+            },
+            "IRegistrationPayload": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "example": "email@provider.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "Password must be at least 8 characters, have: \n \n- at least one digit \n- at least one UPPERCASE character\n \n- at least one lowercase character \n- at least one special character\n\nThis regex should be valid for the enterred password: \n\n`^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$`"
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "The username of the registering user. The username must be unique"
+                    },
+                    "firstName": {
+                        "type": "string",
+                        "description": "The first name of the registering user."
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "description": "The last name of the registering user."
+                    }
                 }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized. Invalid email or password (No user was found).",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "message": "Invalid email address or password"
+            },
+            "ISignedJWTResponse": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "description": "JWT Token containing the necessary information to authorize user on further queries"
+                    },
+                    "expires": {
+                        "type": "string",
+                        "description": "Expiry time of the JWT Token"
+                    }
                 }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict. Username or email already in use.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "message": "Username or email already in use"
+            },
+            "IAllUsersResponse": {
+                "type": "object",
+                "properties": {
+                    "users": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/IUserPublicProfile"
+                        }
+                    },
+                    "paginationInfo": {
+                        "type": "object",
+                        "$ref": "#/components/schemas/IPaginationQuery"
+                    }
                 }
-              }
-            }
-          },
-          "500": {
-            "description": "Unexpected internal server error. This could be due to a problem during JWT token generation.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "example": {
-                  "message": "Internal Server Error"
+            },
+            "IPaginationQuery": {
+                "type": "object",
+                "properties": {
+                    "cursor": {
+                        "type": "integer",
+                        "description": "Used for pagination. Integer used to offset the index of the next batch. This value must be used in the next fetch to continue indexing after the last fetched user."
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Integer used to limit the count of returned information"
+                    },
+                    "skipFirst": {
+                        "type": "boolean",
+                        "description": "Define if the cursor's index should be skipped."
+                    }
                 }
-              }
+            },
+            "IUserPublicProfile": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "description": "Username (Pseudonyme) of the user"
+                    },
+                    "avatarUrl": {
+                        "type": "string",
+                        "description": "URL pointing to the location of the avatar of the user."
+                    }
+                }
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                }
             }
-          }
         }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "IAuthPayload": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
+    },
+    "security": [
+        {
+            "securityRequirement": []
         }
-      },
-      "IRegistrationPayload": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "example": "email@provider.com"
-          },
-          "password": {
-            "type": "string"
-          },
-          "username": {
-            "type": "string"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          }
-        }
-      },
-      "ISignedJWTResponse": {
-        "type": "object",
-        "properties": {
-          "token": {
-            "type": "string"
-          },
-          "expires": {
-            "type": "string"
-          }
-        }
-      },
-      "Error": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
-          }
-        }
-      }
-    }
-  },
-  "security": [
-    {
-      "securityRequirement": []
-    }
-  ]
+    ]
 }

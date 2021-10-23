@@ -93,6 +93,15 @@ git checkout main
 git push heroku main
 ```
 
+# Redis
+
+Redis is used to store sessions and prevent user sessions from being hijacked. Sessions are by default stored for 1 day. `connect-redis` will automatically take care of deleting the keys from those that are timed out. Each SESSID is associated to a user in the back end. On login, we accept the user credentials and assign a new SESSID in the redis server for the given user. 
+
+What this allows us to do:
+
+1. Users cannot be logged in on two devices at once, because upon login, a new SESSID is associated to the user with the given user id.
+2. Sessions will be persistent through server resets and fast.
+
 # Automatic Deployment
 
 On pushes to the main branch, the pipeline will automatically build and push the latest docker image to the heroku registry. This will prompt the deployment. 
