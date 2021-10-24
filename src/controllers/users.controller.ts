@@ -4,7 +4,7 @@ import create from 'http-errors';
 import { Request, Response, NextFunction } from 'express';
 import {
     getAllPublicProfiles,
-    getSinglePublicProfile,
+    getSinglePublicProfileByUsername,
     getCompleteUser
 } from '../services/users.service';
 
@@ -43,7 +43,7 @@ export const getPublicUserController = async (req: Request, res: Response, next:
                 "Missing or invalid 'username' parameter. Make sure the parameter is a string and is present at the end of the uri."
             );
 
-        const user = await getSinglePublicProfile(req.params.username);
+        const user = await getSinglePublicProfileByUsername(req.params.username);
 
         if (!user)
             return res

@@ -1,4 +1,3 @@
-import { IUserComplete } from './../models/IUserComplete.model';
 import { IPublicUserProfile } from './../models/IUserPublicProfile';
 import { db } from '../db';
 
@@ -21,7 +20,9 @@ export const getAllPublicProfiles = async (
     return profiles;
 };
 
-export const getSinglePublicProfile = async (uname: string): Promise<IPublicUserProfile | null> => {
+export const getSinglePublicProfileByUsername = async (
+    uname: string
+): Promise<IPublicUserProfile | null> => {
     const profile = await db.profile.findFirst({
         select: {
             username: true,
@@ -29,6 +30,22 @@ export const getSinglePublicProfile = async (uname: string): Promise<IPublicUser
         },
         where: {
             username: uname
+        }
+    });
+
+    return profile;
+};
+
+export const getSinglePublicProfileById = async (
+    uid: string
+): Promise<IPublicUserProfile | null> => {
+    const profile = await db.profile.findFirst({
+        select: {
+            username: true,
+            avatar_url: true
+        },
+        where: {
+            user_id: uid
         }
     });
 

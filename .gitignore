@@ -8,7 +8,7 @@ postgresdata/
 key.json
 
 svg/
-
+.vscode/
 
 # Exclusion des fichiers Javascripts
 out/

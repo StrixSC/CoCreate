@@ -20,8 +20,9 @@ model User {
   password String
   profile Profile?
   stats Stats?
+  account Account?
   logs Log[]
-  account Account? 
+  channels ChannelMember[]
 }
 
 model Profile {
@@ -67,4 +68,46 @@ enum LogType {
   Connection
   Disconnection
   DrawingUpdate
+}
+
+enum MemberType { 
+  Owner
+  Regular
+}
+
+enum ChannelType {
+  Private
+  Public
+}
+
+model Channel {
+  index Int @unique @default(autoincrement())
+  name String @unique
+  channel_id String @unique @id @default(uuid())
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  collaboration_id String?
+  members ChannelMember[]
+  type ChannelType @default(Public)
+}
+
+model ChannelMember {
+  index Int @unique @default(autoincrement())
+  channel_id String
+  member_id String @unique @id @default(uuid())
+  user_id String
+  type MemberType
+  messages Message[]
+  member User @relation(fields: [user_id], references: [user_id])
+  created_at DateTime @default(now())
+  channel Channel @relation(fields: [channel_id], references: [channel_id]) 
+}
+
+model Message {
+  index Int @unique @default(autoincrement())
+  message_id String @unique @id @default(uuid())
+  member_id String
+  sender ChannelMember @relation(fields: [member_id], references: [member_id])
+  message_data String
+  created_at DateTime @default(now())
 }

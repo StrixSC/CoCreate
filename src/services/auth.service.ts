@@ -2,9 +2,8 @@ import create from 'http-errors';
 import { compareSync, hashSync } from 'bcrypt';
 import { db } from '../db';
 import { validateRegistration } from '../utils/auth';
-import { Prisma, User } from '.prisma/client';
+import { User } from '.prisma/client';
 import { IRegistrationPayload } from '../models/IRegistrationModel';
-import { authErrorRouters } from '../utils/auth';
 
 export const findUserById = async (id: string): Promise<User | null> => {
     const user = await db.user.findUnique({
@@ -32,7 +31,8 @@ export const login = async (email: string, password: string): Promise<User | nul
     return user;
 };
 
-export const register = async (payload: IRegistrationPayload): Promise<boolean> => {
+export const register = async (payload: IRegistrationPayload): Promise<User | null> => {
+    // TODO: Express validator:
     if (!validateRegistration(payload)) throw new create.BadRequest('Invalid or missing inputs');
 
     let { email, password, username, first_name, last_name } = payload;
@@ -42,36 +42,24 @@ export const register = async (payload: IRegistrationPayload): Promise<boolean> 
     first_name = first_name.normalize();
     last_name = last_name.normalize();
 
-    try {
-        const user = await db.user.create({
-            data: {
-                email: email,
-                password: hashedPassword,
-                profile: {
-                    create: {
-                        username: username,
-                        avatar_url: ''
-                    }
-                },
-                account: {
-                    create: {
-                        first_name: first_name,
-                        last_name: last_name
-                    }
+    const user = await db.user.create({
+        data: {
+            email: email,
+            password: hashedPassword,
+            profile: {
+                create: {
+                    username: username,
+                    avatar_url: ''
+                }
+            },
+            account: {
+                create: {
+                    first_name: first_name,
+                    last_name: last_name
                 }
             }
-        });
-
-        if (!user) throw new create.InternalServerError('Internal Server Error');
-
-        return true;
-    } catch (e: any) {
-        console.log(e);
-        if (e instanceof Prisma.PrismaClientKnownRequestError) {
-            throw (
-                authErrorRouters[e.code] || new create.InternalServerError('Internal Server Error')
-            );
         }
-        throw e;
-    }
+    });
+
+    return user;
 };

@@ -33,17 +33,16 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(
-    session({
-        secret: process.env.SESSION_SECRET || 'secret',
-        resave: false,
-        saveUninitialized: false,
-        store: new RedisStore({ client: redisClient, ttl: 86400000 }),
-        cookie: {
-            maxAge: 86400000
-        }
-    })
-);
+export const expressSession = session({
+    secret: process.env.SESSION_SECRET || 'secret',
+    resave: false,
+    saveUninitialized: false,
+    store: new RedisStore({ client: redisClient, ttl: 86400000 }),
+    cookie: {
+        maxAge: 86400000
+    }
+});
+app.use(expressSession);
 
 redisClient.on('error', (err) => console.log(err));
 redisClient.on('connect', function (err) {

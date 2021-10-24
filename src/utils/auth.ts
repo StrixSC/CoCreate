@@ -1,9 +1,9 @@
 import create, { HttpError } from 'http-errors';
 import { IRegistrationPayload } from '../models/IRegistrationModel';
 
-export const authErrorRouters: { [key: string]: HttpError } = {
-    P2001: new create.Unauthorized('Unauthorized'),
-    P2002: new create.Conflict('Username or email already in use')
+export const dbErrorRouters: { [key: string]: HttpError } = {
+    P2001: new create.Unauthorized(),
+    P2002: new create.Conflict()
 };
 
 const validateEmail = (email: string): boolean => {

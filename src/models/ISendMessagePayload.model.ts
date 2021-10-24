@@ -1,3 +1,4 @@
 export interface ISendMessagePayload {
-  message: string;
+    message: string;
+    channel_id: string;
 }
