@@ -3,13 +3,14 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { WelcomePageComponent } from './components/welcome-page/welcome-page.component';
 import { SignUpPageComponent } from './components/sign-up-page/sign-up-page.component';
-import { WorkspaceComponent } from './components/workspace/workspace.component';
+import { SidenavComponent } from './components/sidenav/sidenav.component';
+
 
 
 const routes: Routes = [
-  { path: 'home', component: WelcomePageComponent },
+  { path: '', component: WelcomePageComponent },
   { path: 'signup', component: SignUpPageComponent },
-  { path: 'workspace', component: WorkspaceComponent}
+  { path: 'workspace', component:SidenavComponent}
 ];
 @NgModule({
   declarations: [],

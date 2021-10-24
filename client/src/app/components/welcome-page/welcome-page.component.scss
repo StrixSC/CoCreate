@@ -1,9 +1,11 @@
 
 
-body{
-background: #3399ff;
-
-    
+::ng-deep{
+  body{
+    background-color: #3399ff;
+ 
+    height:100%;
+  }
 }
 .title{
     display: inline;
@@ -11,16 +13,18 @@ background: #3399ff;
     margin-left: 570px;
     margin-top: 200px;
     color: white;
+    
 }
 
 .login-inputs-container{
     
-    height: 300px;
+    height: 290px;
     width:400px;
     display: inline;
     position: absolute;
     margin-left: 400px;
     margin-top: 300px;
+    
 
 }
 
@@ -39,25 +43,24 @@ background: #3399ff;
     }
     
 .input-email-container, .input-password-container{
-    margin-top: 25px;
-    display: inline;
-    width: 519px;
-    height: 60px;
-    left: 651px;
-    top: 277px;
-    outline: none;
-    background: #FFFFFF;
-    border-radius: 10px;
-    font-size: 40px;
-    border-color: inherit;
-    box-shadow: none;
-    font-family: Roboto;
-    font-style: normal;
-    font-weight: 200;
+  display: inline;
+  width: 519px;
+  height: 40px;
+  left: 651px;
+  top: 177px;
+  outline:black;
+  background: #FFFFFF;
+  border-radius: 10px;
+  font-size: 30px;
+  border-color: inherit;
+  box-shadow: none;
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 200;
   
 }
 .google-btn {
-    margin-top: 15px;
+    //margin-top: 15px;
     margin-left: 150px;
     width: 200px;
     height: 42px;
@@ -169,6 +172,28 @@ background: #3399ff;
     opacity: 0.9;
 }
 
+.forgot-password{
+  margin-top: 10px;
+  left: 400px;
+  width: 200px;
+  position: relative;
+  &:hover {
+    color: white;
+    cursor: pointer;
+    
+  }
+  
+}
+.sign-up{
+ 
+  bottom: 25px;
+  position: relative;
+  &:hover {
+    color: white;
+    cursor: pointer;
+    
+  }
+}
 
 
 @keyframes ripple{

@@ -1,7 +1,7 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBarContainer } from '@angular/material';
+import { MatFormFieldModule, MatInputModule, MatSnackBarContainer } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -70,6 +70,8 @@ import { AppRoutingModule } from './app-routing.module';
     ToolParameterModule,
     MomentModule,
     AppRoutingModule,
+    MatFormFieldModule,
+    MatInputModule,
   ],
   exports: [AppRoutingModule,
   ],
