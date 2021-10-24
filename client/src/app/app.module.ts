@@ -36,6 +36,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ChatComponent } from './components/chat/chat.component';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
+import { WelcomePageComponent } from './components/welcome-page/welcome-page.component';
+import { SignUpPageComponent } from './components/sign-up-page/sign-up-page.component';
 
 @NgModule({
   declarations: [
@@ -62,7 +64,9 @@ import { DrawingPageComponent } from './components/drawing-page/drawing-page.com
     ExportDrawingComponent,
     LoginPageComponent,
     ChatComponent,
-    DrawingPageComponent
+    DrawingPageComponent,
+    WelcomePageComponent,
+    SignUpPageComponent
   ],
   imports: [
     BrowserModule,
@@ -82,7 +86,7 @@ import { DrawingPageComponent } from './components/drawing-page/drawing-page.com
     MatButtonModule,
     AppRoutingModule
   ],
-  exports: [
+  exports: [AppRoutingModule,
   ],
   entryComponents: [
     NewDrawingAlertComponent,

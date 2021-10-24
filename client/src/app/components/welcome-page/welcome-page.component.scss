@@ -1,0 +1,187 @@
+
+
+body{
+background: #3399ff;
+
+    
+}
+.title{
+    display: inline;
+    position: absolute;
+    margin-left: 570px;
+    margin-top: 200px;
+    color: white;
+}
+
+.login-inputs-container{
+    
+    height: 300px;
+    width:400px;
+    display: inline;
+    position: absolute;
+    margin-left: 400px;
+    margin-top: 300px;
+
+}
+
+
+    
+     
+
+    .example-form {
+      min-width: 150px;
+      max-width: 500px;
+      width: 100%;
+    }
+    
+    .example-full-width {
+      width: 100%;
+    }
+    
+.input-email-container, .input-password-container{
+    margin-top: 25px;
+    display: inline;
+    width: 519px;
+    height: 60px;
+    left: 651px;
+    top: 277px;
+    outline: none;
+    background: #FFFFFF;
+    border-radius: 10px;
+    font-size: 40px;
+    border-color: inherit;
+    box-shadow: none;
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: 200;
+  
+}
+.google-btn {
+    margin-top: 15px;
+    margin-left: 150px;
+    width: 200px;
+    height: 42px;
+    background-color: #4285f4;
+    border-radius: 2px;
+    box-shadow: 0 3px 4px 0 rgba(0,0,0,.25);
+    .google-icon-wrapper {
+      position: absolute;
+      margin-top: 1px;
+      margin-left: 1px;
+      width: 40px;
+      height: 40px;
+      border-radius: 2px;
+      background-color: white;
+    }
+    .google-icon {
+      position: absolute;
+      margin-top: 11px;
+      margin-left: 11px;
+      width: 18px;
+      height: 18px;
+    }
+    .btn-text {
+      float: right;
+      margin: 11px 11px 0 0;
+      color: white;
+      font-size: 14px;
+      letter-spacing: 0.2px;
+      font-family: "Roboto";
+      text-align: center;
+    }
+    &:hover {
+      box-shadow: 0 0 6px #4285f4;
+    }
+    &:active {
+      background: #84a5dd;
+    }
+  }
+
+
+.circle{
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    animation: ripple 15s infinite;
+    box-shadow: 0px 0px 1px 0px #508fb9;
+    
+    width: 1000px;
+    height:800px;
+    left: -500px;
+    
+    //bottom: -500px;
+
+    opacity: 0.2;
+}
+.circle-xlarge {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    animation: ripple 15s infinite;
+    box-shadow: 0px 0px 1px 0px #508fb9;
+    width: 800px;
+    height: 800px;
+    left: -400px;
+    opacity: 0.5;
+
+}
+.circle-large {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    animation: ripple 15s infinite;
+    box-shadow: 0px 0px 1px 0px #508fb9;
+
+    width: 600px;
+    height: 800px;
+    left: -300px;
+
+    opacity: 0.7;
+    
+
+}
+.circle-medium{
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    animation: ripple 15s infinite;
+    box-shadow: 0px 0px 1px 0px #508fb9;
+
+    width: 400px;
+    height: 800px;
+    left: -200px;
+    
+
+    opacity: 0.8;
+}
+
+.circle-small{
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    animation: ripple 15s infinite;
+    box-shadow: 0px 0px 1px 0px #508fb9;
+
+    width: 200px;
+    height: 800px;
+    left: -100px;
+
+    opacity: 0.9;
+}
+
+
+
+@keyframes ripple{
+0%{
+transform: scale(0.8);
+}
+
+50%{
+transform: scale(1.2);
+}
+
+100%{
+transform: scale(0.8);
+}
+}
+

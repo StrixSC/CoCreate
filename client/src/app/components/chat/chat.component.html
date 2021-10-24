@@ -1,4 +1,4 @@
-<div class="main-page-container">
+<div id = "mychat" [style.display]="isVisible ? 'block' : 'none'" class="main-page-container">
 	<div class="main-chat-container">
 		<div #messageContainer class="messages-container">
 			<div #messagesList *ngFor="let message of messages; index as i">
@@ -35,12 +35,14 @@
 			</button>
 		</div>
 	</div>
-
-
-</div>
-
-<div class="flex-container">
+	<div class="flex-container">
 	<button (click)="disconnect()" class="button-primary clickable">
 		Déconnexion
 	</button>
+	<button (click)="open()" class="button-primary clickable">
+		Fenetre
+	</button>
 </div>
+
+</div>
+

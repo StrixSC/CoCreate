@@ -20,6 +20,7 @@ export class ChatComponent implements OnInit {
   errorListener: Subscription;
   public readonly systemUsername = "Système"
   messageListener: Subscription;
+  isVisible : boolean;
   constructor(
     private router: Router,
     private chatService: ChatService,
@@ -28,6 +29,7 @@ export class ChatComponent implements OnInit {
   ) {
     this.message = "";
     this.messages = [];
+    this.isVisible = true;
     this.errorListener = new Subscription();
     this.messageListener = new Subscription();
   }
@@ -95,7 +97,12 @@ export class ChatComponent implements OnInit {
     this.socketService.disconnect();
     this.router.navigateByUrl("login");
   }
+  open(): void {
+    this.chatService.openChatWindow();
+    this.isVisible = false;
 
+    }
+  
   scrollToBottom(): void {
     try {
       this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
