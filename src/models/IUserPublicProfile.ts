@@ -1,4 +1,4 @@
 export interface IPublicUserProfile {
     username: string;
-    avatarUrl: string;
+    avatar_url: string;
 }

@@ -35,12 +35,12 @@ export const login = async (email: string, password: string): Promise<User | nul
 export const register = async (payload: IRegistrationPayload): Promise<boolean> => {
     if (!validateRegistration(payload)) throw new create.BadRequest('Invalid or missing inputs');
 
-    let { email, password, username, firstName, lastName } = payload;
+    let { email, password, username, first_name, last_name } = payload;
 
     const hashedPassword = hashSync(password, 10);
     email = email.toLowerCase();
-    firstName = firstName.normalize();
-    lastName = lastName.normalize();
+    first_name = first_name.normalize();
+    last_name = last_name.normalize();
 
     try {
         const user = await db.user.create({
@@ -50,13 +50,13 @@ export const register = async (payload: IRegistrationPayload): Promise<boolean> 
                 profile: {
                     create: {
                         username: username,
-                        avatarUrl: ''
+                        avatar_url: ''
                     }
                 },
                 account: {
                     create: {
-                        first_name: firstName,
-                        last_name: lastName
+                        first_name: first_name,
+                        last_name: last_name
                     }
                 }
             }

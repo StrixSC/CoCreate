@@ -13,7 +13,7 @@ CREATE TABLE "User" (
 CREATE TABLE "Profile" (
     "profile_id" TEXT NOT NULL,
     "username" TEXT NOT NULL,
-    "avatarUrl" TEXT NOT NULL,
+    "avatar_url" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
 
     CONSTRAINT "Profile_pkey" PRIMARY KEY ("profile_id")

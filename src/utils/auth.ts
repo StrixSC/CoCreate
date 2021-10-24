@@ -43,8 +43,8 @@ export const validateRegistration = (payload: IRegistrationPayload): boolean => 
 
     valid = validateEmail(payload.email);
     valid = validatePassword(payload.password);
-    valid = validateName(payload.firstName);
-    valid = validateName(payload.lastName);
+    valid = validateName(payload.first_name);
+    valid = validateName(payload.last_name);
     valid = validateUsername(payload.username);
 
     return valid;

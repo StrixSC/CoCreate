@@ -25,9 +25,10 @@ model User {
 }
 
 model Profile {
+  index Int @unique @default(autoincrement())
   profile_id String @unique @id @default(uuid())
   username String @unique
-  avatarUrl String
+  avatar_url String
   user User @relation(fields: [user_id], references: [user_id])
   user_id  String @unique
 }

@@ -1,4 +1,5 @@
 import {
+    getCompleteUserController,
     getPublicUserController,
     getPublicUsersController
 } from './../controllers/users.controller';
@@ -14,6 +15,8 @@ router.get('/profile', (req, res, next) => getPublicUsersController(req, res, ne
 router.get('/profile/:username', (req, res, next) => getPublicUserController(req, res, next));
 
 // [Protected] Get complete information of a user. Requesting user must have a req.user.user_id === the provided id
-router.get('/:id', checkAuthenticated, (req, res, next) => {});
+router.get('/:id', checkAuthenticated, (req, res, next) =>
+    getCompleteUserController(req, res, next)
+);
 
 export default router;

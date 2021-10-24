@@ -39,10 +39,10 @@
                                     "$ref": "#/components/schemas/IUser"
                                 },
                                 "example": {
-                                    "userId": "48bffc61-a8ef-55e3-aa6b-fb5640a90eab",
+                                    "user_id": "48bffc61-a8ef-55e3-aa6b-fb5640a90eab",
                                     "email": "demo@colorimage.com",
                                     "username": "demo",
-                                    "avatarUrl": "https://storage.googleapis.com/1ccd570e-fed0-5049-9143-7e98b240a574.jpg"
+                                    "avatar_url": "https://storage.googleapis.com/1ccd570e-fed0-5049-9143-7e98b240a574.jpg"
                                 }
                             }
                         },
@@ -63,20 +63,20 @@
                                     "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
-                                    "message": "Invalid email address or password"
+                                    "message": "Invalid email address or password."
                                 }
                             }
                         }
                     },
                     "500": {
-                        "description": "Internal server error.",
+                        "description": "Internal Server Error.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
-                                    "message": "Internal Server Error"
+                                    "message": "Internal Server Error."
                                 }
                             }
                         }
@@ -123,14 +123,14 @@
                         }
                     },
                     "500": {
-                        "description": "Internal server error.",
+                        "description": "Internal Server Error.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
-                                    "message": "Internal Server Error"
+                                    "message": "Internal Server Error."
                                 }
                             }
                         }
@@ -229,7 +229,7 @@
                                     "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
-                                    "message": "Internal Server Error"
+                                    "message": "Internal Server Error."
                                 }
                             }
                         }
@@ -242,7 +242,7 @@
                 "parameters": [
                     {
                         "required": true,
-                        "name": "userId",
+                        "name": "user_id",
                         "in": "path",
                         "schema": {
                             "type": "string"
@@ -264,10 +264,58 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/IUserComplete"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content. Request was successful, but no content was found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
-                                    "username": "demoUser1",
-                                    "avatarUrl": "http://storage.googleapis.com/f0c9aac4-1d2a-5e41-88a8-8c2e0174d392.jpg"
+                                    "message": "Request was successful, but no content was found."
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication cookie does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
                                 }
                             }
                         }
@@ -277,38 +325,79 @@
         },
         "/api/users/profile": {
             "get": {
+                "parameters": [
+                    {
+                        "required": false,
+                        "name": "offset",
+                        "description": "The amount of indexes to skip. Default: 0",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "required": false,
+                        "name": "limit",
+                        "description": "The maximum length of the returned array. Default: 50",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "tags": ["Users"],
                 "summary": "Fetch all public profiles",
                 "operationId": "users",
                 "responses": {
                     "200": {
-                        "description": "Success. Returns a JSON with all the users and their respective public information.",
+                        "description": "Success. Returns an array of all public users information.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/IAllUsersResponse"
+                                    "$ref": "#/components/schemas/IUserPublicProfile"
+                                },
+                                "example": [
+                                    {
+                                        "index": 1,
+                                        "username": "demoUser1",
+                                        "avatar_url": "http://storage.googleapis.com/f0c9aac4-1d2a-5e41-88a8-8c2e0174d392.jpg"
+                                    },
+                                    {
+                                        "index": 2,
+                                        "username": "demoUser2",
+                                        "avatar_url": "http://storage.googleapis.com/d6831468-3247-5085-ac77-17830b9ca857.jpg"
+                                    },
+                                    {
+                                        "index": 3,
+                                        "username": "demoUser3",
+                                        "avatar_url": "http://storage.googleapis.com/46f15fdd-2a5c-59fa-9489-ae07b9e3aab2.jpg"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid format of offset and/or limit.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
-                                    "users": [
-                                        {
-                                            "username": "demoUser1",
-                                            "avatarUrl": "http://storage.googleapis.com/f0c9aac4-1d2a-5e41-88a8-8c2e0174d392.jpg"
-                                        },
-                                        {
-                                            "username": "demoUser2",
-                                            "avatarUrl": "http://storage.googleapis.com/d6831468-3247-5085-ac77-17830b9ca857.jpg"
-                                        },
-                                        {
-                                            "username": "demoUser3",
-                                            "avatarUrl": "http://storage.googleapis.com/46f15fdd-2a5c-59fa-9489-ae07b9e3aab2.jpg"
-                                        },
-                                        "..."
-                                    ],
-                                    "paginationInfo": {
-                                        "cursor": 32,
-                                        "limit": 50,
-                                        "skipFirst": true
-                                    }
+                                    "message": "Invalid format of offset and/or limit."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
                                 }
                             }
                         }
@@ -341,7 +430,46 @@
                                 },
                                 "example": {
                                     "username": "demoUser1",
-                                    "avatarUrl": "http://storage.googleapis.com/f0c9aac4-1d2a-5e41-88a8-8c2e0174d392.jpg"
+                                    "avatar_url": "http://storage.googleapis.com/f0c9aac4-1d2a-5e41-88a8-8c2e0174d392.jpg"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content. Request was successful, but no content was found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Request was successful, but no content was found."
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
                                 }
                             }
                         }
@@ -385,45 +513,13 @@
                         "type": "string",
                         "description": "The username of the registering user. The username must be unique"
                     },
-                    "firstName": {
+                    "first_name": {
                         "type": "string",
                         "description": "The first name of the registering user."
                     },
-                    "lastName": {
+                    "last_name": {
                         "type": "string",
                         "description": "The last name of the registering user."
-                    }
-                }
-            },
-            "IAllUsersResponse": {
-                "type": "object",
-                "properties": {
-                    "users": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/IUserPublicProfile"
-                        }
-                    },
-                    "paginationInfo": {
-                        "type": "object",
-                        "$ref": "#/components/schemas/IPaginationQuery"
-                    }
-                }
-            },
-            "IPaginationQuery": {
-                "type": "object",
-                "properties": {
-                    "cursor": {
-                        "type": "integer",
-                        "description": "Used for pagination. Integer used to offset the index of the next batch. This value must be used in the next fetch to continue indexing after the last fetched user."
-                    },
-                    "limit": {
-                        "type": "integer",
-                        "description": "Integer used to limit the count of returned information"
-                    },
-                    "skipFirst": {
-                        "type": "boolean",
-                        "description": "Define if the cursor's index should be skipped."
                     }
                 }
             },
@@ -434,7 +530,7 @@
                         "type": "string",
                         "description": "Username (Pseudonyme) of the user"
                     },
-                    "avatarUrl": {
+                    "avatar_url": {
                         "type": "string",
                         "description": "URL pointing to the location of the avatar of the user."
                     },
@@ -442,7 +538,7 @@
                         "type": "string",
                         "description": "Email of the requesting user"
                     },
-                    "userId": {
+                    "user_id": {
                         "type": "string",
                         "description": "User id of the requesting user"
                     }
@@ -459,7 +555,7 @@
                                 "type": "string",
                                 "example": "AlejandroGordon123"
                             },
-                            "avatarUrl": {
+                            "avatar_url": {
                                 "type": "string",
                                 "description": "URL pointing to the location of the avatar of the user.",
                                 "example": "https://storage.googleapis.com/efb5f957-bd28-5f61-beb4-a82c6dce4fe5.jpg"
@@ -469,11 +565,11 @@
                     "account": {
                         "type": "object",
                         "properties": {
-                            "firstName": {
+                            "first_name": {
                                 "type": "string",
                                 "example": "Alejandro"
                             },
-                            "lastName": {
+                            "last_name": {
                                 "type": "string",
                                 "example": "Gordon"
                             }
@@ -520,9 +616,17 @@
                                 "drawing_id": {
                                     "type": "string",
                                     "description": "[OPTIONAL] If the log type is 'DrawingUpdate', then a drawing id will be present, this can be used to redirect the user to the updated drawing."
-                                }              
+                                }
                             }
                         }
+                    },
+                    "email": {
+                        "type": "string",
+                        "description": "Requesting user's email."
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "description": "Requesting user's id."
                     }
                 }
             },
@@ -533,9 +637,13 @@
                         "type": "string",
                         "description": "Username (Pseudonyme) of the user"
                     },
-                    "avatarUrl": {
+                    "avatar_url": {
                         "type": "string",
                         "description": "URL pointing to the location of the avatar of the user."
+                    },
+                    "index": {
+                        "type": "number",
+                        "description": "Index of the user's profile in the list of profiles. This is used for identification and cursor pagination."
                     }
                 }
             },

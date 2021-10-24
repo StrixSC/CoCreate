@@ -6,10 +6,10 @@ import { StatusCodes } from 'http-status-codes';
 
 export const loginController = async (req: Request, res: Response, next: NextFunction) => {
     res.status(StatusCodes.OK).json({
-        userId: req.user?.user_id,
+        user_id: req.user?.user_id,
         email: req.user?.email,
         username: req.user?.profile.username,
-        avatarUrl: req.user?.profile.avatarUrl
+        avatar_url: req.user?.profile.avatar_url
     } as IUser);
 };
 
@@ -19,8 +19,8 @@ export const registerController = async (req: Request, res: Response, next: Next
             username: req.body.username,
             email: req.body.email,
             password: req.body.password,
-            firstName: req.body.firstName,
-            lastName: req.body.lastName
+            first_name: req.body.first_name,
+            last_name: req.body.last_name
         });
         if (registered) {
             res.status(StatusCodes.CREATED).json({
