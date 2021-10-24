@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../app.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 TextEditingController userController = TextEditingController();
 Color primaryColor =
@@ -34,45 +33,8 @@ class _LoginState extends State<Login> {
   static const padding = 30.0;
 
   _onSubmitTap(BuildContext context, String username) {
-    // Initialize socket connection with server
-    IO.Socket socket = IO.io(
-        'https://colorimage-109-3900.herokuapp.com/',
-        IO.OptionBuilder()
-            .disableAutoConnect()
-            .setTransports(['websocket']) // for Flutter or Dart VM
-            .build());
-
-    socket.auth = {'username': username};
-
-    socket.on('error', (err) {
-      if (err['message'] == "Vous devez fournir un nom d'utilisateur!") {
-        setState(() {
-          usernameEmpty = true;
-          usernameTaken = false;
-        });
-
-
-      } else if (err['message'] == "Ce nom d'utilisateur est déjà utilisé, choisissez-en en autre!") {
-        setState(() {
-          usernameEmpty = false;
-          usernameTaken = true;
-        });
-      }
-
-      socket.dispose();
-    });
-
-    socket.connect();
-
-    socket.on('connect', (_) {
-      setState(() {
-        usernameEmpty = false;
-        usernameTaken = false;
-      });
-      socket.emit('join-channel', {'username': username});
-      Navigator.pushNamed(context, HomeRoute,
-          arguments: {'username': username, 'socket': socket});
-    });
+    Navigator.pushNamed(context, HomeRoute,
+        arguments: {'username': username});
   }
 
   @override
@@ -84,9 +46,9 @@ class _LoginState extends State<Login> {
             key: _formKey,
             child: ListView(
               shrinkWrap: true,
-              padding: EdgeInsets.only(left: 100.0, right: 100.0),
+              padding: const EdgeInsets.only(left: 100.0, right: 100.0),
               children: <Widget>[
-                SizedBox(height: 48.0),
+                const SizedBox(height: 48.0),
                 Text('Connexion',
                     style: TextStyle(
                         fontWeight: FontWeight.w800,

@@ -9,16 +9,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 const LoginRoute = '/';
 const ChatRoute = '/chat';
 const HomeRoute = '/home';
-
+const fontsize = TextStyle(fontSize: 25);
 
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-        designSize: Size(1200, 1920),
+        designSize: const Size(1200, 1920),
         builder: () => MaterialApp(
           onGenerateRoute: _routes(),
-          theme: ThemeData(primarySwatch: Colors.blue, textTheme: TextTheme(button: TextStyle(fontSize: 45.sp)
+          theme: ThemeData(primarySwatch: Colors.blue,
+            textTheme:Theme.of(context).textTheme.apply(
+              fontSizeFactor: 1.5,
+              fontSizeDelta: 2.0,
             ),
           ),//_theme(),
         ),
@@ -30,18 +33,14 @@ class App extends StatelessWidget {
       Widget screen;
       switch (settings.name) {
         case LoginRoute:
-          screen = Login();
-          break;
-        case ChatRoute:
-          // final arguments = settings.arguments as Map<String, dynamic>;
-          screen = ChatScreen();
+          screen = const Login();
           break;
         case HomeRoute:
-          // final arguments = settings.arguments as Map<String, dynamic>;
-          screen = Home();
+          final arguments = settings.arguments as Map<String, dynamic>;
+          screen = Home(arguments['username']);
           break;
         default:
-          screen = Login();
+          screen = const Login();
       }
       return MaterialPageRoute(builder: (BuildContext context) => screen);
     };
