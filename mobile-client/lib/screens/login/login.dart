@@ -37,7 +37,8 @@ class _LoginState extends State<Login> {
   _onSubmitTap(BuildContext context, String username) {
     // Initialize socket connection with server
     IO.Socket socket = IO.io(
-        'https://colorimage-109-3900.herokuapp.com/',
+        // 'https://colorimage-109-3900.herokuapp.com/',
+        'http://98a2-132-207-3-194.ngrok.io/',
         IO.OptionBuilder()
             .disableAutoConnect()
             .setTransports(['websocket']) // for Flutter or Dart VM
@@ -70,8 +71,8 @@ class _LoginState extends State<Login> {
         usernameTaken = false;
       });
       socket.emit('join-channel', {'username': username});
-      Navigator.pushNamed(context, chatRoute,
-          arguments: {'username': username, 'socket': socket});
+      Navigator.pushNamed(context, drawingRoute,
+          arguments: {'socket': socket});
     });
   }
 

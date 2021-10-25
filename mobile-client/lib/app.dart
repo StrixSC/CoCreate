@@ -30,7 +30,8 @@ class App extends StatelessWidget {
           screen = ChatScreen(arguments['username'], arguments['socket']);
           break;
         case drawingRoute:
-          screen = const DrawingScreen();
+          final arguments = settings.arguments as Map<String, dynamic>;
+          screen = DrawingScreen(arguments['socket']);
           break;
         default:
           return null;

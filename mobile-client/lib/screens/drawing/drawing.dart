@@ -3,20 +3,42 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class DrawingScreen extends StatefulWidget {
-  const DrawingScreen({Key? key});
+  final IO.Socket _socket;
+
+  DrawingScreen(this._socket);
 
   @override
-  State<DrawingScreen> createState() => _DrawingScreenState();
+  State<DrawingScreen> createState() => _DrawingScreenState(this._socket);
 }
 
 class _DrawingScreenState extends State<DrawingScreen> {
   List<Offset> offsets = <Offset>[];
   List<Paint> paintList = <Paint>[];
-  Path path = Path()..fillType = PathFillType.nonZero;
+  Path path = Path();
   Offset endPoint = const Offset(-1, -1);
   String drawType = "line";
+  final IO.Socket _socket;
+
+  _DrawingScreenState(this._socket);
+
+  @override
+  void initState() {
+    super.initState();
+
+    _socket.on('freedraw:receive', (data) {
+      setState(() {
+        if (data['coords']['x'] == -1) {
+          print(data['coords']['x'].runtimeType);
+        } else {
+          print(data['coords']['x'].runtimeType);
+        }
+        // offsets.add(Offset(data['coords']['x'], data['coords']['y']));
+      });
+    });
+  }
 
   // create some values
   Color pickerColor = const Color(0xff443a49);
@@ -109,19 +131,22 @@ class _DrawingScreenState extends State<DrawingScreen> {
       ]),
       body: GestureDetector(
         onPanStart: (details) {
-          setState(() {
-            offsets.add(details.localPosition);
+          _socket.emit("freedraw:emit", {
+            'x': details.localPosition.dx,
+            'y': details.localPosition.dy,
+            'state': "down"
           });
         },
         onPanUpdate: (details) {
-          setState(() {
-            offsets.add(details.localPosition);
+          _socket.emit("freedraw:emit", {
+            'x': details.localPosition.dx,
+            'y': details.localPosition.dy,
+            'state': "move"
           });
         },
         onPanEnd: (details) {
-          setState(() {
-            offsets.add(endPoint);
-          });
+          _socket.emit("freedraw:emit",
+              {'x': endPoint.dx, 'y': endPoint.dy, 'state': "up"});
         },
         child: Center(
           child: CustomPaint(
