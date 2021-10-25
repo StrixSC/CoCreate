@@ -5,10 +5,12 @@ import 'screens/chat/chat.dart';
 import 'screens/home/home.dart';
 import 'style.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'screens/drawing/drawing.dart';
 
 const LoginRoute = '/';
 const ChatRoute = '/chat';
 const HomeRoute = '/home';
+const drawingRoute = '/drawing';
 const fontsize = TextStyle(fontSize: 25);
 
 class App extends StatelessWidget {
@@ -39,17 +41,20 @@ class App extends StatelessWidget {
           final arguments = settings.arguments as Map<String, dynamic>;
           screen = Home(arguments['username']);
           break;
+        case drawingRoute:
+          screen = const DrawingScreen();
+          break;
         default:
           screen = const Login();
       }
       return MaterialPageRoute(builder: (BuildContext context) => screen);
     };
   }
-
   // ThemeData _theme() {
   //   return ThemeData(
   //     appBarTheme:
   //     AppBarTheme(textTheme: TextTheme(headline6: AppBarTextStyle)),
   //   );
   // }
+
 }

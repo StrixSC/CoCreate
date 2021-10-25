@@ -264,11 +264,11 @@ class _ChatScreenState extends State<ChatScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Tooltip(
-              message: 'Se déconnecter',
-              child: Icon(Icons.arrow_back,
-                  color: Colors.black, size: 30)),
-          onPressed: () => widget.callback()
+            icon: const Tooltip(
+                message: 'Se déconnecter',
+                child: Icon(Icons.arrow_back,
+                    color: Colors.black, size: 30)),
+            onPressed: () => widget.callback()
         ),
         backgroundColor: Colors.white,
         title:  const Text(

@@ -10,6 +10,7 @@ class Login extends StatefulWidget {
       : super(
     key: key,
   );
+
   @override
   _LoginState createState() => _LoginState();
 }
@@ -46,9 +47,9 @@ class _LoginState extends State<Login> {
             key: _formKey,
             child: ListView(
               shrinkWrap: true,
-              padding: const EdgeInsets.only(left: 100.0, right: 100.0),
+              padding: EdgeInsets.only(left: 100.0, right: 100.0),
               children: <Widget>[
-                const SizedBox(height: 48.0),
+                SizedBox(height: 48.0),
                 Text('Connexion',
                     style: TextStyle(
                         fontWeight: FontWeight.w800,
@@ -67,13 +68,13 @@ class _LoginState extends State<Login> {
                       fontSize: _fontSize,
                     ),
                     contentPadding: const EdgeInsets.all(padding),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0)),
                   ),
                   autovalidate: true,
                   onFieldSubmitted: (value) {
                     if (_formKey.currentState!.validate()) {
-                      _onSubmitTap(
-                          context, userController.text);
+                      _onSubmitTap(context, userController.text);
                     }
                   },
                 ),
@@ -96,13 +97,22 @@ class _LoginState extends State<Login> {
                     // Validate will return true if the form is valid, or false if
                     // the form is invalid.
                     if (_formKey.currentState!.validate()) {
-                      _onSubmitTap(
-                          context, userController.text);
+                      _onSubmitTap(context, userController.text);
                     }
                   },
                   style:
-                  ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
+                      ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
                   child: Text('Se connecter',
+                      style: new TextStyle(fontSize: 30.0)),
+                ),
+                SizedBox(height: 24.0),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, drawingRoute);
+                  },
+                  style:
+                      ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
+                  child: Text('Dessiner sans connexion',
                       style: new TextStyle(fontSize: 30.0)),
                 ),
               ],
