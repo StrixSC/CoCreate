@@ -1,4 +1,5 @@
 import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/models/user.dart';
 import 'package:flutter/material.dart';
 import '../../models/chat.dart';
 import 'chat.dart';
@@ -8,19 +9,19 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:select_dialog/select_dialog.dart';
 
 class ChannelListView extends StatefulWidget {
-  final String username;
-  ChannelListView(this.username);
+  final User user;
+  ChannelListView(this.user);
   @override
-  _ChannelListViewState createState() => _ChannelListViewState(username: this.username);
+  _ChannelListViewState createState() => _ChannelListViewState(user: this.user);
 }
 
 class _ChannelListViewState extends State<ChannelListView> {
-  var username;
+  var user;
   bool isChannelSelected = false;
   List<Chat> channels = chatsData;
 
   _ChannelListViewState({
-    this.username,
+    this.user,
   });
 
   callback() {
@@ -135,12 +136,11 @@ class _ChannelListViewState extends State<ChannelListView> {
           // 'http://colorimage-109-3900.herokuapp.com/',
           'http://localhost:3000',
           IO.OptionBuilder()
-              .setExtraHeaders({'Cookie': 'connect.sid=s%3AqWwIIJbxKIx6WtufUOJknXHlsE6UxUwn.ICblW%2FBsjBpzsSsRW7YMN6PFUkMxBohe%2BoTT3hQwwns; Path=/; Domain=localhost; HttpOnly; Expires=Mon, 25 Oct 2021 18:40:54 GMT;'})
+              .setExtraHeaders({'Cookie': user.cookie})
               .disableAutoConnect()
               .setTransports(['websocket']) // for Flutter or Dart VM
               .build());
 
-      socket.io.options['extraHeaders'] = {'Cookie': 'connect.sid=s%3AqWwIIJbxKIx6WtufUOJknXHlsE6UxUwn.ICblW%2FBsjBpzsSsRW7YMN6PFUkMxBohe%2BoTT3hQwwns; Path=/; Domain=localhost; HttpOnly; Expires=Mon, 25 Oct 2021 18:40:54 GMT;'};
       socket.on('error', (err) {
         print(err);
         socket.dispose();
@@ -153,7 +153,7 @@ class _ChannelListViewState extends State<ChannelListView> {
         socket.emit('join-channel', {'channelId': "30a27c9c-4426-48b0-a08d-2a8c1aa143cb", 'userId': ""});
       });
 
-      return ChatScreen(username, socket, callback);
+      return ChatScreen(user, socket, callback);
   }
 
   @override

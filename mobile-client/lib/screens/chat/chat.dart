@@ -1,9 +1,11 @@
 import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_3.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:http/http.dart' as http;
 
 class ChatMessage extends StatelessWidget {
   const ChatMessage({
@@ -124,10 +126,10 @@ class ChatMessage extends StatelessWidget {
 }
 
 class ChatScreen extends StatefulWidget {
-  final String _username;
+  final User _user;
   final IO.Socket _socket;
   Function callback;
-  ChatScreen(this._username, this._socket, this.callback, {Key? key}) : super(key: key);
+  ChatScreen(this._user, this._socket, this.callback, {Key? key}) : super(key: key);
   @override
   _ChatScreenState createState() =>
       _ChatScreenState();
@@ -146,7 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
     widget._socket.on('receive-message', (data) {
       var message = ChatMessage(
           text: data['message'],
-          username: widget._username,
+          username: widget._user.username,
           message_username: data['username'],
           timestamp: data['timestamp']);
       setState(() {

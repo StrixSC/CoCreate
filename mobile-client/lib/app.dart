@@ -39,7 +39,7 @@ class App extends StatelessWidget {
           break;
         case HomeRoute:
           final arguments = settings.arguments as Map<String, dynamic>;
-          screen = Home(arguments['username']);
+          screen = Home(arguments['user']);
           break;
         case drawingRoute:
           screen = const DrawingScreen();

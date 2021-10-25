@@ -1,3 +1,4 @@
+import 'package:Colorimage/models/user.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
@@ -5,19 +6,19 @@ import './channel_list.dart';
 import '../../constants/general.dart';
 
   class ChannelScreen extends StatefulWidget {
-    final String username;
-    ChannelScreen(this.username);
+    final User user;
+    ChannelScreen(this.user);
     @override
-    _ChannelScreenState createState() => _ChannelScreenState(username: this.username);
+    _ChannelScreenState createState() => _ChannelScreenState(user: this.user);
   }
 
   class _ChannelScreenState extends State<ChannelScreen> {
     _ChannelScreenState({
-      required this.username,
+      required this.user,
     });
 
     List<Channel>? channelList = [];
-    final String username;
+    final User user;
 
     @override
     initState() {
@@ -44,7 +45,7 @@ import '../../constants/general.dart';
     Widget build(BuildContext context) {
       return Scaffold(
         // appBar: buildAppBar(),
-        body: ChannelListView(username),
+        body: ChannelListView(user),
       );
     }
 

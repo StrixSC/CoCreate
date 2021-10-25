@@ -1,3 +1,4 @@
+import 'package:Colorimage/models/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
@@ -5,8 +6,8 @@ import '../screens/chat/channel.dart';
 
 class Sidebar extends StatelessWidget {
   final PersistentTabController _controller;
-  final String _username;
-  Sidebar(this._controller, this._username);
+  final User _user;
+  Sidebar(this._controller, this._user);
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +28,7 @@ class Sidebar extends StatelessWidget {
           //   },
           // ),
           Expanded(
-            child: ChannelScreen(_username)
+            child: ChannelScreen(_user)
           )
         ],
       ));

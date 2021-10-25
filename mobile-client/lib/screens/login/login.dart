@@ -1,7 +1,12 @@
+import 'dart:convert';
+import 'package:Colorimage/models/user.dart';
 import 'package:flutter/material.dart';
 import '../../app.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
 
 TextEditingController userController = TextEditingController();
+TextEditingController passController = TextEditingController();
 Color primaryColor =
 Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
 
@@ -33,9 +38,35 @@ class _LoginState extends State<Login> {
   static const _fontSize = 25.0;
   static const padding = 30.0;
 
-  _onSubmitTap(BuildContext context, String username) {
-    Navigator.pushNamed(context, HomeRoute,
-        arguments: {'username': username});
+  _onSubmitTap(BuildContext context, String email, String password) {
+    login(email, password);
+    print("email  " + email + " password  " + password);
+  }
+
+  Future<void> login(email, password) async {
+
+    Map data = {'email': email, 'password': password};
+    //encode Map to JSON
+    var body = json.encode(data);
+
+    var url = Uri.http('localhost:3000', '/auth/login');
+    var response = await http.post(url, headers: {"Content-Type": "application/json", "withCredentials": "true"}, body: body, );
+
+    if (response.statusCode == 200) {
+      String? rawCookie = response.headers['set-cookie'];
+      print(rawCookie);
+      var jsonResponse = convert.jsonDecode(response.body) as Map<String, dynamic>;
+      // var itemCount = jsonResponse['totalItems'];
+      var user = User(user_id: jsonResponse['user_id'], email: jsonResponse['email'], username: jsonResponse['username'],
+          avatar_url: jsonResponse['avatar_url'], isActive: false, cookie: rawCookie);
+
+      Navigator.pushNamed(context, HomeRoute,
+          arguments: {'user': user});
+
+      print(user);
+    } else {
+      print('Request failed with status: ${response.body}.');
+    }
   }
 
   @override
@@ -63,7 +94,30 @@ class _LoginState extends State<Login> {
                   autofocus: false,
                   decoration: InputDecoration(
                     errorStyle: const TextStyle(fontSize: _fontSize),
-                    hintText: "Nom d'utilisateur",
+                    hintText: "Courriel",
+                    hintStyle: const TextStyle(
+                      fontSize: _fontSize,
+                    ),
+                    contentPadding: const EdgeInsets.all(padding),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0)),
+                  ),
+                  autovalidate: true,
+                  // onFieldSubmitted: (value) {
+                  //   if (_formKey.currentState!.validate()) {
+                  //     _onSubmitTap(context, userController.text);
+                  //   }
+                  // },
+                ),
+                Padding(padding:  EdgeInsets.fromLTRB(0, 20, 0, 0), child:
+                TextFormField(
+                  style: const TextStyle(fontSize: _fontSize),
+                  controller: passController,
+                  maxLines: 1,
+                  autofocus: false,
+                  decoration: InputDecoration(
+                    errorStyle: const TextStyle(fontSize: _fontSize),
+                    hintText: "Password",
                     hintStyle: const TextStyle(
                       fontSize: _fontSize,
                     ),
@@ -74,10 +128,10 @@ class _LoginState extends State<Login> {
                   autovalidate: true,
                   onFieldSubmitted: (value) {
                     if (_formKey.currentState!.validate()) {
-                      _onSubmitTap(context, userController.text);
+                      _onSubmitTap(context, userController.text, passController.text);
                     }
                   },
-                ),
+                )),
                 usernameTaken
                     ? Padding(
                     padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
@@ -97,7 +151,7 @@ class _LoginState extends State<Login> {
                     // Validate will return true if the form is valid, or false if
                     // the form is invalid.
                     if (_formKey.currentState!.validate()) {
-                      _onSubmitTap(context, userController.text);
+                      _onSubmitTap(context, userController.text, passController.text);
                     }
                   },
                   style:
