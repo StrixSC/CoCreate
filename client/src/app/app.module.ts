@@ -30,6 +30,8 @@ import { ToolParameterModule } from './components/tool-parameters/tool-parameter
 import { WelcomePageComponent } from './components/welcome-page/welcome-page.component';
 import { SignUpPageComponent } from './components/sign-up-page/sign-up-page.component';
 import { AppRoutingModule } from './app-routing.module';
+import { UserProfileComponent } from './components/user-profile/user-profile.component';
+import { ChangePasswordComponent } from './components/change-password/change-password.component';
 
 @NgModule({
   declarations: [
@@ -56,6 +58,8 @@ import { AppRoutingModule } from './app-routing.module';
     ExportDrawingComponent,
     WelcomePageComponent,
     SignUpPageComponent,
+    UserProfileComponent,
+    ChangePasswordComponent,
   ],
   imports: [
     BrowserModule,
