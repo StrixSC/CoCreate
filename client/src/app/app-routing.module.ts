@@ -7,10 +7,9 @@ import { DrawingPageComponent } from './components/drawing-page/drawing-page.com
 import { WelcomePageComponent } from './components/welcome-page/welcome-page.component';
 import { SignUpPageComponent } from './components/sign-up-page/sign-up-page.component';
 import { WorkspaceComponent } from './components/workspace/workspace.component';
-//import { SidenavComponent } from './components/sidenav/sidenav.component';
 
 const routes: Routes = [
-  { path: '', component: WelcomePageComponent },
+  { path: "", redirectTo: "login", pathMatch: "full" },
   { path: "login", component: LoginPageComponent },
   { path: "drawing", component: DrawingPageComponent, canActivate: [ChatGuard] },
   { path: "chat", component: ChatComponent},
@@ -22,11 +21,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [],
-  imports: [
-    RouterModule.forRoot(routes),
-   // CommonModule
-  ],
+  imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
