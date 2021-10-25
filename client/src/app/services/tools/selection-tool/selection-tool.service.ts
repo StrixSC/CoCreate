@@ -42,7 +42,7 @@ export class SelectionToolService implements Tools {
   private rectSelection: SVGPolygonElement;
 
   private rectInversement: SVGRectElement;
-  private firstInvObj: SVGElement | null;
+  //private firstInvObj: SVGElement | null;
   private recStrokeWidth = 1;
 
   private objects: SVGElement[] = [];
@@ -117,7 +117,7 @@ export class SelectionToolService implements Tools {
         }
       } else {
         if (obj) {
-          this.firstInvObj = obj;
+          //this.firstInvObj = obj;
         }
         this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectInversement);
 
@@ -140,7 +140,7 @@ export class SelectionToolService implements Tools {
     if ((event.button === RIGHT_CLICK || event.button === LEFT_CLICK) && this.drawingService.drawing) {
       if (event.button === LEFT_CLICK) {
         if (this.wasMoved && !this.hasSelectedItems) {
-          this.findObjects(this.rectSelection, event.button);
+          //this.findObjects(this.rectSelection, event.button);
         } else if (!this.wasMoved && this.objects.length >= 1 && this.isIn) {
           this.objects = [];
           const target = event.target as SVGElement;
@@ -151,7 +151,7 @@ export class SelectionToolService implements Tools {
           }
         }
       } else {
-        this.findObjects(this.rectInversement, event.button);
+        //this.findObjects(this.rectInversement, event.button);
       }
       if (this.objects.length > 0) {
         this.setSelection();
@@ -161,7 +161,7 @@ export class SelectionToolService implements Tools {
 
       this.removeInversement();
 
-      this.firstInvObj = null;
+      //this.firstInvObj = null;
       this.isIn = false;
       this.shiftChanged = false;
       let returnRectangleCommand;
@@ -336,7 +336,7 @@ export class SelectionToolService implements Tools {
   }
 
   /// Methode qui trouve les objets se situant a l'interieur du rectangle de selection ou d'inversement trace.
-  private findObjects(rectUsing: SVGElement, button: number): void {
+  /*private findObjects(rectUsing: SVGElement, button: number): void {
     const allObject: SVGElement[] = [];
     this.drawingService.getObjectList().forEach((value) => {
       if (value.tagName.toLowerCase() !== 'defs') {
@@ -377,7 +377,7 @@ export class SelectionToolService implements Tools {
         }
       }
     }
-  }
+  }*/
 
   /// Methode qui calcule la surface que le rectangle de selection doit prendre en fonction des objets selectionnes.
   private setSelection(): void {
@@ -472,6 +472,7 @@ export class SelectionToolService implements Tools {
         this.rendererService.renderer.setAttribute(this.ctrlPoints[i], 'y', `${this.pointsList[i].y + 0.5 - this.pointsSideLength / 2}`);
       }
     }
+    else return;
   }
 
   /// Methode qui suprime la selection courante .
@@ -589,7 +590,7 @@ export class SelectionToolService implements Tools {
 
   /// Retourne si il y a une selection ou non.
   hasSelection(): boolean {
-    return this.objects.length > 0;
+    return this.objects.length === 1;
   }
 
   /// Selectionne tous les objets du dessin.
