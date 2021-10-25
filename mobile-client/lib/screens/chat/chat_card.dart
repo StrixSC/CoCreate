@@ -36,7 +36,7 @@ class ChatCard extends StatelessWidget {
                       height: 16,
                       width: 16,
                       decoration: BoxDecoration(
-                        color: kPrimaryColor,
+                        color: Colors.green,
                         shape: BoxShape.circle,
                         border: Border.all(
                             color: Theme.of(context).scaffoldBackgroundColor,
@@ -56,25 +56,32 @@ class ChatCard extends StatelessWidget {
                     Text(
                       chat.name,
                       style:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     ),
-                    SizedBox(height: 8),
-                    Opacity(
-                      opacity: 0.64,
-                      child: Text(
-                        chat.lastMessage,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
+                    // SizedBox(height: 8),
+                    // Opacity(
+                    //   opacity: 0.64,
+                    //   child: Text(
+                    //     chat.lastMessage,
+                    //     maxLines: 1,
+                    //     overflow: TextOverflow.ellipsis,
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
             ),
-            Opacity(
-              opacity: 0.64,
-              child: Text(chat.time),
-            ),
+              if(chat.name != "Canal Publique")
+                IconButton(
+                  iconSize: 28,
+                  icon: const Icon(Icons.highlight_remove),
+                  color: kErrorColor,
+                  onPressed: () {
+                    print('delete');
+                  }),
+              // Text(chat.time,
+              //   style:
+              //     const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),),
           ],
         ),
       ),

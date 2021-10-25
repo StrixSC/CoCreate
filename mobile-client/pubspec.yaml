@@ -40,6 +40,8 @@ dependencies:
   google_fonts: ^2.1.0
   flutter_chat_bubble: ^2.0.0
   http: ^0.13.4
+  adaptive_dialog: ^1.1.0
+  select_dialog: ^2.0.0
 
 dev_dependencies:
   flutter_test:

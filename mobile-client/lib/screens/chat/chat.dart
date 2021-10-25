@@ -1,3 +1,4 @@
+import 'package:Colorimage/constants/general.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
@@ -45,9 +46,9 @@ class ChatMessage extends StatelessWidget {
                             elevation: 0,
                             alignment: Alignment.topRight,
                             margin: EdgeInsets.only(top: 10),
-                            backGroundColor: Colors.indigo.shade400,
+                            backGroundColor: kPrimaryColor,
                             child: Container(
-                              color: Color(0xFF5D72CC),
+                              color: kPrimaryColor,
                               constraints: BoxConstraints(
                                 maxWidth:
                                 MediaQuery.of(context).size.width * 0.9,
@@ -78,7 +79,7 @@ class ChatMessage extends StatelessWidget {
                       children: [
                         Padding(
                             padding: EdgeInsets.fromLTRB(0, 45, 0, 0),
-                            child: CircleAvatar(backgroundColor: Color(0xFF5D72CC), child: Text(this.message_username[0], style: TextStyle(color:Colors.white),)))
+                            child: CircleAvatar(backgroundColor: kPrimaryColor, child: Text(this.message_username[0], style: TextStyle(color:Colors.white),)))
                       ],
                     ),
                     Column(
@@ -207,7 +208,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     if (!_validate) {
       _textController.clear();
-      widget._socket.emit('send-message', {'message': text});
+      widget._socket.emit('send-message', {'message': text, 'channel': ''});
     }
   }
 
@@ -221,7 +222,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildTextComposer() {
     return IconTheme(
-      data: const IconThemeData(color:Color(0xFF5D72CC)),
+      data: const IconThemeData(color:kPrimaryColor),
       child: Container(
         height: 75,
         margin: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -246,7 +247,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: IconButton(
                   iconSize: 34,
                   icon: const Icon(Icons.send),
-                  color: Colors.indigo.shade400,
+                  color: kPrimaryColor,
                   onPressed: () {
                     _handleSubmitted(_textController.text);
                   }),
