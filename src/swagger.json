@@ -507,7 +507,7 @@
                     },
                     "password": {
                         "type": "string",
-                        "description": "Password must be at least 8 characters, have: \n \n- at least one digit \n- at least one UPPERCASE character\n \n- at least one lowercase character \n- at least one special character\n\nThis regex should be valid for the enterred password: \n\n`^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$`"
+                        "description": "Password must be at least 8 characters, have at least one digit, at least one UPPERCASE character, at least one lowercase character, at least one special character."
                     },
                     "username": {
                         "type": "string",
