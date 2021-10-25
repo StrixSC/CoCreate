@@ -5,9 +5,9 @@ import 'screens/chat/chat.dart';
 import 'screens/drawing/drawing.dart';
 import 'style.dart';
 
-const LoginRoute = '/';
-const ChatRoute = '/chat';
-const DrawingRoute = '/drawing';
+const loginRoute = '/';
+const chatRoute = '/chat';
+const drawingRoute = '/drawing';
 
 class App extends StatelessWidget {
   @override
@@ -22,15 +22,15 @@ class App extends StatelessWidget {
     return (settings) {
       Widget screen;
       switch (settings.name) {
-        case LoginRoute:
-          screen = Login();
+        case loginRoute:
+          screen = const Login();
           break;
-        case ChatRoute:
+        case chatRoute:
           final arguments = settings.arguments as Map<String, dynamic>;
           screen = ChatScreen(arguments['username'], arguments['socket']);
           break;
-        case DrawingRoute:
-          screen = DrawingScreen();
+        case drawingRoute:
+          screen = const DrawingScreen();
           break;
         default:
           return null;
