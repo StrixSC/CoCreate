@@ -1,4 +1,3 @@
-
 <div class="page-container">
 <div class="circle"> </div>
 <div class="circle-xlarge"></div>
@@ -7,21 +6,21 @@
 <div class="circle-small"></div>
 <h1 class="title"> Colorimage </h1>
     <div class="login-inputs-container">
-        <form class="example-form">
+        <form class="example-form" ngForm="form" (keydown.enter)="mySubmit(f)" #f="ngForm">
             <mat-form-field class="example-full-width" appearance="fill">
-            <input class="input-email-container" placeholder="Email">
+            <input matInput class="input-email-container" #email ="ngModel" name="email" [(ngModel)]="user.email" placeholder="Email">
             </mat-form-field>
             <mat-form-field class="example-full-width" appearance="fill">
-            <input class= "input-id-container" placeholder= "Identificateur">
+            <input matInput class= "input-id-container" #username ="ngModel" name="username" [(ngModel)]="user.username" placeholder= "Identificateur">
             </mat-form-field>
             <mat-form-field class="example-full-width" appearance="fill">
-            <input class="input-password-container" placeholder="Mot de passe">
+            <input matInput class="input-password-container" #password ="ngModel" name="password" [(ngModel)]="user.password" placeholder="Mot de passe">
             </mat-form-field>
             <mat-form-field class="example-full-width" appearance="fill">
-            <input class="input-name-container" placeholder="Prénom">
+            <input matInput class="input-name-container" #firstName="ngModel" name="firstName" [(ngModel)]="user.firstName" placeholder="Prénom">
             </mat-form-field>
             <mat-form-field class="example-full-width" appearance="fill">
-            <input class="input-last-name-container" placeholder="Nom">
+            <input matInput class="input-last-name-container" #lastName="ngModel" name="lastName" [(ngModel)]="user.lastName" placeholder="Nom">
             </mat-form-field>
 
         </form>

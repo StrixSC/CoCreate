@@ -8,13 +8,12 @@
 <div class="circle-small"></div>
 <h1 class="title"> Colorimage </h1>
 <div class="login-inputs-container">
-
     <form class="example-form">
-    <mat-form-field class="example-full-width" appearance="fill">
-    <input class="input-email-container" placeholder="Email">
+    <mat-form-field class="example-full-width" appearance="fill" ngForm="form" (keydown.enter)="mySubmit(f)" #f="ngForm">
+    <input matInput class="input-email-container" placeholder="Email" #email ="ngModel" name="email" [(ngModel)]="user.email" placeholder="Email">
     </mat-form-field>
-    <mat-form-field class="example-full-width" appearance="fill">
-    <input class= "input-password-container" placeholder= "Mot de passe">
+    <mat-form-field class="example-full-width" appearance="fill" #password ="ngModel" name="password" [(ngModel)]="user.password" placeholder="Mot de passe">
+    <input matInput class= "input-password-container" placeholder= "Mot de passe">
     </mat-form-field>
     </form>
     <div class="google-btn">
