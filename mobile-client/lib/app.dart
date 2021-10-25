@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/style.dart';
 import 'screens/login/login.dart';
 import 'screens/chat/chat.dart';
 import 'screens/drawing/drawing.dart';
