@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../app.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 TextEditingController userController = TextEditingController();
 Color primaryColor =
-    Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
+Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
 
 class Login extends StatefulWidget {
   const Login({Key? key})
       : super(
-          key: key,
-        );
+    key: key,
+  );
 
   @override
   _LoginState createState() => _LoginState();
@@ -35,44 +34,8 @@ class _LoginState extends State<Login> {
   static const padding = 30.0;
 
   _onSubmitTap(BuildContext context, String username) {
-    // Initialize socket connection with server
-    IO.Socket socket = IO.io(
-        'https://colorimage-109-3900.herokuapp.com/',
-        IO.OptionBuilder()
-            .disableAutoConnect()
-            .setTransports(['websocket']) // for Flutter or Dart VM
-            .build());
-
-    socket.auth = {'username': username};
-
-    socket.on('error', (err) {
-      if (err['message'] == "Vous devez fournir un nom d'utilisateur!") {
-        setState(() {
-          usernameEmpty = true;
-          usernameTaken = false;
-        });
-      } else if (err['message'] ==
-          "Ce nom d'utilisateur est déjà utilisé, choisissez-en en autre!") {
-        setState(() {
-          usernameEmpty = false;
-          usernameTaken = true;
-        });
-      }
-
-      socket.dispose();
-    });
-
-    socket.connect();
-
-    socket.on('connect', (_) {
-      setState(() {
-        usernameEmpty = false;
-        usernameTaken = false;
-      });
-      socket.emit('join-channel', {'username': username});
-      Navigator.pushNamed(context, chatRoute,
-          arguments: {'username': username, 'socket': socket});
-    });
+    Navigator.pushNamed(context, HomeRoute,
+        arguments: {'username': username});
   }
 
   @override
@@ -117,17 +80,17 @@ class _LoginState extends State<Login> {
                 ),
                 usernameTaken
                     ? Padding(
-                        padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
-                        child: Text("Le nom d'utilisateur est déjà pris",
-                            style: new TextStyle(
-                                color: Colors.red, fontSize: 25.0)))
+                    padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
+                    child: Text("Le nom d'utilisateur est déjà pris",
+                        style: new TextStyle(
+                            color: Colors.red, fontSize: 25.0)))
                     : usernameEmpty
-                        ? Padding(
-                            padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
-                            child: Text("Veuillez entrer un nom d'utilisateur",
-                                style: new TextStyle(
-                                    color: Colors.red, fontSize: 25.0)))
-                        : Text(""),
+                    ? Padding(
+                    padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
+                    child: Text("Veuillez entrer un nom d'utilisateur",
+                        style: new TextStyle(
+                            color: Colors.red, fontSize: 25.0)))
+                    : Text(""),
                 SizedBox(height: 24.0),
                 ElevatedButton(
                   onPressed: () {
@@ -139,7 +102,7 @@ class _LoginState extends State<Login> {
                   },
                   style:
                       ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
-                  child: Text('Se connecter au chat',
+                  child: Text('Se connecter',
                       style: new TextStyle(fontSize: 30.0)),
                 ),
                 SizedBox(height: 24.0),
