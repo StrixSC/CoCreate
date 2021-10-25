@@ -6,10 +6,14 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./welcome-page.component.scss']
 })
 export class WelcomePageComponent implements OnInit {
+  
 
   constructor() { }
 
   ngOnInit() {
   }
-
+  signUp() {
+    //this.router.navigate(['signup']);
+    console.log("clicked")
+  }
 }

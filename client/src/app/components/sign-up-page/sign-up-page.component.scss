@@ -1,10 +1,17 @@
 
-body{
-    background: #3399ff;
-    //min-height: 100%;
+
+  ::ng-deep{
+      body{
+        background-color: #3399ff;
+     
+        height:100%;
+      }
+    }
+    
+   
         
 
-}
+
     .title{
         display: inline;
         position: absolute;
@@ -21,6 +28,7 @@ body{
         position: absolute;
         margin-left: 400px;
         margin-top: 300px;
+        
     
     }
 
