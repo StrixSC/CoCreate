@@ -50,11 +50,13 @@ redisClient.on('connect', function (err) {
     console.log('Connected to redis successfully');
 });
 
+const corsSetup = cors(corsOptions);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-app.use(cors(corsOptions));
+app.use(corsSetup);
 
+app.options('*', corsSetup);
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/api/users', usersRouter);
@@ -66,7 +68,6 @@ app.use(async (req, res, next) => {
 });
 
 app.use((error: HttpError, req: Request, res: Response, next: NextFunction) => {
-    console.error(error);
     res.status(error.status || 500);
     res.json(error);
 });

@@ -1,3 +1,4 @@
+import { handleError } from './../utils/errors';
 import { dbErrorRouters } from './../utils/auth';
 import { Prisma } from '.prisma/client';
 import { IUser } from './../models/IUser.model';
@@ -5,7 +6,6 @@ import { NextFunction, Request, Response } from 'express';
 import create from 'http-errors';
 import { register } from '../services/auth.service';
 import { StatusCodes } from 'http-status-codes';
-import chalk from 'chalk';
 
 export const loginController = async (req: Request, res: Response, next: NextFunction) => {
     res.status(StatusCodes.OK).json({
@@ -25,23 +25,16 @@ export const registerController = async (req: Request, res: Response, next: Next
             first_name: req.body.first_name,
             last_name: req.body.last_name
         });
-        if (!registered) {
+        if (!registered)
             throw new create.InternalServerError(
                 'The user could not be created. We have reported this issue, please try again later'
             );
-        }
 
         return res.status(StatusCodes.CREATED).json({
             message: 'User created successfully.'
         });
     } catch (e: any) {
-        if (e instanceof Prisma.PrismaClientKnownRequestError) {
-            console.log(chalk.red('[ERROR]::' + e.code + e.message.slice(0, e.message.length / 2)));
-            const error = dbErrorRouters[e.code];
-            if (error) return next(create(error.statusCode, error.message));
-            else return next(create(create.InternalServerError));
-        }
-        next(create(e.status, e.message));
+        handleError(e, next);
     }
 };
 

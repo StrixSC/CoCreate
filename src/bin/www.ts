@@ -10,6 +10,7 @@ import { checkAuthenticated } from './../middlewares/auth.middleware';
 // Events
 import chatHandler from '../events/chat.events';
 import passport from 'passport';
+import chalk from 'chalk';
 
 export const normalizePort = (val: string) => {
     const port = parseInt(val, 10);
@@ -57,7 +58,7 @@ const io = new Server(server, {
     cors: corsOptions
 });
 
-const onConnection = (socket: any) => {
+const onConnection = (socket: Socket) => {
     chatHandler(io, socket);
     socket.on('connect_error', (err: any) => {
         console.log(`connect_error due to ${err.message}`);
@@ -73,6 +74,15 @@ io.use(wrap(passport.session()));
 io.use(wrap(checkAuthenticated));
 
 io.on('connection', onConnection);
+io.of('/').adapter.on('create-room', (room) => {
+    console.log(chalk.greenBright(`[SOCKET]::EventTriggered:: Room ${room} was created.`));
+});
+
+io.of('/').adapter.on('join-room', (room, id) => {
+    console.log(
+        chalk.greenBright(`[SOCKET]::EventTriggered:: Room ${room} was joined by socket ${id}.`)
+    );
+});
 
 server.listen(port);
 server.on('error', onError);

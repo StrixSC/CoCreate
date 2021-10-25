@@ -62,7 +62,7 @@ export const getCompleteUserController = async (
     next: NextFunction
 ) => {
     try {
-        const id = req.params.id.toString();
+        const id = req.params.id.toString() || req.user?.user_id;
         if (!id) throw new create.BadRequest('Invalid or missing identifier');
 
         if (id !== req.user?.user_id) throw new create.Unauthorized('Unauthorized');
