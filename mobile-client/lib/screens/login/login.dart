@@ -38,7 +38,7 @@ class _LoginState extends State<Login> {
     // Initialize socket connection with server
     IO.Socket socket = IO.io(
         // 'https://colorimage-109-3900.herokuapp.com/',
-        'http://98a2-132-207-3-194.ngrok.io/',
+        'http://2c28-132-207-3-195.ngrok.io/',
         IO.OptionBuilder()
             .disableAutoConnect()
             .setTransports(['websocket']) // for Flutter or Dart VM

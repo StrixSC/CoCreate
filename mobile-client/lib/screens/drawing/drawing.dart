@@ -30,12 +30,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
     _socket.on('freedraw:receive', (data) {
       setState(() {
-        if (data['coords']['x'] == -1) {
-          print(data['coords']['x'].runtimeType);
-        } else {
-          print(data['coords']['x'].runtimeType);
+        if(data['state'] == "down" || data['state'] == "move"){
+          offsets.add(Offset(data['x'], data['y']));
         }
-        // offsets.add(Offset(data['coords']['x'], data['coords']['y']));
       });
     });
   }
