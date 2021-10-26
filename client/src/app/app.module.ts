@@ -35,7 +35,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ChatComponent } from './components/chat/chat.component';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
-import { WelcomePageComponent } from './components/welcome-page/welcome-page.component';
+import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
 import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';

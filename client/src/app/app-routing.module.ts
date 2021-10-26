@@ -4,7 +4,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginPageComponent } from './components/login/login-page/login-page.component';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
-import { WelcomePageComponent } from './components/welcome-page/welcome-page.component';
+import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
 import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
