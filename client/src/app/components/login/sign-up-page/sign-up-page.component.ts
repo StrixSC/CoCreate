@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { User } from '../../../../../common/communication/user.model';
+import { User } from '../../../../../../common/communication/user.model';
 import { NgForm } from '@angular/forms';
 import { UserService } from 'src/app/services/user.service';
 @Component({
