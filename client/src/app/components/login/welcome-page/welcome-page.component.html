@@ -7,60 +7,62 @@
   <div class="circle-small"></div>
   <h1 class="title">Colorimage</h1>
   <div class="login-inputs-container">
-    <form
-      class="example-form"
-      appearance="fill"
-      ngForm="form"
-      (keydown.enter)="mySubmit(f)"
-      #f="ngForm"
-    >
-      <mat-form-field>
-        <input
-          matInput
-          class="input-email-container"
-          placeholder="Email"
-          #email="ngModel"
-          name="email"
-          [(ngModel)]="user.email"
-          placeholder="Email"
-        />
-      </mat-form-field>
-      <mat-form-field>
-        <input
-          matInput
-          class="example-full-width"
-          appearance="fill"
-          #password="ngModel"
-          name="password"
-          type="password"
-          [(ngModel)]="user.password"
-          placeholder="Mot de passe"
-        />
-      </mat-form-field>
-    </form>
-    <div class="google-btn">
-      <div class="google-icon-wrapper">
-        <!-- <img
-          class="google-icon"
-          src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
-        /> -->
-      </div>
-
+    <mat-card>
+      <form
+        class="example-form"
+        appearance="fill"
+        ngForm="form"
+        (keydown.enter)="mySubmit(f)"
+        #f="ngForm"
+      >
+        <mat-form-field>
+          <input
+            matInput
+            class="example-full-width"
+            placeholder="Email"
+            #email="ngModel"
+            name="email"
+            [(ngModel)]="user.email"
+            placeholder="Email"
+          />
+        </mat-form-field>
+        <br />
+        <mat-form-field>
+          <input
+            matInput
+            class="example-full-width"
+            appearance="fill"
+            #password="ngModel"
+            name="password"
+            type="password"
+            [(ngModel)]="user.password"
+            placeholder="Mot de passe"
+          />
+        </mat-form-field>
+      </form>
       <button style="width: 100%" mat-raised-button (click)="signIn()">
         Sign in
       </button>
+      <div class="google-btn">
+        <div class="google-icon-wrapper">
+          <img
+            class="google-icon"
+            src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+          />
+        </div>
 
-      <!-- <p class="btn-text"><b>Sign in with google</b></p> -->
-    </div>
+        <p class="btn-text"><b>Sign in with google</b></p>
+      </div>
 
-    <div class="forgot-password">
-      <a routerLink="/forgot-password" routerLinkActive="active"
-        >mot de passe oublié?</a
-      >
-    </div>
+      <div class="forgot-password">
+        <a routerLink="/forgot-password" routerLinkActive="active"
+          >mot de passe oublié?</a
+        >
+      </div>
 
-    <p class="sign-up" routerLink="/register" routerLinkActive="active">
-      créer un compte
-    </p>
+      <p class="sign-up" routerLink="/register" routerLinkActive="active">
+        créer un compte
+      </p>
+    </mat-card>
   </div>
 </body>
