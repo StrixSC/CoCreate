@@ -93,3 +93,22 @@ export const getCompleteUser = async (id: string): Promise<any> => {
 
     return user;
 };
+
+export const getUserChannelsById = async (id: string): Promise<any> => {
+    const channels = await db.channelMember.findMany({
+        where: {
+            user_id: id
+        },
+        select: {
+            channel: {
+                select: {
+                    channel_id: true,
+                    name: true,
+                    type: true
+                }
+            }
+        }
+    });
+
+    return channels.map((c) => c.channel);
+};

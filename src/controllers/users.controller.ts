@@ -1,3 +1,4 @@
+import { getUserChannelsById } from './../services/users.service';
 import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { StatusCodes } from 'http-status-codes';
 import create from 'http-errors';
@@ -74,6 +75,20 @@ export const getCompleteUserController = async (
                 .json({ message: 'Request was successful, but no content was found.' });
 
         return res.status(StatusCodes.OK).json(user);
+    } catch (e: any) {
+        next(create(e.status, e.message));
+    }
+};
+
+export const getUserChannelsController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const channels = await getUserChannelsById(req.params.id);
+        if (!channels) res.status(StatusCodes.NO_CONTENT).json([]);
+        else res.status(StatusCodes.OK).json(channels);
     } catch (e: any) {
         next(create(e.status, e.message));
     }

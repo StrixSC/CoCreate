@@ -52,7 +52,7 @@ redisClient.on('error', (err) => {
 
 redisClient.on('connect', function (err) {
     if (err) console.log(err);
-    debug('[ERROR]', chalk.greenBright('Connected to redis successfully'));
+    debug('[INFO]', chalk.greenBright('Connected to redis successfully'));
 });
 
 const corsSetup = cors(corsOptions);
