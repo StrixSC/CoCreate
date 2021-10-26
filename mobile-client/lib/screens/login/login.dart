@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:Colorimage/models/user.dart';
+import 'package:Colorimage/utils/rest_api_service.dart';
 import 'package:flutter/material.dart';
 import '../../app.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 TextEditingController userController = TextEditingController();
 TextEditingController passController = TextEditingController();
@@ -49,8 +51,8 @@ class _LoginState extends State<Login> {
     //encode Map to JSON
     var body = json.encode(data);
 
-    var url = Uri.http('localhost:3000', '/auth/login');
-    var response = await http.post(url, headers: {"Content-Type": "application/json", "withCredentials": "true"}, body: body, );
+    ColorimageRestAPI rest = ColorimageRestAPI();
+    var response = await rest.login(body);
 
     if (response.statusCode == 200) {
       String? rawCookie = response.headers['set-cookie'];
