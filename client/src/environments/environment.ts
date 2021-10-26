@@ -9,7 +9,8 @@ export const environment: IEnvironment = {
   serverURL: 'https://colorimage-109-3900.herokuapp.com/',
   serverRawURL: 'https://colorimage-109-3900.herokuapp.com/',
   
-  WS_URL: 'https://colorimage-109-3900.herokuapp.com/'
+  //WS_URL: 'https://colorimage-109-3900.herokuapp.com/'
+  WS_URL:"http://4045-132-207-3-190.ngrok.io/"
 };
 
 /*
