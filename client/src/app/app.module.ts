@@ -28,15 +28,17 @@ import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { ErrorMessageComponent } from './components/error-message/error-message.component';
 import { ToolParameterModule } from './components/tool-parameters/tool-parameter.module';
 import { AppRoutingModule } from './app-routing.module';
-import { LoginPageComponent } from './components/login-page/login-page.component';
+import { LoginPageComponent } from './components/login/login-page/login-page.component';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ChatComponent } from './components/chat/chat.component';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
-import { WelcomePageComponent } from './components/welcome-page/welcome-page.component';
-import { SignUpPageComponent } from './components/sign-up-page/sign-up-page.component';
+import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
+import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
+import { UserProfileComponent } from './components/user-profile/user-profile.component';
+import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
 
 @NgModule({
   declarations: [
@@ -65,7 +67,9 @@ import { SignUpPageComponent } from './components/sign-up-page/sign-up-page.comp
     ChatComponent,
     DrawingPageComponent,
     WelcomePageComponent,
-    SignUpPageComponent
+    SignUpPageComponent,
+    UserProfileComponent,
+    ChangePasswordComponent,
   ],
   imports: [
     BrowserModule,

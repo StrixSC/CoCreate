@@ -1,4 +1,4 @@
-import { SocketService } from '../../services/chat/socket.service';
+import { SocketService } from '../../../services/chat/socket.service';
 import { Router } from '@angular/router';
 import { Component } from '@angular/core';
 
