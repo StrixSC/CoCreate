@@ -1,39 +1,63 @@
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <body>
-<div class="circle"> </div>
-<div class="circle-xlarge"></div>
-<div class="circle-large"></div>
-<div class="circle-medium"></div>
-<div class="circle-small"></div>
-<h1 class="title"> Colorimage </h1>
-<div class="login-inputs-container">
+  <div class="circle"></div>
+  <div class="circle-xlarge"></div>
+  <div class="circle-large"></div>
+  <div class="circle-medium"></div>
+  <div class="circle-small"></div>
+  <h1 class="title">Colorimage</h1>
+  <div class="login-inputs-container">
     <form class="example-form">
-    <mat-form-field class="example-full-width" appearance="fill" ngForm="form" (keydown.enter)="mySubmit(f)" #f="ngForm">
-    <input matInput class="input-email-container" placeholder="Email" #email ="ngModel" name="email" [(ngModel)]="user.email" placeholder="Email">
-    </mat-form-field>
-    <mat-form-field class="example-full-width" appearance="fill" #password ="ngModel" name="password" [(ngModel)]="user.password" placeholder="Mot de passe">
-    <input matInput class= "input-password-container" placeholder= "Mot de passe">
-    </mat-form-field>
+      <mat-form-field
+        class="example-full-width"
+        appearance="fill"
+        ngForm="form"
+        (keydown.enter)="mySubmit(f)"
+        #f="ngForm"
+      >
+        <input
+          matInput
+          class="input-email-container"
+          placeholder="Email"
+          #email="ngModel"
+          name="email"
+          [(ngModel)]="user.email"
+          placeholder="Email"
+        />
+      </mat-form-field>
+      <mat-form-field
+        class="example-full-width"
+        appearance="fill"
+        #password="ngModel"
+        name="password"
+        [(ngModel)]="user.password"
+        placeholder="Mot de passe"
+      >
+        <input
+          matInput
+          class="input-password-container"
+          placeholder="Mot de passe"
+        />
+      </mat-form-field>
     </form>
     <div class="google-btn">
-    <div class="google-icon-wrapper">
-    <img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"/>
-    
+      <div class="google-icon-wrapper">
+        <img
+          class="google-icon"
+          src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+        />
+      </div>
+      <p class="btn-text"><b>Sign in with google</b></p>
     </div>
-    <p class="btn-text"><b>Sign in with google</b></p>
 
-    
-    </div>
-    
-    
     <div class="forgot-password">
-    <a routerLink="/forgot-password" routerLinkActive="active">mot de passe oublié?</a>
+      <a routerLink="/forgot-password" routerLinkActive="active"
+        >mot de passe oublié?</a
+      >
     </div>
-    
-    
-    <p class="sign-up" routerLink="/register" routerLinkActive="active"> créer un compte</p>
 
-   
-</div>
+    <p class="sign-up" routerLink="/register" routerLinkActive="active">
+      créer un compte
+    </p>
+  </div>
 </body>
