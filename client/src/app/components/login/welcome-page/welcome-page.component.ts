@@ -11,7 +11,8 @@ import axios from "axios";
 })
 export class WelcomePageComponent implements OnInit {
   user = new User();
-
+  logInFail: boolean = false;
+  loading: boolean = false;
   constructor(public userService: UserService) {}
 
   ngOnInit() {}
@@ -22,7 +23,7 @@ export class WelcomePageComponent implements OnInit {
 
   async signIn() {
     console.log(this.user);
-    const URL = "http://localhost:3000/auth/login";
+
     const PAYLOAD = {
       email: this.user.email,
       password: this.user.password,
@@ -31,10 +32,22 @@ export class WelcomePageComponent implements OnInit {
       "Content-Type": "application/json",
     };
     try {
-      const res = await axios.post(URL, PAYLOAD, { headers: headers });
+      this.loading = true;
+      const res = await axios.post(
+        "http://localhost:3000/auth/login",
+        PAYLOAD,
+        {
+          headers: headers,
+        }
+      );
       console.log(res);
+      this.logInFail = false;
     } catch (error) {
+      this.loading = false;
       console.error(error);
+      this.logInFail = true;
+      throw error;
     }
+    this.loading = false;
   }
 }

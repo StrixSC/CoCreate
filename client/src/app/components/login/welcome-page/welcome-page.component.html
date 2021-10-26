@@ -63,6 +63,16 @@
       <p class="sign-up" routerLink="/register" routerLinkActive="active">
         créer un compte
       </p>
+      <mat-progress-bar
+        mode="indeterminate"
+        color="accent"
+        *ngIf="loading"
+      ></mat-progress-bar>
+      <mat-progress-bar
+        mode="indeterminate"
+        color="warn"
+        *ngIf="logInFail"
+      ></mat-progress-bar>
     </mat-card>
   </div>
 </body>
