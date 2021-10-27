@@ -128,8 +128,8 @@ export class SelectionToolService implements Tools {
         return;
       }
 
-      this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectSelection);
-      this.rendererService.renderer.appendChild(this.drawingService.drawing, this.ctrlG);
+      //this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectSelection);
+      //this.rendererService.renderer.appendChild(this.drawingService.drawing, this.ctrlG);
     }
   }
 
