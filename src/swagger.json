@@ -594,7 +594,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/IUserChannel"
+                                    "$ref": "#/components/schemas/IChannel"
                                 }
                             }
                         }
@@ -604,7 +604,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/IUserChannel"
+                                    "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": []
                             }
