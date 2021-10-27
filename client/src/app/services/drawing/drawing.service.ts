@@ -47,6 +47,10 @@ export class DrawingService {
     return this.objectList;
   }
 
+  getLastObject(): any {
+      return this.getObjectList().get(this.lastObjectId)
+  }
+
   /// Retrait d'un objet selon son ID
   removeObject(id: number): void {
     this.renderer.removeChild(this.drawing, this.objectList.get(id));
@@ -60,6 +64,8 @@ export class DrawingService {
     if (!obj.id) {
       this.lastObjectId++;
       this.renderer.setProperty(obj, 'id', this.lastObjectId);
+      this.renderer.setProperty(obj, 'selected', true);
+      console.log(this.objectList);
     }
     const id: number = Number(obj.id);
     this.objectList.set(id, obj);
