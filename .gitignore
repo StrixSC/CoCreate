@@ -6,6 +6,7 @@ false/
 data
 postgresdata/
 key.json
+dist/
 
 svg/
 .vscode/
