@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:Colorimage/models/user.dart';
-import 'package:Colorimage/utils/rest_api_service.dart';
+import 'package:Colorimage/utils/rest/rest_api_service.dart';
 import 'package:flutter/material.dart';
 import '../../app.dart';
 import 'package:http/http.dart' as http;
@@ -161,8 +161,21 @@ class _LoginState extends State<Login> {
                   child: Text('Se connecter',
                       style: new TextStyle(fontSize: 30.0)),
                 ),
+            Padding(padding:  EdgeInsets.fromLTRB(0, 30, 0, 0), child: ElevatedButton(
+                  onPressed: () {
+                    // Validate will return true if the form is valid, or false if
+                    // the form is invalid.
+                    if (_formKey.currentState!.validate()) {
+                      _onSubmitTap(context, userController.text, passController.text);
+                    }
+                  },
+                  style:
+                  ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
+                  child: Text('Créer un compte',
+                      style: new TextStyle(fontSize: 30.0)),
+                )),
                 SizedBox(height: 24.0),
-                ElevatedButton(
+                Padding(padding:  EdgeInsets.fromLTRB(0, 100, 0, 0), child:ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(context, drawingRoute);
                   },
@@ -170,7 +183,7 @@ class _LoginState extends State<Login> {
                       ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
                   child: Text('Dessiner sans connexion',
                       style: new TextStyle(fontSize: 30.0)),
-                ),
+                )),
               ],
             ),
           ),
