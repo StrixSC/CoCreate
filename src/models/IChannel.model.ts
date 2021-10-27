@@ -1,4 +1,7 @@
 export interface IChannel {
     name: string;
-    id: string;
+    channel_id: string;
+    type: string;
+    collaboration_id: string | null;
+    updated_at: Date;
 }

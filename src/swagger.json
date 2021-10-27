@@ -2,7 +2,7 @@
     "openapi": "3.0.1",
     "info": {
         "title": "Colorimage API",
-        "description": "Official documentation of the Colorimage API.\n\n **The `Users` routes have not been implemented yet.**",
+        "description": "Official documentation of the Colorimage API.",
         "version": "1.0.1"
     },
     "servers": [
@@ -16,7 +16,9 @@
     "paths": {
         "/auth/login": {
             "post": {
-                "tags": ["Authentication"],
+                "tags": [
+                    "Authentication"
+                ],
                 "summary": "Log user in",
                 "operationId": "login",
                 "requestBody": {
@@ -91,7 +93,9 @@
                         "Cookie Auth": []
                     }
                 ],
-                "tags": ["Authentication"],
+                "tags": [
+                    "Authentication"
+                ],
                 "summary": "Log user out",
                 "operationId": "logout",
                 "description": "The user's `connect.sid` cookie must be attached to the request. This request deletes the session from the database. This wil remove any persistent data on the server.",
@@ -140,7 +144,9 @@
         },
         "/auth/register": {
             "post": {
-                "tags": ["Authentication"],
+                "tags": [
+                    "Authentication"
+                ],
                 "summary": "Registers the user using the provided information",
                 "operationId": "register",
                 "description": "Registers the user using the provided information, if the email or username are not in use.",
@@ -249,7 +255,9 @@
                         }
                     }
                 ],
-                "tags": ["Users"],
+                "tags": [
+                    "Users"
+                ],
                 "summary": "Fetch all information of the user with the given id",
                 "security": [
                     {
@@ -323,6 +331,93 @@
                 }
             }
         },
+        "/api/users/:id/channels": {
+            "get": {
+                "parameters": [
+                    {
+                        "required": true,
+                        "name": "user_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Fetch all channels of a given user.",
+                "security": [
+                    {
+                        "Cookie Auth": []
+                    }
+                ],
+                "operationId": "user channels",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns an array with all of the user's channels.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "$ref": "#/components/schemas/IUserChannel"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content. Request was successful, but no content was found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IUserChannel"
+                                },
+                                "example": []
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication cookie does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/users/profile": {
             "get": {
                 "parameters": [
@@ -345,7 +440,9 @@
                         }
                     }
                 ],
-                "tags": ["Users"],
+                "tags": [
+                    "Users"
+                ],
                 "summary": "Fetch all public profiles",
                 "operationId": "users",
                 "responses": {
@@ -417,7 +514,9 @@
                         }
                     }
                 ],
-                "tags": ["Users"],
+                "tags": [
+                    "Users"
+                ],
                 "summary": "Fetch public profile of a specific user",
                 "operationId": "single user",
                 "responses": {
@@ -457,6 +556,302 @@
                                 },
                                 "example": {
                                     "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/channels/": {
+            "get": {
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Fetch all channels",
+                "security": [
+                    {
+                        "Cookie Auth": []
+                    }
+                ],
+                "operationId": "get all channels",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns a list of channels",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IUserChannel"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content. Request was successful, but no content was found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IUserChannel"
+                                },
+                                "example": []
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication cookie does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/channels/create": {
+            "post": {
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Create new channel",
+                "security": [
+                    {
+                        "Cookie Auth": []
+                    }
+                ],
+                "operationId": "Create new channel",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns a list of channels",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Success! Channel Demo was created successfully."
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication cookie does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/channels/:id": {
+            "get": {
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Fetch all relevant information pertaining to that channel. The request must be from a user that has access to the channel.",
+                "security": [
+                    {
+                        "Cookie Auth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ID of the channel"
+                    }
+                ],
+                "operationId": "Fetch channel information by id",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns a JSON containing all of the messages by all of the members of the channels.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ICompleteChannelData"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication cookie does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/channels/:id/messages": {
+            "get": {
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Fetch all messages in a channel",
+                "security": [
+                    {
+                        "Cookie Auth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ID of the channel"
+                    }
+                ],
+                "operationId": "Fetch channel messages by id",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns an array of all the messages.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IChannelMessage"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication cookie does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
                                 }
                             }
                         }
@@ -644,6 +1039,140 @@
                     "index": {
                         "type": "number",
                         "description": "Index of the user's profile in the list of profiles. This is used for identification and cursor pagination."
+                    }
+                }
+            },
+            "IUserChannel": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Username (Pseudonyme) of the user"
+                    },
+                    "channel_id": {
+                        "type": "string",
+                        "description": "ID of the channel."
+                    },
+                    "index": {
+                        "type": "number",
+                        "description": ""
+                    },
+                    "is_owner": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "IChannel": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Type of the channel.\n\nPossible values:\n\n- Public\n\n- Private"
+                    },
+                    "channel_id": {
+                        "type": "string"
+                    },
+                    "collaboration_id": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "example": "2021-10-25T02:17:36.301Z"
+                    }
+                }
+            },
+            "ICompleteChannelData": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "collaboration_id": {
+                        "type": "string",
+                        "description": "ID of the collaboration the channel belongs to. This value could be null."
+                    },
+                    "updated_at": {
+                        "type": "string"
+                    },
+                    "channel_id": {
+                        "type": "string"
+                    },
+                    "members": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "member": {
+                                    "type": "object",
+                                    "properties": {
+                                        "profile": {
+                                            "type": "object",
+                                            "properties": {
+                                                "username": {
+                                                    "type": "string"
+                                                },
+                                                "avatar_url": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "messages": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "message_data": {
+                                                "type": "string",
+                                                "description": "Content of the message."
+                                            },
+                                            "created_at": {
+                                                "type": "string",
+                                                "description": "ISO Date string of the time the message was created."
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "IChannelMessage": {
+                "type": "object",
+                "properties": {
+                    "message_data": {
+                        "type": "string",
+                        "description": "Content of the message."
+                    },
+                    "avatar_url": {
+                        "type": "string",
+                        "description": "URL pointing to the location of the avatar of the user."
+                    },
+                    "message_id": {
+                        "type": "string",
+                        "description": "ID of the message."
+                    },
+                    "sender_profile_id": {
+                        "type": "string",
+                        "description": "ID of the sender's profile."
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "description": "Timestamp in HH:mm:ss format of the time the message was created."
+                    },
+                    "username": {
+                        "type": "string"
                     }
                 }
             },
