@@ -1,5 +1,7 @@
 export interface IEnvironment {
-    production: boolean;
-    serverURL: string;
-    serverRawURL: string;
+  production: boolean;
+  serverURL: string;
+  serverRawURL: string;
+  WS_URL: string;
+  local: string;
 }

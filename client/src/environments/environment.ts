@@ -2,12 +2,14 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import { IEnvironment } from './IEnvironment';
+import { IEnvironment } from "./IEnvironment";
 
 export const environment: IEnvironment = {
   production: false,
-  serverURL: 'http://localhost:3000/api',
-  serverRawURL: 'http://localhost:3000',
+  serverURL: "https://colorimage-109-3900.herokuapp.com/",
+  serverRawURL: "https://colorimage-109-3900.herokuapp.com/",
+  WS_URL: "https://colorimage-109-3900.herokuapp.com/",
+  local: "http://localhost:3000/",
 };
 
 /*

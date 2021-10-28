@@ -1,56 +1,65 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Subscription } from 'rxjs';
-import { HotkeysService } from 'src/app/services/hotkeys/hotkeys.service';
-import { WelcomeDialogService } from 'src/app/services/welcome-dialog/welcome-dialog.service';
-import { NewDrawingComponent } from '../new-drawing/new-drawing.component';
-import { WelcomeDialogComponent } from '../welcome-dialog/welcome-dialog/welcome-dialog.component';
+import { IUser } from '../../model/IUser.model';
+import { SocketService } from '../../services/chat/socket.service';
+import { Component, OnDestroy } from '@angular/core';
+import { Subscription/*, merge*/ } from 'rxjs';
+//import { map } from 'rxjs/operators';
+import { ChatService } from '../../services/chat/chat.service';
+//import { IReceiveMessagePayload } from './model/IReceiveMessagePayload.model';
+import { IChannel } from '../../model/IChannel.model';
 
 @Component({
   selector: 'app-root',
-  styleUrls: ['./app.component.scss'],
   templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnDestroy {
+  title = 'prototype-v2';
+  messageListener = new Subscription();
+  currentValue: string;
+  users: IUser[];
+  channels: IChannel[];
+  messages: string[];
+  username: string;
 
-  welcomeDialogRef: MatDialogRef<WelcomeDialogComponent>;
-  welcomeDialogSub: Subscription;
-
-  constructor(
-    public dialog: MatDialog,
-    private welcomeDialogService: WelcomeDialogService,
-    private hotkeyService: HotkeysService,
-  ) {
-    this.hotkeyService.hotkeysListener();
+  constructor(public chatService: ChatService, private socketService: SocketService) {
+    this.username = "";
+    this.socketService.setupSocketConnection();
+    this.socketService.connect();
+    this.currentValue = "";
+    this.messages = [];
+    this.users = [];
+    this.channels = [];
   }
 
-  // Fonction qui ouvre le mat Dialog de bienvenue
-  openDialog() {
+  ngOnInit(): void {
 
-    this.welcomeDialogRef = this.dialog.open(WelcomeDialogComponent, {
-      hasBackdrop: true,
-      panelClass: 'filter-popup',
-      autoFocus: false,
-      disableClose: true,
-      maxHeight: 500,
-      maxWidth: 500,
+
+
+    this.chatService.getUsers().subscribe((users) => {
+      this.users = users.sort((a) => {
+        if (a.userId !== this.socketService.socket.id) return -1
+        else return 1;
+      });
+      
+      this.users = users;
+      console.log(users);
     });
-    this.welcomeDialogSub = this.welcomeDialogRef.afterClosed().subscribe(() => {
-      this.dialog.open(NewDrawingComponent);
-    });
+  
+    this.chatService.getChannels().subscribe((channels: IChannel[]) => {
+      this.channels = channels;
+      console.log(channels);
+    })
+
+    
   }
 
-  // Ouvre le mat dialog lorsque le browser est initialiser si le checkbox est non cocher
-  ngOnInit() {
-    if (this.welcomeDialogService.shouldWelcomeMessageBeShown) {
-      this.openDialog();
-    }
-  }
-
-  /// Detruit le subscribe du welcomeDialogSub
   ngOnDestroy(): void {
-    if (this.welcomeDialogSub) {
-      this.welcomeDialogSub.unsubscribe();
-    }
+    this.messageListener.unsubscribe();
+    this.socketService.disconnect();
+  }
+
+  sendMessage(): void {
+    this.chatService.sendMessage(this.currentValue!);
+    this.currentValue = "";
   }
 }
