@@ -39,7 +39,7 @@ export class SignUpPageComponent implements OnInit {
 
   async register() {
     console.log(this.user);
-    const URL = "http://localhost:3000/auth/register";
+    const URL = "https://colorimage-109-3900.herokuapp.com/auth/register";
     const PAYLOAD = {
       email: this.user.email,
       password: this.user.password,

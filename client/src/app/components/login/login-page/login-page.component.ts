@@ -1,5 +1,5 @@
-import { SocketService } from '../../../services/chat/socket.service';
-import { Router } from '@angular/router';
+// import { SocketService } from '../../../services/chat/socket.service';
+//import { Router } from '@angular/router';
 import { Component } from '@angular/core';
 
 @Component({
@@ -10,12 +10,12 @@ import { Component } from '@angular/core';
 export class LoginPageComponent {
 
   username: string;
-  constructor(private router: Router, public socketService: SocketService) {
+  constructor() {
     this.username = "";
   }
 
-  onSubmit(): void {
-    this.router.navigate(['/drawing'], { queryParams: { username: this.username } });
-  }
+  // onSubmit(): void {
+  //   this.router.navigate(['/drawing'], { queryParams: { username: this.username } });
+  // }
 
 }

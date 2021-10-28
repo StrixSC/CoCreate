@@ -3,6 +3,7 @@ import { NgForm } from "@angular/forms";
 import { UserService } from "src/app/services/user.service";
 import { User } from "../../../../../../common/communication/user.model";
 import axios from "axios";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-welcome-page",
@@ -13,7 +14,8 @@ export class WelcomePageComponent implements OnInit {
   user = new User();
   logInFail: boolean = false;
   loading: boolean = false;
-  constructor(public userService: UserService) {}
+
+  constructor(public userService: UserService,private router: Router) {}
 
   ngOnInit() {}
 
@@ -34,7 +36,7 @@ export class WelcomePageComponent implements OnInit {
     try {
       this.loading = true;
       const res = await axios.post(
-        "http://localhost:3000/auth/login",
+        "https://colorimage-109-3900.herokuapp.com/auth/login",
         PAYLOAD,
         {
           headers: headers,
@@ -42,6 +44,7 @@ export class WelcomePageComponent implements OnInit {
       );
       console.log(res);
       this.logInFail = false;
+      this.router.navigate(['/drawing'], { queryParams: { logInFail: this.logInFail} });
     } catch (error) {
       this.loading = false;
       console.error(error);
@@ -50,4 +53,10 @@ export class WelcomePageComponent implements OnInit {
     }
     this.loading = false;
   }
+  onSubmit(): void {
+    console.log(this.logInFail)
+       this.router.navigate(['/drawing'], { queryParams: { logInFail: this.logInFail} });
+       
+     }
+  
 }
