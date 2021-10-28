@@ -96,7 +96,7 @@ io.of('/').adapter.on('join-room', (room, id) => {
   );
 });
 
-testingServer.listen(6000, () => {
+testingServer.listen(5000, () => {
   debug(chalk.blueBright('[SOCKET_TESTING]::SocketServer::Listening on port 6000'));
 });
 
