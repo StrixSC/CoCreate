@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { User } from "../../../../../../common/communication/user.model";
 import { NgForm } from "@angular/forms";
 import axios from "axios";
-
+import { environment } from "src/environments/environment";
 import { UserService } from "src/app/services/user.service";
 
 @Component({
@@ -13,8 +13,13 @@ import { UserService } from "src/app/services/user.service";
 export class SignUpPageComponent implements OnInit {
   form: NgForm;
   user = new User();
+  URL: string;
 
-  constructor(public userService: UserService) {}
+  constructor(public userService: UserService) {
+    this.URL = environment.production
+      ? environment.serverURL
+      : environment.local;
+  }
 
   ngOnInit() {}
 
@@ -39,7 +44,6 @@ export class SignUpPageComponent implements OnInit {
 
   async register() {
     console.log(this.user);
-    const URL = "https://colorimage-109-3900.herokuapp.com/auth/register";
     const PAYLOAD = {
       email: this.user.email,
       password: this.user.password,
@@ -52,7 +56,9 @@ export class SignUpPageComponent implements OnInit {
     };
 
     try {
-      await axios.post(URL, PAYLOAD, { headers: headers });
+      await axios.post(this.URL + "auth/register", PAYLOAD, {
+        headers: headers,
+      });
     } catch (error) {
       console.error(error);
     }
