@@ -23,9 +23,8 @@ export class SocketService {
 
   connect(): void {
     this.socket.connect();
-    console.log("this.socket.active", this.socket.active);
     this.socket.sendBuffer = [];
-    console.log(environment);
+    console.log("this.socket", this.socket);
   }
 
   disconnect(): void {
