@@ -1,3 +1,4 @@
+import { Socket } from 'socket.io';
 import create from 'http-errors';
 import { Response, NextFunction, Request } from 'express';
 

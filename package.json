@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/bin/www.js",
-    "dev": "@powershell -Command $env:DEBUG='Colorimage'; powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./killport.ps1 3000; nodemon --exec ts-node --files src/bin/www.ts",
-    "dev-unix": "sudo kill $(lsof -t -i:3000); DEBUG=Colorimage nodemon --exec ts-node --files src/bin/www.ts",
-    "docker-dev": "DEBUG=Colorimage nodemon -L --exec ts-node --files src/bin/www.ts",
+    "dev": "@powershell -Command $env:DEBUG='Colorimage'; powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./killport.ps1 3000; nodemon src/bin/www.ts",
+    "dev-unix": "sudo kill $(lsof -t -i:3000); DEBUG=Colorimage nodemon src/bin/www.ts",
+    "docker-dev": "DEBUG=Colorimage nodemon -L src/bin/www.ts",
     "build": "tsc -p .",
     "lint": "./node_modules/.bin/eslint . --ext .ts --no-error-on-unmatched-pattern",
     "fix": "./node_modules/.bin/eslint . --ext .ts --no-error-on-unmatched-pattern --fix",

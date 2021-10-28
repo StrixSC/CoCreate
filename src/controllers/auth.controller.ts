@@ -1,6 +1,4 @@
-import { handleError } from './../utils/errors';
-import { dbErrorRouters } from './../utils/auth';
-import { Prisma } from '.prisma/client';
+import { handleRequestError } from './../utils/errors';
 import { IUser } from './../models/IUser.model';
 import { NextFunction, Request, Response } from 'express';
 import create from 'http-errors';
@@ -34,7 +32,7 @@ export const registerController = async (req: Request, res: Response, next: Next
       message: 'User created successfully.'
     });
   } catch (e: any) {
-    handleError(e, next);
+    handleRequestError(e, next);
   }
 };
 

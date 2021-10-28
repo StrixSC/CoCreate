@@ -3,8 +3,16 @@
 
 ## Channel Events:  
 
+All events can return this error:
+
+`E0000`: Internal Error.
+
+
+
 - Join Channel: 
 
+    Event to emit (Client -> Server): `channel:join`
+    
     Data: 
     ```typescript
     {
@@ -12,11 +20,150 @@
     }
     ```
 
+    Event emitted (Server -> Client): `channel:joined`
+
+    Data: 
+    ```typescript
+    {
+        channel_id: string,
+        name: string,
+        created_at: string,
+        updated_at: string,
+        collaboration_id: string
+    }
+    ```
+
     Possible errors: 
     
-    1. `E0000`: Internal Error.
-    2. `E1001`: Channel ID cannot be empty.
-    3. `E1002`: Channel ID must only contain valid ASCII symbols. 
-    4. `E1003`: Channel was not found in the list of channels.
-    5. `E1004`: Channel could not be joined as user is already a member of the channel.
+    1. `E1001`: Channel ID cannot be empty.
+    2. `E1002`: Channel ID must only contain valid ASCII symbols. 
+    3. `E1003`: Channel was not found in the list of channels.
+    4. `E1004`: Channel could not be joined as user is already a member of the channel.
     5. `E1005`: User could not be added to the channel. Internal Server Error
+
+
+- Create Channel:
+
+    Event to emit (Client -> Server): `channel:create`
+    
+    Data: 
+
+    ```typescript
+    {
+        channelName: string
+    }
+    ```
+
+
+    Emitted event (Server -> Client): `channel:created`
+    
+    Data: 
+    ```typescript
+    {
+        channel_id: string,
+        name: string,
+        created_at: string,
+        updated_at: string,
+        collaboration_id: string
+    }
+    ```
+
+    Possible Errors: 
+
+    1. `E1006`: Channel name must be between 4 and 255 characters
+    2. `E1007`: Channel name must only contain valid ASCII symbols
+    3. `E1008`: Channel could not be created: Internal Socket Server Error
+
+- Leave Channel:
+
+    Event to emit (Client -> Server): `channel:leave`
+
+    Data:
+
+    ```typescript
+    {
+        channelId: string
+    }
+    ```
+
+    Emitted event (Server -> Client): `channel:left`
+    
+    Data: 
+    ```typescript
+    {
+        channelId: string 
+    }
+    ```
+
+    Possible Errors:
+    1. `E1001`: Channel ID cannot be empty.
+    2. `E1002`: Channel ID must only contain valid ASCII symbols. 
+    3. `E1009`: User is not a member of the channel. 
+    4. `E1010`: Could not leave channel: User is channel owner. Channel must be deleted if user wants to leave.
+    
+- Channel Update
+
+    Event to emit (Client -> Socket): `channel:update`
+
+    Data:
+    
+    ```typescript
+    {
+        channelId: string,
+        name: string
+    }
+    ```
+
+    Event emitted (Server -> Client): `channel:updated`
+
+    Data:
+
+    ```typescript
+    {
+        channelId: string,
+        channelName: string,
+        updatedAt: Date | string,
+    }
+    ```
+
+    Possible Errors:
+
+    1. `E1006`: Channel name must be between 4 and 255 characters
+    2. `E1007`: Channel name must only contain valid ASCII symbols
+    3. `E1010`: 'Could not update channel: User is not a member of this channel.'
+    3. `E1011`: 'Could not update channel: User is not the owner of this channel.'
+    3. `E1012`: 'Could not update channel: Channel Name is already taken.'
+    3. `E1013`: 'Could not update channel: Internal socket server error.'
+
+    
+
+   
+- Channel Delete
+
+    Event to emit (Client -> Socket): `channel:delete`
+
+    Data:
+    
+    ```typescript
+    {
+        channelId: string,
+    }
+    ```
+
+    Event emitted (Server -> Client): `channel:deleted`
+
+    Data:
+
+    ```typescript
+    {
+        channelId: string,
+    }
+    ```
+
+    Possible Errors:
+
+    1. `E1001`: Channel ID cannot be empty.
+    2. `E1002`: Channel ID must only contain valid ASCII symbols. 
+    3. `E1015`: 'Could not delete channel: Channel does not exist or user is not a member of this channel.'
+    3. `E1016`: 'Could not delete channel: User is not the owner of this channel.'
+    3. `E1017`: 'Could not delete channel: Internal socket server error.'
