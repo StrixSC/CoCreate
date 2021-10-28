@@ -64,8 +64,7 @@ export class DrawingService {
     if (!obj.id) {
       this.lastObjectId++;
       this.renderer.setProperty(obj, 'id', this.lastObjectId);
-      this.renderer.setProperty(obj, 'selected', true);
-      console.log(this.objectList);
+      this.renderer.setProperty(obj, 'isSelected', true);
     }
     const id: number = Number(obj.id);
     this.objectList.set(id, obj);

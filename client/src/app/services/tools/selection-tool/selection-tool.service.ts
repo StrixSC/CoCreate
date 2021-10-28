@@ -383,6 +383,8 @@ export class SelectionToolService implements Tools {
   private setSelection(): void {
     if (this.hasSelection()) {
       this.hasSelectedItems = true;
+      if(this.objects[0]!==undefined)
+        this.rendererService.renderer.setProperty(this.objects[0], 'isSelected', true);
       this.rendererService.renderer.setAttribute(this.rectSelection, 'transform', ``);
       this.ctrlPoints.forEach((point) => {
         this.rendererService.renderer.setAttribute(point, 'transform', '');
@@ -471,12 +473,16 @@ export class SelectionToolService implements Tools {
         this.rendererService.renderer.setAttribute(this.ctrlPoints[i], 'x', `${this.pointsList[i].x + 0.5 - this.pointsSideLength / 2}`);
         this.rendererService.renderer.setAttribute(this.ctrlPoints[i], 'y', `${this.pointsList[i].y + 0.5 - this.pointsSideLength / 2}`);
       }
+          
+    //console.log(this.objects);
     }
     else return;
   }
 
   /// Methode qui suprime la selection courante .
   removeSelection(): void {
+    if(this.objects[0]!==undefined)
+      this.rendererService.renderer.setProperty(this.objects[0], 'isSelected', false);
     this.objects = [];
     this.hasSelectedItems = false;
 
@@ -484,6 +490,8 @@ export class SelectionToolService implements Tools {
     this.rendererService.renderer.removeChild(this.drawingService.drawing, this.ctrlG);
 
     this.rendererService.renderer.setAttribute(this.rectSelection, 'points', '');
+    //if (this.drawingService.getObjectList!== undefined)
+    //console.log("AfterREMOVED", this.drawingService.getObjectList());
   }
   /// Methode pour cacher la selection en gardant en memoire les element
   hideSelection(): void {
