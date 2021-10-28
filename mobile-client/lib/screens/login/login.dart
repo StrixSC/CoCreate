@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'package:Colorimage/models/user.dart';
-import 'package:Colorimage/utils/rest/rest_api_service.dart';
+import 'package:Colorimage/utils/rest/authentification_api.dart';
 import 'package:flutter/material.dart';
 import '../../app.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 TextEditingController userController = TextEditingController();
 TextEditingController passController = TextEditingController();
@@ -48,18 +46,16 @@ class _LoginState extends State<Login> {
   Future<void> login(email, password) async {
 
     Map data = {'email': email, 'password': password};
-    //encode Map to JSON
     var body = json.encode(data);
 
-    ColorimageRestAPI rest = ColorimageRestAPI();
+    AuthenticationAPI rest = AuthenticationAPI();
     var response = await rest.login(body);
 
     if (response.statusCode == 200) {
-      String? rawCookie = response.headers['set-cookie'];
+      String rawCookie = response.headers['set-cookie'] as String;
       print(rawCookie);
-      var jsonResponse = convert.jsonDecode(response.body) as Map<String, dynamic>;
-      // var itemCount = jsonResponse['totalItems'];
-      var user = User(user_id: jsonResponse['user_id'], email: jsonResponse['email'], username: jsonResponse['username'],
+      var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
+      var user = User(id: jsonResponse['user_id'], email: jsonResponse['email'], username: jsonResponse['username'],
           avatar_url: jsonResponse['avatar_url'], isActive: false, cookie: rawCookie);
 
       Navigator.pushNamed(context, HomeRoute,

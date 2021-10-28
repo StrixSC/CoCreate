@@ -1,10 +1,10 @@
 class User {
-  final String user_id, email, username, avatar_url;
+  final String id, email, username, avatar_url;
   final bool isActive;
-  final String? cookie;
+  final String cookie;
 
   User({
-    this.user_id = '',
+    this.id = '',
     this.email = '',
     this.username = '',
     this.avatar_url = '',

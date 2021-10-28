@@ -46,6 +46,7 @@ dependencies:
   flutter_colorpicker: ^0.6.0
   touchable: ^1.0.0
   flutter_dotenv: ^5.0.2
+  retry: ^3.1.0
 
 dev_dependencies:
   flutter_test:

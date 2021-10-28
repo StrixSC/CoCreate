@@ -1,5 +1,6 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/user.dart';
+import 'package:Colorimage/utils/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
@@ -35,12 +36,6 @@ class ChatMessage extends StatelessWidget {
                     Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          // Usually you know your name...
-                          // Padding(
-                          //     padding: EdgeInsets.fromLTRB(0, 0, 15, 0),
-                          //     child: Text(this.username,
-                          //         style:
-                          //             Theme.of(context).textTheme.headline6)),
                           ChatBubble(
                             clipper:
                             ChatBubbleClipper3(type: BubbleType.sendBubble),
@@ -127,7 +122,7 @@ class ChatMessage extends StatelessWidget {
 
 class ChatScreen extends StatefulWidget {
   final User _user;
-  final IO.Socket _socket;
+  final Socket _socket;
   Function callback;
   ChatScreen(this._user, this._socket, this.callback, {Key? key}) : super(key: key);
   @override
@@ -144,62 +139,19 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-
-    widget._socket.on('receive-message', (data) {
-      var message = ChatMessage(
-          text: data['message'],
-          username: widget._user.username,
-          message_username: data['username'],
-          timestamp: data['timestamp']);
-      setState(() {
-        _messages.insert(0, message);
-      });
-      _focusNode.requestFocus();
-    });
-
-    widget._socket.on('user-connection', (user) {
-      print('Someone connected');
-      print(user);
-      var newConnection = Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-              child: Text(user['message'], style: TextStyle(fontSize: 25)),
-            )
-          ],
-        ),
-      );
-      setState(() {
-        _messages.insert(0, newConnection);
-      });
-      _focusNode.requestFocus();
-    });
-
-    widget._socket.on('user-disconnect', (user) {
-      print('Someone disconnected');
-      print(user);
-      var newConnection = Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-              child: Text(user['message'], style: TextStyle(fontSize: 25)),
-            )
-          ],
-        ),
-      );
-      setState(() {
-        _messages.insert(0, newConnection);
-      });
-      _focusNode.requestFocus();
-    });
+    widget._socket.initializeChatConnections(widget._user.username, callbackMessage);
   }
 
   @override
   void dispose() {
-    widget._socket.dispose();
+    widget._socket.socket.dispose();
     super.dispose();
+  }
+
+  callbackMessage(message) {
+    setState(() {
+      _messages.insert(0, message);
+    });
   }
 
   void _handleSubmitted(String text) {
@@ -210,7 +162,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     if (!_validate) {
       _textController.clear();
-      widget._socket.emit('send-message', {'message': text, 'channel': ''});
+      widget._socket.sendMessage(text, '123456');
     }
   }
 

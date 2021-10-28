@@ -17,28 +17,11 @@ import '../../constants/general.dart';
       required this.user,
     });
 
-    List<Channel>? channelList = [];
     final User user;
 
     @override
     initState() {
       super.initState();
-      fetchChannels();
-    }
-
-    Future<void> fetchChannels() async {
-      var url = Uri.https(
-          'www.googleapis.com', '/books/v1/volumes', {'q': '{http}'});
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        var jsonResponse =
-        convert.jsonDecode(response.body) as Map<String, dynamic>;
-        var itemCount = jsonResponse['totalItems'];
-        print('Number of books about http: $itemCount.');
-        // channels.forEach((element) {channelList!.add(element);});
-      } else {
-        print('Request failed with status: ${response.statusCode}.');
-      }
     }
 
     @override
@@ -48,18 +31,5 @@ import '../../constants/general.dart';
         body: ChannelListView(user),
       );
     }
-
-    // AppBar buildAppBar() {
-    //   return AppBar(
-    //     automaticallyImplyLeading: false,
-    //     title: Text("Chats"),
-    //     actions: [
-    //       IconButton(
-    //         icon: Icon(Icons.search),
-    //         onPressed: () {},
-    //       ),
-    //     ],
-    //   );
-    // }
 
   }
