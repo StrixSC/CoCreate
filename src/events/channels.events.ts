@@ -43,7 +43,11 @@ export const joinChannel = async (ctx: Context<{ channelId: string }>) => {
         }
     });
 
-    if (!createdMember) throw new SocketEventError();
+    if (!createdMember)
+        throw new SocketEventError(
+            'The member could not be added to the channel. Reason: Internal Server Error',
+            'E1005'
+        );
 
     ctx.socket.join(channel.channel_id.toString());
 
@@ -52,3 +56,5 @@ export const joinChannel = async (ctx: Context<{ channelId: string }>) => {
         name: channel.name
     };
 };
+
+export const createChannel = async (ctx: Context<{ channelId: string }>) => {};

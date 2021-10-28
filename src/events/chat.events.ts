@@ -12,10 +12,10 @@ import {
 import moment from 'moment';
 import { IChannelIOPayload } from '../models/IJoinChannelPayload.model';
 import { dbErrorRouters } from '../utils/auth';
-import chalk from 'chalk';
+import log from '../utils/logger';
 
 export = (io: Server, socket: Socket) => {
-    console.log(chalk.greenBright('[INFO]::Socket Event Triggered::'));
+    log('INFO', 'Socket Event Triggered');
     const userId = (socket as any).request.session.passport.user;
     const joinChannel = async (joinChannelPayload: IChannelIOPayload) => {
         try {

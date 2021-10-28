@@ -19,3 +19,4 @@
     3. `E1002`: Channel ID must only contain valid ASCII symbols. 
     4. `E1003`: Channel was not found in the list of channels.
     5. `E1004`: Channel could not be joined as user is already a member of the channel.
+    5. `E1005`: User could not be added to the channel. Internal Server Error

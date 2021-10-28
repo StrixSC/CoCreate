@@ -1,6 +1,7 @@
+import Debug from 'debug';
 import chalk from 'chalk';
-import { debug } from 'console';
 type DebugType = 'ERROR' | 'INFO' | 'WARNING' | 'SUCCESS' | 'CRITICAL';
+const debug = Debug('Colorimage');
 
 const colors: { [key: string]: (message?: any, ...optionalParams: any[]) => any } = {
     ERROR: chalk.redBright,
@@ -11,5 +12,5 @@ const colors: { [key: string]: (message?: any, ...optionalParams: any[]) => any 
 };
 
 export default function log(type: DebugType, ...messages: any[]) {
-    debug(`[${type || 'INFO'}]::${colors[type?.toString() || 'INFO'](...messages)}`);
+    debug(colors[type?.toString() || 'INFO'](`[${type || 'INFO'}]`, ...messages));
 }

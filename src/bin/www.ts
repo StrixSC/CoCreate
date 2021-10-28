@@ -1,12 +1,9 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
-import Debug from 'debug';
 import http from 'http';
 import { app, expressSession } from '../app';
 import { Server, Socket } from 'socket.io';
 import corsOptions from '../cors';
-
-import chalk from 'chalk';
 import passport from 'passport';
 import { checkAuthenticated } from '../middlewares/auth.middleware';
 
@@ -14,10 +11,11 @@ import { checkAuthenticated } from '../middlewares/auth.middleware';
 import chatHandler from '../events/chat.events';
 import drawingHandler from '../events/drawing.events';
 import * as channelEvents from '../events/channels.events';
+import log from '../utils/logger';
 
-// const routes: Routes = {
-//     ...channelEvents
-// };
+const routes: Routes = {
+    ...channelEvents
+};
 
 export const normalizePort = (val: string) => {
     const port = parseInt(val, 10);
@@ -30,7 +28,6 @@ export const normalizePort = (val: string) => {
     return false;
 };
 
-const debug = Debug('Colorimage');
 const port = normalizePort(process.env.PORT || '3000');
 const server = http.createServer(app);
 
@@ -41,10 +38,10 @@ const onError = (error: any) => {
     const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`;
     switch (error.code) {
         case 'EACCES':
-            console.error(`${bind} requires elevated privileges`);
+            log('CRITICAL', `${bind} requires elevated privileges`);
             process.exit(1);
         case 'EADDRINUSE':
-            console.error(`${bind} is already in use`);
+            log('CRITICAL', `${bind} is already in use`);
             process.exit(1);
         default:
             throw error;
@@ -58,7 +55,7 @@ const onListening = () => {
             ? `pipe ${addr}`
             : `port ${addr ? addr.port : 'ERR: Address is null'}`;
 
-    debug(`Listening on ${bind}`);
+    log('INFO', `HTTP Server :: Listening on ${bind}`);
 };
 
 const io = new Server(server, {
@@ -88,22 +85,21 @@ io.use(wrap(checkAuthenticated));
 
 io.on('connection', onConnection);
 io_testing.on('connection', (socket) => {
-    console.log(chalk.blueBright('[SOCKET_TESTING]::SocketEventTriggered::'));
+    log('INFO', '[SOCKET (Testing)]::SocketEventTriggered');
     drawingHandler(io_testing, socket);
 });
 
 io.of('/').adapter.on('create-room', (room) => {
-    console.log(chalk.greenBright(`[SOCKET]::EventTriggered:: Room ${room} was created.`));
+    log('INFO', `[SOCKET]::EventTriggered:: Room ${room} was created.`);
 });
 
 io.of('/').adapter.on('join-room', (room, id) => {
-    console.log(
-        chalk.greenBright(`[SOCKET]::EventTriggered:: Room ${room} was joined by socket ${id}.`)
-    );
+    console.log(log('INFO', `[SOCKET]::EventTriggered:: Room ${room} was joined by socket ${id}.`));
 });
 
-testingServer.listen(6000, () => {
-    debug(chalk.blueBright('[SOCKET_TESTING]::SocketServer::Listening on port 6000'));
+const testingPort = 5000;
+testingServer.listen(testingPort, () => {
+    log('INFO', `Socket Testing Server :: Listening on port ${testingPort}`);
 });
 
 server.listen(port);
