@@ -4,6 +4,7 @@ import { UserService } from "src/app/services/user.service";
 import { User } from "../../../../../../common/communication/user.model";
 import axios from "axios";
 import { Router } from "@angular/router";
+import { environment } from "src/environments/environment";
 
 @Component({
   selector: "app-welcome-page",
@@ -14,8 +15,13 @@ export class WelcomePageComponent implements OnInit {
   user = new User();
   logInFail: boolean = false;
   loading: boolean = false;
+  URL: string;
 
-  constructor(public userService: UserService,private router: Router) {}
+  constructor(public userService: UserService, private router: Router) {
+    this.URL = environment.production
+      ? environment.serverURL
+      : environment.local;
+  }
 
   ngOnInit() {}
 
@@ -35,16 +41,14 @@ export class WelcomePageComponent implements OnInit {
     };
     try {
       this.loading = true;
-      const res = await axios.post(
-        "https://colorimage-109-3900.herokuapp.com/auth/login",
-        PAYLOAD,
-        {
-          headers: headers,
-        }
-      );
+      const res = await axios.post(this.URL + "auth/login", PAYLOAD, {
+        headers: headers,
+      });
       console.log(res);
       this.logInFail = false;
-      this.router.navigate(['/drawing'], { queryParams: { logInFail: this.logInFail} });
+      this.router.navigate(["/drawing"], {
+        queryParams: { logInFail: this.logInFail },
+      });
     } catch (error) {
       this.loading = false;
       console.error(error);
@@ -54,9 +58,9 @@ export class WelcomePageComponent implements OnInit {
     this.loading = false;
   }
   onSubmit(): void {
-    console.log(this.logInFail)
-       this.router.navigate(['/drawing'], { queryParams: { logInFail: this.logInFail} });
-       
-     }
-  
+    console.log(this.logInFail);
+    this.router.navigate(["/drawing"], {
+      queryParams: { logInFail: this.logInFail },
+    });
+  }
 }

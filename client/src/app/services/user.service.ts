@@ -11,16 +11,16 @@ export class UserService {
   URL: String = "";
 
   constructor(private http: HttpClient) {
-    this.URL = environment.local;
+    this.URL = environment.production
+      ? environment.serverURL
+      : environment.local;
   }
 
   registerUser(userInfo: string) {
     console.log(userInfo);
-    return this.http.post(
-      "https://colorimage-109-3900.herokuapp.com/auth/register",
-      JSON.parse(userInfo),
-      { withCredentials: true }
-    );
+    return this.http.post(this.URL + "auth/register", JSON.parse(userInfo), {
+      withCredentials: true,
+    });
   }
 
   async loginUser(user: any) {
@@ -43,13 +43,4 @@ export class UserService {
       throw error;
     }
   }
-
-  // loginUser(userInfo: string) {
-  //   console.log(userInfo);
-  //   return this.http.post(
-  //     "https://colorimage-109-3900.herokuapp.com/auth/login",
-  //     JSON.parse(userInfo),
-  //     { withCredentials: true }
-  //   );
-  // }
 }
