@@ -1,10 +1,10 @@
-import { Observable } from 'rxjs';
-import { Injectable } from '@angular/core';
-import { io, Socket } from 'socket.io-client';
-import { environment } from 'src/environments/environment';
+import { Observable } from "rxjs";
+import { Injectable } from "@angular/core";
+import { io, Socket } from "socket.io-client";
+import { environment } from "src/environments/environment";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class SocketService {
   socket!: Socket;
@@ -16,13 +16,16 @@ export class SocketService {
   }
 
   setupSocketConnection(ip?: string): void {
-    this.socket = io(environment.WS_URL || "http://localhost:3000", { autoConnect: false }) as Socket;
+    this.socket = io(environment.WS_URL || "http://localhost:3000", {
+      autoConnect: false,
+    }) as Socket;
   }
 
   connect(): void {
     this.socket.connect();
+    console.log("this.socket.active", this.socket.active);
     this.socket.sendBuffer = [];
-    console.log(environment)
+    console.log(environment);
   }
 
   disconnect(): void {
@@ -47,16 +50,15 @@ export class SocketService {
     return new Observable((observer) => {
       this.socket.onAny((data: any) => {
         observer.next(data);
-      })
-    }) 
+      });
+    });
   }
 
   onError(): Observable<any> {
     return new Observable((observer) => {
-      this.socket.on('connect_error', (err) => {
+      this.socket.on("connect_error", (err) => {
         observer.next(err);
-      })
-    })
-
+      });
+    });
   }
 }
