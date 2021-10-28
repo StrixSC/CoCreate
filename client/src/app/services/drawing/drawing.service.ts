@@ -70,6 +70,7 @@ export class DrawingService {
     const id: number = Number(obj.id);
     this.objectList.set(id, obj);
     this.renderer.insertBefore(this.drawing, obj, document.getElementById('gridRect') as Element as SVGElement);
+    this.renderer.setAttribute(obj, 'strate', this.objectList.size.toString());
     return id;
   }
 
