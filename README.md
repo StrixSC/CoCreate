@@ -68,6 +68,10 @@ npx prisma migrate dev
 
 Migrations must be done every time the models are updated. Run migrations afterwards, but make sure you have access to the database.
 
+For prisma database GUI:
+```
+npx prisma studio
+```
 
 # OBSOLETE - Deploiment
 
