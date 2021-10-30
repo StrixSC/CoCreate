@@ -8,37 +8,84 @@ class ChannelSocket extends Socket {
 
   // Emits
   joinChannel(channelId) {
+    print('Socket Emit : Join channel');
     socket.emit('channel:join', {'channelId': channelId});
   }
 
-  createChannel() {}
+  createChannel(channelName) {
+    print('Socket Emit : Create channel');
+    socket.emit('channel:create', {'channelName': channelName});
+  }
 
-  leaveChannel(channelId) {}
+  leaveChannel(channelId) {
+    print('Socket Emit : Create channel');
+    socket.emit('channel:leave', {'channelId': channelId});
+  }
 
-  updateChannel() {}
+  updateChannel(channelId, channelName) {
+    print('Socket Emit : Update channel');
+    socket.emit('channel:leave', {'channelId': channelId, 'name': channelName});
+  }
 
-  deleteChannel(channelId) {}
+  deleteChannel(channelId) {
+    print('Socket Emit : Update channel');
+    socket.emit('channel:leave', {'channelId': channelId});
+  }
 
   // Receives
   joinedChannel(callbackChannel) {
-    socket.on('', (data) {
-      print('Joined channel');
-      var message = Chat(
+    socket.on('channel:joined', (data) {
+      print('Socket On : Joined channel');
+      var channel = Chat(
           id: data['channel_id'],
           name: data['name'],
           collaboration_id: data['collaboration_id'],
           updated_at: data['updated_at'],
           type: 'Public');
-      callbackChannel(message);
+      callbackChannel(channel);
     });
   }
 
-  createdChannel(channelId) {}
+  createdChannel(callbackChannel) {
+    socket.on('channel:created', (data) {
+      print('Socket Message : Created channel');
+      var channel = Chat(
+          id: data['channel_id'],
+          name: data['name'],
+          collaboration_id: data['collaboration_id'],
+          updated_at: data['updated_at'],
+          type: 'Public');
+      callbackChannel(channel);
+    });
+  }
 
-  leftChannel(channel)  {}
+  leftChannel(callbackChannel)  {
+    socket.on('channel:left', (data) {
+      print('Socket Message : Left channel');
+      var channel_id = data['channelId'];
+      callbackChannel(channel_id);
+    });
+  }
 
-  updatedChannel() {}
+  // TODO : Be careful with what you receive and update (ex: collaboration_id missing)
+  updatedChannel(callbackChannel) {
+    socket.on('channel:delete', (data) {
+      print('Socket Message : Updated channel');
+      var channel = Chat(
+          id: data['channelId'],
+          name: data['name'],
+          updated_at: data['updated_at'],
+          type: 'Public');
+      callbackChannel(channel);
+    });
+  }
 
-  deletedChannel(channelId) {}
+  deletedChannel(callbackChannel) {
+    socket.on('channel:deleted', (data) {
+      print('Socket Message : Left channel');
+      var channel_id = data['channelId'];
+      callbackChannel(channel_id);
+    });
+  }
 
 }

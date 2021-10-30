@@ -13,6 +13,7 @@ class Messenger extends ChangeNotifier{
   List<Chat> allChannels = [];
   bool isChannelSelected = false;
 
+
   Messenger(this.user, this.userChannels, this.allChannels) {
     fetchChannels();
     fetchAllChannels();
