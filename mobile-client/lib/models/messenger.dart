@@ -28,6 +28,11 @@ class Messenger extends ChangeNotifier{
     notifyListeners();
   }
 
+  void addUserChannel(channel) {
+    userChannels.add(channel);
+    notifyListeners();
+  }
+
   void updateAllChannels(updatedAllChannels) {
     allChannels = updatedAllChannels;
     notifyListeners();
@@ -35,6 +40,7 @@ class Messenger extends ChangeNotifier{
 
   void toggleSelection() {
     isChannelSelected = !isChannelSelected;
+    notifyListeners();
   }
 
   Future<void> fetchChannels() async {
@@ -68,10 +74,18 @@ class Messenger extends ChangeNotifier{
         allChannels.add(Chat(name: channel['name'], id: channel['channel_id'], type: channel['type'],
             updated_at: channel['updated_at']));
       }
-      updateUserChannels(allChannels);
+      updateAllChannels(allChannels);
     } else {
       print('Request failed with status: ${response.body}.');
-      updateUserChannels([]);
+      updateAllChannels([]);
     }
+  }
+
+  List<Chat> getAvailableChannels() {
+    List<Chat> availableChats = allChannels;
+    for (Chat userChat in userChannels) {
+      allChannels.removeWhere((allChat) => allChat.name == userChat.name);
+    }
+    return availableChats;
   }
 }

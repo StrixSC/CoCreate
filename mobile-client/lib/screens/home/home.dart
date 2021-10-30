@@ -16,11 +16,9 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => Messenger(_user, [], []),
-      child:Scaffold(
+    return Scaffold(
         drawer: SizedBox(width:MediaQuery.of(context).size.width * 0.70, child: Sidebar(_controller, _user)) ,
         body: BottomNavBar(_controller, _user)
-      ));
+      );
   }
 }

@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:Colorimage/models/messenger.dart';
 import 'package:Colorimage/models/user.dart';
 import 'package:Colorimage/utils/rest/authentification_api.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/src/provider.dart';
 import '../../app.dart';
 import 'dart:convert' as convert;
 
@@ -57,7 +59,9 @@ class _LoginState extends State<Login> {
       var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
       var user = User(id: jsonResponse['user_id'], email: jsonResponse['email'], username: jsonResponse['username'],
           avatar_url: jsonResponse['avatar_url'], isActive: false, cookie: rawCookie);
-
+      context.read<Messenger>().updateUser(user);
+      context.read<Messenger>().fetchChannels();
+      context.read<Messenger>().fetchAllChannels();
       Navigator.pushNamed(context, HomeRoute,
           arguments: {'user': user});
 

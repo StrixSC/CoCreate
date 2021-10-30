@@ -57,7 +57,7 @@ class _ChannelState extends State<Channel> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ElevatedButton(onPressed: () { joinChannelDialog(); }, child: const Text('Joindre un canal', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500), )),
+            ElevatedButton(onPressed: () { joinChannelDialog(context.read<Messenger>().user); }, child: const Text('Joindre un canal', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500), )),
             const Padding(padding: EdgeInsets.fromLTRB(0, 0, 20, 0)),
             ElevatedButton(onPressed: () { createChannelDialog();  }, child: const Text('Créer un canal', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),))
           ]
@@ -88,56 +88,37 @@ class _ChannelState extends State<Channel> {
       var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
       print('create: ' + jsonResponse["message"]);
       showSnackBarAsBottomSheet(context, 'Channel was successfully reated :)');
-      context.read<Messenger>().userChannels.add(
-          Chat(name: text.first, id: "", type: "Public", is_owner: true,));
+      context.read<Messenger>().addUserChannel(Chat(name: text.first, id: "", type: "Public", is_owner: true,));
     }
   }
 
-  joinChannelDialog() async {
+  joinChannelDialog(user) async {
     dynamic ex1;
     SelectDialog.showModal<Chat>(
       context,
       searchHint: 'Cherchez un canal par son nom',
       label: "Liste des canaux disponibles",
       selectedValue: ex1,
-      items: context.read<Messenger>().allChannels,
-      itemBuilder: (BuildContext context, Chat item, bool isSelected) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: kDefaultPadding, vertical: kDefaultPadding * 0.75),
-          child: Row(
-            children: [
-              Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundImage: AssetImage(item.name),
-                  ),
-                ],
+      items: context.read<Messenger>().getAvailableChannels(),
+      itemBuilder: (context, item, selected) =>
+          ChatCard(
+                chat: item,
+                user: user,
+                press: () { context.read<Messenger>().addUserChannel(item); }
               ),
-              Expanded(
-                child: Padding(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: kDefaultPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.name,
-                        style:
-                        const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+      emptyBuilder: (context) =>
+          Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center,
+              children: const [Text('Aucun canal disponible..', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500))]),
+      okButtonBuilder: (context, onPressed) {
+        return Align(
+          alignment: Alignment.centerRight,
+          child: FloatingActionButton(
+            onPressed: onPressed,
+            child: Icon(Icons.check),
+            mini: true,
+          ));},
       onChange: (selected) {
           ex1 = selected;
-          context.read<Messenger>().userChannels.add(selected);
       },
     );
   }
