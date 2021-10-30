@@ -72,9 +72,11 @@ export class PencilToolService implements Tools {
         //   this.drawingService
         // );
 
-        console.log("\n\n\n\n\n\n\n inside the pencil condition \n\n\n\n\n\n");
         const point: IDrawingSocketPayload = coord;
         if (this.pencilCommand) {
+          console.log(
+            "\n\n\n\n\n\n\n inside the pencil condition \n\n\n\n\n\n"
+          );
           this.pencilCommand.addPoint(
             this.offsetManager.offsetFromMouseEvent(point)
           );
@@ -134,7 +136,7 @@ export class PencilToolService implements Tools {
       const returnPencilCommand = this.pencilCommand;
 
       // TODO: Fix with sync here
-      this.pencilCommand = null;
+      // this.pencilCommand = null;
       return returnPencilCommand;
     }
     return;
@@ -154,9 +156,9 @@ export class PencilToolService implements Tools {
         event.pageY
       );
 
-      // this.pencilCommand.addPoint(
-      //   this.offsetManager.offsetFromMouseEvent(event)
-      // );
+      this.pencilCommand.addPoint(
+        this.offsetManager.offsetFromMouseEvent(event)
+      );
     }
   }
   onKeyUp(event: KeyboardEvent): void {
