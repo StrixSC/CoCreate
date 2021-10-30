@@ -9,7 +9,6 @@ import { checkAuthenticated } from '../middlewares/auth.middleware';
 import { handleSocketError } from './../utils/errors';
 
 // Events
-import chatHandler from '../events/chat.events';
 import drawingHandler from '../events/drawing.events';
 import channelHandler from '../events/channels.events';
 
@@ -69,7 +68,6 @@ const io_testing = new Server(testingServer, {
 const onConnection = (socket: Socket) => {
   socket.data.user = (socket as any).request.session.passport.user;
   try {
-    chatHandler(io, socket);
     channelHandler(io, socket);
   } catch (e) {
     handleSocketError(socket, e);

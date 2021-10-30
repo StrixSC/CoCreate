@@ -38,7 +38,6 @@ Possible errors:
 1. `E1001`: Channel ID cannot be empty.
 2. `E1002`: Channel ID must only contain valid ASCII symbols. 
 3. `E1003`: Channel was not found in the list of channels.
-4. `E1004`: Channel could not be joined as user is already a member of the channel.
 5. `E1005`: User could not be added to the channel. Internal Server Error
 
 
@@ -167,3 +166,39 @@ Possible Errors:
 3. `E1015`: Could not delete channel: Channel does not exist or user is not a member of this channel.
 4. `E1016`: Could not delete channel: User is not the owner of this channel.
 5. `E1017`: Could not delete channel: Internal socket server error.
+   
+## Send Message
+
+Event to emit (Client -> Socket): `channel:send`
+
+Data:
+
+```typescript
+{
+    channelId: string,
+    message: string
+}
+```
+
+Event emitted (Server -> Client): `channel:sent`
+
+Data:
+
+```typescript
+{
+    channelId: string,
+    message: string,
+    createdAt: Date | string,
+    username: string,
+    avatarUrl: string,
+}
+```
+
+Possible Errors:
+
+1. `E1001`: Channel ID cannot be empty.
+2. `E1002`: Channel ID must only contain valid ASCII symbols. 
+3. `E1018`: Message must be between 1 and 256 characters.
+4. `E1019`: Could not send message: Channel ID does not match any existing channels.
+5. `E1020`: Could not send message: The user is not a part of the channel.
+5. `E1021`: Could not send message: Internal Socket Server Error.
