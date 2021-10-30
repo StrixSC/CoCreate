@@ -24,7 +24,7 @@ class ChannelSocket extends Socket {
 
   updateChannel(channelId, channelName) {
     print('Socket Emit : Update channel');
-    socket.emit('channel:leave', {'channelId': channelId, 'name': channelName});
+    socket.emit('channel:leave', {'channelId': channelId, 'channelName': channelName});
   }
 
   deleteChannel(channelId) {
@@ -37,10 +37,10 @@ class ChannelSocket extends Socket {
     socket.on('channel:joined', (data) {
       print('Socket On : Joined channel');
       var channel = Chat(
-          id: data['channel_id'],
-          name: data['name'],
-          collaboration_id: data['collaboration_id'],
-          updated_at: data['updated_at'],
+          id: data['channelId'],
+          name: data['channelName'],
+          collaboration_id: data['collaborationId'],
+          updated_at: data['updatedAt'],
           type: 'Public');
       callbackChannel(channel);
     });
@@ -50,10 +50,10 @@ class ChannelSocket extends Socket {
     socket.on('channel:created', (data) {
       print('Socket Message : Created channel');
       var channel = Chat(
-          id: data['channel_id'],
-          name: data['name'],
-          collaboration_id: data['collaboration_id'],
-          updated_at: data['updated_at'],
+          id: data['channelId'],
+          name: data['channelName'],
+          collaboration_id: data['collaborationId'],
+          updated_at: data['updatedAt'],
           type: 'Public');
       callbackChannel(channel);
     });
@@ -73,8 +73,8 @@ class ChannelSocket extends Socket {
       print('Socket Message : Updated channel');
       var channel = Chat(
           id: data['channelId'],
-          name: data['name'],
-          updated_at: data['updated_at'],
+          name: data['channelName'],
+          updated_at: data['updatedAt'],
           type: 'Public');
       callbackChannel(channel);
     });
