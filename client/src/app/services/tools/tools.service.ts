@@ -36,10 +36,10 @@ export class ToolsService {
     private drawingService: DrawingService,
     private pencilTool: PencilToolService,
     //private brushTool: BrushToolService,
-    private colorApplicator: ToolsApplierColorsService,
+    //private colorApplicator: ToolsApplierColorsService,
     private rectangleTool: ToolRectangleService,
     private ellipseTool: ToolEllipseService,
-    private pipetteTool: PipetteToolService,
+    //private pipetteTool: PipetteToolService,
     //private etampeService: StampToolService,
     //private polygonService: PolygonToolService,
     //private lineTool: LineToolService,
@@ -65,8 +65,8 @@ export class ToolsService {
     this.tools.set(this.ellipseTool.id, this.ellipseTool);
     //this.tools.set(this.polygonService.id, this.polygonService);
     //this.tools.set(this.lineTool.id, this.lineTool);
-    this.tools.set(this.pipetteTool.id, this.pipetteTool);
-    this.tools.set(this.colorApplicator.id, this.colorApplicator);
+    //this.tools.set(this.pipetteTool.id, this.pipetteTool);
+    //this.tools.set(this.colorApplicator.id, this.colorApplicator);
     //this.tools.set(this.etampeService.id, this.etampeService);
     this.tools.set(this.selectionTool.id, this.selectionTool);
     this.tools.set(this.textTool.id, this.textTool);
