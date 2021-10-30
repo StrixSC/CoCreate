@@ -16,7 +16,9 @@ Event to emit (Client -> Server): `channel:join`
 Data: 
 ```typescript
 {
-    channelId: string
+    channelId: string,
+    channelName: string,
+    collaborationId: string,
 }
 ```
 
@@ -27,9 +29,6 @@ Data:
 {
     channelId: string,
     channelName: string,
-    createdAt: string,
-    updatedAt: string,
-    collaborationId: string
 }
 ```
 

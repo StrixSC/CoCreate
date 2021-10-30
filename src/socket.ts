@@ -17,10 +17,10 @@ export class SocketEventError extends Error {
     status: string | null;
 
     constructor(message = 'Internal Server Error', code = 'E0000', status: string | null = null) {
-      super();
-      this.code = code;
-      this.message = message;
-      this.status = status;
+        super();
+        this.code = code;
+        this.message = message;
+        this.status = status;
     }
 }
 
