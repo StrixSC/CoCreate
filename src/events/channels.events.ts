@@ -4,7 +4,6 @@ import { db } from './../db';
 import { SocketEventError } from './../socket';
 import { Server, Socket } from 'socket.io';
 import validator from 'validator';
-import log from '../utils/logger';
 
 const validateChannelId = (channelId: string) => {
     if (!channelId || validator.isEmpty(channelId)) {
@@ -80,8 +79,8 @@ export = (io: Server, socket: Socket) => {
             socket.join(channel.channel_id.toString());
 
             return io.to(channelId).emit('channel:joined', {
-                channel_id: channel.channel_id,
-                name: channel.name
+                channelId: channel.channel_id,
+                channelName: channel.name
             });
         } catch (e) {
             handleSocketError(socket, e);
@@ -112,11 +111,11 @@ export = (io: Server, socket: Socket) => {
             socket.join(channel.channel_id.toString());
 
             socket.emit('channel:created', {
-                channel_id: channel.channel_id,
-                name: channel.name,
-                created_at: channel.created_at,
-                updated_at: channel.updated_at,
-                collaboration_id: channel.collaboration_id || null
+                channelId: channel.channel_id,
+                channelName: channel.name,
+                createdAt: channel.created_at,
+                updatedAt: channel.updated_at,
+                collaborationId: channel.collaboration_id || null
             });
         } catch (e) {
             handleSocketError(socket, e);

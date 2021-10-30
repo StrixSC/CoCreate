@@ -25,11 +25,11 @@ Event emitted (Server -> Client): `channel:joined`
 Data: 
 ```typescript
 {
-    channel_id: string,
-    name: string,
-    created_at: string,
-    updated_at: string,
-    collaboration_id: string
+    channelId: string,
+    channelName: string,
+    createdAt: string,
+    updatedAt: string,
+    collaborationId: string
 }
 ```
 
@@ -60,11 +60,11 @@ Emitted event (Server -> Client): `channel:created`
 Data: 
 ```typescript
 {
-    channel_id: string,
-    name: string,
-    created_at: string,
-    updated_at: string,
-    collaboration_id: string
+    channelId: string,
+    channelName: string,
+    createdAt: string,
+    updatedAt: string,
+    collaborationId: string
 }
 ```
 
@@ -110,7 +110,7 @@ Data:
 ```typescript
 {
     channelId: string,
-    name: string
+    channelName: string
 }
 ```
 
