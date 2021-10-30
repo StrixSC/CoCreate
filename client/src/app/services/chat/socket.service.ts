@@ -2,6 +2,7 @@ import { Observable } from "rxjs";
 import { Injectable } from "@angular/core";
 import { io, Socket } from "socket.io-client";
 import { environment } from "src/environments/environment";
+//import { environment } from "src/environments/environment";
 
 @Injectable({
   providedIn: "root",
@@ -16,9 +17,7 @@ export class SocketService {
   }
 
   setupSocketConnection(ip?: string): void {
-    this.socket = io(environment.WS_URL || "http://localhost:3000", {
-      autoConnect: false,
-    }) as Socket;
+    this.socket = io( environment.WS_URL || "http://localhost:3000", { autoConnect: false }) as Socket;
   }
 
   connect(): void {

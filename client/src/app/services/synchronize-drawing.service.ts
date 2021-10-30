@@ -22,6 +22,6 @@ export class SynchronizeDrawingService {
   }
 
   receiveMessage(): Observable<ISendCoordPayload> {
-    return this.socket.on("freedraw:recieve");
+    return this.socket.on('freedraw:receive');
   }
 }
