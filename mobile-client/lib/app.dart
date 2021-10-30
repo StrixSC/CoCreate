@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:Colorimage/style.dart';
 import 'screens/login/login.dart';
-import 'screens/chat/chat.dart';
+import 'package:provider/provider.dart';
 import 'screens/home/home.dart';
 import 'style.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -18,7 +17,9 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenUtilInit(
         designSize: const Size(1200, 1920),
-        builder: () => MaterialApp(
+        builder: () => Provider<String>(
+          create: (context) => 'Flutter Dev',
+          child: MaterialApp(
           onGenerateRoute: _routes(),
           theme: ThemeData(primarySwatch: Colors.blue,
             textTheme:Theme.of(context).textTheme.apply(
@@ -27,7 +28,7 @@ class App extends StatelessWidget {
             ),
           ),//_theme(),
         ),
-    );
+    ));
   }
 
   RouteFactory _routes() {

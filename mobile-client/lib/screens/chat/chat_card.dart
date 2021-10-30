@@ -63,18 +63,19 @@ class ChatCard extends StatelessWidget {
                   children: [
                     Text(
                       chat.name,
-                      style:
-                      const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     ),
-                    // SizedBox(height: 8),
-                    // Opacity(
-                    //   opacity: 0.64,
-                    //   child: Text(
-                    //     chat.lastMessage,
-                    //     maxLines: 1,
-                    //     overflow: TextOverflow.ellipsis,
-                    //   ),
-                    // ),
+                    SizedBox(height: 8),
+                    const Opacity(
+                      opacity: 0.64,
+                      child: Text(
+                        // chat.lastMessage,
+                        'last message',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                    ),
                   ],
                 ),
               ),

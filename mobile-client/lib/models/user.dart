@@ -1,7 +1,7 @@
 class User {
-  final String id, email, username, avatar_url;
-  final bool isActive;
-  final String cookie;
+  String id, email, username, avatar_url;
+  bool isActive;
+  String cookie;
 
   User({
     this.id = '',

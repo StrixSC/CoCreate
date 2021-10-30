@@ -1,58 +1,32 @@
 import 'package:Colorimage/models/user.dart';
 import 'package:Colorimage/screens/chat/chat.dart';
+import 'package:Colorimage/utils/socket/socket_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:retry/retry.dart';
 
-class Socket {
-  User user;
-  late IO.Socket socket;
-  final String url = 'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:3000");
+class ChatSocket extends Socket {
+  ChatSocket(User user, IO.Socket socket) : super(user, socket);
 
-  Socket(this.user);
-
-  createSocket() {
-    print("creating socket");
-    print(url);
-    socket = IO.io(
-        url,
-        IO.OptionBuilder()
-            .setExtraHeaders({'Cookie': user.cookie})
-            .disableAutoConnect()
-            .setTransports(['websocket']) // for Flutter or Dart VM
-            .build());
-    onError();
-
-    socket.connect();
-    socket.on('connect', (_) {
-      print("connected to socket");
-    });
+  // Emits
+  sendMessage(message, channelId) {
+    print("emit: $message to $channelId");
+    socket.emit('send-message', {'message': message, 'channel_id': channelId, 'user_id': user.id});
   }
 
-  // Change to ERROR codes with server
-  onError() {
-    socket.on('error', (err) {
-      print(err);
-    });
-    socket.dispose();
-  }
-
-  joinChannel(channelId) {
-    socket.emit('join-channel', {'channelId': channelId, 'userId': user});
-  }
-
-  initializeChatConnections(username, callbackMessage) {
-
+  // Receives
+  receiveMessage(callbackMessage) {
     socket.on('receive-message', (data) {
+      print('Received message');
       var message = ChatMessage(
           text: data['message'],
-          username: username,
+          username: user.username,
           message_username: data['username'],
           timestamp: data['timestamp']);
       callbackMessage(message);
     });
+  }
 
+  userConnected(callbackMessage) {
     socket.on('user-connection', (user) {
       print('Someone connected');
       print(user);
@@ -68,7 +42,9 @@ class Socket {
       );
       callbackMessage(newConnection);
     });
+  }
 
+  userDisconnected(callbackMessage) {
     socket.on('user-disconnect', (user) {
       print('Someone disconnected');
       print(user);
@@ -86,11 +62,5 @@ class Socket {
     });
   }
 
-  sendMessage(message, channelId) {
-    print("emit: $message to $channelId");
-    socket.emit('send-message', {'message': message, 'channel_id': channelId, 'user_id': user.id});
-  }
-
-
-
+  initializeChatConnections(username, callbackMessage) {}
 }

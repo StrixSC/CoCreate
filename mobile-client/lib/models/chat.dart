@@ -1,7 +1,7 @@
 class Chat {
-  final String name, id, type;//, lastMessage;
-  final bool is_owner;
-  final String collaboration_id, updated_at;
+  String name, id, type;//, lastMessage;
+  bool is_owner;
+  String collaboration_id, updated_at;
 
   Chat( {
     required this.id,

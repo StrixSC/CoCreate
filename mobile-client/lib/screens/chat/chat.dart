@@ -1,12 +1,12 @@
 import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/models/messenger.dart';
 import 'package:Colorimage/models/user.dart';
-import 'package:Colorimage/utils/socket_service.dart';
+import 'package:Colorimage/utils/socket/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_3.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:http/http.dart' as http;
+import 'package:provider/src/provider.dart';
 
 class ChatMessage extends StatelessWidget {
   const ChatMessage({
@@ -123,8 +123,7 @@ class ChatMessage extends StatelessWidget {
 class ChatScreen extends StatefulWidget {
   final User _user;
   final Socket _socket;
-  Function callback;
-  ChatScreen(this._user, this._socket, this.callback, {Key? key}) : super(key: key);
+  ChatScreen(this._user, this._socket, {Key? key}) : super(key: key);
   @override
   _ChatScreenState createState() =>
       _ChatScreenState();
@@ -139,7 +138,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    widget._socket.initializeChatConnections(widget._user.username, callbackMessage);
+    // widget._socket.initializeChatConnections(widget._user.username, callbackMessage);
   }
 
   @override
@@ -162,7 +161,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     if (!_validate) {
       _textController.clear();
-      widget._socket.sendMessage(text, '123456');
+      // widget._socket.sendMessage(text, '123456');
     }
   }
 
@@ -222,7 +221,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 message: 'Se déconnecter',
                 child: Icon(Icons.arrow_back,
                     color: Colors.black, size: 30)),
-            onPressed: () => widget.callback()
+            onPressed: () => context.read<Messenger>().toggleSelection()
         ),
         backgroundColor: Colors.white,
         title:  const Text(
