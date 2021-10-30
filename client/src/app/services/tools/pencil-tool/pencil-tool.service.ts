@@ -1,19 +1,19 @@
-import { Injectable } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
-import { faPencilAlt, IconDefinition } from '@fortawesome/free-solid-svg-icons';
-import { ICommand } from 'src/app/interfaces/command.interface';
-import { DrawingService } from '../../drawing/drawing.service';
-import { OffsetManagerService } from '../../offset-manager/offset-manager.service';
-import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
-import { ToolsColorService } from '../../tools-color/tools-color.service';
-import { Tools } from '../../../interfaces/tools.interface';
-import { ToolIdConstants } from '../tool-id-constants';
-import { INITIAL_WIDTH, LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
-import { PencilCommand } from './pencil-command';
-import { Pencil } from './pencil.model';
-import { SynchronizeDrawingService } from '../../synchronize-drawing.service';
-import { ISendCoordPayload } from 'src/app/model/ISendCoordPayload.model';
-
+import { Injectable } from "@angular/core";
+import { FormControl, FormGroup } from "@angular/forms";
+import { faPencilAlt, IconDefinition } from "@fortawesome/free-solid-svg-icons";
+import { ICommand } from "src/app/interfaces/command.interface";
+import { DrawingService } from "../../drawing/drawing.service";
+import { OffsetManagerService } from "../../offset-manager/offset-manager.service";
+import { RendererProviderService } from "../../renderer-provider/renderer-provider.service";
+import { ToolsColorService } from "../../tools-color/tools-color.service";
+import { Tools } from "../../../interfaces/tools.interface";
+import { ToolIdConstants } from "../tool-id-constants";
+import { INITIAL_WIDTH, LEFT_CLICK, RIGHT_CLICK } from "../tools-constants";
+import { PencilCommand } from "./pencil-command";
+import { Pencil } from "./pencil.model";
+import { SynchronizeDrawingService } from "../../synchronize-drawing.service";
+import { ISendCoordPayload } from "src/app/model/ISendCoordPayload.model";
+import { Point } from "src/app/model/point.model";
 
 /// Service de l'outil pencil, permet de créer des polyline en svg
 /// Il est possible d'ajuster le stroke width dans le form
@@ -28,8 +28,7 @@ export class PencilToolService implements Tools {
   private pencil: Pencil | null;
   private pencilCommand: PencilCommand | null;
   parameters: FormGroup;
-  coords:ISendCoordPayload;
-  
+  coords: ISendCoordPayload;
 
   constructor(
     private offsetManager: OffsetManagerService,
@@ -48,13 +47,9 @@ export class PencilToolService implements Tools {
   onPressed(event: MouseEvent): void {
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
       if (this.strokeWidth.valid) {
-        const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
-        this.synchronizeDrawingService.sendMessage(offset.x,offset.y)
-        this.synchronizeDrawingService.receiveMessage().subscribe((coord:ISendCoordPayload)=> {
-          console.log("received",coord)
-        })
-        
-        //console.log(this.synchronizeDrawingService.x,"x")
+        const offset: { x: number; y: number } =
+          this.offsetManager.offsetFromMouseEvent(event);
+        this.synchronizeDrawingService.sendMessage(offset.x, offset.y);
 
         this.pencil = {
           pointsList: [offset],
@@ -77,6 +72,18 @@ export class PencilToolService implements Tools {
           this.drawingService
         );
         this.pencilCommand.execute();
+
+        this.synchronizeDrawingService
+          .receiveMessage()
+          .subscribe((coord: ISendCoordPayload) => {
+            console.log("receive:", coord);
+            if (this.pencilCommand) {
+              // const point: Point = this.offsetManager.offsetFromMouseEvent(event);
+              const point: Point = coord;
+              console.log("this.pencilCommand.addPoint(point);");
+              this.pencilCommand.addPoint(point);
+            }
+          });
       }
     }
   }
@@ -98,12 +105,9 @@ export class PencilToolService implements Tools {
       this.pencilCommand.addPoint(
         this.offsetManager.offsetFromMouseEvent(event)
       );
+      // this.pencilCommand.addPoint({ x: 886, y: 317 } as Point);
       this.synchronizeDrawingService.sendMessage(event.offsetX, event.offsetY);
-      console.log(
-        "event.offsetX, event.offsetY ->",
-        event.offsetX,
-        event.offsetY
-      );
+      console.log(event.offsetX, event.offsetY);
     }
   }
   onKeyUp(event: KeyboardEvent): void {
