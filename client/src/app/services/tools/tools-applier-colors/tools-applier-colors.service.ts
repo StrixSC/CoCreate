@@ -26,6 +26,31 @@ export class ToolsApplierColorsService implements Tools {
     private rendererService: RendererProviderService,
   ) { }
 
+  //Changer la couleur de fond d'un trait sélectionné
+  changeColor(target1: SVGElement[]):void | ICommand{
+    let target = target1[0];
+    if (target.tagName === 'tspan') {
+      target = target.parentNode as SVGElement;
+    }
+    let colorAttributeString: string = 'primaryColor';
+    let alphaAttributeString: string = 'primaryOpacity';
+    
+      this.colorApplierCommand = new ColorApplierCommand(
+        this.rendererService.renderer,
+        target,
+        this.toolsColorService.primaryColorString,
+        this.toolsColorService.primaryAlpha,
+        colorAttributeString, alphaAttributeString,
+      );
+    if (this.colorApplierCommand) {
+      this.colorApplierCommand.execute();
+      const tempColorApplierCommand: ColorApplierCommand = this.colorApplierCommand;
+      this.colorApplierCommand = null;
+      return tempColorApplierCommand;
+    }
+    return;
+  }
+
   /// À l'appuis d'un clique de souris, on récupère l'objet cliqué et on modifie sa couleur
   onPressed(event: MouseEvent): void {
     let target = event.target as SVGElement;
