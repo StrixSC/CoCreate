@@ -10,7 +10,7 @@ import { Tools } from '../../interfaces/tools.interface';
 //import { LineToolService } from './line-tool/line-tool.service';
 //import { PenToolService } from './pen-tool/pen-tool.service';
 import { PencilToolService } from './pencil-tool/pencil-tool.service';
-import { PipetteToolService } from './pipette-tool/pipette-tool.service';
+//import { PipetteToolService } from './pipette-tool/pipette-tool.service';
 //import { PolygonToolService } from './polygon-tool/polygon-tool.service';
 import { SelectionToolService } from './selection-tool/selection-tool.service';
 //import { SprayToolService } from './spray-tool/spray-tool.service';
@@ -19,7 +19,7 @@ import { TextToolService } from './text-tool/text-tool.service';
 import { ToolEllipseService } from './tool-ellipse/tool-ellipse.service';
 import { ToolIdConstants } from './tool-id-constants';
 import { ToolRectangleService } from './tool-rectangle/tool-rectangle.service';
-import { ToolsApplierColorsService } from './tools-applier-colors/tools-applier-colors.service';
+//import { ToolsApplierColorsService } from './tools-applier-colors/tools-applier-colors.service';
 
 /// Service permettant de gérer l'outil présent selon son ID
 /// Appelle les bonnes fonctions d'évenement souris selon l'outil selectionner

@@ -9,6 +9,7 @@ import { Tools } from '../../../interfaces/tools.interface';
 import { ToolIdConstants } from '../tool-id-constants';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { ColorApplierCommand } from './color-applier-command';
+import { CommandInvokerService } from '../../command-invoker/command-invoker.service';
 
 /// Outil pour changer la couleur d'un objet, clique gauche change la couleur primaire et clique droit la couleur secondaire
 @Injectable({
@@ -24,6 +25,7 @@ export class ToolsApplierColorsService implements Tools {
   constructor(
     private toolsColorService: ToolsColorService,
     private rendererService: RendererProviderService,
+    private commandInvokerService: CommandInvokerService
   ) { }
 
   //Changer la couleur de fond d'un trait sélectionné
@@ -46,6 +48,7 @@ export class ToolsApplierColorsService implements Tools {
       this.colorApplierCommand.execute();
       const tempColorApplierCommand: ColorApplierCommand = this.colorApplierCommand;
       this.colorApplierCommand = null;
+      this.commandInvokerService.executeCommand(tempColorApplierCommand);
       return tempColorApplierCommand;
     }
     return;
