@@ -14,6 +14,7 @@ import { Pencil } from "./pencil.model";
 import { SynchronizeDrawingService } from "../../synchronize-drawing.service";
 import { ISendCoordPayload } from "src/app/model/ISendCoordPayload.model";
 import { Point } from "src/app/model/point.model";
+import { IDrawingSocketPayload } from "src/app/model/IDrawingSocketPayload";
 
 /// Service de l'outil pencil, permet de créer des polyline en svg
 /// Il est possible d'ajuster le stroke width dans le form
@@ -43,13 +44,62 @@ export class PencilToolService implements Tools {
     });
   }
 
+  synchronizeDrawing() {
+    this.synchronizeDrawingService
+      .receiveMessage()
+      .subscribe((coord: ISendCoordPayload) => {
+        console.log(
+          "coord: ISendCoordPayload",
+          coord.offsetX,
+          coord.offsetY,
+          coord.pageX,
+          coord.pageY
+        );
+
+        // if (!this.pencilCommand) {
+        // const offset: { x: number; y: number } = coord;
+        // this.pencil = {
+        //   pointsList: [offset],
+        //   strokeWidth: this.strokeWidth.value,
+        //   fill: "none",
+        //   stroke: "none",
+        //   fillOpacity: "none",
+        //   strokeOpacity: "none",
+        // };
+        // this.pencilCommand = new PencilCommand(
+        //   this.rendererService.renderer,
+        //   this.pencil,
+        //   this.drawingService
+        // );
+
+        console.log("\n\n\n\n\n\n\n inside the pencil condition \n\n\n\n\n\n");
+        const point: IDrawingSocketPayload = coord;
+        if (this.pencilCommand) {
+          this.pencilCommand.addPoint(
+            this.offsetManager.offsetFromMouseEvent(point)
+          );
+        }
+        // this.onRelease(new MouseEvent("mousemove"));
+      });
+  }
+
   /// Création d'un polyline selon la position de l'evenement de souris, choisi les bonnes couleurs selon le clique de souris
   onPressed(event: MouseEvent): void {
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
       if (this.strokeWidth.valid) {
         const offset: { x: number; y: number } =
           this.offsetManager.offsetFromMouseEvent(event);
-        this.synchronizeDrawingService.sendMessage(offset.x, offset.y);
+
+        this.synchronizeDrawingService.sendMessage(
+          offset.x,
+          offset.y,
+          "pencil",
+          "stuff",
+          event.offsetX,
+          event.offsetY,
+          event.pageX,
+          event.pageY
+        );
 
         this.pencil = {
           pointsList: [offset],
@@ -72,20 +122,9 @@ export class PencilToolService implements Tools {
           this.drawingService
         );
         this.pencilCommand.execute();
-
-        this.synchronizeDrawingService
-          .receiveMessage()
-          .subscribe((coord: ISendCoordPayload) => {
-            console.log("receive:", coord);
-            if (this.pencilCommand) {
-              // const point: Point = this.offsetManager.offsetFromMouseEvent(event);
-              const point: Point = coord;
-              console.log("this.pencilCommand.addPoint(point);");
-              this.pencilCommand.addPoint(point);
-            }
-          });
       }
     }
+    this.synchronizeDrawing();
   }
 
   /// Réinitialisation de l'outil après avoir laisser le clique de la souris
@@ -93,6 +132,8 @@ export class PencilToolService implements Tools {
     this.pencil = null;
     if (this.pencilCommand) {
       const returnPencilCommand = this.pencilCommand;
+
+      // TODO: Fix with sync here
       this.pencilCommand = null;
       return returnPencilCommand;
     }
@@ -102,12 +143,20 @@ export class PencilToolService implements Tools {
   /// Ajout d'un point selon le déplacement de la souris
   onMove(event: MouseEvent): void {
     if (this.pencilCommand) {
-      this.pencilCommand.addPoint(
-        this.offsetManager.offsetFromMouseEvent(event)
+      this.synchronizeDrawingService.sendMessage(
+        event.offsetX,
+        event.offsetY,
+        "pencil",
+        "stuff",
+        event.offsetX,
+        event.offsetY,
+        event.pageX,
+        event.pageY
       );
-      // this.pencilCommand.addPoint({ x: 886, y: 317 } as Point);
-      this.synchronizeDrawingService.sendMessage(event.offsetX, event.offsetY);
-      console.log(event.offsetX, event.offsetY);
+
+      // this.pencilCommand.addPoint(
+      //   this.offsetManager.offsetFromMouseEvent(event)
+      // );
     }
   }
   onKeyUp(event: KeyboardEvent): void {
