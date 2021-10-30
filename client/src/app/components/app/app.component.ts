@@ -1,19 +1,19 @@
-import { IUser } from '../../model/IUser.model';
-import { SocketService } from '../../services/chat/socket.service';
-import { Component, OnDestroy } from '@angular/core';
-import { Subscription/*, merge*/ } from 'rxjs';
+import { IUser } from "../../model/IUser.model";
+import { SocketService } from "../../services/chat/socket.service";
+import { Component, OnDestroy } from "@angular/core";
+import { Subscription /*, merge*/ } from "rxjs";
 //import { map } from 'rxjs/operators';
-import { ChatService } from '../../services/chat/chat.service';
+import { ChatService } from "../../services/chat/chat.service";
 //import { IReceiveMessagePayload } from './model/IReceiveMessagePayload.model';
-import { IChannel } from '../../model/IChannel.model';
+import { IChannel } from "../../model/IChannel.model";
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.scss"],
 })
 export class AppComponent implements OnDestroy {
-  title = 'prototype-v2';
+  title = "prototype-v2";
   messageListener = new Subscription();
   currentValue: string;
   users: IUser[];
@@ -21,8 +21,12 @@ export class AppComponent implements OnDestroy {
   messages: string[];
   username: string;
 
-  constructor(public chatService: ChatService, private socketService: SocketService) {
+  constructor(
+    public chatService: ChatService,
+    private socketService: SocketService
+  ) {
     this.username = "";
+    console.log("this.socketService.setupSocketConnection();");
     this.socketService.setupSocketConnection();
     this.socketService.connect();
     this.currentValue = "";
@@ -32,25 +36,20 @@ export class AppComponent implements OnDestroy {
   }
 
   ngOnInit(): void {
-
-
-
     this.chatService.getUsers().subscribe((users) => {
       this.users = users.sort((a) => {
-        if (a.userId !== this.socketService.socket.id) return -1
+        if (a.userId !== this.socketService.socket.id) return -1;
         else return 1;
       });
-      
+
       this.users = users;
       console.log(users);
     });
-  
+
     this.chatService.getChannels().subscribe((channels: IChannel[]) => {
       this.channels = channels;
       console.log(channels);
-    })
-
-    
+    });
   }
 
   ngOnDestroy(): void {
