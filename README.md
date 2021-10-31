@@ -1,10 +1,15 @@
 # Colorimage Server
 
-# Traditional Setup
+# Setup (Read this first):
 
-```
-npm run dev
-```
+- Install Docker if it's not already done.
+- Clone the repo
+- Go into the repo's directory
+- Create a file named `.env`
+- Add this line to the `.env` file: `DATABASE_URL=postgresql://admin:admin@localhost:5432/postgres`
+- Run `docker-compose up`. If you're on a Unix based machine, you might need to run `sudo docker-compose up`. Wait for this to finish before doing the next step
+- Run `npm run setup`.
+- The server should now be up and running. 
 
 # Setup Docker
 
@@ -45,7 +50,7 @@ Another way to utilize the services is to install them separately and run them o
 - Controllers are defined in the `src/controllers` folder and the filename should end with `.controller.ts`.
 - Interfaces are defined inside of the `src/models/` folder and the filename should end with `.model.ts`.
 - Services are defined inside of the `src/services/` folder and the filename should end with `.service.ts`.
-- Database models are defined in the `src/prisma/scheme.prisma` file.
+- Database models are defined in the `src/prisma/schema.prisma` file.
 - Middlewares are defined in the `src/middlewares` folder and the filename suffix should end with .middleware.ts
 - Utilitary functions are defined inside separte files in the `src/utils/` folder.
 - Socket events are implemented in the `src/events` folder and triggers are defined inside of the `src/bin/www.ts` file 
