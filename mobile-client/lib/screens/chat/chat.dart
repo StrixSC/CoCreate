@@ -211,10 +211,9 @@ class _ChatScreenState extends State<ChatScreen> {
           '',
           style: TextStyle(fontSize: 25, color: Colors.blue),
         ),
-        actions: <Widget>[
-          IconButton(
+        actions:
+          messenger.userChannels[widget.channelIndex].name != "Canal Publique" ? [IconButton(
             icon: const Icon(Icons.exit_to_app_rounded, color: Colors.black, size:30),
-            tooltip: 'Show Snackbar',
             onPressed: () {
               showDialog<String>(
                   context: context,
@@ -223,7 +222,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     content: const Text('Êtes-vous certain?'),
                     actions: <Widget>[
                       TextButton(
-                        onPressed: () => Navigator.pop(context, 'Non'),
+                        onPressed: () { Navigator.pop(context, 'Non');  print('Test NAAAME: ' + messenger.userChannels[widget.channelIndex].name); },
                         child: const Text('Non'),
                       ),
                       TextButton(
@@ -235,7 +234,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                   ],
                 ));
-              })],
+              })]:[],
       ),
       body: Column(
         children: [

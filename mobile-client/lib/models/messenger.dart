@@ -75,6 +75,7 @@ class Messenger extends ChangeNotifier{
         userChannels.add(Chat(name: channel['name'], id: channel['channel_id'], type: channel['type'],
             is_owner: channel['is_owner'], messages: []));
       }
+      userChannels.insert(0, Chat(name: "Canal Publique", id: '0',  type: 'Public', is_owner: false, messages: []));
       updateUserChannels(userChannels);
     } else {
       print('Request failed with status: ${response.body}.');

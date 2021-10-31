@@ -30,7 +30,7 @@ class _ChannelState extends State<Channel> {
       )),
       const Divider(thickness: 2, color: Colors.black),
       Padding(padding: const EdgeInsets.fromLTRB(0, 0, 0, 0), child: ChatCard( user: context.read<Messenger>().user,
-          chat: Chat(name: "Canal Publique", id: '0',  type: 'Public', is_owner: false, messages: [],),
+          chat: context.read<Messenger>().userChannels[0],
           press: () { context.read<Messenger>().toggleSelection();})),
       const Divider(thickness: 2, color: Colors.black),
       MediaQuery.removePadding(context: context, removeTop: true, child:
@@ -41,11 +41,11 @@ class _ChannelState extends State<Channel> {
             shrinkWrap: true,
             itemCount: context.read<Messenger>().userChannels.length,
             itemBuilder: (context, index) =>
-                ChatCard(
+                index != 0 ? ChatCard(
                     chat: context.watch<Messenger>().userChannels[index],
                     user: context.watch<Messenger>().user,
                     press: () { context.read<Messenger>().toggleSelection(); currentSelectedChannelIndex = index;}
-                ),
+                ) : const SizedBox.shrink(),
           )
       )),
       const Divider(thickness: 2, color: Colors.black),
