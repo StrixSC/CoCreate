@@ -55,19 +55,11 @@ export class SelectionToolParameterComponent {
     this.deletingService.deleteSelection();
   }
 
-  /// SelectAll
-  selectAll(): void {
-    this.selectionService.selectAll();
-  }
-
-  changeColor() : void {
-    /*let event: MouseEvent = new MouseEvent('onmousedown', {button: 2});
-    Object.defineProperty(event, 'target', {value: this.selectionService.getObjectList()[0]});
-    this.toolsApplierColorService.onPressed(event);
-    this.toolsApplierColorService.onRelease(event);*/
-
+  changeColor(): void {
     this.toolsApplierColorService.changeColor(this.selectionService.getObjectList());
   }
   
-
+  changeThickness(): void {
+    this.selectionService.setSelectionWidth();
+  }
 }

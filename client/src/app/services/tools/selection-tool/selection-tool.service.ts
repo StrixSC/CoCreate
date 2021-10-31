@@ -127,9 +127,6 @@ export class SelectionToolService implements Tools {
       if (this.hasSelectedItems) {
         return;
       }
-
-      //this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectSelection);
-      //this.rendererService.renderer.appendChild(this.drawingService.drawing, this.ctrlG);
     }
   }
 
@@ -633,6 +630,12 @@ export class SelectionToolService implements Tools {
     }
   }
 
+  setSelectionWidth() : void {
+    this.objects[0].style.strokeWidth = '100px';
+    console.log(this.objects[0]);
+    this.setNewSelection(this.objects);
+  }
+
   /// Verifie si le curseur se situe a l'interieur de la selection.
   private isInside(x: number, y: number): boolean {
     const rectBox = this.rectSelection.getBoundingClientRect();
@@ -657,4 +660,6 @@ export class SelectionToolService implements Tools {
   private xFactor(): number {
     return (this.drawingService.drawing as SVGSVGElement).getBoundingClientRect().left;
   }
+
+  
 }
