@@ -21,7 +21,6 @@ export const getAllChannels = async (): Promise<IChannel[]> => {
 };
 
 export const getChannelById = async (id: string): Promise<ICompleteChannelData | null> => {
-    console.log(id);
     const channel = await db.channel.findUnique({
         where: { channel_id: id },
         select: {

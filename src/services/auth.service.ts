@@ -27,6 +27,7 @@ export const login = async (email: string, password: string): Promise<User | nul
 
     const checkPassword = compareSync(password, user.password);
     if (!checkPassword) return null;
+<<<<<<< HEAD
 
     await db.log.createMany({
         data: {
@@ -34,6 +35,8 @@ export const login = async (email: string, password: string): Promise<User | nul
             user_id: user.user_id
         }
     });
+=======
+>>>>>>> dev
 
     return user;
 };
@@ -65,6 +68,7 @@ export const register = async (payload: IRegistrationPayload): Promise<User | nu
                     last_name: last_name
                 }
             }
+<<<<<<< HEAD
         }
     });
 
@@ -80,4 +84,10 @@ export const logout = async (userId: string) => {
     });
 
     return log;
+=======
+        }
+    });
+
+    return user;
+>>>>>>> dev
 };

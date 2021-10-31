@@ -16,9 +16,7 @@
     "paths": {
         "/auth/login": {
             "post": {
-                "tags": [
-                    "Authentication"
-                ],
+                "tags": ["Authentication"],
                 "summary": "Log user in",
                 "operationId": "login",
                 "requestBody": {
@@ -93,9 +91,7 @@
                         "Cookie Auth": []
                     }
                 ],
-                "tags": [
-                    "Authentication"
-                ],
+                "tags": ["Authentication"],
                 "summary": "Log user out",
                 "operationId": "logout",
                 "description": "The user's `connect.sid` cookie must be attached to the request. This request deletes the session from the database. This wil remove any persistent data on the server.",
@@ -144,9 +140,7 @@
         },
         "/auth/register": {
             "post": {
-                "tags": [
-                    "Authentication"
-                ],
+                "tags": ["Authentication"],
                 "summary": "Registers the user using the provided information",
                 "operationId": "register",
                 "description": "Registers the user using the provided information, if the email or username are not in use.",
@@ -255,9 +249,7 @@
                         }
                     }
                 ],
-                "tags": [
-                    "Users"
-                ],
+                "tags": ["Users"],
                 "summary": "Fetch all information of the user with the given id",
                 "security": [
                     {
@@ -343,9 +335,7 @@
                         }
                     }
                 ],
-                "tags": [
-                    "Users"
-                ],
+                "tags": ["Users"],
                 "summary": "Fetch all channels of a given user.",
                 "security": [
                     {
@@ -440,9 +430,7 @@
                         }
                     }
                 ],
-                "tags": [
-                    "Users"
-                ],
+                "tags": ["Users"],
                 "summary": "Fetch all public profiles",
                 "operationId": "users",
                 "responses": {
@@ -514,9 +502,7 @@
                         }
                     }
                 ],
-                "tags": [
-                    "Users"
-                ],
+                "tags": ["Users"],
                 "summary": "Fetch public profile of a specific user",
                 "operationId": "single user",
                 "responses": {
@@ -578,9 +564,7 @@
         },
         "/api/channels/": {
             "get": {
-                "tags": [
-                    "Channels"
-                ],
+                "tags": ["Channels"],
                 "summary": "Fetch all channels",
                 "security": [
                     {
@@ -654,9 +638,7 @@
         },
         "/api/channels/create": {
             "post": {
-                "tags": [
-                    "Channels"
-                ],
+                "tags": ["Channels"],
                 "summary": "Create new channel",
                 "security": [
                     {
@@ -722,9 +704,7 @@
         },
         "/api/channels/:id": {
             "get": {
-                "tags": [
-                    "Channels"
-                ],
+                "tags": ["Channels"],
                 "summary": "Fetch all relevant information pertaining to that channel. The request must be from a user that has access to the channel.",
                 "security": [
                     {
@@ -798,9 +778,7 @@
         },
         "/api/channels/:id/messages": {
             "get": {
-                "tags": [
-                    "Channels"
-                ],
+                "tags": ["Channels"],
                 "summary": "Fetch all messages in a channel",
                 "security": [
                     {

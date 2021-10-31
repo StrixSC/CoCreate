@@ -30,13 +30,13 @@ model Profile {
   profile_id String @unique @id @default(uuid())
   username String @unique
   avatar_url String
-  user User @relation(fields: [user_id], references: [user_id])
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   user_id  String @unique
 }
 
 model Account { 
   account_id String @unique @id @default(uuid())
-  user User @relation(fields: [user_id], references: [user_id])
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   user_id String @unique
   first_name String
   last_name String
@@ -46,7 +46,7 @@ model Stats {
   index Int @unique @default(autoincrement())
   stats_id String @unique @id @default(uuid())
   user_id String
-  user User @relation(fields: [user_id], references: [user_id])
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   collaboration_count Int
   author_count Int
   active_team_count Int
@@ -58,7 +58,7 @@ model Log {
   index Int @unique @default(autoincrement())
   log_id String @unique @id @default(uuid())
   user_id String
-  user User @relation(fields: [user_id], references: [user_id])
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   type LogType
   created_at DateTime @default(now())
   drawing_id String?
@@ -98,16 +98,16 @@ model ChannelMember {
   user_id String
   type MemberType
   messages Message[]
-  member User @relation(fields: [user_id], references: [user_id])
+  member User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   created_at DateTime @default(now())
-  channel Channel @relation(fields: [channel_id], references: [channel_id]) 
+  channel Channel @relation(fields: [channel_id], references: [channel_id], onDelete: Cascade) 
 }
 
 model Message {
   index Int @unique @default(autoincrement())
   message_id String @unique @id @default(uuid())
   member_id String
-  sender ChannelMember @relation(fields: [member_id], references: [member_id])
+  sender ChannelMember @relation(fields: [member_id], references: [member_id], onDelete: Cascade)
   message_data String
   created_at DateTime @default(now())
 }

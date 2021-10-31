@@ -1,5 +1,5 @@
 import { IReceiveMessagePayload } from './../models/IReceiveMessagePayload.model';
-import { handleError } from '../utils/errors';
+import { handleRequestError } from '../utils/errors';
 import create from 'http-errors';
 import { StatusCodes } from 'http-status-codes';
 import {
@@ -19,7 +19,7 @@ export const getAllChannelsController = async (req: Request, res: Response, next
 
         return res.status(StatusCodes.OK).json(channels);
     } catch (e) {
-        handleError(e, next);
+        handleRequestError(e, next);
     }
 };
 
@@ -31,7 +31,7 @@ export const getChannelByIdController = async (req: Request, res: Response, next
                 message: errors
             });
         }
-        const paramsData = matchedData(req, { locations: ['params'] });
+        const paramsData = matchedData(req, { locations: [ 'params' ] });
 
         const info = await getChannelById(paramsData.id);
         if (!info) {
@@ -40,7 +40,7 @@ export const getChannelByIdController = async (req: Request, res: Response, next
             res.status(StatusCodes.OK).json(info);
         }
     } catch (e: any) {
-        handleError(e, next);
+        handleRequestError(e, next);
     }
 };
 
@@ -52,7 +52,7 @@ export const createChannelController = async (req: Request, res: Response, next:
                 message: errors
             });
         }
-        const bodyData = matchedData(req, { locations: ['body'] });
+        const bodyData = matchedData(req, { locations: [ 'body' ] });
 
         const result = await createChannel(bodyData.name, req.user!.user_id);
         if (!result) throw new create.InternalServerError();
@@ -60,7 +60,7 @@ export const createChannelController = async (req: Request, res: Response, next:
             message: `Success! Channel ${result.channel} was created successfully.`
         });
     } catch (e: any) {
-        handleError(e, next);
+        handleRequestError(e, next);
     }
 };
 
@@ -76,7 +76,7 @@ export const getChannelMessagesController = async (
                 message: errors
             });
         }
-        const paramsData = matchedData(req, { locations: ['params'] });
+        const paramsData = matchedData(req, { locations: [ 'params' ] });
 
         const messages = await getChannelMessagesById(paramsData.id);
         if (!messages)
@@ -96,6 +96,6 @@ export const getChannelMessagesController = async (
 
         res.status(StatusCodes.OK).json(returnMessages);
     } catch (e) {
-        handleError(e, next);
+        handleRequestError(e, next);
     }
 };

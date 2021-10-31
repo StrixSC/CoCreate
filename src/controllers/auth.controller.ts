@@ -1,4 +1,4 @@
-import { handleError } from './../utils/errors';
+import { handleRequestError } from './../utils/errors';
 import { IUser } from './../models/IUser.model';
 import { NextFunction, Request, Response } from 'express';
 import create from 'http-errors';
@@ -32,7 +32,7 @@ export const registerController = async (req: Request, res: Response, next: Next
             message: 'User created successfully.'
         });
     } catch (e: any) {
-        handleError(e, next);
+        handleRequestError(e, next);
     }
 };
 
@@ -52,3 +52,5 @@ export const logoutController = async (req: Request, res: Response, next: NextFu
         return res.status(StatusCodes.OK).json({ message: 'OK' });
     });
 };
+
+export const refreshController = async (req: Request, res: Response, next: NextFunction) => {};
