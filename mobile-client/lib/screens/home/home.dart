@@ -1,12 +1,9 @@
-import 'package:Colorimage/models/messenger.dart';
 import 'package:Colorimage/models/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
-import 'package:provider/provider.dart';
 import '../../widgets/sidebar.dart';
 import '../../widgets/bottom_nav_bar.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 PersistentTabController _controller = new PersistentTabController(initialIndex: 0);
 

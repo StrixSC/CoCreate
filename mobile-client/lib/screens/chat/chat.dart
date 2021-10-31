@@ -1,7 +1,6 @@
 import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/models/chat.dart';
 import 'package:Colorimage/models/messenger.dart';
-import 'package:Colorimage/models/user.dart';
-import 'package:Colorimage/utils/socket/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
@@ -10,11 +9,13 @@ import 'package:provider/src/provider.dart';
 
 class ChatMessage extends StatelessWidget {
   const ChatMessage({
+    required this.channelId,
     required this.text,
     required this.username,
     required this.message_username,
     required this.timestamp,
   });
+  final int channelId;
   final String text;
   final String username;
   final String message_username;
@@ -121,47 +122,28 @@ class ChatMessage extends StatelessWidget {
 }
 
 class ChatScreen extends StatefulWidget {
-  final User _user;
-  final Socket _socket;
-  ChatScreen(this._user, this._socket, {Key? key}) : super(key: key);
+  int channelIndex;
+  ChatScreen(this.channelIndex, {Key? key}) : super(key: key);
   @override
   _ChatScreenState createState() =>
       _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final List<dynamic> _messages = [];
+  // final List<dynamic> _messages = [];
   final _textController = TextEditingController();
   bool _validate = false;
   final FocusNode _focusNode = FocusNode();
 
-  @override
-  void initState() {
-    super.initState();
-    // widget._socket.initializeChatConnections(widget._user.username, callbackMessage);
-  }
-
-  @override
-  void dispose() {
-    widget._socket.socket.dispose();
-    super.dispose();
-  }
-
-  callbackMessage(message) {
-    setState(() {
-      _messages.insert(0, message);
-    });
-  }
-
   void _handleSubmitted(String text) {
-    print('submitted :)');
+    print('submitted');
     setState(() {
       _validate =
           _textController.text.isEmpty || _textController.text.trim().isEmpty;
     });
     if (!_validate) {
       _textController.clear();
-      // widget._socket.sendMessage(text, '123456');
+      context.read<Messenger>().socket.sendMessage(text, context.read<Messenger>().userChannels[widget.channelIndex].id);
     }
   }
 
@@ -213,6 +195,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Messenger messenger = context.read<Messenger>();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -228,6 +211,31 @@ class _ChatScreenState extends State<ChatScreen> {
           '',
           style: TextStyle(fontSize: 25, color: Colors.blue),
         ),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.exit_to_app_rounded, color: Colors.black, size:30),
+            tooltip: 'Show Snackbar',
+            onPressed: () {
+              showDialog<String>(
+                  context: context,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: Text('Quitter le canal ${messenger.userChannels[widget.channelIndex].name}'),
+                    content: const Text('Êtes-vous certain?'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, 'Non'),
+                        child: const Text('Non'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context, 'Oui');
+                          messenger.socket.leaveChannel(messenger.userChannels[widget.channelIndex].id);
+                          messenger.toggleSelection(); },
+                        child: const Text('Oui'),
+                      ),
+                  ],
+                ));
+              })],
       ),
       body: Column(
         children: [
@@ -235,8 +243,8 @@ class _ChatScreenState extends State<ChatScreen> {
             child: ListView.builder(
               padding: const EdgeInsets.all(8.0),
               reverse: true,
-              itemBuilder: (_, index) => _messages[index],
-              itemCount: _messages.length,
+              itemBuilder: (_, index) => context.watch<Messenger>().userChannels[widget.channelIndex].messages[index],
+              itemCount: context.read<Messenger>().userChannels[widget.channelIndex].messages.length,
             ),
           ),
           const Divider(height: 1.0),

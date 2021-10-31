@@ -1,6 +1,8 @@
 import 'package:Colorimage/models/chat.dart';
+import 'package:Colorimage/models/messenger.dart';
 import 'package:Colorimage/models/user.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/src/provider.dart';
 
 import '../../constants/general.dart';
 
@@ -22,6 +24,7 @@ class ChatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Messenger messenger = context.read<Messenger>();
     return InkWell(
       onTap: press,
       child: Padding(
@@ -86,7 +89,25 @@ class ChatCard extends StatelessWidget {
                   icon: const Icon(Icons.highlight_remove),
                   color: kErrorColor,
                   onPressed: () {
-                    print('delete');
+                    showDialog<String>(
+                        context: context,
+                        builder: (BuildContext context) => AlertDialog(
+                          title: Text('Supprimer le canal ${chat.name}'),
+                          content: const Text('Êtes-vous certain?'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, 'Non'),
+                              child: const Text('Non'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                  Navigator.pop(context, 'Oui');
+                                  messenger.socket.deleteChannel(chat.id);
+                                },
+                              child: const Text('Oui'),
+                            ),
+                          ],
+                        ));
                   }),
               // Text(chat.time,
               //   style:

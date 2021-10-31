@@ -1,10 +1,7 @@
 import 'dart:convert';
 import 'package:Colorimage/components/alert.dart';
-import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/messenger.dart';
 import 'package:Colorimage/utils/rest/channels_api.dart';
-import 'package:Colorimage/utils/rest/users_api.dart';
-import 'package:Colorimage/utils/socket/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/src/provider.dart';
 import '../../models/chat.dart';
@@ -12,7 +9,6 @@ import 'chat.dart';
 import 'chat_card.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:select_dialog/select_dialog.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 
 class Channel extends StatefulWidget {
@@ -23,7 +19,7 @@ class Channel extends StatefulWidget {
 }
 
 class _ChannelState extends State<Channel> {
-
+  late int currentSelectedChannelIndex = 0;
 
   Widget channelListWidget() {
     return (Column(children: [
@@ -34,7 +30,7 @@ class _ChannelState extends State<Channel> {
       )),
       const Divider(thickness: 2, color: Colors.black),
       Padding(padding: const EdgeInsets.fromLTRB(0, 0, 0, 0), child: ChatCard( user: context.read<Messenger>().user,
-          chat: Chat(name: "Canal Publique", id: '123',  type: 'Public', is_owner: false,),
+          chat: Chat(name: "Canal Publique", id: '0',  type: 'Public', is_owner: false, messages: [],),
           press: () { context.read<Messenger>().toggleSelection();})),
       const Divider(thickness: 2, color: Colors.black),
       MediaQuery.removePadding(context: context, removeTop: true, child:
@@ -46,9 +42,9 @@ class _ChannelState extends State<Channel> {
             itemCount: context.read<Messenger>().userChannels.length,
             itemBuilder: (context, index) =>
                 ChatCard(
-                    chat: context.read<Messenger>().userChannels[index],
-                    user: context.read<Messenger>().user,
-                    press: () { context.read<Messenger>().toggleSelection(); }
+                    chat: context.watch<Messenger>().userChannels[index],
+                    user: context.watch<Messenger>().user,
+                    press: () { context.read<Messenger>().toggleSelection(); currentSelectedChannelIndex = index;}
                 ),
           )
       )),
@@ -80,15 +76,20 @@ class _ChannelState extends State<Channel> {
       title: 'Créer un canal',
     );
     if (text != null) {
-      ChannelAPI channels_api = ChannelAPI(context.read<Messenger>().user);
-      Map data = {'name': text};
-      var body = json.encode(data);
-      var response = await channels_api.createChannel(body);
-      print('response:' + response.body);
-      var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
-      print('create: ' + jsonResponse["message"]);
-      showSnackBarAsBottomSheet(context, 'Channel was successfully reated :)');
-      context.read<Messenger>().addUserChannel(Chat(name: text.first, id: "", type: "Public", is_owner: true,));
+      context.read<Messenger>().socket.createChannel(text);
+      // ChannelAPI channels_api = ChannelAPI(context.read<Messenger>().user);
+      // Map data = {'name': text};
+      // var body = json.encode(data);
+      // var response = await channels_api.createChannel(body);
+      // if (response.statusCode == 200) {
+      //   print('response:' + response.body);
+      //   var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
+      //   print('create: ' + jsonResponse["message"]);
+      //   showSnackBarAsBottomSheet(context, 'Channel was successfully reated :)');
+      //   context.read<Messenger>().socket.createChannel(text);
+      // } else {
+      //   print('Create request failed with status: ${response.statusCode}.');
+      // }
     }
   }
 
@@ -104,7 +105,7 @@ class _ChannelState extends State<Channel> {
           ChatCard(
                 chat: item,
                 user: user,
-                press: () { context.read<Messenger>().addUserChannel(item); }
+                press: () { context.read<Messenger>().socket.joinChannel(item.id); }
               ),
       emptyBuilder: (context) =>
           Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center,
@@ -112,10 +113,9 @@ class _ChannelState extends State<Channel> {
       okButtonBuilder: (context, onPressed) {
         return Align(
           alignment: Alignment.centerRight,
-          child: FloatingActionButton(
-            onPressed: onPressed,
-            child: Icon(Icons.check),
-            mini: true,
+          child: ElevatedButton(
+            onPressed: () => {},
+            child: Icon(Icons.check, color: Colors.black),
           ));},
       onChange: (selected) {
           ex1 = selected;
@@ -125,24 +125,14 @@ class _ChannelState extends State<Channel> {
 
 
   Widget channelChatWidget() {
-    // temp socket
-    IO.Socket socket = IO.io(
-        'url',
-        IO.OptionBuilder()
-            .setExtraHeaders({'Cookie': context.read<Messenger>().user.cookie})
-            .disableAutoConnect()
-            .setTransports(['websocket']) // for Flutter or Dart VM
-            .build());
-    Socket sock = Socket(context.read<Messenger>().user, socket);
-    sock.createSocket();
-    return ChatScreen(context.read<Messenger>().user, sock);
+    return ChatScreen(currentSelectedChannelIndex);
   }
 
   @override
   Widget build(BuildContext context) {
-    final messenger = context.watch<Messenger>();
+    Messenger messenger = context.watch<Messenger>();
     return Column(
-      key: const PageStorageKey("my_key"),
+      key: const PageStorageKey("channels"),
       children: [
         Expanded(
             child: messenger.isChannelSelected ? channelChatWidget() : channelListWidget()
