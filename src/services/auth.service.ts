@@ -2,7 +2,7 @@ import create from 'http-errors';
 import { compareSync, hashSync } from 'bcrypt';
 import { db } from '../db';
 import { validateRegistration } from '../utils/auth';
-import { LogType, User } from '.prisma/client';
+import { LogType, User, MemberType } from '.prisma/client';
 import { IRegistrationPayload } from '../models/IRegistrationModel';
 
 export const findUserById = async (id: string): Promise<User | null> => {
@@ -65,6 +65,14 @@ export const register = async (payload: IRegistrationPayload): Promise<User | nu
                     last_name: last_name
                 }
             }
+        }
+    });
+
+    const channelMember = await db.channelMember.create({
+        data: {
+            type: MemberType.Regular,
+            channel_id: 'PUBLIC',
+            user_id: user.user_id
         }
     });
 

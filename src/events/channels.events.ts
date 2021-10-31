@@ -106,7 +106,7 @@ export = (io: Server, socket: Socket) => {
                 data: {
                     name: channelName,
                     members: {
-                        create: [ { user_id: socket.data.user, type: 'Owner' } ]
+                        create: [{ user_id: socket.data.user, type: 'Owner' }]
                     }
                 }
             });
@@ -352,6 +352,7 @@ export = (io: Server, socket: Socket) => {
 
             io.to(channel.channel_id).emit('channel:sent', {
                 message: message,
+                messageId: dbMessage.message_id,
                 channelId: channel.channel_id,
                 username: channel.members[userIndex].member.profile?.username,
                 avatarUrl: channel.members[userIndex].member.profile?.avatar_url,

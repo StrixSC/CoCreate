@@ -17,8 +17,6 @@ Data:
 ```typescript
 {
     channelId: string,
-    channelName: string,
-    collaborationId: string,
 }
 ```
 
@@ -29,6 +27,7 @@ Data:
 {
     channelId: string,
     channelName: string,
+    collaborationId: string,
 }
 ```
 
@@ -187,6 +186,7 @@ Data:
 {
     channelId: string,
     message: string,
+    messageId: dbMessage.message_id,
     createdAt: Date | string,
     username: string,
     avatarUrl: string,
