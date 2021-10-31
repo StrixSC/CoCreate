@@ -4,6 +4,7 @@ import 'package:Colorimage/models/user.dart';
 import 'package:Colorimage/utils/rest/authentification_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/src/provider.dart';
 import '../../app.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -70,6 +71,7 @@ class _LoginState extends State<Login> {
       // Initialize socket connection
       initializeSocketConnection(user);
 
+      // Home Page
       Navigator.pushNamed(context, HomeRoute,
           arguments: {'user': user});
 
@@ -81,7 +83,7 @@ class _LoginState extends State<Login> {
 
   void initializeSocketConnection(user) {
     IO.Socket socket = IO.io(
-        'https://colorimage-109-3900.herokuapp.com',
+        'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000"),
         IO.OptionBuilder()
             .setExtraHeaders({'Cookie': user.cookie})
             .disableAutoConnect()
@@ -90,7 +92,6 @@ class _LoginState extends State<Login> {
 
     ChannelSocket channelSocket = ChannelSocket(user, socket);
     context.read<Messenger>().setSocket(channelSocket);
-    context.read<Messenger>().socket.initializeChannelSocketEvents(context.read<Messenger>().callbackChannel);
   }
 
   @override
@@ -157,19 +158,19 @@ class _LoginState extends State<Login> {
                   },
                 )),
                 usernameTaken
-                    ? Padding(
+                    ? const Padding(
                     padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
                     child: Text("Le nom d'utilisateur est déjà pris",
-                        style: new TextStyle(
+                        style: TextStyle(
                             color: Colors.red, fontSize: 25.0)))
                     : usernameEmpty
-                    ? Padding(
+                    ? const Padding(
                     padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
                     child: Text("Veuillez entrer un nom d'utilisateur",
-                        style: new TextStyle(
+                        style: TextStyle(
                             color: Colors.red, fontSize: 25.0)))
                     : Text(""),
-                SizedBox(height: 24.0),
+                const SizedBox(height: 24.0),
                 ElevatedButton(
                   onPressed: () {
                     // Validate will return true if the form is valid, or false if

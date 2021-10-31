@@ -14,8 +14,10 @@ class ChatMessage extends StatelessWidget {
     required this.username,
     required this.message_username,
     required this.timestamp,
+    required this.messageId,
   });
-  final int channelId;
+  final String messageId;
+  final String channelId;
   final String text;
   final String username;
   final String message_username;
@@ -143,7 +145,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     if (!_validate) {
       _textController.clear();
-      context.read<Messenger>().socket.sendMessage(text, context.read<Messenger>().userChannels[widget.channelIndex].id);
+      context.read<Messenger>().channelSocket.sendMessage(text, context.read<Messenger>().userChannels[widget.channelIndex].id);
     }
   }
 
@@ -228,7 +230,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context, 'Oui');
-                          messenger.socket.leaveChannel(messenger.userChannels[widget.channelIndex].id);
+                          messenger.channelSocket.leaveChannel(messenger.userChannels[widget.channelIndex].id);
                           messenger.toggleSelection(); },
                         child: const Text('Oui'),
                       ),

@@ -10,7 +10,7 @@ class ChannelSocket extends SocketService {
   // Emits
   sendMessage(message, channelId) {
     print("Socket Emit: $message to $channelId");
-    socket.emit('channel:send', {'message': message, 'channel_id': channelId});
+    socket.emit('channel:send', {'message': message, 'channelId': channelId});
   }
 
   joinChannel(channelId) {
@@ -20,6 +20,7 @@ class ChannelSocket extends SocketService {
 
   createChannel(channelName) {
     print('Socket Emit : Create channel');
+    print(channelName);
     socket.emit('channel:create', {'channelName': channelName});
   }
 
@@ -39,10 +40,11 @@ class ChannelSocket extends SocketService {
   }
 
   // Receives
-  receiveMessage(callbackMessage) {
+  sentMessage(callbackMessage) {
     socket.on('channel:sent', (data) {
       print('Received message');
       ChatMessage message = ChatMessage(
+          messageId: data['messageId'],
           channelId: data['channelId'],
           text: data['message'],
           username: user.username,
@@ -58,8 +60,6 @@ class ChannelSocket extends SocketService {
       Chat channel = Chat(
           id: data['channelId'],
           name: data['channelName'],
-          collaboration_id: data['collaborationId'],
-          updated_at: data['updatedAt'],
           type: 'Public', messages: []);
       callbackChannel('joined', channel);
     });
@@ -108,6 +108,8 @@ class ChannelSocket extends SocketService {
   }
 
   initializeChannelSocketEvents(callbackChannel) {
+    sentMessage(callbackChannel);
+
     joinedChannel(callbackChannel);
 
     createdChannel(callbackChannel);
@@ -117,6 +119,8 @@ class ChannelSocket extends SocketService {
     updatedChannel(callbackChannel);
 
     deletedChannel(callbackChannel);
+
+    print("initialized socket events");
   }
 
 }

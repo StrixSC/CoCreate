@@ -102,7 +102,7 @@ class ChatCard extends StatelessWidget {
                             TextButton(
                               onPressed: () {
                                   Navigator.pop(context, 'Oui');
-                                  messenger.socket.deleteChannel(chat.id);
+                                  messenger.channelSocket.deleteChannel(chat.id);
                                 },
                               child: const Text('Oui'),
                             ),

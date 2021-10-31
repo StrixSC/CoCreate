@@ -14,7 +14,8 @@ class Messenger extends ChangeNotifier{
   List<Chat> userChannels = [];
   List<Chat> allChannels = [];
   bool isChannelSelected = false;
-  late ChannelSocket socket;
+  int currentSelectedChannelIndex = 0;
+  late ChannelSocket channelSocket;
 
 
   Messenger(this.user, this.userChannels, this.allChannels) {
@@ -22,8 +23,15 @@ class Messenger extends ChangeNotifier{
     fetchAllChannels();
   }
 
-  void setSocket(channelSocket) {
-    socket = channelSocket;
+  void setSocket(socket) {
+    channelSocket = socket;
+    channelSocket.socket.on('connect', (_) {
+      print("connected to socket");
+      channelSocket.initializeChannelSocketEvents(callbackChannel);
+      joinAllUserChannels();
+    });
+
+    notifyListeners();
   }
 
   void updateUser(User updatedUser) {
@@ -61,6 +69,10 @@ class Messenger extends ChangeNotifier{
   void toggleSelection() {
     isChannelSelected = !isChannelSelected;
     notifyListeners();
+  }
+
+  void joinAllUserChannels() {
+    userChannels.forEach((channel) { channelSocket.joinChannel(channel.id); });
   }
 
   Future<void> fetchChannels() async {
@@ -124,7 +136,7 @@ class Messenger extends ChangeNotifier{
         break;
       case 'joined':
         Chat channel = data as Chat;
-        addUserChannel(channel);
+        print("joined: " + channel.name);
         break;
       case 'created':
         Chat channel = data as Chat;
@@ -140,7 +152,7 @@ class Messenger extends ChangeNotifier{
         break;
       case 'updated':
         Chat channel = data as Chat;
-        updateUserChannelName(channel.name, channel.updated_at, channel.id);
+        updateUserChannelName(channel.name, channel.updated_at as String, channel.id);
         break;
       default:
         print("Invalid socket event");

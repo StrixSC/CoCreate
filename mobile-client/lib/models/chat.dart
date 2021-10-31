@@ -3,7 +3,7 @@ import 'package:Colorimage/screens/chat/chat.dart';
 class Chat {
   String name, id, type;//, lastMessage;
   bool is_owner;
-  String collaboration_id, updated_at;
+  String? collaboration_id, updated_at;
   List<ChatMessage> messages;
 
   Chat( {

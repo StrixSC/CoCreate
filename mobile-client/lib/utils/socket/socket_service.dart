@@ -9,10 +9,11 @@ class SocketService {
   final String url = 'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000");
 
   SocketService(this.user, this.socket) {
-    print("----------- CONNECTING SOCKET: " + url + "-----------");
+    print("----------- CONNECTING SOCKET: " + url);
     onError();
     socket.connect();
-    onConnect();
+    // onConnect();
+    socket.on('disconnect', (_) => print('disconnect'));
   }
 
   // Change to ERROR codes with server
@@ -20,12 +21,15 @@ class SocketService {
     socket.on('error', (err) {
       print('Socket error: ' + err);
     });
-    socket.dispose();
-  }
-
-  onConnect() {
-    socket.on('connect', (_) {
-      print("connected to socket");
+    socket.on('exception', (err) {
+      print('exception');
+      print(err);
     });
   }
+
+  // onConnect() {
+  //   socket.on('connect', (_) {
+  //     print("connected to socket");
+  //   });
+  // }
 }

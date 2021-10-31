@@ -19,7 +19,6 @@ class Channel extends StatefulWidget {
 }
 
 class _ChannelState extends State<Channel> {
-  late int currentSelectedChannelIndex = 0;
 
   Widget channelListWidget() {
     return (Column(children: [
@@ -44,7 +43,9 @@ class _ChannelState extends State<Channel> {
                 index != 0 ? ChatCard(
                     chat: context.watch<Messenger>().userChannels[index],
                     user: context.watch<Messenger>().user,
-                    press: () { context.read<Messenger>().toggleSelection(); currentSelectedChannelIndex = index;}
+                    press: () {
+                      context.read<Messenger>().toggleSelection(); context.read<Messenger>().currentSelectedChannelIndex = index;
+                    }
                 ) : const SizedBox.shrink(),
           )
       )),
@@ -76,7 +77,7 @@ class _ChannelState extends State<Channel> {
       title: 'Créer un canal',
     );
     if (text != null) {
-      context.read<Messenger>().socket.createChannel(text);
+      context.read<Messenger>().channelSocket.createChannel(text[0]);
       // ChannelAPI channels_api = ChannelAPI(context.read<Messenger>().user);
       // Map data = {'name': text};
       // var body = json.encode(data);
@@ -105,7 +106,7 @@ class _ChannelState extends State<Channel> {
           ChatCard(
                 chat: item,
                 user: user,
-                press: () { context.read<Messenger>().socket.joinChannel(item.id); }
+                press: () { context.read<Messenger>().channelSocket.joinChannel(item.id); }
               ),
       emptyBuilder: (context) =>
           Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center,
@@ -125,7 +126,7 @@ class _ChannelState extends State<Channel> {
 
 
   Widget channelChatWidget() {
-    return ChatScreen(currentSelectedChannelIndex);
+    return ChatScreen(context.read<Messenger>().currentSelectedChannelIndex);
   }
 
   @override
