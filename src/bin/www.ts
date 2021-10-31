@@ -34,14 +34,14 @@ const onError = (error: any) => {
     }
     const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`;
     switch (error.code) {
-    case 'EACCES':
-        log('CRITICAL', `${bind} requires elevated privileges`);
-        process.exit(1);
-    case 'EADDRINUSE':
-        log('CRITICAL', `${bind} is already in use`);
-        process.exit(1);
-    default:
-        throw error;
+        case 'EACCES':
+            log('CRITICAL', `${bind} requires elevated privileges`);
+            process.exit(1);
+        case 'EADDRINUSE':
+            log('CRITICAL', `${bind} is already in use`);
+            process.exit(1);
+        default:
+            throw error;
     }
 };
 

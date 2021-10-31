@@ -45,3 +45,5 @@ export const logoutController = async (req: Request, res: Response, next: NextFu
         return res.status(StatusCodes.OK).json({ message: 'OK' });
     });
 };
+
+export const refreshController = async (req: Request, res: Response, next: NextFunction) => {};
