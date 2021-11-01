@@ -106,14 +106,27 @@ export const getUserChannelsById = async (id: string): Promise<any> => {
                 select: {
                     channel_id: true,
                     name: true,
-                    type: true
+                    type: true,
+                    index: true,
+                    members: {
+                        include: {
+                            member: {
+                                include: {
+                                    profile: true
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     });
 
     return channels.map((c) => ({
-        ...c.channel,
+        name: c.channel.name,
+        index: c.channel.index,
+        channel_id: c.channel.channel_id,
+        owner_username: c.channel.members[0].member.profile!.username,
         is_owner: c.type === MemberType.Owner ? true : false
     }));
 };

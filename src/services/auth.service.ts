@@ -17,7 +17,7 @@ export const findUserById = async (id: string): Promise<User | null> => {
 export const login = async (email: string, password: string): Promise<User | null> => {
     const user = await db.user.findUnique({
         where: {
-            email: email
+            email: email.toLowerCase()
         },
         include: {
             profile: true
