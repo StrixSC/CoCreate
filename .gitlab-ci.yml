@@ -12,10 +12,8 @@ build:
   stage: build
   services:
     - docker:dind
-  environment:
-    DATABASE_URL: ${DATABASE_URL}
   script:
-    - docker build -f Dockerfile.prod --iidfile imageid.txt -t registry.heroku.com/colorimage-109-3900/web .
+    - docker build -f Dockerfile.prod --iidfile imageid.txt -t registry.heroku.com/colorimage-109-3900/web . --build-arg DATABASE_URL=${DATABASE_URL}
     - docker login -u "${HEROKU_USERNAME}" -p "${HEROKU_TOKEN}" registry.heroku.com
     - docker push registry.heroku.com/colorimage-109-3900/web
     - apk add --no-cache curl
