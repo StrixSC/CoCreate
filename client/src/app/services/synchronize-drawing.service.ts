@@ -11,12 +11,12 @@ export class SynchronizeDrawingService {
   y: number;
   constructor(private socket: SocketService) {}
 
-  sendMessage(x_: number, y_: number, state_: string, actionId_: string): void {
+  sendMessage(x_: number, y_: number, state: string, actionId: string): void {
     this.socket.emit("freedraw:emit", {
       x: x_,
       y: y_,
-      state: "move", // down, move, up
-      actionId: "pencil",
+      state: state,
+      actionId: actionId,
     } as ISendCoordPayload);
   }
 

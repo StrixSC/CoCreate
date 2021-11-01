@@ -8,7 +8,7 @@ export const environment: IEnvironment = {
   production: false,
   serverURL: "https://colorimage-109-3900.herokuapp.com/",
   serverRawURL: "https://colorimage-109-3900.herokuapp.com/",
-  WS_URL: "http://localhost:5000/",
+  WS_URL: "http://edae-132-207-3-192.ngrok.io/",
   local: "http://localhost:3000/",
 };
 

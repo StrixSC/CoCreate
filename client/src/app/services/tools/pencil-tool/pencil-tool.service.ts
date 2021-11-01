@@ -12,6 +12,7 @@ import { PencilCommand } from "./pencil-command";
 import { Pencil } from "./pencil.model";
 import { SynchronizeDrawingService } from "../../synchronize-drawing.service";
 import { ISendCoordPayload } from "src/app/model/ISendCoordPayload.model";
+import { v4 as uuidv4 } from "uuid";
 
 /// Service de l'outil pencil, permet de créer des polyline en svg
 /// Il est possible d'ajuster le stroke width dans le form
@@ -25,6 +26,7 @@ export class PencilToolService implements Tools {
   private strokeWidth: FormControl;
   private pencil: Pencil | null;
   private pencilCommand: PencilCommand | null;
+  private actionID: string;
   parameters: FormGroup;
   coords: ISendCoordPayload;
 
@@ -38,6 +40,7 @@ export class PencilToolService implements Tools {
     this.parameters = new FormGroup({
       strokeWidth: this.strokeWidth,
     });
+    this.actionID = "";
   }
 
   synchronizeDrawing() {
@@ -79,12 +82,14 @@ export class PencilToolService implements Tools {
           y: event.offsetY,
         };
 
+        this.actionID = uuidv4();
         this.synchronizeDrawingService.sendMessage(
           offset.x,
           offset.y,
-          "pencil",
-          "stuff"
+          "down",
+          this.actionID
         );
+        console.log(event.offsetX, event.offsetY, "down", this.actionID);
 
         this.pencil = {
           pointsList: [offset],
@@ -120,6 +125,14 @@ export class PencilToolService implements Tools {
 
       // TODO: Fix with sync here
       // this.pencilCommand = null;
+      this.synchronizeDrawingService.sendMessage(
+        event.offsetX,
+        event.offsetY,
+        "up",
+        this.actionID
+      );
+      console.log(event.offsetX, event.offsetY, "up", this.actionID);
+      this.actionID = "";
       return returnPencilCommand;
     }
     return;
@@ -131,11 +144,12 @@ export class PencilToolService implements Tools {
       this.synchronizeDrawingService.sendMessage(
         event.offsetX,
         event.offsetY,
-        "pencil",
-        "stuff"
+        "move",
+        this.actionID
       );
-
       this.pencilCommand.addPoint({ x: event.offsetX, y: event.offsetY });
+
+      console.log(event.offsetX, event.offsetY, "move", this.actionID);
     }
   }
   onKeyUp(event: KeyboardEvent): void {
