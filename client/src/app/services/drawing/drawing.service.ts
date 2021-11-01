@@ -52,6 +52,7 @@ export class DrawingService {
     this.objectList = objList;
   }
 
+
   getLastObject(): any {
       return this.getObjectList().get(this.lastObjectId)
   }
@@ -76,14 +77,20 @@ export class DrawingService {
       console.log("Stop");
       return;
     }
-      //this.renderer.removeChild(this.drawing, this.objectList.get(id));
     console.log(this.drawing);
   }
 
   removeLayer(id: number): void {
-    console.log(this.renderer.parentNode(this.objectList.get(id)));
-    
-  }
+      let x: SVGElement;
+      this.drawing.childNodes.forEach((children: SVGElement)=>{
+        if(children.getAttribute('id')===id.toString()) {
+          x = <SVGElement> children.previousElementSibling;
+          let previousId : string | null = x.getAttribute('id');
+          if (previousId === null) return;
+          this.addLayer(parseInt(previousId))
+        }
+      });
+}
 
   /// Retrait d'un objet selon son ID
   removeObject(id: number): void {

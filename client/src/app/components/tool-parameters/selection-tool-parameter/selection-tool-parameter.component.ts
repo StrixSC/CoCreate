@@ -60,6 +60,8 @@ export class SelectionToolParameterComponent {
   changeColor(): void {
     this.toolsApplierColorService.changeColor(this.selectionService.getObjectList());
   }
+
+  
   
   changeThickness(): void {
     this.selectionService.setSelectionWidth();
