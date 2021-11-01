@@ -26,7 +26,6 @@ export class AppComponent implements OnDestroy {
     private socketService: SocketService
   ) {
     this.username = "";
-    console.log("this.socketService.setupSocketConnection();");
     this.socketService.setupSocketConnection();
     this.socketService.connect();
     this.currentValue = "";
