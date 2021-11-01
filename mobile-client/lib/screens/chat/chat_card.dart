@@ -20,7 +20,20 @@ class ChatCard extends StatelessWidget {
 
   getfontWeight() {
     return chat.messages.isEmpty ? const TextStyle(fontSize: 16, fontWeight: FontWeight.w500) :
-    chat.lastReadMessage == chat.messages.last.text ? const TextStyle(fontSize: 16, fontWeight: FontWeight.w500) : const TextStyle(fontSize: 16, fontWeight: FontWeight.w700);
+    chat.lastReadMessage == chat.messages.first.text ?
+      const TextStyle(fontSize: 16, fontWeight: FontWeight.w500) :
+      const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: kPrimaryColor);
+  }
+
+  notifIcon() {
+    return chat.messages.isEmpty ? const SizedBox.shrink() :
+    chat.lastReadMessage == chat.messages.first.text ?
+      const SizedBox.shrink() :
+      Icon(
+          Icons.circle,
+          size: 20,
+          color: kPrimaryColor.withOpacity(0.75),
+      );
   }
 
   @override
@@ -74,7 +87,7 @@ class ChatCard extends StatelessWidget {
                       opacity: 0.64,
                       child: Text(
                         // chat.lastMessage,
-                        chat.messages.isEmpty ? "" : chat.messages.last.text,
+                        chat.messages.isEmpty ? "" : chat.messages.first.text,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: getfontWeight(),
@@ -84,6 +97,7 @@ class ChatCard extends StatelessWidget {
                 ),
               ),
             ),
+              notifIcon(),
               if(chat.name != "Canal Publique" && user.username == chat.ownerUsername)
                 IconButton(
                   iconSize: 28,

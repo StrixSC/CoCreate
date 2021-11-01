@@ -13,6 +13,7 @@ class Messenger extends ChangeNotifier{
   User user;
   List<Chat> userChannels = [];
   List<Chat> allChannels = [];
+  List<Chat> availableChannel = [];
   bool isChannelSelected = false;
   int currentSelectedChannelIndex = 0;
   late ChannelSocket channelSocket;
@@ -45,8 +46,17 @@ class Messenger extends ChangeNotifier{
   }
 
   void addUserChannel(Chat channel) {
-    userChannels.add(channel);
-    notifyListeners();
+    if(!userChannels.contains(channel)) {
+      userChannels.add(channel);
+      notifyListeners();
+    }
+  }
+
+  void addAllChannel(Chat channel) {
+    if(!allChannels.contains(channel)) {
+      allChannels.add(channel);
+      notifyListeners();
+    }
   }
 
   void removeUserChannel(String channelId) {
@@ -87,7 +97,6 @@ class Messenger extends ChangeNotifier{
         userChannels.add(Chat(name: channel['name'], id: channel['channel_id'],
             ownerUsername: channel['owner_username'], messages: []));
       }
-      userChannels.insert(0, Chat(name: "Canal Publique", id: '0',  type: 'Public', ownerUsername: 'God', messages: []));
       updateUserChannels(userChannels);
     } else {
       print('Request failed with status: ${response.body}.');
@@ -135,13 +144,15 @@ class Messenger extends ChangeNotifier{
     }
   }
 
-  List<Chat> getAvailableChannels() {
+  void getAvailableChannels() {
     print("availabel channels");
+    fetchAllChannels();
     List<Chat> availableChats = allChannels;
     for (Chat userChat in userChannels) {
-      allChannels.removeWhere((allChat) => allChat.name == userChat.name);
+      availableChats.removeWhere((allChat) => allChat.name == userChat.name);
     }
-    return availableChats;
+    availableChannel = availableChats;
+    notifyListeners();
   }
 
   void addMessage(channelId, message) {
@@ -159,10 +170,11 @@ class Messenger extends ChangeNotifier{
       case 'joined':
         Chat channel = data as Chat;
         print("joined: " + channel.name);
+        addUserChannel(channel);
         break;
       case 'created':
         Chat channel = data as Chat;
-        addUserChannel(channel);
+        channel.ownerUsername == user.username? addUserChannel(channel) : getAvailableChannels();
         break;
       case 'left':
         String channelId = data as String;

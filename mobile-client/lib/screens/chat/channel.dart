@@ -1,7 +1,5 @@
-import 'dart:convert';
-import 'package:Colorimage/components/alert.dart';
+
 import 'package:Colorimage/models/messenger.dart';
-import 'package:Colorimage/utils/rest/channels_api.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/src/provider.dart';
 import '../../models/chat.dart';
@@ -28,10 +26,6 @@ class _ChannelState extends State<Channel> {
         child: const Text('Canaux de Discussions', style: TextStyle()),
       )),
       const Divider(thickness: 2, color: Colors.black),
-      Padding(padding: const EdgeInsets.fromLTRB(0, 0, 0, 0), child: ChatCard( user: context.read<Messenger>().user,
-          chat: context.read<Messenger>().userChannels[0],
-          press: () { context.read<Messenger>().toggleSelection();})),
-      const Divider(thickness: 2, color: Colors.black),
       MediaQuery.removePadding(context: context, removeTop: true, child:
       ConstrainedBox(constraints: context.read<Messenger>().userChannels.isEmpty ?
           const BoxConstraints(minHeight: 5.0, maxHeight: 75.0) : const BoxConstraints(minHeight: 45.0, maxHeight: 475.0),
@@ -42,17 +36,17 @@ class _ChannelState extends State<Channel> {
             shrinkWrap: true,
             itemCount: context.read<Messenger>().userChannels.length,
             itemBuilder: (context, index) =>
-                index != 0 ? ChatCard(
+              ChatCard(
                     chat: context.watch<Messenger>().userChannels[index],
                     user: context.watch<Messenger>().user,
                     press: () {
                       context.read<Messenger>().toggleSelection();
                       context.read<Messenger>().currentSelectedChannelIndex = index;
                       if(context.read<Messenger>().userChannels[index].messages.isNotEmpty) {
-                        context.read<Messenger>().userChannels[index].lastReadMessage = context.read<Messenger>().userChannels[index].messages.last.text;
+                        context.read<Messenger>().userChannels[index].lastReadMessage = context.read<Messenger>().userChannels[index].messages.first.text;
                       }
                     }
-                ) : const SizedBox.shrink(),
+                ),
           )
       )),
       const Divider(thickness: 2, color: Colors.black),
@@ -60,7 +54,7 @@ class _ChannelState extends State<Channel> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ElevatedButton(onPressed: () { joinChannelDialog(context.read<Messenger>().user); },
+            ElevatedButton(onPressed: () { context.read<Messenger>().getAvailableChannels(); joinChannelDialog(context.read<Messenger>().user); },
                 child: const Text('Joindre un canal', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500), )),
             const Padding(padding: EdgeInsets.fromLTRB(0, 0, 20, 0)),
             ElevatedButton(onPressed: () { createChannelDialog();  },
@@ -109,12 +103,12 @@ class _ChannelState extends State<Channel> {
       searchHint: 'Cherchez un canal par son nom',
       label: "Liste des canaux disponibles",
       selectedValue: ex1,
-      items: context.read<Messenger>().getAvailableChannels(),
+      items: context.read<Messenger>().availableChannel,
       itemBuilder: (context, item, selected) =>
           ChatCard(
                 chat: item,
                 user: user,
-                press: () { context.read<Messenger>().channelSocket.joinChannel(item.id); }
+                press: () { context.watch<Messenger>().channelSocket.joinChannel(item.id); }
               ),
       emptyBuilder: (context) =>
           Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center,
