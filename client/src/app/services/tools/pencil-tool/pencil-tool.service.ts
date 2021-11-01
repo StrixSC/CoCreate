@@ -16,6 +16,7 @@ import { ISendCoordPayload } from "src/app/model/ISendCoordPayload.model";
 import { Point } from "src/app/model/point.model";
 import { IDrawingSocketPayload } from "src/app/model/IDrawingSocketPayload";
 
+
 /// Service de l'outil pencil, permet de créer des polyline en svg
 /// Il est possible d'ajuster le stroke width dans le form
 @Injectable({
@@ -30,6 +31,7 @@ export class PencilToolService implements Tools {
   private pencilCommand: PencilCommand | null;
   parameters: FormGroup;
   coords: ISendCoordPayload;
+  receivedPoints:Point;
 
   constructor(
     private offsetManager: OffsetManagerService,
@@ -41,7 +43,10 @@ export class PencilToolService implements Tools {
     this.strokeWidth = new FormControl(INITIAL_WIDTH);
     this.parameters = new FormGroup({
       strokeWidth: this.strokeWidth,
+      
     });
+    
+
   }
 
   synchronizeDrawing() {
@@ -56,21 +61,21 @@ export class PencilToolService implements Tools {
           coord.pageY
         );
 
-        // if (!this.pencilCommand) {
-        // const offset: { x: number; y: number } = coord;
-        // this.pencil = {
-        //   pointsList: [offset],
-        //   strokeWidth: this.strokeWidth.value,
-        //   fill: "none",
-        //   stroke: "none",
-        //   fillOpacity: "none",
-        //   strokeOpacity: "none",
-        // };
-        // this.pencilCommand = new PencilCommand(
-        //   this.rendererService.renderer,
-        //   this.pencil,
-        //   this.drawingService
-        // );
+        if (!this.pencilCommand) {
+        const offset: { x: number; y: number } = coord;
+        this.pencil = {
+          pointsList: [offset],
+          strokeWidth: this.strokeWidth.value,
+          fill: "none",
+          stroke: "none",
+          fillOpacity: "none",
+          strokeOpacity: "none",
+        };
+        this.pencilCommand = new PencilCommand(
+          this.rendererService.renderer,
+          this.pencil,
+          this.drawingService
+        );
 
         const point: IDrawingSocketPayload = coord;
         if (this.pencilCommand) {
@@ -82,8 +87,10 @@ export class PencilToolService implements Tools {
           );
         }
         // this.onRelease(new MouseEvent("mousemove"));
-      });
-  }
+      }
+  })
+}
+
 
   /// Création d'un polyline selon la position de l'evenement de souris, choisi les bonnes couleurs selon le clique de souris
   onPressed(event: MouseEvent): void {
