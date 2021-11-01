@@ -7,6 +7,7 @@ import create, { InternalServerError } from 'http-errors';
 import { db } from '../db';
 import moment from 'moment';
 import { IChannel } from '../models/IChannel.model';
+import { retrieveOwnerFromChannels } from '../utils/channels';
 
 export const getAllChannels = async (): Promise<IChannel[]> => {
     const channels = await db.channel.findMany({
@@ -23,6 +24,12 @@ export const getAllChannels = async (): Promise<IChannel[]> => {
         }
     });
 
+    let owner = retrieveOwnerFromChannels(channels);
+
+    if (!owner) {
+        throw new create.InternalServerError('Error while fetching channel owner.');
+    }
+
     const returnVal = channels.map((c) => {
         return {
             name: c.name,
@@ -30,7 +37,7 @@ export const getAllChannels = async (): Promise<IChannel[]> => {
             type: c.type,
             collaboration_id: c.collaboration_id,
             updated_at: c.updated_at,
-            ownerUsername: c.members[0].member.profile!.username
+            ownerUsername: owner
         };
     });
 

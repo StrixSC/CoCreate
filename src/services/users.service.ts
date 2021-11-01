@@ -1,3 +1,4 @@
+import { retrieveOwnerFromChannels } from './../utils/channels';
 import { IPublicUserProfile } from './../models/IUserPublicProfile';
 import { db } from '../db';
 import { MemberType } from '.prisma/client';
@@ -122,11 +123,17 @@ export const getUserChannelsById = async (id: string): Promise<any> => {
         }
     });
 
+    if (!channels) {
+        return [];
+    }
+
+    let owner = retrieveOwnerFromChannels(channels);
+
     return channels.map((c) => ({
         name: c.channel.name,
         index: c.channel.index,
         channel_id: c.channel.channel_id,
-        owner_username: c.channel.members[0].member.profile!.username,
+        owner_username: owner,
         is_owner: c.type === MemberType.Owner ? true : false
     }));
 };
