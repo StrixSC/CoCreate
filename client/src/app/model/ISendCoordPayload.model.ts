@@ -3,8 +3,4 @@ export interface ISendCoordPayload {
   y: number;
   state: string;
   actionId: string;
-  offsetX: number;
-  offsetY: number;
-  pageX: number;
-  pageY: number;
 }

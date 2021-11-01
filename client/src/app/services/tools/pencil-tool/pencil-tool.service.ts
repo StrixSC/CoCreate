@@ -3,7 +3,6 @@ import { FormControl, FormGroup } from "@angular/forms";
 import { faPencilAlt, IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { ICommand } from "src/app/interfaces/command.interface";
 import { DrawingService } from "../../drawing/drawing.service";
-import { OffsetManagerService } from "../../offset-manager/offset-manager.service";
 import { RendererProviderService } from "../../renderer-provider/renderer-provider.service";
 import { ToolsColorService } from "../../tools-color/tools-color.service";
 import { Tools } from "../../../interfaces/tools.interface";
@@ -13,8 +12,6 @@ import { PencilCommand } from "./pencil-command";
 import { Pencil } from "./pencil.model";
 import { SynchronizeDrawingService } from "../../synchronize-drawing.service";
 import { ISendCoordPayload } from "src/app/model/ISendCoordPayload.model";
-// import { Point } from "src/app/model/point.model";
-import { IDrawingSocketPayload } from "src/app/model/IDrawingSocketPayload";
 
 /// Service de l'outil pencil, permet de créer des polyline en svg
 /// Il est possible d'ajuster le stroke width dans le form
@@ -32,7 +29,6 @@ export class PencilToolService implements Tools {
   coords: ISendCoordPayload;
 
   constructor(
-    private offsetManager: OffsetManagerService,
     private colorTool: ToolsColorService,
     private drawingService: DrawingService,
     private rendererService: RendererProviderService,
@@ -48,14 +44,6 @@ export class PencilToolService implements Tools {
     this.synchronizeDrawingService
       .receiveMessage()
       .subscribe((coord: ISendCoordPayload) => {
-        console.log(
-          "coord: ISendCoordPayload",
-          coord.offsetX,
-          coord.offsetY,
-          coord.pageX,
-          coord.pageY
-        );
-
         // if (!this.pencilCommand) {
         // const offset: { x: number; y: number } = coord;
         // this.pencil = {
@@ -72,14 +60,11 @@ export class PencilToolService implements Tools {
         //   this.drawingService
         // );
 
-        const point: IDrawingSocketPayload = coord;
         if (this.pencilCommand) {
           console.log(
             "\n\n\n\n\n\n\n inside the pencil condition \n\n\n\n\n\n"
           );
-          this.pencilCommand.addPoint(
-            this.offsetManager.offsetFromMouseEvent(point)
-          );
+          this.pencilCommand.addPoint({ x: coord.x, y: coord.y });
         }
         // this.onRelease(new MouseEvent("mousemove"));
       });
@@ -89,18 +74,16 @@ export class PencilToolService implements Tools {
   onPressed(event: MouseEvent): void {
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
       if (this.strokeWidth.valid) {
-        const offset: { x: number; y: number } =
-          this.offsetManager.offsetFromMouseEvent(event);
+        const offset: { x: number; y: number } = {
+          x: event.offsetX,
+          y: event.offsetY,
+        };
 
         this.synchronizeDrawingService.sendMessage(
           offset.x,
           offset.y,
           "pencil",
-          "stuff",
-          event.offsetX,
-          event.offsetY,
-          event.pageX,
-          event.pageY
+          "stuff"
         );
 
         this.pencil = {
@@ -149,16 +132,10 @@ export class PencilToolService implements Tools {
         event.offsetX,
         event.offsetY,
         "pencil",
-        "stuff",
-        event.offsetX,
-        event.offsetY,
-        event.pageX,
-        event.pageY
+        "stuff"
       );
 
-      this.pencilCommand.addPoint(
-        this.offsetManager.offsetFromMouseEvent(event)
-      );
+      this.pencilCommand.addPoint({ x: event.offsetX, y: event.offsetY });
     }
   }
   onKeyUp(event: KeyboardEvent): void {

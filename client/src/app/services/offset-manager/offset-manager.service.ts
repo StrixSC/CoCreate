@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { IDrawingSocketPayload } from "src/app/model/IDrawingSocketPayload";
 import { WorkspaceService } from "../workspace/workspace.service";
 
 /// Classe permettant de simuler le comportement de
@@ -12,7 +11,7 @@ export class OffsetManagerService {
 
   /// Retourne la position relative selon le workspace
 
-  offsetFromMouseEvent(event: MouseEvent | IDrawingSocketPayload): {
+  offsetFromMouseEvent(event: MouseEvent): {
     x: number;
     y: number;
   } {
