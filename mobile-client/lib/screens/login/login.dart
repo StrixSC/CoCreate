@@ -8,7 +8,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/src/provider.dart';
 import '../../app.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:Colorimage/utils/socket/socket_service.dart';
 
 TextEditingController userController = TextEditingController();
 TextEditingController passController = TextEditingController();
@@ -42,11 +41,6 @@ class _LoginState extends State<Login> {
 
   static const _fontSize = 25.0;
   static const padding = 30.0;
-
-  _onSubmitTap(BuildContext context, String email, String password) {
-    login(email, password);
-    print("email  " + email + " password  " + password);
-  }
 
   Future<void> login(email, password) async {
 
@@ -150,10 +144,13 @@ class _LoginState extends State<Login> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.0)),
                   ),
+                  obscureText: true,
+                  enableSuggestions: false,
+                  autocorrect: false,
                   autovalidate: true,
                   onFieldSubmitted: (value) {
                     if (_formKey.currentState!.validate()) {
-                      _onSubmitTap(context, userController.text, passController.text);
+                      login(userController.text, passController.text);
                     }
                   },
                 )),
@@ -176,7 +173,7 @@ class _LoginState extends State<Login> {
                     // Validate will return true if the form is valid, or false if
                     // the form is invalid.
                     if (_formKey.currentState!.validate()) {
-                      _onSubmitTap(context, userController.text, passController.text);
+                      login(userController.text, passController.text);
                     }
                   },
                   style:
@@ -187,10 +184,7 @@ class _LoginState extends State<Login> {
             Padding(padding:  EdgeInsets.fromLTRB(0, 30, 0, 0), child: ElevatedButton(
                   onPressed: () {
                     // Validate will return true if the form is valid, or false if
-                    // the form is invalid.
-                    if (_formKey.currentState!.validate()) {
-                      _onSubmitTap(context, userController.text, passController.text);
-                    }
+                    Navigator.pushNamed(context, RegisterRoute);
                   },
                   style:
                   ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),

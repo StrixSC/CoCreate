@@ -18,8 +18,9 @@ class ChatCard extends StatelessWidget {
   final User user;
   final VoidCallback press;
 
-  fetchChannelInfo() {
-
+  getfontWeight() {
+    return chat.messages.isEmpty ? const TextStyle(fontSize: 16, fontWeight: FontWeight.w500) :
+    chat.lastReadMessage == chat.messages.last.text ? const TextStyle(fontSize: 16, fontWeight: FontWeight.w500) : const TextStyle(fontSize: 16, fontWeight: FontWeight.w700);
   }
 
   @override
@@ -66,24 +67,24 @@ class ChatCard extends StatelessWidget {
                   children: [
                     Text(
                       chat.name,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      style: getfontWeight(),
                     ),
                     SizedBox(height: 8),
-                    const Opacity(
+                    Opacity(
                       opacity: 0.64,
                       child: Text(
                         // chat.lastMessage,
-                        'last message',
+                        chat.messages.isEmpty ? "" : chat.messages.last.text,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                        style: getfontWeight(),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-              if(chat.name != "Canal Publique" && chat.is_owner)
+              if(chat.name != "Canal Publique" && user.username == chat.ownerUsername)
                 IconButton(
                   iconSize: 28,
                   icon: const Icon(Icons.highlight_remove),

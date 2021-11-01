@@ -85,9 +85,9 @@ class Messenger extends ChangeNotifier{
       List<Chat> userChannels = [];
       for (var channel in jsonResponse) {
         userChannels.add(Chat(name: channel['name'], id: channel['channel_id'], type: channel['type'],
-            is_owner: channel['is_owner'], messages: []));
+            ownerUsername: channel['owner_username'], messages: []));
       }
-      userChannels.insert(0, Chat(name: "Canal Publique", id: '0',  type: 'Public', is_owner: false, messages: []));
+      userChannels.insert(0, Chat(name: "Canal Publique", id: '0',  type: 'Public', ownerUsername: 'God', messages: []));
       updateUserChannels(userChannels);
     } else {
       print('Request failed with status: ${response.body}.');
@@ -105,7 +105,7 @@ class Messenger extends ChangeNotifier{
       List<Chat> allChannels = [];
       for (var channel in jsonResponse) {
         allChannels.add(Chat(name: channel['name'], id: channel['channel_id'], type: channel['type'],
-            updated_at: channel['updated_at'], messages: []));
+            ownerUsername: channel['owner_username'], updated_at: channel['updated_at'], messages: []));
       }
       updateAllChannels(allChannels);
     } else {

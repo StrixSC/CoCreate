@@ -71,6 +71,7 @@ class ChannelSocket extends SocketService {
       Chat channel = Chat(
           id: data['channelId'],
           name: data['channelName'],
+          ownerUsername: data['ownerUsername'],
           collaboration_id: data['collaborationId'],
           updated_at: data['updatedAt'],
           type: 'Public', messages: []);
