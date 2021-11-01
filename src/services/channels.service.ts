@@ -28,7 +28,6 @@ export const getAllChannels = async (): Promise<IChannel[]> => {
     channels.forEach((c: any) => {
         c.members.forEach((m: any) => {
             if (m.type === MemberType.Owner) {
-                console.log(JSON.stringify(m));
                 owner = m.member.profile?.username;
             }
         });
@@ -45,7 +44,14 @@ export const getAllChannels = async (): Promise<IChannel[]> => {
             type: c.type,
             collaboration_id: c.collaboration_id,
             updated_at: c.updated_at,
-            ownerUsername: owner
+            owner_username: channels.find((c) =>
+                c.members.find((m) => {
+                    let owner = 'Admin';
+                    if (m.type === MemberType.Owner) {
+                        owner = m.member.profile?.username || 'Admin';
+                    }
+                })
+            )
         };
     });
 
