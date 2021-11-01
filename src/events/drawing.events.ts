@@ -9,7 +9,7 @@ export = (io: Server, socket: Socket) => {
     };
 
     const onShapeDraw = (data: IShapeAction) => {
-        io.emit('shape:emit', {
+        io.emit('shape:receive', {
             ...data
         } as IShapeAction);
     };
