@@ -214,7 +214,31 @@ class _ChatScreenState extends State<ChatScreen> {
           style: TextStyle(fontSize: 25, color: Colors.blue),
         ),
         actions:
-          messenger.userChannels[widget.channelIndex].name != "Canal Publique" ? [IconButton(
+           [IconButton(
+               icon: const Icon(Icons.history_rounded, color: Colors.black, size:30),
+               onPressed: () {
+                 showDialog<String>(
+                     context: context,
+                     builder: (BuildContext context) => AlertDialog(
+                       title: Text('Historique du canal ${messenger.userChannels[widget.channelIndex].name}'),
+                       content: const Text("Voulez-vous obtenir l'historique du canal?"),
+                       actions: <Widget>[
+                         TextButton(
+                           onPressed: () { Navigator.pop(context, 'Non'); },
+                           child: const Text('Non'),
+                         ),
+                         TextButton(
+                           onPressed: () {
+                             Navigator.pop(context, 'Oui');
+                             messenger.fetchChannelHistory(widget.channelIndex);
+                             },
+                           child: const Text('Oui'),
+                         ),
+                       ],
+                     ));
+               }),
+             messenger.userChannels[widget.channelIndex].name != "Canal Publique" ?
+             IconButton(
             icon: const Icon(Icons.exit_to_app_rounded, color: Colors.black, size:30),
             onPressed: () {
               showDialog<String>(
@@ -224,7 +248,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     content: const Text('Êtes-vous certain?'),
                     actions: <Widget>[
                       TextButton(
-                        onPressed: () { Navigator.pop(context, 'Non');  print('Test NAAAME: ' + messenger.userChannels[widget.channelIndex].name); },
+                        onPressed: () { Navigator.pop(context, 'Non'); },
                         child: const Text('Non'),
                       ),
                       TextButton(
@@ -236,7 +260,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                   ],
                 ));
-              })]:[],
+              }):const SizedBox.shrink()
+           ],
       ),
       body: Column(
         children: [

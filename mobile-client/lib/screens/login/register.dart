@@ -1,15 +1,7 @@
 import 'dart:convert';
-import 'package:Colorimage/models/messenger.dart';
-import 'package:Colorimage/models/user.dart';
 import 'package:Colorimage/utils/rest/authentification_api.dart';
-import 'package:Colorimage/utils/rest/users_api.dart';
-import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:provider/src/provider.dart';
 import '../../app.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:Colorimage/utils/socket/socket_service.dart';
 
 TextEditingController emailController = TextEditingController();
 TextEditingController passController = TextEditingController();

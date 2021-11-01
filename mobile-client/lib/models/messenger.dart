@@ -84,7 +84,7 @@ class Messenger extends ChangeNotifier{
       print(jsonResponse);
       List<Chat> userChannels = [];
       for (var channel in jsonResponse) {
-        userChannels.add(Chat(name: channel['name'], id: channel['channel_id'], type: channel['type'],
+        userChannels.add(Chat(name: channel['name'], id: channel['channel_id'],
             ownerUsername: channel['owner_username'], messages: []));
       }
       userChannels.insert(0, Chat(name: "Canal Publique", id: '0',  type: 'Public', ownerUsername: 'God', messages: []));
@@ -114,7 +114,29 @@ class Messenger extends ChangeNotifier{
     }
   }
 
+  Future<void> fetchChannelHistory(index) async {
+    String channelId = userChannels[index].id;
+    ChannelAPI rest = ChannelAPI(user);
+    var  response = await rest.fetchChannelMessages(channelId);
+    if (response.statusCode == 200) {
+      var jsonResponse = json.decode(response.body) as List<dynamic>;//Map<String, dynamic>;
+      print('fetchChannelHistory');
+      print(jsonResponse);
+      List<ChatMessage> allMessages = [];
+      for (var message in jsonResponse) {
+        allMessages.add(ChatMessage(channelId: channelId, message_username: message['username'], text:  message['message_data'],
+          username: user.username, messageId: message['message_id'], timestamp: message['timestamp'],));
+      }
+      var reversedListMessages = allMessages.reversed.toList();
+      userChannels[index].messages = reversedListMessages;
+      notifyListeners();
+    } else {
+      print('Request failed with status: ${response.body}.');
+    }
+  }
+
   List<Chat> getAvailableChannels() {
+    print("availabel channels");
     List<Chat> availableChats = allChannels;
     for (Chat userChat in userChannels) {
       allChannels.removeWhere((allChat) => allChat.name == userChat.name);

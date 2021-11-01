@@ -7,13 +7,13 @@ class Chat {
 
   Chat( {
     required this.id,
-    required this.type,
     required this.name,
     required this.messages,
     this.lastReadMessage = "",
     this.ownerUsername  = "",
     this.collaboration_id = '',
     this.updated_at = '',
+    this.type = "",
 
   });
   @override

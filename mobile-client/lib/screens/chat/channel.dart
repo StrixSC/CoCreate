@@ -33,9 +33,11 @@ class _ChannelState extends State<Channel> {
           press: () { context.read<Messenger>().toggleSelection();})),
       const Divider(thickness: 2, color: Colors.black),
       MediaQuery.removePadding(context: context, removeTop: true, child:
-      ConstrainedBox(constraints: context.read<Messenger>().userChannels.isEmpty ? const BoxConstraints(minHeight: 5.0, maxHeight: 75.0) : const BoxConstraints(minHeight: 45.0, maxHeight: 475.0),
+      ConstrainedBox(constraints: context.read<Messenger>().userChannels.isEmpty ?
+          const BoxConstraints(minHeight: 5.0, maxHeight: 75.0) : const BoxConstraints(minHeight: 45.0, maxHeight: 475.0),
           child:
-          context.read<Messenger>().userChannels.isEmpty ?  const Center(child: Text("Joignez un canal pour discuter avec vos amis! 😄", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),)) :
+          context.read<Messenger>().userChannels.isEmpty ?
+          const Center(child: Text("Joignez un canal pour discuter avec vos amis! 😄", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),)) :
           ListView.builder(
             shrinkWrap: true,
             itemCount: context.read<Messenger>().userChannels.length,
@@ -44,7 +46,11 @@ class _ChannelState extends State<Channel> {
                     chat: context.watch<Messenger>().userChannels[index],
                     user: context.watch<Messenger>().user,
                     press: () {
-                      context.read<Messenger>().toggleSelection(); context.read<Messenger>().currentSelectedChannelIndex = index;
+                      context.read<Messenger>().toggleSelection();
+                      context.read<Messenger>().currentSelectedChannelIndex = index;
+                      if(context.read<Messenger>().userChannels[index].messages.isNotEmpty) {
+                        context.read<Messenger>().userChannels[index].lastReadMessage = context.read<Messenger>().userChannels[index].messages.last.text;
+                      }
                     }
                 ) : const SizedBox.shrink(),
           )
@@ -54,9 +60,11 @@ class _ChannelState extends State<Channel> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ElevatedButton(onPressed: () { joinChannelDialog(context.read<Messenger>().user); }, child: const Text('Joindre un canal', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500), )),
+            ElevatedButton(onPressed: () { joinChannelDialog(context.read<Messenger>().user); },
+                child: const Text('Joindre un canal', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500), )),
             const Padding(padding: EdgeInsets.fromLTRB(0, 0, 20, 0)),
-            ElevatedButton(onPressed: () { createChannelDialog();  }, child: const Text('Créer un canal', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),))
+            ElevatedButton(onPressed: () { createChannelDialog();  },
+                child: const Text('Créer un canal', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),))
           ]
       ),
     ]));

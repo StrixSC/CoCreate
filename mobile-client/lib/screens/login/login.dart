@@ -39,7 +39,7 @@ class _LoginState extends State<Login> {
     ),
   );
 
-  static const _fontSize = 25.0;
+  static const _fontSize = 20.0;
   static const padding = 30.0;
 
   Future<void> login(email, password) async {
@@ -179,7 +179,7 @@ class _LoginState extends State<Login> {
                   style:
                       ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
                   child: Text('Se connecter',
-                      style: new TextStyle(fontSize: 30.0)),
+                      style: new TextStyle(fontSize: 26.0)),
                 ),
             Padding(padding:  EdgeInsets.fromLTRB(0, 30, 0, 0), child: ElevatedButton(
                   onPressed: () {
@@ -189,7 +189,7 @@ class _LoginState extends State<Login> {
                   style:
                   ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
                   child: Text('Créer un compte',
-                      style: new TextStyle(fontSize: 30.0)),
+                      style: new TextStyle(fontSize: 26.0)),
                 )),
                 SizedBox(height: 24.0),
                 Padding(padding:  EdgeInsets.fromLTRB(0, 100, 0, 0), child:ElevatedButton(
