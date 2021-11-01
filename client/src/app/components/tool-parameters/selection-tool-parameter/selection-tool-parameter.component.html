@@ -8,4 +8,7 @@
     <button mat-flat-button id='color' matTooltip="Changer la couleur de fond" (click)="changeColor()" [disabled]='!hasSelection'>Couleur de fond</button>
     <button mat-flat-button id='width' matTooltip="Changer l'épaisseur'" (click)="changeThickness()" [disabled]='!hasSelection'>Épaisseur</button>
     
+    <button mat-flat-button id='addLayer' matTooltip="Ajouter une strate'" (click)="addLayer()" [disabled]='!hasSelection'>Ajouter strate</button>
+    <button mat-flat-button id='removeLayer' matTooltip="Enlever une strate'" (click)="removeLayer()" [disabled]='!hasSelection'>Enlever strate</button>
+    
 </div>
