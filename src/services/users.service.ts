@@ -127,21 +127,13 @@ export const getUserChannelsById = async (id: string): Promise<any> => {
         return [];
     }
 
-    let owner = 'Admin';
-    channels.forEach((c: any) => {
-        c.channel.members.forEach((m: any) => {
-            if (m.type === MemberType.Owner) {
-                console.log(JSON.stringify(m));
-                owner = m.member.profile?.username;
-            }
-        });
-    });
-
     return channels.map((c) => ({
         name: c.channel.name,
         index: c.channel.index,
         channel_id: c.channel.channel_id,
-        owner_username: owner,
+        owner_username:
+            c.channel.members.find((m) => m.type === MemberType.Owner)?.member.profile?.username ||
+            'Admin',
         is_owner: c.type === MemberType.Owner ? true : false
     }));
 };

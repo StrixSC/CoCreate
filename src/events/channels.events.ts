@@ -132,7 +132,7 @@ export = (io: Server, socket: Socket) => {
 
             socket.join(channel.channel_id.toString());
 
-            socket.emit('channel:created', {
+            io.emit('channel:created', {
                 channelId: channel.channel_id,
                 channelName: channel.name,
                 ownerUsername:
