@@ -24,19 +24,6 @@ export const getAllChannels = async (): Promise<IChannel[]> => {
         }
     });
 
-    let owner = 'Admin';
-    channels.forEach((c: any) => {
-        c.members.forEach((m: any) => {
-            if (m.type === MemberType.Owner) {
-                owner = m.member.profile?.username;
-            }
-        });
-    });
-
-    if (!owner) {
-        throw new create.InternalServerError('Error while fetching channel owner.');
-    }
-
     const returnVal = channels.map((c) => {
         return {
             name: c.name,
@@ -44,14 +31,9 @@ export const getAllChannels = async (): Promise<IChannel[]> => {
             type: c.type,
             collaboration_id: c.collaboration_id,
             updated_at: c.updated_at,
-            owner_username: channels.find((c) =>
-                c.members.find((m) => {
-                    let owner = 'Admin';
-                    if (m.type === MemberType.Owner) {
-                        owner = m.member.profile?.username || 'Admin';
-                    }
-                })
-            )
+            owner_username:
+                c.members.find((m) => m.type === MemberType.Owner)?.member.profile?.username ||
+                'Admin'
         };
     });
 
