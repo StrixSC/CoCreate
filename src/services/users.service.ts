@@ -127,7 +127,15 @@ export const getUserChannelsById = async (id: string): Promise<any> => {
         return [];
     }
 
-    let owner = retrieveOwnerFromChannels(channels);
+    let owner = 'Admin';
+    channels.forEach((c: any) => {
+        c.channel.members.forEach((m: any) => {
+            if (m.type === MemberType.Owner) {
+                console.log(JSON.stringify(m));
+                owner = m.member.profile?.username;
+            }
+        });
+    });
 
     return channels.map((c) => ({
         name: c.channel.name,

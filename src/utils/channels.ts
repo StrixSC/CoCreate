@@ -1,13 +1,8 @@
 import { MemberType } from '.prisma/client';
+import log from './logger';
 export const retrieveOwnerFromChannels = (channels: any[]): string => {
     let owner = '';
-    channels.forEach((c: any) => {
-        c.channel.members.forEach((m: any) => {
-            if (m.type === MemberType.Owner) {
-                owner = m.member.profile?.username || '';
-            }
-        });
-    });
+    log('DEBUG', JSON.stringify(channels));
 
     return owner;
 };

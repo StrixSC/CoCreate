@@ -24,7 +24,15 @@ export const getAllChannels = async (): Promise<IChannel[]> => {
         }
     });
 
-    let owner = retrieveOwnerFromChannels(channels);
+    let owner = 'Admin';
+    channels.forEach((c: any) => {
+        c.members.forEach((m: any) => {
+            if (m.type === MemberType.Owner) {
+                console.log(JSON.stringify(m));
+                owner = m.member.profile?.username;
+            }
+        });
+    });
 
     if (!owner) {
         throw new create.InternalServerError('Error while fetching channel owner.');
