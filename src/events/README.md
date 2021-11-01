@@ -61,6 +61,7 @@ Data:
     channelName: string,
     createdAt: string,
     updatedAt: string,
+    ownerUsername: string,
     collaborationId: string
 }
 ```

@@ -1,3 +1,4 @@
+import { MemberType } from '.prisma/client';
 import { ICompleteChannelData } from '../models/ICompleteChannelData.model';
 import { IReceiveMessagePayload } from './../models/IReceiveMessagePayload.model';
 import { ISendMessagePayload } from './../models/ISendMessagePayload.model';
@@ -9,15 +10,31 @@ import { IChannel } from '../models/IChannel.model';
 
 export const getAllChannels = async (): Promise<IChannel[]> => {
     const channels = await db.channel.findMany({
-        select: {
-            name: true,
-            type: true,
-            channel_id: true,
-            collaboration_id: true,
-            updated_at: true
+        include: {
+            members: {
+                include: {
+                    member: {
+                        include: {
+                            profile: true
+                        }
+                    }
+                }
+            }
         }
     });
-    return channels;
+
+    const returnVal = channels.map((c) => {
+        return {
+            name: c.name,
+            channel_id: c.channel_id,
+            type: c.type,
+            collaboration_id: c.collaboration_id,
+            updated_at: c.updated_at,
+            ownerUsername: c.members[0].member.profile!.username
+        };
+    });
+
+    return returnVal;
 };
 
 export const getChannelById = async (id: string): Promise<ICompleteChannelData | null> => {

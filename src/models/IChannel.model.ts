@@ -4,4 +4,5 @@ export interface IChannel {
     type: string;
     collaboration_id: string | null;
     updated_at: Date;
+    ownerUsername: string;
 }
