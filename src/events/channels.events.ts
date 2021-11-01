@@ -5,6 +5,7 @@ import { SocketEventError } from './../socket';
 import { Server, Socket } from 'socket.io';
 import validator from 'validator';
 import moment from 'moment';
+import log from '../utils/logger';
 
 const validateChannelId = (channelId: string) => {
     if (!channelId || validator.isEmpty(channelId)) {
@@ -106,7 +107,18 @@ export = (io: Server, socket: Socket) => {
                 data: {
                     name: channelName,
                     members: {
-                        create: [{ user_id: socket.data.user, type: 'Owner' }]
+                        create: [ { user_id: socket.data.user, type: 'Owner' } ]
+                    }
+                },
+                include: {
+                    members: {
+                        include: {
+                            member: {
+                                include: {
+                                    profile: true
+                                }
+                            }
+                        }
                     }
                 }
             });
@@ -117,11 +129,14 @@ export = (io: Server, socket: Socket) => {
                     'E1008'
                 );
 
+            const owner = channel.members[0].member.profile?.username;
+
             socket.join(channel.channel_id.toString());
 
             socket.emit('channel:created', {
                 channelId: channel.channel_id,
                 channelName: channel.name,
+                ownerUsername: owner,
                 createdAt: channel.created_at,
                 updatedAt: channel.updated_at,
                 collaborationId: channel.collaboration_id || null

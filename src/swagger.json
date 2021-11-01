@@ -1037,6 +1037,9 @@
                     },
                     "is_owner": {
                         "type": "boolean"
+                    },
+                    "owner_username": {
+                        "type": "string"
                     }
                 }
             },
@@ -1059,6 +1062,9 @@
                     "updated_at": {
                         "type": "string",
                         "example": "2021-10-25T02:17:36.301Z"
+                    },
+                    "owner_username": {
+                        "type": "string"
                     }
                 }
             },
