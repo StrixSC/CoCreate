@@ -18,7 +18,10 @@
     "docker-rebuild": "docker-compose up --build --force-recreate --renew-anon-volumes",
     "docker-unix-rebuild": "sudo docker-compose up --build --force-recreate --renew-anon-volumes",
     "psql": "psql --host=localhost --port=3001 --dbname=colorimage",
-    "setup": "npm install && npx prisma generate && npm run dev"
+    "setup": "npm install && npx prisma generate && npx prisma db seed && npm run dev"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
@@ -32,7 +35,7 @@
     "@types/http-errors": "^1.8.1",
     "@types/jsonwebtoken": "^8.5.5",
     "@types/morgan": "^1.9.3",
-    "@types/node": "^14.17.21",
+    "@types/node": "^14.17.32",
     "@types/passport": "^1.0.6",
     "@types/passport-local": "^1.0.34",
     "@types/pg": "^8.6.1",
@@ -49,7 +52,7 @@
     "prettier": "^2.4.1",
     "prisma": "^3.2.1",
     "ts-node": "^8.10.2",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.4"
   },
   "dependencies": {
     "@prisma/client": "^3.2.1",

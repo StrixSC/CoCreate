@@ -68,14 +68,6 @@ export const register = async (payload: IRegistrationPayload): Promise<User | nu
         }
     });
 
-    // const channelMember = await db.channelMember.create({
-    //     data: {
-    //         type: MemberType.Regular,
-    //         channel_id: 'PUBLIC',
-    //         user_id: user.user_id
-    //     }
-    // });
-
     return user;
 };
 
