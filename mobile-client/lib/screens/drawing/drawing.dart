@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:uuid/uuid.dart';
 
 class DrawingScreen extends StatefulWidget {
   final IO.Socket _socket;
@@ -15,23 +16,62 @@ class DrawingScreen extends StatefulWidget {
 }
 
 class _DrawingScreenState extends State<DrawingScreen> {
+  // todo: remove this once the drawing don't need it anymore.
   List<Offset> offsets = <Offset>[];
-  List<Paint> paintList = <Paint>[];
+
+  Map paintsMap = <String, Paint>{};
+
   Path path = Path();
   Offset endPoint = const Offset(-1, -1);
   String drawType = "line";
+  late String shapeID;
   final IO.Socket _socket;
+  Map actionsMap = <String, Map<String, List<Offset>>>{};
 
   _DrawingScreenState(this._socket);
 
   @override
   void initState() {
     super.initState();
-
     _socket.on('freedraw:receive', (data) {
       setState(() {
-        if(data['state'] == "down" || data['state'] == "move"){
-          offsets.add(Offset(data['x'], data['y']));
+        if (data['state'] == "down") {
+          Map map = <String, List<Offset>>{};
+          List<Offset> offsetList = <Offset>[];
+          offsetList.add(Offset(data['x'], data['y']));
+          map.putIfAbsent("line", () => offsetList);
+          actionsMap.putIfAbsent(
+              data['actionId'], () => map as Map<String, List<Offset>>);
+          final paint = Paint()
+            ..color = Color(data['color'])
+            ..isAntiAlias = true
+            ..strokeWidth = 3.0
+            ..style = PaintingStyle.stroke;
+          paintsMap.putIfAbsent(data['actionId'], () => paint);
+        } else if (data['state'] == "move") {
+          actionsMap.forEach((key, value) {
+            if (key == data['actionId']) {
+              value.values.first.add(Offset(data['x'], data['y']));
+              actionsMap.update(data['actionId'],
+                  (value) => value as Map<String, List<Offset>>);
+            }
+          });
+        } else {
+          // todo: maybe changing this when undo-redo will be create
+          // (actionsMap[data['actionId']] as Map<String, List<Offset>>)
+          //     .forEach((toolType, offsetList) {
+          //   path.moveTo(offsetList.first.dx, offsetList.first.dy);
+          //   for (var offset in offsetList) {
+          //     path.lineTo(offset.dx, offset.dy);
+          //   }
+          // });
+          actionsMap.forEach((key, value) {
+            if (key == data['actionId']) {
+              value.values.first.add(Offset(endPoint.dx, endPoint.dy));
+              actionsMap.update(data['actionId'],
+                  (value) => value as Map<String, List<Offset>>);
+            }
+          });
         }
       });
     });
@@ -49,105 +89,114 @@ class _DrawingScreenState extends State<DrawingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(actions: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(right: 20.0),
-          child: RaisedButton(
-            elevation: 3.0,
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Select a color'),
-                    content: SingleChildScrollView(
-                      child: BlockPicker(
-                        pickerColor: currentColor,
-                        onColorChanged: changeColor,
+      appBar: AppBar(
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: RaisedButton(
+              elevation: 3.0,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Select a color'),
+                      content: SingleChildScrollView(
+                        child: BlockPicker(
+                          pickerColor: currentColor,
+                          onColorChanged: changeColor,
+                        ),
                       ),
-                    ),
-                  );
-                },
-              );
-            },
-            child: const Text('Colors'),
-            color: currentColor,
-            textColor: useWhiteForeground(currentColor)
-                ? const Color(0xffffffff)
-                : const Color(0xff000000),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 20.0),
-          child: GestureDetector(
-            onTap: () {
-              drawType = "line";
-            },
-            child: const Icon(
-              CupertinoIcons.hand_draw_fill,
-              size: 26.0,
+                    );
+                  },
+                );
+              },
+              child: const Text('Colors'),
+              color: currentColor,
+              textColor: useWhiteForeground(currentColor)
+                  ? const Color(0xffffffff)
+                  : const Color(0xff000000),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 20.0),
-          child: GestureDetector(
-            onTap: () {
-              drawType = "select";
-            },
-            child: const Icon(
-              CupertinoIcons.hand_raised_fill,
-              size: 26.0,
+          Padding(
+            padding: const EdgeInsets.only(right: 20.0),
+            child: GestureDetector(
+              onTap: () {
+                drawType = "line";
+              },
+              child: const Icon(
+                CupertinoIcons.hand_draw_fill,
+                size: 26.0,
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 20.0),
-          child: GestureDetector(
-            onTap: () {
-              drawType = "cercle";
-            },
-            child: const Icon(
-              CupertinoIcons.circle,
-              size: 26.0,
+          Padding(
+            padding: const EdgeInsets.only(right: 20.0),
+            child: GestureDetector(
+              onTap: () {
+                drawType = "select";
+              },
+              child: const Icon(
+                CupertinoIcons.hand_raised_fill,
+                size: 26.0,
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 20.0),
-          child: GestureDetector(
-            onTap: () {
-              drawType = "rect";
-            },
-            child: const Icon(
-              CupertinoIcons.rectangle,
-              size: 26.0,
+          Padding(
+            padding: const EdgeInsets.only(right: 20.0),
+            child: GestureDetector(
+              onTap: () {
+                drawType = "cercle";
+              },
+              child: const Icon(
+                CupertinoIcons.circle,
+                size: 26.0,
+              ),
             ),
           ),
-        ),
-      ]),
+          Padding(
+            padding: const EdgeInsets.only(right: 20.0),
+            child: GestureDetector(
+              onTap: () {
+                drawType = "rect";
+              },
+              child: const Icon(
+                CupertinoIcons.rectangle,
+                size: 26.0,
+              ),
+            ),
+          ),
+        ],
+      ),
       body: GestureDetector(
         onPanStart: (details) {
           _socket.emit("freedraw:emit", {
             'x': details.localPosition.dx,
             'y': details.localPosition.dy,
-            'state': "down"
+            'state': "down",
+            'color': currentColor.value,
+            'actionId': shapeID = const Uuid().v1()
           });
         },
         onPanUpdate: (details) {
           _socket.emit("freedraw:emit", {
             'x': details.localPosition.dx,
             'y': details.localPosition.dy,
-            'state': "move"
+            'state': "move",
+            'actionId': shapeID
           });
         },
         onPanEnd: (details) {
-          _socket.emit("freedraw:emit",
-              {'x': endPoint.dx, 'y': endPoint.dy, 'state': "up"});
+          _socket.emit("freedraw:emit", {
+            'x': endPoint.dx,
+            'y': endPoint.dy,
+            'state': "up",
+            'actionId': shapeID
+          });
         },
         child: Center(
           child: CustomPaint(
-            painter: Painter(offsets, path, drawType, currentColor, paintList),
+            painter: Painter(path, drawType, paintsMap, actionsMap),
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
@@ -160,157 +209,156 @@ class _DrawingScreenState extends State<DrawingScreen> {
 }
 
 class Painter extends CustomPainter {
-  Painter(this.offsets, this.path, this.drawType, this.currentColor,
-      this.paintList);
-  List<Offset> offsets;
-  List<Paint> paintList;
-  Color currentColor;
+  Painter(this.path, this.drawType, this.paintsMap, this.actionsMap);
+  Map paintsMap;
   String drawType;
   Path path;
   Offset endPoint = const Offset(-1, -1);
   List<int> selectId = <int>[];
+  Map actionsMap;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = currentColor
+      ..color = Colors.black
       ..isAntiAlias = true
-      ..strokeWidth = 6.0
+      ..strokeWidth = 3.0
       ..style = PaintingStyle.stroke;
 
     List<PathMetric> pathMetrics;
 
     pathMetrics = path.computeMetrics().toList();
 
-    if (drawType == "line") {
-      for (var i = 0; i < offsets.length - 1; i++) {
-        if (offsets[i] != endPoint && offsets[i + 1] != endPoint) {
-          canvas.drawLine(offsets[i], offsets[i + 1], paint);
-        } else if (offsets[i] != endPoint) {
-          offsets.removeLast();
-          paintList.add(paint);
-          path.moveTo(offsets.first.dx, offsets.first.dy);
-          for (var offset in offsets) {
-            path.lineTo(offset.dx, offset.dy);
-          }
-          offsets.clear();
-        }
-      }
-    }
-
-    if (drawType == "select") {
-      for (var i = 0; i < pathMetrics.length; i++) {
-        for (var j = 0; j < pathMetrics.elementAt(i).length; j++) {
-          Tangent? tangent =
-              pathMetrics.elementAt(i).getTangentForOffset(j.toDouble());
-          if ((tangent!.position - offsets.first).distance.toInt() <=
-              paintList.elementAt(0).strokeWidth / 2) {
-            if (offsets.last != endPoint) {
-              Path dragPath = pathMetrics
-                  .elementAt(i)
-                  .extractPath(0, pathMetrics.elementAt(i).length)
-                  .shift(Offset(offsets.last.dx - offsets.first.dx,
-                      offsets.last.dy - offsets.first.dy));
-              canvas.drawPath(getCorner(dragPath), paintList.elementAt(i));
-              canvas.drawPath(dragPath, paintList.elementAt(i));
-              selectId.add(i);
-              break;
-            } else {
-              offsets.removeLast();
-              Path dragPath = pathMetrics
-                  .elementAt(i)
-                  .extractPath(0, pathMetrics.elementAt(i).length)
-                  .shift(Offset(offsets.last.dx - offsets.first.dx,
-                      offsets.last.dy - offsets.first.dy));
-              Paint paintCopy = paintList.removeAt(i);
-              paintList.add(paintCopy);
-              pathMetrics.removeAt(i);
-              path.reset();
-              for (var element in pathMetrics) {
-                path.addPath(
-                    element.extractPath(0, element.length), const Offset(0, 0));
-              }
-              path.addPath(dragPath, const Offset(0, 0));
-              offsets.add(endPoint);
-              selectId.add(i);
-              break;
+    actionsMap.forEach((actionId, action) {
+      action.forEach((toolType, offsetList) {
+        if (toolType == "line" && !offsetList.contains(endPoint)) {
+          for (var i = 0; i < offsetList.length - 1; i++) {
+            if (offsetList[i] != endPoint && offsetList[i + 1] != endPoint) {
+              canvas.drawLine(
+                  offsetList[i], offsetList[i + 1], paintsMap[actionId]);
             }
           }
+        } else if (toolType == "line" && offsetList.contains(endPoint)) {
+          for (var i = 0; i < offsetList.length - 2; i++) {
+            canvas.drawLine(
+                offsetList[i], offsetList[i + 1], paintsMap[actionId]);
+          }
         }
-        if (selectId.isNotEmpty) {
-          break;
-        }
-      }
-      if (offsets.last == endPoint) {
-        offsets.clear();
-      }
-    }
+      });
+    });
 
-    if (drawType == "cercle" || drawType == "rect") {
-      if (offsets.last == endPoint) {
-        offsets.removeLast();
-        Rect rectOrElip = Rect.fromLTRB(offsets.first.dx, offsets.first.dy,
-            offsets.last.dx, offsets.last.dy);
-        if (drawType == "cercle") {
-          paintList.add(paint);
-          path.addOval(rectOrElip);
-        } else {
-          paintList.add(paint);
-          path.addRect(rectOrElip);
-        }
-        offsets.clear();
-      } else {
-        Rect rectOrElip = Rect.fromLTRB(offsets.first.dx, offsets.first.dy,
-            offsets.last.dx, offsets.last.dy);
-        if (drawType == "cercle") {
-          canvas.drawOval(rectOrElip, paint);
-        } else {
-          canvas.drawRect(rectOrElip, paint);
-        }
-      }
-    }
+    // if (drawType == "select") {
+    //   for (var i = 0; i < pathMetrics.length; i++) {
+    //     for (var j = 0; j < pathMetrics.elementAt(i).length; j++) {
+    //       Tangent? tangent =
+    //           pathMetrics.elementAt(i).getTangentForOffset(j.toDouble());
+    //       if ((tangent!.position - offsets.first).distance.toInt() <=
+    //           paintList.elementAt(0).strokeWidth / 2) {
+    //         if (offsets.last != endPoint) {
+    //           Path dragPath = pathMetrics
+    //               .elementAt(i)
+    //               .extractPath(0, pathMetrics.elementAt(i).length)
+    //               .shift(Offset(offsets.last.dx - offsets.first.dx,
+    //                   offsets.last.dy - offsets.first.dy));
+    //           canvas.drawPath(getCorner(dragPath), paintList.elementAt(i));
+    //           canvas.drawPath(dragPath, paintList.elementAt(i));
+    //           selectId.add(i);
+    //           break;
+    //         } else {
+    //           offsets.removeLast();
+    //           Path dragPath = pathMetrics
+    //               .elementAt(i)
+    //               .extractPath(0, pathMetrics.elementAt(i).length)
+    //               .shift(Offset(offsets.last.dx - offsets.first.dx,
+    //                   offsets.last.dy - offsets.first.dy));
+    //           Paint paintCopy = paintList.removeAt(i);
+    //           paintList.add(paintCopy);
+    //           pathMetrics.removeAt(i);
+    //           path.reset();
+    //           for (var element in pathMetrics) {
+    //             path.addPath(
+    //                 element.extractPath(0, element.length), const Offset(0, 0));
+    //           }
+    //           path.addPath(dragPath, const Offset(0, 0));
+    //           offsets.add(endPoint);
+    //           selectId.add(i);
+    //           break;
+    //         }
+    //       }
+    //     }
+    //     if (selectId.isNotEmpty) {
+    //       break;
+    //     }
+    //   }
+    //   if (offsets.last == endPoint) {
+    //     offsets.clear();
+    //   }
+    // }
 
-    pathMetrics = path.computeMetrics().toList();
-    for (var i = 0; i < paintList.length; i++) {
-      if (selectId.isNotEmpty && offsets.isNotEmpty) {
-        if (selectId.elementAt(0) == i) {
-          //Don't draw the selected shape because it is already draw while
-          // shifting
-        } else {
-          PathMetric pathMetric = pathMetrics.elementAt(i);
-          canvas.drawPath(pathMetric.extractPath(0, pathMetric.length),
-              paintList.elementAt(i));
-        }
-      } else {
-        PathMetric pathMetric = pathMetrics.elementAt(i);
-        canvas.drawPath(pathMetric.extractPath(0, pathMetric.length),
-            paintList.elementAt(i));
-      }
-    }
+    // if (drawType == "cercle" || drawType == "rect") {
+    //   if (offsets.last == endPoint) {
+    //     offsets.removeLast();
+    //     Rect rectOrElip = Rect.fromLTRB(offsets.first.dx, offsets.first.dy,
+    //         offsets.last.dx, offsets.last.dy);
+    //     if (drawType == "cercle") {
+    //       paintList.add(paint);
+    //       path.addOval(rectOrElip);
+    //     } else {
+    //       paintList.add(paint);
+    //       path.addRect(rectOrElip);
+    //     }
+    //     offsets.clear();
+    //   } else {
+    //     Rect rectOrElip = Rect.fromLTRB(offsets.first.dx, offsets.first.dy,
+    //         offsets.last.dx, offsets.last.dy);
+    //     if (drawType == "cercle") {
+    //       canvas.drawOval(rectOrElip, paint);
+    //     } else {
+    //       canvas.drawRect(rectOrElip, paint);
+    //     }
+    //   }
+    // }
+
+    // pathMetrics = path.computeMetrics().toList();
+    // for (var i = 0; i < pathMetrics.length; i++) {
+    //   // if (selectId.isNotEmpty && offsets.isNotEmpty) {
+    //   //   if (selectId.elementAt(0) == i) {
+    //   //     //Don't draw the selected shape because it is already draw while
+    //   //     // shifting
+    //   //   } else {
+    //   //     PathMetric pathMetric = pathMetrics.elementAt(i);
+    //   //     canvas.drawPath(pathMetric.extractPath(0, pathMetric.length),
+    //   //         paintList.elementAt(i));
+    //   //   }
+    //   // } else {
+    //   PathMetric pathMetric = pathMetrics.elementAt(i);
+    //   canvas.drawPath(pathMetric.extractPath(0, pathMetric.length), paint);
+    // }
+    // }
   }
 
-  Path getCorner(Path dragPath) {
-    Rect bounds = dragPath.getBounds();
-    var pathCorner = Path();
-
-    pathCorner.moveTo(bounds.topLeft.dx + 5, bounds.topLeft.dy - 5);
-    pathCorner.lineTo(bounds.topLeft.dx - 5, bounds.topLeft.dy - 5);
-    pathCorner.lineTo(bounds.topLeft.dx - 5, bounds.topLeft.dy + 5);
-
-    pathCorner.moveTo(bounds.topRight.dx - 5, bounds.topRight.dy - 5);
-    pathCorner.lineTo(bounds.topRight.dx + 5, bounds.topRight.dy - 5);
-    pathCorner.lineTo(bounds.topRight.dx + 5, bounds.topRight.dy + 5);
-
-    pathCorner.moveTo(bounds.bottomLeft.dx - 5, bounds.bottomLeft.dy - 5);
-    pathCorner.lineTo(bounds.bottomLeft.dx - 5, bounds.bottomLeft.dy + 5);
-    pathCorner.lineTo(bounds.bottomLeft.dx + 5, bounds.bottomLeft.dy + 5);
-
-    pathCorner.moveTo(bounds.bottomRight.dx + 5, bounds.bottomRight.dy - 5);
-    pathCorner.lineTo(bounds.bottomRight.dx + 5, bounds.bottomRight.dy + 5);
-    pathCorner.lineTo(bounds.bottomRight.dx - 5, bounds.bottomRight.dy + 5);
-
-    return pathCorner;
-  }
+  // Path getCorner(Path dragPath) {
+  //   Rect bounds = dragPath.getBounds();
+  //   var pathCorner = Path();
+  //
+  //   pathCorner.moveTo(bounds.topLeft.dx + 5, bounds.topLeft.dy - 5);
+  //   pathCorner.lineTo(bounds.topLeft.dx - 5, bounds.topLeft.dy - 5);
+  //   pathCorner.lineTo(bounds.topLeft.dx - 5, bounds.topLeft.dy + 5);
+  //
+  //   pathCorner.moveTo(bounds.topRight.dx - 5, bounds.topRight.dy - 5);
+  //   pathCorner.lineTo(bounds.topRight.dx + 5, bounds.topRight.dy - 5);
+  //   pathCorner.lineTo(bounds.topRight.dx + 5, bounds.topRight.dy + 5);
+  //
+  //   pathCorner.moveTo(bounds.bottomLeft.dx - 5, bounds.bottomLeft.dy - 5);
+  //   pathCorner.lineTo(bounds.bottomLeft.dx - 5, bounds.bottomLeft.dy + 5);
+  //   pathCorner.lineTo(bounds.bottomLeft.dx + 5, bounds.bottomLeft.dy + 5);
+  //
+  //   pathCorner.moveTo(bounds.bottomRight.dx + 5, bounds.bottomRight.dy - 5);
+  //   pathCorner.lineTo(bounds.bottomRight.dx + 5, bounds.bottomRight.dy + 5);
+  //   pathCorner.lineTo(bounds.bottomRight.dx - 5, bounds.bottomRight.dy + 5);
+  //
+  //   return pathCorner;
+  // }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;

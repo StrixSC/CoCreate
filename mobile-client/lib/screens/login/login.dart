@@ -34,11 +34,25 @@ class _LoginState extends State<Login> {
   static const _fontSize = 25.0;
   static const padding = 30.0;
 
+  _toDrawing(BuildContext context) {
+    IO.Socket socket = IO.io(
+        'http://localhost:5000/',
+        IO.OptionBuilder()
+            .disableAutoConnect()
+            .setTransports(['websocket']) // for Flutter or Dart VM
+            .build());
+
+    socket.connect();
+
+    socket.on('connect', (_) {
+      Navigator.pushNamed(context, drawingRoute, arguments: {'socket': socket});
+    });
+  }
+
   _onSubmitTap(BuildContext context, String username) {
     // Initialize socket connection with server
     IO.Socket socket = IO.io(
-        // 'https://colorimage-109-3900.herokuapp.com/',
-        'http://2c28-132-207-3-195.ngrok.io/',
+        'http://localhost:5000/',
         IO.OptionBuilder()
             .disableAutoConnect()
             .setTransports(['websocket']) // for Flutter or Dart VM
@@ -71,8 +85,8 @@ class _LoginState extends State<Login> {
         usernameTaken = false;
       });
       socket.emit('join-channel', {'username': username});
-      Navigator.pushNamed(context, drawingRoute,
-          arguments: {'socket': socket});
+      Navigator.pushNamed(context, chatRoute,
+          arguments: {'username': username, 'socket': socket});
     });
   }
 
@@ -146,7 +160,7 @@ class _LoginState extends State<Login> {
                 SizedBox(height: 24.0),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, drawingRoute);
+                    _toDrawing(context);
                   },
                   style:
                       ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
