@@ -13,7 +13,7 @@ import { PencilCommand } from "./pencil-command";
 import { Pencil } from "./pencil.model";
 import { SynchronizeDrawingService } from "../../synchronize-drawing.service";
 import { ISendCoordPayload } from "src/app/model/ISendCoordPayload.model";
-import { Point } from "src/app/model/point.model";
+// import { Point } from "src/app/model/point.model";
 import { IDrawingSocketPayload } from "src/app/model/IDrawingSocketPayload";
 
 
