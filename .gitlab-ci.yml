@@ -4,8 +4,8 @@ variables:
   DOCKER_DRIVER: overlay
 
 stages:
-  - build
   - migrate
+  - build
 
 build:
   image: docker:latest
