@@ -6,6 +6,7 @@ import { dbErrorRouters } from './auth';
 import log from './logger';
 
 export const handleRequestError = (e: any, next: NextFunction) => {
+    log('DEBUG', e);
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
         log('ERROR', e.code);
         const error = dbErrorRouters[e.code];

@@ -28,5 +28,6 @@ prisma:
   script:
     - npm install -g prisma
     - DATABASE_URL="${DATABASE_URL}" prisma migrate deploy
+    - prisma db seed
   only:
     - main
