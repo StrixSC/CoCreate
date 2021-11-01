@@ -1,4 +1,4 @@
-import { ChannelType } from '.prisma/client';
+import { ChannelType, MemberType } from '.prisma/client';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
@@ -35,6 +35,9 @@ async function main() {
                     first_name: 'demo',
                     last_name: 'demo'
                 }
+            },
+            channels: {
+                create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
             }
         }
     });

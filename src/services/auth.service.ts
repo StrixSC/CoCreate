@@ -64,6 +64,9 @@ export const register = async (payload: IRegistrationPayload): Promise<User | nu
                     first_name: first_name,
                     last_name: last_name
                 }
+            },
+            channels: {
+                create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
             }
         }
     });
