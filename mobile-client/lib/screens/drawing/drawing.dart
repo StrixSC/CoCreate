@@ -38,38 +38,63 @@ class _DrawingScreenState extends State<DrawingScreen> {
         if (data['state'] == "down") {
           Map map = <String, List<Offset>>{};
           List<Offset> offsetList = <Offset>[];
-          offsetList.add(Offset(data['x'], data['y']));
+          offsetList.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
           map.putIfAbsent("line", () => offsetList);
+          actionsMap.putIfAbsent(
+              data['actionId'], () => map as Map<String, List<Offset>>);
+          final paint = Paint()
+            ..color = Color(data['color'])
+            // todo: en attandant que le client lourd integre les couleurs
+            // ..color = Color(0xFFFF9000)
+            ..isAntiAlias = true
+            ..strokeWidth = 3.0
+            ..style = PaintingStyle.stroke;
+          paintsMap.putIfAbsent(data['actionId'], () => paint);
+        } else if (data['state'] == "move") {
+          actionsMap.forEach((actionId, actionMap) {
+            if (actionId == data['actionId']) {
+              actionMap["line"]
+                  .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+              actionsMap.update(data['actionId'],
+                  (value) => actionMap as Map<String, List<Offset>>);
+            }
+          });
+        }
+      });
+    });
+
+    _socket.on('shapedraw:receive', (data) {
+      setState(() {
+        if (data['state'] == "down") {
+          Map map = <String, List<Offset>>{};
+          List<Offset> offsetList = <Offset>[];
+          offsetList.add(Offset(data['x'], data['y']));
+          map.putIfAbsent(data['shapeType'], () => offsetList);
           actionsMap.putIfAbsent(
               data['actionId'], () => map as Map<String, List<Offset>>);
           final paint = Paint()
             ..color = Color(data['color'])
             ..isAntiAlias = true
             ..strokeWidth = 3.0
-            ..style = PaintingStyle.stroke;
+            ..style = data['fill'] ? PaintingStyle.fill : PaintingStyle.stroke;
           paintsMap.putIfAbsent(data['actionId'], () => paint);
         } else if (data['state'] == "move") {
-          actionsMap.forEach((key, value) {
-            if (key == data['actionId']) {
-              value.values.first.add(Offset(data['x'], data['y']));
+          actionsMap.forEach((actionId, actionMap) {
+            if (actionId == data['actionId']) {
+              actionMap[data['shapeType']].add(Offset(data['x'], data['y']));
               actionsMap.update(data['actionId'],
-                  (value) => value as Map<String, List<Offset>>);
+                  (value) => actionMap as Map<String, List<Offset>>);
             }
           });
         } else {
-          // todo: maybe changing this when undo-redo will be create
-          // (actionsMap[data['actionId']] as Map<String, List<Offset>>)
-          //     .forEach((toolType, offsetList) {
-          //   path.moveTo(offsetList.first.dx, offsetList.first.dy);
-          //   for (var offset in offsetList) {
-          //     path.lineTo(offset.dx, offset.dy);
-          //   }
-          // });
-          actionsMap.forEach((key, value) {
-            if (key == data['actionId']) {
-              value.values.first.add(Offset(endPoint.dx, endPoint.dy));
+          actionsMap.forEach((actionId, actionMap) {
+            if (actionId == data['actionId']) {
+              List<Offset> rectOffsets = <Offset>[];
+              rectOffsets.add(actionMap.values.first.first);
+              rectOffsets.add(actionMap.values.first.last);
+              actionMap.update(data['shapeType'], (value) => rectOffsets);
               actionsMap.update(data['actionId'],
-                  (value) => value as Map<String, List<Offset>>);
+                  (value) => actionMap as Map<String, List<Offset>>);
             }
           });
         }
@@ -170,29 +195,101 @@ class _DrawingScreenState extends State<DrawingScreen> {
       ),
       body: GestureDetector(
         onPanStart: (details) {
-          _socket.emit("freedraw:emit", {
-            'x': details.localPosition.dx,
-            'y': details.localPosition.dy,
-            'state': "down",
-            'color': currentColor.value,
-            'actionId': shapeID = const Uuid().v1()
-          });
+          switch (drawType) {
+            case "line":
+              _socket.emit("freedraw:emit", {
+                'x': details.localPosition.dx,
+                'y': details.localPosition.dy,
+                'state': "down",
+                'color': currentColor.value,
+                'actionId': shapeID = const Uuid().v1()
+              });
+              break;
+            case "rect":
+              _socket.emit("shapedraw:emit", {
+                'x': details.localPosition.dx,
+                'y': details.localPosition.dy,
+                'state': "down",
+                'color': currentColor.value,
+                'actionId': shapeID = const Uuid().v1(),
+                // todo: add fill button
+                'fill': false,
+                'shapeType': "rect"
+              });
+              break;
+            case "cercle":
+              _socket.emit("shapedraw:emit", {
+                'x': details.localPosition.dx,
+                'y': details.localPosition.dy,
+                'state': "down",
+                'color': currentColor.value,
+                'actionId': shapeID = const Uuid().v1(),
+                // todo: add fill button
+                'fill': false,
+                'shapeType': "cercle"
+              });
+              break;
+          }
         },
         onPanUpdate: (details) {
-          _socket.emit("freedraw:emit", {
-            'x': details.localPosition.dx,
-            'y': details.localPosition.dy,
-            'state': "move",
-            'actionId': shapeID
-          });
+          switch (drawType) {
+            case "line":
+              _socket.emit("freedraw:emit", {
+                'x': details.localPosition.dx,
+                'y': details.localPosition.dy,
+                'state': "move",
+                'actionId': shapeID,
+              });
+              break;
+            case "rect":
+              _socket.emit("shapedraw:emit", {
+                'x': details.localPosition.dx,
+                'y': details.localPosition.dy,
+                'state': "move",
+                'actionId': shapeID,
+                'shapeType': "rect"
+              });
+              break;
+            case "cercle":
+              _socket.emit("shapedraw:emit", {
+                'x': details.localPosition.dx,
+                'y': details.localPosition.dy,
+                'state': "move",
+                'actionId': shapeID,
+                'shapeType': "cercle"
+              });
+              break;
+          }
         },
         onPanEnd: (details) {
-          _socket.emit("freedraw:emit", {
-            'x': endPoint.dx,
-            'y': endPoint.dy,
-            'state': "up",
-            'actionId': shapeID
-          });
+          switch (drawType) {
+            case "line":
+              _socket.emit("freedraw:emit", {
+                'x': endPoint.dx,
+                'y': endPoint.dy,
+                'state': "up",
+                'actionId': shapeID
+              });
+              break;
+            case "rect":
+              _socket.emit("shapedraw:emit", {
+                'x': endPoint.dx,
+                'y': endPoint.dy,
+                'state': "up",
+                'actionId': shapeID,
+                'shapeType': "rect"
+              });
+              break;
+            case "cercle":
+              _socket.emit("shapedraw:emit", {
+                'x': endPoint.dx,
+                'y': endPoint.dy,
+                'state': "up",
+                'actionId': shapeID,
+                'shapeType': "cercle"
+              });
+              break;
+          }
         },
         child: Center(
           child: CustomPaint(
@@ -219,30 +316,25 @@ class Painter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.black
-      ..isAntiAlias = true
-      ..strokeWidth = 3.0
-      ..style = PaintingStyle.stroke;
-
-    List<PathMetric> pathMetrics;
-
-    pathMetrics = path.computeMetrics().toList();
-
     actionsMap.forEach((actionId, action) {
       action.forEach((toolType, offsetList) {
-        if (toolType == "line" && !offsetList.contains(endPoint)) {
+        if (toolType == "line") {
           for (var i = 0; i < offsetList.length - 1; i++) {
             if (offsetList[i] != endPoint && offsetList[i + 1] != endPoint) {
               canvas.drawLine(
                   offsetList[i], offsetList[i + 1], paintsMap[actionId]);
             }
           }
-        } else if (toolType == "line" && offsetList.contains(endPoint)) {
-          for (var i = 0; i < offsetList.length - 2; i++) {
-            canvas.drawLine(
-                offsetList[i], offsetList[i + 1], paintsMap[actionId]);
-          }
+        }
+        if (toolType == "rect") {
+          Rect rect = Rect.fromLTRB(offsetList.first.dx, offsetList.first.dy,
+              offsetList.last.dx, offsetList.last.dy);
+          canvas.drawRect(rect, paintsMap[actionId]);
+        }
+        if (toolType == "cercle") {
+          Rect rect = Rect.fromLTRB(offsetList.first.dx, offsetList.first.dy,
+              offsetList.last.dx, offsetList.last.dy);
+          canvas.drawOval(rect, paintsMap[actionId]);
         }
       });
     });
