@@ -26,8 +26,7 @@ build:
 prisma:
   stage: migrate
   script:
-    - npm install -g prisma
-    - npm install -D typescript ts-node @types/node
+    - npm install -g prisma typescript ts-node @types/node
     - DATABASE_URL="${DATABASE_URL}" prisma migrate deploy
     - DATABASE_URL="${DATABASE_URL}" prisma db seed
   only:
