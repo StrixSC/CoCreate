@@ -29,6 +29,6 @@ prisma:
     - npm install -g prisma
     - npm install -D typescript ts-node @types/node
     - DATABASE_URL="${DATABASE_URL}" prisma migrate deploy
-    - prisma db seed
+    - DATABASE_URL="${DATABASE_URL}" prisma db seed
   only:
     - main
