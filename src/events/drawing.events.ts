@@ -3,13 +3,13 @@ import { Server, Socket } from 'socket.io';
 
 export = (io: Server, socket: Socket) => {
     const onFreedraw = (data: IFreedrawAction) => {
-        io.emit('freedraw:receive', {
+        io.emit('freedraw:received', {
             ...data
         } as IFreedrawAction);
     };
 
     const onShapeDraw = (data: IShapeAction) => {
-        io.emit('shape:receive', {
+        io.emit('shape:received', {
             ...data
         } as IShapeAction);
     };
