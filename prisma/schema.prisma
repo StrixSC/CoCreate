@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -10,59 +7,116 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Notes:
-// Index is used for ordering for cursors and pagination
-
 model User {
-  index Int @unique @default(autoincrement())
-  user_id String @unique @id @default(uuid())
-  email   String   @unique
+  index    Int             @unique @default(autoincrement())
+  user_id  String          @id @unique @default(uuid())
+  email    String          @unique
   password String
-  profile Profile?
-  stats Stats?
-  account Account?
-  logs Log[]
+  profile  Profile?
+  stats    Stats?
+  account  Account?
+  logs     Log[]
   channels ChannelMember[]
+  actions  Action[]
 }
 
 model Profile {
-  index Int @unique @default(autoincrement())
-  profile_id String @unique @id @default(uuid())
-  username String @unique
+  index      Int    @unique @default(autoincrement())
+  profile_id String @id @unique @default(uuid())
+  username   String @unique
   avatar_url String
-  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  user_id  String @unique
+  user       User   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_id    String @unique
 }
 
-model Account { 
-  account_id String @unique @id @default(uuid())
-  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  user_id String @unique
+model Account {
+  account_id String @id @unique @default(uuid())
+  user       User   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_id    String @unique
   first_name String
-  last_name String
+  last_name  String
 }
 
 model Stats {
-  index Int @unique @default(autoincrement())
-  stats_id String @unique @id @default(uuid())
-  user_id String
-  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  collaboration_count Int
-  author_count Int
-  active_team_count Int
+  index                      Int    @unique @default(autoincrement())
+  stats_id                   String @id @unique @default(uuid())
+  user_id                    String @unique
+  user                       User   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  collaboration_count        Int
+  author_count               Int
+  active_team_count          Int
   average_collaboration_time Float
-  total_collaboration_time Float
+  total_collaboration_time   Float
 }
 
 model Log {
-  index Int @unique @default(autoincrement())
-  log_id String @unique @id @default(uuid())
-  user_id String
-  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  type LogType
+  index      Int      @unique @default(autoincrement())
+  log_id     String   @id @unique @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  type       LogType
   created_at DateTime @default(now())
   drawing_id String?
 }
+
+model Channel {
+  index            Int             @unique @default(autoincrement())
+  name             String          @unique
+  channel_id       String          @id @unique @default(uuid())
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @default(now())
+  collaboration_id String?
+  members          ChannelMember[]
+  type             ChannelType     @default(Public)
+}
+
+model ChannelMember {
+  index      Int        @unique @default(autoincrement())
+  channel_id String
+  member_id  String     @id @unique @default(uuid())
+  user_id    String
+  type       MemberType
+  messages   Message[]
+  member     User       @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  created_at DateTime   @default(now())
+  channel    Channel    @relation(fields: [channel_id], references: [channel_id], onDelete: Cascade)
+}
+
+model Message {
+  index        Int           @unique @default(autoincrement())
+  message_id   String        @id @unique @default(uuid())
+  member_id    String
+  sender       ChannelMember @relation(fields: [member_id], references: [member_id], onDelete: Cascade)
+  message_data String
+  created_at   DateTime      @default(now())
+}
+
+model Drawing {
+  index            Int      @unique @default(autoincrement())
+  drawing_id       String   @id @unique @default(uuid())
+  thumbnail_url    String   @default("")
+  created_at       DateTime @default(now())
+  updated_at       DateTime @default(now())
+  collaboration_id String   @unique
+  // collaboration Collaboration (@relation(fields: [collaboration_id], references: [collaboration_id]))
+  Action           Action[]
+}
+
+model Action {
+  index       Int         @unique @default(autoincrement())
+  action_id   String      @id @unique @default(uuid())
+  user_id     String
+  user        User        @relation(fields: [user_id], references: [user_id])
+  drawing_id  String
+  drawing     Drawing     @relation(fields: [drawing_id], references: [drawing_id])
+  x           Float
+  y           Float
+  is_selected Boolean
+  state       ActionState
+  shape_type  ShapeType
+}
+
+// Enums
 
 enum LogType {
   Connection
@@ -70,9 +124,15 @@ enum LogType {
   DrawingUpdate
 }
 
-enum MemberType { 
+enum MemberType {
   Owner
   Regular
+}
+
+enum ActionState {
+  move
+  up
+  down
 }
 
 enum ChannelType {
@@ -80,34 +140,7 @@ enum ChannelType {
   Public
 }
 
-model Channel {
-  index Int @unique @default(autoincrement())
-  name String @unique
-  channel_id String @unique @id @default(uuid())
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
-  collaboration_id String?
-  members ChannelMember[]
-  type ChannelType @default(Public)
-}
-
-model ChannelMember {
-  index Int @unique @default(autoincrement())
-  channel_id String
-  member_id String @unique @id @default(uuid())
-  user_id String
-  type MemberType
-  messages Message[]
-  member User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  created_at DateTime @default(now())
-  channel Channel @relation(fields: [channel_id], references: [channel_id], onDelete: Cascade) 
-}
-
-model Message {
-  index Int @unique @default(autoincrement())
-  message_id String @unique @id @default(uuid())
-  member_id String
-  sender ChannelMember @relation(fields: [member_id], references: [member_id], onDelete: Cascade)
-  message_data String
-  created_at DateTime @default(now())
+enum ShapeType {
+  Rectangle
+  Ellipse
 }
