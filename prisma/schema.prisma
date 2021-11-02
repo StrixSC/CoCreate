@@ -114,6 +114,7 @@ model Action {
   is_selected Boolean
   state       ActionState
   shape_type  ShapeType
+  action_type ActionType
 }
 
 // Enums
@@ -143,4 +144,17 @@ enum ChannelType {
 enum ShapeType {
   Rectangle
   Ellipse
+}
+
+enum ActionType {
+  Freedraw
+  Shape
+  Select
+  Translate
+  Rotate
+  Delete
+  Resize
+  Text
+  Layer
+  UndoRedo
 }
