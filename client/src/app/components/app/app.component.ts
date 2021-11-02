@@ -24,6 +24,7 @@ export class AppComponent implements OnDestroy {
   constructor(public chatService: ChatService, private socketService: SocketService) {
     this.username = "";
     this.socketService.setupSocketConnection();
+    this.socketService.connect();
     this.currentValue = "";
     this.messages = [];
     this.users = [];

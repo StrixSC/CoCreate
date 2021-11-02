@@ -12,6 +12,7 @@ import { INITIAL_WIDTH, LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { PencilCommand } from './pencil-command';
 import { Pencil } from './pencil.model';
 import { SelectionToolService } from '../selection-tool/selection-tool.service';
+import { SynchronizeDrawingService } from '../../synchronize-drawing.service';
 
 /// Service de l'outil pencil, permet de créer des polyline en svg
 /// Il est possible d'ajuster le stroke width dans le form
@@ -32,7 +33,8 @@ export class PencilToolService implements Tools {
     private colorTool: ToolsColorService,
     private drawingService: DrawingService,
     private rendererService: RendererProviderService,
-    private selectionToolService: SelectionToolService
+    private selectionToolService: SelectionToolService,
+    private synchronizeDrawingService:SynchronizeDrawingService
   ) {
     this.strokeWidth = new FormControl(INITIAL_WIDTH);
     this.parameters = new FormGroup({
@@ -45,6 +47,9 @@ export class PencilToolService implements Tools {
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
       if (this.strokeWidth.valid) {
         const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
+        this.synchronizeDrawingService.sendMessage(offset.x,offset.y)
+        console.log(this.synchronizeDrawingService.x,"x")
+
         this.pencil = {
           pointsList: [offset],
           strokeWidth: this.strokeWidth.value,

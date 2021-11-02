@@ -1,3 +1,4 @@
+import 'package:Colorimage/constants/general.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
@@ -11,7 +12,6 @@ class ChatMessage extends StatelessWidget {
     required this.message_username,
     required this.timestamp,
   });
-
   final String text;
   final String username;
   final String message_username;
@@ -26,7 +26,7 @@ class ChatMessage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             (() {
-              if (this.username == this.message_username) {
+              if (username == message_username) {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -46,19 +46,16 @@ class ChatMessage extends StatelessWidget {
                             elevation: 0,
                             alignment: Alignment.topRight,
                             margin: EdgeInsets.only(top: 10),
-                            backGroundColor: Colors.indigo.shade400,
+                            backGroundColor: kPrimaryColor,
                             child: Container(
-                              color: Color(0xFF5D72CC),
+                              color: kPrimaryColor,
                               constraints: BoxConstraints(
                                 maxWidth:
-                                MediaQuery
-                                    .of(context)
-                                    .size
-                                    .width * 0.9,
+                                MediaQuery.of(context).size.width * 0.9,
                               ),
                               child: Text(
                                 text,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Colors.white, fontSize: 30),
                               ),
                             ),
@@ -69,12 +66,7 @@ class ChatMessage extends StatelessWidget {
                         ]),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        // Usually you dont have a Avatar showing for yourself
-                        // Padding(
-                        //     padding: EdgeInsets.fromLTRB(0, 45, 0, 0),
-                        //     child: CircleAvatar(child: Text(this.username[0])))
-                      ],
+                      children: const [],
                     ),
                   ],
                 );
@@ -87,10 +79,7 @@ class ChatMessage extends StatelessWidget {
                       children: [
                         Padding(
                             padding: EdgeInsets.fromLTRB(0, 45, 0, 0),
-                            child: CircleAvatar(backgroundColor: Color(
-                                0xFF5D72CC), child: Text(this
-                                .message_username[0],
-                              style: TextStyle(color: Colors.white),)))
+                            child: CircleAvatar(backgroundColor: kPrimaryColor, child: Text(this.message_username[0], style: TextStyle(color:Colors.white),)))
                       ],
                     ),
                     Column(
@@ -100,10 +89,7 @@ class ChatMessage extends StatelessWidget {
                               padding: EdgeInsets.fromLTRB(15, 0, 0, 0),
                               child: Text(this.message_username,
                                   style:
-                                  Theme
-                                      .of(context)
-                                      .textTheme
-                                      .headline6)),
+                                  Theme.of(context).textTheme.headline6)),
                           ChatBubble(
                             clipper: ChatBubbleClipper3(
                                 type: BubbleType.receiverBubble, radius: 15),
@@ -115,14 +101,11 @@ class ChatMessage extends StatelessWidget {
                             child: Container(
                               constraints: BoxConstraints(
                                 maxWidth:
-                                MediaQuery
-                                    .of(context)
-                                    .size
-                                    .width * 0.9,
+                                MediaQuery.of(context).size.width * 0.9,
                               ),
                               child: Text(
                                 text,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Colors.black, fontSize: 30),
                               ),
                             ),
@@ -143,20 +126,14 @@ class ChatMessage extends StatelessWidget {
 class ChatScreen extends StatefulWidget {
   final String _username;
   final IO.Socket _socket;
-
-  ChatScreen(this._username, this._socket);
-
+  Function callback;
+  ChatScreen(this._username, this._socket, this.callback, {Key? key}) : super(key: key);
   @override
   _ChatScreenState createState() =>
-      _ChatScreenState(this._username, this._socket);
+      _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final String _username;
-  final IO.Socket _socket;
-
-  _ChatScreenState(this._username, this._socket);
-
   final List<dynamic> _messages = [];
   final _textController = TextEditingController();
   bool _validate = false;
@@ -166,10 +143,10 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
 
-    _socket.on('receive-message', (data) {
+    widget._socket.on('receive-message', (data) {
       var message = ChatMessage(
           text: data['message'],
-          username: this._username,
+          username: widget._username,
           message_username: data['username'],
           timestamp: data['timestamp']);
       setState(() {
@@ -178,7 +155,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _focusNode.requestFocus();
     });
 
-    _socket.on('user-connection', (user) {
+    widget._socket.on('user-connection', (user) {
       print('Someone connected');
       print(user);
       var newConnection = Container(
@@ -197,7 +174,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _focusNode.requestFocus();
     });
 
-    _socket.on('user-disconnect', (user) {
+    widget._socket.on('user-disconnect', (user) {
       print('Someone disconnected');
       print(user);
       var newConnection = Container(
@@ -219,20 +196,19 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
-    _socket.dispose();
+    widget._socket.dispose();
     super.dispose();
   }
 
   void _handleSubmitted(String text) {
+    print('submitted :)');
     setState(() {
       _validate =
-          _textController.text.isEmpty || _textController.text
-              .trim()
-              .isEmpty;
+          _textController.text.isEmpty || _textController.text.trim().isEmpty;
     });
     if (!_validate) {
       _textController.clear();
-      this._socket.emit('send-message', {'message': text});
+      widget._socket.emit('send-message', {'message': text, 'channel': ''});
     }
   }
 
@@ -246,7 +222,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildTextComposer() {
     return IconTheme(
-      data: IconThemeData(color: Color(0xFF5D72CC)),
+      data: const IconThemeData(color:kPrimaryColor),
       child: Container(
         height: 75,
         margin: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -254,7 +230,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Flexible(
               child: TextField(
-                style: TextStyle(fontSize: 25),
+                style: const TextStyle(fontSize: 25),
                 controller: _textController,
                 onSubmitted: _handleSubmitted,
                 onChanged: _handleChange,
@@ -271,7 +247,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: IconButton(
                   iconSize: 34,
                   icon: const Icon(Icons.send),
-                  color: Colors.indigo.shade400,
+                  color: kPrimaryColor,
                   onPressed: () {
                     _handleSubmitted(_textController.text);
                   }),
@@ -288,14 +264,14 @@ class _ChatScreenState extends State<ChatScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: Tooltip(
-              message: 'Se déconnecter',
-              child: new Icon(Icons.arrow_back,
-                  color: Colors.black, size: 30)),
-          onPressed: () => Navigator.of(context).pop(),
+            icon: const Tooltip(
+                message: 'Se déconnecter',
+                child: Icon(Icons.arrow_back,
+                    color: Colors.black, size: 30)),
+            onPressed: () => widget.callback()
         ),
         backgroundColor: Colors.white,
-        title: Text(
+        title:  const Text(
           '',
           style: TextStyle(fontSize: 25, color: Colors.blue),
         ),
@@ -312,9 +288,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           const Divider(height: 1.0),
           Container(
-            decoration: BoxDecoration(color: Theme
-                .of(context)
-                .cardColor),
+            decoration: BoxDecoration(color: Theme.of(context).cardColor),
             child: _buildTextComposer(),
           ),
         ],
