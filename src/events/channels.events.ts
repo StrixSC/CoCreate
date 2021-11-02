@@ -1,3 +1,4 @@
+import { retrieveOwnerFromChannels } from './../utils/channels';
 import { handleSocketError } from './../utils/errors';
 import { MemberType, ChannelMember } from '.prisma/client';
 import { db } from './../db';
@@ -129,14 +130,14 @@ export = (io: Server, socket: Socket) => {
                     'E1008'
                 );
 
-            const owner = channel.members[0].member.profile?.username;
-
             socket.join(channel.channel_id.toString());
 
-            socket.emit('channel:created', {
+            io.emit('channel:created', {
                 channelId: channel.channel_id,
                 channelName: channel.name,
-                ownerUsername: owner,
+                ownerUsername:
+                    channel.members.find((m) => m.type === MemberType.Owner)?.member.profile
+                        ?.username || 'Admin',
                 createdAt: channel.created_at,
                 updatedAt: channel.updated_at,
                 collaborationId: channel.collaboration_id || null

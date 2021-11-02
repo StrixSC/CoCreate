@@ -6,7 +6,7 @@
 - Clone the repo
 - Go into the repo's directory
 - Create a file named `.env`
-- Add this line to the `.env` file: `DATABASE_URL=postgresql://admin:admin@localhost:5432/postgres`
+- Add this line to the `.env` file: `DATABASE_URL=postgresql://admin:admin@localhost:3001/postgres`
 - Run `docker-compose up`. If you're on a Unix based machine, you might need to run `sudo docker-compose up`. Wait for this to finish before doing the next step
 - Run `npm run setup`.
 - The server should now be up and running. 

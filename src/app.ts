@@ -72,8 +72,13 @@ app.use(async (req, res, next) => {
 });
 
 app.use((error: HttpError, req: Request, res: Response, next: NextFunction) => {
-    res.status(error.status || 500);
-    res.json(error);
+    log('CRITICAL', error);
+    if (error instanceof HttpError) {
+        res.status(error.status).json(error);
+    } else {
+        log('CRITICAL', error);
+        res.status(500).json(create(new create.InternalServerError()));
+    }
 });
 
 export { app, redisClient, getAsync, keysAsync, setAsync };

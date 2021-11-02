@@ -15,6 +15,33 @@ async function main() {
         }
     });
 
+    const systemUser = await prisma.user.upsert({
+        where: {
+            user_id: 'ADMIN'
+        },
+        update: {},
+        create: {
+            user_id: 'ADMIN',
+            email: 'admin',
+            password: '$2b$10$96mpoqKrG5rRdLKm16p9U.g9TQZNXjuLOXqRIZ4eVNwLC/tk.ajCe', // admin
+            profile: {
+                create: {
+                    username: 'admin',
+                    avatar_url: ''
+                }
+            },
+            account: {
+                create: {
+                    first_name: 'Admin',
+                    last_name: 'Admin'
+                }
+            },
+            channels: {
+                create: [{ channel_id: 'PUBLIC', type: MemberType.Owner }]
+            }
+        }
+    });
+
     const demoUser = await prisma.user.upsert({
         where: {
             user_id: 'DEMO'
@@ -23,7 +50,7 @@ async function main() {
         create: {
             user_id: 'DEMO',
             email: 'demo',
-            password: '$2b$10$BCGXlbIMN7mg0jXZ4lFpV.JQ5AqNSROSjqvhDN.ZQVf0P.ku20Lem',
+            password: '$2b$10$BCGXlbIMN7mg0jXZ4lFpV.JQ5AqNSROSjqvhDN.ZQVf0P.ku20Lem', // demo
             profile: {
                 create: {
                     username: 'demo',

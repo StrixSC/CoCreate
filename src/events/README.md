@@ -201,4 +201,4 @@ Possible Errors:
 3. `E1018`: Message must be between 1 and 256 characters.
 4. `E1019`: Could not send message: Channel ID does not match any existing channels.
 5. `E1020`: Could not send message: The user is not a part of the channel.
-5. `E1021`: Could not send message: Internal Socket Server Error.
+6. `E1021`: Could not send message: Internal Socket Server Error.

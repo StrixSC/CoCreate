@@ -1,21 +1,36 @@
-export enum ActionTool {
-  FREEDRAW = 'FREEDRAW',
-  SELECT = 'SELECT',
-  SHAPE_RECTANGLE = 'SHAPE_RECTANGLE',
-  SHAPE_ELLIPSE = 'SHAPE_ELLIPSE',
-  CHANGE_BG_COLOR = 'CHANGE_BG_COLOR',
+export enum DrawingState {
+    Move = 'move',
+    Down = 'down',
+    Up = 'up'
+}
+
+export enum ShapeType {
+    Rectangle = 'RECTANGLE',
+    Ellipse = 'Ellipse'
 }
 
 export interface IAction {
-  actionId: string;
-  type: ActionTool;
-  userId: string;
-  username: string;
-  timestamp: number;
-  x?: number;
-  y?: number;
-  color?: string;
-  width?: number;
-  fillColor?: string;
-  isSelected?: boolean;
+    actionId: string;
+    userId: string;
+    username: string;
+    isSelected: boolean;
+    timestamp: number;
+    state: DrawingState;
+}
+
+export interface IShapeAction extends IAction {
+    x: number;
+    y: number;
+    isFilled: boolean;
+    fillColor: number;
+    color: number;
+    width: number;
+    shapeType: ShapeType;
+}
+
+export interface IFreedrawAction extends IAction {
+    x: number;
+    y: number;
+    color: number;
+    width: number;
 }
