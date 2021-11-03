@@ -202,3 +202,66 @@ Possible Errors:
 4. `E1019`: Could not send message: Channel ID does not match any existing channels.
 5. `E1020`: Could not send message: The user is not a part of the channel.
 6. `E1021`: Could not send message: Internal Socket Server Error.
+
+
+# Drawing Events:
+
+## "ActionTypes":
+These are the accepted values of the actionType fields:
+
+```typescript
+  'Freedraw'
+  'Shape'
+  'Select'
+  'Translate'
+  'Rotate'
+  'Delete'
+  'Resize'
+  'Text'
+  'Layer'
+  'UndoRedo'
+```
+
+## Freedraw
+
+Event to emit (Client -> Socket): `freedraw:emit`
+
+Data:
+
+```typescript
+{
+    actionId: string,
+    username: string,
+    userId: string,
+    collaborationId: string,
+    actionType: string,
+    state: string,
+    isSelected: boolean,
+    x: number // float,
+    y: number // float,
+    color: number // integer,
+    width: number // float,
+}
+```
+
+Event emitted (Server -> Client): `freedraw:received`
+
+Data:
+
+```typescript
+{
+    actionId: string,
+    username: string,
+    userId: string,
+    collaborationId: string,
+    actionType: string,
+    state: string, // move/down/up
+    isSelected: boolean,
+    x: number // float,
+    y: number // float,
+    color: number // integer,
+    width: number // float,
+    timestamp: Date | string // ISO Format
+}
+```
+

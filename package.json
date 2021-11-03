@@ -18,7 +18,8 @@
     "docker-rebuild": "docker-compose up --build --force-recreate --renew-anon-volumes",
     "docker-unix-rebuild": "sudo docker-compose up --build --force-recreate --renew-anon-volumes",
     "psql": "psql --host=localhost --port=3001 --dbname=colorimage",
-    "setup": "npm install && npx prisma generate && npx prisma db seed && npm run dev"
+    "setup": "npm install && npx prisma generate && npx prisma db seed && npm run dev",
+    "prisma": "npx prisma generate && npx prisma migrate dev && npx prisma format"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

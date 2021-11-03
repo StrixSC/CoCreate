@@ -15,6 +15,7 @@ export interface IAction {
     username: string;
     isSelected: boolean;
     timestamp: number;
+    drawingId: string;
     state: DrawingState;
 }
 

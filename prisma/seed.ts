@@ -37,7 +37,7 @@ async function main() {
                 }
             },
             channels: {
-                create: [{ channel_id: 'PUBLIC', type: MemberType.Owner }]
+                create: [ { channel_id: 'PUBLIC', type: MemberType.Owner } ]
             }
         }
     });
@@ -64,7 +64,26 @@ async function main() {
                 }
             },
             channels: {
-                create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
+                create: [ { channel_id: 'PUBLIC', type: MemberType.Regular } ]
+            }
+        }
+    });
+
+    const demoCollaboration = await prisma.collaboration.upsert({
+        where: {
+            collaboration_id: 'DEMO_COLLABORATION'
+        },
+        update: {},
+        create: {
+            collaboration_id: 'DEMO_COLLABORATION',
+            drawing_id: 'DEMO_DRAWING',
+            collaboration_members: {
+                create: [ { user_id: 'DEMO', type: 'Owner' } ]
+            },
+            drawing: {
+                create: {
+                    drawing_id: 'DEMO_DRAWING'
+                }
             }
         }
     });

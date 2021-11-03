@@ -7,6 +7,7 @@ import corsOptions from '../cors';
 import passport from 'passport';
 import { checkAuthenticated } from '../middlewares/auth.middleware';
 import { handleSocketError } from './../utils/errors';
+import { logEvent } from './../middlewares/socket.middleware';
 
 // Events
 import drawingHandler from '../events/drawing.events';
@@ -88,16 +89,16 @@ io.use(wrap(checkAuthenticated));
 
 io.on('connection', onConnection);
 io_testing.on('connection', (socket) => {
-    log('INFO', '[SOCKET (Testing)]::SocketEventTriggered');
+    socket.use(logEvent(socket));
     drawingHandler(io_testing, socket);
 });
 
 io.of('/').adapter.on('create-room', (room) => {
-    log('INFO', `[SOCKET]::EventTriggered:: Room ${room} was created.`);
+    log('DEBUG', `Room ${room} was created.`);
 });
 
 io.of('/').adapter.on('join-room', (room, id) => {
-    log('INFO', `[SOCKET]::EventTriggered:: Room ${room} was joined by socket ${id}.`);
+    log('DEBUG', `Room ${room} was joined by socket ${id}.`);
 });
 
 const testingPort = 5000;

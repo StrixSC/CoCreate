@@ -108,7 +108,7 @@ export = (io: Server, socket: Socket) => {
                 data: {
                     name: channelName,
                     members: {
-                        create: [{ user_id: socket.data.user, type: 'Owner' }]
+                        create: [ { user_id: socket.data.user, type: 'Owner' } ]
                     }
                 },
                 include: {

@@ -22,7 +22,7 @@ services:
     command: "./wait-for-it.sh postgres:5432 -- npm run docker-dev"
   postgres:
     container_name: postgres
-    image: postgres:10.4
+    image: postgres:13.4
     ports:
       - "3001:5432"
     volumes:

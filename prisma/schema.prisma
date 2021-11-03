@@ -8,45 +8,52 @@ generator client {
 }
 
 model User {
-  index    Int             @unique @default(autoincrement())
-  user_id  String          @id @unique @default(uuid())
-  email    String          @unique
-  password String
-  profile  Profile?
-  stats    Stats?
-  account  Account?
-  logs     Log[]
-  channels ChannelMember[]
-  actions  Action[]
+  index          Int                   @unique @default(autoincrement())
+  user_id        String                @id @unique @default(uuid())
+  email          String                @unique
+  password       String
+  profile        Profile?
+  stats          Stats?
+  account        Account?
+  logs           Log[]
+  channels       ChannelMember[]
+  actions        Action[]
+  collaborations CollaborationMember[]
 }
 
 model Profile {
-  index      Int    @unique @default(autoincrement())
-  profile_id String @id @unique @default(uuid())
-  username   String @unique
+  index      Int      @unique @default(autoincrement())
+  profile_id String   @id @unique @default(uuid())
+  username   String   @unique
   avatar_url String
-  user       User   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  user_id    String @unique
+  user       User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_id    String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Account {
-  account_id String @id @unique @default(uuid())
-  user       User   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  user_id    String @unique
+  account_id String   @id @unique @default(uuid())
+  user       User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_id    String   @unique
   first_name String
   last_name  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Stats {
-  index                      Int    @unique @default(autoincrement())
-  stats_id                   String @id @unique @default(uuid())
-  user_id                    String @unique
-  user                       User   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  index                      Int      @unique @default(autoincrement())
+  stats_id                   String   @id @unique @default(uuid())
+  user_id                    String   @unique
+  user                       User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   collaboration_count        Int
   author_count               Int
   active_team_count          Int
   average_collaboration_time Float
   total_collaboration_time   Float
+  created_at                 DateTime @default(now())
+  updated_at                 DateTime @updatedAt
 }
 
 model Log {
@@ -55,8 +62,9 @@ model Log {
   user_id    String
   user       User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   type       LogType
-  created_at DateTime @default(now())
   drawing_id String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Channel {
@@ -64,7 +72,7 @@ model Channel {
   name             String          @unique
   channel_id       String          @id @unique @default(uuid())
   created_at       DateTime        @default(now())
-  updated_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
   collaboration_id String?
   members          ChannelMember[]
   type             ChannelType     @default(Public)
@@ -79,6 +87,7 @@ model ChannelMember {
   messages   Message[]
   member     User       @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
   channel    Channel    @relation(fields: [channel_id], references: [channel_id], onDelete: Cascade)
 }
 
@@ -92,33 +101,66 @@ model Message {
 }
 
 model Drawing {
-  index            Int      @unique @default(autoincrement())
-  drawing_id       String   @id @unique @default(uuid())
-  thumbnail_url    String   @default("")
-  created_at       DateTime @default(now())
-  updated_at       DateTime @default(now())
-  collaboration_id String   @unique
-  // collaboration Collaboration (@relation(fields: [collaboration_id], references: [collaboration_id]))
-  Action           Action[]
+  index            Int           @unique @default(autoincrement())
+  drawing_id       String        @id @unique @default(uuid())
+  thumbnail_url    String        @default("")
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+  collaboration_id String        @unique
+  collaboration    Collaboration @relation(fields: [collaboration_id], references: [collaboration_id], onDelete: Cascade)
 }
 
 model Action {
-  index       Int         @unique @default(autoincrement())
-  action_id   String      @id @unique @default(uuid())
-  user_id     String
-  user        User        @relation(fields: [user_id], references: [user_id])
-  drawing_id  String
-  drawing     Drawing     @relation(fields: [drawing_id], references: [drawing_id])
-  x           Float
-  y           Float
-  is_selected Boolean
-  state       ActionState
-  shape_type  ShapeType
-  action_type ActionType
+  index         Int           @unique @default(autoincrement())
+  dbActionId    String        @id @unique @default(uuid())
+  user          User          @relation(fields: [userId], references: [user_id])
+  collaboration Collaboration @relation(fields: [collaborationId], references: [collaboration_id], onDelete: Cascade)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Mandatory:
+  actionId        String
+  username        String
+  userId          String
+  collaborationId String
+  actionType      ActionType
+
+  // Freedraw:
+  x     Float?
+  y     Float?
+  color Int?
+  width Float?
+
+  // Shared:
+  state      ActionState?
+  isSelected Boolean?
+
+}
+
+model CollaborationMember {
+  collaboration_member_id String        @id @unique @default(uuid())
+  index                   Int           @unique @default(autoincrement())
+  type                    MemberType
+  collaboration_id        String
+  user_id                 String
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+  user                    User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  collaboration           Collaboration @relation(fields: [collaboration_id], references: [collaboration_id], onDelete: Cascade)
+}
+
+model Collaboration {
+  index                 Int                   @unique @default(autoincrement())
+  collaboration_id      String                @id @unique @default(uuid())
+  drawing_id            String                @unique
+  created_at            DateTime              @default(now())
+  updated_at            DateTime              @updatedAt
+  collaboration_members CollaborationMember[]
+  drawing               Drawing?
+  Action                Action[]
 }
 
 // Enums
-
 enum LogType {
   Connection
   Disconnection
@@ -144,6 +186,7 @@ enum ChannelType {
 enum ShapeType {
   Rectangle
   Ellipse
+  Null
 }
 
 enum ActionType {
