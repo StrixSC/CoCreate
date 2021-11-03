@@ -81,7 +81,8 @@ class _LoginState extends State<Login> {
 
   void initializeSocketConnection(user) {
     IO.Socket socket = IO.io(
-        'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000"),
+        'https://colorimage-109-3900.herokuapp.com/',
+        // 'http://localhost:5000/',
         IO.OptionBuilder()
             .setExtraHeaders({'Cookie': user.cookie})
             .disableAutoConnect()
@@ -90,6 +91,22 @@ class _LoginState extends State<Login> {
 
     ChannelSocket channelSocket = ChannelSocket(user, socket);
     context.read<Messenger>().setSocket(channelSocket);
+  }
+
+  _toDrawing(BuildContext context) {
+    IO.Socket socket = IO.io(
+        'http://localhost:5000/',
+        // 'http://edae-132-207-3-192.ngrok.io/',
+        IO.OptionBuilder()
+            .disableAutoConnect()
+            .setTransports(['websocket']) // for Flutter or Dart VM
+            .build());
+
+    socket.connect();
+
+    socket.on('connect', (_) {
+      Navigator.pushNamed(context, drawingRoute, arguments: {'socket': socket});
+    });
   }
 
   @override
@@ -203,7 +220,7 @@ class _LoginState extends State<Login> {
                     padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, drawingRoute);
+                    _toDrawing(context);
                       },
                       style: ElevatedButton.styleFrom(
                           minimumSize: Size(80.0, 80.0)),

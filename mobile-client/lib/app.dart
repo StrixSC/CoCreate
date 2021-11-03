@@ -49,7 +49,8 @@ class App extends StatelessWidget {
           screen = Home(arguments['user']);
           break;
         case drawingRoute:
-          screen = const DrawingScreen();
+          final arguments = settings.arguments as Map<String, dynamic>;
+          screen = DrawingScreen(arguments['socket']);
           break;
         default:
           screen = const Login();
