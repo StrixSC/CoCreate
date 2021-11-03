@@ -1,7 +1,9 @@
 import 'dart:ui';
 
+import 'package:Colorimage/models/drawing.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:uuid/uuid.dart';
@@ -18,7 +20,7 @@ class DrawingScreen extends StatefulWidget {
 class _DrawingScreenState extends State<DrawingScreen> {
   Map paintsMap = <String, Paint>{};
   Offset endPoint = const Offset(-1, -1);
-  String drawType = "line";
+  String drawType = DrawingType.freedraw;
   late String shapeID;
   final IO.Socket _socket;
   Map actionsMap = <String, Map<String, List<Offset>>>{};
@@ -30,13 +32,13 @@ class _DrawingScreenState extends State<DrawingScreen> {
   @override
   void initState() {
     super.initState();
-    _socket.on('freedraw:receive', (data) {
+    _socket.on('freedraw:received', (data) {
       setState(() {
-        if (data['state'] == "down") {
+        if (data['state'] == DrawingState.down) {
           Map map = <String, List<Offset>>{};
           List<Offset> offsetList = <Offset>[];
           offsetList.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-          map.putIfAbsent("line", () => offsetList);
+          map.putIfAbsent(DrawingType.freedraw, () => offsetList);
           actionsMap.putIfAbsent(
               data['actionId'], () => map as Map<String, List<Offset>>);
           final paint = Paint()
@@ -47,10 +49,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
             ..strokeWidth = 6.0
             ..style = PaintingStyle.stroke;
           paintsMap.putIfAbsent(data['actionId'], () => paint);
-        } else if (data['state'] == "move") {
+        } else if (data['state'] == DrawingState.move) {
           actionsMap.forEach((actionId, actionMap) {
             if (actionId == data['actionId']) {
-              actionMap["line"]
+              actionMap[DrawingType.freedraw]
                   .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
               actionsMap.update(data['actionId'],
                   (value) => actionMap as Map<String, List<Offset>>);
@@ -60,12 +62,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
       });
     });
 
-    _socket.on('shapedraw:receive', (data) {
+    _socket.on('shape:received', (data) {
       setState(() {
-        if (data['state'] == "down") {
+        if (data['state'] == DrawingState.down) {
           Map map = <String, List<Offset>>{};
           List<Offset> offsetList = <Offset>[];
-          offsetList.add(Offset(data['x'], data['y']));
+          offsetList.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
           map.putIfAbsent(data['shapeType'], () => offsetList);
           actionsMap.putIfAbsent(
               data['actionId'], () => map as Map<String, List<Offset>>);
@@ -73,12 +75,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
             ..color = Color(data['color'])
             ..isAntiAlias = true
             ..strokeWidth = 6.0
-            ..style = data['fill'] ? PaintingStyle.fill : PaintingStyle.stroke;
+            ..style = data['isFilled'] ? PaintingStyle.fill : PaintingStyle.stroke;
           paintsMap.putIfAbsent(data['actionId'], () => paint);
-        } else if (data['state'] == "move") {
+        } else if (data['state'] == DrawingState.move) {
           actionsMap.forEach((actionId, actionMap) {
             if (actionId == data['actionId']) {
-              actionMap[data['shapeType']].add(Offset(data['x'], data['y']));
+              actionMap[data['shapeType']].add(Offset(data['x'].toDouble(), data['y'].toDouble()));
               actionsMap.update(data['actionId'],
                   (value) => actionMap as Map<String, List<Offset>>);
             }
@@ -97,7 +99,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
         }
       });
     });
-    _socket.on('select:receive', (data) {
+    _socket.on('select:received', (data) {
       setState(() {
         selectedItems.add(data['selectedActionId']);
         print("");
@@ -150,7 +152,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
             padding: const EdgeInsets.only(right: 20.0),
             child: GestureDetector(
               onTap: () {
-                drawType = "line";
+                drawType = DrawingType.freedraw;
               },
               child: const Icon(
                 CupertinoIcons.hand_draw_fill,
@@ -174,7 +176,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
             padding: const EdgeInsets.only(right: 20.0),
             child: GestureDetector(
               onTap: () {
-                drawType = "cercle";
+                drawType = DrawingType.ellipse;
               },
               child: const Icon(
                 CupertinoIcons.circle,
@@ -186,7 +188,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
             padding: const EdgeInsets.only(right: 20.0),
             child: GestureDetector(
               onTap: () {
-                drawType = "rect";
+                drawType = DrawingType.rectangle;
               },
               child: const Icon(
                 CupertinoIcons.rectangle,
@@ -199,37 +201,37 @@ class _DrawingScreenState extends State<DrawingScreen> {
       body: GestureDetector(
         onPanStart: (details) {
           switch (drawType) {
-            case "line":
+            case DrawingType.freedraw:
               _socket.emit("freedraw:emit", {
                 'x': details.localPosition.dx,
                 'y': details.localPosition.dy,
-                'state': "down",
+                'state': DrawingState.down,
                 'color': currentColor.value,
                 'actionId': shapeID = const Uuid().v1()
               });
               break;
-            case "rect":
-              _socket.emit("shapedraw:emit", {
+            case DrawingType.rectangle:
+              _socket.emit("shape:emit", {
                 'x': details.localPosition.dx,
                 'y': details.localPosition.dy,
-                'state': "down",
+                'state': DrawingState.down,
                 'color': currentColor.value,
                 'actionId': shapeID = const Uuid().v1(),
                 // todo: add fill button
-                'fill': false,
-                'shapeType': "rect"
+                'isFilled': false,
+                'shapeType': DrawingType.rectangle
               });
               break;
-            case "cercle":
-              _socket.emit("shapedraw:emit", {
+            case DrawingType.ellipse:
+              _socket.emit("shape:emit", {
                 'x': details.localPosition.dx,
                 'y': details.localPosition.dy,
-                'state': "down",
+                'state': DrawingState.down,
                 'color': currentColor.value,
                 'actionId': shapeID = const Uuid().v1(),
                 // todo: add fill button
-                'fill': true,
-                'shapeType': "cercle"
+                'isFilled': false,
+                'shapeType': DrawingType.ellipse
               });
               break;
             case "select":
@@ -237,7 +239,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   Offset(details.localPosition.dx, details.localPosition.dy));
               if (selectItem != null && !selectedItems.contains(selectItem)) {
                 _socket.emit("select:emit", {
-                  'state': "down",
+                  'state': DrawingState.down,
                   'selectedActionId': selectItem,
                 });
                 mySelectedItem.add(selectItem);
@@ -247,60 +249,60 @@ class _DrawingScreenState extends State<DrawingScreen> {
         },
         onPanUpdate: (details) {
           switch (drawType) {
-            case "line":
+            case DrawingType.freedraw:
               _socket.emit("freedraw:emit", {
                 'x': details.localPosition.dx,
                 'y': details.localPosition.dy,
-                'state': "move",
+                'state': DrawingState.move,
                 'actionId': shapeID,
               });
               break;
-            case "rect":
-              _socket.emit("shapedraw:emit", {
+            case DrawingType.rectangle:
+              _socket.emit("shape:emit", {
                 'x': details.localPosition.dx,
                 'y': details.localPosition.dy,
-                'state': "move",
+                'state': DrawingState.move,
                 'actionId': shapeID,
-                'shapeType': "rect"
+                'shapeType': DrawingType.rectangle
               });
               break;
-            case "cercle":
-              _socket.emit("shapedraw:emit", {
+            case DrawingType.ellipse:
+              _socket.emit("shape:emit", {
                 'x': details.localPosition.dx,
                 'y': details.localPosition.dy,
-                'state': "move",
+                'state': DrawingState.move,
                 'actionId': shapeID,
-                'shapeType': "cercle"
+                'shapeType': DrawingType.ellipse
               });
               break;
           }
         },
         onPanEnd: (details) {
           switch (drawType) {
-            case "line":
+            case DrawingType.freedraw:
               _socket.emit("freedraw:emit", {
                 'x': endPoint.dx,
                 'y': endPoint.dy,
-                'state': "up",
+                'state': DrawingState.up,
                 'actionId': shapeID
               });
               break;
-            case "rect":
-              _socket.emit("shapedraw:emit", {
+            case DrawingType.rectangle:
+              _socket.emit("shape:emit", {
                 'x': endPoint.dx,
                 'y': endPoint.dy,
-                'state': "up",
+                'state': DrawingState.up,
                 'actionId': shapeID,
-                'shapeType': "rect"
+                'shapeType': DrawingType.rectangle
               });
               break;
-            case "cercle":
-              _socket.emit("shapedraw:emit", {
+            case DrawingType.ellipse:
+              _socket.emit("shape:emit", {
                 'x': endPoint.dx,
                 'y': endPoint.dy,
-                'state': "up",
+                'state': DrawingState.up,
                 'actionId': shapeID,
-                'shapeType': "cercle"
+                'shapeType': DrawingType.ellipse
               });
               break;
           }
@@ -322,7 +324,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
     List<String> overlapItems = <String>[];
     actionsMap.forEach((actionId, actionMap) {
       (actionMap as Map<String, List<Offset>>).forEach((action, offsetList) {
-        if (action == "line") {
+        if (action == DrawingType.freedraw) {
           Path path = Path();
           path.moveTo(offsetList.first.dx, offsetList.first.dy);
           for (int i = 1; i < offsetList.length; i++) {
@@ -336,11 +338,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
               overlapItems.add(actionId);
             }
           }
-        } else if (action == "rect" || action == "cercle") {
+        } else if (action == DrawingType.rectangle || action == DrawingType.ellipse) {
           Rect rect = Rect.fromLTRB(offsetList.first.dx, offsetList.first.dy,
               offsetList.last.dx, offsetList.last.dy);
           Path path = Path();
-          if (action == "rect") {
+          if (action == DrawingType.rectangle) {
             path.addRect(rect);
           } else {
             path.addOval(rect);
@@ -368,18 +370,18 @@ class Painter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     actionsMap.forEach((actionId, action) {
       action.forEach((toolType, offsetList) {
-        if (toolType == "line") {
+        if (toolType == DrawingType.freedraw) {
           for (var i = 0; i < offsetList.length - 1; i++) {
             canvas.drawLine(
                 offsetList[i], offsetList[i + 1], paintsMap[actionId]);
           }
         }
-        if (toolType == "rect") {
+        if (toolType == DrawingType.rectangle) {
           Rect rect = Rect.fromLTRB(offsetList.first.dx, offsetList.first.dy,
               offsetList.last.dx, offsetList.last.dy);
           canvas.drawRect(rect, paintsMap[actionId]);
         }
-        if (toolType == "cercle") {
+        if (toolType == DrawingType.ellipse) {
           Rect rect = Rect.fromLTRB(offsetList.first.dx, offsetList.first.dy,
               offsetList.last.dx, offsetList.last.dy);
           canvas.drawOval(rect, paintsMap[actionId]);
