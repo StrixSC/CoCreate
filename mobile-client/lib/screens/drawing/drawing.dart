@@ -16,17 +16,14 @@ class DrawingScreen extends StatefulWidget {
 }
 
 class _DrawingScreenState extends State<DrawingScreen> {
-  // todo: remove this once the drawing don't need it anymore.
-  List<Offset> offsets = <Offset>[];
-
   Map paintsMap = <String, Paint>{};
-
-  Path path = Path();
   Offset endPoint = const Offset(-1, -1);
   String drawType = "line";
   late String shapeID;
   final IO.Socket _socket;
   Map actionsMap = <String, Map<String, List<Offset>>>{};
+  List<String> selectedItems = <String>[];
+  List<String> mySelectedItem = <String>[];
 
   _DrawingScreenState(this._socket);
 
@@ -47,7 +44,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
             // todo: en attandant que le client lourd integre les couleurs
             // ..color = Color(0xFFFF9000)
             ..isAntiAlias = true
-            ..strokeWidth = 3.0
+            ..strokeWidth = 6.0
             ..style = PaintingStyle.stroke;
           paintsMap.putIfAbsent(data['actionId'], () => paint);
         } else if (data['state'] == "move") {
@@ -75,7 +72,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
           final paint = Paint()
             ..color = Color(data['color'])
             ..isAntiAlias = true
-            ..strokeWidth = 3.0
+            ..strokeWidth = 6.0
             ..style = data['fill'] ? PaintingStyle.fill : PaintingStyle.stroke;
           paintsMap.putIfAbsent(data['actionId'], () => paint);
         } else if (data['state'] == "move") {
@@ -98,6 +95,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
             }
           });
         }
+      });
+    });
+    _socket.on('select:receive', (data) {
+      setState(() {
+        selectedItems.add(data['selectedActionId']);
+        print("");
       });
     });
   }
@@ -225,9 +228,20 @@ class _DrawingScreenState extends State<DrawingScreen> {
                 'color': currentColor.value,
                 'actionId': shapeID = const Uuid().v1(),
                 // todo: add fill button
-                'fill': false,
+                'fill': true,
                 'shapeType': "cercle"
               });
+              break;
+            case "select":
+              String? selectItem = getSelectedId(
+                  Offset(details.localPosition.dx, details.localPosition.dy));
+              if (selectItem != null && !selectedItems.contains(selectItem)) {
+                _socket.emit("select:emit", {
+                  'state': "down",
+                  'selectedActionId': selectItem,
+                });
+                mySelectedItem.add(selectItem);
+              }
               break;
           }
         },
@@ -293,7 +307,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
         },
         child: Center(
           child: CustomPaint(
-            painter: Painter(path, drawType, paintsMap, actionsMap),
+            painter: Painter(drawType, paintsMap, actionsMap),
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
@@ -303,15 +317,51 @@ class _DrawingScreenState extends State<DrawingScreen> {
       ),
     );
   }
+
+  String? getSelectedId(Offset offset) {
+    List<String> overlapItems = <String>[];
+    actionsMap.forEach((actionId, actionMap) {
+      (actionMap as Map<String, List<Offset>>).forEach((action, offsetList) {
+        if (action == "line") {
+          Path path = Path();
+          path.moveTo(offsetList.first.dx, offsetList.first.dy);
+          for (int i = 1; i < offsetList.length; i++) {
+            path.lineTo(offsetList[i].dx, offsetList[i].dy);
+          }
+          for (int i = 0; i < path.computeMetrics().first.length; i++) {
+            Tangent? tangent =
+                path.computeMetrics().first.getTangentForOffset(i.toDouble());
+            if ((tangent!.position - offset).distance.toInt() <=
+                paintsMap[actionId].strokeWidth / 2) {
+              overlapItems.add(actionId);
+            }
+          }
+        } else if (action == "rect" || action == "cercle") {
+          Rect rect = Rect.fromLTRB(offsetList.first.dx, offsetList.first.dy,
+              offsetList.last.dx, offsetList.last.dy);
+          Path path = Path();
+          if (action == "rect") {
+            path.addRect(rect);
+          } else {
+            path.addOval(rect);
+          }
+          if (path.contains(offset)) {
+            overlapItems.add(actionId);
+          }
+        }
+      });
+    });
+    if(overlapItems.isNotEmpty){
+      return overlapItems.last;
+    }
+    return null;
+  }
 }
 
 class Painter extends CustomPainter {
-  Painter(this.path, this.drawType, this.paintsMap, this.actionsMap);
+  Painter(this.drawType, this.paintsMap, this.actionsMap);
   Map paintsMap;
   String drawType;
-  Path path;
-  Offset endPoint = const Offset(-1, -1);
-  List<int> selectId = <int>[];
   Map actionsMap;
 
   @override
@@ -320,10 +370,8 @@ class Painter extends CustomPainter {
       action.forEach((toolType, offsetList) {
         if (toolType == "line") {
           for (var i = 0; i < offsetList.length - 1; i++) {
-            if (offsetList[i] != endPoint && offsetList[i + 1] != endPoint) {
-              canvas.drawLine(
-                  offsetList[i], offsetList[i + 1], paintsMap[actionId]);
-            }
+            canvas.drawLine(
+                offsetList[i], offsetList[i + 1], paintsMap[actionId]);
           }
         }
         if (toolType == "rect") {
@@ -384,30 +432,6 @@ class Painter extends CustomPainter {
     //   }
     //   if (offsets.last == endPoint) {
     //     offsets.clear();
-    //   }
-    // }
-
-    // if (drawType == "cercle" || drawType == "rect") {
-    //   if (offsets.last == endPoint) {
-    //     offsets.removeLast();
-    //     Rect rectOrElip = Rect.fromLTRB(offsets.first.dx, offsets.first.dy,
-    //         offsets.last.dx, offsets.last.dy);
-    //     if (drawType == "cercle") {
-    //       paintList.add(paint);
-    //       path.addOval(rectOrElip);
-    //     } else {
-    //       paintList.add(paint);
-    //       path.addRect(rectOrElip);
-    //     }
-    //     offsets.clear();
-    //   } else {
-    //     Rect rectOrElip = Rect.fromLTRB(offsets.first.dx, offsets.first.dy,
-    //         offsets.last.dx, offsets.last.dy);
-    //     if (drawType == "cercle") {
-    //       canvas.drawOval(rectOrElip, paint);
-    //     } else {
-    //       canvas.drawRect(rectOrElip, paint);
-    //     }
     //   }
     // }
 
