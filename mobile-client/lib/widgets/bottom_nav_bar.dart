@@ -1,4 +1,3 @@
-import 'package:Colorimage/models/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
@@ -7,8 +6,8 @@ import '../screens/chat/channel.dart';
 
 class BottomNavBar extends StatelessWidget {
   final PersistentTabController _controller;
-  final User _user;
-  BottomNavBar(this._controller, this._user);
+  final String _username;
+  BottomNavBar(this._controller, this._username);
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +15,7 @@ class BottomNavBar extends StatelessWidget {
           context,
           navBarHeight: 75,
           controller: this._controller,
-          screens: _buildScreens(context, this._user),
+          screens: _buildScreens(context, this._username),
           items: _navBarsItems(),
           confineInSafeArea: true,
           backgroundColor: Colors.white, // Default is Colors.white.
@@ -44,7 +43,7 @@ class BottomNavBar extends StatelessWidget {
   }
 }
 
-List<Widget> _buildScreens(context, user) {
+List<Widget> _buildScreens(context, username) {
   return [
     Container(),
     Container(),
