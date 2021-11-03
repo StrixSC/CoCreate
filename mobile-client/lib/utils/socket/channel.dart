@@ -74,8 +74,8 @@ class ChannelSocket extends SocketService {
           id: data['channelId'],
           name: data['channelName'],
           ownerUsername: data['ownerUsername'],
-          collaboration_id: data['collaborationId'],
-          updated_at: data['updatedAt'],
+          collaborationId: data['collaborationId'],
+          updatedAt: data['updatedAt'],
           type: 'Public',
           messages: []);
       callbackChannel('created', channel);
@@ -97,7 +97,7 @@ class ChannelSocket extends SocketService {
       Chat channel = Chat(
           id: data['channelId'],
           name: data['channelName'],
-          updated_at: data['updatedAt'],
+          updatedAt: data['updatedAt'],
           type: 'Public',
           messages: []);
       callbackChannel('updated', channel);

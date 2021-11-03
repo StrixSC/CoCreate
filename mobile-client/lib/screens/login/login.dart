@@ -71,7 +71,7 @@ class _LoginState extends State<Login> {
       initializeSocketConnection(user);
 
       // Home Page
-      Navigator.pushNamed(context, HomeRoute, arguments: {'user': user});
+      Navigator.pushNamed(context, homeRoute, arguments: {'user': user});
 
       print(user);
     } else {
@@ -81,7 +81,8 @@ class _LoginState extends State<Login> {
 
   void initializeSocketConnection(user) {
     IO.Socket socket = IO.io(
-        'https://colorimage-109-3900.herokuapp.com/',
+        'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000"),
+        // 'https://colorimage-109-3900.herokuapp.com/',
         // 'http://localhost:5000/',
         IO.OptionBuilder()
             .setExtraHeaders({'Cookie': user.cookie})
@@ -116,120 +117,122 @@ class _LoginState extends State<Login> {
         body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Form(
             key: _formKey,
-            child: ListView(
-              shrinkWrap: true,
-              padding: EdgeInsets.only(left: 100.0, right: 100.0),
-              children: <Widget>[
-                SizedBox(height: 48.0),
-                Text('Connexion',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 40.0,
-                        color: primaryColor)),
-                SizedBox(height: 24.0),
-                TextFormField(
-                  style: const TextStyle(fontSize: _fontSize),
-                  controller: userController,
-                  maxLines: 1,
-                  autofocus: false,
-                  decoration: InputDecoration(
-                    errorStyle: const TextStyle(fontSize: _fontSize),
-                    hintText: "Courriel",
-                    hintStyle: const TextStyle(
-                      fontSize: _fontSize,
-                    ),
-                    contentPadding: const EdgeInsets.all(padding),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0)),
-                  ),
-                  autovalidate: true,
-                  // onFieldSubmitted: (value) {
-                  //   if (_formKey.currentState!.validate()) {
-                  //     _onSubmitTap(context, userController.text);
-                  //   }
-                  // },
-                ),
-                Padding(
-                    padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
-                    child: TextFormField(
-                      style: const TextStyle(fontSize: _fontSize),
-                      controller: passController,
-                      maxLines: 1,
-                      autofocus: false,
-                      decoration: InputDecoration(
-                        errorStyle: const TextStyle(fontSize: _fontSize),
-                        hintText: "Password",
-                        hintStyle: const TextStyle(
-                          fontSize: _fontSize,
-                        ),
-                        contentPadding: const EdgeInsets.all(padding),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0)),
+            child: Expanded(
+              child: ListView(
+                shrinkWrap: true,
+                padding: EdgeInsets.only(left: 100.0, right: 100.0),
+                children: <Widget>[
+                  SizedBox(height: 48.0),
+                  Text('Connexion',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 40.0,
+                          color: primaryColor)),
+                  SizedBox(height: 24.0),
+                  TextFormField(
+                    style: const TextStyle(fontSize: _fontSize),
+                    controller: userController,
+                    maxLines: 1,
+                    autofocus: false,
+                    decoration: InputDecoration(
+                      errorStyle: const TextStyle(fontSize: _fontSize),
+                      hintText: "Courriel",
+                      hintStyle: const TextStyle(
+                        fontSize: _fontSize,
                       ),
-                      obscureText: true,
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      autovalidate: true,
-                      onFieldSubmitted: (value) {
-                        if (_formKey.currentState!.validate()) {
-                          login(userController.text, passController.text);
-                        }
-                      },
-                    )),
-                usernameTaken
-                    ? const Padding(
-                        padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
-                        child: Text("Le nom d'utilisateur est déjà pris",
-                            style:
-                                TextStyle(color: Colors.red, fontSize: 25.0)))
-                    : usernameEmpty
-                        ? const Padding(
-                            padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
-                            child: Text("Veuillez entrer un nom d'utilisateur",
-                                style: TextStyle(
-                                    color: Colors.red, fontSize: 25.0)))
-                        : Text(""),
-                const SizedBox(height: 24.0),
-                ElevatedButton(
-                  onPressed: () {
-                    // Validate will return true if the form is valid, or false if
-                    // the form is invalid.
-                    if (_formKey.currentState!.validate()) {
-                      login(userController.text, passController.text);
-                    }
-                  },
-                  style:
-                      ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
-                  child: Text('Se connecter',
-                      style: new TextStyle(fontSize: 26.0)),
-                ),
-                Padding(
-                    padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Validate will return true if the form is valid, or false if
-                        Navigator.pushNamed(context, RegisterRoute);
-                      },
-                      style: ElevatedButton.styleFrom(
-                          minimumSize: Size(80.0, 80.0)),
-                      child: Text('Créer un compte',
-                          style: new TextStyle(fontSize: 26.0)),
-                    )),
-                SizedBox(height: 24.0),
-                Padding(
-                    padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                    _toDrawing(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                          minimumSize: Size(80.0, 80.0)),
-                      child: Text('Dessiner sans connexion',
-                          style: new TextStyle(fontSize: 30.0)),
-                    )),
-              ],
+                      contentPadding: const EdgeInsets.all(padding),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0)),
+                    ),
+                    autovalidate: true,
+                    // onFieldSubmitted: (value) {
+                    //   if (_formKey.currentState!.validate()) {
+                    //     _onSubmitTap(context, userController.text);
+                    //   }
+                    // },
+                  ),
+                  Padding(
+                      padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                      child: TextFormField(
+                        style: const TextStyle(fontSize: _fontSize),
+                        controller: passController,
+                        maxLines: 1,
+                        autofocus: false,
+                        decoration: InputDecoration(
+                          errorStyle: const TextStyle(fontSize: _fontSize),
+                          hintText: "Password",
+                          hintStyle: const TextStyle(
+                            fontSize: _fontSize,
+                          ),
+                          contentPadding: const EdgeInsets.all(padding),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0)),
+                        ),
+                        obscureText: true,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        autovalidate: true,
+                        onFieldSubmitted: (value) {
+                          if (_formKey.currentState!.validate()) {
+                            login(userController.text, passController.text);
+                          }
+                        },
+                      )),
+                  usernameTaken
+                      ? const Padding(
+                          padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
+                          child: Text("Le nom d'utilisateur est déjà pris",
+                              style:
+                                  TextStyle(color: Colors.red, fontSize: 25.0)))
+                      : usernameEmpty
+                          ? const Padding(
+                              padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
+                              child: Text(
+                                  "Veuillez entrer un nom d'utilisateur",
+                                  style: TextStyle(
+                                      color: Colors.red, fontSize: 25.0)))
+                          : Text(""),
+                  const SizedBox(height: 24.0),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Validate will return true if the form is valid, or false if
+                      // the form is invalid.
+                      if (_formKey.currentState!.validate()) {
+                        login(userController.text, passController.text);
+                      }
+                    },
+                    style:
+                        ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
+                    child: Text('Se connecter',
+                        style: new TextStyle(fontSize: 26.0)),
+                  ),
+                  Padding(
+                      padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Validate will return true if the form is valid, or false if
+                          Navigator.pushNamed(context, registerRoute);
+                        },
+                        style: ElevatedButton.styleFrom(
+                            minimumSize: Size(80.0, 80.0)),
+                        child: Text('Créer un compte',
+                            style: new TextStyle(fontSize: 26.0)),
+                      )),
+                  Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 30, 0, 30),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _toDrawing(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                            minimumSize: Size(80.0, 80.0)),
+                        child: const Text('Dessiner sans connexion',
+                            style: TextStyle(fontSize: 30.0)),
+                      )),
+                ],
+              ),
             ),
-          ),
+          )
         ]));
   }
 }

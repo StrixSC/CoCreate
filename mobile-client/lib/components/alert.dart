@@ -7,9 +7,7 @@ void showSnackBarAsBottomSheet(BuildContext context, String message) {
     barrierColor: const Color.fromRGBO(0, 0, 0, 0),
     builder: (BuildContext context) {
       Future.delayed(const Duration(seconds: 5), () {
-        try {
-          Navigator.pop(context);
-        } on Exception {}
+        Navigator.pop(context);
       });
       return Container(
           color: Colors.grey.shade800,
@@ -17,7 +15,7 @@ void showSnackBarAsBottomSheet(BuildContext context, String message) {
           child: Wrap(children: [
             Text(
               message,
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             )
           ]));
     },

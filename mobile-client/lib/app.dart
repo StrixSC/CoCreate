@@ -3,18 +3,19 @@ import 'package:flutter/material.dart';
 import 'screens/login/login.dart';
 import 'package:provider/provider.dart';
 import 'screens/home/home.dart';
-import 'style.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'screens/drawing/drawing.dart';
 
-const LoginRoute = '/';
-const ChatRoute = '/chat';
-const HomeRoute = '/home';
+const loginRoute = '/';
+const chatRoute = '/chat';
+const homeRoute = '/home';
 const drawingRoute = '/drawing';
-const RegisterRoute = '/register';
+const registerRoute = '/register';
 const fontsize = TextStyle(fontSize: 25);
 
 class App extends StatelessWidget {
+  const App({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -38,13 +39,13 @@ class App extends StatelessWidget {
     return (settings) {
       Widget screen;
       switch (settings.name) {
-        case LoginRoute:
+        case loginRoute:
           screen = const Login();
           break;
-        case RegisterRoute:
+        case registerRoute:
           screen = const Register();
           break;
-        case HomeRoute:
+        case homeRoute:
           final arguments = settings.arguments as Map<String, dynamic>;
           screen = Home(arguments['user']);
           break;

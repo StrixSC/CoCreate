@@ -2,7 +2,7 @@ import 'package:Colorimage/screens/chat/chat.dart';
 
 class Chat {
   String name, id, type, ownerUsername, lastReadMessage;
-  String? collaboration_id, updated_at;
+  String? collaborationId, updatedAt;
   List<ChatMessage> messages;
 
   Chat({
@@ -11,8 +11,8 @@ class Chat {
     required this.messages,
     this.lastReadMessage = "",
     this.ownerUsername = "",
-    this.collaboration_id = '',
-    this.updated_at = '',
+    this.collaborationId = '',
+    this.updatedAt = '',
     this.type = "",
   });
 

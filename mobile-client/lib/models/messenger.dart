@@ -66,7 +66,7 @@ class Messenger extends ChangeNotifier {
   void updateUserChannelName(String name, String updatedAt, String channelId) {
     int index = userChannels.indexWhere((channel) => channel.id == channelId);
     userChannels[index].name = name;
-    userChannels[index].updated_at = updatedAt;
+    userChannels[index].updatedAt = updatedAt;
     notifyListeners();
   }
 
@@ -124,7 +124,7 @@ class Messenger extends ChangeNotifier {
             id: channel['channel_id'],
             type: channel['type'],
             ownerUsername: channel['owner_username'],
-            updated_at: channel['updated_at'],
+            updatedAt: channel['updated_at'],
             messages: []));
       }
       updateAllChannels(allChannels);
@@ -207,7 +207,7 @@ class Messenger extends ChangeNotifier {
       case 'updated':
         Chat channel = data as Chat;
         updateUserChannelName(
-            channel.name, channel.updated_at as String, channel.id);
+            channel.name, channel.updatedAt as String, channel.id);
         break;
       default:
         print("Invalid socket event");

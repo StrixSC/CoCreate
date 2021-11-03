@@ -13,7 +13,7 @@ Future main() async {
       ChangeNotifierProvider(create: (_) => Messenger(User(), [], []))
     ],
     builder: (context, child) {
-      return App();
+      return const App();
     },
   ));
 }
