@@ -20,17 +20,18 @@ class App extends StatelessWidget {
     return ScreenUtilInit(
         designSize: const Size(1200, 1920),
         builder: () => Provider<String>(
-          create: (context) => 'Flutter Dev',
-          child: MaterialApp(
-          onGenerateRoute: _routes(),
-          theme: ThemeData(primarySwatch: Colors.blue,
-            textTheme:Theme.of(context).textTheme.apply(
-              fontSizeFactor: 1.5,
-              fontSizeDelta: 2.0,
-            ),
-          ),//_theme(),
-        ),
-    ));
+              create: (context) => 'Flutter Dev',
+              child: MaterialApp(
+                onGenerateRoute: _routes(),
+                theme: ThemeData(
+                  primarySwatch: Colors.blue,
+                  textTheme: Theme.of(context).textTheme.apply(
+                        fontSizeFactor: 1.5,
+                        fontSizeDelta: 2.0,
+                      ),
+                ), //_theme(),
+              ),
+            ));
   }
 
   RouteFactory _routes() {
@@ -56,11 +57,11 @@ class App extends StatelessWidget {
       return MaterialPageRoute(builder: (BuildContext context) => screen);
     };
   }
-  // ThemeData _theme() {
-  //   return ThemeData(
-  //     appBarTheme:
-  //     AppBarTheme(textTheme: TextTheme(headline6: AppBarTextStyle)),
-  //   );
-  // }
+// ThemeData _theme() {
+//   return ThemeData(
+//     appBarTheme:
+//     AppBarTheme(textTheme: TextTheme(headline6: AppBarTextStyle)),
+//   );
+// }
 
 }

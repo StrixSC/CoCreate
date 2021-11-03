@@ -5,17 +5,17 @@ class Chat {
   String? collaboration_id, updated_at;
   List<ChatMessage> messages;
 
-  Chat( {
+  Chat({
     required this.id,
     required this.name,
     required this.messages,
     this.lastReadMessage = "",
-    this.ownerUsername  = "",
+    this.ownerUsername = "",
     this.collaboration_id = '',
     this.updated_at = '',
     this.type = "",
-
   });
+
   @override
   String toString() => name;
 

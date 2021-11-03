@@ -13,13 +13,13 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 TextEditingController userController = TextEditingController();
 TextEditingController passController = TextEditingController();
 Color primaryColor =
-Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
+    Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
 
 class Login extends StatefulWidget {
   const Login({Key? key})
       : super(
-    key: key,
-  );
+          key: key,
+        );
 
   @override
   _LoginState createState() => _LoginState();
@@ -44,7 +44,6 @@ class _LoginState extends State<Login> {
   static const padding = 30.0;
 
   Future<void> login(email, password) async {
-
     Map data = {'email': email, 'password': password};
     var body = json.encode(data);
 
@@ -55,8 +54,13 @@ class _LoginState extends State<Login> {
       String rawCookie = response.headers['set-cookie'] as String;
       print(rawCookie);
       var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
-      var user = User(id: jsonResponse['user_id'], email: jsonResponse['email'], username: jsonResponse['username'],
-          avatar_url: jsonResponse['avatar_url'], isActive: false, cookie: rawCookie);
+      var user = User(
+          id: jsonResponse['user_id'],
+          email: jsonResponse['email'],
+          username: jsonResponse['username'],
+          avatar_url: jsonResponse['avatar_url'],
+          isActive: false,
+          cookie: rawCookie);
 
       // Fetch initial user info
       context.read<Messenger>().updateUser(user);
@@ -67,8 +71,7 @@ class _LoginState extends State<Login> {
       initializeSocketConnection(user);
 
       // Home Page
-      Navigator.pushNamed(context, HomeRoute,
-          arguments: {'user': user});
+      Navigator.pushNamed(context, HomeRoute, arguments: {'user': user});
 
       print(user);
     } else {
@@ -129,45 +132,46 @@ class _LoginState extends State<Login> {
                   //   }
                   // },
                 ),
-                Padding(padding:  EdgeInsets.fromLTRB(0, 20, 0, 0), child:
-                TextFormField(
-                  style: const TextStyle(fontSize: _fontSize),
-                  controller: passController,
-                  maxLines: 1,
-                  autofocus: false,
-                  decoration: InputDecoration(
-                    errorStyle: const TextStyle(fontSize: _fontSize),
-                    hintText: "Password",
-                    hintStyle: const TextStyle(
-                      fontSize: _fontSize,
-                    ),
-                    contentPadding: const EdgeInsets.all(padding),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0)),
-                  ),
-                  obscureText: true,
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  autovalidate: true,
-                  onFieldSubmitted: (value) {
-                    if (_formKey.currentState!.validate()) {
-                      login(userController.text, passController.text);
-                    }
-                  },
-                )),
+                Padding(
+                    padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                    child: TextFormField(
+                      style: const TextStyle(fontSize: _fontSize),
+                      controller: passController,
+                      maxLines: 1,
+                      autofocus: false,
+                      decoration: InputDecoration(
+                        errorStyle: const TextStyle(fontSize: _fontSize),
+                        hintText: "Password",
+                        hintStyle: const TextStyle(
+                          fontSize: _fontSize,
+                        ),
+                        contentPadding: const EdgeInsets.all(padding),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0)),
+                      ),
+                      obscureText: true,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      autovalidate: true,
+                      onFieldSubmitted: (value) {
+                        if (_formKey.currentState!.validate()) {
+                          login(userController.text, passController.text);
+                        }
+                      },
+                    )),
                 usernameTaken
                     ? const Padding(
-                    padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
-                    child: Text("Le nom d'utilisateur est déjà pris",
-                        style: TextStyle(
-                            color: Colors.red, fontSize: 25.0)))
+                        padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
+                        child: Text("Le nom d'utilisateur est déjà pris",
+                            style:
+                                TextStyle(color: Colors.red, fontSize: 25.0)))
                     : usernameEmpty
-                    ? const Padding(
-                    padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
-                    child: Text("Veuillez entrer un nom d'utilisateur",
-                        style: TextStyle(
-                            color: Colors.red, fontSize: 25.0)))
-                    : Text(""),
+                        ? const Padding(
+                            padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
+                            child: Text("Veuillez entrer un nom d'utilisateur",
+                                style: TextStyle(
+                                    color: Colors.red, fontSize: 25.0)))
+                        : Text(""),
                 const SizedBox(height: 24.0),
                 ElevatedButton(
                   onPressed: () {
@@ -182,26 +186,30 @@ class _LoginState extends State<Login> {
                   child: Text('Se connecter',
                       style: new TextStyle(fontSize: 26.0)),
                 ),
-            Padding(padding:  EdgeInsets.fromLTRB(0, 30, 0, 0), child: ElevatedButton(
-                  onPressed: () {
-                    // Validate will return true if the form is valid, or false if
-                    Navigator.pushNamed(context, RegisterRoute);
-                  },
-                  style:
-                  ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
-                  child: Text('Créer un compte',
-                      style: new TextStyle(fontSize: 26.0)),
-                )),
+                Padding(
+                    padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Validate will return true if the form is valid, or false if
+                        Navigator.pushNamed(context, RegisterRoute);
+                      },
+                      style: ElevatedButton.styleFrom(
+                          minimumSize: Size(80.0, 80.0)),
+                      child: Text('Créer un compte',
+                          style: new TextStyle(fontSize: 26.0)),
+                    )),
                 SizedBox(height: 24.0),
-                Padding(padding:  EdgeInsets.fromLTRB(0, 100, 0, 0), child:ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, drawingRoute);
-                  },
-                  style:
-                      ElevatedButton.styleFrom(minimumSize: Size(80.0, 80.0)),
-                  child: Text('Dessiner sans connexion',
-                      style: new TextStyle(fontSize: 30.0)),
-                )),
+                Padding(
+                    padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, drawingRoute);
+                      },
+                      style: ElevatedButton.styleFrom(
+                          minimumSize: Size(80.0, 80.0)),
+                      child: Text('Dessiner sans connexion',
+                          style: new TextStyle(fontSize: 30.0)),
+                    )),
               ],
             ),
           ),

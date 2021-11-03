@@ -9,7 +9,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'chat.dart';
 
-class Messenger extends ChangeNotifier{
+class Messenger extends ChangeNotifier {
   User user;
   List<Chat> userChannels = [];
   List<Chat> allChannels = [];
@@ -17,7 +17,6 @@ class Messenger extends ChangeNotifier{
   bool isChannelSelected = false;
   int currentSelectedChannelIndex = 0;
   late ChannelSocket channelSocket;
-
 
   Messenger(this.user, this.userChannels, this.allChannels) {
     fetchChannels();
@@ -46,14 +45,14 @@ class Messenger extends ChangeNotifier{
   }
 
   void addUserChannel(Chat channel) {
-    if(!userChannels.contains(channel)) {
+    if (!userChannels.contains(channel)) {
       userChannels.add(channel);
       notifyListeners();
     }
   }
 
   void addAllChannel(Chat channel) {
-    if(!allChannels.contains(channel)) {
+    if (!allChannels.contains(channel)) {
       allChannels.add(channel);
       notifyListeners();
     }
@@ -82,20 +81,26 @@ class Messenger extends ChangeNotifier{
   }
 
   void joinAllUserChannels() {
-    userChannels.forEach((channel) { channelSocket.joinChannel(channel.id); });
+    userChannels.forEach((channel) {
+      channelSocket.joinChannel(channel.id);
+    });
   }
 
   Future<void> fetchChannels() async {
     UsersAPI rest = UsersAPI(user);
-    var  response = await rest.fetchUserChannels();
+    var response = await rest.fetchUserChannels();
     if (response.statusCode == 200) {
-      var jsonResponse = json.decode(response.body) as List<dynamic>;//Map<String, dynamic>;
+      var jsonResponse =
+          json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
       print('fetchChannels: ');
       print(jsonResponse);
       List<Chat> userChannels = [];
       for (var channel in jsonResponse) {
-        userChannels.add(Chat(name: channel['name'], id: channel['channel_id'],
-            ownerUsername: channel['owner_username'], messages: []));
+        userChannels.add(Chat(
+            name: channel['name'],
+            id: channel['channel_id'],
+            ownerUsername: channel['owner_username'],
+            messages: []));
       }
       updateUserChannels(userChannels);
     } else {
@@ -106,15 +111,21 @@ class Messenger extends ChangeNotifier{
 
   Future<void> fetchAllChannels() async {
     ChannelAPI rest = ChannelAPI(user);
-    var  response = await rest.fetchChannels();
+    var response = await rest.fetchChannels();
     if (response.statusCode == 200) {
-      var jsonResponse = json.decode(response.body) as List<dynamic>;//Map<String, dynamic>;
+      var jsonResponse =
+          json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
       print('fetchAllChannels');
       print(jsonResponse);
       List<Chat> allChannels = [];
       for (var channel in jsonResponse) {
-        allChannels.add(Chat(name: channel['name'], id: channel['channel_id'], type: channel['type'],
-            ownerUsername: channel['owner_username'], updated_at: channel['updated_at'], messages: []));
+        allChannels.add(Chat(
+            name: channel['name'],
+            id: channel['channel_id'],
+            type: channel['type'],
+            ownerUsername: channel['owner_username'],
+            updated_at: channel['updated_at'],
+            messages: []));
       }
       updateAllChannels(allChannels);
     } else {
@@ -126,15 +137,22 @@ class Messenger extends ChangeNotifier{
   Future<void> fetchChannelHistory(index) async {
     String channelId = userChannels[index].id;
     ChannelAPI rest = ChannelAPI(user);
-    var  response = await rest.fetchChannelMessages(channelId);
+    var response = await rest.fetchChannelMessages(channelId);
     if (response.statusCode == 200) {
-      var jsonResponse = json.decode(response.body) as List<dynamic>;//Map<String, dynamic>;
+      var jsonResponse =
+          json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
       print('fetchChannelHistory');
       print(jsonResponse);
       List<ChatMessage> allMessages = [];
       for (var message in jsonResponse) {
-        allMessages.add(ChatMessage(channelId: channelId, message_username: message['username'], text:  message['message_data'],
-          username: user.username, messageId: message['message_id'], timestamp: message['timestamp'],));
+        allMessages.add(ChatMessage(
+          channelId: channelId,
+          message_username: message['username'],
+          text: message['message_data'],
+          username: user.username,
+          messageId: message['message_id'],
+          timestamp: message['timestamp'],
+        ));
       }
       var reversedListMessages = allMessages.reversed.toList();
       userChannels[index].messages = reversedListMessages;
@@ -174,7 +192,9 @@ class Messenger extends ChangeNotifier{
         break;
       case 'created':
         Chat channel = data as Chat;
-        channel.ownerUsername == user.username? addUserChannel(channel) : getAvailableChannels();
+        channel.ownerUsername == user.username
+            ? addUserChannel(channel)
+            : getAvailableChannels();
         break;
       case 'left':
         String channelId = data as String;
@@ -186,7 +206,8 @@ class Messenger extends ChangeNotifier{
         break;
       case 'updated':
         Chat channel = data as Chat;
-        updateUserChannelName(channel.name, channel.updated_at as String, channel.id);
+        updateUserChannelName(
+            channel.name, channel.updated_at as String, channel.id);
         break;
       default:
         print("Invalid socket event");

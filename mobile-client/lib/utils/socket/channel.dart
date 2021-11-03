@@ -31,7 +31,8 @@ class ChannelSocket extends SocketService {
 
   updateChannel(channelId, channelName) {
     print('Socket Emit : Update channel');
-    socket.emit('channel:update', {'channelId': channelId, 'channelName': channelName});
+    socket.emit(
+        'channel:update', {'channelId': channelId, 'channelName': channelName});
   }
 
   deleteChannel(channelId) {
@@ -60,7 +61,8 @@ class ChannelSocket extends SocketService {
       Chat channel = Chat(
           id: data['channelId'],
           name: data['channelName'],
-          type: 'Public', messages: []);
+          type: 'Public',
+          messages: []);
       callbackChannel('joined', channel);
     });
   }
@@ -74,12 +76,13 @@ class ChannelSocket extends SocketService {
           ownerUsername: data['ownerUsername'],
           collaboration_id: data['collaborationId'],
           updated_at: data['updatedAt'],
-          type: 'Public', messages: []);
+          type: 'Public',
+          messages: []);
       callbackChannel('created', channel);
     });
   }
 
-  leftChannel(callbackChannel)  {
+  leftChannel(callbackChannel) {
     socket.on('channel:left', (data) {
       print('Socket Message : Left channel');
       String channelId = data['channelId'];
@@ -95,7 +98,8 @@ class ChannelSocket extends SocketService {
           id: data['channelId'],
           name: data['channelName'],
           updated_at: data['updatedAt'],
-          type: 'Public', messages: []);
+          type: 'Public',
+          messages: []);
       callbackChannel('updated', channel);
     });
   }
@@ -123,5 +127,4 @@ class ChannelSocket extends SocketService {
 
     print("initialized socket events");
   }
-
 }

@@ -11,5 +11,4 @@ class User {
     this.isActive = false,
     this.cookie = '',
   });
-
 }

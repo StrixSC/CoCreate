@@ -1,10 +1,7 @@
-
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-void showSnackBarAsBottomSheet(BuildContext context, String message)
-{
+void showSnackBarAsBottomSheet(BuildContext context, String message) {
   showModalBottomSheet<void>(
     context: context,
     barrierColor: const Color.fromRGBO(0, 0, 0, 0),
@@ -20,7 +17,7 @@ void showSnackBarAsBottomSheet(BuildContext context, String message)
           child: Wrap(children: [
             Text(
               message,
-              style : TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.white),
             )
           ]));
     },
