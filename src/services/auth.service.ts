@@ -2,13 +2,16 @@ import create from 'http-errors';
 import { compareSync, hashSync } from 'bcrypt';
 import { db } from '../db';
 import { validateRegistration } from '../utils/auth';
-import { LogType, User, MemberType } from '.prisma/client';
+import { LogType, User, MemberType, Profile } from '.prisma/client';
 import { IRegistrationPayload } from '../models/IRegistrationModel';
 
-export const findUserById = async (id: string): Promise<User | null> => {
+export const findUserById = async (id: string): Promise<any> => {
     const user = await db.user.findUnique({
         where: {
             user_id: id
+        },
+        include: {
+            profile: true
         }
     });
     return user;

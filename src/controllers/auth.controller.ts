@@ -2,7 +2,7 @@ import { handleRequestError } from './../utils/errors';
 import { IUser } from './../models/IUser.model';
 import { NextFunction, Request, Response } from 'express';
 import create from 'http-errors';
-import { register, logout } from '../services/auth.service';
+import { register, logout, findUserById } from '../services/auth.service';
 import { StatusCodes } from 'http-status-codes';
 
 export const loginController = async (req: Request, res: Response, next: NextFunction) => {
@@ -53,4 +53,26 @@ export const logoutController = async (req: Request, res: Response, next: NextFu
     });
 };
 
-export const refreshController = async (req: Request, res: Response, next: NextFunction) => {};
+export const refreshController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log(req.user);
+        const userId = req.user?.user_id;
+        if (!userId) return next(new create.Unauthorized());
+
+        const user = await findUserById(userId);
+
+        if (!user)
+            return next(
+                new create.Unauthorized('Invalid or missing userId led to no users being found.')
+            );
+
+        res.status(StatusCodes.OK).send({
+            userId: user.user_id,
+            avatar_url: user.profile.avatar_url,
+            username: user.profile.username,
+            email: user.email
+        });
+    } catch (e) {
+        handleRequestError(e, next);
+    }
+};
