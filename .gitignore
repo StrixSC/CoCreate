@@ -11,6 +11,8 @@ dist/
 svg/
 .vscode/
 
+logs/
+
 # Exclusion des fichiers Javascripts
 out/
 
