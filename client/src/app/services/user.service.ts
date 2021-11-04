@@ -1,46 +1,39 @@
+import { IUser } from './../model/IUser.model';
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import axios from "axios";
 import { environment } from "src/environments/environment";
-//import { Observable } from 'rxjs';
+import { isDevMode } from '@angular/core';
+import { Observable } from "rxjs";
 
 @Injectable({
   providedIn: "root",
 })
 export class UserService {
   URL: String = "";
+  user: IUser;
 
   constructor(private http: HttpClient) {
-    this.URL = environment.production
-      ? environment.serverURL
-      : environment.local;
+    this.URL = isDevMode() ? environment.local : environment.serverURL;
   }
 
-  registerUser(userInfo: string) {
-    console.log(userInfo);
-    return this.http.post(this.URL + "auth/register", JSON.parse(userInfo), {
-      withCredentials: true,
-    });
+  refreshUser(): Observable<any> {
+    return this.http.get(this.URL + "auth/refresh", { withCredentials: true });
   }
 
-  async loginUser(user: any) {
-    console.log(user);
+  register(userInfo: string): Observable<any> {
+    return this.http.post(this.URL + "auth/register", JSON.stringify(userInfo));
+  }
 
-    const PAYLOAD = {
+  login(user: any): Observable<any> {
+  const payload = {
       email: user.email,
       password: user.password,
     };
+
     const headers = {
       "Content-Type": "application/json",
     };
-    try {
-      const res = await axios.post(URL + "auth/login", PAYLOAD, {
-        headers: headers,
-      });
-      console.log(res);
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
+
+    return this.http.post(this.URL + "auth/login", JSON.stringify(payload), { headers, withCredentials: true });
   }
 }

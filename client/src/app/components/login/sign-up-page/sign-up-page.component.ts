@@ -4,6 +4,7 @@ import { NgForm } from "@angular/forms";
 import axios from "axios";
 import { environment } from "src/environments/environment";
 import { UserService } from "src/app/services/user.service";
+import { isDevMode } from '@angular/core';
 
 @Component({
   selector: "app-sign-up-page",
@@ -12,13 +13,13 @@ import { UserService } from "src/app/services/user.service";
 })
 export class SignUpPageComponent implements OnInit {
   form: NgForm;
-  user = new User();
+  user = {} as User;
   URL: string;
 
   constructor(public userService: UserService) {
-    this.URL = environment.production
-      ? environment.serverURL
-      : environment.local;
+    this.URL = isDevMode()
+    ? environment.local
+    : environment.serverURL
   }
 
   ngOnInit() {}
@@ -35,10 +36,11 @@ export class SignUpPageComponent implements OnInit {
     };
   }
   mySubmit(f: NgForm) {
-    console.log("submitted");
-    console.log(JSON.stringify(this.user));
-    this.userService.registerUser(JSON.stringify(this.user)).subscribe((t) => {
+    this.userService.register(JSON.stringify(this.user)).subscribe((t) => {
       console.log(t);
+    }, (error: Error | any) => {
+      console.error(error);
+      
     });
   }
 

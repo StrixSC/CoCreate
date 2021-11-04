@@ -1,8 +1,7 @@
 import { Observable } from "rxjs";
-import { Injectable } from "@angular/core";
+import { Injectable, isDevMode } from "@angular/core";
 import { io, Socket } from "socket.io-client";
 import { environment } from "src/environments/environment";
-//import { environment } from "src/environments/environment";
 
 @Injectable({
   providedIn: "root",
@@ -11,22 +10,23 @@ export class SocketService {
   socket!: Socket;
   error: string;
   username: string;
+  url: string;
   constructor() {
     this.error = "";
     this.username = "";
+    this.url = isDevMode() ? environment.local : environment.serverURL
   }
 
   setupSocketConnection(ip?: string): void {
-    this.socket = io(environment.WS_URL || "http://localhost:5000", {
+    this.socket = io(this.url, {
       autoConnect: false,
+      withCredentials: true
     }) as Socket;
-    console.log("this.socket");
   }
 
   connect(): void {
     this.socket.connect();
     this.socket.sendBuffer = [];
-    console.log("this.socket", this.socket);
   }
 
   disconnect(): void {
@@ -61,5 +61,13 @@ export class SocketService {
         observer.next(err);
       });
     });
+  }
+
+  onException(): Observable<{ message: string }> {
+    return new Observable((observer) => {
+      this.socket.on('exception', (err: { message: string }) => {
+        observer.next(err);
+      });
+    })
   }
 }
