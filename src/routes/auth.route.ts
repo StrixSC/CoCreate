@@ -1,5 +1,5 @@
 import { checkAuthenticated, checkNotAuthentified } from './../middlewares/auth.middleware';
-import { logoutController } from './../controllers/auth.controller';
+import { logoutController, refreshController } from './../controllers/auth.controller';
 import { Request, Router, Response, NextFunction } from 'express';
 import { registerController, loginController } from '../controllers/auth.controller';
 import passport from '../passport';
@@ -23,6 +23,12 @@ router.post(
     '/logout',
     checkAuthenticated,
     async (req, res, next) => await logoutController(req, res, next)
+);
+
+router.get(
+    '/refresh',
+    checkAuthenticated,
+    async (req, res, next) => await refreshController(req, res, next)
 );
 
 export default router;

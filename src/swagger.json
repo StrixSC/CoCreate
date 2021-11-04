@@ -237,6 +237,60 @@
                 }
             }
         },
+        "/auth/refresh": {
+            "get": {
+                "security": [
+                    {
+                        "Cookie Auth": []
+                    }
+                ],
+                "tags": ["Authentication"],
+                "summary": "Refresh the user's information by sending it the cookie again.",
+                "operationId": "refresh",
+                "description": "Refresh the user's information by sending it the cookie again. This will renew the cookie on the server as well.",
+                "responses": {
+                    "200": {
+                        "description": "Success. User found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IUser"
+                                },
+                                "example": {
+                                    "message": "User created successfully."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Invalid userId (No user was found).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid userId"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected internal server error. This could be due to a problem during JWT token generation.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/users/:id": {
             "get": {
                 "parameters": [
