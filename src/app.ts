@@ -41,7 +41,9 @@ export const expressSession = session({
     store: new RedisStore({ client: redisClient, ttl: 86400000 }),
     cookie: {
         maxAge: 86400000,
-        path: '/'
+        path: '/',
+        sameSite: 'lax',
+        secure: false
     }
 });
 app.use(expressSession);
