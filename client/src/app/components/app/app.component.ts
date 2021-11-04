@@ -1,65 +1,40 @@
-import { IUser } from '../../model/IUser.model';
-import { SocketService } from '../../services/chat/socket.service';
-import { Component, OnDestroy } from '@angular/core';
-import { Subscription/*, merge*/ } from 'rxjs';
-//import { map } from 'rxjs/operators';
-import { ChatService } from '../../services/chat/chat.service';
-//import { IReceiveMessagePayload } from './model/IReceiveMessagePayload.model';
-import { IChannel } from '../../model/IChannel.model';
+import { Subscription } from 'rxjs';
+import { SocketService } from "../../services/chat/socket.service";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.scss"],
 })
-export class AppComponent implements OnDestroy {
-  title = 'prototype-v2';
-  messageListener = new Subscription();
-  currentValue: string;
-  users: IUser[];
-  channels: IChannel[];
-  messages: string[];
-  username: string;
+export class AppComponent implements OnInit, OnDestroy {
+  title = "Colorimage";
 
-  constructor(public chatService: ChatService, private socketService: SocketService) {
-    this.username = "";
+  errorSubscription: Subscription;
+  exceptionSubscription: Subscription;
+
+  constructor(
+    private socketService: SocketService
+  ) {
     this.socketService.setupSocketConnection();
-    this.socketService.connect();
-    this.currentValue = "";
-    this.messages = [];
-    this.users = [];
-    this.channels = [];
   }
 
   ngOnInit(): void {
-
-
-
-    this.chatService.getUsers().subscribe((users) => {
-      this.users = users.sort((a) => {
-        if (a.userId !== this.socketService.socket.id) return -1
-        else return 1;
-      });
-      
-      this.users = users;
-      console.log(users);
+    this.errorSubscription = this.socketService.onError().subscribe((err: Error | any) => {
+      console.error(err);
+    }, (err) => {
+      console.error(err);
     });
-  
-    this.chatService.getChannels().subscribe((channels: IChannel[]) => {
-      this.channels = channels;
-      console.log(channels);
-    })
 
-    
+    // Handle exceptions here. Logic needs to be separated for each specific exception.
+    this.exceptionSubscription = this.socketService.onException().subscribe((err: Error | any) => {
+      console.error(err);
+    }, (err) => {
+      console.error(err);
+    })
   }
 
   ngOnDestroy(): void {
-    this.messageListener.unsubscribe();
     this.socketService.disconnect();
-  }
-
-  sendMessage(): void {
-    this.chatService.sendMessage(this.currentValue!);
-    this.currentValue = "";
   }
 }

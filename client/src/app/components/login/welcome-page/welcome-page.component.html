@@ -12,7 +12,7 @@
         class="example-form"
         appearance="fill"
         ngForm="form"
-        (keydown.enter)="mySubmit(f)"
+        (keydown.enter)="onSubmit()"
         #f="ngForm"
       >
         <mat-form-field>
@@ -40,7 +40,7 @@
           />
         </mat-form-field>
       </form>
-      <button style="width: 100%" mat-raised-button (click)="signIn()">
+      <button style="width: 100%" mat-raised-button (click)="onSubmit()">
         Sign in
       </button>
       <div class="google-btn">
@@ -56,12 +56,12 @@
 
       <div class="forgot-password">
         <a routerLink="/forgot-password" routerLinkActive="active"
-          >mot de passe oublié?</a
+          >Mot de passe oublié?</a
         >
       </div>
 
       <p class="sign-up" routerLink="/register" routerLinkActive="active">
-        créer un compte
+        Créer un compte
       </p>
       <mat-progress-bar
         mode="indeterminate"
