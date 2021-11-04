@@ -283,7 +283,6 @@ Data:
     userId: string,
     collaborationId: string,
     actionType: string,
-    state: string,
     isSelected: boolean,    // Whether to select or unselect the action.
 }
 ```
