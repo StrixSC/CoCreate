@@ -2,7 +2,7 @@ import { Action, ActionType, ActionState } from '@prisma/client';
 import validator from 'validator';
 import log from './logger';
 
-const defaultStates = [ ActionState.up, ActionState.down, ActionState.move ];
+const defaultStates = [ActionState.up, ActionState.down, ActionState.move];
 const defaultTypes = [
     ActionType.Freedraw,
     ActionType.Shape,
@@ -92,8 +92,7 @@ const typesCallbacks: Record<
             return { result: false, field: 'Width' };
         }
 
-        log('DEBUG', action.isSelected);
-        if (!validator.isIn(action.isSelected!.toString(), [ 'false', 'true', false, true ])) {
+        if (!validator.isIn(action.isSelected!.toString(), ['false', 'true', false, true])) {
             return { result: false, field: 'isSelected' };
         }
 
@@ -110,7 +109,36 @@ const typesCallbacks: Record<
         return { result: true, field: null };
     },
 
-    Select: () => ({ result: false, field: null }),
+    Select: (a: Action) => {
+        const action = {
+            isSelected: a.isSelected
+        };
+
+        const checkEmpty = hasEmptyProperties(action);
+        if (checkEmpty.result) {
+            return { result: false, field: checkEmpty.field };
+        }
+
+        if (typeof action.isSelected === 'string') {
+            if (!validator.isIn(action.isSelected, ['false', 'true'])) {
+                return {
+                    result: false,
+                    field: "isSelected is a string and does not have 'false' or 'true' as a value"
+                };
+            } else {
+                return { result: true, field: null };
+            }
+        }
+
+        if (typeof action.isSelected === 'boolean') {
+            return { result: true, field: null };
+        } else {
+            return {
+                result: false,
+                field: "isSelected must be a boolean value or a string value with  'false' or 'true' as values"
+            };
+        }
+    },
     Translate: () => ({ result: false, field: null }),
     Resize: () => ({ result: false, field: null }),
     Delete: () => ({ result: false, field: null }),

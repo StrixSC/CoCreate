@@ -5,6 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { validateDrawingEvents } from './../utils/drawings';
 import { ActionType, Action } from '@prisma/client';
 import validator from 'validator';
+import log from '../utils/logger';
 
 export = (io: Server, socket: Socket) => {
     const onFreedraw = async (data: Action) => {
@@ -28,14 +29,17 @@ export = (io: Server, socket: Socket) => {
                     x: data.x,
                     y: data.y,
                     width: data.width,
-                    isSelected: validator.toBoolean(data.isSelected as unknown as string),
+                    isSelected:
+                        typeof data.isSelected === 'string'
+                            ? validator.toBoolean(data.isSelected)
+                            : data.isSelected,
                     state: data.state
                 }
             });
 
             if (!dbAction) {
                 throw new SocketEventError(
-                    'Could not emit the action: Internal Socket Server Error',
+                    'Could not trigger the action: Internal Socket Server Error',
                     'E2002'
                 );
             }
@@ -66,6 +70,73 @@ export = (io: Server, socket: Socket) => {
         } as Action);
     };
 
+    const onSelection = async (data: Action) => {
+        try {
+            const validated = validateDrawingEvents(ActionType.Freedraw, data);
+            if (!validated.result) {
+                throw new SocketEventError(
+                    `Could not trigger action: Selection data error on: ${validated.field}`,
+                    'E2201'
+                );
+            }
+
+            const action = await db.action.findFirst({
+                where: {
+                    actionId: data.actionId,
+                    collaborationId: data.collaborationId
+                }
+            });
+
+            if (!action) {
+                throw new SocketEventError(
+                    'Could not trigger action: Action could not be found in the database',
+                    'E2202'
+                );
+            }
+
+            log('DEBUG', JSON.stringify(action));
+            if (action.isSelected && action.selectedBy !== socket.data.user) {
+                throw new SocketEventError(
+                    'Could not trigger action: The action is already selected by a different user.',
+                    'E2203'
+                );
+            }
+
+            const userSelectionChoice =
+                typeof data.isSelected === 'string'
+                    ? validator.toBoolean(data.isSelected)
+                    : data.isSelected;
+
+            const selectedByUser = userSelectionChoice ? socket.data.user : '';
+
+            const updatedAction = await db.action.updateMany({
+                where: {
+                    actionId: action.actionId
+                },
+                data: {
+                    selectedBy: selectedByUser,
+                    isSelected: userSelectionChoice
+                }
+            });
+
+            if (updatedAction.count === 0) {
+                throw new SocketEventError(
+                    'Could not trigger action. Either the isSelected value does not differ from the one currently applied or there was an unexpected socket server error.',
+                    'E2204'
+                );
+            }
+
+            io.emit('selection:received', {
+                actionId: action.actionId,
+                isSelected: userSelectionChoice,
+                selectedBy: selectedByUser
+            });
+        } catch (e: any) {
+            handleSocketError(socket, e);
+        }
+    };
+
     socket.on('freedraw:emit', onFreedraw);
     socket.on('shape:emit', onShapeDraw);
+    socket.on('selection:emit', onSelection);
 };

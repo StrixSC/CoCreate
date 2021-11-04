@@ -35,14 +35,14 @@ const onError = (error: any) => {
     }
     const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`;
     switch (error.code) {
-    case 'EACCES':
-        log('CRITICAL', `${bind} requires elevated privileges`);
-        process.exit(1);
-    case 'EADDRINUSE':
-        log('CRITICAL', `${bind} is already in use`);
-        process.exit(1);
-    default:
-        throw error;
+        case 'EACCES':
+            log('CRITICAL', `${bind} requires elevated privileges`);
+            process.exit(1);
+        case 'EADDRINUSE':
+            log('CRITICAL', `${bind} is already in use`);
+            process.exit(1);
+        default:
+            throw error;
     }
 };
 
@@ -60,16 +60,12 @@ const io = new Server(server, {
     cors: corsOptions
 });
 
-const testingServer = http.createServer();
-const io_testing = new Server(testingServer, {
-    cors: corsOptions,
-    path: '/'
-});
-
 const onConnection = (socket: Socket) => {
+    socket.use(logEvent(socket));
     socket.data.user = (socket as any).request.session.passport.user;
     try {
         channelHandler(io, socket);
+        drawingHandler(io, socket);
     } catch (e) {
         handleSocketError(socket, e);
     }
@@ -88,10 +84,6 @@ io.use(wrap(passport.session()));
 io.use(wrap(checkAuthenticated));
 
 io.on('connection', onConnection);
-io_testing.on('connection', (socket) => {
-    socket.use(logEvent(socket));
-    drawingHandler(io_testing, socket);
-});
 
 io.of('/').adapter.on('create-room', (room) => {
     log('DEBUG', `Room ${room} was created.`);
@@ -99,11 +91,6 @@ io.of('/').adapter.on('create-room', (room) => {
 
 io.of('/').adapter.on('join-room', (room, id) => {
     log('DEBUG', `Room ${room} was joined by socket ${id}.`);
-});
-
-const testingPort = 5000;
-testingServer.listen(testingPort, () => {
-    log('INFO', `Socket Testing Server :: Listening on port ${testingPort}`);
 });
 
 server.listen(port);

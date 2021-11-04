@@ -265,3 +265,45 @@ Data:
 }
 ```
 
+Possible Errors: 
+ 
+1. `E2001`: Could not trigger action: Freedraw data error on [Error] (The error is dynamically computed)                    
+2. `E2002`: Could not trigger the action: Internal Socket Server Error 
+
+## Selection
+
+Event to emit (Client -> Socket): `selection:emit`
+
+Data:
+
+```typescript
+{
+    actionId: string,
+    username: string,
+    userId: string,
+    collaborationId: string,
+    actionType: string,
+    state: string,
+    isSelected: boolean,    // Whether to select or unselect the action.
+}
+```
+
+Event emitted (Server -> Client): `selection:received`
+
+Data:
+
+```typescript
+{
+    actionId: string,
+    isSelected: boolean,
+    selectedBy: string // The userId of the user that selected the action.
+}
+```
+
+Possible Errors: 
+ 
+1. `E2201`: Could not trigger action: Selection data error on: [Error] (The error is computed dynamically)                    
+2. `E2202`: Could not trigger action: Action could not be found in the database
+3. `E2203`: Could not trigger action: The action is already selected by a different user.
+4. `E2204`: Could not trigger action. Either the isSelected value does not differ from the one currently applied or there was an unexpected socket server error. 
+

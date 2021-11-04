@@ -1,4 +1,3 @@
-import { retrieveOwnerFromChannels } from './../utils/channels';
 import { IPublicUserProfile } from './../models/IUserPublicProfile';
 import { db } from '../db';
 import { MemberType } from '.prisma/client';

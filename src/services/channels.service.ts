@@ -7,7 +7,6 @@ import create, { InternalServerError } from 'http-errors';
 import { db } from '../db';
 import moment from 'moment';
 import { IChannel } from '../models/IChannel.model';
-import { retrieveOwnerFromChannels } from '../utils/channels';
 
 export const getAllChannels = async (): Promise<IChannel[]> => {
     const channels = await db.channel.findMany({

@@ -134,6 +134,7 @@ model Action {
   // Shared:
   state      ActionState?
   isSelected Boolean?
+  selectedBy String       @default("")
 
 }
 
