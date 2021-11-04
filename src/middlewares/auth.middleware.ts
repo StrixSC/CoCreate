@@ -1,8 +1,9 @@
 import create from 'http-errors';
 import { Response, NextFunction, Request } from 'express';
+import log from '../utils/logger';
 
 export const checkAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.headers);
+    log('DEBUG', JSON.stringify(req.headers));
     if (req.isAuthenticated()) {
         return next();
     }
@@ -11,6 +12,7 @@ export const checkAuthenticated = (req: Request, res: Response, next: NextFuncti
 };
 
 export const checkNotAuthentified = async (req: Request, res: Response, next: NextFunction) => {
+    log('DEBUG', JSON.stringify(req.headers));
     if (!req.isAuthenticated()) {
         return next();
     }
