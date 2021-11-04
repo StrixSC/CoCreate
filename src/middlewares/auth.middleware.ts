@@ -2,6 +2,7 @@ import create from 'http-errors';
 import { Response, NextFunction, Request } from 'express';
 
 export const checkAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.headers);
     if (req.isAuthenticated()) {
         return next();
     }
