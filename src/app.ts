@@ -42,8 +42,8 @@ export const expressSession = session({
     cookie: {
         maxAge: 86400000,
         path: '/',
-        sameSite: 'lax',
-        secure: false
+        sameSite: 'none',
+        secure: true
     }
 });
 app.use(expressSession);
