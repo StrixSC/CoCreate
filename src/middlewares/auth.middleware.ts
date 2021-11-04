@@ -3,7 +3,7 @@ import { Response, NextFunction, Request } from 'express';
 import log from '../utils/logger';
 
 export const checkAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-    log('DEBUG', JSON.stringify(req.headers));
+    log('DEBUG', JSON.stringify(req.headers.cookie));
     if (req.isAuthenticated()) {
         return next();
     }
