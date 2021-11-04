@@ -55,7 +55,6 @@ export const logoutController = async (req: Request, res: Response, next: NextFu
 
 export const refreshController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        console.log(req.user);
         const userId = req.user?.user_id;
         if (!userId) return next(new create.Unauthorized());
 
