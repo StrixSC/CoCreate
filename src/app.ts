@@ -46,6 +46,11 @@ export const expressSession = session({
         secure: true
     }
 });
+
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
+
 app.use(expressSession);
 
 redisClient.on('error', (err) => {
@@ -58,6 +63,7 @@ redisClient.on('connect', function (err) {
 });
 
 const corsSetup = cors(corsOptions);
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
