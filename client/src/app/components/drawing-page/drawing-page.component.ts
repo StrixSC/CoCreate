@@ -21,7 +21,7 @@ export class DrawingPageComponent implements OnDestroy {
   ) {
     this.hotkeyService.hotkeysListener();
   }
-
+  
   // Fonction qui ouvre le mat Dialog de bienvenue
   openDialog() {
     this.welcomeDialogRef = this.dialog.open(WelcomeDialogComponent, {

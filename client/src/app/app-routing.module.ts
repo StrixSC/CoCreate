@@ -18,7 +18,7 @@ const routes: Routes = [
   { path: "drawing", component: DrawingPageComponent, canActivate: [AuthGuard] },
   { path: "chat", component: ChatComponent},
   { path: 'forgot-password', component:ChangePasswordComponent },
-  { path: "*", redirectTo: ''}
+  { path: "**", redirectTo: ''}
 ];
 
 @NgModule({
