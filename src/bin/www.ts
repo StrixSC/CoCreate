@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import create from 'http-errors';
 import 'reflect-metadata';
 import http from 'http';
 import { app, expressSession } from '../app';
@@ -62,7 +63,7 @@ const io = new Server(server, {
 
 const onConnection = (socket: Socket) => {
     socket.use(logEvent(socket));
-    socket.data.user = (socket as any).request.session.passport.user;
+    // socket.data.user = (socket as any).request.session.passport.user;
     try {
         channelHandler(io, socket);
         drawingHandler(io, socket);
@@ -78,10 +79,18 @@ const onConnection = (socket: Socket) => {
 const wrap = (middleware: any) => (socket: Socket, next: any) =>
     middleware(socket.request, {}, next);
 
-io.use(wrap(expressSession));
-io.use(wrap(passport.initialize()));
-io.use(wrap(passport.session()));
-io.use(wrap(checkAuthenticated));
+// io.use(wrap(expressSession));
+// io.use(wrap(passport.initialize()));
+// io.use(wrap(passport.session()));
+// io.use(wrap(checkAuthenticated));
+
+io.use((socket, next) => {
+    if (!socket.request.headers['x-user-id']) {
+        next(new create.Unauthorized());
+    }
+    socket.data.user = socket.request.headers['x-user-id'];
+    next();
+});
 
 io.on('connection', onConnection);
 
