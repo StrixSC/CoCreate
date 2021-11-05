@@ -79,10 +79,10 @@ const onConnection = (socket: Socket) => {
 const wrap = (middleware: any) => (socket: Socket, next: any) =>
     middleware(socket.request, {}, next);
 
-io.use(wrap(expressSession));
-io.use(wrap(passport.initialize()));
-io.use(wrap(passport.session()));
-io.use(wrap(checkAuthenticated));
+// io.use(wrap(expressSession));
+// io.use(wrap(passport.initialize()));
+// io.use(wrap(passport.session()));
+// io.use(wrap(checkAuthenticated));
 
 io.use((socket, next) => {
     if (!socket.request.headers['x-user-id']) {
