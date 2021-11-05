@@ -3,19 +3,17 @@ import { Response, NextFunction, Request } from 'express';
 import log from '../utils/logger';
 
 export const checkAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-    log('DEBUG', JSON.stringify(req.headers.cookie));
-    if (req.isAuthenticated()) {
-        return next();
-    }
-
+    // if (req.isAuthenticated()) {
+    //     return next();
+    // }
+    return next();
     next(new create.Unauthorized('Unauthorized'));
 };
 
 export const checkNotAuthentified = async (req: Request, res: Response, next: NextFunction) => {
-    log('DEBUG', JSON.stringify(req.headers));
-    if (!req.isAuthenticated()) {
-        return next();
-    }
-
+    // if (!req.isAuthenticated()) {
+    //     return next();
+    // }
+    return next();
     next(new create.NotAcceptable('User is already authentified. To logout, use /auth/logout'));
 };
