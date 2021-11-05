@@ -18,7 +18,7 @@ export class SignUpPageComponent implements OnInit {
 
   constructor(public userService: UserService) {
     this.URL = isDevMode()
-    ? environment.local
+    ? environment.serverURL
     : environment.serverURL
   }
 

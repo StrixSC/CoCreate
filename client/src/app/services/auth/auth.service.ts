@@ -18,6 +18,7 @@ export class AuthService {
 
 	loginSuccessRoutine(user: IUser) {
 		this.userService.user = user;
+		this.socketService.setupSocketConnection(user.userId);
 		this.socketService.connect();
 	}
 }

@@ -14,18 +14,22 @@ export class SocketService {
   constructor() {
     this.error = "";
     this.username = "";
-    this.url = isDevMode() ? environment.local : environment.serverURL
+    this.url = environment.serverURL
   }
 
-  setupSocketConnection(ip?: string): void {
+  setupSocketConnection(userId: string): void {
     this.socket = io(this.url, {
       autoConnect: false,
-      withCredentials: true
+      withCredentials: true,
+      extraHeaders: {
+        'x-user-id': userId
+      }
     }) as Socket;
   }
 
   connect(): void {
     this.socket.connect();
+    console.log(this.socket.connected);
     this.socket.sendBuffer = [];
   }
 

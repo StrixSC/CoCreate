@@ -4,7 +4,6 @@
 
 export const environment = {
   serverURL: "https://colorimage-109-3900.herokuapp.com/",
-  allowNoLogin: false
 };
 
 /*

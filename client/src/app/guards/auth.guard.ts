@@ -23,7 +23,8 @@ export class AuthGuard implements CanActivate {
 		}
 
 		return this.userService.refreshUser().pipe(
-			catchError(() => {
+			catchError((e) => {
+				console.log(e);
 				this.authService.loginFailureRoutine();
 				return of(false).pipe(map(() => false))
 			}),

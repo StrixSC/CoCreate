@@ -14,8 +14,8 @@ export class LoginGuard implements CanActivate {
 	canActivate() {
         return this.userService.refreshUser().pipe(
             map((data) => {
-                console.log(data);
                 if(data) {
+                    console.log(data);
                     this.authService.loginSuccessRoutine(data);
                     this.router.navigateByUrl('drawing');
                     return false;

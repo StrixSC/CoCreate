@@ -1,8 +1,7 @@
-import { IUser } from './../model/IUser.model';
+import { IUser } from "./../model/IUser.model";
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { environment } from "src/environments/environment";
-import { isDevMode } from '@angular/core';
 import { Observable } from "rxjs";
 
 @Injectable({
@@ -13,11 +12,13 @@ export class UserService {
   user: IUser;
 
   constructor(private http: HttpClient) {
-    this.URL = isDevMode() ? environment.local : environment.serverURL;
+    this.URL = environment.serverURL;
   }
 
   refreshUser(): Observable<any> {
-    return this.http.get(this.URL + "auth/refresh", { withCredentials: true });
+    return this.http.get(this.URL + "auth/refresh", {
+      withCredentials: true,
+    });
   }
 
   register(userInfo: string): Observable<any> {
@@ -25,7 +26,7 @@ export class UserService {
   }
 
   login(user: any): Observable<any> {
-  const payload = {
+    const payload = {
       email: user.email,
       password: user.password,
     };
@@ -34,6 +35,9 @@ export class UserService {
       "Content-Type": "application/json",
     };
 
-    return this.http.post(this.URL + "auth/login", JSON.stringify(payload), { headers, withCredentials: true });
+    return this.http.post(this.URL + "auth/login", JSON.stringify(payload), {
+      headers,
+      withCredentials: true,
+    });
   }
 }

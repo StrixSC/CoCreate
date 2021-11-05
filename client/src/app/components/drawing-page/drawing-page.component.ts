@@ -1,3 +1,5 @@
+import { Router } from '@angular/router';
+import { SocketService } from './../../services/chat/socket.service';
 import { Component, OnDestroy } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
@@ -14,14 +16,33 @@ export class DrawingPageComponent implements OnDestroy {
 
   welcomeDialogRef: MatDialogRef<WelcomeDialogComponent>;
   welcomeDialogSub: Subscription;
+  errorSubscription: Subscription;
+  exceptionSubscription: Subscription;
 
   constructor(
     public dialog: MatDialog,
     private hotkeyService: HotkeysService,
+    private socketService: SocketService,
+    private router: Router
   ) {
     this.hotkeyService.hotkeysListener();
   }
   
+  ngOnInit() {
+    this.errorSubscription = this.socketService.onError().subscribe((err: Error | any) => {
+      this.router.navigateByUrl("")
+      console.error(err);
+    }, (err) => {
+      console.error(err);
+    });
+
+    // Handle exceptions here. Logic needs to be separated for each specific exception.
+    this.exceptionSubscription = this.socketService.onException().subscribe((err: Error | any) => {
+      console.error(err);
+    }, (err) => {
+      console.error(err);
+    })
+  }
   // Fonction qui ouvre le mat Dialog de bienvenue
   openDialog() {
     this.welcomeDialogRef = this.dialog.open(WelcomeDialogComponent, {
@@ -37,10 +58,17 @@ export class DrawingPageComponent implements OnDestroy {
     });
   }
 
-  /// Detruit le subscribe du welcomeDialogSub
   ngOnDestroy(): void {
     if (this.welcomeDialogSub) {
       this.welcomeDialogSub.unsubscribe();
+    }
+
+    if(this.errorSubscription) {
+      this.errorSubscription.unsubscribe();
+    }
+
+    if(this.exceptionSubscription) {
+      this.exceptionSubscription.unsubscribe();
     }
   }
 }
