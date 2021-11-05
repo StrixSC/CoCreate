@@ -126,10 +126,14 @@ model Action {
   actionType      ActionType
 
   // Freedraw:
-  x     Float?
-  y     Float?
-  color Int?
-  width Float?
+  x       Float?
+  y       Float?
+  r       Int?
+  g       Int?
+  b       Int?
+  a       Int?
+  width   Float?
+  offsets String?
 
   // Shared:
   state      ActionState?

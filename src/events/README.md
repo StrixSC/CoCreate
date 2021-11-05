@@ -228,6 +228,8 @@ Event to emit (Client -> Socket): `freedraw:emit`
 
 Data:
 
+These values are necessary when the actions are in state "down" or "move":
+
 ```typescript
 {
     actionId: string,
@@ -244,10 +246,32 @@ Data:
 }
 ```
 
+These values are necessary when the actions are in state "up": 
+```typescript
+{
+    actionId: string,
+    username: string,
+    userId: string,
+    collaborationId: string,
+    actionType: string,
+    state: string,
+    isSelected: boolean,
+    r: number, // integer
+    g: number, // integer
+    b: number, // integer
+    a: number, // integer,
+    offsets: {x: number, y: number}[], // x and y can be either floats or integers.
+    width: number // float,
+}
+
+```
+The offsets value is the list of x and y coords sent to the server. These are used to store the actions in the database. These offsets should be used to draw the full action on the screen when received from the server. They will also be given to the new users that join a drawing to render the drawing on the screen.
+
 Event emitted (Server -> Client): `freedraw:received`
 
 Data:
 
+These values are received from the server in state "down" or "move":
 ```typescript
 {
     actionId: string,
@@ -259,11 +283,34 @@ Data:
     isSelected: boolean,
     x: number // float,
     y: number // float,
-    color: number // integer,
+    r: number // integer,
+    g: number // integer,
+    b: number // integer,
+    a: number // integer,
     width: number // float,
-    timestamp: Date | string // ISO Format
 }
 ```
+
+These values should be sent from the server when the actions are in state "up":
+```typescript
+{
+    actionId: string,
+    username: string,
+    userId: string,
+    collaborationId: string,
+    actionType: string,
+    state: string, // move/down/up
+    isSelected: boolean,
+    x: number // integer | float,
+    y: number // integer | float,
+    r: number // integer | float,
+    g: number // integer | float,
+    b: number // integer | float,
+    a: number // integer | float,
+    offsets: {x: number, y: number}[], // x and y can be either floats or integers.
+    color: number // integer,
+    width: number // float,
+}
 
 Possible Errors: 
  
@@ -306,3 +353,18 @@ Possible Errors:
 3. `E2203`: Could not trigger action: The action is already selected by a different user.
 4. `E2204`: Could not trigger action. Either the isSelected value does not differ from the one currently applied or there was an unexpected socket server error. 
 
+# Action Saving
+
+The database needs time to save each data, subscribe to `action:saved` to be able to send the rest of the necessary actions regarding an action to the server.
+
+For example, for selecting a line after it's been drawn, you must wait for the `action:saved` signal to send the `select:emit` with the appropriate actionId.
+
+Event emitted (Server -> Client): `action:saved`
+
+Data:
+
+```typescript
+{
+    actionId: string;
+    collaborationId: string;
+}

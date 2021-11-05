@@ -18,10 +18,36 @@ const defaultTypes = [
 
 const hasEmptyProperties = (obj: any): { result: boolean; field: string | null } => {
     for (const key in obj) {
+        if (typeof obj[key] == 'boolean') {
+            continue;
+        }
+
         if (!obj[key] || obj[key] === null || obj[key] === '')
             return { result: true, field: `${key} is missing/empty or is invalid` };
     }
     return { result: false, field: null };
+};
+
+const validateSelection = (isSelected: string | boolean) => {
+    if (typeof isSelected === 'string') {
+        if (!validator.isIn(isSelected, ['false', 'true'])) {
+            return {
+                result: false,
+                field: "isSelected is a string and does not have 'false' or 'true' as a value"
+            };
+        } else {
+            return { result: true, field: null };
+        }
+    }
+
+    if (typeof isSelected === 'boolean') {
+        return { result: true, field: null };
+    } else {
+        return {
+            result: false,
+            field: "isSelected must be a boolean value or a string value with  'false' or 'true' as values"
+        };
+    }
 };
 
 const validateBaseAction = (a: Action): { result: boolean; field: string | null } => {
@@ -65,7 +91,6 @@ const typesCallbacks: Record<
         const action = {
             x: a.x || null,
             y: a.y || null,
-            color: a.color || null,
             width: a.width || null,
             state: a.state || null,
             isSelected: a.isSelected || null
@@ -76,24 +101,33 @@ const typesCallbacks: Record<
             return { result: false, field: checkEmpty.field };
         }
 
-        if (!validator.isFloat(action.x!.toString()) || !validator.isInt(action.x!.toString())) {
-            return { result: false, field: 'X' };
+        if (a.state !== 'up') {
+            if (
+                !validator.isFloat(action.x!.toString()) ||
+                !validator.isInt(action.x!.toString())
+            ) {
+                return { result: false, field: 'X' };
+            }
+
+            if (
+                !validator.isFloat(action.y!.toString()) ||
+                !validator.isInt(action.y!.toString())
+            ) {
+                return { result: false, field: 'Y' };
+            }
         }
 
-        if (!validator.isFloat(action.y!.toString()) || !validator.isInt(action.y!.toString())) {
-            return { result: false, field: 'Y' };
-        }
-
-        if (!validator.isInt(action.color!.toString())) {
-            return { result: false, field: 'Color' };
-        }
+        // if (!validator.isInt(action.color!.toString())) {
+        //     return { result: false, field: 'Color' };
+        // }
 
         if (!validator.isFloat(action.width!.toString())) {
             return { result: false, field: 'Width' };
         }
 
-        if (!validator.isIn(action.isSelected!.toString(), ['false', 'true', false, true])) {
-            return { result: false, field: 'isSelected' };
+        const selectionValidation = validateSelection(a.isSelected!);
+        if (!selectionValidation.result) {
+            return { result: false, field: selectionValidation.field };
         }
 
         if (!validator.isIn(action.state!, defaultStates)) {
@@ -119,25 +153,12 @@ const typesCallbacks: Record<
             return { result: false, field: checkEmpty.field };
         }
 
-        if (typeof action.isSelected === 'string') {
-            if (!validator.isIn(action.isSelected, ['false', 'true'])) {
-                return {
-                    result: false,
-                    field: "isSelected is a string and does not have 'false' or 'true' as a value"
-                };
-            } else {
-                return { result: true, field: null };
-            }
+        const selectionValidation = validateSelection(a.isSelected!);
+        if (!selectionValidation.result) {
+            return { result: false, field: selectionValidation.field };
         }
 
-        if (typeof action.isSelected === 'boolean') {
-            return { result: true, field: null };
-        } else {
-            return {
-                result: false,
-                field: "isSelected must be a boolean value or a string value with  'false' or 'true' as values"
-            };
-        }
+        return { result: true, field: null };
     },
     Translate: () => ({ result: false, field: null }),
     Resize: () => ({ result: false, field: null }),

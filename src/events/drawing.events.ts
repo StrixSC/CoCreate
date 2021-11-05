@@ -18,46 +18,77 @@ export = (io: Server, socket: Socket) => {
                 );
             }
 
-            const dbAction = await db.action.create({
-                data: {
-                    actionType: data.actionType,
-                    userId: socket.data.user || 'DEMO',
-                    username: data.username,
-                    collaborationId: 'DEMO_COLLABORATION',
-                    actionId: data.actionId,
-                    color: data.color,
-                    x: data.x,
-                    y: data.y,
-                    width: data.width,
-                    isSelected:
-                        typeof data.isSelected === 'string'
-                            ? validator.toBoolean(data.isSelected)
-                            : data.isSelected,
-                    state: data.state
-                }
-            });
+            if (data.state === 'up') {
+                const dbAction = await db.action.create({
+                    data: {
+                        actionType: data.actionType,
+                        userId: socket.data.user || 'DEMO',
+                        username: data.username,
+                        collaborationId: 'DEMO_COLLABORATION',
+                        actionId: data.actionId,
+                        a: data.a,
+                        r: data.r,
+                        g: data.g,
+                        b: data.b,
+                        width: data.width,
+                        isSelected:
+                            typeof data.isSelected === 'string'
+                                ? validator.toBoolean(data.isSelected)
+                                : data.isSelected,
+                        offsets: JSON.stringify(data.offsets),
+                        state: data.state
+                    }
+                });
 
-            if (!dbAction) {
-                throw new SocketEventError(
-                    'Could not trigger the action: Internal Socket Server Error',
-                    'E2002'
-                );
+                if (!dbAction) {
+                    throw new SocketEventError(
+                        'Could not trigger the action: Internal Socket Server Error',
+                        'E2002'
+                    );
+                }
+
+                socket.emit('action:saved', {
+                    collaborationId: dbAction.collaborationId,
+                    actionId: dbAction.actionId
+                });
+
+                return io.emit('freedraw:received', {
+                    actionId: dbAction.actionId,
+                    username: dbAction.username,
+                    userId: dbAction.userId,
+                    actionType: dbAction.actionType,
+                    state: dbAction.state,
+                    isSelected: dbAction.isSelected,
+                    offsets: JSON.stringify(dbAction.offsets),
+                    r: dbAction.r,
+                    g: dbAction.g,
+                    b: dbAction.b,
+                    a: dbAction.a,
+                    width: dbAction.width,
+                    collaborationId: dbAction.collaborationId,
+                    timestamp: dbAction.createdAt
+                });
             }
 
             // TODO: Collaboration rooms. io.to(collaborationId).emit('freedraw:received', {});
             io.emit('freedraw:received', {
-                actionId: dbAction.actionId,
-                username: dbAction.username,
-                userId: dbAction.userId,
-                actionType: dbAction.actionType,
-                state: dbAction.state,
-                isSelected: dbAction.isSelected,
-                x: dbAction.x,
-                y: dbAction.y,
-                color: dbAction.color,
-                width: dbAction.width,
-                collaborationId: dbAction.collaborationId,
-                timestamp: dbAction.createdAt
+                actionType: data.actionType,
+                userId: socket.data.user || 'DEMO',
+                username: data.username,
+                collaborationId: 'DEMO_COLLABORATION',
+                actionId: data.actionId,
+                a: data.a,
+                r: data.r,
+                g: data.g,
+                b: data.b,
+                x: data.x,
+                y: data.y,
+                width: data.width,
+                isSelected:
+                    typeof data.isSelected === 'string'
+                        ? validator.toBoolean(data.isSelected)
+                        : data.isSelected,
+                state: data.state
             });
         } catch (e) {
             handleSocketError(socket, e);
@@ -72,7 +103,7 @@ export = (io: Server, socket: Socket) => {
 
     const onSelection = async (data: Action) => {
         try {
-            const validated = validateDrawingEvents(ActionType.Freedraw, data);
+            const validated = validateDrawingEvents(ActionType.Select, data);
             if (!validated.result) {
                 throw new SocketEventError(
                     `Could not trigger action: Selection data error on: ${validated.field}`,
@@ -94,7 +125,6 @@ export = (io: Server, socket: Socket) => {
                 );
             }
 
-            log('DEBUG', JSON.stringify(action));
             if (action.isSelected && action.selectedBy !== socket.data.user) {
                 throw new SocketEventError(
                     'Could not trigger action: The action is already selected by a different user.',
@@ -107,7 +137,8 @@ export = (io: Server, socket: Socket) => {
                     ? validator.toBoolean(data.isSelected)
                     : data.isSelected;
 
-            const selectedByUser = userSelectionChoice ? socket.data.user : '';
+            const selectedByUser = userSelectionChoice ? data.userId : '';
+            log('DEBUG', selectedByUser);
 
             const updatedAction = await db.action.updateMany({
                 where: {

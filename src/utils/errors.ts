@@ -20,6 +20,7 @@ const isPrismaError = (e: Error) => {
         e instanceof PrismaClientUnknownRequestError
     );
 };
+
 export const handleRequestError = (e: any, next: NextFunction) => {
     log('DEBUG', e);
     if (isPrismaError(e)) {
