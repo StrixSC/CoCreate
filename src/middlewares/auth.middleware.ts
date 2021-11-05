@@ -3,10 +3,10 @@ import { Response, NextFunction, Request } from 'express';
 import log from '../utils/logger';
 
 export const checkAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-    // if (req.isAuthenticated()) {
-    //     return next();
-    // }
-    return next();
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    // return next();
     next(new create.Unauthorized('Unauthorized'));
 };
 

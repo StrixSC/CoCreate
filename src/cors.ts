@@ -20,8 +20,7 @@ const corsOptions = {
         'http://localhost:5554',
         'http://localhost:5556',
         'http://localhost:5556',
-        'http://localhost:6000',
-        '142.122.55.52'
+        'http://localhost:6000'
     ]
 };
 
