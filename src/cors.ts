@@ -10,7 +10,9 @@ const corsOptions = {
         'Origin',
         'X-Requested-With',
         'Content-Type',
-        'Accept'
+        'Accept',
+        'x-user-id',
+        'X-User-Id'
     ],
     exposedHeaders: 'Location',
     origin: [
