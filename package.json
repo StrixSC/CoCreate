@@ -13,6 +13,7 @@
     "fix": "./node_modules/.bin/eslint . --ext .ts --no-error-on-unmatched-pattern --fix",
     "pretty": "prettier --write src/*.{js,json,ts}",
     "postpretty": "npm run fix",
+    "postinstall": "npx prisma generate",
     "docker": "docker-compose up",
     "docker-unix": "sudo docker-compose up",
     "docker-rebuild": "docker-compose up --build --force-recreate --renew-anon-volumes",

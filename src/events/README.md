@@ -301,12 +301,10 @@ These values should be sent from the server when the actions are in state "up":
     actionType: string,
     state: string, // move/down/up
     isSelected: boolean,
-    x: number // integer | float,
-    y: number // integer | float,
-    r: number // integer | float,
-    g: number // integer | float,
-    b: number // integer | float,
-    a: number // integer | float,
+    r: number, // integer | float
+    g: number, // integer | float
+    b: number, // integer | float
+    a: number, // integer | float
     offsets: {x: number, y: number}[], // x and y can be either floats or integers.
     color: number // integer,
     width: number // float,
