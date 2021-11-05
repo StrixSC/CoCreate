@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:Colorimage/models/drawing.dart';
+import 'package:Colorimage/models/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -10,11 +11,12 @@ import 'package:uuid/uuid.dart';
 
 class DrawingScreen extends StatefulWidget {
   final IO.Socket _socket;
+  final User _user;
 
-  DrawingScreen(this._socket);
+  DrawingScreen(this._socket, this._user);
 
   @override
-  State<DrawingScreen> createState() => _DrawingScreenState(this._socket);
+  State<DrawingScreen> createState() => _DrawingScreenState(_socket, _user);
 }
 
 class _DrawingScreenState extends State<DrawingScreen> {
@@ -23,15 +25,19 @@ class _DrawingScreenState extends State<DrawingScreen> {
   String drawType = DrawingType.freedraw;
   late String shapeID;
   final IO.Socket _socket;
+  final User _user;
   Map actionsMap = <String, Map<String, List<Offset>>>{};
-  List<String> selectedItems = <String>[];
-  List<String> mySelectedItem = <String>[];
+  Map selectedItems = <String, String>{};
 
-  _DrawingScreenState(this._socket);
+  _DrawingScreenState(this._socket, this._user);
 
   @override
   void initState() {
     super.initState();
+    _socket.on('exception', (data) {
+      print(data);
+      print("");
+    });
     _socket.on('freedraw:received', (data) {
       setState(() {
         if (data['state'] == DrawingState.down) {
@@ -75,12 +81,14 @@ class _DrawingScreenState extends State<DrawingScreen> {
             ..color = Color(data['color'])
             ..isAntiAlias = true
             ..strokeWidth = 6.0
-            ..style = data['isFilled'] ? PaintingStyle.fill : PaintingStyle.stroke;
+            ..style =
+                data['isFilled'] ? PaintingStyle.fill : PaintingStyle.stroke;
           paintsMap.putIfAbsent(data['actionId'], () => paint);
         } else if (data['state'] == DrawingState.move) {
           actionsMap.forEach((actionId, actionMap) {
             if (actionId == data['actionId']) {
-              actionMap[data['shapeType']].add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+              actionMap[data['shapeType']]
+                  .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
               actionsMap.update(data['actionId'],
                   (value) => actionMap as Map<String, List<Offset>>);
             }
@@ -99,10 +107,13 @@ class _DrawingScreenState extends State<DrawingScreen> {
         }
       });
     });
-    _socket.on('select:received', (data) {
+    _socket.on('selection:received', (data) {
       setState(() {
-        selectedItems.add(data['selectedActionId']);
-        print("");
+        if (data['isSelected']) {
+          selectedItems.putIfAbsent(data['actionId'], () => data['selectedBy']);
+        } else {
+          selectedItems.remove(data['actionId']);
+        }
       });
     });
   }
@@ -199,14 +210,21 @@ class _DrawingScreenState extends State<DrawingScreen> {
         ],
       ),
       body: GestureDetector(
+        //todo: remove hardcode variable when merge with login page
         onPanStart: (details) {
           switch (drawType) {
             case DrawingType.freedraw:
               _socket.emit("freedraw:emit", {
-                'x': details.localPosition.dx,
-                'y': details.localPosition.dy,
+                'x': details.localPosition.dx.toInt(),
+                'y': details.localPosition.dy.toInt(),
+                'collaborationId': "DEMO_COLLABORATION",
+                'username': _user.username,
+                'userId': _user.id,
+                'actionType': "Freedraw",
                 'state': DrawingState.down,
                 'color': currentColor.value,
+                'width': 3,
+                'isSelected': true,
                 'actionId': shapeID = const Uuid().v1()
               });
               break;
@@ -214,6 +232,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
               _socket.emit("shape:emit", {
                 'x': details.localPosition.dx,
                 'y': details.localPosition.dy,
+                'collaborationId': "DEMO_COLLABORATION",
                 'state': DrawingState.down,
                 'color': currentColor.value,
                 'actionId': shapeID = const Uuid().v1(),
@@ -226,6 +245,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
               _socket.emit("shape:emit", {
                 'x': details.localPosition.dx,
                 'y': details.localPosition.dy,
+                'collaborationId': "DEMO_COLLABORATION",
                 'state': DrawingState.down,
                 'color': currentColor.value,
                 'actionId': shapeID = const Uuid().v1(),
@@ -237,12 +257,15 @@ class _DrawingScreenState extends State<DrawingScreen> {
             case "select":
               String? selectItem = getSelectedId(
                   Offset(details.localPosition.dx, details.localPosition.dy));
-              if (selectItem != null && !selectedItems.contains(selectItem)) {
-                _socket.emit("select:emit", {
-                  'state': DrawingState.down,
-                  'selectedActionId': selectItem,
+              if (selectItem != null) {
+                _socket.emit("selection:emit", {
+                  'actionId': selectItem,
+                  'username': _user.username,
+                  'userId': _user.id,
+                  'collaborationId': "DEMO_COLLABORATION",
+                  'actionType': "Select",
+                  'isSelected': true,
                 });
-                mySelectedItem.add(selectItem);
               }
               break;
           }
@@ -251,9 +274,16 @@ class _DrawingScreenState extends State<DrawingScreen> {
           switch (drawType) {
             case DrawingType.freedraw:
               _socket.emit("freedraw:emit", {
-                'x': details.localPosition.dx,
-                'y': details.localPosition.dy,
+                'x': details.localPosition.dx.toInt(),
+                'y': details.localPosition.dy.toInt(),
+                'collaborationId': "DEMO_COLLABORATION",
+                'username': _user.username,
+                'userId': _user.id,
+                'actionType': "Freedraw",
                 'state': DrawingState.move,
+                'color': currentColor.value,
+                'width': 3,
+                'isSelected': true,
                 'actionId': shapeID,
               });
               break;
@@ -281,10 +311,25 @@ class _DrawingScreenState extends State<DrawingScreen> {
           switch (drawType) {
             case DrawingType.freedraw:
               _socket.emit("freedraw:emit", {
-                'x': endPoint.dx,
-                'y': endPoint.dy,
+                'x': endPoint.dx.toInt(),
+                'y': endPoint.dy.toInt(),
+                'collaborationId': "DEMO_COLLABORATION",
+                'username': _user.username,
+                'userId': _user.id,
+                'actionType': "Freedraw",
                 'state': DrawingState.up,
+                'color': currentColor.value,
+                'width': 3,
+                'isSelected': "false",
                 'actionId': shapeID
+              });
+              _socket.emit("selection:emit", {
+                'actionId': shapeID,
+                'username': _user.username,
+                'userId': _user.id,
+                'collaborationId': "DEMO_COLLABORATION",
+                'actionType': "Select",
+                'isSelected': true,
               });
               break;
             case DrawingType.rectangle:
@@ -309,7 +354,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
         },
         child: Center(
           child: CustomPaint(
-            painter: Painter(drawType, paintsMap, actionsMap),
+            painter: Painter(drawType, paintsMap, actionsMap, selectedItems),
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
@@ -338,7 +383,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
               overlapItems.add(actionId);
             }
           }
-        } else if (action == DrawingType.rectangle || action == DrawingType.ellipse) {
+        } else if (action == DrawingType.rectangle ||
+            action == DrawingType.ellipse) {
           Rect rect = Rect.fromLTRB(offsetList.first.dx, offsetList.first.dy,
               offsetList.last.dx, offsetList.last.dy);
           Path path = Path();
@@ -353,7 +399,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
         }
       });
     });
-    if(overlapItems.isNotEmpty){
+    if (overlapItems.isNotEmpty) {
       return overlapItems.last;
     }
     return null;
@@ -361,10 +407,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
 }
 
 class Painter extends CustomPainter {
-  Painter(this.drawType, this.paintsMap, this.actionsMap);
+  Painter(this.drawType, this.paintsMap, this.actionsMap, this.selectedItems);
+
   Map paintsMap;
   String drawType;
   Map actionsMap;
+  Map selectedItems;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -374,6 +422,14 @@ class Painter extends CustomPainter {
           for (var i = 0; i < offsetList.length - 1; i++) {
             canvas.drawLine(
                 offsetList[i], offsetList[i + 1], paintsMap[actionId]);
+          }
+          if (selectedItems.containsKey(actionId)) {
+            Path path = Path();
+            path.moveTo(offsetList.first.dx, offsetList.first.dy);
+            for (int i = 1; i < selectedItems.length; i) {
+              path.lineTo(offsetList[i].dx, offsetList[i].dy);
+            }
+            canvas.drawPath(getCorner(path), paintsMap[actionId]);
           }
         }
         if (toolType == DrawingType.rectangle) {
@@ -388,7 +444,6 @@ class Painter extends CustomPainter {
         }
       });
     });
-
     // if (drawType == "select") {
     //   for (var i = 0; i < pathMetrics.length; i++) {
     //     for (var j = 0; j < pathMetrics.elementAt(i).length; j++) {
@@ -455,28 +510,28 @@ class Painter extends CustomPainter {
     // }
   }
 
-  // Path getCorner(Path dragPath) {
-  //   Rect bounds = dragPath.getBounds();
-  //   var pathCorner = Path();
-  //
-  //   pathCorner.moveTo(bounds.topLeft.dx + 5, bounds.topLeft.dy - 5);
-  //   pathCorner.lineTo(bounds.topLeft.dx - 5, bounds.topLeft.dy - 5);
-  //   pathCorner.lineTo(bounds.topLeft.dx - 5, bounds.topLeft.dy + 5);
-  //
-  //   pathCorner.moveTo(bounds.topRight.dx - 5, bounds.topRight.dy - 5);
-  //   pathCorner.lineTo(bounds.topRight.dx + 5, bounds.topRight.dy - 5);
-  //   pathCorner.lineTo(bounds.topRight.dx + 5, bounds.topRight.dy + 5);
-  //
-  //   pathCorner.moveTo(bounds.bottomLeft.dx - 5, bounds.bottomLeft.dy - 5);
-  //   pathCorner.lineTo(bounds.bottomLeft.dx - 5, bounds.bottomLeft.dy + 5);
-  //   pathCorner.lineTo(bounds.bottomLeft.dx + 5, bounds.bottomLeft.dy + 5);
-  //
-  //   pathCorner.moveTo(bounds.bottomRight.dx + 5, bounds.bottomRight.dy - 5);
-  //   pathCorner.lineTo(bounds.bottomRight.dx + 5, bounds.bottomRight.dy + 5);
-  //   pathCorner.lineTo(bounds.bottomRight.dx - 5, bounds.bottomRight.dy + 5);
-  //
-  //   return pathCorner;
-  // }
+  Path getCorner(Path dragPath) {
+    Rect bounds = dragPath.getBounds();
+    var pathCorner = Path();
+
+    pathCorner.moveTo(bounds.topLeft.dx + 5, bounds.topLeft.dy - 5);
+    pathCorner.lineTo(bounds.topLeft.dx - 5, bounds.topLeft.dy - 5);
+    pathCorner.lineTo(bounds.topLeft.dx - 5, bounds.topLeft.dy + 5);
+
+    pathCorner.moveTo(bounds.topRight.dx - 5, bounds.topRight.dy - 5);
+    pathCorner.lineTo(bounds.topRight.dx + 5, bounds.topRight.dy - 5);
+    pathCorner.lineTo(bounds.topRight.dx + 5, bounds.topRight.dy + 5);
+
+    pathCorner.moveTo(bounds.bottomLeft.dx - 5, bounds.bottomLeft.dy - 5);
+    pathCorner.lineTo(bounds.bottomLeft.dx - 5, bounds.bottomLeft.dy + 5);
+    pathCorner.lineTo(bounds.bottomLeft.dx + 5, bounds.bottomLeft.dy + 5);
+
+    pathCorner.moveTo(bounds.bottomRight.dx + 5, bounds.bottomRight.dy - 5);
+    pathCorner.lineTo(bounds.bottomRight.dx + 5, bounds.bottomRight.dy + 5);
+    pathCorner.lineTo(bounds.bottomRight.dx - 5, bounds.bottomRight.dy + 5);
+
+    return pathCorner;
+  }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;

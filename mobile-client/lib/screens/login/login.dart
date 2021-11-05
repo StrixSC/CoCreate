@@ -81,8 +81,8 @@ class _LoginState extends State<Login> {
 
   void initializeSocketConnection(user) {
     IO.Socket socket = IO.io(
-        'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000"),
-        // 'https://colorimage-109-3900.herokuapp.com/',
+        // 'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000"),
+        'https://colorimage-109-3900.herokuapp.com/',
         // 'http://localhost:5000/',
         IO.OptionBuilder()
             .setExtraHeaders({'Cookie': user.cookie})
@@ -94,20 +94,42 @@ class _LoginState extends State<Login> {
     context.read<Messenger>().setSocket(channelSocket);
   }
 
-  _toDrawing(BuildContext context) {
-    IO.Socket socket = IO.io(
-        'http://localhost:5000/',
-        // 'http://edae-132-207-3-192.ngrok.io/',
-        IO.OptionBuilder()
-            .disableAutoConnect()
-            .setTransports(['websocket']) // for Flutter or Dart VM
-            .build());
+  _toDrawing(BuildContext context) async {
+    //todo: remove after merge drawing with login
+    Map data = {'email': "demo", 'password': "demo"};
+    var body = json.encode(data);
 
-    socket.connect();
+    AuthenticationAPI rest = AuthenticationAPI();
+    var response = await rest.login(body);
 
-    socket.on('connect', (_) {
-      Navigator.pushNamed(context, drawingRoute, arguments: {'socket': socket});
-    });
+    if (response.statusCode == 200) {
+      String rawCookie = response.headers['set-cookie'] as String;
+      print(rawCookie);
+      var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
+      var user = User(
+          id: jsonResponse['user_id'],
+          email: jsonResponse['email'],
+          username: jsonResponse['username'],
+          avatar_url: jsonResponse['avatar_url'],
+          isActive: false,
+          cookie: rawCookie);
+
+      IO.Socket socket = IO.io(
+          // 'http://localhost:5000/',
+          'https://colorimage-109-3900.herokuapp.com/',
+          IO.OptionBuilder()
+              .setExtraHeaders({'Cookie': user.cookie})
+              .disableAutoConnect()
+              .setTransports(['websocket']) // for Flutter or Dart VM
+              .build());
+
+      socket.connect();
+
+      socket.on('connect', (_) {
+        Navigator.pushNamed(context, drawingRoute,
+            arguments: {'socket': socket, 'user': user});
+      });
+    }
   }
 
   @override
