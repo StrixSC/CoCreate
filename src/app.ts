@@ -43,7 +43,7 @@ export const expressSession = session({
         maxAge: 86400000,
         path: '/',
         sameSite: 'none',
-        secure: 'auto'
+        secure: true
     }
 });
 

@@ -22,7 +22,7 @@ export = (io: Server, socket: Socket) => {
                 const dbAction = await db.action.create({
                     data: {
                         actionType: data.actionType,
-                        userId: socket.data.user || 'DEMO',
+                        userId: data.userId || 'DEMO',
                         username: data.username,
                         collaborationId: 'DEMO_COLLABORATION',
                         actionId: data.actionId,
@@ -73,7 +73,7 @@ export = (io: Server, socket: Socket) => {
             // TODO: Collaboration rooms. io.to(collaborationId).emit('freedraw:received', {});
             io.emit('freedraw:received', {
                 actionType: data.actionType,
-                userId: socket.data.user || 'DEMO',
+                userId: data.userId || 'DEMO',
                 username: data.username,
                 collaborationId: 'DEMO_COLLABORATION',
                 actionId: data.actionId,
@@ -125,7 +125,7 @@ export = (io: Server, socket: Socket) => {
                 );
             }
 
-            if (action.isSelected && action.selectedBy !== socket.data.user) {
+            if (action.isSelected && action.selectedBy !== action.userId) {
                 throw new SocketEventError(
                     'Could not trigger action: The action is already selected by a different user.',
                     'E2203'
@@ -138,7 +138,6 @@ export = (io: Server, socket: Socket) => {
                     : data.isSelected;
 
             const selectedByUser = userSelectionChoice ? data.userId : '';
-            log('DEBUG', selectedByUser);
 
             const updatedAction = await db.action.updateMany({
                 where: {
