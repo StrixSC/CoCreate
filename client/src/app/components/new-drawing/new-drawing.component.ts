@@ -1,3 +1,6 @@
+import { IAction } from './../../model/action.model';
+import { ActionType } from './../../services/synchronization/sync.service';
+import { ToolFactoryService } from './../../services/synchronization/tool-factory.service';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -30,6 +33,7 @@ export class NewDrawingComponent implements OnInit {
     private dialog: MatDialog,
     private colorPickerService: ColorPickerService,
     private gridService: GridService,
+    private toolFactory: ToolFactoryService,
   ) { }
 
   /// Créer un nouveau form avec les dimensions et la couleur
@@ -47,6 +51,22 @@ export class NewDrawingComponent implements OnInit {
 
   get sizeForm(): FormGroup {
     return (this.form.get('dimension') as FormGroup).get('size') as FormGroup;
+  }
+  
+  ngAfterViewInit(): void {
+      const command = this.toolFactory.create({
+      a: 1,
+      r: 0,
+      g: 0,
+      b: 0,
+      x: 0,
+      y: 0,
+      width: 3,
+      actionType: ActionType.Freedraw,
+      isSelected: true,
+      offsets: [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }, { x: 4, y: 4 }, { x: 5, y: 5 }, { x: 6, y: 6 }, { x: 7, y: 8 }] as Point[],
+    } as IAction);
+    command.execute();
   }
 
   /// Ouvre le dialog pour l'alerte lorsque le service est creer
