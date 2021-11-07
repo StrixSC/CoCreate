@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:Colorimage/utils/rest/authentification_api.dart';
+import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:flutter/material.dart';
 import '../../app.dart';
 
@@ -44,8 +45,8 @@ class _RegisterState extends State<Register> {
     Map data = userInfo;
     var body = json.encode(data);
 
-    AuthenticationAPI rest = AuthenticationAPI();
-    var response = await rest.register(body);
+    RestApi rest = RestApi();
+    var response = await rest.auth.register(body);
 
     if (response.statusCode == 201) {
       print(response.body);

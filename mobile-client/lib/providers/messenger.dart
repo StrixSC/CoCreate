@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:Colorimage/models/user.dart';
 import 'package:Colorimage/screens/chat/chat.dart';
 import 'package:Colorimage/utils/rest/channels_api.dart';
+import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/utils/rest/users_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -85,8 +86,8 @@ class Messenger extends ChangeNotifier {
   }
 
   Future<void> fetchChannels() async {
-    UsersAPI rest = UsersAPI();
-    var response = await rest.fetchUserChannels(auth!.user!);
+    RestApi rest = RestApi();
+    var response = await rest.user.fetchUserChannels(auth!.user!);
     if (response.statusCode == 200) {
       var jsonResponse =
           json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
@@ -108,8 +109,8 @@ class Messenger extends ChangeNotifier {
   }
 
   Future<void> fetchAllChannels() async {
-    ChannelAPI rest = ChannelAPI();
-    var response = await rest.fetchChannels();
+    RestApi rest = RestApi();
+    var response = await rest.channel.fetchChannels();
     if (response.statusCode == 200) {
       var jsonResponse =
           json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
@@ -134,8 +135,8 @@ class Messenger extends ChangeNotifier {
 
   Future<void> fetchChannelHistory(index) async {
     String channelId = userChannels[index].id;
-    ChannelAPI rest = ChannelAPI();
-    var response = await rest.fetchChannelMessages(channelId);
+    RestApi rest = RestApi();
+    var response = await rest.channel.fetchChannelMessages(channelId);
     if (response.statusCode == 200) {
       var jsonResponse =
           json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;

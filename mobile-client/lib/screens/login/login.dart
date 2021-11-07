@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:Colorimage/providers/messenger.dart';
 import 'package:Colorimage/models/user.dart' as ColorimageUser;
 import 'package:Colorimage/utils/rest/authentification_api.dart';
+import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -61,8 +62,8 @@ class _LoginState extends State<Login> {
 
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
 
-    AuthenticationAPI rest = AuthenticationAPI();
-    var response = await rest.login(token);
+    RestApi rest = RestApi();
+    var response = await rest.auth.login(token);
 
     if (response.statusCode == 202) {
       print(response.body);      // Initialize socket connection

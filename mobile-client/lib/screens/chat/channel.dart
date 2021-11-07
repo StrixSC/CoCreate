@@ -138,7 +138,7 @@ class _ChannelState extends State<Channel> {
           chat: item,
           user: user,
           press: () {
-            context.watch<Messenger>().channelSocket.joinChannel(item.id);
+            context.read<Messenger>().channelSocket.joinChannel(item.id);
           }),
       emptyBuilder: (context) => Column(
           crossAxisAlignment: CrossAxisAlignment.center,
