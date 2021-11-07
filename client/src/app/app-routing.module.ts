@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { AngularFireAuthGuard, redirectLoggedInTo, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 import { RouterModule, Routes } from '@angular/router';
 import { ChatComponent } from './components/chat/chat.component';
+import { DrawingGalleryComponent } from './components/drawing-gallery/drawing-gallery.component';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
 import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
@@ -26,6 +27,9 @@ const routes: Routes = [
   { path: 'drawing', component: DrawingPageComponent, canActivate: [AngularFireAuthGuard], data: {
       authGuardPipe: redirectUnauthorizedToLogin,
   }},
+  { path: 'gallery', component: DrawingGalleryComponent, canActivate: [AngularFireAuthGuard], data: {
+    authGuardPipe: redirectUnauthorizedToLogin,
+}},
   { path: 'chat', component: ChatComponent },
   { path: 'forgot-password', component: ChangePasswordComponent },
   { path: '**', redirectTo: '' },
