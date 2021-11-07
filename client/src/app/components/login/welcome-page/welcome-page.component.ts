@@ -27,7 +27,6 @@ export class WelcomePageComponent {
     this.loginSubscription = this.authService.signIn(this.user).pipe(mergeMap((data) => {
       return this.authService.logUserConnection();
     })).subscribe((data) => {
-      console.log(data);
       this.loading = false;
       this.router.navigateByUrl('drawing');
     }, (error) => {

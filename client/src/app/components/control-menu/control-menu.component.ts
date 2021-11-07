@@ -1,7 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { from, Subscription } from 'rxjs';
-import { mergeMap, switchMap } from 'rxjs/operators';
+import { mergeMap, switchMap, take } from 'rxjs/operators';
 import { CommandInvokerService } from 'src/app/services/command-invoker/command-invoker.service';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { ExportDialogService } from 'src/app/services/export-dialog/export-dialog.service';
@@ -94,12 +94,13 @@ export class ControlMenuComponent implements OnDestroy {
   }
 
   signOut(): void {
-    this.signOutSubscription = this.authService.logUserDisconnection().pipe(
-      mergeMap(() => from(this.authService.signOut()))).subscribe((data) => {
-        console.log(data);
-      }, (error) => {
-        console.log(error);
-      });
+    this.authService.logUserDisconnection()
+    .pipe(
+      mergeMap(() => from(this.authService.signOut())), 
+      take(1)
+    ).subscribe((d) => {
+      console.log('Sign out successful!');
+    });
   }
 
   ngOnDestroy(): void {

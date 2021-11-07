@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
@@ -12,6 +12,7 @@ export class SocketService {
   error: string;
   username: string;
   url: string;
+  socketReadyEmitter: EventEmitter<boolean> = new EventEmitter<boolean>();
   constructor(private af: AngularFireAuth) {
     this.error = '';
     this.username = '';
@@ -31,6 +32,8 @@ export class SocketService {
         Authorization: 'Bearer ' + userToken,
       },
     }) as Socket;
+
+    this.socketReadyEmitter.emit(true);
   }
 
   disconnect(): void {
