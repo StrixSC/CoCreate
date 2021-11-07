@@ -15,13 +15,7 @@ const corsOptions = {
         'X-User-Id'
     ],
     exposedHeaders: 'Location',
-    origin: [
-        'http://localhost:4200',
-        'http://localhost:5554',
-        'http://localhost:5556',
-        'http://localhost:5556',
-        'http://localhost:6000'
-    ]
+    origin: true
 };
 
 export default corsOptions;

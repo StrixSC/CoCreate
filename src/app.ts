@@ -2,7 +2,6 @@ import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
 import corsOptions from './cors';
-import passport from './passport';
 import create, { HttpError } from 'http-errors';
 import { setup, serve } from 'swagger-ui-express';
 import swaggerDoc from './swagger.json';
@@ -34,24 +33,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-export const expressSession = session({
-    secret: process.env.SESSION_SECRET || 'secret',
-    resave: false,
-    saveUninitialized: false,
-    store: new RedisStore({ client: redisClient, ttl: 86400000 }),
-    cookie: {
-        maxAge: 86400000,
-        path: '/',
-        sameSite: 'none',
-        secure: 'auto'
-    }
-});
-
 if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', 1);
 }
-
-app.use(expressSession);
 
 redisClient.on('error', (err) => {
     log('ERROR', err);
@@ -64,23 +48,9 @@ redisClient.on('connect', function (err) {
 
 const corsSetup = cors(corsOptions);
 
-app.use(passport.initialize());
-app.use(passport.session());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(corsSetup);
-
 app.options('*', corsSetup);
-app.use(function (req, res, next) {
-    // res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,PATCH,DELETE,OPTIONS');
-    res.header(
-        'Access-Control-Allow-Headers',
-        'Origin,X-Requested-With,Content-Type,Accept,content-type,application/json, x-user-id, X-User-Id'
-    );
-    next();
-});
-
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/api/users', usersRouter);

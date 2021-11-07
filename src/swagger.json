@@ -15,61 +15,42 @@
     ],
     "paths": {
         "/auth/login": {
-            "post": {
+            "get": {
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
                 "tags": ["Authentication"],
-                "summary": "Log user in",
+                "summary": "Log the user's connection to the database.",
                 "operationId": "login",
-                "requestBody": {
-                    "description": "Requires the email and the password of the user.",
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/IAuthPayload"
-                            }
-                        }
-                    },
-                    "required": true
-                },
+                "description": "Logs the user's connection to the database.",
                 "responses": {
-                    "200": {
-                        "description": "Success. User was logged in successfully.\n\nThis will remove any other sessions opened by a user with this email.\n\nThe session ID is returned in a cookie named `connect.sid`. You need to include this cookie in subsequent requests.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/IUser"
-                                },
-                                "example": {
-                                    "user_id": "48bffc61-a8ef-55e3-aa6b-fb5640a90eab",
-                                    "email": "demo@colorimage.com",
-                                    "username": "demo",
-                                    "avatar_url": "https://storage.googleapis.com/1ccd570e-fed0-5049-9143-7e98b240a574.jpg"
-                                }
-                            }
-                        },
-                        "headers": {
-                            "Set-Cookie": {
-                                "schema": {
-                                    "type": "string",
-                                    "example": "connect.sid={...}; Path=/; HttpOnly; Expires=Sun, 24 Oct 2021 20:53:30 GMT;"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized. Invalid email or password (No user was found).",
+                    "201": {
+                        "description": "Created. User's connection was logged successfully.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/IMessage"
                                 },
                                 "example": {
-                                    "message": "Invalid email address or password."
+                                    "message": "User created successfully."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized, the provided token does not match any tokens in our database.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
                                 }
                             }
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error.",
+                        "description": "Unexpected internal server error.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -85,19 +66,18 @@
             }
         },
         "/auth/logout": {
-            "post": {
+            "get": {
                 "security": [
                     {
-                        "Cookie Auth": []
+                        "Authorization": []
                     }
                 ],
                 "tags": ["Authentication"],
-                "summary": "Log user out",
+                "summary": "Log the user's disconnection to the database.",
                 "operationId": "logout",
-                "description": "The user's `connect.sid` cookie must be attached to the request. This request deletes the session from the database. This wil remove any persistent data on the server.",
                 "responses": {
                     "200": {
-                        "description": "Success. User was logged out successfully.\n\nThis will remove any other sessions opened by a user with this email.",
+                        "description": "Success. User's disconnection was successfully logged into the database.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -110,7 +90,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized. No user logged in.",
+                        "description": "Unauthorized. Invalid token provided with authorization header.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -170,7 +150,7 @@
                         }
                     },
                     "400": {
-                        "description": "Bad request. Invalid format of email or password.",
+                        "description": "Bad request. Invalid or missing information.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -182,21 +162,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized. Invalid email or password (No user was found).",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/IMessage"
-                                },
-                                "example": {
-                                    "message": "Invalid email address or password"
-                                }
-                            }
-                        }
-                    },
                     "406": {
-                        "description": "Not acceptable. A user is already logged in, log user out first.",
+                        "description": "Not acceptable. Username or email are already taken.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -237,60 +204,6 @@
                 }
             }
         },
-        "/auth/refresh": {
-            "get": {
-                "security": [
-                    {
-                        "Cookie Auth": []
-                    }
-                ],
-                "tags": ["Authentication"],
-                "summary": "Refresh the user's information by sending it the cookie again.",
-                "operationId": "refresh",
-                "description": "Refresh the user's information by sending it the cookie again. This will renew the cookie on the server as well.",
-                "responses": {
-                    "200": {
-                        "description": "Success. User found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/IUser"
-                                },
-                                "example": {
-                                    "message": "User created successfully."
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized. Invalid userId (No user was found).",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/IMessage"
-                                },
-                                "example": {
-                                    "message": "Invalid userId"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Unexpected internal server error. This could be due to a problem during JWT token generation.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/IMessage"
-                                },
-                                "example": {
-                                    "message": "Internal Server Error."
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/users/:id": {
             "get": {
                 "parameters": [
@@ -307,7 +220,7 @@
                 "summary": "Fetch all information of the user with the given id",
                 "security": [
                     {
-                        "Cookie Auth": []
+                        "Authorization": []
                     }
                 ],
                 "operationId": "complete user",
@@ -393,7 +306,7 @@
                 "summary": "Fetch all channels of a given user.",
                 "security": [
                     {
-                        "Cookie Auth": []
+                        "Authorization": []
                     }
                 ],
                 "operationId": "user channels",
@@ -622,7 +535,7 @@
                 "summary": "Fetch all channels",
                 "security": [
                     {
-                        "Cookie Auth": []
+                        "Authorization": []
                     }
                 ],
                 "operationId": "get all channels",
@@ -696,7 +609,7 @@
                 "summary": "Create new channel",
                 "security": [
                     {
-                        "Cookie Auth": []
+                        "Authorization": []
                     }
                 ],
                 "operationId": "Create new channel",
@@ -762,7 +675,7 @@
                 "summary": "Fetch all relevant information pertaining to that channel. The request must be from a user that has access to the channel.",
                 "security": [
                     {
-                        "Cookie Auth": []
+                        "Authorization": []
                     }
                 ],
                 "parameters": [
@@ -836,7 +749,7 @@
                 "summary": "Fetch all messages in a channel",
                 "security": [
                     {
-                        "Cookie Auth": []
+                        "Authorization": []
                     }
                 ],
                 "parameters": [
@@ -907,10 +820,10 @@
     },
     "components": {
         "securitySchemes": {
-            "Cookie Auth": {
+            "Authorization": {
                 "type": "apiKey",
-                "in": "cookie",
-                "name": "connect.sid"
+                "in": "header",
+                "name": "Bearer"
             }
         },
         "schemas": {

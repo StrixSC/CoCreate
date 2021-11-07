@@ -41,7 +41,7 @@ export const getPublicUserController = async (req: Request, res: Response, next:
         const username = req.params.username;
         if (!username || typeof username !== 'string')
             throw new create.BadRequest(
-                'Missing or invalid \'username\' parameter. Make sure the parameter is a string and is present at the end of the uri.'
+                "Missing or invalid 'username' parameter. Make sure the parameter is a string and is present at the end of the uri."
             );
 
         const user = await getSinglePublicProfileByUsername(req.params.username);
@@ -63,10 +63,10 @@ export const getCompleteUserController = async (
     next: NextFunction
 ) => {
     try {
-        const id = req.params.id.toString() || req.user?.user_id;
+        const id = req.params.id.toString() || req.userId;
         if (!id) throw new create.BadRequest('Invalid or missing identifier');
 
-        if (id !== req.user?.user_id) throw new create.Unauthorized('Unauthorized');
+        if (id !== req.userId) throw new create.Unauthorized('Unauthorized');
 
         const user = await getCompleteUser(id);
         if (!user)

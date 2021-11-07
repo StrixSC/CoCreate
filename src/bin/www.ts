@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-import create from 'http-errors';
+import dotenv from 'dotenv';
+dotenv.config();
 import 'reflect-metadata';
 import http from 'http';
-import { app, expressSession } from '../app';
+import { app } from '../app';
 import { Server, Socket } from 'socket.io';
 import corsOptions from '../cors';
-import passport from 'passport';
-import { checkAuthenticated } from '../middlewares/auth.middleware';
+import { checkIfAuthenticated } from '../middlewares/auth.middleware';
 import { handleSocketError } from './../utils/errors';
 import { logEvent } from './../middlewares/socket.middleware';
 
@@ -63,7 +63,8 @@ const io = new Server(server, {
 
 const onConnection = (socket: Socket) => {
     socket.use(logEvent(socket));
-    // socket.data.user = (socket as any).request.session.passport.user;
+    socket.data.user = (socket as any).request.userId;
+    console.log(socket.data.user);
     try {
         channelHandler(io, socket);
         drawingHandler(io, socket);
@@ -82,15 +83,7 @@ const wrap = (middleware: any) => (socket: Socket, next: any) =>
 // io.use(wrap(expressSession));
 // io.use(wrap(passport.initialize()));
 // io.use(wrap(passport.session()));
-// io.use(wrap(checkAuthenticated));
-
-io.use((socket, next) => {
-    if (!socket.request.headers['x-user-id']) {
-        next(new create.Unauthorized());
-    }
-    socket.data.user = socket.request.headers['x-user-id'];
-    next();
-});
+io.use(wrap(checkIfAuthenticated));
 
 io.on('connection', onConnection);
 

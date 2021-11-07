@@ -2,8 +2,10 @@ import create from 'http-errors';
 import { compareSync, hashSync } from 'bcrypt';
 import { db } from '../db';
 import { validateRegistration } from '../utils/auth';
-import { LogType, User, MemberType, Profile } from '.prisma/client';
+import { LogType, User, MemberType, Profile, Log } from '.prisma/client';
 import { IRegistrationPayload } from '../models/IRegistrationModel';
+import { admin } from '../firebase';
+import log from '../utils/logger';
 
 export const findUserById = async (id: string): Promise<any> => {
     const user = await db.user.findUnique({
@@ -17,64 +19,66 @@ export const findUserById = async (id: string): Promise<any> => {
     return user;
 };
 
-export const login = async (email: string, password: string): Promise<User | null> => {
-    const user = await db.user.findUnique({
-        where: {
-            email: email.toLowerCase()
-        },
-        include: {
-            profile: true
-        }
-    });
-    if (!user) return null;
-
-    const checkPassword = compareSync(password, user.password);
-    if (!checkPassword) return null;
-
-    await db.log.createMany({
+export const login = async (userId: string): Promise<Log | null> => {
+    const log = await db.log.create({
         data: {
             type: LogType.Connection,
-            user_id: user.user_id
+            user_id: userId
         }
     });
 
-    return user;
+    return log;
 };
 
 export const register = async (payload: IRegistrationPayload): Promise<User | null> => {
     // TODO: Express validator:
+    log('DEBUG', JSON.stringify(payload));
     if (!validateRegistration(payload)) throw new create.BadRequest('Invalid or missing inputs');
 
     let { email, password, username, first_name, last_name } = payload;
 
-    const hashedPassword = hashSync(password, 10);
-    email = email.toLowerCase();
     first_name = first_name.normalize();
     last_name = last_name.normalize();
 
-    const user = await db.user.create({
-        data: {
-            email: email,
-            password: hashedPassword,
-            profile: {
-                create: {
-                    username: username,
-                    avatar_url: ''
-                }
-            },
-            account: {
-                create: {
-                    first_name: first_name,
-                    last_name: last_name
-                }
-            },
-            channels: {
-                create: [ { channel_id: 'PUBLIC', type: MemberType.Regular } ]
-            }
-        }
-    });
+    try {
+        const usernameFound = await db.profile.findFirst({ where: { username: username } });
 
-    return user;
+        if (usernameFound) {
+            throw new create.Conflict('There is already a user with this username.');
+        }
+
+        const firebaseUser = await admin.auth().createUser({
+            email: email,
+            password: password,
+            displayName: `${first_name} ${last_name}`
+        });
+
+        const user = await db.user.create({
+            data: {
+                email: email,
+                user_id: firebaseUser.uid,
+                profile: {
+                    create: {
+                        username: username,
+                        avatar_url: firebaseUser.photoURL || ''
+                    }
+                },
+                account: {
+                    create: {
+                        first_name: first_name,
+                        last_name: last_name
+                    }
+                },
+                channels: {
+                    create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
+                }
+            }
+        });
+
+        return user;
+    } catch (e) {
+        throw e;
+    }
 };
 
 export const logout = async (userId: string) => {
@@ -84,6 +88,7 @@ export const logout = async (userId: string) => {
             type: LogType.Disconnection
         }
     });
+    await admin.auth().revokeRefreshTokens(userId);
 
     return log;
 };

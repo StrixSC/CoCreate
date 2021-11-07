@@ -6,3 +6,4 @@ DELETE FROM "Log";
 DELETE FROM "Profile";
 DELETE FROM "Account";
 DELETE FROM "User";
+DELETE FROM "Action";

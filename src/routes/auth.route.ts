@@ -1,33 +1,26 @@
-import { checkAuthenticated, checkNotAuthentified } from './../middlewares/auth.middleware';
+import { body } from 'express-validator';
+import { checkIfAuthenticated } from './../middlewares/auth.middleware';
 import { logoutController, refreshController } from './../controllers/auth.controller';
 import { Request, Router, Response, NextFunction } from 'express';
 import { registerController, loginController } from '../controllers/auth.controller';
-import passport from '../passport';
 
 const router = Router();
 
-router.post(
-    '/login',
-    checkNotAuthentified,
-    passport.authenticate('local'),
-    (req: Request, res: Response, next: NextFunction) => loginController(req, res, next)
+router.get('/login', checkIfAuthenticated, (req: Request, res: Response, next: NextFunction) =>
+    loginController(req, res, next)
 );
 
-router.post(
-    '/register',
-    checkNotAuthentified,
-    async (req, res, next) => await registerController(req, res, next)
-);
+router.post('/register', async (req, res, next) => await registerController(req, res, next));
 
-router.post(
+router.get(
     '/logout',
-    checkAuthenticated,
+    checkIfAuthenticated,
     async (req, res, next) => await logoutController(req, res, next)
 );
 
 router.get(
     '/refresh',
-    checkAuthenticated,
+    checkIfAuthenticated,
     async (req, res, next) => await refreshController(req, res, next)
 );
 

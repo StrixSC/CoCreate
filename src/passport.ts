@@ -40,7 +40,7 @@ export const localStrategy = new LocalStrategy(
     { usernameField: 'email', passwordField: 'password', passReqToCallback: true },
     async (req: Request, email: string, password: string, done) => {
         try {
-            const user = await login(email, password);
+            const user = await login(email);
             if (!user)
                 return done(null, false, new create.Unauthorized('Invalid email or password'));
 
