@@ -1,11 +1,11 @@
+import {
+    HttpEvent,
+    HttpHandler,
+    HttpInterceptor,
+    HttpRequest
+} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import {
-    HttpRequest,
-    HttpHandler,
-    HttpEvent,
-    HttpInterceptor
-} from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
@@ -19,7 +19,7 @@ export class StdHttpInterceptor implements HttpInterceptor {
         return this.auth.idToken.pipe(
             mergeMap((token: any) => {
                 if (token) {
-                    request = request.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+                    request = request.clone({ setHeaders: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } });
                 }
                 return next.handle(request);
             }));

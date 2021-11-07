@@ -1,10 +1,10 @@
-import { Injectable } from "@angular/core";
-import { WorkspaceService } from "../workspace/workspace.service";
+import { Injectable } from '@angular/core';
+import { WorkspaceService } from '../workspace/workspace.service';
 
 /// Classe permettant de simuler le comportement de
 /// offsetX et offsetY dans des browsers autre que Chrome
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class OffsetManagerService {
   constructor(private workspaceService: WorkspaceService) {}

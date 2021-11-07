@@ -1,6 +1,7 @@
-import { AuthService } from './../../services/auth.service';
 import { Component, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material';
+import { from, Subscription } from 'rxjs';
+import { mergeMap, switchMap } from 'rxjs/operators';
 import { CommandInvokerService } from 'src/app/services/command-invoker/command-invoker.service';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { ExportDialogService } from 'src/app/services/export-dialog/export-dialog.service';
@@ -9,8 +10,7 @@ import { SaveDrawingDialogService } from 'src/app/services/save-drawing-dialog/s
 import { NewDrawingComponent } from '../../components/new-drawing/new-drawing.component';
 import { HelpDialogComponent } from '../welcome-dialog/help-dialog/help-dialog.component';
 import { DIALOG_PROPERTIES, WelcomeDialogComponent } from '../welcome-dialog/welcome-dialog/welcome-dialog.component';
-import { mergeMap, switchMap } from 'rxjs/operators';
-import { from, Subscription } from 'rxjs';
+import { AuthService } from './../../services/auth.service';
 
 /// Component pour afficher les options fichiers
 @Component({
@@ -29,7 +29,7 @@ export class ControlMenuComponent implements OnDestroy {
     private commandInvoker: CommandInvokerService,
     private exportDialogService: ExportDialogService,
     private openDrawingService: OpenDrawingDialogService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
   }
 
@@ -99,7 +99,7 @@ export class ControlMenuComponent implements OnDestroy {
         console.log(data);
       }, (error) => {
         console.log(error);
-      })
+      });
   }
 
   ngOnDestroy(): void {

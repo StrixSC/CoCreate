@@ -1,26 +1,26 @@
-import { Router } from '@angular/router';
-import { SocketService } from './../../services/chat/socket.service';
-import { Subscriber, Subscription } from 'rxjs';
+import { Component } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { Component } from "@angular/core";
+import { Router } from '@angular/router';
+import { Subscriber, Subscription } from 'rxjs';
+import { SocketService } from './../../services/chat/socket.service';
 
 @Component({
-  selector: "app-root",
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.scss"],
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  title = "Colorimage";
+  title = 'Colorimage';
   authSubscription: Subscription;
   constructor(private router: Router, private socketService: SocketService, private af: AngularFireAuth) {
     this.authSubscription = this.af.authState.subscribe((state) => {
-      if(!state) {
+      if (!state) {
         this.router.navigateByUrl('');
         this.socketService.disconnect();
       } else {
         this.socketService.setupSocketConnection();
       }
-    })
+    });
   }
 
 }

@@ -5,10 +5,10 @@ import { faEyeDropper } from '@fortawesome/free-solid-svg-icons';
 import { Point } from 'src/app/model/point.model';
 import { RGB_MAX_VALUE } from 'src/app/model/rgb.model';
 import { RGBA } from 'src/app/model/rgba.model';
+import { Tools } from '../../../interfaces/tools.interface';
 import { DrawingService } from '../../drawing/drawing.service';
 import { OffsetManagerService } from '../../offset-manager/offset-manager.service';
 import { ToolsColorService } from '../../tools-color/tools-color.service';
-import { Tools } from '../../../interfaces/tools.interface';
 import { ToolIdConstants } from '../tool-id-constants';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 

@@ -1,27 +1,27 @@
+import { Injectable } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
+import { faPencilAlt, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { ICommand } from 'src/app/interfaces/command.interface';
+import { ISendCoordPayload } from 'src/app/model/ISendCoordPayload.model';
 import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
-import { Injectable } from "@angular/core";
-import { FormControl, FormGroup } from "@angular/forms";
-import { faPencilAlt, IconDefinition } from "@fortawesome/free-solid-svg-icons";
-import { ICommand } from "src/app/interfaces/command.interface";
-import { DrawingService } from "../../drawing/drawing.service";
-import { RendererProviderService } from "../../renderer-provider/renderer-provider.service";
-import { ToolsColorService } from "../../tools-color/tools-color.service";
-import { Tools } from "../../../interfaces/tools.interface";
-import { ToolIdConstants } from "../tool-id-constants";
-import { INITIAL_WIDTH, LEFT_CLICK, RIGHT_CLICK } from "../tools-constants";
-import { PencilCommand } from "./pencil-command";
-import { Pencil } from "./pencil.model";
-import { SynchronizeDrawingService } from "../../synchronize-drawing.service";
-import { ISendCoordPayload } from "src/app/model/ISendCoordPayload.model";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
+import { Tools } from '../../../interfaces/tools.interface';
+import { DrawingService } from '../../drawing/drawing.service';
+import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
+import { SynchronizeDrawingService } from '../../synchronize-drawing.service';
+import { ToolsColorService } from '../../tools-color/tools-color.service';
+import { ToolIdConstants } from '../tool-id-constants';
+import { INITIAL_WIDTH, LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
+import { PencilCommand } from './pencil-command';
+import { Pencil } from './pencil.model';
 
 /// Service de l'outil pencil, permet de créer des polyline en svg
 /// Il est possible d'ajuster le stroke width dans le form
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class PencilToolService implements Tools {
-  readonly toolName = "Outil Crayon";
+  readonly toolName = 'Outil Crayon';
   readonly faIcon: IconDefinition = faPencilAlt;
   readonly id = ToolIdConstants.PENCIL_ID;
   private strokeWidth: FormControl;
@@ -36,13 +36,13 @@ export class PencilToolService implements Tools {
     private drawingService: DrawingService,
     private rendererService: RendererProviderService,
     private selectionToolService: SelectionToolService,
-    private synchronizeDrawingService:SynchronizeDrawingService
+    private synchronizeDrawingService: SynchronizeDrawingService,
   ) {
     this.strokeWidth = new FormControl(INITIAL_WIDTH);
     this.parameters = new FormGroup({
       strokeWidth: this.strokeWidth,
     });
-    this.actionID = "";
+    this.actionID = '';
   }
 
   synchronizeDrawing() {
@@ -67,7 +67,7 @@ export class PencilToolService implements Tools {
 
         if (this.pencilCommand) {
           console.log(
-            "\n\n\n\n\n\n\n inside the pencil condition \n\n\n\n\n\n"
+            '\n\n\n\n\n\n\n inside the pencil condition \n\n\n\n\n\n',
           );
           this.pencilCommand.addPoint({ x: coord.x, y: coord.y });
         }
@@ -88,18 +88,18 @@ export class PencilToolService implements Tools {
         this.synchronizeDrawingService.sendMessage(
           offset.x,
           offset.y,
-          "down",
-          this.actionID
+          'down',
+          this.actionID,
         );
-        console.log(event.offsetX, event.offsetY, "down", this.actionID);
+        console.log(event.offsetX, event.offsetY, 'down', this.actionID);
 
         this.pencil = {
           pointsList: [offset],
           strokeWidth: this.strokeWidth.value,
-          fill: "none",
-          stroke: "none",
-          fillOpacity: "none",
-          strokeOpacity: "none",
+          fill: 'none',
+          stroke: 'none',
+          fillOpacity: 'none',
+          strokeOpacity: 'none',
         };
         if (event.button === LEFT_CLICK) {
           this.pencil.stroke = this.colorTool.primaryColorString;
@@ -111,7 +111,7 @@ export class PencilToolService implements Tools {
         this.pencilCommand = new PencilCommand(
           this.rendererService.renderer,
           this.pencil,
-          this.drawingService
+          this.drawingService,
         );
         this.pencilCommand.execute();
       }
@@ -125,7 +125,7 @@ export class PencilToolService implements Tools {
     if (this.pencilCommand) {
       const returnPencilCommand = this.pencilCommand;
       this.pencilCommand = null;
-      let lastObj = new Array(this.drawingService.getLastObject());
+      const lastObj = new Array(this.drawingService.getLastObject());
       this.selectionToolService.setNewSelection(lastObj);
 
       // TODO: Fix with sync here
@@ -133,11 +133,11 @@ export class PencilToolService implements Tools {
       this.synchronizeDrawingService.sendMessage(
         event.offsetX,
         event.offsetY,
-        "up",
-        this.actionID
+        'up',
+        this.actionID,
       );
-      console.log(event.offsetX, event.offsetY, "up", this.actionID);
-      this.actionID = "";
+      console.log(event.offsetX, event.offsetY, 'up', this.actionID);
+      this.actionID = '';
       return returnPencilCommand;
     }
     return;
@@ -149,12 +149,12 @@ export class PencilToolService implements Tools {
       this.synchronizeDrawingService.sendMessage(
         event.offsetX,
         event.offsetY,
-        "move",
-        this.actionID
+        'move',
+        this.actionID,
       );
       this.pencilCommand.addPoint({ x: event.offsetX, y: event.offsetY });
 
-      console.log(event.offsetX, event.offsetY, "move", this.actionID);
+      console.log(event.offsetX, event.offsetY, 'move', this.actionID);
     }
   }
   onKeyUp(event: KeyboardEvent): void {

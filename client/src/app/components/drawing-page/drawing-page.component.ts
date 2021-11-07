@@ -1,11 +1,10 @@
-import { Router } from '@angular/router';
-import { SocketService } from './../../services/chat/socket.service';
 import { Component, OnDestroy } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Subscription } from 'rxjs';
+import { merge, Subscription } from 'rxjs';
 import { HotkeysService } from 'src/app/services/hotkeys/hotkeys.service';
 import { NewDrawingComponent } from '../new-drawing/new-drawing.component';
 import { WelcomeDialogComponent } from '../welcome-dialog/welcome-dialog/welcome-dialog.component';
+import { SocketService } from './../../services/chat/socket.service';
 
 @Component({
   selector: 'app-drawing-page',
@@ -16,22 +15,25 @@ export class DrawingPageComponent implements OnDestroy {
 
   welcomeDialogRef: MatDialogRef<WelcomeDialogComponent>;
   welcomeDialogSub: Subscription;
-  errorSubscription: Subscription;
-  exceptionSubscription: Subscription;
+  errorListener: Subscription;
 
   constructor(
     public dialog: MatDialog,
     private hotkeyService: HotkeysService,
     private socketService: SocketService,
-    private router: Router
   ) {
     this.hotkeyService.hotkeysListener();
   }
-  
+
   async ngOnInit() {
-   
+    this.errorListener = merge(
+      this.socketService.onError(),
+      this.socketService.onException(),
+    ).subscribe((data) => {
+      console.log(data);
+    });
   }
-  // Fonction qui ouvre le mat Dialog de bienvenue
+
   openDialog() {
     this.welcomeDialogRef = this.dialog.open(WelcomeDialogComponent, {
       hasBackdrop: true,
@@ -51,12 +53,8 @@ export class DrawingPageComponent implements OnDestroy {
       this.welcomeDialogSub.unsubscribe();
     }
 
-    if(this.errorSubscription) {
-      this.errorSubscription.unsubscribe();
-    }
-
-    if(this.exceptionSubscription) {
-      this.exceptionSubscription.unsubscribe();
+    if (this.errorListener) {
+      this.errorListener.unsubscribe();
     }
   }
 }

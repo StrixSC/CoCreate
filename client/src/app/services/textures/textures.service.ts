@@ -1,13 +1,13 @@
 import { Injectable, Renderer2 } from '@angular/core';
 import { RGBA } from 'src/app/model/rgba.model';
-import { TextureOptions } from '../../model/texture-options.model';
-import { Texture } from '../../interfaces/texture.interface';
 import { TEXTURE_FIVE, TEXTURE_FOUR, TEXTURE_ONE, TEXTURE_THREE, TEXTURE_TWO } from '../../classes/textures/texture-id';
 import { TextureOne } from '../../classes/textures/texture1';
 import { TextureTwo } from '../../classes/textures/texture2';
 import { TextureThree } from '../../classes/textures/texture3';
 import { TextureFour } from '../../classes/textures/texture4';
 import { TextureFive } from '../../classes/textures/texture5';
+import { Texture } from '../../interfaces/texture.interface';
+import { TextureOptions } from '../../model/texture-options.model';
 
 /// Classe service qui permet de retourner une texture selon un indexe
 @Injectable({

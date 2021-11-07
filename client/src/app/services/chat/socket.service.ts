@@ -1,11 +1,11 @@
+import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { Observable } from "rxjs";
-import { Injectable } from "@angular/core";
-import { io, Socket } from "socket.io-client";
-import { environment } from "src/environments/environment";
+import { Observable } from 'rxjs';
+import { io, Socket } from 'socket.io-client';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class SocketService {
   socket!: Socket;
@@ -13,23 +13,23 @@ export class SocketService {
   username: string;
   url: string;
   constructor(private af: AngularFireAuth) {
-    this.error = "";
-    this.username = "";
-    this.url = environment.serverURL
+    this.error = '';
+    this.username = '';
+    this.url = environment.serverURL;
   }
 
   async setupSocketConnection(): Promise<void> {
-    if(!this.af.auth.currentUser) {
+    if (!this.af.auth.currentUser) {
       return;
     }
-    
+
     const userToken = await this.af.auth.currentUser.getIdToken();
 
     this.socket = io(this.url, {
       autoConnect: true,
       extraHeaders: {
-        'Authorization': 'Bearer ' + userToken
-      }
+        Authorization: 'Bearer ' + userToken,
+      },
     }) as Socket;
   }
 
@@ -61,7 +61,7 @@ export class SocketService {
 
   onError(): Observable<any> {
     return new Observable((observer) => {
-      this.socket.on("connect_error", (err) => {
+      this.socket.on('connect_error', (err) => {
         observer.next(err);
       });
     });
@@ -72,6 +72,6 @@ export class SocketService {
       this.socket.on('exception', (err: { message: string }) => {
         observer.next(err);
       });
-    })
+    });
   }
 }

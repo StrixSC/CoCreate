@@ -1,8 +1,8 @@
-import { Renderer2 } from "@angular/core";
-import { ICommand } from "src/app/interfaces/command.interface";
-import { Point } from "src/app/model/point.model";
-import { DrawingService } from "../../drawing/drawing.service";
-import { Pencil } from "./pencil.model";
+import { Renderer2 } from '@angular/core';
+import { ICommand } from 'src/app/interfaces/command.interface';
+import { Point } from 'src/app/model/point.model';
+import { DrawingService } from '../../drawing/drawing.service';
+import { Pencil } from './pencil.model';
 
 /// Commande pour ajouter un objet de type pencil sur le dessin
 export class PencilCommand implements ICommand {
@@ -11,12 +11,12 @@ export class PencilCommand implements ICommand {
   constructor(
     readonly renderer: Renderer2,
     private pencilAttributes: Pencil,
-    private drawingService: DrawingService
+    private drawingService: DrawingService,
   ) {}
 
   /// Transformation de la liste des points vers la version SVG en string
   private pointString(): string {
-    let pointString = "";
+    let pointString = '';
     for (const point of this.pencilAttributes.pointsList) {
       pointString += `${point.x} ${point.y},`;
     }
@@ -44,7 +44,7 @@ export class PencilCommand implements ICommand {
       this.dot = null;
       this.execute();
     } else if (this.pencil) {
-      this.renderer.setAttribute(this.pencil, "points", this.pointString());
+      this.renderer.setAttribute(this.pencil, 'points', this.pointString());
     }
   }
 
@@ -57,62 +57,62 @@ export class PencilCommand implements ICommand {
     } else {
       if (this.pencilAttributes.pointsList.length <= 1) {
         this.dot = this.renderer.createElement(
-          "circle",
-          "svg"
+          'circle',
+          'svg',
         ) as SVGCircleElement;
         this.renderer.setAttribute(
           this.dot,
-          "cx",
-          this.pencilAttributes.pointsList[0].x.toString() + "px"
+          'cx',
+          this.pencilAttributes.pointsList[0].x.toString() + 'px',
         );
         this.renderer.setAttribute(
           this.dot,
-          "cy",
-          this.pencilAttributes.pointsList[0].y.toString() + "px"
+          'cy',
+          this.pencilAttributes.pointsList[0].y.toString() + 'px',
         );
         this.renderer.setAttribute(
           this.dot,
-          "r",
-          (this.pencilAttributes.strokeWidth / 2).toString() + "px"
+          'r',
+          (this.pencilAttributes.strokeWidth / 2).toString() + 'px',
         );
-        this.renderer.setAttribute(this.dot, "name", "dot");
-        this.renderer.setStyle(this.dot, "fill", this.pencilAttributes.stroke);
-        this.renderer.setStyle(this.dot, "stroke", "none");
+        this.renderer.setAttribute(this.dot, 'name', 'dot');
+        this.renderer.setStyle(this.dot, 'fill', this.pencilAttributes.stroke);
+        this.renderer.setStyle(this.dot, 'stroke', 'none');
         this.renderer.setStyle(
           this.dot,
-          "fillOpacity",
-          this.pencilAttributes.strokeOpacity
+          'fillOpacity',
+          this.pencilAttributes.strokeOpacity,
         );
         this.drawingService.addObject(this.dot);
       } else {
         this.pencil = this.renderer.createElement(
-          "polyline",
-          "svg"
+          'polyline',
+          'svg',
         ) as SVGPolylineElement;
-        this.renderer.setAttribute(this.pencil, "name", "pencil");
-        this.renderer.setAttribute(this.pencil, "points", this.pointString());
+        this.renderer.setAttribute(this.pencil, 'name', 'pencil');
+        this.renderer.setAttribute(this.pencil, 'points', this.pointString());
         this.renderer.setStyle(
           this.pencil,
-          "stroke-width",
-          this.pencilAttributes.strokeWidth.toString() + "px"
+          'stroke-width',
+          this.pencilAttributes.strokeWidth.toString() + 'px',
         );
-        this.renderer.setStyle(this.pencil, "stroke-linecap", `round`);
-        this.renderer.setStyle(this.pencil, "stroke-linejoin", `round`);
-        this.renderer.setStyle(this.pencil, "fill", this.pencilAttributes.fill);
+        this.renderer.setStyle(this.pencil, 'stroke-linecap', `round`);
+        this.renderer.setStyle(this.pencil, 'stroke-linejoin', `round`);
+        this.renderer.setStyle(this.pencil, 'fill', this.pencilAttributes.fill);
         this.renderer.setStyle(
           this.pencil,
-          "stroke",
-          this.pencilAttributes.stroke
-        );
-        this.renderer.setStyle(
-          this.pencil,
-          "fillOpacity",
-          this.pencilAttributes.fillOpacity
+          'stroke',
+          this.pencilAttributes.stroke,
         );
         this.renderer.setStyle(
           this.pencil,
-          "strokeOpacity",
-          this.pencilAttributes.strokeOpacity
+          'fillOpacity',
+          this.pencilAttributes.fillOpacity,
+        );
+        this.renderer.setStyle(
+          this.pencil,
+          'strokeOpacity',
+          this.pencilAttributes.strokeOpacity,
         );
         this.drawingService.addObject(this.pencil);
       }

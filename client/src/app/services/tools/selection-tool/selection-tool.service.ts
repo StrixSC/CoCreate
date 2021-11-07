@@ -4,13 +4,13 @@ import { IconDefinition } from '@fortawesome/fontawesome-common-types';
 import { faMousePointer } from '@fortawesome/free-solid-svg-icons';
 import { ICommand } from 'src/app/interfaces/command.interface';
 import { Point } from 'src/app/model/point.model';
+import { Tools } from '../../../interfaces/tools.interface';
 import { DrawingService } from '../../drawing/drawing.service';
 import { KeyCodes } from '../../hotkeys/hotkeys-constants';
 import { MagnetismService } from '../../magnetism/magnetism.service';
 import { OffsetManagerService } from '../../offset-manager/offset-manager.service';
 import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
 import { GridService } from '../grid-tool/grid.service';
-import { Tools } from '../../../interfaces/tools.interface';
 import { ToolIdConstants } from '../tool-id-constants';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { SelectionCommandConstants } from './command-type-constant';
@@ -42,7 +42,7 @@ export class SelectionToolService implements Tools {
   private rectSelection: SVGPolygonElement;
 
   private rectInversement: SVGRectElement;
-  //private firstInvObj: SVGElement | null;
+  // private firstInvObj: SVGElement | null;
   private recStrokeWidth = 1;
 
   private objects: SVGElement[] = [];
@@ -117,7 +117,7 @@ export class SelectionToolService implements Tools {
         }
       } else {
         if (obj) {
-          //this.firstInvObj = obj;
+          // this.firstInvObj = obj;
         }
         this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectInversement);
 
@@ -137,7 +137,7 @@ export class SelectionToolService implements Tools {
     if ((event.button === RIGHT_CLICK || event.button === LEFT_CLICK) && this.drawingService.drawing) {
       if (event.button === LEFT_CLICK) {
         if (this.wasMoved && !this.hasSelectedItems) {
-          //this.findObjects(this.rectSelection, event.button);
+          // this.findObjects(this.rectSelection, event.button);
         } else if (!this.wasMoved && this.objects.length >= 1 && this.isIn) {
           this.objects = [];
           const target = event.target as SVGElement;
@@ -148,7 +148,7 @@ export class SelectionToolService implements Tools {
           }
         }
       } else {
-        //this.findObjects(this.rectInversement, event.button);
+        // this.findObjects(this.rectInversement, event.button);
       }
       if (this.objects.length > 0) {
         this.setSelection();
@@ -158,7 +158,7 @@ export class SelectionToolService implements Tools {
 
       this.removeInversement();
 
-      //this.firstInvObj = null;
+      // this.firstInvObj = null;
       this.isIn = false;
       this.shiftChanged = false;
       let returnRectangleCommand;
@@ -380,8 +380,9 @@ export class SelectionToolService implements Tools {
   private setSelection(): void {
     if (this.hasSelection()) {
       this.hasSelectedItems = true;
-      if(this.objects[0]!==undefined)
+      if (this.objects[0] !== undefined) {
         this.rendererService.renderer.setProperty(this.objects[0], 'isSelected', true);
+      }
       this.rendererService.renderer.setAttribute(this.rectSelection, 'transform', ``);
       this.ctrlPoints.forEach((point) => {
         this.rendererService.renderer.setAttribute(point, 'transform', '');
@@ -470,16 +471,16 @@ export class SelectionToolService implements Tools {
         this.rendererService.renderer.setAttribute(this.ctrlPoints[i], 'x', `${this.pointsList[i].x + 0.5 - this.pointsSideLength / 2}`);
         this.rendererService.renderer.setAttribute(this.ctrlPoints[i], 'y', `${this.pointsList[i].y + 0.5 - this.pointsSideLength / 2}`);
       }
-          
-    //console.log(this.objects);
-    }
-    else return;
+
+    // console.log(this.objects);
+    } else { return; }
   }
 
   /// Methode qui suprime la selection courante .
   removeSelection(): void {
-    if(this.objects[0]!==undefined)
+    if (this.objects[0] !== undefined) {
       this.rendererService.renderer.setProperty(this.objects[0], 'isSelected', false);
+    }
     this.objects = [];
     this.hasSelectedItems = false;
 
@@ -487,8 +488,8 @@ export class SelectionToolService implements Tools {
     this.rendererService.renderer.removeChild(this.drawingService.drawing, this.ctrlG);
 
     this.rendererService.renderer.setAttribute(this.rectSelection, 'points', '');
-    //if (this.drawingService.getObjectList!== undefined)
-    //console.log("AfterREMOVED", this.drawingService.getObjectList());
+    // if (this.drawingService.getObjectList!== undefined)
+    // console.log("AfterREMOVED", this.drawingService.getObjectList());
   }
   /// Methode pour cacher la selection en gardant en memoire les element
   hideSelection(): void {
@@ -630,7 +631,7 @@ export class SelectionToolService implements Tools {
     }
   }
 
-  setSelectionWidth() : void {
+  setSelectionWidth(): void {
     this.objects[0].style.strokeWidth = '100px';
     console.log(this.objects[0]);
     this.setNewSelection(this.objects);
@@ -661,5 +662,4 @@ export class SelectionToolService implements Tools {
     return (this.drawingService.drawing as SVGSVGElement).getBoundingClientRect().left;
   }
 
-  
 }

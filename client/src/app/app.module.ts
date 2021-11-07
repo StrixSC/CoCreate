@@ -1,21 +1,34 @@
-import { environment } from 'src/environments/environment';
-import { UserService } from 'src/app/services/user.service';
-import { SocketService } from './services/chat/socket.service';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFireAuthModule } from '@angular/fire/auth';
+import { AngularFireAuthGuardModule } from '@angular/fire/auth-guard';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBarContainer } from '@angular/material';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MomentModule } from 'ngx-moment';
-import { AlertMessageComponent } from './components/alert-message/alert-message.component';
+import { environment } from 'src/environments/environment';
 import { MaterialModules } from './app-material.module';
+import { AppRoutingModule } from './app-routing.module';
 import { ColorPickerModule } from './color-picker/color-picker.module';
+import { AlertMessageComponent } from './components/alert-message/alert-message.component';
 import { AppComponent } from './components/app/app.component';
 import { CanvasComponent } from './components/canvas/canvas.component';
+import { ChatComponent } from './components/chat/chat.component';
 import { ControlMenuComponent } from './components/control-menu/control-menu.component';
+import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
+import { ErrorMessageComponent } from './components/error-message/error-message.component';
 import { ExportDrawingComponent } from './components/export-drawing/export-drawing.component';
+import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
+import { LoginPageComponent } from './components/login/login-page/login-page.component';
+import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
+import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
 import { NewDrawingAlertComponent } from './components/new-drawing/new-drawing-alert/new-drawing-alert.component';
 import { NewDrawingFormComponent } from './components/new-drawing/new-drawing-form/new-drawing-form.component';
 import { NewDrawingComponent } from './components/new-drawing/new-drawing.component';
@@ -24,28 +37,14 @@ import { ParameterMenuComponent } from './components/parameter-menu/parameter-me
 import { ParameterDirective } from './components/parameter-menu/parameter.directive';
 import { SaveDrawingComponent } from './components/save-drawing/save-drawing.component';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
+import { ToolParameterModule } from './components/tool-parameters/tool-parameter.module';
 import { ToolsColorPickerComponent } from './components/tools-color-picker/tools-color-picker.component';
 import { ToolsColorComponent } from './components/tools-color/tools-color.component';
+import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { WelcomeDialogModule } from './components/welcome-dialog/welcome-dialog.module';
 import { WorkspaceComponent } from './components/workspace/workspace.component';
-import { ErrorMessageComponent } from './components/error-message/error-message.component';
-import { ToolParameterModule } from './components/tool-parameters/tool-parameter.module';
-import { AppRoutingModule } from './app-routing.module';
-import { LoginPageComponent } from './components/login/login-page/login-page.component';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { ChatComponent } from './components/chat/chat.component';
-import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
-import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
-import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
-import { UserProfileComponent } from './components/user-profile/user-profile.component';
-import { AngularFireModule } from '@angular/fire';
-import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFireAuthGuardModule } from '@angular/fire/auth-guard';
 import { StdHttpInterceptor } from './http/stdhttp.interceptor';
+import { SocketService } from './services/chat/socket.service';
 
 @NgModule({
   declarations: [
@@ -97,7 +96,7 @@ import { StdHttpInterceptor } from './http/stdhttp.interceptor';
     MatInputModule,
     MatIconModule,
     MatButtonModule,
-    AppRoutingModule
+    AppRoutingModule,
   ],
   exports: [AppRoutingModule,
   ],
@@ -117,8 +116,7 @@ import { StdHttpInterceptor } from './http/stdhttp.interceptor';
   providers: [
     FileReader,
     SocketService,
-    UserService,
-    { provide: HTTP_INTERCEPTORS, useClass: StdHttpInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: StdHttpInterceptor, multi: true },
   ],
   bootstrap: [AppComponent],
 })

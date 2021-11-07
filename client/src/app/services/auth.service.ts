@@ -1,10 +1,8 @@
-import { catchError, concatMap, mergeMap, map, flatMap } from 'rxjs/operators';
 import { environment } from './../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
-import { Observable, from, of, EMPTY } from "rxjs";
+import { Observable, from } from "rxjs";
 import { AngularFireAuth } from '@angular/fire/auth';
-import { switchMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: "root",
@@ -22,9 +20,11 @@ export class AuthService {
   }
 
   register(payload: any): Observable<any> {
-    return this.http.post(environment.serverURL + '/auth/register', {
-      payload
-    })
+    return this.http.post(environment.serverURL + '/auth/register', JSON.stringify(payload), {
+      headers: {
+        'Content-Type': "application/json"
+      }
+    });
   }
 
   signOut(): Observable<any> {
