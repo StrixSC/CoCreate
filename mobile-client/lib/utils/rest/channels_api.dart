@@ -10,14 +10,11 @@ const JSON_CONTENT_TYPE = {
 
 class ChannelAPI {
   final String? _url = dotenv.env['SERVER_URL'] ?? "localhost:3000";
-  User user;
-
-  ChannelAPI(this.user);
 
   // Fetch all channels
   Future<http.Response> fetchChannels() async {
     var url = Uri.http(_url!, '/api/channels/');
-    var response = await http.get(url, headers: {"cookie": user.cookie});
+    var response = await http.get(url, headers: {"Authorization": ""});
     return response;
   }
 
@@ -26,7 +23,7 @@ class ChannelAPI {
   Future<http.Response> createChannel(body) async {
     var url = Uri.http(_url!, '/api/channels/create');
     var response = await http.post(url,
-        headers: {"Content-Type": "application/json", "cookie": user.cookie},
+        headers: {"Content-Type": "application/json"},
         body: body);
     return response;
   }
@@ -35,14 +32,14 @@ class ChannelAPI {
   // The request must be from a user that has access to the channel.
   Future<http.Response> fetchChannel(id) async {
     var url = Uri.http(_url!, '/api/channels/$id');
-    var response = await http.get(url, headers: {"cookie": user.cookie});
+    var response = await http.get(url, headers: {});
     return response;
   }
 
   // Fetch all messages in a channel
   Future<http.Response> fetchChannelMessages(id) async {
     var url = Uri.http(_url!, '/api/channels/$id/messages');
-    var response = await http.get(url, headers: {"cookie": user.cookie});
+    var response = await http.get(url, headers: {});
     return response;
   }
 }

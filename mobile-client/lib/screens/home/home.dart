@@ -9,16 +9,14 @@ PersistentTabController _controller =
     new PersistentTabController(initialIndex: 0);
 
 class Home extends StatelessWidget {
-  Home(this._user);
-
-  final User _user;
+  Home();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         drawer: SizedBox(
             width: MediaQuery.of(context).size.width * 0.70,
-            child: Sidebar(_controller, _user)),
-        body: BottomNavBar(_controller, _user));
+            child: Sidebar()),
+        body: BottomNavBar(_controller));
   }
 }

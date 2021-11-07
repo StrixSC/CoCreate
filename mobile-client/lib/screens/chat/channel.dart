@@ -1,4 +1,4 @@
-import 'package:Colorimage/models/messenger.dart';
+import 'package:Colorimage/providers/messenger.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/src/provider.dart';
 import '../../models/chat.dart';
@@ -43,7 +43,7 @@ class _ChannelState extends State<Channel> {
                       itemCount: context.read<Messenger>().userChannels.length,
                       itemBuilder: (context, index) => ChatCard(
                           chat: context.watch<Messenger>().userChannels[index],
-                          user: context.watch<Messenger>().user,
+                          user: context.watch<Messenger>().auth!.user!,
                           press: () {
                             context.read<Messenger>().toggleSelection();
                             context
@@ -75,7 +75,7 @@ class _ChannelState extends State<Channel> {
             ElevatedButton(
                 onPressed: () {
                   context.read<Messenger>().getAvailableChannels();
-                  joinChannelDialog(context.read<Messenger>().user);
+                  joinChannelDialog(context.read<Messenger>().auth!.user);
                 },
                 child: const Text(
                   'Joindre un canal',

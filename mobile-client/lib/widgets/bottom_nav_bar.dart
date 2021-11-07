@@ -7,8 +7,7 @@ import '../screens/chat/channel.dart';
 
 class BottomNavBar extends StatelessWidget {
   final PersistentTabController _controller;
-  final User _user;
-  BottomNavBar(this._controller, this._user);
+  BottomNavBar(this._controller);
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +15,7 @@ class BottomNavBar extends StatelessWidget {
           context,
           navBarHeight: 75,
           controller: this._controller,
-          screens: _buildScreens(context, this._user),
+          screens: _buildScreens(context),
           items: _navBarsItems(),
           confineInSafeArea: true,
           backgroundColor: Colors.white, // Default is Colors.white.
@@ -44,7 +43,7 @@ class BottomNavBar extends StatelessWidget {
   }
 }
 
-List<Widget> _buildScreens(context, user) {
+List<Widget> _buildScreens(context) {
   return [
     Container(),
     Container(),

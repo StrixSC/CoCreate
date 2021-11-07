@@ -5,12 +5,13 @@ import 'package:Colorimage/screens/chat/chat.dart';
 import 'package:Colorimage/utils/rest/channels_api.dart';
 import 'package:Colorimage/utils/rest/users_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
-import 'chat.dart';
+import '../models/chat.dart';
 
 class Messenger extends ChangeNotifier {
-  User user;
+  UserCredential? auth;
   List<Chat> userChannels = [];
   List<Chat> allChannels = [];
   List<Chat> availableChannel = [];
@@ -18,10 +19,7 @@ class Messenger extends ChangeNotifier {
   int currentSelectedChannelIndex = 0;
   late ChannelSocket channelSocket;
 
-  Messenger(this.user, this.userChannels, this.allChannels) {
-    fetchChannels();
-    fetchAllChannels();
-  }
+  Messenger(this.auth, this.userChannels, this.allChannels);
 
   void setSocket(socket) {
     channelSocket = socket;
@@ -34,8 +32,8 @@ class Messenger extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateUser(User updatedUser) {
-    user = updatedUser;
+  void updateUser(UserCredential updatedUser) {
+    auth = updatedUser;
     notifyListeners();
   }
 
@@ -87,8 +85,8 @@ class Messenger extends ChangeNotifier {
   }
 
   Future<void> fetchChannels() async {
-    UsersAPI rest = UsersAPI(user);
-    var response = await rest.fetchUserChannels();
+    UsersAPI rest = UsersAPI();
+    var response = await rest.fetchUserChannels(auth!.user!);
     if (response.statusCode == 200) {
       var jsonResponse =
           json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
@@ -110,7 +108,7 @@ class Messenger extends ChangeNotifier {
   }
 
   Future<void> fetchAllChannels() async {
-    ChannelAPI rest = ChannelAPI(user);
+    ChannelAPI rest = ChannelAPI();
     var response = await rest.fetchChannels();
     if (response.statusCode == 200) {
       var jsonResponse =
@@ -136,7 +134,7 @@ class Messenger extends ChangeNotifier {
 
   Future<void> fetchChannelHistory(index) async {
     String channelId = userChannels[index].id;
-    ChannelAPI rest = ChannelAPI(user);
+    ChannelAPI rest = ChannelAPI();
     var response = await rest.fetchChannelMessages(channelId);
     if (response.statusCode == 200) {
       var jsonResponse =
@@ -149,7 +147,7 @@ class Messenger extends ChangeNotifier {
           channelId: channelId,
           message_username: message['username'],
           text: message['message_data'],
-          username: user.username,
+          username: auth!.user!.displayName as String,
           messageId: message['message_id'],
           timestamp: message['timestamp'],
         ));
@@ -192,7 +190,7 @@ class Messenger extends ChangeNotifier {
         break;
       case 'created':
         Chat channel = data as Chat;
-        channel.ownerUsername == user.username
+        channel.ownerUsername == auth!.user!.displayName
             ? addUserChannel(channel)
             : getAvailableChannels();
         break;

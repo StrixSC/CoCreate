@@ -1,13 +1,13 @@
 import 'dart:convert';
-import 'package:Colorimage/models/messenger.dart';
-import 'package:Colorimage/models/user.dart';
+import 'package:Colorimage/providers/messenger.dart';
+import 'package:Colorimage/models/user.dart' as ColorimageUser;
 import 'package:Colorimage/utils/rest/authentification_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/src/provider.dart';
 import '../../app.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 TextEditingController userController = TextEditingController();
@@ -30,6 +30,7 @@ class _LoginState extends State<Login> {
 
   bool usernameTaken = false;
   bool usernameEmpty = false;
+  late UserCredential userCredential;
 
   final logo = Hero(
     tag: 'hero',
@@ -44,59 +45,61 @@ class _LoginState extends State<Login> {
   static const padding = 30.0;
 
   Future<void> login(email, password) async {
-    Map data = {'email': email, 'password': password};
-    var body = json.encode(data);
+
+    try {
+      userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password
+      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        print('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        print('Wrong password provided for that user.');
+      }
+    }
+
+    var token = await FirebaseAuth.instance.currentUser!.getIdToken();
 
     AuthenticationAPI rest = AuthenticationAPI();
-    var response = await rest.login(body);
+    var response = await rest.login(token);
 
-    if (response.statusCode == 200) {
-      String rawCookie = response.headers['set-cookie'] as String;
-      print(rawCookie);
-      var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
-      var user = User(
-          id: jsonResponse['user_id'],
-          email: jsonResponse['email'],
-          username: jsonResponse['username'],
-          avatar_url: jsonResponse['avatar_url'],
-          isActive: false,
-          cookie: rawCookie);
+    if (response.statusCode == 202) {
+      print(response.body);      // Initialize socket connection
+
+      initializeSocketConnection(userCredential, token);
 
       // Fetch initial user info
-      context.read<Messenger>().updateUser(user);
+      context.read<Messenger>().updateUser(userCredential);
       context.read<Messenger>().fetchChannels();
       context.read<Messenger>().fetchAllChannels();
 
-      // Initialize socket connection
-      initializeSocketConnection(user);
-
       // Home Page
-      Navigator.pushNamed(context, homeRoute, arguments: {'user': user});
+      Navigator.pushNamed(context, homeRoute);
+      print(userCredential.user);
 
-      print(user);
     } else {
       print('Login request failed with status: ${response.statusCode}.');
     }
   }
 
-  void initializeSocketConnection(user) {
+  void initializeSocketConnection(auth, token) {
     IO.Socket socket = IO.io(
         'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000"),
-        // 'https://colorimage-109-3900.herokuapp.com/',
-        // 'http://localhost:5000/',
         IO.OptionBuilder()
-            .setExtraHeaders({'Cookie': user.cookie})
+            // .setAuth({token:token})
+            .setExtraHeaders({'Authorization':'Bearer ' + token})
             .disableAutoConnect()
             .setTransports(['websocket']) // for Flutter or Dart VM
             .build());
 
-    ChannelSocket channelSocket = ChannelSocket(user, socket);
+    ChannelSocket channelSocket = ChannelSocket(auth.user, socket);
     context.read<Messenger>().setSocket(channelSocket);
   }
 
   _toDrawing(BuildContext context) {
     IO.Socket socket = IO.io(
-        'http://localhost:5000/',
+        'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000"),
         // 'http://edae-132-207-3-192.ngrok.io/',
         IO.OptionBuilder()
             .disableAutoConnect()
@@ -117,7 +120,7 @@ class _LoginState extends State<Login> {
         body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Form(
             key: _formKey,
-            child: Expanded(
+            child: Flexible(
               child: ListView(
                 shrinkWrap: true,
                 padding: EdgeInsets.only(left: 100.0, right: 100.0),
@@ -227,7 +230,7 @@ class _LoginState extends State<Login> {
                         style: ElevatedButton.styleFrom(
                             minimumSize: Size(80.0, 80.0)),
                         child: const Text('Dessiner sans connexion',
-                            style: TextStyle(fontSize: 30.0)),
+                            style: TextStyle(fontSize: 26.0)),
                       )),
                 ],
               ),
