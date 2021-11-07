@@ -3,13 +3,13 @@ import { FormGroup } from '@angular/forms';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { faTint } from '@fortawesome/free-solid-svg-icons';
 import { ICommand } from 'src/app/interfaces/command.interface';
+import { Tools } from '../../../interfaces/tools.interface';
+import { CommandInvokerService } from '../../command-invoker/command-invoker.service';
 import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
 import { ToolsColorService } from '../../tools-color/tools-color.service';
-import { Tools } from '../../../interfaces/tools.interface';
 import { ToolIdConstants } from '../tool-id-constants';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { ColorApplierCommand } from './color-applier-command';
-import { CommandInvokerService } from '../../command-invoker/command-invoker.service';
 
 /// Outil pour changer la couleur d'un objet, clique gauche change la couleur primaire et clique droit la couleur secondaire
 @Injectable({
@@ -25,19 +25,19 @@ export class ToolsApplierColorsService implements Tools {
   constructor(
     private toolsColorService: ToolsColorService,
     private rendererService: RendererProviderService,
-    private commandInvokerService: CommandInvokerService
+    private commandInvokerService: CommandInvokerService,
   ) { }
 
-  //Changer la couleur de fond d'un trait sélectionné
-  changeColor(target1: SVGElement[]):void | ICommand{
+  // Changer la couleur de fond d'un trait sélectionné
+  changeColor(target1: SVGElement[]): void | ICommand {
     let target = target1[0];
     if (target.tagName === 'tspan') {
       target = target.parentNode as SVGElement;
     }
-    let colorAttributeString: string = 'primaryColor';
-    let alphaAttributeString: string = 'primaryOpacity';
-    
-      this.colorApplierCommand = new ColorApplierCommand(
+    const colorAttributeString = 'primaryColor';
+    const alphaAttributeString = 'primaryOpacity';
+
+    this.colorApplierCommand = new ColorApplierCommand(
         this.rendererService.renderer,
         target,
         this.toolsColorService.primaryColorString,

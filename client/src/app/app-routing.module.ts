@@ -1,31 +1,38 @@
-import { ChatGuard } from './guards/chat.guard';
-import { ChatComponent } from './components/chat/chat.component';
 import { NgModule } from '@angular/core';
+import { AngularFireAuthGuard, redirectLoggedInTo, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 import { RouterModule, Routes } from '@angular/router';
-//import { LoginPageComponent } from './components/login/login-page/login-page.component';
+import { ChatComponent } from './components/chat/chat.component';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
-import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
+import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
 import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
+import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
-import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
 
-
+const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['']);
+const redirectLoggedInToDrawing = () => redirectLoggedInTo(['drawing']);
 
 const routes: Routes = [
-  { path: '', component: WelcomePageComponent },
-  { path: 'register', component: SignUpPageComponent },
-  { path: 'workspace', component:SidenavComponent},
-  { path: 'profile', component:UserProfileComponent},
-  { path: "drawing", component: DrawingPageComponent, canActivate: [ChatGuard] },
-  { path: "chat", component: ChatComponent},
-  { path: 'forgot-password', component:ChangePasswordComponent },
-  //{ path: "login", component: LoginPageComponent },
-
+  {
+    path: '', component: WelcomePageComponent, canActivate: [AngularFireAuthGuard], data: {
+      authGuardPipe: redirectLoggedInToDrawing,
+    },
+  },
+  { path: 'register', component: SignUpPageComponent, canActivate: [AngularFireAuthGuard], data: {
+      authGuardPipe: redirectLoggedInToDrawing,
+  }},
+  { path: 'workspace', component: SidenavComponent },
+  { path: 'profile', component: UserProfileComponent },
+  { path: 'drawing', component: DrawingPageComponent, canActivate: [AngularFireAuthGuard], data: {
+      authGuardPipe: redirectUnauthorizedToLogin,
+  }},
+  { path: 'chat', component: ChatComponent },
+  { path: 'forgot-password', component: ChangePasswordComponent },
+  { path: '**', redirectTo: '' },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class AppRoutingModule { }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatButtonToggleChange } from '@angular/material';
-import { ToggleDrawerService } from '../toggle-drawer/toggle-drawer.service';
 import { Tools } from '../../interfaces/tools.interface';
+import { ToggleDrawerService } from '../toggle-drawer/toggle-drawer.service';
 import { ToolsService } from '../tools/tools.service';
 
 /// Service permettant au sidenav de bien interagir avec les hotkeys et de bien gerer

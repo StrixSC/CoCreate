@@ -3,16 +3,16 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { IconDefinition } from '@fortawesome/fontawesome-common-types';
 import { faSquareFull } from '@fortawesome/free-solid-svg-icons';
 import { ICommand } from 'src/app/interfaces/command.interface';
+import { Tools } from '../../../interfaces/tools.interface';
 import { DrawingService } from '../../drawing/drawing.service';
 import { OffsetManagerService } from '../../offset-manager/offset-manager.service';
 import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
 import { ToolsColorService } from '../../tools-color/tools-color.service';
-import { Tools } from '../../../interfaces/tools.interface';
+import { SelectionToolService } from '../selection-tool/selection-tool.service';
 import { ToolIdConstants } from '../tool-id-constants';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { FilledShape } from './filed-shape.model';
 import { RectangleCommand } from './rectangle-command';
-import { SelectionToolService } from '../selection-tool/selection-tool.service';
 
 /// Outil pour créer des rectangle, click suivis de bouge suivis de relache crée le rectangle
 /// et avec shift créer un carrée
@@ -43,7 +43,7 @@ export class ToolRectangleService implements Tools {
     private colorTool: ToolsColorService,
     private drawingService: DrawingService,
     private rendererService: RendererProviderService,
-    private selectionToolService: SelectionToolService
+    private selectionToolService: SelectionToolService,
   ) {
     this.strokeWidth = new FormControl(1, Validators.min(1));
     this.rectStyle = new FormControl('fill');
@@ -95,7 +95,7 @@ export class ToolRectangleService implements Tools {
     if (this.rectangleCommand) {
       const returnRectangleCommand = this.rectangleCommand;
       this.rectangleCommand = null;
-      let lastObj = new Array(this.drawingService.getLastObject());
+      const lastObj = new Array(this.drawingService.getLastObject());
       this.selectionToolService.setNewSelection(lastObj);
       return returnRectangleCommand;
     }

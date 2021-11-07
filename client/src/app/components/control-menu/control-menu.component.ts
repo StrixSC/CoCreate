@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material';
+import { from, Subscription } from 'rxjs';
+import { mergeMap, switchMap, take } from 'rxjs/operators';
 import { CommandInvokerService } from 'src/app/services/command-invoker/command-invoker.service';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { ExportDialogService } from 'src/app/services/export-dialog/export-dialog.service';
@@ -8,6 +10,7 @@ import { SaveDrawingDialogService } from 'src/app/services/save-drawing-dialog/s
 import { NewDrawingComponent } from '../../components/new-drawing/new-drawing.component';
 import { HelpDialogComponent } from '../welcome-dialog/help-dialog/help-dialog.component';
 import { DIALOG_PROPERTIES, WelcomeDialogComponent } from '../welcome-dialog/welcome-dialog/welcome-dialog.component';
+import { AuthService } from './../../services/auth.service';
 
 /// Component pour afficher les options fichiers
 @Component({
@@ -15,7 +18,9 @@ import { DIALOG_PROPERTIES, WelcomeDialogComponent } from '../welcome-dialog/wel
   templateUrl: './control-menu.component.html',
   styleUrls: ['./control-menu.component.scss'],
 })
-export class ControlMenuComponent {
+export class ControlMenuComponent implements OnDestroy {
+
+  signOutSubscription: Subscription;
 
   constructor(
     private dialog: MatDialog,
@@ -24,6 +29,7 @@ export class ControlMenuComponent {
     private commandInvoker: CommandInvokerService,
     private exportDialogService: ExportDialogService,
     private openDrawingService: OpenDrawingDialogService,
+    private authService: AuthService,
   ) {
   }
 
@@ -86,4 +92,21 @@ export class ControlMenuComponent {
   redo(): void {
     this.commandInvoker.redo();
   }
+
+  signOut(): void {
+    this.authService.logUserDisconnection()
+    .pipe(
+      mergeMap(() => from(this.authService.signOut())), 
+      take(1)
+    ).subscribe((d) => {
+      console.log('Sign out successful!');
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.signOutSubscription) {
+      this.signOutSubscription.unsubscribe();
+    }
+  }
+
 }

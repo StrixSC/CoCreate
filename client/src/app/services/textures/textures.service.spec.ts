@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { Texture } from 'src/app/interfaces/texture.interface';
 import { TEXTURE_ONE, TEXTURE_TWO } from 'src/app/classes/textures/texture-id';
+import { Texture } from 'src/app/interfaces/texture.interface';
 import { TexturesService } from './textures.service';
 
 describe('TexturesService', () => {

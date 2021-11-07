@@ -6,13 +6,13 @@ import { ICommand } from 'src/app/interfaces/command.interface';
 import { Point } from 'src/app/model/point.model';
 import { RGB, RGB_MAX_VALUE } from 'src/app/model/rgb.model';
 import { RGBA } from 'src/app/model/rgba.model';
+import { Tools } from '../../../interfaces/tools.interface';
 import { CommandInvokerService } from '../../command-invoker/command-invoker.service';
 import { DrawingService } from '../../drawing/drawing.service';
 import { OffsetManagerService } from '../../offset-manager/offset-manager.service';
 import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
 import { ToolsColorService } from '../../tools-color/tools-color.service';
 import { GridService } from '../grid-tool/grid.service';
-import { Tools } from '../../../interfaces/tools.interface';
 import { ToolIdConstants } from '../tool-id-constants';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { BucketFillCommand } from './bucket-fill-command';
@@ -177,7 +177,7 @@ export class BucketFillToolService implements Tools {
 
             for (let offset = -1; offset <= 1; offset += 2) {
                 const xOffset = currentPoint.x + offset;
-                const yOffset = currentPoint.y + offset
+                const yOffset = currentPoint.y + offset;
                 if (this.isInDrawing(xOffset, currentPoint.y, width, height)
                     && !visited.has((xOffset) + '_' + (currentPoint.y))
                     && this.colorMatch(this.getPixelColor(imageData, { x: currentPoint.x + offset, y: currentPoint.y }), targetColor)) {

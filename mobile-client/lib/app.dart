@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'screens/home/home.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'screens/drawing/drawing.dart';
+import 'style.dart';
 
 const loginRoute = '/';
 const chatRoute = '/chat';
@@ -54,7 +55,7 @@ class App extends StatelessWidget {
           screen = DrawingScreen(arguments['socket']);
           break;
         default:
-          screen = const Login();
+          return null;
       }
       return MaterialPageRoute(builder: (BuildContext context) => screen);
     };
@@ -66,4 +67,10 @@ class App extends StatelessWidget {
 //   );
 // }
 
+  ThemeData _theme() {
+    return ThemeData(
+      appBarTheme:
+      AppBarTheme(textTheme: TextTheme(headline6: AppBarTextStyle)),
+    );
+  }
 }

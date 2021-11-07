@@ -2,14 +2,18 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import { IEnvironment } from "./IEnvironment";
-
-export const environment: IEnvironment = {
-  production: false,
-  serverURL: "https://colorimage-109-3900.herokuapp.com/",
-  serverRawURL: "https://colorimage-109-3900.herokuapp.com/",
-  WS_URL: "https://colorimage-109-3900.herokuapp.com/",
-  local: "http://localhost:3000/",
+// serverURL: "https://colorimage-109-3900.herokuapp.com/",
+export const environment = {
+  serverURL: 'https://81a2-142-122-55-52.ngrok.io',
+  allowNoLogin: false,
+  firebaseConfig: {
+  apiKey: 'AIzaSyCfef5WBapS3mTkp_swLaXZVQ6haiwH6hA',
+    authDomain: 'colorimage-f380e.firebaseapp.com',
+    projectId: 'colorimage-f380e',
+    storageBucket: 'colorimage-f380e.appspot.com',
+    messagingSenderId: '529472970911',
+    appId: '1:529472970911:web:eb14f2b67c57debf1d42aa',
+  },
 };
 
 /*
