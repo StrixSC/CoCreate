@@ -1,8 +1,10 @@
+import { mergeMap } from 'rxjs/operators';
+import { AuthService } from './../../../services/auth.service';
 import { Router } from '@angular/router';
 import { SocketService } from './../../../services/chat/socket.service';
-import { IUser } from './../../../model/IUser.model';
 import { Component } from "@angular/core";
 import { UserService } from "src/app/services/user.service";
+import { Subscription, merge } from 'rxjs';
 
 @Component({
   selector: "app-welcome-page",
@@ -15,24 +17,43 @@ export class WelcomePageComponent {
     password: ""
   };
 
-  logInFail: boolean = false;
   loading: boolean = false;
+  loginSubscription: Subscription;
 
-  constructor(public userService: UserService, private socketService: SocketService, private router: Router) {}
+  constructor(public userService: UserService, private authService: AuthService, private socketService: SocketService, private router: Router) { }
 
-  onSubmit() {
-    if(this.loading) return; 
-
+  signIn() {
+    if (this.loading) return;
     this.loading = true;
-    this.userService.login(this.user).subscribe((user: IUser) => {
-      this.userService.user = user;
+
+    // this.loginSubscription = this.authService.signIn(this.user).subscribe((data) => {
+    //   if(data) {
+    //     this.authService.logUserConnection().subscribe((data) => {
+    //       this.router.navigateByUrl("drawing");
+    //     });
+    //     this.loginSubscription.unsubscribe();
+    //     this.loading = false;
+    //   }
+    // }, (error) => {
+    //   this.loading = false;
+    //   console.error(error);
+    // })
+
+    this.loginSubscription = this.authService.signIn(this.user).pipe(mergeMap((data) => {
+      return this.authService.logUserConnection();
+    })).subscribe((data) => {
+      console.log(data);
       this.loading = false;
       this.router.navigateByUrl('drawing');
-      this.socketService.connect();
-    }, (error: Error | any) => {
+    }, (error) => {
       console.error(error);
-      this.loading = false;
     })
+  }
+
+  ngOnDestroy(): void {
+    if(this.loginSubscription) {
+      this.loginSubscription.unsubscribe();
+    }
   }
 
 }

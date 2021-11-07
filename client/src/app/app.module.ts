@@ -1,4 +1,7 @@
-import { HttpClientModule } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
+import { UserService } from 'src/app/services/user.service';
+import { SocketService } from './services/chat/socket.service';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBarContainer } from '@angular/material';
@@ -38,7 +41,11 @@ import { DrawingPageComponent } from './components/drawing-page/drawing-page.com
 import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
 import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
+import { AngularFireModule } from '@angular/fire';
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
+import { AngularFireAuthModule } from '@angular/fire/auth';
+import { AngularFireAuthGuardModule } from '@angular/fire/auth-guard';
+import { StdHttpInterceptor } from './http/stdhttp.interceptor';
 
 @NgModule({
   declarations: [
@@ -78,6 +85,9 @@ import { ChangePasswordComponent } from './components/login/change-password/chan
     HttpClientModule,
     ReactiveFormsModule,
     MaterialModules,
+    AngularFireModule.initializeApp(environment.firebaseConfig),
+    AngularFireAuthModule,
+    AngularFireAuthGuardModule,
     WelcomeDialogModule,
     ColorPickerModule,
     FontAwesomeModule,
@@ -106,6 +116,9 @@ import { ChangePasswordComponent } from './components/login/change-password/chan
   ],
   providers: [
     FileReader,
+    SocketService,
+    UserService,
+    { provide: HTTP_INTERCEPTORS, useClass: StdHttpInterceptor, multi: true }
   ],
   bootstrap: [AppComponent],
 })

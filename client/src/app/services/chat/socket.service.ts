@@ -1,5 +1,6 @@
+import { AngularFireAuth } from '@angular/fire/auth';
 import { Observable } from "rxjs";
-import { Injectable, isDevMode } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { io, Socket } from "socket.io-client";
 import { environment } from "src/environments/environment";
 
@@ -11,26 +12,25 @@ export class SocketService {
   error: string;
   username: string;
   url: string;
-  constructor() {
+  constructor(private af: AngularFireAuth) {
     this.error = "";
     this.username = "";
     this.url = environment.serverURL
   }
 
-  setupSocketConnection(userId: string): void {
+  async setupSocketConnection(): Promise<void> {
+    if(!this.af.auth.currentUser) {
+      return;
+    }
+    
+    const userToken = await this.af.auth.currentUser.getIdToken();
+
     this.socket = io(this.url, {
-      autoConnect: false,
-      withCredentials: true,
+      autoConnect: true,
       extraHeaders: {
-        'x-user-id': userId
+        'Authorization': 'Bearer ' + userToken
       }
     }) as Socket;
-  }
-
-  connect(): void {
-    this.socket.connect();
-    console.log(this.socket.connected);
-    this.socket.sendBuffer = [];
   }
 
   disconnect(): void {

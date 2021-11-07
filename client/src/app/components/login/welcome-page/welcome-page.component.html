@@ -12,10 +12,10 @@
         class="example-form"
         appearance="fill"
         ngForm="form"
-        (keydown.enter)="onSubmit()"
+        (keydown.enter)="signIn()"
         #f="ngForm"
       >
-        <mat-form-field>
+        <mat-form-field class="mat-form-field">
           <input
             matInput
             class="example-full-width"
@@ -27,7 +27,7 @@
           />
         </mat-form-field>
         <br />
-        <mat-form-field>
+        <mat-form-field class="mat-form-field">
           <input
             matInput
             class="example-full-width"
@@ -40,10 +40,11 @@
           />
         </mat-form-field>
       </form>
-      <button style="width: 100%" mat-raised-button (click)="onSubmit()">
-        Sign in
-      </button>
-      <div class="google-btn">
+    <button style="width: 100%" mat-raised-button id='signin' matTooltip="Connexion" (click)="signIn()" [disabled]="loading"
+        >Connexion</button>
+
+      <div class="
+      google-btn">
         <div class="google-icon-wrapper">
           <img
             class="google-icon"

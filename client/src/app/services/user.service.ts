@@ -13,7 +13,7 @@ export class UserService {
 
   constructor(private http: HttpClient) {
     this.URL = environment.serverURL;
-  }
+  }   
 
   refreshUser(): Observable<any> {
     return this.http.get(this.URL + "auth/refresh", {
@@ -35,6 +35,7 @@ export class UserService {
       "Content-Type": "application/json",
     };
 
+    console.log(this.URL);
     return this.http.post(this.URL + "auth/login", JSON.stringify(payload), {
       headers,
       withCredentials: true,

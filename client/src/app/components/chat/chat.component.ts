@@ -46,8 +46,6 @@ export class ChatComponent implements OnInit {
       this.socketService.disconnect();
     });
 
-
-
     this.messageListener = merge(
       this.chatService.userConnection(),
       this.chatService.userDisconnect(),
@@ -83,7 +81,6 @@ export class ChatComponent implements OnInit {
     this.socketService.socket.auth = {
       username: username,
     }
-    this.socketService.connect();
     this.chatService.joinChannel();
   }
 

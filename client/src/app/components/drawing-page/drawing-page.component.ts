@@ -28,20 +28,8 @@ export class DrawingPageComponent implements OnDestroy {
     this.hotkeyService.hotkeysListener();
   }
   
-  ngOnInit() {
-    this.errorSubscription = this.socketService.onError().subscribe((err: Error | any) => {
-      this.router.navigateByUrl("")
-      console.error(err);
-    }, (err) => {
-      console.error(err);
-    });
-
-    // Handle exceptions here. Logic needs to be separated for each specific exception.
-    this.exceptionSubscription = this.socketService.onException().subscribe((err: Error | any) => {
-      console.error(err);
-    }, (err) => {
-      console.error(err);
-    })
+  async ngOnInit() {
+   
   }
   // Fonction qui ouvre le mat Dialog de bienvenue
   openDialog() {
