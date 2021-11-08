@@ -35,7 +35,7 @@ class _ChannelState extends State<Channel> {
                   ? const Center(
                       child: Text(
                       "Joignez un canal pour discuter avec vos amis! 😄",
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w500),
                     ))
                   : ListView.builder(
@@ -110,19 +110,6 @@ class _ChannelState extends State<Channel> {
     );
     if (text != null) {
       context.read<Messenger>().channelSocket.createChannel(text[0]);
-      // ChannelAPI channels_api = ChannelAPI(context.read<Messenger>().user);
-      // Map data = {'name': text};
-      // var body = json.encode(data);
-      // var response = await channels_api.createChannel(body);
-      // if (response.statusCode == 200) {
-      //   print('response:' + response.body);
-      //   var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
-      //   print('create: ' + jsonResponse["message"]);
-      //   showSnackBarAsBottomSheet(context, 'Channel was successfully reated :)');
-      //   context.read<Messenger>().socket.createChannel(text);
-      // } else {
-      //   print('Create request failed with status: ${response.statusCode}.');
-      // }
     }
   }
 

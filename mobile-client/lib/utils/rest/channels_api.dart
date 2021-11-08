@@ -2,11 +2,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
 import 'package:http_interceptor/http/intercepted_http.dart';
 
-const JSON_CONTENT_TYPE = {
-  "Content-Type": "application/json",
-  "withCredentials": "true"
-};
-
 class ChannelAPI {
   final String? _url = dotenv.env['SERVER_URL'] ?? "localhost:3000";
 

@@ -1,7 +1,4 @@
-import 'dart:convert';
 import 'package:Colorimage/providers/messenger.dart';
-import 'package:Colorimage/models/user.dart' as ColorimageUser;
-import 'package:Colorimage/utils/rest/authentification_api.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:flutter/material.dart';
@@ -29,8 +26,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  bool usernameTaken = false;
-  bool usernameEmpty = false;
+  String errorMessage = "";
   late UserCredential userCredential;
 
   final logo = Hero(
@@ -46,18 +42,14 @@ class _LoginState extends State<Login> {
   static const padding = 30.0;
 
   Future<void> login(email, password) async {
-
     try {
-      userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: email,
-          password: password
-      );
+      userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        print('No user found for that email.');
-      } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.');
-      }
+      setState(() {
+        errorMessage = e.message!;
+      });
+      return;
     }
 
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
@@ -66,7 +58,7 @@ class _LoginState extends State<Login> {
     var response = await rest.auth.login(token);
 
     if (response.statusCode == 202) {
-      print(response.body);      // Initialize socket connection
+      print(response.body); // Initialize socket connection
 
       initializeSocketConnection(userCredential, token);
 
@@ -77,8 +69,9 @@ class _LoginState extends State<Login> {
 
       // Home Page
       Navigator.pushNamed(context, homeRoute);
-      print(userCredential.user);
+      // Navigator.pushNamed(context, drawingRoute, arguments: {'socket': context.read<Messenger>().channelSocket.socket});
 
+      print(userCredential.user);
     } else {
       print('Login request failed with status: ${response.statusCode}.');
     }
@@ -89,29 +82,13 @@ class _LoginState extends State<Login> {
         'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000"),
         IO.OptionBuilder()
             // .setAuth({token:token})
-            .setExtraHeaders({'Authorization':'Bearer ' + token})
+            .setExtraHeaders({'Authorization': 'Bearer ' + token})
             .disableAutoConnect()
             .setTransports(['websocket']) // for Flutter or Dart VM
             .build());
 
     ChannelSocket channelSocket = ChannelSocket(auth.user, socket);
     context.read<Messenger>().setSocket(channelSocket);
-  }
-
-  _toDrawing(BuildContext context) {
-    IO.Socket socket = IO.io(
-        'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000"),
-        // 'http://edae-132-207-3-192.ngrok.io/',
-        IO.OptionBuilder()
-            .disableAutoConnect()
-            .setTransports(['websocket']) // for Flutter or Dart VM
-            .build());
-
-    socket.connect();
-
-    socket.on('connect', (_) {
-      Navigator.pushNamed(context, drawingRoute, arguments: {'socket': socket});
-    });
   }
 
   @override
@@ -132,6 +109,13 @@ class _LoginState extends State<Login> {
                           fontWeight: FontWeight.w800,
                           fontSize: 40.0,
                           color: primaryColor)),
+                  errorMessage.isNotEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.fromLTRB(30, 20, 0, 0),
+                          child: Text(errorMessage,
+                              style: const TextStyle(
+                                  color: Colors.red, fontSize: 25.0)))
+                      : const SizedBox.shrink(),
                   SizedBox(height: 24.0),
                   TextFormField(
                     style: const TextStyle(fontSize: _fontSize),
@@ -182,20 +166,6 @@ class _LoginState extends State<Login> {
                           }
                         },
                       )),
-                  usernameTaken
-                      ? const Padding(
-                          padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
-                          child: Text("Le nom d'utilisateur est déjà pris",
-                              style:
-                                  TextStyle(color: Colors.red, fontSize: 25.0)))
-                      : usernameEmpty
-                          ? const Padding(
-                              padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
-                              child: Text(
-                                  "Veuillez entrer un nom d'utilisateur",
-                                  style: TextStyle(
-                                      color: Colors.red, fontSize: 25.0)))
-                          : Text(""),
                   const SizedBox(height: 24.0),
                   ElevatedButton(
                     onPressed: () {
@@ -221,17 +191,6 @@ class _LoginState extends State<Login> {
                             minimumSize: Size(80.0, 80.0)),
                         child: Text('Créer un compte',
                             style: new TextStyle(fontSize: 26.0)),
-                      )),
-                  Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 30, 0, 30),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _toDrawing(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                            minimumSize: Size(80.0, 80.0)),
-                        child: const Text('Dessiner sans connexion',
-                            style: TextStyle(fontSize: 26.0)),
                       )),
                 ],
               ),

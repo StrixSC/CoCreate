@@ -1,8 +1,7 @@
 import 'dart:ui';
-
+import 'package:Colorimage/screens/drawing/toolbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:uuid/uuid.dart';
 
@@ -111,91 +110,22 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
 // ValueChanged<Color> callback
   void changeColor(Color color) {
+    print(color);
     setState(() => currentColor = color);
+  }
+
+  // ValueChanged<Tool> callback
+  void changeTool(String type) {
+    print(type);
+    setState(() => drawType = type);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: RaisedButton(
-              elevation: 3.0,
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Select a color'),
-                      content: SingleChildScrollView(
-                        child: BlockPicker(
-                          pickerColor: currentColor,
-                          onColorChanged: changeColor,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-              child: const Text('Colors'),
-              color: currentColor,
-              textColor: useWhiteForeground(currentColor)
-                  ? const Color(0xffffffff)
-                  : const Color(0xff000000),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: () {
-                drawType = "line";
-              },
-              child: const Icon(
-                CupertinoIcons.hand_draw_fill,
-                size: 26.0,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: () {
-                drawType = "select";
-              },
-              child: const Icon(
-                CupertinoIcons.hand_raised_fill,
-                size: 26.0,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: () {
-                drawType = "cercle";
-              },
-              child: const Icon(
-                CupertinoIcons.circle,
-                size: 26.0,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: () {
-                drawType = "rect";
-              },
-              child: const Icon(
-                CupertinoIcons.rectangle,
-                size: 26.0,
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(50.0), // here the desired height
+          child:Toolbar(changeTool, changeColor)),
       body: GestureDetector(
         onPanStart: (details) {
           switch (drawType) {
