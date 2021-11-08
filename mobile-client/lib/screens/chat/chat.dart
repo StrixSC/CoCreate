@@ -1,6 +1,6 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/chat.dart';
-import 'package:Colorimage/models/messenger.dart';
+import 'package:Colorimage/providers/messenger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
@@ -33,7 +33,7 @@ class ChatMessage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             (() {
-              if (username == message_username) {
+              if (this.username == this.message_username) {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -47,16 +47,16 @@ class ChatMessage extends StatelessWidget {
                             elevation: 0,
                             alignment: Alignment.topRight,
                             margin: EdgeInsets.only(top: 10),
-                            backGroundColor: kPrimaryColor,
+                            backGroundColor: Colors.indigo.shade400,
                             child: Container(
-                              color: kPrimaryColor,
+                              color: Color(0xFF5D72CC),
                               constraints: BoxConstraints(
                                 maxWidth:
                                     MediaQuery.of(context).size.width * 0.9,
                               ),
                               child: Text(
                                 text,
-                                style: const TextStyle(
+                                style: TextStyle(
                                     color: Colors.white, fontSize: 30),
                               ),
                             ),
@@ -67,7 +67,12 @@ class ChatMessage extends StatelessWidget {
                         ]),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.end,
-                      children: const [],
+                      children: [
+                        // Usually you dont have a Avatar showing for yourself
+                        // Padding(
+                        //     padding: EdgeInsets.fromLTRB(0, 45, 0, 0),
+                        //     child: CircleAvatar(child: Text(this.username[0])))
+                      ],
                     ),
                   ],
                 );
@@ -111,7 +116,7 @@ class ChatMessage extends StatelessWidget {
                               ),
                               child: Text(
                                 text,
-                                style: const TextStyle(
+                                style: TextStyle(
                                     color: Colors.black, fontSize: 30),
                               ),
                             ),
@@ -148,7 +153,9 @@ class _ChatScreenState extends State<ChatScreen> {
     print('submitted');
     setState(() {
       _validate =
-          _textController.text.isEmpty || _textController.text.trim().isEmpty;
+          _textController.text.isEmpty || _textController.text
+              .trim()
+              .isEmpty;
     });
     if (!_validate) {
       _textController.clear();
@@ -175,7 +182,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Flexible(
               child: TextField(
-                style: const TextStyle(fontSize: 25),
+                style: TextStyle(fontSize: 25),
                 controller: _textController,
                 onSubmitted: _handleSubmitted,
                 onChanged: _handleChange,
@@ -192,7 +199,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: IconButton(
                   iconSize: 34,
                   icon: const Icon(Icons.send),
-                  color: kPrimaryColor,
+                  color: Colors.indigo.shade400,
                   onPressed: () {
                     _handleSubmitted(_textController.text);
                   }),
@@ -303,7 +310,9 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           const Divider(height: 1.0),
           Container(
-            decoration: BoxDecoration(color: Theme.of(context).cardColor),
+            decoration: BoxDecoration(color: Theme
+                .of(context)
+                .cardColor),
             child: _buildTextComposer(),
           ),
         ],

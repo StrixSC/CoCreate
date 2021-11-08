@@ -1,5 +1,5 @@
 export interface IReceiveMessagePayload {
-    message: string,
-    username: string,
-    timestamp: string
+    message: string;
+    username: string;
+    timestamp: string;
 }

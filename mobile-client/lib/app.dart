@@ -1,10 +1,13 @@
 import 'package:Colorimage/screens/login/register.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'screens/login/login.dart';
 import 'package:provider/provider.dart';
 import 'screens/home/home.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'screens/drawing/drawing.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'style.dart';
 
 const loginRoute = '/';
 const chatRoute = '/chat';
@@ -13,26 +16,70 @@ const drawingRoute = '/drawing';
 const registerRoute = '/register';
 const fontsize = TextStyle(fontSize: 25);
 
-class App extends StatelessWidget {
-  const App({Key? key}) : super(key: key);
+class App extends StatefulWidget {
+  @override
+  _AppState createState() => _AppState();
+}
+
+class _AppState extends State<App> with TickerProviderStateMixin {
+
+  late AnimationController controller;
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+
+  @override
+  void initState() {
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..addListener(() {
+      setState(() {});
+    });
+    controller.repeat();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder(
+      // Initialize FlutterFire:
+      future: _initialization,
+      builder: (context, snapshot) {
+        // Check for errors
+        if (snapshot.hasError) {
+          print("There was an error while initializing FlutterFire: " + snapshot.toString());
+        }
+
+        // Once complete, show your application
+        if (snapshot.connectionState == ConnectionState.done) {
+          return App();
+        }
+
+        // Otherwise, show something whilst waiting for initialization to complete
+        return
+          CircularProgressIndicator(
+            value: controller.value,
+            semanticsLabel: 'Linear progress indicator',
+          );
+      },
+    );
+  }
+
+  App() {
     return ScreenUtilInit(
         designSize: const Size(1200, 1920),
         builder: () => Provider<String>(
-              create: (context) => 'Flutter Dev',
-              child: MaterialApp(
-                onGenerateRoute: _routes(),
-                theme: ThemeData(
-                  primarySwatch: Colors.blue,
-                  textTheme: Theme.of(context).textTheme.apply(
-                        fontSizeFactor: 1.5,
-                        fontSizeDelta: 2.0,
-                      ),
-                ), //_theme(),
+          create: (context) => 'Flutter Dev',
+          child: MaterialApp(
+            onGenerateRoute: _routes(),
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+              textTheme: Theme.of(context).textTheme.apply(
+                fontSizeFactor: 1.5,
+                fontSizeDelta: 2.0,
               ),
-            ));
+            ), //_theme(),
+          ),
+        ));
   }
 
   RouteFactory _routes() {
@@ -46,15 +93,14 @@ class App extends StatelessWidget {
           screen = const Register();
           break;
         case homeRoute:
-          final arguments = settings.arguments as Map<String, dynamic>;
-          screen = Home(arguments['user']);
+          screen = Home();
           break;
         case drawingRoute:
           final arguments = settings.arguments as Map<String, dynamic>;
           screen = DrawingScreen(arguments['socket'] , arguments['user']);
           break;
         default:
-          screen = const Login();
+          return null;
       }
       return MaterialPageRoute(builder: (BuildContext context) => screen);
     };

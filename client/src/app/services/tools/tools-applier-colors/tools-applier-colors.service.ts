@@ -3,9 +3,10 @@ import { FormGroup } from '@angular/forms';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { faTint } from '@fortawesome/free-solid-svg-icons';
 import { ICommand } from 'src/app/interfaces/command.interface';
+import { Tools } from '../../../interfaces/tools.interface';
+import { CommandInvokerService } from '../../command-invoker/command-invoker.service';
 import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
 import { ToolsColorService } from '../../tools-color/tools-color.service';
-import { Tools } from '../../../interfaces/tools.interface';
 import { ToolIdConstants } from '../tool-id-constants';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { ColorApplierCommand } from './color-applier-command';
@@ -24,7 +25,34 @@ export class ToolsApplierColorsService implements Tools {
   constructor(
     private toolsColorService: ToolsColorService,
     private rendererService: RendererProviderService,
+    private commandInvokerService: CommandInvokerService,
   ) { }
+
+  // Changer la couleur de fond d'un trait sélectionné
+  changeColor(target1: SVGElement[]): void | ICommand {
+    let target = target1[0];
+    if (target.tagName === 'tspan') {
+      target = target.parentNode as SVGElement;
+    }
+    const colorAttributeString = 'primaryColor';
+    const alphaAttributeString = 'primaryOpacity';
+
+    this.colorApplierCommand = new ColorApplierCommand(
+        this.rendererService.renderer,
+        target,
+        this.toolsColorService.primaryColorString,
+        this.toolsColorService.primaryAlpha,
+        colorAttributeString, alphaAttributeString,
+      );
+    if (this.colorApplierCommand) {
+      this.colorApplierCommand.execute();
+      const tempColorApplierCommand: ColorApplierCommand = this.colorApplierCommand;
+      this.colorApplierCommand = null;
+      this.commandInvokerService.executeCommand(tempColorApplierCommand);
+      return tempColorApplierCommand;
+    }
+    return;
+  }
 
   /// À l'appuis d'un clique de souris, on récupère l'objet cliqué et on modifie sa couleur
   onPressed(event: MouseEvent): void {

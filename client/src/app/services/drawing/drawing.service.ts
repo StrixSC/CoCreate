@@ -18,9 +18,10 @@ export class DrawingService {
   isCreated = false;
   color: RGB = DEFAULT_RGB_COLOR;
   alpha: number = DEFAULT_ALPHA;
-  width = 0;
-  height = 0;
+  width = 1000;
+  height = 1000;
   drawing: SVGElement;
+  numberOfStrates = 0;
 
   private objectList: Map<number, SVGElement>;
 
@@ -47,6 +48,47 @@ export class DrawingService {
     return this.objectList;
   }
 
+  setObjectList(objList: Map<number, SVGElement>): void {
+    this.objectList = objList;
+  }
+
+  getLastObject(): any {
+      return this.getObjectList().get(this.lastObjectId);
+  }
+
+  addLayer(id: number): void {
+    // console.log(this.renderer.nextSibling(this.objectList.get(id)));
+    if (this.renderer.nextSibling(this.objectList.get(id)).getAttribute('id') !== 'gridRect') {
+      let tempStrate: string;
+      let siblingStrate: string;
+      if (this.objectList.get(id) === undefined) {
+        return;
+      } else {
+        tempStrate = (this.objectList.get(id) as any).getAttribute('strate');
+        siblingStrate = this.renderer.nextSibling(this.objectList.get(id)).getAttribute('strate');
+        this.renderer.nextSibling(this.objectList.get(id)).setAttribute('strate', tempStrate);
+        (this.objectList.get(id) as any).setAttribute('strate', siblingStrate);
+      }
+      this.renderer.insertBefore(this.drawing, this.renderer.nextSibling(this.objectList.get(id)), this.objectList.get(id));
+    } else {
+      console.log('Stop');
+      return;
+    }
+    console.log(this.drawing);
+  }
+
+  removeLayer(id: number): void {
+      let x: SVGElement;
+      this.drawing.childNodes.forEach((children: SVGElement) => {
+        if (children.getAttribute('id') === id.toString()) {
+          x = (children.previousElementSibling as SVGElement);
+          const previousId: string | null = x.getAttribute('id');
+          if (previousId === null) { return; }
+          this.addLayer(parseInt(previousId));
+        }
+      });
+}
+
   /// Retrait d'un objet selon son ID
   removeObject(id: number): void {
     this.renderer.removeChild(this.drawing, this.objectList.get(id));
@@ -59,7 +101,12 @@ export class DrawingService {
     this.saved = false;
     if (!obj.id) {
       this.lastObjectId++;
+      this.numberOfStrates++;
+
       this.renderer.setProperty(obj, 'id', this.lastObjectId);
+      this.renderer.setProperty(obj, 'isSelected', true);
+
+      this.renderer.setAttribute(obj, 'strate', this.numberOfStrates.toString());
     }
     const id: number = Number(obj.id);
     this.objectList.set(id, obj);

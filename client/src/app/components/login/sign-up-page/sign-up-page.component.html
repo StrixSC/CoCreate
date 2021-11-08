@@ -1,0 +1,76 @@
+<div class="page-container">
+  <div class="circle"></div>
+  <div class="circle-xlarge"></div>
+  <div class="circle-large"></div>
+  <div class="circle-medium"></div>
+  <div class="circle-small"></div>
+  <h1 class="title">Colorimage</h1>
+  <div class="login-inputs-container">
+    <form
+      class="example-form"
+      ngForm="form"
+      (keydown.enter)="register()"
+      #f="ngForm"
+    >
+      <mat-form-field class="example-full-width" appearance="fill">
+        <input
+          matInput
+          class="input-email-container"
+          #email="ngModel"
+          name="email"
+          [(ngModel)]="user.email"
+          placeholder="Email"
+        />
+      </mat-form-field>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <input
+          matInput
+          class="input-id-container"
+          #username="ngModel"
+          name="username"
+          [(ngModel)]="user.username"
+          placeholder="Identificateur"
+        />
+      </mat-form-field>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <input
+          matInput
+          class="input-password-container"
+          #password="ngModel"
+          name="password"
+          type="password"
+          [(ngModel)]="user.password"
+          placeholder="Mot de passe"
+        />
+      </mat-form-field>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <input
+          matInput
+          class="input-name-container"
+          #firstName="ngModel"
+          name="firstName"
+          [(ngModel)]="user.firstName"
+          placeholder="Prénom"
+        />
+      </mat-form-field>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <input
+          matInput
+          class="input-last-name-container"
+          #lastName="ngModel"
+          name="lastName"
+          [(ngModel)]="user.lastName"
+          placeholder="Nom"
+        />
+      </mat-form-field>
+      <button style="width: 100%" mat-raised-button (click)="register()">
+        Créer compte
+      </button>
+    </form>
+    <br />
+
+    <a style="text-align: center" routerLink="/" routerLinkActive="active">
+      Retour
+    </a>
+  </div>
+</div>

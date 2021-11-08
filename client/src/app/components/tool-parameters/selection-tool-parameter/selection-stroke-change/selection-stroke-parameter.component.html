@@ -1,0 +1,19 @@
+<div class="parameter">
+    <h4>{{toolName}}</h4>
+    <div [formGroup]='form'>
+        <mat-grid-list cols="4" rowHeight="70px">
+            <mat-grid-tile [colspan]="1">
+                <svg width="50px" height="50px">
+                    <circle cy="25px" cx="25px" [attr.r]="strokeWidthValue/2" />
+                </svg>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="3">
+                <mat-form-field>
+                    <mat-label>Largeur de trait</mat-label>
+                    <input matInput formControlName='strokeWidth' type="number" placeholder="Largeur de trait" min="1"
+                        oninput="validity.valid||(value='1');" onblur="validity.valid||(value='1');">
+                </mat-form-field>
+            </mat-grid-tile>
+        </mat-grid-list>
+    </div>
+</div>

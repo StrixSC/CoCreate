@@ -1,6 +1,6 @@
 import 'package:Colorimage/models/chat.dart';
-import 'package:Colorimage/models/messenger.dart';
-import 'package:Colorimage/models/user.dart';
+import 'package:Colorimage/providers/messenger.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/src/provider.dart';
 
@@ -98,7 +98,7 @@ class ChatCard extends StatelessWidget {
               ),
             ),
               notifIcon(),
-              if(chat.name != "Canal Publique" && user.username == chat.ownerUsername)
+              if(chat.name != "Canal Publique" && user.displayName == chat.ownerUsername)
                 IconButton(
                   iconSize: 28,
                   icon: const Icon(Icons.highlight_remove),

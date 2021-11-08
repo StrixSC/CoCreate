@@ -1,13 +1,11 @@
-import 'dart:convert';
-import 'package:Colorimage/models/messenger.dart';
-import 'package:Colorimage/models/user.dart';
-import 'package:Colorimage/utils/rest/authentification_api.dart';
+import 'package:Colorimage/providers/messenger.dart';
+import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/src/provider.dart';
 import '../../app.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 TextEditingController userController = TextEditingController();
@@ -28,8 +26,8 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  bool usernameTaken = false;
-  bool usernameEmpty = false;
+  String errorMessage = "";
+  late UserCredential userCredential;
 
   final logo = Hero(
     tag: 'hero',
@@ -44,96 +42,53 @@ class _LoginState extends State<Login> {
   static const padding = 30.0;
 
   Future<void> login(email, password) async {
-    Map data = {'email': email, 'password': password};
-    var body = json.encode(data);
+    try {
+      userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        errorMessage = e.message!;
+      });
+      return;
+    }
 
-    AuthenticationAPI rest = AuthenticationAPI();
-    var response = await rest.login(body);
+    var token = await FirebaseAuth.instance.currentUser!.getIdToken();
 
-    if (response.statusCode == 200) {
-      String rawCookie = response.headers['set-cookie'] as String;
-      print(rawCookie);
-      var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
-      var user = User(
-          id: jsonResponse['user_id'],
-          email: jsonResponse['email'],
-          username: jsonResponse['username'],
-          avatar_url: jsonResponse['avatar_url'],
-          isActive: false,
-          cookie: rawCookie);
+    RestApi rest = RestApi();
+    var response = await rest.auth.login(token);
+
+    if (response.statusCode == 202) {
+      print(response.body); // Initialize socket connection
+
+      initializeSocketConnection(userCredential, token);
 
       // Fetch initial user info
-      context.read<Messenger>().updateUser(user);
+      context.read<Messenger>().updateUser(userCredential);
       context.read<Messenger>().fetchChannels();
       context.read<Messenger>().fetchAllChannels();
 
-      // Initialize socket connection
-      initializeSocketConnection(user);
-
       // Home Page
-      Navigator.pushNamed(context, homeRoute, arguments: {'user': user});
+      Navigator.pushNamed(context, homeRoute);
+      // Navigator.pushNamed(context, drawingRoute, arguments: {'socket': context.read<Messenger>().channelSocket.socket});
 
-      print(user);
+      print(userCredential.user);
     } else {
       print('Login request failed with status: ${response.statusCode}.');
     }
   }
 
-  void initializeSocketConnection(user) {
+  void initializeSocketConnection(auth, token) {
     IO.Socket socket = IO.io(
-        // 'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000"),
-        'https://colorimage-109-3900.herokuapp.com/',
-        // 'http://localhost:5000/',
+        'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000"),
         IO.OptionBuilder()
-            .setExtraHeaders({'Cookie': user.cookie})
+            // .setAuth({token:token})
+            .setExtraHeaders({'Authorization': 'Bearer ' + token})
             .disableAutoConnect()
             .setTransports(['websocket']) // for Flutter or Dart VM
             .build());
 
-    ChannelSocket channelSocket = ChannelSocket(user, socket);
+    ChannelSocket channelSocket = ChannelSocket(auth.user, socket);
     context.read<Messenger>().setSocket(channelSocket);
-  }
-
-  _toDrawing(BuildContext context, String userController,
-      String passController) async {
-    //todo: remove after merge drawing with login
-    // Map data = {'email': userController, 'password': passController};
-    Map data = {'email': "demo", 'password': "demo"};
-    var body = json.encode(data);
-
-    AuthenticationAPI rest = AuthenticationAPI();
-    var response = await rest.login(body);
-
-    if (response.statusCode == 200) {
-      // String rawCookie = response.headers['set-cookie'] as String;
-      // print(rawCookie);
-      var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
-      var user = User(
-        id: jsonResponse['user_id'],
-        email: jsonResponse['email'],
-        username: jsonResponse['username'],
-        avatar_url: jsonResponse['avatar_url'],
-        isActive: false,
-        // cookie: rawCookie
-      );
-
-      IO.Socket socket = IO.io(
-          'https://colorimage-109-3900.herokuapp.com/',
-          IO.OptionBuilder()
-              // .setExtraHeaders({'Cookie': user.cookie})
-              .setExtraHeaders({'x-user-id': user.id})
-              .setExtraHeaders({'Cookie': user.cookie})
-              .disableAutoConnect()
-              .setTransports(['websocket']) // for Flutter or Dart VM
-              .build());
-
-      socket.connect();
-
-      socket.on('connect', (_) {
-        Navigator.pushNamed(context, drawingRoute,
-            arguments: {'socket': socket, 'user': user});
-      });
-    }
   }
 
   @override
@@ -143,7 +98,7 @@ class _LoginState extends State<Login> {
         body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Form(
             key: _formKey,
-            child: Expanded(
+            child: Flexible(
               child: ListView(
                 shrinkWrap: true,
                 padding: EdgeInsets.only(left: 100.0, right: 100.0),
@@ -154,6 +109,13 @@ class _LoginState extends State<Login> {
                           fontWeight: FontWeight.w800,
                           fontSize: 40.0,
                           color: primaryColor)),
+                  errorMessage.isNotEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.fromLTRB(30, 20, 0, 0),
+                          child: Text(errorMessage,
+                              style: const TextStyle(
+                                  color: Colors.red, fontSize: 25.0)))
+                      : const SizedBox.shrink(),
                   SizedBox(height: 24.0),
                   TextFormField(
                     style: const TextStyle(fontSize: _fontSize),
@@ -204,20 +166,6 @@ class _LoginState extends State<Login> {
                           }
                         },
                       )),
-                  usernameTaken
-                      ? const Padding(
-                          padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
-                          child: Text("Le nom d'utilisateur est déjà pris",
-                              style:
-                                  TextStyle(color: Colors.red, fontSize: 25.0)))
-                      : usernameEmpty
-                          ? const Padding(
-                              padding: EdgeInsets.fromLTRB(30, 20, 0, 0),
-                              child: Text(
-                                  "Veuillez entrer un nom d'utilisateur",
-                                  style: TextStyle(
-                                      color: Colors.red, fontSize: 25.0)))
-                          : Text(""),
                   const SizedBox(height: 24.0),
                   ElevatedButton(
                     onPressed: () {
@@ -243,18 +191,6 @@ class _LoginState extends State<Login> {
                             minimumSize: Size(80.0, 80.0)),
                         child: Text('Créer un compte',
                             style: new TextStyle(fontSize: 26.0)),
-                      )),
-                  Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 30, 0, 30),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _toDrawing(context, userController.text,
-                              passController.text);
-                        },
-                        style: ElevatedButton.styleFrom(
-                            minimumSize: Size(80.0, 80.0)),
-                        child: const Text('Dessiner sans connexion',
-                            style: TextStyle(fontSize: 30.0)),
                       )),
                 ],
               ),

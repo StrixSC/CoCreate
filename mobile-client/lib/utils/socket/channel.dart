@@ -1,7 +1,7 @@
 import 'package:Colorimage/models/chat.dart';
-import 'package:Colorimage/models/user.dart';
 import 'package:Colorimage/screens/chat/chat.dart';
 import 'package:Colorimage/utils/socket/socket_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChannelSocket extends SocketService {
@@ -48,7 +48,7 @@ class ChannelSocket extends SocketService {
           messageId: data['messageId'],
           channelId: data['channelId'],
           text: data['message'],
-          username: user.username,
+          username: user.displayName as String,
           message_username: data['username'],
           timestamp: data['createdAt']);
       callbackMessage('sent', message);
