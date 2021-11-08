@@ -94,8 +94,10 @@ class _LoginState extends State<Login> {
     context.read<Messenger>().setSocket(channelSocket);
   }
 
-  _toDrawing(BuildContext context) async {
+  _toDrawing(BuildContext context, String userController,
+      String passController) async {
     //todo: remove after merge drawing with login
+    // Map data = {'email': userController, 'password': passController};
     Map data = {'email': "demo", 'password': "demo"};
     var body = json.encode(data);
 
@@ -103,21 +105,23 @@ class _LoginState extends State<Login> {
     var response = await rest.login(body);
 
     if (response.statusCode == 200) {
-      String rawCookie = response.headers['set-cookie'] as String;
-      print(rawCookie);
+      // String rawCookie = response.headers['set-cookie'] as String;
+      // print(rawCookie);
       var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
       var user = User(
-          id: jsonResponse['user_id'],
-          email: jsonResponse['email'],
-          username: jsonResponse['username'],
-          avatar_url: jsonResponse['avatar_url'],
-          isActive: false,
-          cookie: rawCookie);
+        id: jsonResponse['user_id'],
+        email: jsonResponse['email'],
+        username: jsonResponse['username'],
+        avatar_url: jsonResponse['avatar_url'],
+        isActive: false,
+        // cookie: rawCookie
+      );
 
       IO.Socket socket = IO.io(
-          // 'http://localhost:5000/',
           'https://colorimage-109-3900.herokuapp.com/',
           IO.OptionBuilder()
+              // .setExtraHeaders({'Cookie': user.cookie})
+              .setExtraHeaders({'x-user-id': user.id})
               .setExtraHeaders({'Cookie': user.cookie})
               .disableAutoConnect()
               .setTransports(['websocket']) // for Flutter or Dart VM
@@ -244,7 +248,8 @@ class _LoginState extends State<Login> {
                       padding: const EdgeInsets.fromLTRB(0, 30, 0, 30),
                       child: ElevatedButton(
                         onPressed: () {
-                          _toDrawing(context);
+                          _toDrawing(context, userController.text,
+                              passController.text);
                         },
                         style: ElevatedButton.styleFrom(
                             minimumSize: Size(80.0, 80.0)),

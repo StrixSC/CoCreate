@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:Colorimage/models/drawing.dart';
@@ -23,10 +24,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
   Map paintsMap = <String, Paint>{};
   Offset endPoint = const Offset(-1, -1);
   String drawType = DrawingType.freedraw;
-  late String shapeID;
+  String? shapeID;
+  String? lastShapeID;
   final IO.Socket _socket;
   final User _user;
-  Map actionsMap = <String, Map<String, List<Offset>>>{};
+  Map actionsMap = <String, Map<String, dynamic>>{};
   Map selectedItems = <String, String>{};
 
   _DrawingScreenState(this._socket, this._user);
@@ -38,6 +40,16 @@ class _DrawingScreenState extends State<DrawingScreen> {
       print(data);
       print("");
     });
+    _socket.on('action:saved', (data) {
+      _socket.emit("selection:emit", {
+        'actionId': data['actionId'],
+        'username': _user.username,
+        'userId': _user.id,
+        'collaborationId': "DEMO_COLLABORATION",
+        'actionType': "Select",
+        'isSelected': true,
+      });
+    });
     _socket.on('freedraw:received', (data) {
       setState(() {
         if (data['state'] == DrawingState.down) {
@@ -48,9 +60,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
           actionsMap.putIfAbsent(
               data['actionId'], () => map as Map<String, List<Offset>>);
           final paint = Paint()
-            ..color = Color(data['color'])
-            // todo: en attandant que le client lourd integre les couleurs
-            // ..color = Color(0xFFFF9000)
+            ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
+                data['g'] as int, data['b'] as int)
             ..isAntiAlias = true
             ..strokeWidth = 6.0
             ..style = PaintingStyle.stroke;
@@ -110,7 +121,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
     _socket.on('selection:received', (data) {
       setState(() {
         if (data['isSelected']) {
-          selectedItems.putIfAbsent(data['actionId'], () => data['selectedBy']);
+          selectedItems.putIfAbsent(
+              data['actionId'], () => data['selectedBy'] as String);
         } else {
           selectedItems.remove(data['actionId']);
         }
@@ -214,6 +226,16 @@ class _DrawingScreenState extends State<DrawingScreen> {
         onPanStart: (details) {
           switch (drawType) {
             case DrawingType.freedraw:
+              if (shapeID != null) {
+                _socket.emit("selection:emit", {
+                  'actionId': lastShapeID,
+                  'username': _user.username,
+                  'userId': _user.id,
+                  'collaborationId': "DEMO_COLLABORATION",
+                  'actionType': "Select",
+                  'isSelected': "false",
+                });
+              }
               _socket.emit("freedraw:emit", {
                 'x': details.localPosition.dx.toInt(),
                 'y': details.localPosition.dy.toInt(),
@@ -222,7 +244,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
                 'userId': _user.id,
                 'actionType': "Freedraw",
                 'state': DrawingState.down,
-                'color': currentColor.value,
+                'a': currentColor.alpha,
+                'r': currentColor.red,
+                'g': currentColor.green,
+                'b': currentColor.blue,
                 'width': 3,
                 'isSelected': true,
                 'actionId': shapeID = const Uuid().v1()
@@ -273,6 +298,17 @@ class _DrawingScreenState extends State<DrawingScreen> {
         onPanUpdate: (details) {
           switch (drawType) {
             case DrawingType.freedraw:
+              //todo: only if i'm the person the selected it
+              if(selectedItems.containsKey(lastShapeID)){
+                _socket.emit("selection:emit", {
+                  'actionId': lastShapeID,
+                  'username': _user.username,
+                  'userId': _user.id,
+                  'collaborationId': "DEMO_COLLABORATION",
+                  'actionType': "Select",
+                  'isSelected': "false",
+                });
+              }
               _socket.emit("freedraw:emit", {
                 'x': details.localPosition.dx.toInt(),
                 'y': details.localPosition.dy.toInt(),
@@ -281,7 +317,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
                 'userId': _user.id,
                 'actionType': "Freedraw",
                 'state': DrawingState.move,
-                'color': currentColor.value,
+                'a': currentColor.alpha,
+                'r': currentColor.red,
+                'g': currentColor.green,
+                'b': currentColor.blue,
                 'width': 3,
                 'isSelected': true,
                 'actionId': shapeID,
@@ -318,19 +357,17 @@ class _DrawingScreenState extends State<DrawingScreen> {
                 'userId': _user.id,
                 'actionType': "Freedraw",
                 'state': DrawingState.up,
-                'color': currentColor.value,
+                'a': currentColor.alpha,
+                'r': currentColor.red,
+                'g': currentColor.green,
+                'b': currentColor.blue,
                 'width': 3,
                 'isSelected': "false",
-                'actionId': shapeID
-              });
-              _socket.emit("selection:emit", {
                 'actionId': shapeID,
-                'username': _user.username,
-                'userId': _user.id,
-                'collaborationId': "DEMO_COLLABORATION",
-                'actionType': "Select",
-                'isSelected': true,
+                'offsets': json
+                    .encode(test(actionsMap[shapeID][DrawingType.freedraw])),
               });
+              lastShapeID = shapeID;
               break;
             case DrawingType.rectangle:
               _socket.emit("shape:emit", {
@@ -363,6 +400,14 @@ class _DrawingScreenState extends State<DrawingScreen> {
         ),
       ),
     );
+  }
+
+  List<dynamic> test(List<Offset> offsetList) {
+    var coords = [];
+    for (var offset in offsetList) {
+      coords.add({'x': offset.dx, 'y': offset.dy});
+    }
+    return coords;
   }
 
   String? getSelectedId(Offset offset) {
@@ -426,7 +471,7 @@ class Painter extends CustomPainter {
           if (selectedItems.containsKey(actionId)) {
             Path path = Path();
             path.moveTo(offsetList.first.dx, offsetList.first.dy);
-            for (int i = 1; i < selectedItems.length; i) {
+            for (int i = 1; i < offsetList.length; i++) {
               path.lineTo(offsetList[i].dx, offsetList[i].dy);
             }
             canvas.drawPath(getCorner(path), paintsMap[actionId]);
