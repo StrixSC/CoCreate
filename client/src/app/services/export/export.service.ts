@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
+import { CanvasToBMP } from '../../classes/canvas-to-bmp';
 import { DrawingService } from '../drawing/drawing.service';
 import { GridService } from '../tools/grid-tool/grid.service';
 import { SelectionToolService } from '../tools/selection-tool/selection-tool.service';
 import { SOURCE_KEY } from '../tools/tools-constants';
-import { CanvasToBMP } from '../../classes/canvas-to-bmp';
 @Injectable({
   providedIn: 'root',
 })

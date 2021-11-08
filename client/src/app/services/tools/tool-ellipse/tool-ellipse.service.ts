@@ -3,16 +3,16 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { IconDefinition } from '@fortawesome/fontawesome-common-types';
 import { faCircle } from '@fortawesome/free-solid-svg-icons';
 import { ICommand } from 'src/app/interfaces/command.interface';
+import { Tools } from '../../../interfaces/tools.interface';
 import { DrawingService } from '../../drawing/drawing.service';
 import { OffsetManagerService } from '../../offset-manager/offset-manager.service';
 import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
 import { ToolsColorService } from '../../tools-color/tools-color.service';
-import { Tools } from '../../../interfaces/tools.interface';
+import { SelectionToolService } from '../selection-tool/selection-tool.service';
 import { ToolIdConstants } from '../tool-id-constants';
 import { FilledShape } from '../tool-rectangle/filed-shape.model';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { EllipseCommand } from './ellipse-command';
-import { SelectionToolService } from '../selection-tool/selection-tool.service';
 
 /// Outil pour créer des ellipse, click suivis de bouge suivis de relache crée l'ellipse
 /// et avec shift créer un cercle
@@ -45,7 +45,7 @@ export class ToolEllipseService implements Tools {
     private colorTool: ToolsColorService,
     private drawingService: DrawingService,
     private rendererService: RendererProviderService,
-    private selectionToolService: SelectionToolService
+    private selectionToolService: SelectionToolService,
   ) {
     this.strokeWidth = new FormControl(1, Validators.min(1));
     this.ellipseStyle = new FormControl('fill');
@@ -114,7 +114,7 @@ export class ToolEllipseService implements Tools {
     if (this.ellipseCommand) {
       const returnEllipseCommand = this.ellipseCommand;
       this.ellipseCommand = null;
-      let lastObj = new Array(this.drawingService.getLastObject());
+      const lastObj = new Array(this.drawingService.getLastObject());
       this.selectionToolService.setNewSelection(lastObj);
       return returnEllipseCommand;
     }

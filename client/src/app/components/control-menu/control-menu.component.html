@@ -17,4 +17,6 @@
         [disabled]='!canUndo'>Retour à l'arrière</button>
     <button mat-flat-button id='redo' matTooltip="Retour à l'avant (CTRL+SHIFT+Z)" (click)="redo()"
         [disabled]='!canRedo'>Retour à l'avant</button>
+    <button mat-flat-button id='signout' matTooltip="Déconnexion" (click)="signOut()"
+        >Déconnexion</button>
 </div>

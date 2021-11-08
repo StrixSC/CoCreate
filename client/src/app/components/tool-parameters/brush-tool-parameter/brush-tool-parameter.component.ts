@@ -1,10 +1,10 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { TEXTURE_FIVE, TEXTURE_FOUR, TEXTURE_ONE, TEXTURE_THREE, TEXTURE_TWO } from 'src/app/classes/textures/texture-id';
 import { TextureOptions } from 'src/app/model/texture-options.model';
 import { RendererProviderService } from 'src/app/services/renderer-provider/renderer-provider.service';
 import { TexturesService } from 'src/app/services/textures/textures.service';
 import { BrushToolService } from 'src/app/services/tools/brush-tool/brush-tool.service';
-import { TEXTURE_FIVE, TEXTURE_FOUR, TEXTURE_ONE, TEXTURE_THREE, TEXTURE_TWO } from 'src/app/classes/textures/texture-id';
 
 /// Le component d'affichage des paramètres du pinceau
 @Component({

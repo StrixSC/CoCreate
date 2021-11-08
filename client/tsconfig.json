@@ -16,7 +16,7 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "target": "es2015",
     "typeRoots": [
       "node_modules/@types"
@@ -30,6 +30,8 @@
 
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
-    "strictInjectionParameters": true
+    "strictInjectionParameters": true,
+    "esModuleInterop": true, 
+    "allowSyntheticDefaultImports": true 
   }
 }

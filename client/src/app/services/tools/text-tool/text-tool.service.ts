@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { faHeading, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { Tools } from '../../../interfaces/tools.interface';
 import { CommandInvokerService } from '../../command-invoker/command-invoker.service';
 import { DrawingService } from '../../drawing/drawing.service';
 import { HotkeysEnablerService } from '../../hotkeys/hotkeys-enabler.service';
 import { OffsetManagerService } from '../../offset-manager/offset-manager.service';
 import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
 import { ToolsColorService } from '../../tools-color/tools-color.service';
-import { Tools } from '../../../interfaces/tools.interface';
 import { ToolIdConstants } from '../tool-id-constants';
 import { INITIAL_TEXT_SIZE, LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { TextCommand } from './text-command';

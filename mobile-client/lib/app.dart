@@ -7,6 +7,7 @@ import 'screens/home/home.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'screens/drawing/drawing.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'style.dart';
 
 const loginRoute = '/';
 const chatRoute = '/chat';
@@ -99,7 +100,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
           screen = DrawingScreen(arguments['socket']);
           break;
         default:
-          screen = const Login();
+          return null;
       }
       return MaterialPageRoute(builder: (BuildContext context) => screen);
     };
