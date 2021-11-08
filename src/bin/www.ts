@@ -64,7 +64,6 @@ const io = new Server(server, {
 const onConnection = (socket: Socket) => {
     socket.use(logEvent(socket));
     socket.data.user = (socket as any).request.userId;
-    console.log(socket.data.user);
     try {
         channelHandler(io, socket);
         drawingHandler(io, socket);
@@ -80,9 +79,6 @@ const onConnection = (socket: Socket) => {
 const wrap = (middleware: any) => (socket: Socket, next: any) =>
     middleware(socket.request, {}, next);
 
-// io.use(wrap(expressSession));
-// io.use(wrap(passport.initialize()));
-// io.use(wrap(passport.session()));
 io.use(wrap(checkIfAuthenticated));
 
 io.on('connection', onConnection);

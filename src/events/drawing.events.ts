@@ -5,7 +5,6 @@ import { Server, Socket } from 'socket.io';
 import { validateDrawingEvents } from './../utils/drawings';
 import { ActionType, Action } from '@prisma/client';
 import validator from 'validator';
-import log from '../utils/logger';
 
 export = (io: Server, socket: Socket) => {
     const onFreedraw = async (data: Action) => {
@@ -59,7 +58,7 @@ export = (io: Server, socket: Socket) => {
                     actionType: dbAction.actionType,
                     state: dbAction.state,
                     isSelected: dbAction.isSelected,
-                    offsets: JSON.stringify(dbAction.offsets),
+                    offsets: dbAction.offsets,
                     r: dbAction.r,
                     g: dbAction.g,
                     b: dbAction.b,
@@ -166,7 +165,14 @@ export = (io: Server, socket: Socket) => {
         }
     };
 
+    const onUndo = async (data: Action) => {
+        io.emit('undoredo:received', {
+            ...data
+        } as Action);
+    };
+
     socket.on('freedraw:emit', onFreedraw);
     socket.on('shape:emit', onShapeDraw);
     socket.on('selection:emit', onSelection);
+    socket.on('undoredo:emit', onUndo);
 };
