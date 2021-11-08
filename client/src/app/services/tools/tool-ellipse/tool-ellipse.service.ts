@@ -1,3 +1,5 @@
+import { setStyle } from './../../../utils/colors';
+import { SyncDrawingService } from './../../syncdrawing.service';
 import { Injectable } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { IconDefinition } from '@fortawesome/fontawesome-common-types';
@@ -13,6 +15,7 @@ import { ToolIdConstants } from '../tool-id-constants';
 import { FilledShape } from '../tool-rectangle/filed-shape.model';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { EllipseCommand } from './ellipse-command';
+import { DrawingState, ShapeType } from 'src/app/model/IAction.model';
 
 /// Outil pour créer des ellipse, click suivis de bouge suivis de relache crée l'ellipse
 /// et avec shift créer un cercle
@@ -40,12 +43,15 @@ export class ToolEllipseService implements Tools {
   private x: number;
   private y: number;
 
+  private isDrawing = false;
+
   constructor(
     private offsetManager: OffsetManagerService,
     private colorTool: ToolsColorService,
     private drawingService: DrawingService,
     private rendererService: RendererProviderService,
     private selectionToolService: SelectionToolService,
+    private syncService: SyncDrawingService,
   ) {
     this.strokeWidth = new FormControl(1, Validators.min(1));
     this.ellipseStyle = new FormControl('fill');
@@ -58,7 +64,12 @@ export class ToolEllipseService implements Tools {
   /// Quand le bouton de la sourie est enfoncé, on crée un ellipse et on le retourne
   /// en sortie et est inceré dans l'objet courrant de l'outil.
   onPressed(event: MouseEvent): void {
+    if (this.isDrawing) {
+      return;
+    }
+
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
+      this.isDrawing = true;
       this.contour = this.rendererService.renderer.createElement('rect', 'svg');
       this.rendererService.renderer.setStyle(this.contour, 'stroke', `rgba(0, 0, 0, 1)`);
       this.rendererService.renderer.setStyle(this.contour, 'stroke-width', `1`);
@@ -84,27 +95,36 @@ export class ToolEllipseService implements Tools {
       };
 
       if (event.button === LEFT_CLICK) {
-        this.setStyle(
+        setStyle(
+          this.ellipse,
           this.colorTool.primaryColorString,
           this.colorTool.primaryAlpha.toString(),
           this.colorTool.secondaryColorString,
           this.colorTool.secondaryAlpha.toString(),
+          this.ellipseStyle.value
         );
       } else {
-        this.setStyle(
+        setStyle(
+          this.ellipse,
           this.colorTool.secondaryColorString,
           this.colorTool.secondaryAlpha.toString(),
           this.colorTool.primaryColorString,
           this.colorTool.primaryAlpha.toString(),
+          this.ellipseStyle.value
         );
       }
       this.ellipseCommand = new EllipseCommand(this.rendererService.renderer, this.ellipse, this.drawingService);
       this.ellipseCommand.execute();
+      this.syncService.sendShape(DrawingState.down, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse);
     }
   }
 
   /// Quand le bouton de la sourie est relaché, l'objet courrant de l'outil est mis a null.
   onRelease(event: MouseEvent): ICommand | void {
+    if (!this.isDrawing) {
+      return;
+    }
+
     this.isCircle = false;
     this.ellipse = null;
     if (this.contour) {
@@ -113,18 +133,28 @@ export class ToolEllipseService implements Tools {
     }
     if (this.ellipseCommand) {
       const returnEllipseCommand = this.ellipseCommand;
+      returnEllipseCommand.actionId = this.syncService.activeActionId;
       this.ellipseCommand = null;
       const lastObj = new Array(this.drawingService.getLastObject());
+      this.syncService.sendShape(DrawingState.up, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse!);
       this.selectionToolService.setNewSelection(lastObj);
+      this.ellipse = null;
       return returnEllipseCommand;
     }
+
+    this.isDrawing = false;
     return;
   }
 
   /// Quand le bouton de la sourie est apuyé et on bouge celle-ci, l'objet courrant subit des modifications.
   onMove(event: MouseEvent): void {
+    if (!this.isDrawing) {
+      return;
+    }
+
     const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
     this.setSize(offset.x, offset.y);
+    this.syncService.sendShape(DrawingState.move, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse!);
   }
 
   /// Verification de la touche shift

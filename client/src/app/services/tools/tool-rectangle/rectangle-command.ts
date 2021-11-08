@@ -7,7 +7,7 @@ import { FilledShape } from './filed-shape.model';
 export class RectangleCommand implements ICommand {
 
     private rectangle: SVGRectElement;
-
+    public actionId: string = "";
     constructor(
         readonly renderer: Renderer2,
         private rectangleAttributes: FilledShape,

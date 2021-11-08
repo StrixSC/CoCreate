@@ -120,7 +120,6 @@ export class SelectionToolService implements Tools {
           // this.firstInvObj = obj;
         }
         this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectInversement);
-
         this.wasMoved = true;
       }
 
