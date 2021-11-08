@@ -8,9 +8,10 @@ import { Pencil } from './pencil.model';
 export class PencilCommand implements ICommand {
   private pencil: SVGPolylineElement | null = null;
   private dot: SVGCircleElement | null = null;
+  public actionId = "";
   constructor(
     readonly renderer: Renderer2,
-    private pencilAttributes: Pencil,
+    public pencilAttributes: Pencil,
     private drawingService: DrawingService,
   ) {}
 

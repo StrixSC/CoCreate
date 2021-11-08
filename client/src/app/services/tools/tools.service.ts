@@ -1,3 +1,4 @@
+import { SyncDrawingService } from './../syncdrawing.service';
 import { Injectable } from '@angular/core';
 import { ICommand } from 'src/app/interfaces/command.interface';
 import { CommandInvokerService } from 'src/app/services/command-invoker/command-invoker.service';
@@ -50,6 +51,7 @@ export class ToolsService {
     // private featherTool: FeatherToolService,
     // private fillerTool: BucketFillToolService,
     // private sprayTool: SprayToolService,
+    private syncService: SyncDrawingService,
 
     private commandInvoker: CommandInvokerService,
   ) {
@@ -127,6 +129,7 @@ export class ToolsService {
       if (this.isPressed || tool.id === ToolIdConstants.LINE_ID) {
         const command: ICommand | void = tool.onRelease(event);
         if (command) {
+          command.actionId = this.syncService.activeActionId;
           this.commandInvoker.addCommand(command);
         }
       }

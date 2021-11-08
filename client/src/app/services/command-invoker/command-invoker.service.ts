@@ -1,3 +1,4 @@
+import { SyncDrawingService } from './../syncdrawing.service';
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { ICommand } from '../../interfaces/command.interface';
 import { DrawingService } from '../drawing/drawing.service';
@@ -18,6 +19,7 @@ export class CommandInvokerService {
   constructor(
     private selectionService: SelectionToolService,
     private drawingService: DrawingService,
+    private syncService: SyncDrawingService
   ) {
     this.drawingService.drawingEmit.subscribe(() => {
       this.clearCommandHistory();
@@ -61,8 +63,9 @@ export class CommandInvokerService {
       undoneCommand.undo();
       this.undonedCommandsList.push(undoneCommand);
       this.commandCallEmitter.emit('undo');
-    }
+      this.syncService.sendUndo(undoneCommand);
   }
+}
 
   /// Appelle la fonction redo de la commande sur le dessus de la pile et l'envoie
   /// a la liste de commande redo
@@ -73,6 +76,7 @@ export class CommandInvokerService {
       redoneCommand.execute();
       this.commandsList.push(redoneCommand);
       this.commandCallEmitter.emit('redo');
+      this.syncService.sendRedo(redoneCommand);
     }
   }
 }
