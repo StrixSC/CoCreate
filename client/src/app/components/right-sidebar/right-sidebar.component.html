@@ -1,0 +1,24 @@
+<div class="rightsidebar">
+  <div class="options">empty for now</div>
+  <div class="chatbox">
+    <mat-action-list>
+      <mat-list-item *ngFor="let channel of channels">
+        <!-- <a matLine href="...">{{ channel }}</a> -->
+        <button
+          id="create_button"
+          (click)="addDummyChannel()"
+          matBadge="1"
+          matBadgePosition="before"
+        >
+          {{ channel }}
+        </button>
+      </mat-list-item>
+    </mat-action-list>
+  </div>
+
+  <div class="grounded">
+    <button mat-raised-button id="create_button" (click)="addDummyChannel()">
+      Button
+    </button>
+  </div>
+</div>
