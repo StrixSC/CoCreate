@@ -1,4 +1,5 @@
 import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/models/tool.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,10 +24,10 @@ class _ToolbarState extends State<Toolbar> {
   String currentTool = '';
 
   final tools = [
-    Tool("line", CupertinoIcons.hand_draw_fill),
+    Tool(DrawingType.freedraw, CupertinoIcons.hand_draw_fill),
     Tool("select", CupertinoIcons.hand_raised_fill),
-    Tool("circle", CupertinoIcons.circle),
-    Tool("rect", CupertinoIcons.rectangle)
+    Tool(DrawingType.ellipse, CupertinoIcons.circle),
+    Tool(DrawingType.rectangle, CupertinoIcons.rectangle)
   ];
 
   _ToolbarState(this.changeTool, this.changeColor);

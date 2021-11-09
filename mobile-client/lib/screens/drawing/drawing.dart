@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:Colorimage/models/drawing.dart';
-import 'package:Colorimage/models/user.dart';
+import 'package:Colorimage/screens/drawing/toolbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:uuid/uuid.dart';
 
@@ -30,55 +30,149 @@ class _DrawingScreenState extends State<DrawingScreen> {
   final User _user;
   Map actionsMap = <String, Map<String, dynamic>>{};
   Map selectedItems = <String, String>{};
+  bool allowMove = false;
+  Offset? selectRef;
+  Color pickerColor = const Color(0xff443a49);
+  Color currentColor = const Color(0xff443a49);
 
   _DrawingScreenState(this._socket, this._user);
 
   @override
   void initState() {
     super.initState();
-    _socket.on('exception', (data) {
-      print(data);
-      print("");
-    });
-    _socket.on('action:saved', (data) {
-      _socket.emit("selection:emit", {
-        'actionId': data['actionId'],
-        'username': _user.username,
-        'userId': _user.id,
-        'collaborationId': "DEMO_COLLABORATION",
-        'actionType': "Select",
-        'isSelected': true,
-      });
-    });
-    _socket.on('freedraw:received', (data) {
+    socketException();
+    socketSaveConfirmation();
+    socketFreedrawReception();
+    socketShapeReception();
+    socketSelectionReception();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(50.0), // here the desired height
+          child: Toolbar(changeTool, changeColor)),
+      body: GestureDetector(
+        //todo: remove hardcode variable when merge with login page
+        onPanStart: (details) {
+          switch (drawType) {
+            case DrawingType.freedraw:
+              if (shapeID != null) {
+                socketSelectionEmission(lastShapeID!, false);
+              }
+              socketFreedrawEmission(details, DrawingState.down);
+              break;
+            case DrawingType.rectangle:
+              socketShapeEmission(
+                  details, DrawingType.rectangle, DrawingState.down);
+              break;
+            case DrawingType.ellipse:
+              socketShapeEmission(
+                  details, DrawingType.ellipse, DrawingState.down);
+              break;
+            case "select":
+              allowMove = false;
+              selectRef =
+                  Offset(details.localPosition.dx, details.localPosition.dy);
+              String? selectItem = getSelectedId(selectRef!);
+              if (selectedItems.containsValue(_user.uid)) {
+                selectedItems.forEach((oldActionId, userId) {
+                  if (userId == _user.uid && oldActionId != selectItem) {
+                    socketSelectionEmission(oldActionId, false);
+                  }
+                });
+              }
+              if (selectItem != null) {
+                socketSelectionEmission(selectItem, true);
+              }
+              break;
+          }
+        },
+        onPanUpdate: (details) {
+          switch (drawType) {
+            case DrawingType.freedraw:
+              //todo: need to add only if i'm the person the selected it
+              if (selectedItems.containsKey(lastShapeID)) {
+                socketSelectionEmission(lastShapeID!, false);
+              }
+              socketFreedrawEmission(details, DrawingState.move);
+              break;
+            case DrawingType.rectangle:
+              socketShapeEmission(
+                  details, DrawingType.rectangle, DrawingState.move);
+              break;
+            case DrawingType.ellipse:
+              socketShapeEmission(
+                  details, DrawingType.ellipse, DrawingState.move);
+              break;
+            case "select":
+              if (allowMove && selectedItems.containsValue(_user.uid)) {
+                selectedItems.forEach((actionId, userId) {
+                  if (userId == _user.uid) {
+                    // todo: finishing translation with this
+                    print((details.localPosition - selectRef!).dx);
+                    print((details.localPosition - selectRef!).dy);
+                  }
+                });
+              }
+              break;
+          }
+        },
+        onPanEnd: (details) {
+          switch (drawType) {
+            case DrawingType.freedraw:
+              lastShapeID = shapeID;
+              break;
+            case DrawingType.rectangle:
+              socketShapeEmission(
+                  details, DrawingType.rectangle, DrawingState.up);
+              lastShapeID = shapeID;
+              break;
+            case DrawingType.ellipse:
+              socketShapeEmission(
+                  details, DrawingType.ellipse, DrawingState.up);
+              lastShapeID = shapeID;
+              break;
+          }
+        },
+        child: Center(
+          child: CustomPaint(
+            painter: Painter(drawType, paintsMap, actionsMap, selectedItems),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void changeColor(Color color) {
+    setState(() => currentColor = color);
+  }
+
+  void changeTool(String type) {
+    print(type);
+    setState(() => drawType = type);
+  }
+
+  void socketSelectionReception() {
+    _socket.on('selection:received', (data) {
       setState(() {
-        if (data['state'] == DrawingState.down) {
-          Map map = <String, List<Offset>>{};
-          List<Offset> offsetList = <Offset>[];
-          offsetList.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-          map.putIfAbsent(DrawingType.freedraw, () => offsetList);
-          actionsMap.putIfAbsent(
-              data['actionId'], () => map as Map<String, List<Offset>>);
-          final paint = Paint()
-            ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
-                data['g'] as int, data['b'] as int)
-            ..isAntiAlias = true
-            ..strokeWidth = 6.0
-            ..style = PaintingStyle.stroke;
-          paintsMap.putIfAbsent(data['actionId'], () => paint);
-        } else if (data['state'] == DrawingState.move) {
-          actionsMap.forEach((actionId, actionMap) {
-            if (actionId == data['actionId']) {
-              actionMap[DrawingType.freedraw]
-                  .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-              actionsMap.update(data['actionId'],
-                  (value) => actionMap as Map<String, List<Offset>>);
-            }
-          });
+        if (data['isSelected']) {
+          selectedItems.putIfAbsent(
+              data['actionId'], () => data['selectedBy'] as String);
+          allowMove = true;
+        } else {
+          selectedItems.remove(data['actionId']);
         }
       });
     });
+  }
 
+  void socketShapeReception() {
     _socket.on('shape:received', (data) {
       setState(() {
         if (data['state'] == DrawingState.down) {
@@ -118,291 +212,113 @@ class _DrawingScreenState extends State<DrawingScreen> {
         }
       });
     });
-    _socket.on('selection:received', (data) {
+  }
+
+  void socketFreedrawReception() {
+    _socket.on('freedraw:received', (data) {
       setState(() {
-        if (data['isSelected']) {
-          selectedItems.putIfAbsent(
-              data['actionId'], () => data['selectedBy'] as String);
-        } else {
-          selectedItems.remove(data['actionId']);
+        if (data['state'] == DrawingState.down) {
+          Map map = <String, List<Offset>>{};
+          List<Offset> offsetList = <Offset>[];
+          offsetList.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+          map.putIfAbsent(DrawingType.freedraw, () => offsetList);
+          actionsMap.putIfAbsent(
+              data['actionId'], () => map as Map<String, List<Offset>>);
+          final paint = Paint()
+            ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
+                data['g'] as int, data['b'] as int)
+            ..isAntiAlias = true
+            ..strokeWidth = 6.0
+            ..style = PaintingStyle.stroke;
+          paintsMap.putIfAbsent(data['actionId'], () => paint);
+        } else if (data['state'] == DrawingState.move) {
+          actionsMap.forEach((actionId, actionMap) {
+            if (actionId == data['actionId']) {
+              actionMap[DrawingType.freedraw]
+                  .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+              actionsMap.update(data['actionId'],
+                  (value) => actionMap as Map<String, List<Offset>>);
+            }
+          });
         }
       });
     });
   }
 
-  // create some values
-  Color pickerColor = const Color(0xff443a49);
-  Color currentColor = const Color(0xff443a49);
-
-// ValueChanged<Color> callback
-  void changeColor(Color color) {
-    setState(() => currentColor = color);
+  void socketSaveConfirmation() {
+    _socket.on('action:saved', (data) {
+      _socket.emit("selection:emit", {
+        'actionId': data['actionId'],
+        'username': _user.displayName,
+        'userId': _user.uid,
+        'collaborationId': "DEMO_COLLABORATION",
+        'actionType': "Select",
+        'isSelected': true,
+      });
+    });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: RaisedButton(
-              elevation: 3.0,
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Select a color'),
-                      content: SingleChildScrollView(
-                        child: BlockPicker(
-                          pickerColor: currentColor,
-                          onColorChanged: changeColor,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-              child: const Text('Colors'),
-              color: currentColor,
-              textColor: useWhiteForeground(currentColor)
-                  ? const Color(0xffffffff)
-                  : const Color(0xff000000),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: () {
-                drawType = DrawingType.freedraw;
-              },
-              child: const Icon(
-                CupertinoIcons.hand_draw_fill,
-                size: 26.0,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: () {
-                drawType = "select";
-              },
-              child: const Icon(
-                CupertinoIcons.hand_raised_fill,
-                size: 26.0,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: () {
-                drawType = DrawingType.ellipse;
-              },
-              child: const Icon(
-                CupertinoIcons.circle,
-                size: 26.0,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: () {
-                drawType = DrawingType.rectangle;
-              },
-              child: const Icon(
-                CupertinoIcons.rectangle,
-                size: 26.0,
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: GestureDetector(
-        //todo: remove hardcode variable when merge with login page
-        onPanStart: (details) {
-          switch (drawType) {
-            case DrawingType.freedraw:
-              if (shapeID != null) {
-                _socket.emit("selection:emit", {
-                  'actionId': lastShapeID,
-                  'username': _user.username,
-                  'userId': _user.id,
-                  'collaborationId': "DEMO_COLLABORATION",
-                  'actionType': "Select",
-                  'isSelected': "false",
-                });
-              }
-              _socket.emit("freedraw:emit", {
-                'x': details.localPosition.dx.toInt(),
-                'y': details.localPosition.dy.toInt(),
-                'collaborationId': "DEMO_COLLABORATION",
-                'username': _user.username,
-                'userId': _user.id,
-                'actionType': "Freedraw",
-                'state': DrawingState.down,
-                'a': currentColor.alpha,
-                'r': currentColor.red,
-                'g': currentColor.green,
-                'b': currentColor.blue,
-                'width': 3,
-                'isSelected': true,
-                'actionId': shapeID = const Uuid().v1()
-              });
-              break;
-            case DrawingType.rectangle:
-              _socket.emit("shape:emit", {
-                'x': details.localPosition.dx,
-                'y': details.localPosition.dy,
-                'collaborationId': "DEMO_COLLABORATION",
-                'state': DrawingState.down,
-                'color': currentColor.value,
-                'actionId': shapeID = const Uuid().v1(),
-                // todo: add fill button
-                'isFilled': false,
-                'shapeType': DrawingType.rectangle
-              });
-              break;
-            case DrawingType.ellipse:
-              _socket.emit("shape:emit", {
-                'x': details.localPosition.dx,
-                'y': details.localPosition.dy,
-                'collaborationId': "DEMO_COLLABORATION",
-                'state': DrawingState.down,
-                'color': currentColor.value,
-                'actionId': shapeID = const Uuid().v1(),
-                // todo: add fill button
-                'isFilled': false,
-                'shapeType': DrawingType.ellipse
-              });
-              break;
-            case "select":
-              String? selectItem = getSelectedId(
-                  Offset(details.localPosition.dx, details.localPosition.dy));
-              if (selectItem != null) {
-                _socket.emit("selection:emit", {
-                  'actionId': selectItem,
-                  'username': _user.username,
-                  'userId': _user.id,
-                  'collaborationId': "DEMO_COLLABORATION",
-                  'actionType': "Select",
-                  'isSelected': true,
-                });
-              }
-              break;
-          }
-        },
-        onPanUpdate: (details) {
-          switch (drawType) {
-            case DrawingType.freedraw:
-              //todo: only if i'm the person the selected it
-              if(selectedItems.containsKey(lastShapeID)){
-                _socket.emit("selection:emit", {
-                  'actionId': lastShapeID,
-                  'username': _user.username,
-                  'userId': _user.id,
-                  'collaborationId': "DEMO_COLLABORATION",
-                  'actionType': "Select",
-                  'isSelected': "false",
-                });
-              }
-              _socket.emit("freedraw:emit", {
-                'x': details.localPosition.dx.toInt(),
-                'y': details.localPosition.dy.toInt(),
-                'collaborationId': "DEMO_COLLABORATION",
-                'username': _user.username,
-                'userId': _user.id,
-                'actionType': "Freedraw",
-                'state': DrawingState.move,
-                'a': currentColor.alpha,
-                'r': currentColor.red,
-                'g': currentColor.green,
-                'b': currentColor.blue,
-                'width': 3,
-                'isSelected': true,
-                'actionId': shapeID,
-              });
-              break;
-            case DrawingType.rectangle:
-              _socket.emit("shape:emit", {
-                'x': details.localPosition.dx,
-                'y': details.localPosition.dy,
-                'state': DrawingState.move,
-                'actionId': shapeID,
-                'shapeType': DrawingType.rectangle
-              });
-              break;
-            case DrawingType.ellipse:
-              _socket.emit("shape:emit", {
-                'x': details.localPosition.dx,
-                'y': details.localPosition.dy,
-                'state': DrawingState.move,
-                'actionId': shapeID,
-                'shapeType': DrawingType.ellipse
-              });
-              break;
-          }
-        },
-        onPanEnd: (details) {
-          switch (drawType) {
-            case DrawingType.freedraw:
-              _socket.emit("freedraw:emit", {
-                'x': endPoint.dx.toInt(),
-                'y': endPoint.dy.toInt(),
-                'collaborationId': "DEMO_COLLABORATION",
-                'username': _user.username,
-                'userId': _user.id,
-                'actionType': "Freedraw",
-                'state': DrawingState.up,
-                'a': currentColor.alpha,
-                'r': currentColor.red,
-                'g': currentColor.green,
-                'b': currentColor.blue,
-                'width': 3,
-                'isSelected': "false",
-                'actionId': shapeID,
-                'offsets': json
-                    .encode(test(actionsMap[shapeID][DrawingType.freedraw])),
-              });
-              lastShapeID = shapeID;
-              break;
-            case DrawingType.rectangle:
-              _socket.emit("shape:emit", {
-                'x': endPoint.dx,
-                'y': endPoint.dy,
-                'state': DrawingState.up,
-                'actionId': shapeID,
-                'shapeType': DrawingType.rectangle
-              });
-              break;
-            case DrawingType.ellipse:
-              _socket.emit("shape:emit", {
-                'x': endPoint.dx,
-                'y': endPoint.dy,
-                'state': DrawingState.up,
-                'actionId': shapeID,
-                'shapeType': DrawingType.ellipse
-              });
-              break;
-          }
-        },
-        child: Center(
-          child: CustomPaint(
-            painter: Painter(drawType, paintsMap, actionsMap, selectedItems),
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-            ),
-          ),
-        ),
-      ),
-    );
+  void socketException() {
+    _socket.on('exception', (data) {
+      print(data);
+      print("");
+    });
   }
 
-  List<dynamic> test(List<Offset> offsetList) {
+  void socketSelectionEmission(String selectItem, bool isSelected) {
+    _socket.emit("selection:emit", {
+      'actionId': selectItem,
+      'username': _user.displayName,
+      'userId': _user.uid,
+      'collaborationId': "DEMO_COLLABORATION",
+      'actionType': "Select",
+      'isSelected': isSelected,
+    });
+  }
+
+  void socketShapeEmission(
+      var details, String drawingType, String drawingState) {
+    _socket.emit("shape:emit", {
+      'x': (drawingState == DrawingState.up)
+          ? details.localPosition.dx
+          : endPoint.dx,
+      'y': (drawingState == DrawingState.up)
+          ? details.localPosition.dx
+          : endPoint.dy,
+      'collaborationId': "DEMO_COLLABORATION",
+      'state': drawingState,
+      'color': currentColor.value,
+      'actionId': (drawingState == DrawingState.down)
+          ? shapeID = const Uuid().v1()
+          : shapeID,
+      // todo: add fill button
+      'isFilled': false,
+      'shapeType': drawingType
+    });
+  }
+
+  void socketFreedrawEmission(var details, String drawingState) {
+    _socket.emit("freedraw:emit", {
+      'x': details.localPosition.dx.toInt(),
+      'y': details.localPosition.dy.toInt(),
+      'collaborationId': "DEMO_COLLABORATION",
+      'username': _user.displayName,
+      'userId': _user.uid,
+      'actionType': "Freedraw",
+      'state': drawingState,
+      'a': currentColor.alpha,
+      'r': currentColor.red,
+      'g': currentColor.green,
+      'b': currentColor.blue,
+      'width': 3,
+      'isSelected': true,
+      'actionId': (drawingState == DrawingState.down)
+          ? shapeID = const Uuid().v1()
+          : shapeID
+    });
+  }
+
+  List<dynamic> convertOffsetToCoords(List<Offset> offsetList) {
     var coords = [];
     for (var offset in offsetList) {
       coords.add({'x': offset.dx, 'y': offset.dy});
@@ -581,286 +497,3 @@ class Painter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
-// import 'package:flutter/cupertino.dart' show CupertinoTextField;
-// import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
-//
-// import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-//
-// class DrawingScreen extends StatefulWidget {
-//   @override
-//   State<StatefulWidget> createState() => _DrawingScreen();
-// }
-//
-// class _DrawingScreen extends State<DrawingScreen> {
-//   bool lightTheme = true;
-//   Color currentColor = Colors.limeAccent;
-//   List<Color> currentColors = [Colors.limeAccent, Colors.green];
-//
-//   void changeColor(Color color) => setState(() => currentColor = color);
-//   void changeColors(List<Color> colors) =>
-//       setState(() => currentColors = colors);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Theme(
-//       data: lightTheme ? ThemeData.light() : ThemeData.dark(),
-//       child: DefaultTabController(
-//         length: 3,
-//         child: Scaffold(
-//           appBar: AppBar(
-//             title: GestureDetector(
-//               child: Text('Flutter Color Picker Example'),
-//               onDoubleTap: () => setState(() => lightTheme = !lightTheme),
-//             ),
-//             bottom: TabBar(
-//               tabs: <Widget>[
-//                 const Tab(text: 'HSV'),
-//                 const Tab(text: 'Material'),
-//                 const Tab(text: 'Block'),
-//               ],
-//             ),
-//           ),
-//           body: TabBarView(
-//             physics: const NeverScrollableScrollPhysics(),
-//             children: <Widget>[
-//               Column(
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 children: <Widget>[
-//                   RaisedButton(
-//                     elevation: 3.0,
-//                     onPressed: () {
-//                       showDialog(
-//                         context: context,
-//                         builder: (BuildContext context) {
-//                           return AlertDialog(
-//                             titlePadding: const EdgeInsets.all(0.0),
-//                             contentPadding: const EdgeInsets.all(0.0),
-//                             content: SingleChildScrollView(
-//                               child: ColorPicker(
-//                                 pickerColor: currentColor,
-//                                 onColorChanged: changeColor,
-//                                 colorPickerWidth: 300.0,
-//                                 pickerAreaHeightPercent: 0.7,
-//                                 enableAlpha: true,
-//                                 displayThumbColor: true,
-//                                 showLabel: true,
-//                                 paletteType: PaletteType.hsv,
-//                                 pickerAreaBorderRadius: const BorderRadius.only(
-//                                   topLeft: const Radius.circular(2.0),
-//                                   topRight: const Radius.circular(2.0),
-//                                 ),
-//                               ),
-//                             ),
-//                           );
-//                         },
-//                       );
-//                     },
-//                     child: const Text('Change me'),
-//                     color: currentColor,
-//                     textColor: useWhiteForeground(currentColor)
-//                         ? const Color(0xffffffff)
-//                         : const Color(0xff000000),
-//                   ),
-//                   RaisedButton(
-//                     elevation: 3.0,
-//                     onPressed: () {
-//                       showDialog(
-//                         context: context,
-//                         builder: (BuildContext context) {
-//                           return AlertDialog(
-//                             titlePadding: const EdgeInsets.all(0.0),
-//                             contentPadding: const EdgeInsets.all(0.0),
-//                             shape: RoundedRectangleBorder(
-//                               borderRadius: BorderRadius.circular(25.0),
-//                             ),
-//                             content: SingleChildScrollView(
-//                               child: SlidePicker(
-//                                 pickerColor: currentColor,
-//                                 onColorChanged: changeColor,
-//                                 paletteType: PaletteType.rgb,
-//                                 enableAlpha: false,
-//                                 displayThumbColor: true,
-//                                 showLabel: false,
-//                                 showIndicator: true,
-//                                 indicatorBorderRadius:
-//                                     const BorderRadius.vertical(
-//                                   top: const Radius.circular(25.0),
-//                                 ),
-//                               ),
-//                             ),
-//                           );
-//                         },
-//                       );
-//                     },
-//                     child: const Text('Change me again'),
-//                     color: currentColor,
-//                     textColor: useWhiteForeground(currentColor)
-//                         ? const Color(0xffffffff)
-//                         : const Color(0xff000000),
-//                   ),
-//                   MaterialButton(
-//                     elevation: 3.0,
-//                     onPressed: () {
-//                       // The initial value can be provided directly to the controller.
-//                       final textController =
-//                           TextEditingController(text: '#2F19DB');
-//                       showDialog(
-//                         context: context,
-//                         builder: (BuildContext context) {
-//                           return AlertDialog(
-//                             scrollable: true,
-//                             titlePadding: const EdgeInsets.all(0.0),
-//                             contentPadding: const EdgeInsets.all(0.0),
-//                             content: Column(
-//                               children: [
-//                                 ColorPicker(
-//                                   pickerColor: currentColor,
-//                                   onColorChanged: changeColor,
-//                                   colorPickerWidth: 300.0,
-//                                   pickerAreaHeightPercent: 0.7,
-//                                   enableAlpha:
-//                                       true, // hexInputController will respect it too.
-//                                   displayThumbColor: true,
-//                                   showLabel: true,
-//                                   paletteType: PaletteType.hsv,
-//                                   pickerAreaBorderRadius:
-//                                       const BorderRadius.only(
-//                                     topLeft: const Radius.circular(2.0),
-//                                     topRight: const Radius.circular(2.0),
-//                                   ),
-//                                   hexInputController: textController, // <- here
-//                                   portraitOnly: true,
-//                                 ),
-//                                 Padding(
-//                                   padding: const EdgeInsets.all(16),
-//                                   /* It can be any text field, for example:
-//
-//                                   * TextField
-//                                   * TextFormField
-//                                   * CupertinoTextField
-//                                   * EditableText
-//                                   * any text field from 3-rd party package
-//                                   * your own text field
-//
-//                                   so basically anything that supports/uses
-//                                   a TextEditingController for an editable text.
-//                                   */
-//                                   child: CupertinoTextField(
-//                                     controller: textController,
-//                                     // Everything below is purely optional.
-//                                     prefix: Padding(
-//                                       padding: const EdgeInsets.only(left: 8),
-//                                       child: const Icon(Icons.tag),
-//                                     ),
-//                                   ),
-//                                 )
-//                               ],
-//                             ),
-//                           );
-//                         },
-//                       );
-//                     },
-//                     child: const Text('Change me via text input'),
-//                     color: currentColor,
-//                     textColor: useWhiteForeground(currentColor)
-//                         ? const Color(0xffffffff)
-//                         : const Color(0xff000000),
-//                   ),
-//                 ],
-//               ),
-//               Center(
-//                 child: RaisedButton(
-//                   elevation: 3.0,
-//                   onPressed: () {
-//                     showDialog(
-//                       context: context,
-//                       builder: (BuildContext context) {
-//                         return AlertDialog(
-//                           titlePadding: const EdgeInsets.all(0.0),
-//                           contentPadding: const EdgeInsets.all(0.0),
-//                           content: SingleChildScrollView(
-//                             child: MaterialPicker(
-//                               pickerColor: currentColor,
-//                               onColorChanged: changeColor,
-//                               enableLabel: true,
-//                             ),
-//                           ),
-//                         );
-//                       },
-//                     );
-//                   },
-//                   child: const Text('Change me'),
-//                   color: currentColor,
-//                   textColor: useWhiteForeground(currentColor)
-//                       ? const Color(0xffffffff)
-//                       : const Color(0xff000000),
-//                 ),
-//               ),
-//               Center(
-//                 child: Column(
-//                     mainAxisAlignment: MainAxisAlignment.center,
-//                     children: <Widget>[
-//                       RaisedButton(
-//                         elevation: 3.0,
-//                         onPressed: () {
-//                           showDialog(
-//                             context: context,
-//                             builder: (BuildContext context) {
-//                               return AlertDialog(
-//                                 title: Text('Select a color'),
-//                                 content: SingleChildScrollView(
-//                                   child: BlockPicker(
-//                                     pickerColor: currentColor,
-//                                     onColorChanged: changeColor,
-//                                   ),
-//                                 ),
-//                               );
-//                             },
-//                           );
-//                         },
-//                         child: const Text('Change me'),
-//                         color: currentColor,
-//                         textColor: useWhiteForeground(currentColor)
-//                             ? const Color(0xffffffff)
-//                             : const Color(0xff000000),
-//                       ),
-//                       RaisedButton(
-//                         elevation: 3.0,
-//                         onPressed: () {
-//                           showDialog(
-//                             context: context,
-//                             builder: (BuildContext context) {
-//                               return AlertDialog(
-//                                 title: Text('Select colors'),
-//                                 content: SingleChildScrollView(
-//                                   child: MultipleChoiceBlockPicker(
-//                                     pickerColors: currentColors,
-//                                     onColorsChanged: changeColors,
-//                                   ),
-//                                 ),
-//                               );
-//                             },
-//                           );
-//                         },
-//                         child: const Text('Change me again'),
-//                         color: currentColor,
-//                         textColor: useWhiteForeground(currentColor)
-//                             ? const Color(0xffffffff)
-//                             : const Color(0xff000000),
-//                       )
-//                     ]),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-//
-// class UpperCaseTextFormatter extends TextInputFormatter {
-//   @override
-//   TextEditingValue formatEditUpdate(_, TextEditingValue nv) =>
-//       TextEditingValue(text: nv.text.toUpperCase(), selection: nv.selection);
-// }

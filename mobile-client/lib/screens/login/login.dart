@@ -14,10 +14,7 @@ Color primaryColor =
     Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
 
 class Login extends StatefulWidget {
-  const Login({Key? key})
-      : super(
-          key: key,
-        );
+  const Login({Key? key}) : super(key: key);
 
   @override
   _LoginState createState() => _LoginState();
@@ -44,7 +41,9 @@ class _LoginState extends State<Login> {
   Future<void> login(email, password) async {
     try {
       userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+          // .signInWithEmailAndPassword(email: email, password: password);
+          .signInWithEmailAndPassword(
+              email: "demo@demo.com", password: "demo123");
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = e.message!;
@@ -68,8 +67,11 @@ class _LoginState extends State<Login> {
       context.read<Messenger>().fetchAllChannels();
 
       // Home Page
-      Navigator.pushNamed(context, homeRoute);
-      // Navigator.pushNamed(context, drawingRoute, arguments: {'socket': context.read<Messenger>().channelSocket.socket});
+      // Navigator.pushNamed(context, homeRoute);
+      Navigator.pushNamed(context, drawingRoute, arguments: {
+        'socket': context.read<Messenger>().channelSocket.socket,
+        'user': userCredential.user
+      });
 
       print(userCredential.user);
     } else {
