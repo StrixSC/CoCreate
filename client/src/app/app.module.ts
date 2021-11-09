@@ -5,7 +5,7 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFireAuthGuardModule } from '@angular/fire/auth-guard';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBarContainer } from '@angular/material';
+import { MatPaginatorIntl, MatSnackBarContainer } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -122,6 +122,7 @@ import { DrawingGalleryCardComponent } from './components/drawing-gallery-card/d
     FileReader,
     SocketService,
     { provide: HTTP_INTERCEPTORS, useClass: StdHttpInterceptor, multi: true },
+    MatPaginatorIntl
   ],
   bootstrap: [AppComponent],
 })

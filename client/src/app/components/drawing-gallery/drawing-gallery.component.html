@@ -1,61 +1,80 @@
-<div class="banner">Galerie de dessin</div>
-<div class="main-container" >
-    <form>
-        <div class="search-bar-container">
-            <input class="primary-input icon-search" placeholder="Recherche" type="text" >
-            <button></button>
+<p>
+    <mat-toolbar color="primary">
+      <span>Galerie de dessins</span>
+    </mat-toolbar>
+  </p>
+    <mat-tab-group dynamicHeight style =" overflow: visible;">
+        <mat-tab class="drawing-list" label="Dessins privés">
+            <br>
+            <div  style="text-align: center;">             
+                    <mat-form-field [style.width.%]="50" appearance="outline">
+                      <mat-label>Recherche</mat-label>
+                      <input matInput placeholder="Entrez un mot-clé">
+                      <button mat-button matPrefix mat-icon-button>
+                        <mat-icon>search</mat-icon>
+                      </button>
+                      <mat-hint>Le mot-clé doit être un attribut de l’image</mat-hint>
+                    </mat-form-field>
+
+                
+            <mat-paginator [length]="numPages" [pageSize]="3" [pageIndex]="pageIndex">
+            </mat-paginator>
+            <div class="drawing-list">
+                <div>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                </div>
+            </div>
         </div>
-    </form>
-    <hr>
-    <div>
-        <button (click)="createDrawing()" class="plus-button" > Nouveau dessin</button>
-    </div>
-    <div>
-        <div class="title">
-            Dessins privés
+        </mat-tab>
+        
+        <mat-tab label="Dessins publiques">
+            <br>
+            <div  style="text-align: center;">             
+                    <mat-form-field [style.width.%]="50" appearance="outline">
+                      <mat-label>Recherche</mat-label>
+                      <input matInput placeholder="Entrez un mot-clé">
+                      <button mat-button matPrefix mat-icon-button>
+                        <mat-icon>search</mat-icon>
+                      </button>
+                      <mat-hint>Le mot-clé doit être un attribut de l’image</mat-hint>
+                    </mat-form-field>
+
+                
+            <mat-paginator [length]="numPages" [pageSize]="3" [pageIndex]="pageIndex">
+            </mat-paginator>
+            <div class="drawing-list">
+                <div>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                </div>
+            </div>
         </div>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-    </div>
-    <div>
-        <div class="title">
-            Dessins publiques
-        </div>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-    </div>
-    <div>
-        <div class="title">
-            Dessins protégés
-        </div>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-        <app-drawing-gallery-card></app-drawing-gallery-card>
-    </div>
-</div> 
+        </mat-tab>
+        <mat-tab label="Nouveau dessin">
+            <div style="grid-column: 1;
+                grid-row: 1;">
+            </div>
+            <div class="drawing-list">
+                <div>
+                        <app-drawing-gallery-card></app-drawing-gallery-card>
+                </div>
+            </div>
+        </mat-tab>
+    </mat-tab-group>

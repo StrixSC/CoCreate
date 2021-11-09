@@ -1,6 +1,29 @@
 .drawing-card {
-  max-width: 300px;
+  max-width: 200px;
   display:inline-block;
   margin: 10px;
   align-items: center;
+}
+
+.drawing-card:hover .image-preview{
+  opacity: 0.4;
+  transition: .5s ease;
+  filter: alpha(opacity=40);
+  background-color: #000;
+}
+
+.btn {
+  
+  transition: .5s ease;
+  opacity: 0;
+  position: absolute;
+  top: 29%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.drawing-card:hover .btn {
+  opacity: 1;
 }
