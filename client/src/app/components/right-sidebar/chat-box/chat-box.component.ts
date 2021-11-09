@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { ThemePalette } from "@angular/material/core";
+import { NgForm } from "@angular/forms";
 
 export interface Messages {
   text: string;
@@ -44,7 +45,7 @@ export class ChatBoxComponent implements OnInit {
   ];
 
   chatBoxCSS: any = {};
-
+  currentText: string;
   isChatOpen = true;
 
   constructor() {
@@ -52,16 +53,19 @@ export class ChatBoxComponent implements OnInit {
   }
 
   sendMessage() {
-    this.socketConversation.push({
-      text: "In some scenarios",
-      color: "warn",
-      isMe: true,
-      style: {
-        height: "50px",
-        width: "100px",
-        right: "1",
-      },
-    });
+    if (this.currentText.length > 0) {
+      this.socketConversation.push({
+        text: this.currentText,
+        color: "warn",
+        isMe: true,
+        style: {
+          height: "50px",
+          width: "100px",
+          right: "1",
+        },
+      });
+      this.currentText = "";
+    }
   }
 
   ngOnInit() {}

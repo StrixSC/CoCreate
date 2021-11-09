@@ -1,5 +1,4 @@
 <div [ngStyle]="chatBoxCSS">
-  <!-- class="open-box" -->
   <div class="top-open-box">
     <mat-grid-list cols="2" rowHeight="2:0.5">
       <mat-grid-tile><p>Channel 3</p></mat-grid-tile>
@@ -36,7 +35,13 @@
     </mat-chip-list>
   </div>
   <div style="margin-left: 5px; height: 15%; background-color: #fafafa">
-    <input placeholder="Aa" class="text-input" type="text" />
+    <input
+      placeholder="Aa"
+      class="text-input"
+      type="text"
+      [(ngModel)]="currentText"
+      (keyup.enter)="sendMessage()"
+    />
     <button mat-icon-button (click)="sendMessage()">
       <mat-icon>send</mat-icon>
     </button>
