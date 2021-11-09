@@ -9,6 +9,7 @@
   border-top-left-radius: 5%;
   border-top-right-radius: 5%;
   border-bottom-left-radius: 5%;
+  overflow: hidden;
 }
 
 .closed-box {
@@ -23,6 +24,38 @@
 
 .top-open-box {
   width: 100%;
+  margin: auto;
   background-color: hotpink;
+  // border-radius: 10%;
   font-size: 28px;
+}
+
+.text-input {
+  width: 320px;
+  height: 40px;
+}
+
+input {
+  position: relative;
+  display: inline-block;
+  font-size: 20px;
+  box-sizing: border-box;
+  transition: 0.5s;
+}
+
+input[type="text"] {
+  background-color: #fff;
+  width: 350px;
+  height: 50px;
+  outline: none;
+  border-color: hotpink;
+  padding: 0 25px;
+  border-radius: 3px 15px 3px 15px;
+}
+
+.conversation {
+  overflow: auto;
+  overflow-x: hidden;
+  margin-left: 5px;
+  margin-right: 5px;
 }

@@ -1,15 +1,44 @@
-<div class="open-box">
+<div [ngStyle]="chatBoxCSS">
+  <!-- class="open-box" -->
   <div class="top-open-box">
-    <p style="margin-top: 0; margin-left: 10px">Channel 3</p>
-    <button mat-icon-button>
-      <mat-icon>minimize</mat-icon>
-    </button>
-    <button mat-icon-button>
-      <mat-icon>open_in_new</mat-icon>
-    </button>
-    <button mat-icon-button>
-      <mat-icon>close</mat-icon>
+    <mat-grid-list cols="2" rowHeight="2:0.5">
+      <mat-grid-tile><p>Channel 3</p></mat-grid-tile>
+      <mat-grid-tile>
+        <button
+          mat-icon-button
+          style="margin-left: 50px"
+          (click)="isChatOpen ? minimiseChatBox() : openChatBox()"
+        >
+          <mat-icon *ngIf="isChatOpen">minimize</mat-icon>
+          <mat-icon *ngIf="isChatOpen === false">maximize</mat-icon>
+        </button>
+        <button mat-icon-button>
+          <mat-icon>open_in_new</mat-icon>
+        </button>
+        <button mat-icon-button>
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </div>
+  <mat-divider></mat-divider>
+
+  <div style="height: 77%" class="conversation">
+    <mat-chip-list style="cursor: none" class="mat-chip-list-stacked">
+      <mat-chip
+        *ngFor="let message of socketConversation"
+        selected
+        [color]="message.color"
+        [ngStyle]="message.style"
+      >
+        {{ message.text }}
+      </mat-chip>
+    </mat-chip-list>
+  </div>
+  <div style="margin-left: 5px; height: 15%; background-color: #fafafa">
+    <input placeholder="Aa" class="text-input" type="text" />
+    <button mat-icon-button (click)="sendMessage()">
+      <mat-icon>send</mat-icon>
     </button>
   </div>
-  <div>body</div>
 </div>
