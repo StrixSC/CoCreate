@@ -1,0 +1,28 @@
+.open-box {
+  width: 400px;
+  height: 450px;
+  background-color: rgb(247, 247, 247);
+  position: fixed;
+  bottom: 0;
+  right: 300px;
+  border: 2px solid black;
+  border-top-left-radius: 5%;
+  border-top-right-radius: 5%;
+  border-bottom-left-radius: 5%;
+}
+
+.closed-box {
+  width: 350px;
+  height: 40px;
+  background-color: rgb(247, 247, 247);
+  position: fixed;
+  bottom: 0;
+  right: 300px;
+  border: 2px solid black;
+}
+
+.top-open-box {
+  width: 100%;
+  background-color: hotpink;
+  font-size: 28px;
+}

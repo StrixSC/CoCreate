@@ -3,15 +3,16 @@
   <div class="chatbox">
     <mat-action-list>
       <mat-list-item *ngFor="let channel of channels">
-        <!-- <a matLine href="...">{{ channel }}</a> -->
         <button
           id="create_button"
           (click)="addDummyChannel()"
           matBadge="1"
           matBadgePosition="before"
+          matBadgeColor="warn"
         >
           {{ channel }}
         </button>
+        <mat-divider></mat-divider>
       </mat-list-item>
     </mat-action-list>
   </div>

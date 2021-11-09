@@ -46,6 +46,7 @@ import { WorkspaceComponent } from "./components/workspace/workspace.component";
 import { StdHttpInterceptor } from "./http/stdhttp.interceptor";
 import { SocketService } from "./services/chat/socket.service";
 import { RightSidebarComponent } from "./components/right-sidebar/right-sidebar.component";
+import { ChatBoxComponent } from "./components/right-sidebar/chat-box/chat-box.component";
 
 @NgModule({
   declarations: [
@@ -78,6 +79,7 @@ import { RightSidebarComponent } from "./components/right-sidebar/right-sidebar.
     UserProfileComponent,
     ChangePasswordComponent,
     RightSidebarComponent,
+    ChatBoxComponent,
   ],
   imports: [
     BrowserModule,
