@@ -1,16 +1,12 @@
-import { Point } from 'src/app/model/point.model';
-import { IAction } from './../../model/action.model';
-import { ToolFactoryService } from './../../services/synchronization/tool-factory.service';
-import { SyncDrawingService } from './../../services/synchronization/syncdrawing.service';
+import { SyncDrawingService } from '../../services/syncdrawing.service';
 import { switchMap, take } from "rxjs/operators";
 import { Component, OnDestroy } from "@angular/core";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
-import { merge, Subscription, BehaviorSubject, of, EMPTY } from "rxjs";
+import { merge, Subscription, of, EMPTY } from "rxjs";
 import { HotkeysService } from "src/app/services/hotkeys/hotkeys.service";
 import { NewDrawingComponent } from "../new-drawing/new-drawing.component";
 import { WelcomeDialogComponent } from "../welcome-dialog/welcome-dialog/welcome-dialog.component";
 import { SocketService } from "./../../services/chat/socket.service";
-import { ActionType } from 'src/app/model/IAction.model';
 
 @Component({
   selector: "app-drawing-page",
@@ -28,7 +24,6 @@ export class DrawingPageComponent implements OnDestroy {
     public dialog: MatDialog,
     private hotkeyService: HotkeysService,
     private socketService: SocketService,
-    private toolFactory: ToolFactoryService,
   ) {
     this.hotkeyService.hotkeysListener();
   }
@@ -58,33 +53,20 @@ export class DrawingPageComponent implements OnDestroy {
         switchMap((ready: boolean) => {
           if (ready) {
             return merge(
-              this.socketService.on('freedraw:received'),
-              this.socketService.on('shape:received'),
-              this.socketService.on('selection:received')
+              this.syncDrawingService.onFreedraw(),
+              this.syncDrawingService.onSelection(),
+              this.syncDrawingService.onShape(),
+              this.syncDrawingService.onUndoRedo()
             )
           } else {
             return of(EMPTY);
           }
         })
-      ).subscribe((data) => {
-        this.syncDrawingService.handleResponse(data);
+      ).subscribe((data: any) => {
+        if(data && data.userId !== this.syncDrawingService.defaultPayload!.userId) {
+          this.syncDrawingService.handleResponse(data);
+        }
       })
-  }
-
-  ngAfterViewInit(): void {
-    const command = this.toolFactory.create({
-      a: 1,
-      r: 0,
-      g: 0,
-      b: 0,
-      x: 0,
-      y: 0,
-      width: 3,
-      actionType: ActionType.Freedraw,
-      isSelected: true,
-      offsets: [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 3 }, { x: 4, y: 4 }, { x: 5, y: 5 }, { x: 6, y: 6 }, { x: 7, y: 8 }] as Point[],
-    } as IAction);
-    command.execute();
   }
 
   openDialog() {

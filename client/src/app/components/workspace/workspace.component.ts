@@ -25,6 +25,7 @@ export class WorkspaceComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.workspaceService.scrolledElement = this.workspaceEnv;
+
   }
 
   /// Effectue un onPress sur le clique droit de la sourie
