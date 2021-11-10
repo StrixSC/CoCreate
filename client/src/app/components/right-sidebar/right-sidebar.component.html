@@ -11,25 +11,18 @@
   </div>
 
   <div class="chatbox">
-    <mat-grid-list cols="2" rowHeight="2:1">
-      <mat-grid-tile>
-        <button
-          matTooltip="Add new channel"
-          matTooltipPosition="left"
-          class="add_button"
-        >
-          <mat-icon style="color: rgb(214, 210, 210)">add</mat-icon>
-        </button>
-      </mat-grid-tile>
-      <mat-grid-tile>
-        <p class="channelHeaders">Channels</p>
-      </mat-grid-tile>
-    </mat-grid-list>
-    <div class="channel_box" *ngFor="let channel of textChannels">
-      <p class="channels">
-        {{ channel }}
-      </p>
-    </div>
+    <mat-action-list>
+      <p class="channelHeaders">Channels</p>
+
+      <div
+        class="channel_box"
+        *ngFor="let channel of textChannels | keyvalue"
+        (click)="addDummyChannel(channel.key)"
+      >
+        <p class="channels" [ngStyle]="channel.value.style">
+          {{ channel.value.name }}
+        </p>
+      </div>
+    </mat-action-list>
   </div>
-  <!-- background-color: #2f3136; -->
 </div>
