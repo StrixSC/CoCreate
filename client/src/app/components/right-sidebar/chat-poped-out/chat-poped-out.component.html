@@ -1,0 +1,24 @@
+<div style="height: 77%" class="conversation">
+  <mat-chip-list style="cursor: none" class="mat-chip-list-stacked">
+    <mat-chip
+      *ngFor="let message of socketConversation"
+      selected
+      [color]="message.color"
+      [ngStyle]="message.style"
+    >
+      {{ message.text }}
+    </mat-chip>
+  </mat-chip-list>
+</div>
+<div style="margin-left: 5px; height: 15%; background-color: #fafafa">
+  <input
+    placeholder="Aa"
+    class="text-input"
+    type="text"
+    [(ngModel)]="currentText"
+    (keyup.enter)="sendMessage()"
+  />
+  <button mat-icon-button (click)="sendMessage()">
+    <mat-icon>send</mat-icon>
+  </button>
+</div>

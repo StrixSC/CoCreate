@@ -11,10 +11,10 @@
           <mat-icon *ngIf="isChatOpen">minimize</mat-icon>
           <mat-icon *ngIf="isChatOpen === false">maximize</mat-icon>
         </button>
-        <button mat-icon-button>
+        <button mat-icon-button (click)="popOutChat()">
           <mat-icon>open_in_new</mat-icon>
         </button>
-        <button mat-icon-button>
+        <button mat-icon-button (click)="ngOnDestroy()">
           <mat-icon>close</mat-icon>
         </button>
       </mat-grid-tile>

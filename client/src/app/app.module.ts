@@ -47,6 +47,7 @@ import { StdHttpInterceptor } from "./http/stdhttp.interceptor";
 import { SocketService } from "./services/chat/socket.service";
 import { RightSidebarComponent } from "./components/right-sidebar/right-sidebar.component";
 import { ChatBoxComponent } from "./components/right-sidebar/chat-box/chat-box.component";
+import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out/chat-poped-out.component";
 
 @NgModule({
   declarations: [
@@ -80,6 +81,7 @@ import { ChatBoxComponent } from "./components/right-sidebar/chat-box/chat-box.c
     ChangePasswordComponent,
     RightSidebarComponent,
     ChatBoxComponent,
+    ChatPopedOutComponent,
   ],
   imports: [
     BrowserModule,

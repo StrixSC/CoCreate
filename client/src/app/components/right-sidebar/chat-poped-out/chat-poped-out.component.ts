@@ -1,6 +1,5 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { ThemePalette } from "@angular/material/core";
-import { NgForm } from "@angular/forms";
 
 export interface Messages {
   text: string;
@@ -15,11 +14,11 @@ export interface Messages {
 }
 
 @Component({
-  selector: "app-chat-box",
-  templateUrl: "./chat-box.component.html",
-  styleUrls: ["./chat-box.component.scss"],
+  selector: "app-chat-poped-out",
+  templateUrl: "./chat-poped-out.component.html",
+  styleUrls: ["./chat-poped-out.component.scss"],
 })
-export class ChatBoxComponent implements OnInit, OnDestroy {
+export class ChatPopedOutComponent implements OnInit {
   socketConversation: Messages[] = [
     {
       text: "In some scenarios, developers might prefer that behavior over the default and would like to have the same for",
