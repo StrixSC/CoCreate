@@ -1,25 +1,35 @@
 <div class="rightsidebar">
-  <div class="options">empty for now</div>
-  <div class="chatbox">
+  <div class="options">
     <mat-action-list>
-      <mat-list-item *ngFor="let channel of channels">
-        <button
-          id="create_button"
-          (click)="addDummyChannel()"
-          matBadge="1"
-          matBadgePosition="before"
-          matBadgeColor="warn"
-        >
-          {{ channel }}
-        </button>
-        <mat-divider></mat-divider>
-      </mat-list-item>
+      <p class="channelHeaders">Recently Joined</p>
+      <div class="channel_box" *ngFor="let room of prevJoinedCollabChannels">
+        <p class="channels">
+          {{ room }}
+        </p>
+      </div>
     </mat-action-list>
   </div>
 
-  <div class="grounded">
-    <button mat-raised-button id="create_button" (click)="addDummyChannel()">
-      Button
-    </button>
+  <div class="chatbox">
+    <mat-grid-list cols="2" rowHeight="2:1">
+      <mat-grid-tile>
+        <button
+          matTooltip="Add new channel"
+          matTooltipPosition="left"
+          class="add_button"
+        >
+          <mat-icon style="color: rgb(214, 210, 210)">add</mat-icon>
+        </button>
+      </mat-grid-tile>
+      <mat-grid-tile>
+        <p class="channelHeaders">Channels</p>
+      </mat-grid-tile>
+    </mat-grid-list>
+    <div class="channel_box" *ngFor="let channel of textChannels">
+      <p class="channels">
+        {{ channel }}
+      </p>
+    </div>
   </div>
+  <!-- background-color: #2f3136; -->
 </div>

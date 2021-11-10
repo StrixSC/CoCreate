@@ -87,6 +87,7 @@ export class ChatBoxComponent implements OnInit, OnDestroy {
       "border-top-right-radius": "5%",
       "border-bottom-left-radius": "5%",
       overflow: "hidden",
+      display: "block",
     };
     this.isChatOpen = true;
   }
@@ -102,6 +103,19 @@ export class ChatBoxComponent implements OnInit, OnDestroy {
       border: "2px solid black",
     };
     this.isChatOpen = false;
+  }
+
+  closeChatBox() {
+    this.chatBoxCSS = {
+      width: "350px",
+      height: "40px",
+      "background-color": "rgb(247, 247, 247)",
+      position: "fixed",
+      bottom: "0",
+      right: "-1000px",
+      border: "2px solid black",
+    };
+    // this.isChatOpen = false;
   }
 
   popOutChat() {
