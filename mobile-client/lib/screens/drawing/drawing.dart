@@ -122,6 +122,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
         onPanEnd: (details) {
           switch (drawType) {
             case DrawingType.freedraw:
+              socketFreedrawEmission(details, DrawingState.up);
               lastShapeID = shapeID;
               break;
             case DrawingType.rectangle:
@@ -280,11 +281,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
       var details, String drawingType, String drawingState) {
     _socket.emit("shape:emit", {
       'x': (drawingState == DrawingState.up)
-          ? details.localPosition.dx
-          : endPoint.dx,
+          ? endPoint.dx
+          : details.localPosition.dx,
       'y': (drawingState == DrawingState.up)
-          ? details.localPosition.dx
-          : endPoint.dy,
+          ? endPoint.dy
+          : details.localPosition.dy,
       'collaborationId': "DEMO_COLLABORATION",
       'state': drawingState,
       'color': currentColor.value,
@@ -299,8 +300,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
   void socketFreedrawEmission(var details, String drawingState) {
     _socket.emit("freedraw:emit", {
-      'x': details.localPosition.dx.toInt(),
-      'y': details.localPosition.dy.toInt(),
+      'x': (drawingState == DrawingState.up)
+          ? endPoint.dx
+          : details.localPosition.dx.toInt(),
+      'y': (drawingState == DrawingState.up)
+          ? endPoint.dy
+          : details.localPosition.dy.toInt(),
       'collaborationId': "DEMO_COLLABORATION",
       'username': _user.displayName,
       'userId': _user.uid,
@@ -311,7 +316,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'g': currentColor.green,
       'b': currentColor.blue,
       'width': 3,
-      'isSelected': true,
+      'isSelected': (drawingState == DrawingState.up) ? "false" : true,
       'actionId': (drawingState == DrawingState.down)
           ? shapeID = const Uuid().v1()
           : shapeID
