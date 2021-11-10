@@ -103,9 +103,9 @@ export class ToolFactoryService {
         setStyle(
           shape,
           shape.fill,
-          shape.strokeOpacity,
-          shape.stroke,
           shape.fillOpacity,
+          shape.stroke,
+          shape.strokeOpacity,
           payload.shapeStyle
         );
 
