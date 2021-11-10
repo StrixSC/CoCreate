@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/screens/drawing/toolbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -51,10 +52,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0), // here the desired height
-          child: Toolbar(changeTool, changeColor)),
-      body: GestureDetector(
+      body: Row( children: [
+        Container(child: Toolbar(changeTool, changeColor)),
+        Expanded(child: GestureDetector(
         //todo: remove hardcode variable when merge with login page
         onPanStart: (details) {
           switch (drawType) {
@@ -149,7 +149,26 @@ class _DrawingScreenState extends State<DrawingScreen> {
             ),
           ),
         ),
-      ),
+      ))]), // TODO: changer a outil de selection des que freedraw termine
+      floatingActionButton: Visibility(
+          visible: selectedItems.isNotEmpty,
+          child: FloatingActionButton(
+            onPressed: () => setState(() {
+              print(selectedItems.toString());
+              print(actionsMap.toString());
+              setState(() {
+                // TODO: All actions need to be saved for undo redo
+                 actionsMap.remove(selectedItems.keys.first);
+                 selectedItems.clear();
+              });
+              print(selectedItems.toString());
+              print(actionsMap.toString());
+            }),
+            tooltip: 'Supression',
+            child: const Icon(CupertinoIcons.archivebox_fill),
+            backgroundColor: kErrorColor,
+          )),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
