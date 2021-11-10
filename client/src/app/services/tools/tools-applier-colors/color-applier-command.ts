@@ -12,6 +12,7 @@ export class ColorApplierCommand implements ICommand {
     private colorAtribute: string;
     private additionalFeatherAttribute: string;
     private alphaAtribute: string;
+    public actionId: string = "";
 
     constructor(
         renderer: Renderer2,

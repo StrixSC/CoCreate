@@ -2,6 +2,7 @@ import { ICommand } from 'src/app/interfaces/command.interface';
 
 export class RotateTranslateCompositeCommand implements ICommand {
     private subCommand: ICommand[] = [];
+    public actionId: string = "";
 
     addSubCommand(command: ICommand): void {
         this.subCommand.push(command);

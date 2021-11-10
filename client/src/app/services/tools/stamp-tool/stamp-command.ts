@@ -9,6 +9,7 @@ import { Stamp } from './stamp.model';
 export class StampCommand implements ICommand {
 
     private stamp: SVGElement | null;
+    public actionId: string = "";
 
     constructor(
         private renderer: Renderer2,

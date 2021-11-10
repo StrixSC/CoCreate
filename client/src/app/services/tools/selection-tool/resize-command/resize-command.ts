@@ -8,6 +8,7 @@ export class ResizeCommand implements ICommand {
   private lastYScaled = 1;
   private lastXTranslate = 0;
   private lastYTranslate = 0;
+  public actionId: string = "";
 
   constructor(
     private renderer: Renderer2,

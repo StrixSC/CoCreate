@@ -6,6 +6,7 @@ export class TranslateCommand implements ICommand {
 
     private lastXTranslate = 0;
     private lastYTranslate = 0;
+    public actionId: string = "";
 
     constructor(
         private renderer: Renderer2,

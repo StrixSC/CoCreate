@@ -6,6 +6,8 @@ import { Spray } from './spray.model';
 /// Commande pour la creation de l'aerosol
 export class SprayCommand implements ICommand {
     private spray: SVGGElement | null = null;
+    public actionId: string = "";
+
     constructor(
         readonly renderer: Renderer2,
         private sprayAttributes: Spray,

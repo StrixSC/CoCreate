@@ -7,6 +7,7 @@ export class EraserCommand implements ICommand {
   private markerDef: SVGDefsElement[] = [];
   private drawingService: DrawingService;
   private elementToErase: Map<string, SVGElement> = new Map<string, SVGElement>();
+  public actionId: string = "";
 
   constructor(
     eraserAttributes: Map<string, SVGElement>,
