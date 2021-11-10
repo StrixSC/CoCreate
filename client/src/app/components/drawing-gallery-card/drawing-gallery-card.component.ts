@@ -12,7 +12,7 @@ export class DrawingGalleryCardComponent {
   constructor(public dialog: MatDialog) {}
 
   openDialog(): void {
-    const dialogRef = this.dialog.open(DrawingPreviewDialogComponent, {height: '580px'});
+    const dialogRef = this.dialog.open(DrawingPreviewDialogComponent);
 
     dialogRef.afterClosed().subscribe(() => {
       console.log('The dialog was closed');
