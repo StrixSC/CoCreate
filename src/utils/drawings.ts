@@ -160,13 +160,13 @@ const typesCallbacks: Record<
 
         return { result: true, field: null };
     },
-    Translate: () => ({ result: false, field: null }),
-    Resize: () => ({ result: false, field: null }),
-    Delete: () => ({ result: false, field: null }),
-    Rotate: () => ({ result: false, field: null }),
-    Text: () => ({ result: false, field: null }),
-    Layer: () => ({ result: false, field: null }),
-    UndoRedo: () => ({ result: false, field: null })
+    Translate: () => ({ result: true, field: null }),
+    Resize: () => ({ result: true, field: null }),
+    Delete: () => ({ result: true, field: null }),
+    Rotate: () => ({ result: true, field: null }),
+    Text: () => ({ result: true, field: null }),
+    Layer: () => ({ result: true, field: null }),
+    UndoRedo: () => ({ result: true, field: null })
 };
 
 export const validateDrawingEvents = (

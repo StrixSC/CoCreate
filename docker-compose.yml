@@ -8,52 +8,50 @@ services:
       - .env
     environment:
       DATABASE_URL: 'postgres://admin:admin@postgres:3001/colorimage'
-      CACHE_REDIS_HOST: 'redis'
+      CACHE_REDIS_HOST: redis
       CACHE_REDIS_PORT: 6379
       NODE_ENV: development
       PORT: 3000
     ports:
       - '3000:3000'
     depends_on:
-      - postgres
       - redis
     volumes:
-      - ./src/:/usr/src/app/src/
-    command: "./wait-for-it.sh postgres:5432 -- npm run docker-dev"
+      - './src/:/usr/src/app/src/'
+    command: './wait-for-it.sh postgres:5432 -- npm run docker-dev'
   postgres:
     container_name: postgres
-    image: postgres:13.4
+    image: 'postgres:13.4'
     ports:
-      - "3001:5432"
+      - '3001:5432'
     volumes:
-      - ./postgresdata:/var/lib/postgresql/data
+      - './postgresdata:/var/lib/postgresql/data'
     restart: always
     env_file:
       - .env
     environment:
-      POSTGRES_USER: ${PSQL_USER:-admin}
-      POSTGRES_PASSWORD: ${PSQL_PASS:-admin}
-      POSTGRES_DB: ${PSQL_DB:-colorimage}
-      command: "postgres -c config_file=./postgresdata/postgresql.conf log_statement=all"
+      POSTGRES_USER: '${PSQL_USER:-admin}'
+      POSTGRES_PASSWORD: '${PSQL_PASS:-admin}'
+      POSTGRES_DB: '${PSQL_DB:-colorimage}'
+      command: postgres -c config_file=./postgresdata/postgresql.conf log_statement=all
   pgadmin:
     container_name: pgadmin
-    image: dpage/pgadmin4:4.18
+    image: 'dpage/pgadmin4:4.18'
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: admin
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_LISTEN_PORT: 8080
     ports:
-      - "3002:8080"
+      - '3002:8080'
     volumes:
-      - pg-data:/var/lib/pgadmin
-    depends_on:
-      - postgres
+      - 'pg-data:/var/lib/pgadmin'
+    depends_on: []
   redis:
     image: redis
     container_name: redis
     ports:
-      - "3003:6379"
+      - '3003:6379'
 volumes:
-  db-data:
-  pg-data:
+  db-data: null
+  pg-data: null

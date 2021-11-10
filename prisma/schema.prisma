@@ -32,13 +32,14 @@ model Profile {
 }
 
 model Account {
-  account_id String   @id @unique @default(uuid())
-  user       User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  user_id    String   @unique
-  first_name String
-  last_name  String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  account_id     String   @id @unique @default(uuid())
+  user           User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_id        String   @unique
+  first_name     String
+  last_name      String
+  allow_searchig Boolean  @default(true)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 }
 
 model Stats {
@@ -100,6 +101,7 @@ model Message {
 }
 
 model Drawing {
+  title            String        
   index            Int           @unique @default(autoincrement())
   drawing_id       String        @id @unique @default(uuid())
   thumbnail_url    String        @default("")
@@ -162,6 +164,7 @@ model Collaboration {
   collaboration_members CollaborationMember[]
   drawing               Drawing?
   Action                Action[]
+  type                  CollaborationType
 }
 
 // Enums
@@ -204,4 +207,10 @@ enum ActionType {
   Text
   Layer
   UndoRedo
+}
+
+enum CollaborationType {
+  Private
+  Public
+  Protected
 }

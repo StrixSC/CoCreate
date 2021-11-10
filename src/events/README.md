@@ -1,19 +1,17 @@
 # Socket Events
 
-
-# Channel Events:  
+# Channel Events:
 
 All events can return this error:
 
 `E0000`: Internal Error.
 
-
-
-## Join Channel: 
+## Join Channel:
 
 Event to emit (Client -> Server): `channel:join`
 
-Data: 
+Data:
+
 ```typescript
 {
     channelId: string,
@@ -22,7 +20,8 @@ Data:
 
 Event emitted (Server -> Client): `channel:joined`
 
-Data: 
+Data:
+
 ```typescript
 {
     channelId: string,
@@ -31,30 +30,29 @@ Data:
 }
 ```
 
-Possible errors: 
+Possible errors:
 
 1. `E1001`: Channel ID cannot be empty.
-2. `E1002`: Channel ID must only contain valid ASCII symbols. 
+2. `E1002`: Channel ID must only contain valid ASCII symbols.
 3. `E1003`: Channel was not found in the list of channels.
-5. `E1005`: User could not be added to the channel. Internal Server Error
-
+4. `E1005`: User could not be added to the channel. Internal Server Error
 
 ## Create Channel:
 
 Event to emit (Client -> Server): `channel:create`
 
-Data: 
+Data:
 
 ```typescript
 {
-    channelName: string
+    channelName: string;
 }
 ```
 
-
 Emitted event (Server -> Client): `channel:created`
 
-Data: 
+Data:
+
 ```typescript
 {
     channelId: string,
@@ -66,7 +64,7 @@ Data:
 }
 ```
 
-Possible Errors: 
+Possible Errors:
 
 1. `E1006`: Channel name must be between 4 and 255 characters
 2. `E1007`: Channel name must only contain valid ASCII symbols
@@ -80,23 +78,25 @@ Data:
 
 ```typescript
 {
-    channelId: string
+    channelId: string;
 }
 ```
 
 Emitted event (Server -> Client): `channel:left`
 
-Data: 
+Data:
+
 ```typescript
 {
-    channelId: string 
+    channelId: string;
 }
 ```
 
 Possible Errors:
+
 1. `E1001`: Channel ID cannot be empty.
-2. `E1002`: Channel ID must only contain valid ASCII symbols. 
-3. `E1009`: User is not a member of the channel. 
+2. `E1002`: Channel ID must only contain valid ASCII symbols.
+3. `E1009`: User is not a member of the channel.
 4. `E1010`: Could not leave channel: User is channel owner. Channel must be deleted if user wants to leave.
 
 ## Channel Update
@@ -133,9 +133,6 @@ Possible Errors:
 5. `E1012`: Could not update channel: Channel Name is already taken.
 6. `E1013`: Could not update channel: Internal socket server error.
 
-
-
-   
 ## Channel Delete
 
 Event to emit (Client -> Socket): `channel:delete`
@@ -161,11 +158,11 @@ Data:
 Possible Errors:
 
 1. `E1001`: Channel ID cannot be empty.
-2. `E1002`: Channel ID must only contain valid ASCII symbols. 
+2. `E1002`: Channel ID must only contain valid ASCII symbols.
 3. `E1015`: Could not delete channel: Channel does not exist or user is not a member of this channel.
 4. `E1016`: Could not delete channel: User is not the owner of this channel.
 5. `E1017`: Could not delete channel: Internal socket server error.
-   
+
 ## Send Message
 
 Event to emit (Client -> Socket): `channel:send`
@@ -197,29 +194,45 @@ Data:
 Possible Errors:
 
 1. `E1001`: Channel ID cannot be empty.
-2. `E1002`: Channel ID must only contain valid ASCII symbols. 
+2. `E1002`: Channel ID must only contain valid ASCII symbols.
 3. `E1018`: Message must be between 1 and 256 characters.
 4. `E1019`: Could not send message: Channel ID does not match any existing channels.
 5. `E1020`: Could not send message: The user is not a part of the channel.
 6. `E1021`: Could not send message: Internal Socket Server Error.
 
-
 # Drawing Events:
 
+Possible events:
+
+```typescript
+ Client Emits          Server Emits
+'freedraw:emit'    -> 'freedraw:received'
+'shape:emit'       -> 'shape:received'
+'selection:emit'   -> 'selection:received'
+'rotation:emit'    -> 'rotation:received'
+'resize:emit'      -> 'resize:received'
+'translation:emit' -> 'translation:received'
+'delete:emit'      -> 'delete:received'
+'undoredo:emit'    -> 'undoredo:received'
+'text:emit'        -> 'text:received'
+'layer:emit'       -> 'layer:received'
+```
+
 ## "ActionTypes":
+
 These are the accepted values of the actionType fields:
 
 ```typescript
-  'Freedraw'
-  'Shape'
-  'Select'
-  'Translate'
-  'Rotate'
-  'Delete'
-  'Resize'
-  'Text'
-  'Layer'
-  'UndoRedo'
+'Freedraw';
+'Shape';
+'Select';
+'Translate';
+'Rotate';
+'Delete';
+'Resize';
+'Text';
+'Layer';
+'UndoRedo';
 ```
 
 ## Freedraw
@@ -241,12 +254,16 @@ These values are necessary when the actions are in state "down" or "move":
     isSelected: boolean,
     x: number // float,
     y: number // float,
-    color: number // integer,
+    r: number // integer,
+    g: number // integer,
+    b: number // integer,
+    a: number // integer,
     width: number // float,
 }
 ```
 
-These values are necessary when the actions are in state "up": 
+These values are necessary when the actions are in state "up":
+
 ```typescript
 {
     actionId: string,
@@ -265,6 +282,7 @@ These values are necessary when the actions are in state "up":
 }
 
 ```
+
 The offsets value is the list of x and y coords sent to the server. These are used to store the actions in the database. These offsets should be used to draw the full action on the screen when received from the server. They will also be given to the new users that join a drawing to render the drawing on the screen.
 
 Event emitted (Server -> Client): `freedraw:received`
@@ -272,6 +290,7 @@ Event emitted (Server -> Client): `freedraw:received`
 Data:
 
 These values are received from the server in state "down" or "move":
+
 ```typescript
 {
     actionId: string,
@@ -292,6 +311,7 @@ These values are received from the server in state "down" or "move":
 ```
 
 These values should be sent from the server when the actions are in state "up":
+
 ```typescript
 {
     actionId: string,
@@ -306,14 +326,82 @@ These values should be sent from the server when the actions are in state "up":
     b: number, // integer | float
     a: number, // integer | float
     offsets: {x: number, y: number}[], // x and y can be either floats or integers.
-    color: number // integer,
     width: number // float,
 }
+```
 
-Possible Errors: 
- 
-1. `E2001`: Could not trigger action: Freedraw data error on [Error] (The error is dynamically computed)                    
-2. `E2002`: Could not trigger the action: Internal Socket Server Error 
+Possible Errors:
+
+1. `E2001`: Could not trigger action: Freedraw data error on [Error] (The error is dynamically computed)
+2. `E2002`: Could not trigger the action: Internal Socket Server Error
+
+## Shape
+
+Event to emit (Client -> Socket): `shape:emit`
+
+Data:
+
+These values are necessary when the actions are in state "down" or "move":
+
+```typescript
+{
+actionId: string,
+    username: string,
+    userId: string,
+    collaborationId: string,
+    actionType: string,
+    state: string, // move/down/up
+    isSelected: boolean,
+    x1: number // float,
+    y1: number // float,
+    r: number // integer,
+    g: number // integer,
+    b: number // integer,
+    a: number // integer,
+    x2: number // float,
+    y2: number // float,
+    rFill: number // integer,
+    gFill: number // integer,
+    bFill: number // integer,
+    aFill: number // integer,
+    width: number // float,
+    shapeType: string // Rectangle | Ellipse | Null
+}
+```
+
+Event emitted (Server -> Client): `shape:received`
+
+Data:
+
+These values are received from the server in state "down" or "move":
+
+```typescript
+{
+    actionId: string,
+    username: string,
+    userId: string,
+    collaborationId: string,
+    actionType: string,
+    state: string, // move/down/up
+    isSelected: boolean,
+    x1: number // integer/float,
+    y1: number // integer/float,
+    r: number // integer,
+    g: number // integer,
+    b: number // integer,
+    a: number // integer,
+    x2: number // integer/float,
+    y2: number // integer/float,
+    rFill: number // integer,
+    gFill: number // integer,
+    bFill: number // integer,
+    aFill: number // integer,
+    width: number // float,
+    shapeType: string // Rectangle | Ellipse | Null
+}
+```
+
+Possible Errors: TODO
 
 ## Selection
 
@@ -344,14 +432,88 @@ Data:
 }
 ```
 
-Possible Errors: 
- 
-1. `E2201`: Could not trigger action: Selection data error on: [Error] (The error is computed dynamically)                    
+Possible Errors:
+
+1. `E2201`: Could not trigger action: Selection data error on: [Error] (The error is computed dynamically)
 2. `E2202`: Could not trigger action: Action could not be found in the database
 3. `E2203`: Could not trigger action: The action is already selected by a different user.
-4. `E2204`: Could not trigger action. Either the isSelected value does not differ from the one currently applied or there was an unexpected socket server error. 
+4. `E2204`: Could not trigger action. Either the isSelected value does not differ from the one currently applied or there was an unexpected socket server error.
 
-# Action Saving
+## Translation
+
+Event to emit (Client -> Socket): `translation:emit`
+
+Data:
+
+```typescript
+{
+    actionId: string,
+    username: string,
+    userId: string,
+    collaborationId: string,
+    actionType: string,
+    xTranslation: number,   // float
+    yTranslation: number    // float
+}
+```
+
+Event emitted (Server -> Client): `translation:received`
+
+Data:
+
+```typescript
+{
+    actionId: string,
+    isSelected: boolean,
+    selectedBy: string // The userId of the user that selected the action.
+}
+```
+
+Possible Errors: TODO
+
+## Rotation
+
+## Delete
+
+## Resize
+
+## Text
+
+## Layers
+
+## UndoRedo
+
+Event to emit (Client -> Socket): `undoredo:emit`
+
+Data:
+
+```typescript
+{
+    actionId: string,
+    username: string,
+    userId: string,
+    collaborationId: string,
+    actionType: string,
+    isUndo: boolean // Set to true for undo action, otherwise false for redo action.
+}
+```
+
+Event emitted (Server -> Client): `undoredo:received`
+
+Data:
+
+```typescript
+{
+    actionId: string, // Action to undo
+    isUndo: boolean,
+    userId: string, // UserId of the user that undoed the action
+}
+```
+
+Possible Errors:
+TODO
+
+## Action Saving
 
 The database needs time to save each data, subscribe to `action:saved` to be able to send the rest of the necessary actions regarding an action to the server.
 
@@ -366,3 +528,4 @@ Data:
     actionId: string;
     collaborationId: string;
 }
+```

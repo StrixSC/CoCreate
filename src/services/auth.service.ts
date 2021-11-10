@@ -50,7 +50,7 @@ export const register = async (payload: IRegistrationPayload): Promise<User | nu
         const firebaseUser = await admin.auth().createUser({
             email: email,
             password: password,
-            displayName: `${first_name} ${last_name}`
+            displayName: username
         });
 
         const user = await db.user.create({

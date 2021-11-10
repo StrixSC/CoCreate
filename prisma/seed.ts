@@ -1,4 +1,4 @@
-import { ChannelType, MemberType } from '.prisma/client';
+import { ChannelType, CollaborationType, MemberType } from '.prisma/client';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
@@ -15,6 +15,24 @@ async function main() {
         }
     });
 
+    const demoCollaboration = await prisma.collaboration.upsert({
+        where: {
+            collaboration_id: 'DEMO_COLLABORATION'
+        },
+        update: {},
+        create: {
+            collaboration_id: 'DEMO_COLLABORATION',
+            drawing_id: 'DEMO_DRAWING',
+            type: CollaborationType.Public,
+            drawing: {
+                create: {
+                    title: 'DEMO_TITLE',
+                    drawing_id: 'DEMO_DRAWING'
+                }
+            }
+        }
+    });
+
     const systemUser = await prisma.user.upsert({
         where: {
             user_id: 'ADMIN'
@@ -23,7 +41,6 @@ async function main() {
         create: {
             user_id: 'ADMIN',
             email: 'admin',
-            password: '$2b$10$96mpoqKrG5rRdLKm16p9U.g9TQZNXjuLOXqRIZ4eVNwLC/tk.ajCe', // admin
             profile: {
                 create: {
                     username: 'admin',
@@ -37,20 +54,19 @@ async function main() {
                 }
             },
             channels: {
-                create: [ { channel_id: 'PUBLIC', type: MemberType.Owner } ]
+                create: [{ channel_id: 'PUBLIC', type: MemberType.Owner }]
             }
         }
     });
 
     const demoUser = await prisma.user.upsert({
         where: {
-            user_id: 'DEMO'
+            user_id: 'LnJiMTeEAbd9u3plL2FD5Jaa3PF3'
         },
         update: {},
         create: {
-            user_id: 'DEMO',
-            email: 'demo',
-            password: '$2b$10$BCGXlbIMN7mg0jXZ4lFpV.JQ5AqNSROSjqvhDN.ZQVf0P.ku20Lem', // demo
+            user_id: 'LnJiMTeEAbd9u3plL2FD5Jaa3PF3',
+            email: 'demo@demo.com',
             profile: {
                 create: {
                     username: 'demo',
@@ -64,29 +80,45 @@ async function main() {
                 }
             },
             channels: {
-                create: [ { channel_id: 'PUBLIC', type: MemberType.Regular } ]
+                create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
+            },
+            collaborations: {
+                create: [{ collaboration_id: 'DEMO_COLLABORATION', type: MemberType.Owner }]
             }
         }
     });
 
-    const demoCollaboration = await prisma.collaboration.upsert({
-        where: {
-            collaboration_id: 'DEMO_COLLABORATION'
-        },
-        update: {},
-        create: {
-            collaboration_id: 'DEMO_COLLABORATION',
-            drawing_id: 'DEMO_DRAWING',
-            collaboration_members: {
-                create: [ { user_id: 'DEMO', type: 'Owner' } ]
+    if (process.env.NODE_ENV !== "production") {
+        const demoTestUser = await prisma.user.upsert({
+            where: {
+                user_id: 'DEMO'
             },
-            drawing: {
-                create: {
-                    drawing_id: 'DEMO_DRAWING'
+            update: {},
+            create: {
+                user_id: 'DEMO',
+                email: 'demo',
+                profile: {
+                    create: {
+                        username: 'demo_user',
+                        avatar_url: ''
+                    }
+                },
+                account: {
+                    create: {
+                        first_name: 'demo',
+                        last_name: 'demo'
+                    }
+                },
+                channels: {
+                    create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
+                },
+                collaborations: {
+                    create: [{ collaboration_id: 'DEMO_COLLABORATION', type: MemberType.Regular }]
                 }
             }
-        }
-    });
+        });
+    }
+
 }
 
 main()

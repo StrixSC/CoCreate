@@ -15,6 +15,7 @@ import indexRouter from './routes/index.route';
 import authRouter from './routes/auth.route';
 import usersRouter from './routes/users.route';
 import channelsRouter from './routes/channels.route';
+import galleryRouter from './routes/gallery.route';
 import log from './utils/logger';
 
 const REDIS_URL =
@@ -55,6 +56,7 @@ app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/channels', channelsRouter);
+app.use('/api/gallery', galleryRouter);
 app.use('/docs', serve, setup(swaggerDoc));
 
 app.use(async (req, res, next) => {

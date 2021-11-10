@@ -63,7 +63,11 @@ const io = new Server(server, {
 
 const onConnection = (socket: Socket) => {
     socket.use(logEvent(socket));
-    socket.data.user = (socket as any).request.userId;
+
+    if (process.env.NODE_ENV === "production") {
+        socket.data.user = (socket as any).request.userId;
+    } else socket.data.user = "DEMO";
+
     try {
         channelHandler(io, socket);
         drawingHandler(io, socket);
@@ -79,7 +83,9 @@ const onConnection = (socket: Socket) => {
 const wrap = (middleware: any) => (socket: Socket, next: any) =>
     middleware(socket.request, {}, next);
 
-io.use(wrap(checkIfAuthenticated));
+if (process.env.NODE_ENV === "production") {
+    io.use(wrap(checkIfAuthenticated));
+}
 
 io.on('connection', onConnection);
 

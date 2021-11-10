@@ -8,9 +8,12 @@ postgresdata/
 key.json
 dist/
 
+
 svg/
 .vscode/
 
+# logs:
+*.log
 logs/
 
 # Exclusion des fichiers Javascripts

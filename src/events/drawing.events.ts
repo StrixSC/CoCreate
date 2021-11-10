@@ -171,8 +171,50 @@ export = (io: Server, socket: Socket) => {
         } as Action);
     };
 
+    const onTranslation = async (data: Action) => {
+        io.emit('translation:received', {
+            ...data
+        } as Action);
+    }
+
+    const onRotation = async (data: Action) => {
+        io.emit('rotation:received', {
+            ...data
+        } as Action);
+    }
+
+    const onDelete = async (data: Action) => {
+        io.emit('delete:received', {
+            ...data
+        } as Action);
+    }
+
+    const onResize = async (data: Action) => {
+        io.emit('resize:received', {
+            ...data
+        } as Action);
+    }
+
+    const onText = async (data: Action) => {
+        io.emit('text:received', {
+            ...data
+        } as Action);
+    }
+
+    const onLayer = async (data: Action) => {
+        io.emit('layer:received', {
+            ...data
+        } as Action);
+    }
+
     socket.on('freedraw:emit', onFreedraw);
     socket.on('shape:emit', onShapeDraw);
     socket.on('selection:emit', onSelection);
     socket.on('undoredo:emit', onUndo);
+    socket.on('translation:emit', onTranslation);
+    socket.on('rotation:emit', onRotation);
+    socket.on('delete:emit', onDelete);
+    socket.on('layer:emit', onLayer);
+    socket.on('resize:emit', onResize);
+    socket.on('text:emit', onText);
 };
