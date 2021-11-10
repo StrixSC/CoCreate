@@ -51,10 +51,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0), // here the desired height
-          child: Toolbar(changeTool, changeColor)),
-      body: GestureDetector(
+      body: Row( children: [
+        Container(child: Toolbar(changeTool, changeColor)),
+        Expanded(child: GestureDetector(
         //todo: remove hardcode variable when merge with login page
         onPanStart: (details) {
           switch (drawType) {
@@ -147,7 +146,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
             ),
           ),
         ),
-      ), // TODO: changer a outil de selection des que freedraw termine
+      ))]), // TODO: changer a outil de selection des que freedraw termine
       floatingActionButton: Visibility(
           visible: selectedItems.isNotEmpty,
           child: FloatingActionButton(
@@ -168,10 +167,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
           )),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
-  }
-
-  void removeSelected() {
-    print('removing..');
   }
 
   void changeColor(Color color) {
