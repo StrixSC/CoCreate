@@ -94,12 +94,12 @@ export class ControlMenuComponent implements OnDestroy {
 
   signOut(): void {
     this.authService.logUserDisconnection()
-    .pipe(
-      mergeMap(() => from(this.authService.signOut())), 
-      take(1)
-    ).subscribe((d: any) => {
-      console.log('Sign out successful!');
-    });
+      .pipe(
+        mergeMap(() => from(this.authService.signOut())),
+        take(1)
+      ).subscribe((d: any) => {
+        console.log('Sign out successful!');
+      });
   }
 
   ngOnDestroy(): void {

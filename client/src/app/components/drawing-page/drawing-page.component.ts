@@ -56,14 +56,20 @@ export class DrawingPageComponent implements OnDestroy {
               this.syncDrawingService.onFreedraw(),
               this.syncDrawingService.onSelection(),
               this.syncDrawingService.onShape(),
-              this.syncDrawingService.onUndoRedo()
+              this.syncDrawingService.onUndoRedo(),
+              this.syncDrawingService.onDelete(),
+              this.syncDrawingService.onTranslate(),
+              this.syncDrawingService.onRotate(),
+              this.syncDrawingService.onResize(),
+              this.syncDrawingService.onText(),
+              this.syncDrawingService.onLayer(),
             )
           } else {
             return of(EMPTY);
           }
         })
       ).subscribe((data: any) => {
-        if(data && data.userId !== this.syncDrawingService.defaultPayload!.userId) {
+        if (data && data.userId !== this.syncDrawingService.defaultPayload!.userId) {
           this.syncDrawingService.handleResponse(data);
         }
       })

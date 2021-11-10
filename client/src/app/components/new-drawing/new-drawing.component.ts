@@ -43,14 +43,11 @@ export class NewDrawingComponent implements OnInit {
     this.dialogRef.disableClose = true;
     this.dialogRef.afterOpened().subscribe(() => this.onResize());
     this.colorPickerService.setFormColor(DEFAULT_RGB_COLOR, DEFAULT_ALPHA);
+    this.newDrawing();
   }
 
   get sizeForm(): FormGroup {
     return (this.form.get('dimension') as FormGroup).get('size') as FormGroup;
-  }
-
-  ngAfterViewInit(): void {
-    
   }
 
   /// Ouvre le dialog pour l'alerte lorsque le service est creer
@@ -75,11 +72,11 @@ export class NewDrawingComponent implements OnInit {
     this.drawingService.isCreated = true;
     const size: { width: number, height: number } = this.newDrawingService.sizeGroup.value;
     this.drawingService.newDrawing(
-      size.width,
-      size.height,
+      size.width || 1000,
+      size.height || 1000,
       {
-        rgb: this.colorPickerService.rgb.value,
-        a: this.colorPickerService.a.value,
+        rgb: this.colorPickerService.rgb.value || { r: 255, g: 255, b: 255 },
+        a: this.colorPickerService.a.value || 255
       },
     );
     this.snackBar.open('Nouveau dessin créé', '', { duration: ONE_SECOND, });

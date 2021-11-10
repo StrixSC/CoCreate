@@ -127,7 +127,7 @@ export class ToolEllipseService implements Tools {
 
     this.isCircle = false;
     this.ellipse = null;
-    if (this.contour) {
+    if (this.contour && this.ellipseCommand && !this.ellipseCommand.isSyncAction) {
       this.drawingService.removeObject(this.contourId);
       this.contourId = -1;
     }
@@ -228,34 +228,5 @@ export class ToolEllipseService implements Tools {
     this.rendererService.renderer.setAttribute(this.contour, 'y', (yValue - height / 2).toString());
     this.rendererService.renderer.setAttribute(this.contour, 'width', (width).toString());
     this.rendererService.renderer.setAttribute(this.contour, 'height', (height).toString());
-  }
-
-  /// Ajustement du style de l'ellipse
-  private setStyle(primaryColor: string, primaryAlphas: string, secondaryColor: string, secondaryAlpha: string): void {
-    if (!this.ellipse) {
-      return;
-    }
-    switch (this.ellipseStyle.value) {
-      case 'center':
-        this.ellipse.fill = primaryColor;
-        this.ellipse.fillOpacity = primaryAlphas;
-        this.ellipse.stroke = 'none';
-        this.ellipse.strokeOpacity = 'none';
-        break;
-
-      case 'border':
-        this.ellipse.fill = 'none';
-        this.ellipse.fillOpacity = 'none';
-        this.ellipse.stroke = secondaryColor;
-        this.ellipse.strokeOpacity = secondaryAlpha;
-        break;
-
-      case 'fill':
-        this.ellipse.fill = primaryColor;
-        this.ellipse.fillOpacity = primaryAlphas;
-        this.ellipse.stroke = secondaryColor;
-        this.ellipse.strokeOpacity = secondaryAlpha;
-        break;
-    }
   }
 }

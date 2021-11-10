@@ -8,13 +8,13 @@ import { Injectable } from '@angular/core';
 export class CollaborationService {
 
   private actions: Map<string, Map<string, { data: IAction, command: ICommand, isUndone: boolean }>>;
-  
+
   constructor() {
-    this.actions = new Map<string, Map<string,{ data: IAction, command: ICommand, isUndone: boolean }>>();
+    this.actions = new Map<string, Map<string, { data: IAction, command: ICommand, isUndone: boolean }>>();
   }
 
   addUser(userId: string): boolean {
-    if(this.userExists(userId)) {
+    if (this.userExists(userId)) {
       return false;
     }
 
@@ -24,12 +24,12 @@ export class CollaborationService {
 
   getUserActions(userId: string): Map<string, { data: IAction, command: ICommand, isUndone: boolean }> | null {
     const userActions = this.actions.get(userId);
-    if(userActions) return userActions
+    if (userActions) return userActions
     else return null;
   }
 
   addActionToUser(userId: string, action: { data: IAction, command: ICommand, isUndone: boolean }) {
-    if(this.userExists(userId)) {
+    if (this.userExists(userId)) {
       this.actions.get(userId)!.set(action.data.actionId, action);
     }
 
@@ -37,12 +37,12 @@ export class CollaborationService {
   }
 
   undoUserAction(userId: string, actionId: string): boolean {
-    if(!this.userExists(userId)) {
+    if (!this.userExists(userId)) {
       return false;
     }
 
     const action = this.actions.get(userId)!.get(actionId);
-    if(action && action.isUndone === false) {
+    if (action && action.isUndone === false) {
       action.command.undo();
       action.isUndone = true;
       return true;
@@ -52,12 +52,12 @@ export class CollaborationService {
   }
 
   redoUserAction(userId: string, actionId: string): boolean {
-    if(!this.userExists(userId)) {
+    if (!this.userExists(userId)) {
       return false;
     }
 
     const action = this.actions.get(userId)!.get(actionId);
-    if(action && action.isUndone === true) {
+    if (action && action.isUndone === true) {
       action.command.execute();
       action.isUndone = false;
       return true;

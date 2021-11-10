@@ -8,7 +8,7 @@ import {
 import { fromRGB, fromOpacity } from "../utils/colors";
 import { Pencil } from "./tools/pencil-tool/pencil.model";
 import { ICommand } from "src/app/interfaces/command.interface";
-import { Observable } from "rxjs";
+import { Observable, of, EMPTY } from "rxjs";
 import { ToolFactoryService } from "./tool-factory.service";
 import {
   DrawingState,
@@ -110,6 +110,10 @@ export class SyncDrawingService {
     let alpha = 255;
     let fillAlpha = 255;
 
+    if (state === DrawingState.down) {
+      this.activeActionId = v4();
+    }
+
     if (shape.stroke !== "none") {
       rgb = fromRGB(shape.stroke);
     }
@@ -186,8 +190,32 @@ export class SyncDrawingService {
     return this.socketService.on("undoredo:received");
   }
 
-  handleResponse(payload: IAction): ICommand {
+  onDelete(): Observable<any> {
+    return of(EMPTY);
+  }
+
+  onTranslate(): Observable<any> {
+    return of(EMPTY);
+  }
+
+  onRotate(): Observable<any> {
+    return of(EMPTY);
+  }
+
+  onResize(): Observable<any> {
+    return of(EMPTY);
+  }
+
+  onText(): Observable<any> {
+    return of(EMPTY);
+  }
+
+  onLayer(): Observable<any> {
+    return of(EMPTY);
+  }
+
+  handleResponse(payload: IAction): ICommand | boolean {
     const command = this.toolFactory.create(payload);
-    return command;
+    return command ? command : !!command;
   }
 }

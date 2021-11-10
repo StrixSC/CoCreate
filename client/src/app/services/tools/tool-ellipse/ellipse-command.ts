@@ -7,7 +7,7 @@ import { FilledShape } from "../tool-rectangle/filed-shape.model";
 export class EllipseCommand implements ICommand {
     private ellipse: SVGEllipseElement;
     public actionId: string = "";
-
+    public isSyncAction: boolean = false;
     constructor(
         readonly renderer: Renderer2,
         private ellipseAttributes: FilledShape,

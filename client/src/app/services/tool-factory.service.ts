@@ -91,6 +91,7 @@ export class ToolFactoryService {
             shape,
             this.drawingService
           )
+          this.currentCommand.isSyncAction = true;
         } else {
           this.currentCommand = new RectangleCommand(
             this.rendererService.renderer,
@@ -108,7 +109,6 @@ export class ToolFactoryService {
           payload.shapeStyle
         );
 
-        console.log(shape);
         this.currentCommand.execute();
       } else if (payload.state === DrawingState.move) {
         if (payload.shapeType === ShapeType.Rectangle) {
@@ -170,7 +170,10 @@ export class ToolFactoryService {
     private collaborationService: CollaborationService
   ) { }
 
-  create(payload: IAction): ICommand {
-    return this.tools[payload.actionType](payload);
+  create(payload: IAction): ICommand | null {
+    const callback = this.tools[payload.actionType];
+    if (callback) {
+      return callback(payload);
+    } else return null;
   }
 }
