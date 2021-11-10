@@ -45,6 +45,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
     socketFreedrawReception();
     socketShapeReception();
     socketSelectionReception();
+    socketTranslationReception();
   }
 
   @override
@@ -110,9 +111,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
               if (allowMove && selectedItems.containsValue(_user.uid)) {
                 selectedItems.forEach((actionId, userId) {
                   if (userId == _user.uid) {
-                    // todo: finishing translation with this
-                    print((details.localPosition - selectRef!).dx);
-                    print((details.localPosition - selectRef!).dy);
+                    socketTranslationEmission(
+                        actionId,
+                        (details.localPosition - selectRef!).dx,
+                        (details.localPosition - selectRef!).dy);
+                    selectRef = details.localPosition;
                   }
                 });
               }
@@ -169,6 +172,28 @@ class _DrawingScreenState extends State<DrawingScreen> {
         } else {
           selectedItems.remove(data['actionId']);
         }
+      });
+    });
+  }
+
+  void socketTranslationReception() {
+    _socket.on('translation:received', (data) {
+      setState(() {
+        actionsMap.forEach((actionId, actionMap) {
+          if (actionId == data['actionId']) {
+            var offsetList = actionMap[DrawingType.freedraw] as List<Offset>;
+            List<Offset> translateOffsetList = <Offset>[];
+
+            for (var offset in offsetList) {
+              translateOffsetList.add(offset.translate(
+                  data['xTranslation'].toDouble(),
+                  data['yTranslation'].toDouble()));
+            }
+            actionMap.update(DrawingType.freedraw, (value) => translateOffsetList);
+            actionsMap.update(data['actionId'],
+                (value) => actionMap as Map<String, List<Offset>>);
+          }
+        });
       });
     });
   }
@@ -274,6 +299,19 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'collaborationId': "DEMO_COLLABORATION",
       'actionType': "Select",
       'isSelected': isSelected,
+    });
+  }
+
+  void socketTranslationEmission(
+      String selectItem, double xTranslation, double yTranslation) {
+    _socket.emit("translation:emit", {
+      'actionId': selectItem,
+      'username': _user.displayName,
+      'userId': _user.uid,
+      'collaborationId': "DEMO_COLLABORATION",
+      'actionType': "Select",
+      'xTranslation': xTranslation,
+      'yTranslation': yTranslation
     });
   }
 
@@ -410,70 +448,6 @@ class Painter extends CustomPainter {
         }
       });
     });
-    // if (drawType == "select") {
-    //   for (var i = 0; i < pathMetrics.length; i++) {
-    //     for (var j = 0; j < pathMetrics.elementAt(i).length; j++) {
-    //       Tangent? tangent =
-    //           pathMetrics.elementAt(i).getTangentForOffset(j.toDouble());
-    //       if ((tangent!.position - offsets.first).distance.toInt() <=
-    //           paintList.elementAt(0).strokeWidth / 2) {
-    //         if (offsets.last != endPoint) {
-    //           Path dragPath = pathMetrics
-    //               .elementAt(i)
-    //               .extractPath(0, pathMetrics.elementAt(i).length)
-    //               .shift(Offset(offsets.last.dx - offsets.first.dx,
-    //                   offsets.last.dy - offsets.first.dy));
-    //           canvas.drawPath(getCorner(dragPath), paintList.elementAt(i));
-    //           canvas.drawPath(dragPath, paintList.elementAt(i));
-    //           selectId.add(i);
-    //           break;
-    //         } else {
-    //           offsets.removeLast();
-    //           Path dragPath = pathMetrics
-    //               .elementAt(i)
-    //               .extractPath(0, pathMetrics.elementAt(i).length)
-    //               .shift(Offset(offsets.last.dx - offsets.first.dx,
-    //                   offsets.last.dy - offsets.first.dy));
-    //           Paint paintCopy = paintList.removeAt(i);
-    //           paintList.add(paintCopy);
-    //           pathMetrics.removeAt(i);
-    //           path.reset();
-    //           for (var element in pathMetrics) {
-    //             path.addPath(
-    //                 element.extractPath(0, element.length), const Offset(0, 0));
-    //           }
-    //           path.addPath(dragPath, const Offset(0, 0));
-    //           offsets.add(endPoint);
-    //           selectId.add(i);
-    //           break;
-    //         }
-    //       }
-    //     }
-    //     if (selectId.isNotEmpty) {
-    //       break;
-    //     }
-    //   }
-    //   if (offsets.last == endPoint) {
-    //     offsets.clear();
-    //   }
-    // }
-
-    // pathMetrics = path.computeMetrics().toList();
-    // for (var i = 0; i < pathMetrics.length; i++) {
-    //   // if (selectId.isNotEmpty && offsets.isNotEmpty) {
-    //   //   if (selectId.elementAt(0) == i) {
-    //   //     //Don't draw the selected shape because it is already draw while
-    //   //     // shifting
-    //   //   } else {
-    //   //     PathMetric pathMetric = pathMetrics.elementAt(i);
-    //   //     canvas.drawPath(pathMetric.extractPath(0, pathMetric.length),
-    //   //         paintList.elementAt(i));
-    //   //   }
-    //   // } else {
-    //   PathMetric pathMetric = pathMetrics.elementAt(i);
-    //   canvas.drawPath(pathMetric.extractPath(0, pathMetric.length), paint);
-    // }
-    // }
   }
 
   Path getCorner(Path dragPath) {
