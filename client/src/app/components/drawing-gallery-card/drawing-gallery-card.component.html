@@ -1,21 +1,12 @@
-<!-- <div fxLayoutAlign="start start"> -->
 <mat-card class="drawing-card">
   
   <img class="image-preview" mat-card-image src="../../../assets/img/dessin-exemple.jpg">
-  <!-- <mat-card-content>
-    <div>
-     Auteur:
-    </div>
-    <div>
-      Nombre de collaborateurs actifs:
-    </div>
-  </mat-card-content> -->
   <mat-card-header>
     <mat-card-title>Titre du dessin</mat-card-title>
     <mat-card-subtitle>Date de création</mat-card-subtitle>
   </mat-card-header>
   <mat-card-actions>
-    <button class="btn" mat-raised-button color="primary">Aperçu du dessin</button>
+    <button class="btn" mat-raised-button color="primary" (click)="openDialog()">Aperçu du dessin</button>
   </mat-card-actions>
 </mat-card>
 

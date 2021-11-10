@@ -48,6 +48,7 @@ import { UserProfileComponent } from './components/user-profile/user-profile.com
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
 import { DrawingGalleryComponent } from './components/drawing-gallery/drawing-gallery.component';
 import { DrawingGalleryCardComponent } from './components/drawing-gallery-card/drawing-gallery-card.component';
+import { DrawingPreviewDialogComponent } from './components/drawing-preview-dialog/drawing-preview-dialog.component';
 
 @NgModule({
   declarations: [
@@ -80,7 +81,8 @@ import { DrawingGalleryCardComponent } from './components/drawing-gallery-card/d
     UserProfileComponent,
     ChangePasswordComponent,
     DrawingGalleryComponent,
-    DrawingGalleryCardComponent
+    DrawingGalleryCardComponent,
+    DrawingPreviewDialogComponent
   ],
   imports: [
     BrowserModule,
