@@ -162,7 +162,9 @@ export = (io: Server, socket: Socket) => {
                 isSelected: userSelectionChoice,
                 selectedBy: selectedByUser,
                 actionType: ActionType.Select,
-                userId: action.userId
+                username: action.username,
+                userId: action.userId,
+                collaborationId: action.collaborationId,
             });
         } catch (e: any) {
             handleSocketError(socket, e);
