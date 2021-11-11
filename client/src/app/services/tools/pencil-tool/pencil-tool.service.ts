@@ -75,9 +75,11 @@ export class PencilToolService implements Tools {
           this.pencil.strokeOpacity = this.colorTool.secondaryAlpha.toString();
         }
 
-        this.pencilCommand = new PencilCommand(this.rendererService.renderer, this.pencil, this.drawingService)
-        this.pencilCommand.execute();
+        this.pencilCommand = new PencilCommand(this.rendererService.renderer, this.pencil, this.drawingService);
         this.syncDrawingService.sendFreedraw(DrawingState.down, this.pencil);
+        this.pencilCommand.actionId = this.syncDrawingService.activeActionId;
+        this.pencilCommand.userId = this.syncDrawingService.defaultPayload!.userId;
+        this.pencilCommand.execute();
         this.isDrawing = true;
       }
     }
@@ -86,7 +88,7 @@ export class PencilToolService implements Tools {
   /// Ajout d'un point selon le déplacement de la souris
   onMove(event: MouseEvent): void {
     if (this.isDrawing && this.pencilCommand) {
-      this.pencilCommand.addPoint({x: event.offsetX, y:event.offsetY});
+      this.pencilCommand.addPoint({ x: event.offsetX, y: event.offsetY });
       this.syncDrawingService.sendFreedraw(DrawingState.move, this.pencil!);
     }
   }
@@ -95,9 +97,8 @@ export class PencilToolService implements Tools {
   onRelease(event: MouseEvent): void | ICommand {
     if (this.isDrawing && this.pencilCommand) {
       const returnPencilCommand = this.pencilCommand;
-      returnPencilCommand.actionId = this.syncDrawingService.activeActionId;
       const lastObj = new Array(this.drawingService.getLastObject());
-      this.selectionToolService.setNewSelection(lastObj);
+      // this.selectionToolService.setNewSelection(lastObj);
       this.syncDrawingService.sendFreedraw(DrawingState.up, this.pencil!);
       this.isDrawing = false;
       this.pencilCommand = null;

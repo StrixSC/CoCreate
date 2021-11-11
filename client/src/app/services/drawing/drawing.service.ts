@@ -53,7 +53,7 @@ export class DrawingService {
   }
 
   getLastObject(): any {
-      return this.getObjectList().get(this.lastObjectId);
+    return this.getObjectList().get(this.lastObjectId);
   }
 
   addLayer(id: number): void {
@@ -78,16 +78,16 @@ export class DrawingService {
   }
 
   removeLayer(id: number): void {
-      let x: SVGElement;
-      this.drawing.childNodes.forEach((children: SVGElement) => {
-        if (children.getAttribute('id') === id.toString()) {
-          x = (children.previousElementSibling as SVGElement);
-          const previousId: string | null = x.getAttribute('id');
-          if (previousId === null) { return; }
-          this.addLayer(parseInt(previousId));
-        }
-      });
-}
+    let x: SVGElement;
+    this.drawing.childNodes.forEach((children: SVGElement) => {
+      if (children.getAttribute('id') === id.toString()) {
+        x = (children.previousElementSibling as SVGElement);
+        const previousId: string | null = x.getAttribute('id');
+        if (previousId === null) { return; }
+        this.addLayer(parseInt(previousId));
+      }
+    });
+  }
 
   /// Retrait d'un objet selon son ID
   removeObject(id: number): void {
@@ -104,8 +104,7 @@ export class DrawingService {
       this.numberOfStrates++;
 
       this.renderer.setProperty(obj, 'id', this.lastObjectId);
-      this.renderer.setProperty(obj, 'isSelected', true);
-
+      // this.renderer.setProperty(obj, 'isSelected', true);
       this.renderer.setAttribute(obj, 'strate', this.numberOfStrates.toString());
     }
     const id: number = Number(obj.id);
@@ -117,6 +116,18 @@ export class DrawingService {
   /// Récupère un objet selon son id dans la map d'objet
   getObject(id: number): SVGElement | undefined {
     return this.objectList.get(id);
+  }
+
+  getObjectByActionId(actionId: string): SVGElement | null {
+    let tmp = null;
+
+    this.objectList.forEach((obj) => {
+      if (obj.outerHTML.includes(actionId)) {
+        tmp = obj;
+      }
+    })
+
+    return tmp;
   }
 
   /// Redéfinit la dimension du dessin

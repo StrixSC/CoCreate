@@ -1,18 +1,18 @@
+import { CollaborationService } from './collaboration.service';
 import { FilledShape } from "./tools/tool-rectangle/filed-shape.model";
 import {
   IUndoRedoAction,
   IShapeAction,
   ShapeType,
   ShapeStyle,
+  ISelectionAction,
 } from "./../model/IAction.model";
 import { fromRGB, fromOpacity } from "../utils/colors";
 import { Pencil } from "./tools/pencil-tool/pencil.model";
 import { ICommand } from "src/app/interfaces/command.interface";
 import { Observable, of, EMPTY } from "rxjs";
-import { ToolFactoryService } from "./tool-factory.service";
 import {
   DrawingState,
-  IAction,
   IFreedrawUpAction,
   IDefaultActionPayload,
   ActionType,
@@ -33,8 +33,7 @@ export class SyncDrawingService {
   public activeActionId: string = "";
 
   constructor(
-    private socketService: SocketService,
-    private toolFactory: ToolFactoryService
+    private socketService: SocketService
   ) {
     this.defaultPayload = null;
   }
@@ -178,6 +177,27 @@ export class SyncDrawingService {
     });
   }
 
+  // sendSelection(SVGElement[]) {
+  //   this.socketService.emit("selection:emit", {
+  //     ...this.defaultPayload,
+  //     isSelected: true
+  //   } as ISelectionAction);
+  // }
+
+  sendSelect(actionId: string, selection: boolean): void {
+    this.socketService.emit("selection:emit", {
+      ...this.defaultPayload,
+      actionId: actionId,
+      actionType: ActionType.Select,
+      isSelected: selection
+    } as ISelectionAction);
+  }
+
+  sendPostSaveSelect(data: { collaborationId: string, actionId: string }) {
+    const { collaborationId, actionId } = data;
+    this.sendSelect(actionId, true);
+  }
+
   onShape(): Observable<void> {
     return this.socketService.on("shape:received");
   }
@@ -191,31 +211,31 @@ export class SyncDrawingService {
   }
 
   onDelete(): Observable<any> {
-    return of(EMPTY);
+    return this.socketService.on('delete:received');
   }
 
   onTranslate(): Observable<any> {
-    return of(EMPTY);
+    return this.socketService.on('translation:received');
   }
 
   onRotate(): Observable<any> {
-    return of(EMPTY);
+    return this.socketService.on('rotation:received');
   }
 
   onResize(): Observable<any> {
-    return of(EMPTY);
+    return this.socketService.on('resize:received');
   }
 
   onText(): Observable<any> {
-    return of(EMPTY);
+    return this.socketService.on('text:received');
   }
 
   onLayer(): Observable<any> {
-    return of(EMPTY);
+    return this.socketService.on('layer:received');
   }
 
-  handleResponse(payload: IAction): ICommand | boolean {
-    const command = this.toolFactory.create(payload);
-    return command ? command : !!command;
+  onActionSave(): Observable<any> {
+    return this.socketService.on('action:saved');
   }
+
 }

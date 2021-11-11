@@ -1,3 +1,6 @@
+import { SyncDrawingService } from './syncdrawing.service';
+import { ISelectionAction } from './../model/IAction.model';
+import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
 import { EllipseCommand } from './tools/tool-ellipse/ellipse-command';
 import { setStyle } from "src/app/utils/colors";
 import { ToolRectangleService } from "src/app/services/tools/tool-rectangle/tool-rectangle.service";
@@ -29,17 +32,10 @@ import { RendererProviderService } from "./renderer-provider/renderer-provider.s
 export class ToolFactoryService {
   private currentCommand: ICommand;
 
-  tools: Record<ActionType, (payload: IAction) => any> = {
+  tools: Record<ActionType | string, (payload: IAction) => any> = {
     Freedraw: (
       payload: IDefaultActionPayload & IFreedrawAction & IFreedrawUpAction
     ) => {
-      this.collaborationService.addUser(payload.userId);
-      this.collaborationService.addActionToUser(payload.userId, {
-        data: payload,
-        command: this.currentCommand,
-        isUndone: false,
-      });
-
       if (payload.state === DrawingState.down) {
         let pencil: Pencil = {} as Pencil;
         pencil.pointsList = [{ x: payload.x, y: payload.y }];
@@ -54,24 +50,25 @@ export class ToolFactoryService {
           pencil,
           this.drawingService
         );
+        this.currentCommand.actionId = payload.actionId;
+        (this.currentCommand as PencilCommand).userId = payload.userId;
         this.currentCommand.execute();
       } else if (payload.state === DrawingState.move) {
         (this.currentCommand as PencilCommand).addPoint({
           x: payload.x,
           y: payload.y,
         });
+      } else if (payload.state === DrawingState.up) {
+        this.addOrUpdateCollaboration(payload.userId, { data: payload, command: this.currentCommand, isUndone: false });
       }
     },
-    Select: () => {
-      return;
+    Select: (payload: ISelectionAction) => {
+      // this.collaborationService.selectAction(payload.userId, payload.actionId);
+      console.log(payload);
+      this.selectionService.selectByActionId(payload.actionId, payload.userId);
+
     },
     Shape: (payload: IShapeAction) => {
-      this.collaborationService.addUser(payload.userId);
-      this.collaborationService.addActionToUser(payload.userId, {
-        data: payload,
-        command: this.currentCommand,
-        isUndone: false,
-      });
 
       if (payload.state === DrawingState.down) {
         let shape = {} as FilledShape;
@@ -130,8 +127,10 @@ export class ToolFactoryService {
             payload.y2 - payload.y1
           );
         }
-
+      } else if (payload.state === DrawingState.up) {
+        this.addOrUpdateCollaboration(payload.userId, { data: payload, command: this.currentCommand, isUndone: false });
       }
+
     },
     Delete: () => {
       return;
@@ -162,12 +161,21 @@ export class ToolFactoryService {
       return;
     },
     Text: () => { },
+    'Save': (payload: { collaborationId: string, actionId: string, userId: string, actionType: string }) => {
+      const { actionId, userId } = payload;
+      if (userId !== this.syncService.defaultPayload!.userId) {
+        return;
+      }
+      this.selectionService.selectByActionId(actionId, userId);
+    },
   };
 
   constructor(
     private rendererService: RendererProviderService,
     private drawingService: DrawingService,
-    private collaborationService: CollaborationService
+    private selectionService: SelectionToolService,
+    private collaborationService: CollaborationService,
+    private syncService: SyncDrawingService
   ) { }
 
   create(payload: IAction): ICommand | null {
@@ -175,5 +183,15 @@ export class ToolFactoryService {
     if (callback) {
       return callback(payload);
     } else return null;
+  }
+
+  handleEvent(payload: IAction): ICommand | null {
+    return this.create(payload);
+  }
+
+  addOrUpdateCollaboration(userId: string, payload: { data: IAction, command: ICommand, isUndone: boolean }) {
+    this.collaborationService.addUser(userId);
+    this.collaborationService.addActionToUser(userId, payload);
+    console.log(this.collaborationService.getUserActions);
   }
 }

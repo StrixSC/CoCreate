@@ -1,3 +1,5 @@
+import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
+import { ToolFactoryService } from './../../services/tool-factory.service';
 import { SyncDrawingService } from '../../services/syncdrawing.service';
 import { switchMap, take } from "rxjs/operators";
 import { Component, OnDestroy } from "@angular/core";
@@ -18,12 +20,15 @@ export class DrawingPageComponent implements OnDestroy {
   welcomeDialogSub: Subscription;
   errorListener: Subscription;
   messageListener: Subscription;
+  actionSavedListener: Subscription;
 
   constructor(
     private syncDrawingService: SyncDrawingService,
     public dialog: MatDialog,
     private hotkeyService: HotkeysService,
     private socketService: SocketService,
+    private selectionService: SelectionToolService,
+    private toolFactory: ToolFactoryService
   ) {
     this.hotkeyService.hotkeysListener();
   }
@@ -63,15 +68,15 @@ export class DrawingPageComponent implements OnDestroy {
               this.syncDrawingService.onResize(),
               this.syncDrawingService.onText(),
               this.syncDrawingService.onLayer(),
+              this.syncDrawingService.onActionSave()
             )
           } else {
             return of(EMPTY);
           }
         })
       ).subscribe((data: any) => {
-        if (data && data.userId !== this.syncDrawingService.defaultPayload!.userId) {
-          this.syncDrawingService.handleResponse(data);
-        }
+        console.log('Event received from user', data.username, 'with type', data.actionType);
+        this.toolFactory.handleEvent(data);
       })
   }
 
@@ -98,6 +103,10 @@ export class DrawingPageComponent implements OnDestroy {
 
     if (this.errorListener) {
       this.errorListener.unsubscribe();
+    }
+
+    if (this.actionSavedListener) {
+      this.actionSavedListener.unsubscribe();
     }
   }
 }

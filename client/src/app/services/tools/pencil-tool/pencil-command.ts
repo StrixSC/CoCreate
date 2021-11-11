@@ -9,11 +9,12 @@ export class PencilCommand implements ICommand {
   private pencil: SVGPolylineElement | null = null;
   private dot: SVGCircleElement | null = null;
   public actionId = "";
+  public userId = "";
   constructor(
     readonly renderer: Renderer2,
     public pencilAttributes: Pencil,
     private drawingService: DrawingService,
-  ) {}
+  ) { }
 
   /// Transformation de la liste des points vers la version SVG en string
   private pointString(): string {
@@ -46,6 +47,7 @@ export class PencilCommand implements ICommand {
       this.execute();
     } else if (this.pencil) {
       this.renderer.setAttribute(this.pencil, 'points', this.pointString());
+
     }
   }
 
@@ -77,6 +79,9 @@ export class PencilCommand implements ICommand {
           (this.pencilAttributes.strokeWidth / 2).toString() + 'px',
         );
         this.renderer.setAttribute(this.dot, 'name', 'dot');
+        this.renderer.setAttribute(this.dot, 'actionId', this.actionId);
+        this.renderer.setAttribute(this.dot, 'userId', this.userId);
+
         this.renderer.setStyle(this.dot, 'fill', this.pencilAttributes.stroke);
         this.renderer.setStyle(this.dot, 'stroke', 'none');
         this.renderer.setStyle(
@@ -91,6 +96,8 @@ export class PencilCommand implements ICommand {
           'svg',
         ) as SVGPolylineElement;
         this.renderer.setAttribute(this.pencil, 'name', 'pencil');
+        this.renderer.setAttribute(this.pencil, 'actionId', this.actionId);
+        this.renderer.setAttribute(this.pencil, 'userId', this.userId);
         this.renderer.setAttribute(this.pencil, 'points', this.pointString());
         this.renderer.setStyle(
           this.pencil,

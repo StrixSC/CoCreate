@@ -64,8 +64,8 @@ export class CommandInvokerService {
       this.undonedCommandsList.push(undoneCommand);
       this.commandCallEmitter.emit('undo');
       this.syncService.sendUndo(undoneCommand);
+    }
   }
-}
 
   /// Appelle la fonction redo de la commande sur le dessus de la pile et l'envoie
   /// a la liste de commande redo

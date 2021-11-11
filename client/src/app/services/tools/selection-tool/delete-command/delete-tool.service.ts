@@ -1,3 +1,4 @@
+import { SyncDrawingService } from './../../../syncdrawing.service';
 import { Injectable } from '@angular/core';
 import { CommandInvokerService } from '../../../command-invoker/command-invoker.service';
 import { DrawingService } from '../../../drawing/drawing.service';
@@ -16,6 +17,7 @@ export class DeletingToolService {
     private selectionTool: SelectionToolService,
     private commandInvoker: CommandInvokerService,
     private drawingService: DrawingService,
+    private syncDrawingService: SyncDrawingService
   ) { }
 
   /// Creation et execution d'une commande de supression

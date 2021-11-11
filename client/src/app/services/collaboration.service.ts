@@ -33,7 +33,6 @@ export class CollaborationService {
       this.actions.get(userId)!.set(action.data.actionId, action);
     }
 
-    console.log(this.actions.get(userId));
   }
 
   undoUserAction(userId: string, actionId: string): boolean {

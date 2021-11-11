@@ -1,3 +1,4 @@
+import { SyncDrawingService } from './../../syncdrawing.service';
 import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { IconDefinition } from '@fortawesome/fontawesome-common-types';
@@ -58,7 +59,7 @@ export class SelectionToolService implements Tools {
     private rendererService: RendererProviderService,
     private gridService: GridService,
     private magnetismService: MagnetismService,
-    private selectionTransformService: SelectionTransformService,
+    private selectionTransformService: SelectionTransformService
   ) {
     this.setRectInversement();
     this.setRectSelection();
@@ -471,7 +472,7 @@ export class SelectionToolService implements Tools {
         this.rendererService.renderer.setAttribute(this.ctrlPoints[i], 'y', `${this.pointsList[i].y + 0.5 - this.pointsSideLength / 2}`);
       }
 
-    // console.log(this.objects);
+      // console.log(this.objects);
     } else { return; }
   }
 
@@ -612,6 +613,12 @@ export class SelectionToolService implements Tools {
       this.rendererService.renderer.appendChild(this.drawingService.drawing, this.ctrlG);
       this.setSelection();
     }
+  }
+
+  selectByActionId(actionId: string, userId: string) {
+    const obj = this.drawingService.getObjectByActionId(actionId);
+    if (!obj) return;
+    this.setNewSelection([obj]);
   }
 
   /// Applique une selection sur une liste d'objets fourni.
