@@ -185,6 +185,7 @@ export class SyncDrawingService {
   // }
 
   sendSelect(actionId: string, selection: boolean): void {
+    if (!actionId) return;
     this.socketService.emit("selection:emit", {
       ...this.defaultPayload,
       actionId: actionId,

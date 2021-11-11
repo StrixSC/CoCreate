@@ -59,7 +59,8 @@ export class SelectionToolService implements Tools {
     private rendererService: RendererProviderService,
     private gridService: GridService,
     private magnetismService: MagnetismService,
-    private selectionTransformService: SelectionTransformService
+    private selectionTransformService: SelectionTransformService,
+    private syncService: SyncDrawingService
   ) {
     this.setRectInversement();
     this.setRectSelection();
@@ -480,6 +481,8 @@ export class SelectionToolService implements Tools {
   removeSelection(): void {
     if (this.objects[0] !== undefined) {
       this.rendererService.renderer.setProperty(this.objects[0], 'isSelected', false);
+      const actionId = this.objects[0].getAttribute('actionId');
+      this.syncService.sendSelect(actionId!, false);
     }
     this.objects = [];
     this.hasSelectedItems = false;
@@ -615,7 +618,7 @@ export class SelectionToolService implements Tools {
     }
   }
 
-  selectByActionId(actionId: string, userId: string) {
+  selectByActionId(actionId: string) {
     const obj = this.drawingService.getObjectByActionId(actionId);
     if (!obj) return;
     this.setNewSelection([obj]);
@@ -634,6 +637,8 @@ export class SelectionToolService implements Tools {
       this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectSelection);
       this.rendererService.renderer.appendChild(this.drawingService.drawing, this.ctrlG);
       this.setSelection();
+      const obj = newSelectionList[0].getAttribute('actionId');
+      this.syncService.sendSelect(obj!, true);
     }
   }
 

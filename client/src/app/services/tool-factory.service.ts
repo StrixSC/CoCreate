@@ -31,6 +31,7 @@ import { RendererProviderService } from "./renderer-provider/renderer-provider.s
 })
 export class ToolFactoryService {
   private currentCommand: ICommand;
+  private pendingExternalCommands: Map<string, ICommand> = new Map<string, ICommand>();
 
   tools: Record<ActionType | string, (payload: IAction) => any> = {
     Freedraw: (
@@ -45,31 +46,31 @@ export class ToolFactoryService {
         pencil.strokeWidth = payload.width;
         pencil.strokeOpacity = fromAlpha(payload.a);
 
-        this.currentCommand = new PencilCommand(
+        const command = new PencilCommand(
           this.rendererService.renderer,
           pencil,
           this.drawingService
         );
-        this.currentCommand.actionId = payload.actionId;
-        (this.currentCommand as PencilCommand).userId = payload.userId;
-        this.currentCommand.execute();
+        command.actionId = payload.actionId;
+        (command as PencilCommand).userId = payload.userId;
+        this.pendingExternalCommands.set(command.actionId, command);
+        if (this.syncService.defaultPayload!.userId !== payload.userId) {
+          command.execute();
+        }
+
       } else if (payload.state === DrawingState.move) {
-        (this.currentCommand as PencilCommand).addPoint({
+        ((this.pendingExternalCommands.get(payload.actionId)!) as PencilCommand).addPoint({
           x: payload.x,
           y: payload.y,
         });
       } else if (payload.state === DrawingState.up) {
-        this.addOrUpdateCollaboration(payload.userId, { data: payload, command: this.currentCommand, isUndone: false });
+        this.addOrUpdateCollaboration(payload.userId, { data: payload, command: this.pendingExternalCommands.get(payload.actionId)!, isUndone: false });
       }
     },
     Select: (payload: ISelectionAction) => {
-      // this.collaborationService.selectAction(payload.userId, payload.actionId);
-      console.log(payload);
-      this.selectionService.selectByActionId(payload.actionId, payload.userId);
-
+      this.collaborationService.updateActionSelection(payload.userId, payload.actionId, payload.isSelected);
     },
     Shape: (payload: IShapeAction) => {
-
       if (payload.state === DrawingState.down) {
         let shape = {} as FilledShape;
         (shape.x = payload.x1),
@@ -166,7 +167,8 @@ export class ToolFactoryService {
       if (userId !== this.syncService.defaultPayload!.userId) {
         return;
       }
-      this.selectionService.selectByActionId(actionId, userId);
+      this.selectionService.selectByActionId(payload.actionId);
+      this.syncService.sendSelect(actionId, true);
     },
   };
 
@@ -192,6 +194,6 @@ export class ToolFactoryService {
   addOrUpdateCollaboration(userId: string, payload: { data: IAction, command: ICommand, isUndone: boolean }) {
     this.collaborationService.addUser(userId);
     this.collaborationService.addActionToUser(userId, payload);
-    console.log(this.collaborationService.getUserActions);
+    this.pendingExternalCommands.delete(payload.data.actionId);
   }
 }

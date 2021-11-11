@@ -8,6 +8,8 @@ export class RectangleCommand implements ICommand {
 
     private rectangle: SVGRectElement;
     public actionId: string = "";
+    public userId: string = "";
+
     constructor(
         readonly renderer: Renderer2,
         private rectangleAttributes: FilledShape,

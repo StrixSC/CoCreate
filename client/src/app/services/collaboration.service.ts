@@ -1,4 +1,4 @@
-import { IAction } from './../model/IAction.model';
+import { IAction, ISelectionAction } from './../model/IAction.model';
 import { ICommand } from 'src/app/interfaces/command.interface';
 import { Injectable } from '@angular/core';
 
@@ -67,5 +67,9 @@ export class CollaborationService {
 
   userExists(userId: string): boolean {
     return this.actions.has(userId);
+  }
+
+  updateActionSelection(userId: string, actionId: string, selection: boolean) {
+    (this.actions.get(userId)!.get(actionId)!.data as ISelectionAction).isSelected = selection;
   }
 }
