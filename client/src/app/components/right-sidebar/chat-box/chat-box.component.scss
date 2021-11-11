@@ -1,61 +1,23 @@
-.open-box {
-  width: 400px;
-  height: 450px;
-  background-color: rgb(247, 247, 247);
-  position: fixed;
+.chat_box {
+  background-color: #36393f;
+  width: 300px;
+  height: 100%;
   bottom: 0;
-  right: 300px;
-  border: 2px solid black;
-  border-top-left-radius: 5%;
-  border-top-right-radius: 5%;
-  border-bottom-left-radius: 5%;
-  overflow: hidden;
 }
 
-.closed-box {
-  width: 350px;
-  height: 40px;
-  background-color: rgb(247, 247, 247);
-  position: fixed;
+.text {
+  padding: 10px;
+  width: 260px;
   bottom: 0;
-  right: 300px;
-  border: 2px solid black;
-}
-
-.top-open-box {
-  width: 100%;
-  margin: auto;
-  background-color: hotpink;
-  // border-radius: 10%;
-  font-size: 28px;
-}
-
-.text-input {
-  width: 320px;
-  height: 40px;
-}
-
-input {
-  position: relative;
-  display: inline-block;
-  font-size: 20px;
-  box-sizing: border-box;
-  transition: 0.5s;
-}
-
-input[type="text"] {
-  background-color: #fff;
-  width: 350px;
-  height: 50px;
+  position: fixed;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border-color: #36393f;
+  border: none;
   outline: none;
-  border-color: hotpink;
-  padding: 0 25px;
-  border-radius: 3px 15px 3px 15px;
-}
-
-.conversation {
-  overflow: auto;
-  overflow-x: hidden;
-  margin-left: 5px;
-  margin-right: 5px;
+  font-size: 15px;
+  color: white;
+  background-color: #40444b;
 }

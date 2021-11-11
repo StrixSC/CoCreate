@@ -13,7 +13,10 @@ export interface DialogData {
 export interface TextChannel {
   name: string;
   style: Object;
+  divStyle: Object;
 }
+
+const l = "#36393F";
 
 @Component({
   selector: "app-right-sidebar",
@@ -37,11 +40,25 @@ export class RightSidebarComponent implements OnInit {
     this.textChannels.set("general", {
       name: "general",
       style: {},
+      divStyle: {},
     });
 
     this.textChannels.set("Second", {
       name: "new-channel",
       style: {},
+      divStyle: {},
+    });
+
+    this.textChannels.set("another", {
+      name: "old-channel",
+      style: {},
+      divStyle: {},
+    });
+
+    this.textChannels.set("s", {
+      name: "a-channel",
+      style: {},
+      divStyle: {},
     });
 
     this.prevJoinedCollabChannels = [
@@ -61,18 +78,33 @@ export class RightSidebarComponent implements OnInit {
   }
 
   addDummyChannel(channel_key: string) {
-    const change = this.textChannels.get(this.selectedChannel) as TextChannel;
-    change.style = {};
-    this.textChannels.set(this.selectedChannel, change);
+    const old = this.textChannels.get(this.selectedChannel) as TextChannel;
+    old.style = {};
+    old.divStyle = {};
+    this.textChannels.set(this.selectedChannel, old);
     this.selectedChannel = channel_key;
 
-    const old: TextChannel = this.textChannels.get(
+    const new_select: TextChannel = this.textChannels.get(
       this.selectedChannel
     ) as TextChannel;
-    old.style = {
+    new_select.style = {
       color: "white",
+      padding: "5px",
+      "margin-right": "5px",
+      "margin-top": "0px",
     };
-    this.textChannels.set(this.selectedChannel, old);
+    new_select.divStyle = {
+      "margin-left": "10px",
+      "margin-right": "10px",
+      "margin-top": "-12px",
+      "background-color": "#393c43",
+      height: "30px",
+      "border-radius": "7px",
+      cursor: "pointer",
+      "animation-duration": "4s",
+    };
+    this.textChannels.set(this.selectedChannel, new_select);
+    console.log(this.selectedChannel);
   }
 
   ngOnInit() {}

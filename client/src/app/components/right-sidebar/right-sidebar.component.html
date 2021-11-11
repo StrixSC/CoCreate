@@ -18,6 +18,7 @@
         class="channel_box"
         *ngFor="let channel of textChannels | keyvalue"
         (click)="addDummyChannel(channel.key)"
+        [ngStyle]="channel.value.divStyle"
       >
         <p class="channels" [ngStyle]="channel.value.style">
           {{ channel.value.name }}
