@@ -5,7 +5,19 @@
   bottom: 0;
 }
 
-.text {
+.hide_all {
+  display: none;
+}
+
+.header_box {
+  top: 0;
+  position: fixed;
+  margin-left: 10px;
+  margin-top: -8px;
+  color: rgb(174, 174, 174);
+}
+
+.input_text {
   padding: 10px;
   width: 260px;
   bottom: 0;
