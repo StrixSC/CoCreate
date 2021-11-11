@@ -1,8 +1,5 @@
 .chat_box {
-  background-color: #36393f;
   width: 300px;
-  height: 100%;
-  bottom: 0;
 }
 
 .hide_all {
@@ -10,11 +7,40 @@
 }
 
 .header_box {
-  top: 0;
-  position: fixed;
-  margin-left: 10px;
-  margin-top: -8px;
+  margin-top: -20px;
+  padding: 15px;
   color: rgb(174, 174, 174);
+  background-color: #36393f;
+  width: 300px;
+}
+
+.messages_container {
+  height: 100%;
+  width: 300px;
+  position: fixed;
+  background-color: #36393f;
+  overflow: scroll;
+}
+
+.column1 {
+  float: left;
+  width: 30px;
+  padding: 10px;
+}
+.column2 {
+  float: left;
+  width: 270px;
+  padding: 10px;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.messages_container::-webkit-scrollbar {
+  display: none;
 }
 
 .input_text {

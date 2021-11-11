@@ -1,17 +1,19 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { ThemePalette } from "@angular/material/core";
 import { NgForm } from "@angular/forms";
 
-export interface Messages {
+export interface Tile {
+  color: string;
+  cols: number;
+  rows: number;
   text: string;
-  color: ThemePalette;
-  isMe: boolean;
-  style: {
-    height: string;
-    width: string;
-    margin?: string;
-    right?: string;
-  };
+}
+
+export interface Message {
+  message: string;
+  avatar: string;
+  username: string;
+  time: string;
 }
 
 @Component({
@@ -19,105 +21,49 @@ export interface Messages {
   templateUrl: "./chat-box.component.html",
   styleUrls: ["./chat-box.component.scss"],
 })
-export class ChatBoxComponent implements OnInit, OnDestroy {
-  socketConversation: Messages[] = [
-    {
-      text: "In some scenarios, developers might prefer that behavior over the default and would like to have the same for",
-      color: "accent",
-      isMe: false,
-      style: {
-        height: "50px",
-        width: "300px",
-        margin: "0 5 5 0",
-      },
-    },
-
-    {
-      text: "In some scenarios",
-      color: "warn",
-      isMe: true,
-      style: {
-        height: "50px",
-        width: "100px",
-        right: "1",
-      },
-    },
+export class ChatBoxComponent implements OnInit {
+  tiles: Tile[] = [
+    { text: "Avatar", cols: 1, rows: 1, color: "lightpink" },
+    { text: "Pritam", cols: 2, rows: 1, color: "#DDBDF1" },
+    { text: "Three", cols: 1, rows: 1, color: "lightpink" },
   ];
-
-  chatBoxCSS: any = {};
   currentText: string;
-  isChatOpen = true;
 
+  messages: Array<Message>;
   constructor() {
-    this.openChatBox();
+    this.messages = [
+      {
+        message: "Bonjour comment va tu?",
+        avatar: "avatar",
+        username: "Max",
+        time: "8:30pm",
+      },
+      {
+        message: "Bien et toi?",
+        avatar: "avatar",
+        username: "Bob",
+        time: "8:30pm",
+      },
+    ];
   }
-  ngOnDestroy(): void {
-    console.log("Destroyed!");
+  ngOnInit(): void {
+    console.log("l");
   }
 
   sendMessage() {
     if (this.currentText.length > 0) {
-      this.socketConversation.push({
-        text: this.currentText,
-        color: "warn",
-        isMe: true,
-        style: {
-          height: "50px",
-          width: "100px",
-          right: "1",
-        },
+      console.log(this.currentText);
+      this.messages.push({
+        message: this.currentText,
+        avatar: "avatar",
+        username: "@me",
+        time: "8:30pm",
       });
       this.currentText = "";
-      window.scroll(0, 0);
     }
   }
 
-  ngOnInit() {}
-
-  openChatBox() {
-    this.chatBoxCSS = {
-      width: "400px",
-      height: "450px",
-      "background-color": "rgb(247, 247, 247)",
-      position: "fixed",
-      bottom: "0",
-      right: "300px",
-      border: "2px solid black",
-      "border-top-left-radius": "5%",
-      "border-top-right-radius": "5%",
-      "border-bottom-left-radius": "5%",
-      overflow: "hidden",
-      display: "block",
-    };
-    this.isChatOpen = true;
-  }
-
-  minimiseChatBox() {
-    this.chatBoxCSS = {
-      width: "350px",
-      height: "40px",
-      "background-color": "rgb(247, 247, 247)",
-      position: "fixed",
-      bottom: "0",
-      right: "300px",
-      border: "2px solid black",
-    };
-    this.isChatOpen = false;
-  }
-
-  closeChatBox() {
-    this.chatBoxCSS = {
-      width: "350px",
-      height: "40px",
-      "background-color": "rgb(247, 247, 247)",
-      position: "fixed",
-      bottom: "0",
-      right: "-1000px",
-      border: "2px solid black",
-    };
-    // this.isChatOpen = false;
-  }
-
+  OnInit() {}
   popOutChat() {
     window.open(
       "http://localhost:4200/popped-chat",
