@@ -50,7 +50,8 @@ export = (io: Server, socket: Socket) => {
                     collaborationId: dbAction.collaborationId,
                     actionId: dbAction.actionId,
                     userId: dbAction.userId,
-                    actionType: 'Save'
+                    actionType: 'Save',
+                    username: dbAction.username
                 });
 
                 return io.emit('freedraw:received', {
