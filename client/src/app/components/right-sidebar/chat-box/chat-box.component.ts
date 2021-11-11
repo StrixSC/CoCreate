@@ -1,6 +1,4 @@
 import { Component, OnInit } from "@angular/core";
-import { ThemePalette } from "@angular/material/core";
-import { NgForm } from "@angular/forms";
 
 export interface Tile {
   color: string;
@@ -22,6 +20,8 @@ export interface Message {
   styleUrls: ["./chat-box.component.scss"],
 })
 export class ChatBoxComponent implements OnInit {
+  chatCss: any = { width: "300px" };
+
   tiles: Tile[] = [
     { text: "Avatar", cols: 1, rows: 1, color: "lightpink" },
     { text: "Pritam", cols: 2, rows: 1, color: "#DDBDF1" },
@@ -70,5 +70,6 @@ export class ChatBoxComponent implements OnInit {
       "C-Sharpcorner",
       "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=800,height=1000"
     );
+    this.chatCss = { display: "none" };
   }
 }

@@ -1,7 +1,16 @@
-<div class="chat_box">
+<div [ngStyle]="chatCss">
   <div class="header_box">
-    <p style="font-size: 20px">general</p>
-    <!-- <button mat-button (click)="popOutChat()">Pop</button> -->
+    <mat-grid-list cols="4" rowHeight="50px">
+      <mat-grid-tile colspan="3" rowspan="1">
+        <p style="font-size: 20px">general</p>
+      </mat-grid-tile>
+      <mat-grid-tile colspan="1" rowspan="1">
+        <button mat-button (click)="popOutChat()">
+          <mat-icon>launch</mat-icon>
+        </button>
+      </mat-grid-tile>
+    </mat-grid-list>
+    <br />
   </div>
   <div class="messages_container">
     <div
