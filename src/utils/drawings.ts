@@ -13,7 +13,7 @@ const defaultTypes = [
     ActionType.Resize,
     ActionType.Text,
     ActionType.Layer,
-    ActionType.UndoRedo
+    ActionType.UndoRedo,
 ];
 
 const hasEmptyProperties = (obj: any): { result: boolean; field: string | null } => {
@@ -166,7 +166,7 @@ const typesCallbacks: Record<
     Rotate: () => ({ result: true, field: null }),
     Text: () => ({ result: true, field: null }),
     Layer: () => ({ result: true, field: null }),
-    UndoRedo: () => ({ result: true, field: null })
+    UndoRedo: () => ({ result: true, field: null }),
 };
 
 export const validateDrawingEvents = (

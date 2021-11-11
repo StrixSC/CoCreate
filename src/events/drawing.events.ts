@@ -48,7 +48,9 @@ export = (io: Server, socket: Socket) => {
 
                 socket.emit('action:saved', {
                     collaborationId: dbAction.collaborationId,
-                    actionId: dbAction.actionId
+                    actionId: dbAction.actionId,
+                    userId: dbAction.userId,
+                    actionType: 'Save'
                 });
 
                 return io.emit('freedraw:received', {
@@ -158,7 +160,8 @@ export = (io: Server, socket: Socket) => {
             io.emit('selection:received', {
                 actionId: action.actionId,
                 isSelected: userSelectionChoice,
-                selectedBy: selectedByUser
+                selectedBy: selectedByUser,
+                actionType: ActionType.Select
             });
         } catch (e: any) {
             handleSocketError(socket, e);
