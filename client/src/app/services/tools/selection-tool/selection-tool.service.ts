@@ -99,8 +99,9 @@ export class SelectionToolService implements Tools {
           const userId = obj.getAttribute('userId');
           const actionId = obj.getAttribute('actionId');
           if (userId && actionId) {
-            const isSelected = this.collaborationService.getSelectionStatus(userId!, actionId!);
-            const isSelectedByMe = (userId === this.syncService.defaultPayload!.userId && isSelected)
+            const isSelected = this.collaborationService.getSelectionStatus(userId, actionId);
+            const isSelectedByMe = (this.collaborationService.getSelectedByUser(userId, actionId) === this.syncService.defaultPayload!.userId && isSelected)
+            console.log(isSelected, isSelectedByMe);
             if (!isSelected || isSelectedByMe) {
               this.allowMove = true;
               this.selectedActionId = actionId;
@@ -368,7 +369,7 @@ export class SelectionToolService implements Tools {
   }
 
   /// Methode qui suprime la selection courante .
-  removeSelection(isCurrent?: boolean): void {
+  removeSelection(): void {
     if (this.objects[0] !== undefined) {
       this.rendererService.renderer.setProperty(this.objects[0], 'isSelected', false);
     }
@@ -508,9 +509,9 @@ export class SelectionToolService implements Tools {
   selectByActionId(actionId: string) {
     const obj = this.drawingService.getObjectByActionId(actionId);
     if (!obj) return;
-    if (this.selectedActionId !== "") {
-      this.syncService.sendSelect(this.selectedActionId, false);
-    }
+    // if (this.selectedActionId !== "") {
+    //   this.syncService.sendSelect(this.selectedActionId, false);
+    // }
     this.selectedActionId = obj.getAttribute('actionId')!;
     this.setNewSelection([obj]);
   }

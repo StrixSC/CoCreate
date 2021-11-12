@@ -1,3 +1,4 @@
+import { environment } from 'src/environments/environment';
 import { SyncDrawingService } from '../../services/syncdrawing.service';
 import { Component } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
@@ -15,6 +16,7 @@ export class AppComponent {
   title = 'Colorimage';
   authSubscription: Subscription;
   constructor(private router: Router, private socketService: SocketService, private af: AngularFireAuth, private syncDrawing: SyncDrawingService) {
+    this.af.auth.useEmulator(environment.authEmulator)
     this.authSubscription = this.af.authState.subscribe((state) => {
       if (!state) {
         this.router.navigateByUrl('');
@@ -23,10 +25,11 @@ export class AppComponent {
         this.syncDrawing.defaultPayload = {
           collaborationId: 'DEMO_COLLABORATION',
           userId: state.uid,
-          username: 'demo',
+          username: state.displayName || 'demo',
           actionId: '',
           actionType: ActionType.Freedraw
         }
+        console.log(this.syncDrawing.defaultPayload);
         this.socketService.setupSocketConnection();
       }
     });

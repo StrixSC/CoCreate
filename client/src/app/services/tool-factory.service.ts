@@ -59,23 +59,26 @@ export class ToolFactoryService {
         }
 
       } else if (payload.state === DrawingState.move) {
-        ((this.pendingExternalCommands.get(payload.actionId)!) as PencilCommand).addPoint({
-          x: payload.x,
-          y: payload.y,
-        });
+        const command = this.pendingExternalCommands.get(payload.actionId) as PencilCommand;
+        if (command) {
+          command.addPoint({
+            x: payload.x,
+            y: payload.y,
+          });
+        }
       } else if (payload.state === DrawingState.up) {
-        this.addOrUpdateCollaboration(payload.userId, { data: payload, command: this.pendingExternalCommands.get(payload.actionId)!, isUndone: false });
+        const command = this.pendingExternalCommands.get(payload.actionId) as PencilCommand;
+        if (command) {
+          this.addOrUpdateCollaboration(payload.userId, { data: payload, command, isUndone: false });
+        }
       }
     },
     Select: (payload: ISelectionAction) => {
-      console.log(payload.actionId, payload.isSelected);
-      if (payload.isSelected && payload.userId === this.syncService.defaultPayload!.userId) {
+      if (payload.isSelected && payload.selectedBy === this.syncService.defaultPayload!.userId) {
         this.selectionService.selectByActionId(payload.actionId);
-      } else if (payload.userId !== this.syncService.defaultPayload!.userId) {
-        console.log('External selection by', payload.selectedBy, payload.username);
       }
 
-      this.collaborationService.updateActionSelection(payload.userId, payload.actionId, payload.isSelected);
+      this.collaborationService.updateActionSelection(payload.userId, payload.actionId, payload.isSelected, payload.selectedBy || '');
     },
     Shape: (payload: IShapeAction) => {
       if (payload.state === DrawingState.down) {
@@ -90,21 +93,26 @@ export class ToolFactoryService {
         shape.strokeOpacity = fromAlpha(payload.a);
         shape.strokeWidth = payload.width;
 
+        let command: ICommand;
         if (payload.shapeType === ShapeType.Ellipse) {
-          this.currentCommand = new EllipseCommand(
+          command = new EllipseCommand(
             this.rendererService.renderer,
             shape,
             this.drawingService
           )
-          this.currentCommand.isSyncAction = true;
+          command.isSyncAction = true;
+          command.actionId = payload.actionId;
+          (command as EllipseCommand).userId = payload.userId;
         } else {
-          this.currentCommand = new RectangleCommand(
+          command = new RectangleCommand(
             this.rendererService.renderer,
             shape,
             this.drawingService
           );
+          command.actionId = payload.actionId;
+          (command as RectangleCommand).userId = payload.userId;
         }
-
+        this.pendingExternalCommands.set(command.actionId, command);
         setStyle(
           shape,
           shape.fill,
@@ -114,29 +122,32 @@ export class ToolFactoryService {
           payload.shapeStyle
         );
 
-        this.currentCommand.execute();
+        if (this.syncService.defaultPayload!.userId !== payload.userId) {
+          command.execute();
+        };
       } else if (payload.state === DrawingState.move) {
         if (payload.shapeType === ShapeType.Rectangle) {
-          (this.currentCommand as RectangleCommand).setX(payload.x1);
-          (this.currentCommand as RectangleCommand).setY(payload.y1);
-          (this.currentCommand as RectangleCommand).setWidth(
-            payload.x2 - payload.x1
-          );
-          (this.currentCommand as RectangleCommand).setHeight(
-            payload.y2 - payload.y1
-          );
+          const command = this.pendingExternalCommands.get(payload.actionId) as RectangleCommand;
+          if (command) {
+            command.setX(payload.x1);
+            command.setY(payload.y1);
+            command.setWidth(payload.x2 - payload.x1);
+            command.setHeight(payload.y2 - payload.y1);
+          }
         } else {
-          (this.currentCommand as EllipseCommand).setCX(payload.x1);
-          (this.currentCommand as EllipseCommand).setCY(payload.y1);
-          (this.currentCommand as EllipseCommand).setWidth(
-            payload.x2 - payload.x1
-          );
-          (this.currentCommand as EllipseCommand).setHeight(
-            payload.y2 - payload.y1
-          );
+          const command = this.pendingExternalCommands.get(payload.actionId) as EllipseCommand;
+          if (command) {
+            command.setCX(payload.x1);
+            command.setCY(payload.y1);
+            command.setWidth(payload.x2 - payload.x1);
+            command.setHeight(payload.y2 - payload.y1);
+          }
         }
       } else if (payload.state === DrawingState.up) {
-        this.addOrUpdateCollaboration(payload.userId, { data: payload, command: this.currentCommand, isUndone: false });
+        const command = this.pendingExternalCommands.get(payload.actionId);
+        if (command) {
+          this.addOrUpdateCollaboration(payload.userId, { data: payload, command, isUndone: false });
+        }
       }
 
     },
@@ -170,11 +181,8 @@ export class ToolFactoryService {
     },
     Text: () => { },
     'Save': (payload: { collaborationId: string, actionId: string, userId: string, actionType: string }) => {
-      const { actionId, userId } = payload;
-      if (userId !== this.syncService.defaultPayload!.userId) {
-        return;
-      }
-      this.syncService.sendSelect(actionId, true);
+      this.syncService.sendSelect(this.selectionService['selectedActionId'], false);
+      this.syncService.sendSelect(payload.actionId, true);
     },
   };
 

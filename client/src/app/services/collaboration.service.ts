@@ -69,14 +69,24 @@ export class CollaborationService {
     return this.actions.has(userId);
   }
 
-  updateActionSelection(userId: string, actionId: string, selection: boolean) {
+  updateActionSelection(userId: string, actionId: string, selection: boolean, selectedBy: string) {
     if (this.actions.has(userId) && this.actions.get(userId)!.has(actionId)) {
       (this.actions.get(userId)!.get(actionId)!.data as ISelectionAction).isSelected = selection;
+      (this.actions.get(userId)!.get(actionId)!.data as ISelectionAction).selectedBy = selectedBy;
+
     }
   }
 
   getSelectionStatus(userId: string, actionId: string) {
-    return (this.actions.get(userId!)!.get(actionId)!.data as ISelectionAction).isSelected;
+    if (this.actions.has(userId) && this.actions.get(userId)!.has(actionId)) {
+      return (this.actions.get(userId!)!.get(actionId)!.data as ISelectionAction).isSelected;
+    } else return true;
+  }
+
+  getSelectedByUser(userId: string, actionId: string) {
+    if (this.actions.has(userId) && this.actions.get(userId)!.has(actionId)) {
+      return (this.actions.get(userId)!.get(actionId)!.data as ISelectionAction).selectedBy;
+    } else return '';
   }
 
 }

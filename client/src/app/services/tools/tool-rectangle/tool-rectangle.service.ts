@@ -62,10 +62,10 @@ export class ToolRectangleService implements Tools {
   /// Quand le bouton de la sourie est enfoncé, on crée un rectangle et on le retourne
   /// en sortie et est inceré dans l'objet courrant de l'outil.
   onPressed(event: MouseEvent): void {
-    if(this.isDrawing) {
+    if (this.isDrawing) {
       return;
     }
-    
+
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
       this.isDrawing = true;
       const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
@@ -99,19 +99,21 @@ export class ToolRectangleService implements Tools {
         );
       }
       this.rectangleCommand = new RectangleCommand(this.rendererService.renderer, this.rectangle, this.drawingService);
-      this.rectangleCommand.execute();
       this.syncService.sendShape(DrawingState.down, this.rectStyle.value, ShapeType.Rectangle, this.rectangle);
+      this.rectangleCommand.actionId = this.syncService.activeActionId;
+      this.rectangleCommand.userId = this.syncService.defaultPayload!.userId;
+      this.rectangleCommand.execute();
     }
   }
 
   /// Quand le bouton de la sourie est apuyé et on bouge celle-ci, l'objet courrant subit des modifications.
   onMove(event: MouseEvent): void {
-    if(!this.isDrawing) {
+    if (!this.isDrawing) {
       return;
     }
 
     const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
-    if(this.rectangle && this.rectangleCommand) {
+    if (this.rectangle && this.rectangleCommand) {
       this.setSize(this.rectangleCommand, this.rectangle, offset.x, offset.y);
     }
     this.syncService.sendShape(DrawingState.move, this.rectStyle.value, ShapeType.Rectangle, this.rectangle!);
@@ -119,7 +121,7 @@ export class ToolRectangleService implements Tools {
 
   /// Quand le bouton de la sourie est relaché, l'objet courrant de l'outil est mis a null.
   onRelease(event: MouseEvent): ICommand | void {
-    if(!this.isDrawing) {
+    if (!this.isDrawing) {
       return;
     }
 
@@ -142,7 +144,7 @@ export class ToolRectangleService implements Tools {
   onKeyDown(event: KeyboardEvent): void {
     if (event.shiftKey) {
       this.isSquare = true;
-      if(this.rectangleCommand && this.rectangle) {
+      if (this.rectangleCommand && this.rectangle) {
         this.setSize(this.rectangleCommand, this.rectangle, this.oldX, this.oldY);
       }
     }
@@ -152,7 +154,7 @@ export class ToolRectangleService implements Tools {
   onKeyUp(event: KeyboardEvent): void {
     if (!event.shiftKey) {
       this.isSquare = false;
-      if(this.rectangleCommand && this.rectangle) {
+      if (this.rectangleCommand && this.rectangle) {
         this.setSize(this.rectangleCommand, this.rectangle, this.oldX, this.oldY);
       }
     }
