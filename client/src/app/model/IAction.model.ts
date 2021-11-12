@@ -1,20 +1,20 @@
 import { Point } from 'src/app/model/point.model';
 
 export enum DrawingState {
-    move='move',
-    up='up',
-    down='down'
+    move = 'move',
+    up = 'up',
+    down = 'down'
 }
 
 export enum ShapeType {
-    Rectangle="Rectangle",
-    Ellipse="Ellipse"
+    Rectangle = "Rectangle",
+    Ellipse = "Ellipse"
 }
 
 export enum ShapeStyle {
-    Center="center",
-    Border="border",
-    fill="fill"
+    Center = "center",
+    Border = "border",
+    fill = "fill"
 }
 
 export enum ActionType {
@@ -74,6 +74,7 @@ export type IShapeAction = IDefaultActionPayload & ISelectionAction & {
 
 export type ISelectionAction = IDefaultActionPayload & {
     isSelected: boolean;
+    selectedBy?: string;
     state: DrawingState
 }
 
@@ -82,8 +83,8 @@ export type IUndoRedoAction = IDefaultActionPayload & {
 }
 
 export type IAction = IDefaultActionPayload & (
-        IFreedrawAction
-    |   IShapeAction  
-    |   ISelectionAction
-    |   IUndoRedoAction
+    IFreedrawAction
+    | IShapeAction
+    | ISelectionAction
+    | IUndoRedoAction
 );

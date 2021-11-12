@@ -70,6 +70,13 @@ export class CollaborationService {
   }
 
   updateActionSelection(userId: string, actionId: string, selection: boolean) {
-    (this.actions.get(userId)!.get(actionId)!.data as ISelectionAction).isSelected = selection;
+    if (this.actions.has(userId) && this.actions.get(userId)!.has(actionId)) {
+      (this.actions.get(userId)!.get(actionId)!.data as ISelectionAction).isSelected = selection;
+    }
   }
+
+  getSelectionStatus(userId: string, actionId: string) {
+    return (this.actions.get(userId!)!.get(actionId)!.data as ISelectionAction).isSelected;
+  }
+
 }

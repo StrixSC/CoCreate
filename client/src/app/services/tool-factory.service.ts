@@ -68,6 +68,13 @@ export class ToolFactoryService {
       }
     },
     Select: (payload: ISelectionAction) => {
+      console.log(payload.actionId, payload.isSelected);
+      if (payload.isSelected && payload.userId === this.syncService.defaultPayload!.userId) {
+        this.selectionService.selectByActionId(payload.actionId);
+      } else if (payload.userId !== this.syncService.defaultPayload!.userId) {
+        console.log('External selection by', payload.selectedBy, payload.username);
+      }
+
       this.collaborationService.updateActionSelection(payload.userId, payload.actionId, payload.isSelected);
     },
     Shape: (payload: IShapeAction) => {
@@ -167,7 +174,6 @@ export class ToolFactoryService {
       if (userId !== this.syncService.defaultPayload!.userId) {
         return;
       }
-      this.selectionService.selectByActionId(payload.actionId);
       this.syncService.sendSelect(actionId, true);
     },
   };

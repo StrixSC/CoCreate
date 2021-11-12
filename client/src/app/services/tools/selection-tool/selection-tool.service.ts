@@ -1,3 +1,4 @@
+import { CollaborationService } from 'src/app/services/collaboration.service';
 import { SyncDrawingService } from './../../syncdrawing.service';
 import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
@@ -51,6 +52,8 @@ export class SelectionToolService implements Tools {
   private tmpY: number;
   private wasMoved = false;
   private isIn = false;
+  private selectedActionId: string = "";
+  private allowMove: boolean = false;
   private firstMovementMagnetism: boolean;
 
   constructor(
@@ -60,7 +63,8 @@ export class SelectionToolService implements Tools {
     private gridService: GridService,
     private magnetismService: MagnetismService,
     private selectionTransformService: SelectionTransformService,
-    private syncService: SyncDrawingService
+    private syncService: SyncDrawingService,
+    private collaborationService: CollaborationService,
   ) {
     this.setRectInversement();
     this.setRectSelection();
@@ -90,8 +94,29 @@ export class SelectionToolService implements Tools {
         target = target.parentNode as SVGElement;
       }
       const obj = this.drawingService.getObject(Number(target.id));
-
       if (event.button === LEFT_CLICK) {
+        if (obj) {
+          const userId = obj.getAttribute('userId');
+          const actionId = obj.getAttribute('actionId');
+          if (userId && actionId) {
+            const isSelected = this.collaborationService.getSelectionStatus(userId!, actionId!);
+            const isSelectedByMe = (userId === this.syncService.defaultPayload!.userId && isSelected)
+            if (!isSelected || isSelectedByMe) {
+              this.allowMove = true;
+              this.selectedActionId = actionId;
+              this.objects.push(obj);
+            }
+          }
+        }
+
+        if (!this.allowMove) {
+          if (this.selectedActionId !== "") {
+            this.syncService.sendSelect(this.selectedActionId, false);
+          }
+          this.removeSelection();
+          return;
+        }
+
         if (this.isInside(offset.x, offset.y)) {
           this.isIn = true;
           this.setMouseWheelEvent();
@@ -99,34 +124,9 @@ export class SelectionToolService implements Tools {
             this.selectionTransformService.setCommandType(SelectionCommandConstants.NONE);
           }
         } else {
-          this.ctrlPoints.forEach((point) => {
-            this.rendererService.renderer.setAttribute(point, 'x', `${offset.x}`);
-            this.rendererService.renderer.setAttribute(point, 'y', `${offset.y}`);
-          });
-          this.removeSelection();
-          if (obj && (this.objects.length < 2 || !this.objects.includes(obj))) {
-            this.setMouseWheelEvent();
-            this.objects.push(obj);
-            this.setSelection();
-            this.isIn = true;
-
-            this.selectionTransformService.setCommandType(SelectionCommandConstants.NONE);
-
-            this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectSelection);
-            this.rendererService.renderer.appendChild(this.drawingService.drawing, this.ctrlG);
-            return;
-          }
+          this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectInversement);
+          this.wasMoved = true;
         }
-      } else {
-        if (obj) {
-          // this.firstInvObj = obj;
-        }
-        this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectInversement);
-        this.wasMoved = true;
-      }
-
-      if (this.hasSelectedItems) {
-        return;
       }
     }
   }
@@ -135,28 +135,12 @@ export class SelectionToolService implements Tools {
   /// et on recherche les objets a l'interieur. Avec le droit, on termine la zone d'inversement et on inverse
   /// la selection des objets se situant a l'interieur.
   onRelease(event: MouseEvent): ICommand | void {
+    if (!this.allowMove) return;
     if ((event.button === RIGHT_CLICK || event.button === LEFT_CLICK) && this.drawingService.drawing) {
-      if (event.button === LEFT_CLICK) {
-        if (this.wasMoved && !this.hasSelectedItems) {
-          // this.findObjects(this.rectSelection, event.button);
-        } else if (!this.wasMoved && this.objects.length >= 1 && this.isIn) {
-          this.objects = [];
-          const target = event.target as SVGElement;
-          const obj = this.drawingService.getObject(Number(target.id));
-          if (obj) {
-            this.objects.push(obj);
-            this.selectionTransformService.createCommand(SelectionCommandConstants.TRANSLATE, this.rectSelection, this.objects);
-          }
-        }
-      } else {
-        // this.findObjects(this.rectInversement, event.button);
-      }
       if (this.objects.length > 0) {
-        this.setSelection();
-      } else {
-        this.removeSelection();
+        this.syncService.sendSelect(this.selectedActionId, true);
+        this.allowMove = false;
       }
-
       this.removeInversement();
 
       // this.firstInvObj = null;
@@ -186,6 +170,7 @@ export class SelectionToolService implements Tools {
     const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
     if (this.drawingService.drawing) {
       if (event.buttons === 1) {
+
         this.wasMoved = true;
 
         if (this.selectionTransformService.getCommandType() === SelectionCommandConstants.RESIZE) {
@@ -216,11 +201,7 @@ export class SelectionToolService implements Tools {
             this.selectionTransformService.translate(event.movementX, event.movementY);
           }
           this.setSelection();
-        } else {
-          this.setSizeOfSelectionArea(offset.x, offset.y, this.rectSelection);
         }
-      } else if (event.buttons === 2) {
-        this.setSizeOfSelectionArea(offset.x, offset.y, this.rectInversement);
       }
     }
   }
@@ -280,102 +261,12 @@ export class SelectionToolService implements Tools {
 
   }
 
-  /// Methode qui applique un redimensionnement au rectangle de selection ou d'inversement.
-  private setSizeOfSelectionArea(x: number, y: number, rectUsing: SVGElement): void {
-    let recX = this.tmpX + this.recStrokeWidth / 2;
-    let recY = this.tmpY + this.recStrokeWidth / 2;
-    let width = x - this.tmpX - this.recStrokeWidth;
-    let height = y - this.tmpY - this.recStrokeWidth;
-
-    if (width < 0) {
-      recX = x + this.recStrokeWidth / 2;
-      width = Math.abs(width) - 2 * this.recStrokeWidth;
-    }
-    if (height < 0) {
-      recY = y + this.recStrokeWidth / 2;
-      height = Math.abs(height) - 2 * this.recStrokeWidth;
-    }
-
-    if (width < 0) {
-      width = 0;
-    }
-    if (height < 0) {
-      height = 0;
-    }
-
-    if (rectUsing === this.rectInversement) {
-      this.rendererService.renderer.setAttribute(rectUsing, 'x', `${recX}`);
-      this.rendererService.renderer.setAttribute(rectUsing, 'y', `${recY}`);
-      this.rendererService.renderer.setAttribute(rectUsing, 'height', `${height}`);
-      this.rendererService.renderer.setAttribute(rectUsing, 'width', `${width}`);
-    } else {
-      this.pointsList[0].x = recX; this.pointsList[0].y = recY;
-      this.pointsList[1].x = recX + width / 2; this.pointsList[1].y = recY;
-      this.pointsList[2].x = recX + width; this.pointsList[2].y = recY;
-      this.pointsList[3].x = recX + width; this.pointsList[3].y = recY + height / 2;
-      this.pointsList[4].x = recX + width; this.pointsList[4].y = recY + height;
-      this.pointsList[5].x = recX + width / 2; this.pointsList[5].y = recY + height;
-      this.pointsList[6].x = recX; this.pointsList[6].y = recY + height;
-      this.pointsList[7].x = recX; this.pointsList[7].y = recY + height / 2;
-      this.elementCenterPoint = { x: (recX + width / 2), y: (recY + height / 2) };
-      this.rendererService.renderer.setAttribute(rectUsing, 'points', this.pointsToString());
-      for (let i = 0; i < 8; i++) {
-        this.rendererService.renderer.setAttribute(this.ctrlPoints[i], 'x', `${this.pointsList[i].x + 0.5 - this.pointsSideLength / 2}`);
-        this.rendererService.renderer.setAttribute(this.ctrlPoints[i], 'y', `${this.pointsList[i].y + 0.5 - this.pointsSideLength / 2}`);
-      }
-    }
-  }
-
   pickupTool(): void {
     return;
   }
   dropTool(): void {
     return;
   }
-
-  /// Methode qui trouve les objets se situant a l'interieur du rectangle de selection ou d'inversement trace.
-  /*private findObjects(rectUsing: SVGElement, button: number): void {
-    const allObject: SVGElement[] = [];
-    this.drawingService.getObjectList().forEach((value) => {
-      if (value.tagName.toLowerCase() !== 'defs') {
-        allObject.push(value);
-      }
-    });
-
-    const rectBox = rectUsing.getBoundingClientRect();
-
-    if (button === 0) {
-      allObject.forEach((obj) => {
-        const box = obj.getBoundingClientRect();
-        if (!(rectBox.left > box.right + this.strToNum(obj.style.strokeWidth) / 2
-          || rectBox.right < box.left - this.strToNum(obj.style.strokeWidth) / 2
-          || rectBox.top > box.bottom + this.strToNum(obj.style.strokeWidth) / 2
-          || rectBox.bottom < box.top - this.strToNum(obj.style.strokeWidth) / 2)) {
-          this.objects.push(obj);
-        }
-      });
-    } else {
-      allObject.forEach((obj) => {
-        const box = obj.getBoundingClientRect();
-        if (!(rectBox.left > box.right || rectBox.right < box.left || rectBox.top > box.bottom || rectBox.bottom < box.top)) {
-          if (obj && obj !== this.firstInvObj) {
-            if (this.objects.includes(obj)) {
-              this.objects.splice(this.objects.indexOf(obj, 0), 1);
-            } else {
-              this.objects.push(obj);
-            }
-          }
-        }
-      });
-      if (this.firstInvObj) {
-        if (this.objects.includes(this.firstInvObj)) {
-          this.objects.splice(this.objects.indexOf(this.firstInvObj, 0), 1);
-        } else {
-          this.objects.push(this.firstInvObj);
-        }
-      }
-    }
-  }*/
 
   /// Methode qui calcule la surface que le rectangle de selection doit prendre en fonction des objets selectionnes.
   private setSelection(): void {
@@ -473,16 +364,13 @@ export class SelectionToolService implements Tools {
         this.rendererService.renderer.setAttribute(this.ctrlPoints[i], 'y', `${this.pointsList[i].y + 0.5 - this.pointsSideLength / 2}`);
       }
 
-      // console.log(this.objects);
     } else { return; }
   }
 
   /// Methode qui suprime la selection courante .
-  removeSelection(): void {
+  removeSelection(isCurrent?: boolean): void {
     if (this.objects[0] !== undefined) {
       this.rendererService.renderer.setProperty(this.objects[0], 'isSelected', false);
-      const actionId = this.objects[0].getAttribute('actionId');
-      this.syncService.sendSelect(actionId!, false);
     }
     this.objects = [];
     this.hasSelectedItems = false;
@@ -492,7 +380,6 @@ export class SelectionToolService implements Tools {
 
     this.rendererService.renderer.setAttribute(this.rectSelection, 'points', '');
     // if (this.drawingService.getObjectList!== undefined)
-    // console.log("AfterREMOVED", this.drawingService.getObjectList());
   }
   /// Methode pour cacher la selection en gardant en memoire les element
   hideSelection(): void {
@@ -621,6 +508,10 @@ export class SelectionToolService implements Tools {
   selectByActionId(actionId: string) {
     const obj = this.drawingService.getObjectByActionId(actionId);
     if (!obj) return;
+    if (this.selectedActionId !== "") {
+      this.syncService.sendSelect(this.selectedActionId, false);
+    }
+    this.selectedActionId = obj.getAttribute('actionId')!;
     this.setNewSelection([obj]);
   }
 
@@ -637,14 +528,11 @@ export class SelectionToolService implements Tools {
       this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectSelection);
       this.rendererService.renderer.appendChild(this.drawingService.drawing, this.ctrlG);
       this.setSelection();
-      const obj = newSelectionList[0].getAttribute('actionId');
-      this.syncService.sendSelect(obj!, true);
     }
   }
 
   setSelectionWidth(): void {
     this.objects[0].style.strokeWidth = '100px';
-    console.log(this.objects[0]);
     this.setNewSelection(this.objects);
   }
 
@@ -673,4 +561,34 @@ export class SelectionToolService implements Tools {
     return (this.drawingService.drawing as SVGSVGElement).getBoundingClientRect().left;
   }
 
+  private isValidSelection(obj?: SVGElement): boolean {
+    if (this.hasSelection()) {
+      const actionId = this.objects[0].getAttribute('actionId')!;
+      const userId = this.objects[0].getAttribute('userId')!;
+      const isSelected = this.collaborationService.getSelectionStatus(userId, actionId);
+      if (!this.objects || !actionId || !userId) return false;
+
+      const isMine = userId === this.syncService.defaultPayload!.userId;
+
+      if (!isMine && isSelected) {
+        return false;
+      }
+
+      return true;
+    } else if (!this.objects.length) {
+      if (!obj) return false;
+      const actionId = obj.getAttribute('actionId');
+      const userId = obj.getAttribute('userId');
+
+      if (!actionId || !userId) return false;
+
+      const isSelected = this.collaborationService.getSelectionStatus(userId, actionId);
+      const isMine = userId === this.syncService.defaultPayload!.userId;
+      if (isSelected || !isMine) return false;
+
+      return true;
+    }
+
+    return false;
+  }
 }

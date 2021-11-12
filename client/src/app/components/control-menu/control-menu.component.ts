@@ -2,6 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { from, Subscription } from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
+import { CollaborationService } from 'src/app/services/collaboration.service';
 import { CommandInvokerService } from 'src/app/services/command-invoker/command-invoker.service';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { ExportDialogService } from 'src/app/services/export-dialog/export-dialog.service';
@@ -30,6 +31,7 @@ export class ControlMenuComponent implements OnDestroy {
     private exportDialogService: ExportDialogService,
     private openDrawingService: OpenDrawingDialogService,
     private authService: AuthService,
+    private collaborationService: CollaborationService
   ) {
   }
 
@@ -100,6 +102,10 @@ export class ControlMenuComponent implements OnDestroy {
       ).subscribe((d: any) => {
         console.log('Sign out successful!');
       });
+  }
+
+  getActions(): void {
+    console.log(this.collaborationService['actions']);
   }
 
   ngOnDestroy(): void {
