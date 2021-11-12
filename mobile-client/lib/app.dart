@@ -6,8 +6,6 @@ import 'package:provider/provider.dart';
 import 'screens/home/home.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'screens/drawing/drawing.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'style.dart';
 
 const loginRoute = '/';
 const chatRoute = '/chat';
@@ -17,6 +15,8 @@ const registerRoute = '/register';
 const fontsize = TextStyle(fontSize: 25);
 
 class App extends StatefulWidget {
+  const App({Key? key}) : super(key: key);
+
   @override
   _AppState createState() => _AppState();
 }

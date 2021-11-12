@@ -26,6 +26,7 @@ class _ToolbarState extends State<Toolbar> {
   final tools = [
     Tool(DrawingType.freedraw, CupertinoIcons.hand_draw_fill),
     Tool("select", CupertinoIcons.hand_raised_fill),
+    Tool("rotate", CupertinoIcons.arrow_clockwise),
     Tool(DrawingType.ellipse, CupertinoIcons.circle),
     Tool(DrawingType.rectangle, CupertinoIcons.rectangle)
   ];
@@ -46,38 +47,40 @@ class _ToolbarState extends State<Toolbar> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [SizedBox(
-        width: MediaQuery.of(context).size.width * 0.10,
-        height: MediaQuery.of(context).size.height,
-        child: Drawer(
-            child: Container(
-                color: Colors.white24,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Expanded(child: colorPicker()),
-                    Expanded(
-                        child: ListView.builder(
-                            itemCount: tools.length,
-                            itemBuilder: (context, index) => Container(
-                                color: currentTool == tools[index].type
-                                    ? kContentColorLightTheme.withOpacity(0.2)
-                                    : Colors.white24,
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                      0, 20.0, 0, 20.0),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      selectTool(tools[index].type);
-                                    },
-                                    child: Icon(
-                                      tools[index].icon,
-                                      size: 32.0,
+    return Column(children: [
+      SizedBox(
+          width: MediaQuery.of(context).size.width * 0.10,
+          height: MediaQuery.of(context).size.height,
+          child: Drawer(
+              child: Container(
+                  color: Colors.white24,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Expanded(child: colorPicker()),
+                      Expanded(
+                          child: ListView.builder(
+                              itemCount: tools.length,
+                              itemBuilder: (context, index) => Container(
+                                  color: currentTool == tools[index].type
+                                      ? kContentColorLightTheme.withOpacity(0.2)
+                                      : Colors.white24,
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        0, 20.0, 0, 20.0),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        selectTool(tools[index].type);
+                                      },
+                                      child: Icon(
+                                        tools[index].icon,
+                                        size: 32.0,
+                                      ),
                                     ),
-                                  ),
-                                )))),
-                  ],
-                ))))]);
+                                  )))),
+                    ],
+                  ))))
+    ]);
   }
 
   colorPicker() {
@@ -118,14 +121,14 @@ class _ToolbarState extends State<Toolbar> {
                       },
                     );
                   },
-                  child: const Text('B', style: TextStyle(fontSize: 24)),
+                  child: const Text('B'),
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(currentColor),
                     textStyle: MaterialStateProperty.all(
                       TextStyle(
                           color: useWhiteForeground(currentColor)
-                              ? const Color(0xffffffff)
-                              : const Color(0xff000000)),
+                              ? const Color(0xff000000)
+                              : const Color(0xffffffff)),
                     ),
                   )))
         ]);

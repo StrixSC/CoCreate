@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:Colorimage/constants/general.dart';
@@ -8,14 +8,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:uuid/uuid.dart';
+import 'package:vector_math/vector_math.dart';
 
 class DrawingScreen extends StatefulWidget {
-  final IO.Socket _socket;
+  final io.Socket _socket;
   final User _user;
 
-  DrawingScreen(this._socket, this._user);
+  const DrawingScreen(this._socket, this._user);
 
   @override
   State<DrawingScreen> createState() => _DrawingScreenState(_socket, _user);
@@ -27,7 +28,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   String drawType = DrawingType.freedraw;
   String? shapeID;
   String? lastShapeID;
-  final IO.Socket _socket;
+  final io.Socket _socket;
   final User _user;
   Map actionsMap = <String, Map<String, dynamic>>{};
   Map selectedItems = <String, String>{};
@@ -52,117 +53,164 @@ class _DrawingScreenState extends State<DrawingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row( children: [
-        Container(child: Toolbar(changeTool, changeColor)),
-        Expanded(child: GestureDetector(
-        //todo: remove hardcode variable when merge with login page
-        onPanStart: (details) {
-          switch (drawType) {
-            case DrawingType.freedraw:
-              if (shapeID != null) {
-                socketSelectionEmission(lastShapeID!, false);
-              }
-              socketFreedrawEmission(details, DrawingState.down);
-              break;
-            case DrawingType.rectangle:
-              socketShapeEmission(
-                  details, DrawingType.rectangle, DrawingState.down);
-              break;
-            case DrawingType.ellipse:
-              socketShapeEmission(
-                  details, DrawingType.ellipse, DrawingState.down);
-              break;
-            case "select":
-              allowMove = false;
-              selectRef =
-                  Offset(details.localPosition.dx, details.localPosition.dy);
-              String? selectItem = getSelectedId(selectRef!);
-              if (selectedItems.containsValue(_user.uid)) {
-                selectedItems.forEach((oldActionId, userId) {
-                  if (userId == _user.uid && oldActionId != selectItem) {
-                    socketSelectionEmission(oldActionId, false);
+      body: Row(children: [
+        Toolbar(changeTool, changeColor),
+        Expanded(
+            child: GestureDetector(
+          onPanStart: (details) {
+            switch (drawType) {
+              case DrawingType.freedraw:
+                unselectLastShape();
+                socketFreedrawEmission(details, DrawingState.down);
+                break;
+              case DrawingType.rectangle:
+                unselectLastShape();
+                socketShapeEmission(
+                    details, DrawingType.rectangle, DrawingState.down);
+                break;
+              case DrawingType.ellipse:
+                unselectLastShape();
+                socketShapeEmission(
+                    details, DrawingType.ellipse, DrawingState.down);
+                break;
+              case "select":
+                allowMove = false;
+                selectRef =
+                    Offset(details.localPosition.dx, details.localPosition.dy);
+                String? selectItem = getSelectedId(selectRef!);
+                if (selectedItems.containsValue(_user.uid)) {
+                  selectedItems.forEach((oldActionId, userId) {
+                    if (userId == _user.uid && oldActionId != selectItem) {
+                      socketSelectionEmission(oldActionId, false);
+                    }
+                  });
+                }
+                if (selectItem != null &&
+                    !selectedItems.containsKey(selectItem)) {
+                  socketSelectionEmission(selectItem, true);
+                  lastShapeID = selectItem;
+                } else {
+                  allowMove = true;
+                }
+                break;
+              case "rotate":
+                selectRef = details.localPosition;
+                break;
+            }
+          },
+          onPanUpdate: (details) {
+            switch (drawType) {
+              case DrawingType.freedraw:
+                unselectLastShape();
+                socketFreedrawEmission(details, DrawingState.move);
+                break;
+              case DrawingType.rectangle:
+                unselectLastShape();
+                socketShapeEmission(
+                    details, DrawingType.rectangle, DrawingState.move);
+                break;
+              case DrawingType.ellipse:
+                unselectLastShape();
+                socketShapeEmission(
+                    details, DrawingType.ellipse, DrawingState.move);
+                break;
+              case "select":
+                if (allowMove && selectedItems.containsValue(_user.uid)) {
+                  selectedItems.forEach((actionId, selectedBy) {
+                    if (selectedBy == _user.uid) {
+                      socketTranslationEmission(
+                          actionId,
+                          (details.localPosition - selectRef!).dx,
+                          (details.localPosition - selectRef!).dy);
+                      selectRef = details.localPosition;
+                    }
+                  });
+                }
+                break;
+              case "rotate":
+                setState(() {
+                  if (selectedItems.containsValue(_user.uid)) {
+                    selectedItems.forEach((actionId, selectedBy) {
+                      if (selectedBy == _user.uid) {
+                        Path path = Path();
+                        var actionMap =
+                            actionsMap[actionId][DrawingType.freedraw];
+
+                        path.moveTo(actionMap.first.dx, actionMap.first.dy);
+                        for (int i = 1; i < actionMap.length; i++) {
+                          path.lineTo(actionMap[i].dx, actionMap[i].dy);
+                        }
+                        Offset center = path.getBounds().center;
+
+                        var angle = atan2(details.localPosition.dy - center.dy,
+                            details.localPosition.dx - center.dx);
+                        var angleRef = atan2(selectRef!.dy - center.dy,
+                            selectRef!.dx - center.dx);
+
+                        List<Offset> rotateOffset = <Offset>[];
+                        var angleVariation = angle - angleRef;
+
+                        for (var offset in (actionMap as List<Offset>)) {
+                          var angleOffset = atan2(
+                              offset.dy - center.dy, offset.dx - center.dx);
+
+                          var x = center.dx +
+                              (offset - center).distance *
+                                  cos(angleOffset + angleVariation);
+                          var y = center.dy +
+                              (offset - center).distance *
+                                  sin(angleOffset + angleVariation);
+                          rotateOffset.add(Offset(x, y));
+                        }
+                        (actionsMap[actionId] as Map<String, List<Offset>>)
+                            .update(
+                                DrawingType.freedraw, (value) => rotateOffset);
+                        selectRef = details.localPosition;
+                      }
+                    });
                   }
                 });
-              }
-              if (selectItem != null) {
-                socketSelectionEmission(selectItem, true);
-              }
-              break;
-          }
-        },
-        onPanUpdate: (details) {
-          switch (drawType) {
-            case DrawingType.freedraw:
-              //todo: need to add only if i'm the person the selected it
-              if (selectedItems.containsKey(lastShapeID)) {
-                socketSelectionEmission(lastShapeID!, false);
-              }
-              socketFreedrawEmission(details, DrawingState.move);
-              break;
-            case DrawingType.rectangle:
-              socketShapeEmission(
-                  details, DrawingType.rectangle, DrawingState.move);
-              break;
-            case DrawingType.ellipse:
-              socketShapeEmission(
-                  details, DrawingType.ellipse, DrawingState.move);
-              break;
-            case "select":
-              if (allowMove && selectedItems.containsValue(_user.uid)) {
-                selectedItems.forEach((actionId, userId) {
-                  if (userId == _user.uid) {
-                    socketTranslationEmission(
-                        actionId,
-                        (details.localPosition - selectRef!).dx,
-                        (details.localPosition - selectRef!).dy);
-                    selectRef = details.localPosition;
-                  }
-                });
-              }
-              break;
-          }
-        },
-        onPanEnd: (details) {
-          switch (drawType) {
-            case DrawingType.freedraw:
-              socketFreedrawEmission(details, DrawingState.up);
-              lastShapeID = shapeID;
-              break;
-            case DrawingType.rectangle:
-              socketShapeEmission(
-                  details, DrawingType.rectangle, DrawingState.up);
-              lastShapeID = shapeID;
-              break;
-            case DrawingType.ellipse:
-              socketShapeEmission(
-                  details, DrawingType.ellipse, DrawingState.up);
-              lastShapeID = shapeID;
-              break;
-          }
-        },
-        child: Center(
-          child: CustomPaint(
-            painter: Painter(drawType, paintsMap, actionsMap, selectedItems),
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
+                break;
+            }
+          },
+          onPanEnd: (details) {
+            switch (drawType) {
+              case DrawingType.freedraw:
+                socketFreedrawEmission(details, DrawingState.up);
+                lastShapeID = shapeID;
+                break;
+              case DrawingType.rectangle:
+                socketShapeEmission(
+                    details, DrawingType.rectangle, DrawingState.up);
+                lastShapeID = shapeID;
+                break;
+              case DrawingType.ellipse:
+                socketShapeEmission(
+                    details, DrawingType.ellipse, DrawingState.up);
+                lastShapeID = shapeID;
+                break;
+            }
+          },
+          child: Center(
+            child: CustomPaint(
+              painter: Painter(drawType, paintsMap, actionsMap, selectedItems),
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+              ),
             ),
           ),
-        ),
-      ))]), // TODO: changer a outil de selection des que freedraw termine
+        ))
+      ]), // TODO: changer a outil de selection des que freedraw termine
       floatingActionButton: Visibility(
           visible: selectedItems.isNotEmpty,
           child: FloatingActionButton(
             onPressed: () => setState(() {
-              print(selectedItems.toString());
-              print(actionsMap.toString());
               setState(() {
                 // TODO: All actions need to be saved for undo redo
-                 actionsMap.remove(selectedItems.keys.first);
-                 selectedItems.clear();
+                actionsMap.remove(selectedItems.keys.first);
+                selectedItems.clear();
               });
-              print(selectedItems.toString());
-              print(actionsMap.toString());
             }),
             tooltip: 'Supression',
             child: const Icon(CupertinoIcons.archivebox_fill),
@@ -172,12 +220,19 @@ class _DrawingScreenState extends State<DrawingScreen> {
     );
   }
 
+  void unselectLastShape() {
+    if (selectedItems.containsKey(lastShapeID) &&
+        selectedItems[lastShapeID] == _user.uid) {
+      socketSelectionEmission(lastShapeID!, false);
+      selectedItems.remove(lastShapeID);
+    }
+  }
+
   void changeColor(Color color) {
     setState(() => currentColor = color);
   }
 
   void changeTool(String type) {
-    print(type);
     setState(() => drawType = type);
   }
 
@@ -208,7 +263,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   data['xTranslation'].toDouble(),
                   data['yTranslation'].toDouble()));
             }
-            actionMap.update(DrawingType.freedraw, (value) => translateOffsetList);
+            actionMap.update(
+                DrawingType.freedraw, (value) => translateOffsetList);
             actionsMap.update(data['actionId'],
                 (value) => actionMap as Map<String, List<Offset>>);
           }
@@ -378,14 +434,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
           ? shapeID = const Uuid().v1()
           : shapeID
     });
-  }
-
-  List<dynamic> convertOffsetToCoords(List<Offset> offsetList) {
-    var coords = [];
-    for (var offset in offsetList) {
-      coords.add({'x': offset.dx, 'y': offset.dy});
-    }
-    return coords;
   }
 
   String? getSelectedId(Offset offset) {
