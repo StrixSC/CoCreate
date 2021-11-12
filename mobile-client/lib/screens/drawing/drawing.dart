@@ -57,6 +57,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
         Expanded(child: GestureDetector(
         //todo: remove hardcode variable when merge with login page
         onPanStart: (details) {
+          print("PANSTART");
+          print(details.localPosition);
           switch (drawType) {
             case DrawingType.freedraw:
               if (shapeID != null) {
@@ -94,9 +96,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
           switch (drawType) {
             case DrawingType.freedraw:
               //todo: need to add only if i'm the person the selected it
-              if (selectedItems.containsKey(lastShapeID)) {
-                socketSelectionEmission(lastShapeID!, false);
-              }
+              // if (selectedItems.containsKey(lastShapeID)) {
+              //   socketSelectionEmission(lastShapeID!, false);
+              // }
               socketFreedrawEmission(details, DrawingState.move);
               break;
             case DrawingType.rectangle:
@@ -108,6 +110,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   details, DrawingType.ellipse, DrawingState.move);
               break;
             case "select":
+              print(details);
               if (allowMove && selectedItems.containsValue(_user.uid)) {
                 selectedItems.forEach((actionId, userId) {
                   if (userId == _user.uid) {
@@ -261,6 +264,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
   void socketFreedrawReception() {
     _socket.on('freedraw:received', (data) {
+      if(_user.displayName == data["username"]) {
       setState(() {
         if (data['state'] == DrawingState.down) {
           Map map = <String, List<Offset>>{};
@@ -287,8 +291,15 @@ class _DrawingScreenState extends State<DrawingScreen> {
           });
         }
       });
+    }});
+  }
+
+  void socketDeleteReception() {
+    _socket.on('delete:received', (data) {
+      print(data);
     });
   }
+
 
   void socketSaveConfirmation() {
     _socket.on('action:saved', (data) {
@@ -331,6 +342,16 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'actionType': "Select",
       'xTranslation': xTranslation,
       'yTranslation': yTranslation
+    });
+  }
+
+  void socketDeleteEmission() {
+    _socket.emit('delete:emit', {
+      'actionId': '',
+      'username': _user.displayName,
+      'userId': _user.uid,
+      'collaborationId': "DEMO_COLLABORATION",
+      'actionType': 'Delete',
     });
   }
 
@@ -452,7 +473,8 @@ class Painter extends CustomPainter {
             for (int i = 1; i < offsetList.length; i++) {
               path.lineTo(offsetList[i].dx, offsetList[i].dy);
             }
-            canvas.drawPath(getCorner(path), paintsMap[actionId]);
+            var corners = getCorner(path);
+            canvas.drawPath(corners["path"], corners["paint"]);
           }
         }
         if (toolType == DrawingType.rectangle) {
@@ -469,27 +491,26 @@ class Painter extends CustomPainter {
     });
   }
 
-  Path getCorner(Path dragPath) {
+  Map getCorner(Path dragPath) {
     Rect bounds = dragPath.getBounds();
     var pathCorner = Path();
 
-    pathCorner.moveTo(bounds.topLeft.dx + 5, bounds.topLeft.dy - 5);
-    pathCorner.lineTo(bounds.topLeft.dx - 5, bounds.topLeft.dy - 5);
-    pathCorner.lineTo(bounds.topLeft.dx - 5, bounds.topLeft.dy + 5);
+    double width = 15.0; double height = 15.0;
+    List corners = [bounds.topLeft, bounds.topRight, bounds.bottomLeft,  bounds.bottomRight];
+    print("LEFT: " );
+    print(bounds.topLeft);
+    for(var corner in corners) {
+      Rect rect  = Rect.fromCenter(center: corner, width: width, height: height);
+      pathCorner.addRect(rect);
+    }
 
-    pathCorner.moveTo(bounds.topRight.dx - 5, bounds.topRight.dy - 5);
-    pathCorner.lineTo(bounds.topRight.dx + 5, bounds.topRight.dy - 5);
-    pathCorner.lineTo(bounds.topRight.dx + 5, bounds.topRight.dy + 5);
+    final paint = Paint()
+      ..color = kPrimaryColor
+      ..isAntiAlias = true
+      ..strokeWidth = 5.0
+      ..style = PaintingStyle.stroke;
 
-    pathCorner.moveTo(bounds.bottomLeft.dx - 5, bounds.bottomLeft.dy - 5);
-    pathCorner.lineTo(bounds.bottomLeft.dx - 5, bounds.bottomLeft.dy + 5);
-    pathCorner.lineTo(bounds.bottomLeft.dx + 5, bounds.bottomLeft.dy + 5);
-
-    pathCorner.moveTo(bounds.bottomRight.dx + 5, bounds.bottomRight.dy - 5);
-    pathCorner.lineTo(bounds.bottomRight.dx + 5, bounds.bottomRight.dy + 5);
-    pathCorner.lineTo(bounds.bottomRight.dx - 5, bounds.bottomRight.dy + 5);
-
-    return pathCorner;
+    return {"path": pathCorner, "paint": paint};
   }
 
   @override
