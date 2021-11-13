@@ -30,8 +30,7 @@ export class ControlMenuComponent implements OnDestroy {
     private commandInvoker: CommandInvokerService,
     private exportDialogService: ExportDialogService,
     private openDrawingService: OpenDrawingDialogService,
-    private authService: AuthService,
-    private router: Router
+    private authService: AuthService
   ) {
   }
 
@@ -62,10 +61,6 @@ export class ControlMenuComponent implements OnDestroy {
   /// Ouvre le message de bienvenue
   openWelcomeMessage(): void {
     this.dialog.open(WelcomeDialogComponent, DIALOG_PROPERTIES);
-  }
-
-  openDrawingGallery() : void {
-    this.router.navigateByUrl("gallery")
   }
 
   /// Ouvrir le dialog de sauvegarde de dessin
