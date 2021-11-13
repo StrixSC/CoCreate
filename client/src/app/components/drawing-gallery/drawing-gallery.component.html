@@ -25,10 +25,10 @@
         <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
       </mat-form-field>
   
-      <mat-paginator #paginator [length]="numPrivatePages" [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
+      <mat-paginator #paginator [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
 
       <div >
-          <app-drawing-gallery-card *ngFor="let drawing of drawings" [drawing]="drawing"></app-drawing-gallery-card>
+          <app-drawing-gallery-card *ngFor="let drawing of dataObsPrivate | async" [drawing]="drawing"></app-drawing-gallery-card>
       </div>
     </div>
   </mat-tab>
@@ -45,10 +45,10 @@
           <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
         </mat-form-field>
     
-        <mat-paginator #paginator [length]="numPrivatePages" [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
+        <mat-paginator #paginator2 [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
   
         <div >
-            <app-drawing-gallery-card *ngFor="let drawing of drawings" [drawing]="drawing"></app-drawing-gallery-card>
+            <app-drawing-gallery-card *ngFor="let drawing of dataObsPublic | async" [drawing]="drawing"></app-drawing-gallery-card>
         </div>
       </div>
     </mat-tab>
@@ -64,10 +64,10 @@
             <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
           </mat-form-field>
       
-          <mat-paginator #paginator2 [length]="numPrivatePages" [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
+          <mat-paginator #paginator3 [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
     
           <div >
-              <app-drawing-gallery-card *ngFor="let drawing of drawings" [drawing]="drawing"></app-drawing-gallery-card>
+              <app-drawing-gallery-card *ngFor="let drawing of dataObsProtected | async" [drawing]="drawing"></app-drawing-gallery-card>
           </div>
         </div>
       </mat-tab>

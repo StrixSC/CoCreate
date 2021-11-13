@@ -56,6 +56,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   
   dataSource = new MatTableDataSource<Drawing1>(DATA);
   dataSource2 = new MatTableDataSource<Drawing1>(DATA);
+  dataSource3 = new MatTableDataSource<Drawing1>(DATA);
 
 
   @ViewChild('tagInput', { static: false }) tagInput: ElementRef<HTMLInputElement>;
@@ -67,20 +68,23 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   // @ViewChild(MatPaginator,  { static: true }) paginatorPrivate: MatPaginator;
 
 
-  @ViewChild('paginator', { static: true }) paginatorPublic: MatPaginator;
-  @ViewChild('paginator2', { static: true }) paginatorPrivate: MatPaginator;
+  @ViewChild('paginator', { static: true }) paginatorPrivate: MatPaginator;
+  @ViewChild('paginator2', { static: true }) paginatorPublic: MatPaginator;
+  @ViewChild('paginator3', { static: true }) paginatorProtected: MatPaginator;
 
   drawings: Drawing1[] = [];
 
 
   teamName: String[];
   isLoaded = false;
-  numPublicPages = 0;
-  
-  numPrivatePages = 0;
+  // numPublicPages = 0;
+  // numPrivatePages = 0;
+  // numProtectedPages = 0
 
   //dataSource: MatTableDataSource<Drawing> = new MatTableDataSource<Drawing>();
-  dataObs: BehaviorSubject<Drawing1[]>;
+  dataObsPublic: BehaviorSubject<Drawing1[]>;
+  dataObsPrivate: BehaviorSubject<Drawing1[]>;
+  dataObsProtected: BehaviorSubject<Drawing1[]>;
 
   constructor(
     private openDrawingService: OpenDrawingService,
@@ -112,8 +116,12 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     this.drawings = this.dataSource2.connect().value;
     this.dataSource.paginator = this.paginatorPublic;
     this.dataSource2.paginator = this.paginatorPrivate;
-    this.numPrivatePages = this.drawings.length;
-    this.numPublicPages = this.drawings.length;
+    this.dataSource3.paginator = this.paginatorProtected;
+    // this.numPrivatePages = this.drawings.length;
+    // this.numPublicPages = this.drawings.length;
+    this.dataObsPublic = this.dataSource.connect();
+    this.dataObsPrivate = this.dataSource2.connect();
+    this.dataObsProtected = this.dataSource3.connect();
     this.cdr.detectChanges();
   }
 
@@ -221,7 +229,10 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
         !this.dataSource.paginator ? this.dataSource.paginator = this.paginatorPublic : null;  
         break;
         case 1:
-        !this.dataSource2.paginator ? this.dataSource2.paginator = this.paginatorPrivate : null;
+        !this.dataSource2.paginator ? this.dataSource2.paginator = this.paginatorPrivate : null;  
+        break;
+        case 2:
+        !this.dataSource3.paginator ? this.dataSource3.paginator = this.paginatorProtected : null;
       }
     });
 }
