@@ -54,20 +54,15 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   pageIndex = 0;
   selectedTab = new FormControl(0);
   
-  dataSource = new MatTableDataSource<Drawing1>(DATA);
-  dataSource2 = new MatTableDataSource<Drawing1>(DATA);
-  dataSource3 = new MatTableDataSource<Drawing1>(DATA);
+  
+  dataSource = new MatTableDataSource<Drawing1>(this.sortPublicVisibility(DATA));
+  dataSource2 = new MatTableDataSource<Drawing1>(this.sortPrivateVisibility(DATA));
+  dataSource3 = new MatTableDataSource<Drawing1>(this.sortProtectedVisibility(DATA));
 
 
   @ViewChild('tagInput', { static: false }) tagInput: ElementRef<HTMLInputElement>;
   @ViewChild('auto', { static: false }) matAutocomplete: MatAutocomplete;
-  //@ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild('fileUpload', { static: false }) fileUploadEl: ElementRef;
-
-  // @ViewChild(MatPaginator,  { static: true }) paginatorPublic: MatPaginator;
-  // @ViewChild(MatPaginator,  { static: true }) paginatorPrivate: MatPaginator;
-
-
   @ViewChild('paginator', { static: true }) paginatorPrivate: MatPaginator;
   @ViewChild('paginator2', { static: true }) paginatorPublic: MatPaginator;
   @ViewChild('paginator3', { static: true }) paginatorProtected: MatPaginator;
@@ -150,6 +145,37 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     return Math.round(new Date().getTime() - new Date(date).getTime()) > ONE_WEEK_NUMERIC_VALUE;
   }
 
+  sortPublicVisibility(drawings: Drawing1[]) : Drawing1[] {
+    let sort: Drawing1[] = new Array();
+    for (let drawing of drawings){
+      if(drawing.visibility ==='Public')
+      {
+        sort.push(drawing);
+      }
+    }
+    return sort;
+  }
+
+  sortPrivateVisibility(drawings: Drawing1[]) : Drawing1[] {
+    let sort: Drawing1[] = new Array();
+    for (let drawing of drawings){
+      if(drawing.visibility ==='Privé')
+      {
+        sort.push(drawing);
+      }
+    }
+    return sort;
+  }
+  sortProtectedVisibility(drawings: Drawing1[]) : Drawing1[] {
+    let sort: Drawing1[] = new Array();
+    for (let drawing of drawings){
+      if(drawing.visibility ==='Protégé')
+      {
+        sort.push(drawing);
+      }
+    }
+    return sort;
+  }
   getLocalThumbnail() {
     const container: HTMLElement | null = document.getElementById('localFileThumbnail');
     if (container) {
