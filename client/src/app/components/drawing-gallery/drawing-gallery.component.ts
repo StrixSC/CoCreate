@@ -10,7 +10,6 @@ import {
 import { BehaviorSubject, Observable } from 'rxjs';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { OpenDrawingService } from 'src/app/services/open-drawing/open-drawing.service';
-import { TagService } from 'src/app/services/tag/tag.service';
 import { Drawing } from '../../../../../common/communication/drawing';
 
 const ONE_WEEK_NUMERIC_VALUE = 24 * 60 * 60 * 1000 * 7;
@@ -43,6 +42,7 @@ const DATA: Drawing1[] = [
   templateUrl: './drawing-gallery.component.html',
   styleUrls: ['./drawing-gallery.component.scss']
 })
+
 export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   user: string= "Pati";
@@ -55,9 +55,9 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   selectedTab = new FormControl(0);
   
   
-  dataSource = new MatTableDataSource<Drawing1>(this.sortPublicVisibility(DATA));
-  dataSource2 = new MatTableDataSource<Drawing1>(this.sortPrivateVisibility(DATA));
-  dataSource3 = new MatTableDataSource<Drawing1>(this.sortProtectedVisibility(DATA));
+  datasourcePublic = new MatTableDataSource<Drawing1>(this.sortPublicVisibility(DATA));
+  datasourcePrivate = new MatTableDataSource<Drawing1>(this.sortPrivateVisibility(DATA));
+  datasourceProtected = new MatTableDataSource<Drawing1>(this.sortProtectedVisibility(DATA));
 
 
   @ViewChild('tagInput', { static: false }) tagInput: ElementRef<HTMLInputElement>;
@@ -72,11 +72,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
   teamName: String[];
   isLoaded = false;
-  // numPublicPages = 0;
-  // numPrivatePages = 0;
-  // numProtectedPages = 0
-
-  //dataSource: MatTableDataSource<Drawing> = new MatTableDataSource<Drawing>();
   dataObsPublic: BehaviorSubject<Drawing1[]>;
   dataObsPrivate: BehaviorSubject<Drawing1[]>;
   dataObsProtected: BehaviorSubject<Drawing1[]>;
@@ -86,7 +81,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     public drawingService: DrawingService,
     private renderer: Renderer2,
     public dialog: MatDialog,
-    private tagService: TagService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {
@@ -95,28 +89,27 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   ngOnInit(): void {
-    //this.dataSource.filterPredicate = ((data: NewDrawingParameters) => this.tagService.containsTag(data, this.selectedTags));
-
-    //this.paginator._intl.itemsPerPageLabel="Dessins par page: ";
+    this.paginatorPrivate._intl.itemsPerPageLabel="Dessins par page: ";
+    this.paginatorPublic._intl.itemsPerPageLabel="Dessins par page: ";
+    this.paginatorProtected._intl.itemsPerPageLabel="Dessins par page: ";
   }
 
   ngOnDestroy(): void {
-    if (this.dataSource) { this.dataSource.disconnect(); }
+    if (this.datasourcePublic) { this.datasourcePublic.disconnect(); }
+    if (this.datasourcePrivate) { this.datasourcePrivate.disconnect(); }
+    if (this.datasourceProtected) { this.datasourceProtected.disconnect(); }
   }
 
   ngAfterViewInit(): void {
-    //this.dataSource.paginator = this.paginator;
-    
-    this.drawings = this.dataSource.connect().value;
-    this.drawings = this.dataSource2.connect().value;
-    this.dataSource.paginator = this.paginatorPublic;
-    this.dataSource2.paginator = this.paginatorPrivate;
-    this.dataSource3.paginator = this.paginatorProtected;
+
+    this.datasourcePublic.paginator = this.paginatorPublic;
+    this.datasourcePrivate.paginator = this.paginatorPrivate;
+    this.datasourceProtected.paginator = this.paginatorProtected;
     // this.numPrivatePages = this.drawings.length;
     // this.numPublicPages = this.drawings.length;
-    this.dataObsPublic = this.dataSource.connect();
-    this.dataObsPrivate = this.dataSource2.connect();
-    this.dataObsProtected = this.dataSource3.connect();
+    this.dataObsPublic = this.datasourcePublic.connect();
+    this.dataObsPrivate = this.datasourcePrivate.connect();
+    this.dataObsProtected = this.datasourceProtected.connect();
     this.cdr.detectChanges();
   }
 
@@ -176,6 +169,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     }
     return sort;
   }
+  
   getLocalThumbnail() {
     const container: HTMLElement | null = document.getElementById('localFileThumbnail');
     if (container) {
@@ -217,7 +211,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   //   this.dialogRef.close();
   // }
 
-  add(event: MatChipInputEvent): void {
+  /*add(event: MatChipInputEvent): void {
     this.openDrawingService.add(event, this.matAutocomplete.isOpen);
     this.dataSource.filter = this.openDrawingService.selectedTags.toString();
   }
@@ -225,13 +219,13 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   remove(tag: string): void {
     this.openDrawingService.remove(tag);
     this.dataSource.filter = this.openDrawingService.selectedTags.toString();
-  }
+  }*/
   // Selecting a tag from suggestion
-  selected(event: MatAutocompleteSelectedEvent): void {
+  /*selected(event: MatAutocompleteSelectedEvent): void {
     this.openDrawingService.selectTag(event.option.viewValue);
     this.tagInput.nativeElement.value = '';
     this.dataSource.filter = this.openDrawingService.selectedTags.toString();
-  }
+  }*/
   handleFile() {
     this.openDrawingService.handleFile(this.fileUploadEl.nativeElement.files);
   }
@@ -252,13 +246,13 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     setTimeout(() => {
       switch (index) {
         case 0:
-        !this.dataSource.paginator ? this.dataSource.paginator = this.paginatorPublic : null;  
+        !this.datasourcePublic.paginator ? this.datasourcePublic.paginator = this.paginatorPublic : null;  
         break;
         case 1:
-        !this.dataSource2.paginator ? this.dataSource2.paginator = this.paginatorPrivate : null;  
+        !this.datasourcePrivate.paginator ? this.datasourcePrivate.paginator = this.paginatorPrivate : null;  
         break;
         case 2:
-        !this.dataSource3.paginator ? this.dataSource3.paginator = this.paginatorProtected : null;
+        !this.datasourceProtected.paginator ? this.datasourceProtected.paginator = this.paginatorProtected : null;
       }
     });
   }
