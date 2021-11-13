@@ -2,9 +2,19 @@
   flex: 1 1 auto;
 }
 
+.centerTab {
+  text-align: center; 
+  overflow: visible;
+}
+
 .wrapper {
   width: 100%;
   height: 100%;
+}
+
+.margin-center {
+  margin-left: 5%; 
+  margin-right: 5%;
 }
 
 .overlay {
@@ -14,7 +24,6 @@
   height: 100%;
 }
 .drawing-list {
-  
   padding-left: 2%;
   padding-right: 2%;
 }

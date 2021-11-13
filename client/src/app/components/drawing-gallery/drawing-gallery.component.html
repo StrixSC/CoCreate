@@ -12,10 +12,10 @@
   </mat-toolbar-row>
 </mat-toolbar>
 
-<mat-tab-group #tabGroup (selectedIndexChange)="setPagination($event)" dynamicHeight style =" overflow: visible;">
+<mat-tab-group #tabGroup class="centerTab" (selectedIndexChange)="setPagination($event)">
   <mat-tab class="drawing-list" label="Dessins privés">
   <br>
-    <div  style="text-align: center;">             
+    <div>             
       <mat-form-field [style.width.%]="50" appearance="outline">
         <mat-label>Recherche</mat-label>
         <input matInput placeholder="Entrez un mot-clé">
@@ -27,7 +27,7 @@
   
       <mat-paginator #paginator [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
 
-      <div >
+      <div class = "margin-center">
           <app-drawing-gallery-card *ngFor="let drawing of dataObsPrivate | async" [drawing]="drawing"></app-drawing-gallery-card>
       </div>
     </div>
@@ -35,7 +35,7 @@
     
   <mat-tab class="drawing-list" label="Dessins publiques">
     <br>
-      <div  style="text-align: center;">             
+      <div>             
         <mat-form-field [style.width.%]="50" appearance="outline">
           <mat-label>Recherche</mat-label>
           <input matInput placeholder="Entrez un mot-clé">
@@ -47,14 +47,14 @@
     
         <mat-paginator #paginator2 [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
   
-        <div >
+        <div class="margin-center">
             <app-drawing-gallery-card *ngFor="let drawing of dataObsPublic | async" [drawing]="drawing"></app-drawing-gallery-card>
         </div>
       </div>
     </mat-tab>
     <mat-tab class="drawing-list" label="Dessins protégés">
       <br>
-        <div  style="text-align: center;">             
+        <div>             
           <mat-form-field [style.width.%]="50" appearance="outline">
             <mat-label>Recherche</mat-label>
             <input matInput placeholder="Entrez un mot-clé">
@@ -66,7 +66,7 @@
       
           <mat-paginator #paginator3 [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
     
-          <div >
+          <div class = "margin-center">
               <app-drawing-gallery-card *ngFor="let drawing of dataObsProtected | async" [drawing]="drawing"></app-drawing-gallery-card>
           </div>
         </div>
