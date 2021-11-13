@@ -11,10 +11,15 @@ export class CreateDrawingComponent  {
   
     drawingNameControl = new FormControl('', Validators.required);
     selectVisibilityControl = new FormControl('', Validators.required);
+    teamNameControl = new FormControl('', Validators.required);
+
+    
     public visibilityTypes: String[];
+    public teamNames: String[];
     public constructor(){
       
       this.visibilityTypes = [VisibilityType.public, VisibilityType.protected, VisibilityType.private]
+      this.teamNames = ['Moi-même', 'Équipe de collaboration']
     }
     
 }

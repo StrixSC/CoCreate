@@ -50,6 +50,7 @@ import { DrawingGalleryComponent } from './components/drawing-gallery/drawing-ga
 import { DrawingGalleryCardComponent } from './components/drawing-gallery-card/drawing-gallery-card.component';
 import { DrawingPreviewDialogComponent } from './components/drawing-preview-dialog/drawing-preview-dialog.component';
 import { CreateDrawingComponent } from './components/create-drawing/create-drawing.component';
+import { MenuPageComponent } from './components/menu-page/menu-page.component';
 
 @NgModule({
   declarations: [
@@ -84,7 +85,8 @@ import { CreateDrawingComponent } from './components/create-drawing/create-drawi
     DrawingGalleryComponent,
     DrawingGalleryCardComponent,
     DrawingPreviewDialogComponent,
-    CreateDrawingComponent
+    CreateDrawingComponent,
+    MenuPageComponent
   ],
   imports: [
     BrowserModule,

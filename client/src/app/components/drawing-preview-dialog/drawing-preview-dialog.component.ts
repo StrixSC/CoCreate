@@ -1,5 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { Drawing1 } from '../../../../../common/communication/new-drawing-parameters';
 
 @Component({
   selector: 'app-drawing-preview-dialog',
@@ -7,11 +8,13 @@ import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
   styleUrls: ['./drawing-preview-dialog.component.scss']
 })
 export class DrawingPreviewDialogComponent  {
-
+    drawing: Drawing1;
     constructor(
       public dialogRef: MatDialogRef<DrawingPreviewDialogComponent>,
       @Inject(MAT_DIALOG_DATA) public data: any,
-    ) {}
+    ) {
+      this.drawing = data;
+    }
   
     onNoClick(): void {
       this.dialogRef.close();

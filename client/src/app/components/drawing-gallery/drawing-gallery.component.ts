@@ -1,7 +1,8 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Drawing1 } from '../../../../../common/communication//new-drawing-parameters';
 import {
   MatAutocomplete, MatAutocompleteSelectedEvent, MatChipInputEvent,
   MatDialog, MatPaginator, MatTableDataSource
@@ -13,6 +14,30 @@ import { TagService } from 'src/app/services/tag/tag.service';
 import { Drawing } from '../../../../../common/communication/drawing';
 
 const ONE_WEEK_NUMERIC_VALUE = 24 * 60 * 60 * 1000 * 7;
+
+const DATA: Drawing1[] = [
+  {id: "1", name: 'Hydrogen', visibility: 'Public', owner: 'Pati', creationDate: new Date("2019-01-16"), numActifCollaborators: 2, author: 'Flower', img:"../../../assets/img/mock-img/1.jpg"},
+  {id: "2", name: 'Helium', visibility: 'Protégé',owner: 'Pati', creationDate: new Date("2020-01-16"), numActifCollaborators: 0, author: 'Pati', img:"../../../assets/img/mock-img/2.jpg"},
+  {id: "3", name: 'Lithium', visibility: 'Privé',owner: 'Daisy', creationDate: new Date("2021-01-16"), numActifCollaborators: 1, author: 'Daisy', img:"../../../assets/img/mock-img/3.jpg"},
+  {id: "4",name: 'Beryllium', visibility: 'Public',owner: 'Tulipe', creationDate: new Date("2021-09-23"), numActifCollaborators: 0, author: 'Power', img:"../../../assets/img/mock-img/4.jpg"},
+  {id: "5",name: 'Boron', visibility: 'Protégé',owner: 'Mari', creationDate: new Date("2021-09-16"), numActifCollaborators: 0, author: 'Mari', img:"../../../assets/img/mock-img/5.jpg"},
+  {id: "6",name: 'Carbon', visibility: 'Privé',owner: 'Cherry', creationDate: new Date("2018-03-04"), numActifCollaborators: 1, author: 'Cherry', img:"../../../assets/img/mock-img/6.jpg"},
+  {id: "7",name: 'Nitrogen', visibility: 'Public',owner: 'Blossom', creationDate: new Date("2020-12-02"), numActifCollaborators: 1, author: 'Blossom', img:"../../../assets/img/mock-img/7.jpg"},
+  {id: "8",name: 'Oxygen', visibility: 'Protégé',owner: 'Berry', creationDate: new Date("2021-04-03"), numActifCollaborators: 4, author: 'Berry', img:"../../../assets/img/mock-img/8.jpg"},
+  {id: "9",name: 'Fluorine', visibility: 'Public',owner: 'Mari', creationDate: new Date("2021-08-30"), numActifCollaborators: 5, author: 'Mari', img:"../../../assets/img/mock-img/9.jpg"},
+  {id: "10",name: 'Neon', visibility: 'Privé',owner: 'Pati', creationDate: new Date("2021-03-21"), numActifCollaborators: 3, author: 'Pati', img:"../../../assets/img/mock-img/10.jpg"},
+  {id: "11",name: 'Sodium', visibility: 'Protégé',owner: 'Daisy', creationDate: new Date("2021-02-14"), numActifCollaborators: 2, author: 'Daisy', img:"../../../assets/img/mock-img/11.jpg"},
+  {id: "12",name: 'Magnesium', visibility: 'Public',owner: 'Daisy', creationDate: new Date("2020-12-25"), numActifCollaborators: 2, author: 'Daisy', img:"../../../assets/img/mock-img/12.jpg"},
+  {id: "13",name: 'Aluminum', visibility: 'Privé',owner: 'Tulipe', creationDate: new Date("2021-01-01"), numActifCollaborators: 1, author: 'Tulipe', img:"../../../assets/img/mock-img/13.jpg"},
+  {id: "14",name: 'Silicon', visibility: 'Protégé',owner: 'Heroku', creationDate: new Date("2021-08-05"), numActifCollaborators: 0, author: 'Heroku', img:"../../../assets/img/mock-img/14.jpg"},
+  {id: "15",name: 'Phosphorus', visibility: 'Public',owner: 'Stella', creationDate: new Date("2021-07-31"), numActifCollaborators: 0, author: 'Stella', img:"../../../assets/img/mock-img/15.jpg"},
+  {id: "16",name: 'Sulfur',visibility: 'Privé',owner: 'Pepsi_Hero', creationDate: new Date("2021-05-19"), numActifCollaborators: 0, author: 'Pepsi_Hero', img:"../../../assets/img/mock-img/16.jpg"},
+  {id: "17",name: 'Chlorine', visibility: 'Protégé',owner: 'Louis XIV', creationDate: new Date("2021-10-31"), numActifCollaborators: 0, author: 'Louis XIV', img:"../../../assets/img/mock-img/17.jpg"},
+  {id: "18",name: 'Argon', visibility: 'Public',owner: 'Pati', creationDate: new Date("2019-01-08"), numActifCollaborators: 2, author: 'Pati', img:"../../../assets/img/mock-img/18.jpg"},
+  {id: "19",name: 'Potassium', visibility: 'Protégé',owner: 'Pati', creationDate: new Date("2020-03-29"), numActifCollaborators: 1, author: 'Pati', img:"../../../assets/img/mock-img/19.jpg"},
+  {id: "20",name: 'Calcium',visibility: 'Privé',owner: 'Peach', creationDate: new Date("2021-06-24"), numActifCollaborators: 1, author: 'Peach', img:"../../../assets/img/mock-img/20.jpg"},
+];
+
 @Component({
   selector: 'app-drawing-gallery',
   templateUrl: './drawing-gallery.component.html',
@@ -20,6 +45,7 @@ const ONE_WEEK_NUMERIC_VALUE = 24 * 60 * 60 * 1000 * 7;
 })
 export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit {
 
+  user: string= "Pati";
   visible = true;
   selectable = true;
   removable = true;
@@ -27,19 +53,34 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   separatorKeysCodes: number[] = [ENTER, COMMA];
   pageIndex = 0;
   selectedTab = new FormControl(0);
+  
+  dataSource = new MatTableDataSource<Drawing1>(DATA);
+  dataSource2 = new MatTableDataSource<Drawing1>(DATA);
+
 
   @ViewChild('tagInput', { static: false }) tagInput: ElementRef<HTMLInputElement>;
   @ViewChild('auto', { static: false }) matAutocomplete: MatAutocomplete;
-  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+  //@ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild('fileUpload', { static: false }) fileUploadEl: ElementRef;
-  
 
-  drawingPreview: Drawing[] = [];
+  // @ViewChild(MatPaginator,  { static: true }) paginatorPublic: MatPaginator;
+  // @ViewChild(MatPaginator,  { static: true }) paginatorPrivate: MatPaginator;
+
+
+  @ViewChild('paginator', { static: true }) paginatorPublic: MatPaginator;
+  @ViewChild('paginator2', { static: true }) paginatorPrivate: MatPaginator;
+
+  drawings: Drawing1[] = [];
+
+
+  teamName: String[];
   isLoaded = false;
-  numPages = 1;
+  numPublicPages = 0;
+  
+  numPrivatePages = 0;
 
-  dataSource: MatTableDataSource<Drawing> = new MatTableDataSource<Drawing>();
-  dataObs: BehaviorSubject<Drawing[]>;
+  //dataSource: MatTableDataSource<Drawing> = new MatTableDataSource<Drawing>();
+  dataObs: BehaviorSubject<Drawing1[]>;
 
   constructor(
     private openDrawingService: OpenDrawingService,
@@ -48,15 +89,16 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     public dialog: MatDialog,
     private tagService: TagService,
     private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
-    this.dataSource = new MatTableDataSource<Drawing>();
+    
 
   }
 
   ngOnInit(): void {
-    this.dataSource.filterPredicate = ((data: Drawing) => this.tagService.containsTag(data, this.selectedTags));
-    this.dataObs = this.dataSource.connect();
-    this.paginator._intl.itemsPerPageLabel="Dessins par page: ";
+    //this.dataSource.filterPredicate = ((data: NewDrawingParameters) => this.tagService.containsTag(data, this.selectedTags));
+
+    //this.paginator._intl.itemsPerPageLabel="Dessins par page: ";
   }
 
   ngOnDestroy(): void {
@@ -64,7 +106,15 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
+    //this.dataSource.paginator = this.paginator;
+    
+    this.drawings = this.dataSource.connect().value;
+    this.drawings = this.dataSource2.connect().value;
+    this.dataSource.paginator = this.paginatorPublic;
+    this.dataSource2.paginator = this.paginatorPrivate;
+    this.numPrivatePages = this.drawings.length;
+    this.numPublicPages = this.drawings.length;
+    this.cdr.detectChanges();
   }
 
   get tagCtrl(): FormControl {
@@ -103,7 +153,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     }
   }
 
-  async deleteDrawing(event: MouseEvent, drawing: Drawing): Promise<void> {
+ /*async deleteDrawing(event: MouseEvent, drawing: Drawing): Promise<void> {
     event.stopPropagation();
     if (await this.openDrawingService.deleteDrawing(drawing)) {
       const index = this.dataSource.data.indexOf(drawing, 0);
@@ -113,15 +163,15 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
         this.dataObs.next(this.dataSource.data);
       }
     }
-  }
+  }*/
 
-  getBackgroundSelected(drawing: Drawing): string {
-    return this.openDrawingService.getBackgroundSelected(drawing);
-  }
+  // getBackgroundSelected(drawing: Drawing): string {
+  //   return this.openDrawingService.getBackgroundSelected(drawing);
+  // }
 
-  selectDrawing(drawing: Drawing) {
-    this.openDrawingService.selectDrawing(drawing);
-  }
+  // selectDrawing(drawing: Drawing) {
+  //   this.openDrawingService.selectDrawing(drawing);
+  // }
 
   // ouvre un nouveau dessin  avec l'ancien drawing
   // accept(): void {
@@ -163,4 +213,16 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   createDrawing(){    
     this.router.navigateByUrl("drawing");
   }
+
+  setPagination(index : number) {
+    setTimeout(() => {
+      switch (index) {
+        case 0:
+        !this.dataSource.paginator ? this.dataSource.paginator = this.paginatorPublic : null;  
+        break;
+        case 1:
+        !this.dataSource2.paginator ? this.dataSource2.paginator = this.paginatorPrivate : null;
+      }
+    });
+}
 }

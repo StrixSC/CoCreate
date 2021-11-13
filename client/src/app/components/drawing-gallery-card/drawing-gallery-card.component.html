@@ -1,9 +1,8 @@
-<mat-card class="drawing-card">
-  
-  <img class="image-preview" mat-card-image src="../../../assets/img/dessin-exemple.jpg">
+<mat-card class="drawing-card" *ngIf="drawing">
+  <img class="image-preview" mat-card-image src={{drawing.img}}>
   <mat-card-header>
-    <mat-card-title>Titre du dessin</mat-card-title>
-    <mat-card-subtitle>Date de création</mat-card-subtitle>
+    <mat-card-title>{{drawing.name}}</mat-card-title>
+    <mat-card-subtitle>{{drawing.creationDate}}</mat-card-subtitle>
   </mat-card-header>
   <mat-card-actions>
     <button class="btn" mat-raised-button color="primary" (click)="openDialog()">Aperçu du dessin</button>

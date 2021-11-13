@@ -7,6 +7,7 @@ import { DrawingPageComponent } from './components/drawing-page/drawing-page.com
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
 import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
 import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
+import { MenuPageComponent } from './components/menu-page/menu-page.component';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 
@@ -29,7 +30,10 @@ const routes: Routes = [
   }},
   { path: 'gallery', component: DrawingGalleryComponent, canActivate: [AngularFireAuthGuard], data: {
     authGuardPipe: redirectUnauthorizedToLogin,
-}},
+  }},
+  { path: 'menu', component: MenuPageComponent, canActivate: [AngularFireAuthGuard], data: {
+    authGuardPipe: redirectUnauthorizedToLogin,
+  }},
   { path: 'chat', component: ChatComponent },
   { path: 'forgot-password', component: ChangePasswordComponent },
   { path: '**', redirectTo: '' },

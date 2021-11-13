@@ -2,8 +2,8 @@
 
 @include mat-core();
 
-$polydessin-theme-primary: mat-palette($mat-indigo);
-$polydessin-theme-accent: mat-palette($mat-blue-grey);
+$polydessin-theme-primary: mat-palette($mat-grey, 800, 700, 900);
+$polydessin-theme-accent: mat-palette($mat-grey);
 $polydessin-theme-theme: mat-light-theme($polydessin-theme-primary, $polydessin-theme-accent);
 
 @include angular-material-theme($polydessin-theme-theme);

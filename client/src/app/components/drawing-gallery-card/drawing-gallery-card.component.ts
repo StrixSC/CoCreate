@@ -1,6 +1,7 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, Input } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { DrawingPreviewDialogComponent } from '../drawing-preview-dialog/drawing-preview-dialog.component';
+import { Drawing1 } from '../../../../../common/communication//new-drawing-parameters';
 
 @Component({
   selector: 'app-drawing-gallery-card',
@@ -8,11 +9,15 @@ import { DrawingPreviewDialogComponent } from '../drawing-preview-dialog/drawing
   styleUrls: ['./drawing-gallery-card.component.scss']
 })
 export class DrawingGalleryCardComponent {
-
+  
+  @Input() public drawing: Drawing1;
   constructor(public dialog: MatDialog) {}
 
   openDialog(): void {
-    const dialogRef = this.dialog.open(DrawingPreviewDialogComponent);
+    const dialogRef = this.dialog.open(DrawingPreviewDialogComponent,
+      {
+        data: this.drawing
+      });
 
     dialogRef.afterClosed().subscribe(() => {
       console.log('The dialog was closed');

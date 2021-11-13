@@ -1,10 +1,18 @@
-<p style="margin: 0;">
-    <mat-toolbar color="primary">
-      <span>Galerie de dessins</span>
-    </mat-toolbar>
-</p>
+<mat-toolbar class="mat-elevation-z8" color="primary">
+  <mat-toolbar-row class="mat-elevation-z8">
+    <span>Colorimage</span>
+    <button mat-raised-button style="margin: 2%;"> Galerie de dessins</button>
+    <span class="icon-space"></span>
+    <button mat-icon-button>
+      <mat-icon>account_circle</mat-icon>
+    </button>
+    <button mat-icon-button>
+      <mat-icon>exit_to_app</mat-icon>
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
 
-<mat-tab-group dynamicHeight style =" overflow: visible;">
+<mat-tab-group #tabGroup (selectedIndexChange)="setPagination($event)" dynamicHeight style =" overflow: visible;">
   <mat-tab class="drawing-list" label="Dessins privés">
   <br>
     <div  style="text-align: center;">             
@@ -17,54 +25,52 @@
         <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
       </mat-form-field>
   
-      <mat-paginator [length]="numPages" [pageSize]="3" [pageIndex]="pageIndex"></mat-paginator>
+      <mat-paginator #paginator [length]="numPrivatePages" [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
 
-      <div class="drawing-list">
-        <div>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-        </div>
+      <div >
+          <app-drawing-gallery-card *ngFor="let drawing of drawings" [drawing]="drawing"></app-drawing-gallery-card>
       </div>
     </div>
   </mat-tab>
     
-  <mat-tab label="Dessins publiques">
+  <mat-tab class="drawing-list" label="Dessins publiques">
     <br>
-    <div  style="text-align: center;">             
-      <mat-form-field [style.width.%]="50" appearance="outline">
-        <mat-label>Recherche</mat-label>
-        <input matInput placeholder="Entrez un mot-clé">
-        <button mat-button matPrefix mat-icon-button>
-          <mat-icon>search</mat-icon>
-        </button>
-        <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
-      </mat-form-field>
-
-      <mat-paginator [length]="numPages" [pageSize]="3" [pageIndex]="pageIndex"></mat-paginator>
-      <div class="drawing-list">
-        <div>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
-          <app-drawing-gallery-card></app-drawing-gallery-card>
+      <div  style="text-align: center;">             
+        <mat-form-field [style.width.%]="50" appearance="outline">
+          <mat-label>Recherche</mat-label>
+          <input matInput placeholder="Entrez un mot-clé">
+          <button mat-button matPrefix mat-icon-button>
+            <mat-icon>search</mat-icon>
+          </button>
+          <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
+        </mat-form-field>
+    
+        <mat-paginator #paginator [length]="numPrivatePages" [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
+  
+        <div >
+            <app-drawing-gallery-card *ngFor="let drawing of drawings" [drawing]="drawing"></app-drawing-gallery-card>
         </div>
       </div>
-    </div>
-  </mat-tab>
+    </mat-tab>
+    <mat-tab class="drawing-list" label="Dessins protégés">
+      <br>
+        <div  style="text-align: center;">             
+          <mat-form-field [style.width.%]="50" appearance="outline">
+            <mat-label>Recherche</mat-label>
+            <input matInput placeholder="Entrez un mot-clé">
+            <button mat-button matPrefix mat-icon-button>
+              <mat-icon>search</mat-icon>
+            </button>
+            <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
+          </mat-form-field>
+      
+          <mat-paginator #paginator2 [length]="numPrivatePages" [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
+    
+          <div >
+              <app-drawing-gallery-card *ngFor="let drawing of drawings" [drawing]="drawing"></app-drawing-gallery-card>
+          </div>
+        </div>
+      </mat-tab>
   <mat-tab label="Nouveau dessin">
     <app-create-drawing></app-create-drawing>
   </mat-tab>
