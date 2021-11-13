@@ -159,7 +159,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   sortPrivateVisibility(drawings: Drawing1[]) : Drawing1[] {
     let sort: Drawing1[] = new Array();
     for (let drawing of drawings){
-      if(drawing.visibility ==='Privé')
+      if(drawing.visibility ==='Privé' && drawing.author == this.user)
       {
         sort.push(drawing);
       }
@@ -248,7 +248,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     this.router.navigateByUrl("drawing");
   }
 
-  setPagination(index : number) {
+  setPagination(index : number) : void {
     setTimeout(() => {
       switch (index) {
         case 0:
@@ -261,5 +261,9 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
         !this.dataSource3.paginator ? this.dataSource3.paginator = this.paginatorProtected : null;
       }
     });
-}
+  }
+  
+  exitToApp() : void {
+    this.router.navigateByUrl("menu");
+  }
 }
