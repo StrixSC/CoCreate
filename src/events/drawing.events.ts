@@ -1,3 +1,4 @@
+import { DrawingState, IShapeAction } from './../models/IAction.model';
 import { db } from './../db';
 import { SocketEventError } from './../socket';
 import { handleSocketError } from './../utils/errors';
@@ -35,7 +36,8 @@ export = (io: Server, socket: Socket) => {
                                 ? validator.toBoolean(data.isSelected)
                                 : data.isSelected,
                         offsets: JSON.stringify(data.offsets),
-                        state: data.state
+                        state: data.state,
+                        selectedBy: '',
                     }
                 });
 
@@ -97,10 +99,43 @@ export = (io: Server, socket: Socket) => {
         }
     };
 
-    const onShapeDraw = (data: Action) => {
-        io.emit('shape:received', {
-            ...data
-        } as Action);
+    const onShapeDraw = async (data: Action) => {
+        try {
+            if (data.state === DrawingState.Down || data.state === DrawingState.Move) {
+                io.emit('shape:received', {
+                    ...data,
+                    isSelected: (typeof data.isSelected === 'string' ? validator.toBoolean(data.isSelected) : data.isSelected),
+                });
+            } else if (data.state === DrawingState.Up) {
+                const dbAction = await db.action.create({
+                    data: {
+                        ...data,
+                        isSelected: (typeof data.isSelected === 'string' ? validator.toBoolean(data.isSelected) : data.isSelected),
+                    }
+                });
+
+                if (!dbAction) {
+                    throw new SocketEventError(
+                        'Could not trigger the action: Internal Socket Server Error',
+                        'E2102'
+                    );
+                }
+
+                socket.emit('action:saved', {
+                    collaborationId: dbAction.collaborationId,
+                    actionId: dbAction.actionId,
+                    userId: dbAction.userId,
+                    actionType: 'Save',
+                    username: dbAction.username
+                });
+
+                io.emit('shape:received', {
+                    ...dbAction,
+                });
+            }
+        } catch (e) {
+            handleSocketError(socket, e);
+        }
     };
 
     const onSelection = async (data: Action) => {
@@ -127,7 +162,7 @@ export = (io: Server, socket: Socket) => {
                 );
             }
 
-            if (action.isSelected && action.selectedBy !== action.userId) {
+            if (action.isSelected && action.selectedBy !== data.userId) {
                 throw new SocketEventError(
                     'Could not trigger action: The action is already selected by a different user.',
                     'E2203'
@@ -163,7 +198,7 @@ export = (io: Server, socket: Socket) => {
                 isSelected: userSelectionChoice,
                 selectedBy: selectedByUser,
                 actionType: ActionType.Select,
-                username: action.username,
+                username: data.username,
                 userId: action.userId,
                 collaborationId: action.collaborationId,
             });

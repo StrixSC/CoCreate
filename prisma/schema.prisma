@@ -136,11 +136,20 @@ model Action {
   width   Float?
   offsets String?
 
+  // Shapes
+  x2      Float?
+  y2      Float?
+  rFill   Int?
+  gFill   Int?
+  bFill   Int?
+  aFill   Int?
+  shapeType ShapeType?  @default(Null)
+  shapeStyle ShapeStyle? @default(border)
+
   // Shared:
   state      ActionState?
   isSelected Boolean?
   selectedBy String       @default("")
-
 }
 
 model CollaborationMember {
@@ -194,6 +203,12 @@ enum ShapeType {
   Rectangle
   Ellipse
   Null
+}
+
+enum ShapeStyle { 
+  center
+  border
+  fill
 }
 
 enum ActionType {
