@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
+import { ChatService } from "src/app/services/chat/chat.service";
 
-export interface Tile {
+export interface MessageHeader {
   color: string;
   cols: number;
   rows: number;
@@ -21,16 +22,16 @@ export interface Message {
 })
 export class ChatBoxComponent implements OnInit {
   chatCss: any = { width: "300px" };
-
-  tiles: Tile[] = [
+  chatBoxName: string;
+  currentText: string;
+  tiles: MessageHeader[] = [
     { text: "Avatar", cols: 1, rows: 1, color: "lightpink" },
     { text: "Pritam", cols: 2, rows: 1, color: "#DDBDF1" },
     { text: "Three", cols: 1, rows: 1, color: "lightpink" },
   ];
-  currentText: string;
 
   messages: Array<Message>;
-  constructor() {
+  constructor(private chatService: ChatService) {
     this.messages = [
       {
         message: "Bonjour comment va tu?",
@@ -45,10 +46,11 @@ export class ChatBoxComponent implements OnInit {
         time: "8:30pm",
       },
     ];
+    this.chatBoxName = "General";
   }
-  ngOnInit(): void {
-    console.log("l");
-  }
+  ngOnInit(): void {}
+
+  updateChat() {}
 
   sendMessage() {
     if (this.currentText.length > 0) {
