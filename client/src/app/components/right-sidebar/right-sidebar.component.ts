@@ -71,7 +71,7 @@ export class RightSidebarComponent implements OnInit {
 
   changeChannel(channelID: string) {
     this.selectedChannel = channelID;
-    this.changeCSS(channelID);
+    // this.changeCSS(channelID);
     if (this.textChannels.has(channelID)) {
       this.channel = this.textChannels.get(channelID) as IChannel;
     }

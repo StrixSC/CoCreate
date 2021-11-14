@@ -37,6 +37,7 @@ export interface Message {
 export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
   chatCss: any = { width: "300px" };
   chatBoxName: string;
+  myChannelID: string;
   alreadySubbed: boolean;
   messagesList: Set<string>;
   @Input() channel_object: IChannel;
@@ -64,8 +65,16 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
     this.chatCss = { display: "none" };
   }
 
+  listenToMessages() {
+    this.chatService
+      .receiveMessage()
+      .subscribe((data: IReceiveMessagePayload) => {
+        console.log(data);
+      });
+  }
+
   getMessagesFromChannel(channelID: string) {
-    this.messages = [];
+    this.initialize();
     this.http
       .get(
         "https://colorimage-109-3900.herokuapp.com/api/channels/" +
@@ -84,21 +93,36 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
       });
   }
 
-  ngOnChanges() {
+  initialize() {
     this.chatCss = { width: "300px" };
+    this.messagesList.clear();
+    this.messages = [];
+  }
 
+  updateChannelInformation() {
     if (this.channel_object) {
-      this.getMessagesFromChannel(this.channel_object.channel_id);
-      // console.log(this.channel_object.channel_id);
-      // if (!this.alreadySubbed) {
+      this.myChannelID = this.channel_object.channel_id;
+      this.chatBoxName = this.channel_object.name;
+      console.log(this.myChannelID);
+      console.log(this.chatBoxName);
+    }
+  }
+
+  ngOnChanges() {
+    // this.initialize();
+    // this.updateChannelInformation();
+    this.initialize();
+    // this.listenToMessages();
+    if (this.channel_object) {
+      this.getMessagesFromChannel(this.myChannelID);
+
       this.chatService
         .receiveMessage()
         .subscribe((data: IReceiveMessagePayload) => {
-          console.log(data.channelId);
-          console.log(this.channel_object.channel_id);
+          console.log(data);
           if (
             !this.messagesList.has(data.messageId) &&
-            data.channelId === this.channel_object.channel_id
+            data.channelId === this.myChannelID
           ) {
             this.messages.push({
               message: data.message,
@@ -110,9 +134,9 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
           }
           if (this.messagesList.size > 20) this.messagesList.clear();
         });
-      //   this.alreadySubbed = true;
-      // }
+
       this.chatBoxName = this.channel_object.name;
+      this.myChannelID = this.channel_object.channel_id;
       this.chatService.joinChannel(this.channel_object.channel_id);
     }
   }
@@ -126,10 +150,8 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
 
   sendMessage() {
     if (this.currentText.length > 0) {
-      this.chatService.sendMessage(
-        this.channel_object.channel_id,
-        this.currentText
-      );
+      console.log(this.myChannelID, this.currentText);
+      this.chatService.sendMessage(this.myChannelID, this.currentText);
       this.currentText = "";
     }
   }
