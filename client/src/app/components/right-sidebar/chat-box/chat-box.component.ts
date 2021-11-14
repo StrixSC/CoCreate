@@ -67,12 +67,12 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
       )
       .subscribe((data: any) => {
         data.forEach((m: any) => {
-          // this.messages.push({
-          //   message: m.message_data,
-          //   avatar: m.avatar_url,
-          //   username: m.username,
-          //   time: m.timestamp,
-          // });
+          this.messages.push({
+            message: m.message_data,
+            avatar: m.avatar_url,
+            username: m.username,
+            time: m.timestamp,
+          });
         });
       });
   }

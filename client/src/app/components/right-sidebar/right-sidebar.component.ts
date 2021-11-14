@@ -21,14 +21,10 @@ export class RightSidebarComponent implements OnInit {
   animal: string;
   name: string;
   selectedChannel: string;
-  messageListener: Subscription;
-  errorListener: Subscription;
   channel: IChannel;
 
   constructor(private http: HttpClient, private chatService: ChatService) {
     this.textChannels = new Map();
-    this.errorListener = new Subscription();
-    this.messageListener = new Subscription();
   }
 
   ngOnInit(): void {
@@ -45,8 +41,37 @@ export class RightSidebarComponent implements OnInit {
       });
   }
 
+  changeCSS(channelID: string) {
+    const prev = this.textChannels.get(this.selectedChannel) as IChannel;
+    if (prev) {
+      prev.divStyle = {
+        "margin-left": "10px",
+        "margin-right": "10px",
+        "margin-top": "-12px",
+        "background-color": "#393c43",
+        height: "30px",
+        "border-radius": "7px",
+        cursor: "pointer",
+        "animation-duration": "4s",
+      };
+      this.textChannels.set(this.selectedChannel, prev);
+    }
+
+    const next = this.textChannels.get(channelID) as IChannel;
+    if (next) {
+      next.divStyle = {
+        padding: "5px",
+        color: "white",
+        "margin-right": "5px",
+        "margin-top": "0px",
+      };
+      this.textChannels.set(channelID, next);
+    }
+  }
+
   changeChannel(channelID: string) {
     this.selectedChannel = channelID;
+    this.changeCSS(channelID);
     if (this.textChannels.has(channelID)) {
       this.channel = this.textChannels.get(channelID) as IChannel;
     }
