@@ -352,20 +352,21 @@ actionId: string,
     actionType: string,
     state: string, // move/down/up
     isSelected: boolean,
-    x1: number // float,
-    y1: number // float,
+    x: number // integer/float,
+    y: number // integer/float,
     r: number // integer,
     g: number // integer,
     b: number // integer,
     a: number // integer,
-    x2: number // float,
-    y2: number // float,
+    x2: number // integer/float,
+    y2: number // integer/float,
     rFill: number // integer,
     gFill: number // integer,
     bFill: number // integer,
     aFill: number // integer,
     width: number // float,
     shapeType: string // Rectangle | Ellipse | Null
+    shapeStyle: string // border | fill | center
 }
 ```
 
@@ -384,8 +385,8 @@ These values are received from the server in state "down" or "move":
     actionType: string,
     state: string, // move/down/up
     isSelected: boolean,
-    x1: number // integer/float,
-    y1: number // integer/float,
+    x: number // integer/float,
+    y: number // integer/float,
     r: number // integer,
     g: number // integer,
     b: number // integer,
@@ -398,6 +399,7 @@ These values are received from the server in state "down" or "move":
     aFill: number // integer,
     width: number // float,
     shapeType: string // Rectangle | Ellipse | Null
+    shapeStyle: string // fill | center | border
 }
 ```
 
