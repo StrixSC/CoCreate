@@ -7,7 +7,11 @@ export interface Context<T> {
         user: string;
         join: (room: string) => void;
         leave: (room: string) => void;
-        emit: (target: string[] | string, event: string, data: any) => void;
+        emit: (
+            target: string[] | string,
+            event: string,
+            data: any
+        ) => void;
     };
 }
 
@@ -16,7 +20,11 @@ export class SocketEventError extends Error {
     message: string;
     status: string | null;
 
-    constructor(message = 'Internal Server Error', code = 'E0000', status: string | null = null) {
+    constructor(
+        message = 'Internal Server Error',
+        code = 'E0000',
+        status: string | null = null
+    ) {
         super();
         this.code = code;
         this.message = message;
@@ -28,7 +36,10 @@ export interface RouteHandler {
     (ctx: Context<any>): string | any;
 }
 
-export type Routes = Record<string, RouteHandler | null>;
+export type Routes = Record<
+    string,
+    RouteHandler | null
+>;
 
 export type MiddlewareArgs = Array<any>;
 

@@ -1,5 +1,4 @@
-import { checkIfAuthenticated } from './../middlewares/auth.middleware';
-import { Router, NextFunction } from 'express';
+import { Router } from 'express';
 import { getGalleryController } from '../controllers/gallery.controller';
 
 const router = Router();

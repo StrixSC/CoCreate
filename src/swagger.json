@@ -262,7 +262,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized. The provided authentication cookie does not meet the necessary criterias to complete the request.",
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -347,7 +347,111 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized. The provided authentication cookie does not meet the necessary criterias to complete the request.",
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/:id/logs": {
+            "get": {
+                "parameters": [
+                    {
+                        "required": true,
+                        "name": "id",
+                        "in": "path",
+                        "description": "Id of the user for whom to fetch the logs.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "description": "Amount of records to skip. Use this for pagination. Defauls to 0",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "description": "Amount of records to take. Use this for pagination. Defaults to 50.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": ["Users"],
+                "summary": "Fetch all logs for a given user.",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "operationId": "user logs",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns an array with all of the user's logs.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "$ref": "#/components/schemas/IUserLog"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content. Request was successful, but no content was found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IUserChannel"
+                                },
+                                "example": []
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -575,7 +679,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized. The provided authentication cookie does not meet the necessary criterias to complete the request.",
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -641,7 +745,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized. The provided authentication cookie does not meet the necessary criterias to complete the request.",
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -715,7 +819,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized. The provided authentication cookie does not meet the necessary criterias to complete the request.",
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -789,7 +893,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized. The provided authentication cookie does not meet the necessary criterias to complete the request.",
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1131,6 +1235,33 @@
                 "type": "object",
                 "properties": {
                     "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "IUserLog": {
+                "type": "object",
+                "properties": {
+                    "index": {
+                        "type": "integer"
+                    },
+                    "log_id": {
+                        "type": "string"
+                    },
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "drawing_id": {
+                        "type": "string",
+                        "description": "Use this id to redirect to the drawing if the type is DrawingUpdate"
+                    },
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "updated_at": {
                         "type": "string"
                     }
                 }

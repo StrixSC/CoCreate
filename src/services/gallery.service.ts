@@ -1,5 +1,5 @@
 import { MemberType } from '.prisma/client';
-import { db } from "../db";
+import { db } from '../db';
 
 export const getDrawingsWithFilter = async (filter: string, offset: number, limit: number) => {
     const result = await db.drawing.findMany({

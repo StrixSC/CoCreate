@@ -2,7 +2,7 @@ import { Action, ActionType, ActionState } from '@prisma/client';
 import validator from 'validator';
 import log from './logger';
 
-const defaultStates = [ActionState.up, ActionState.down, ActionState.move];
+const defaultStates = [ ActionState.up, ActionState.down, ActionState.move ];
 const defaultTypes = [
     ActionType.Freedraw,
     ActionType.Shape,
@@ -30,10 +30,10 @@ const hasEmptyProperties = (obj: any): { result: boolean; field: string | null }
 
 const validateSelection = (isSelected: string | boolean) => {
     if (typeof isSelected === 'string') {
-        if (!validator.isIn(isSelected, ['false', 'true'])) {
+        if (!validator.isIn(isSelected, [ 'false', 'true' ])) {
             return {
                 result: false,
-                field: "isSelected is a string and does not have 'false' or 'true' as a value"
+                field: 'isSelected is a string and does not have \'false\' or \'true\' as a value'
             };
         } else {
             return { result: true, field: null };
@@ -45,7 +45,7 @@ const validateSelection = (isSelected: string | boolean) => {
     } else {
         return {
             result: false,
-            field: "isSelected must be a boolean value or a string value with  'false' or 'true' as values"
+            field: 'isSelected must be a boolean value or a string value with  \'false\' or \'true\' as values'
         };
     }
 };

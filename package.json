@@ -22,7 +22,9 @@
     "setup": "npm install && npx prisma generate && npx prisma db seed && npm run dev",
     "prisma": "npx prisma generate && npx prisma migrate dev && npx prisma format",
     "reset_prisma": "npx prisma db push --accept-data-loss --schema=./prisma/reset.prisma; prisma db push --accept-data-loss",
-    "emulators": "firebase emulators:start"
+    "emulators": "firebase emulators:start",
+    "debug": "heroku ps:forward 9229 -a colorimage-109-3900",
+    "studio": "npx prisma studio"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

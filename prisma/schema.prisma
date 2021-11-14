@@ -101,7 +101,7 @@ model Message {
 }
 
 model Drawing {
-  title            String        
+  title            String
   index            Int           @unique @default(autoincrement())
   drawing_id       String        @id @unique @default(uuid())
   thumbnail_url    String        @default("")

@@ -195,7 +195,7 @@ export const addUserMessage = async (
     const message = await db.message.create({
         data: {
             message_data: payload.message,
-            member_id: channelMember.member_id
+            member_id: channelMember.member_id,
         }
     });
 
@@ -255,19 +255,3 @@ export type MessageReturn = {
         };
     };
 };
-
-/*
-"index": 1,
-        "message_id": "557f0fba-2715-4875-9e50-aaa4c21163bb",
-        "member_id": "04281653-3b25-43e3-a9d2-81d3b259c16e",
-        "message_data": "asdadasd",
-        "created_at": "2021-10-25T02:18:59.841Z",
-        "sender": {
-            "member": {
-                "profile": {
-                    "username": "2",
-                    "avatar_url": ""
-                }
-            }
-        }
-*/

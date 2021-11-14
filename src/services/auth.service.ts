@@ -70,7 +70,7 @@ export const register = async (payload: IRegistrationPayload): Promise<User | nu
                     }
                 },
                 channels: {
-                    create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
+                    create: [ { channel_id: 'PUBLIC', type: MemberType.Regular } ]
                 }
             }
         });

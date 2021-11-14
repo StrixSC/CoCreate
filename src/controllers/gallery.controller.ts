@@ -5,7 +5,7 @@ import { getDrawingsWithFilter } from '../services/gallery.service';
 
 export const getGalleryController = async (req: Request<any>, res: Response<any>, next: NextFunction) => {
     try {
-        const filter = req.query.filter || "";
+        const filter = req.query.filter || '';
         const offset = req.query.offset || 0;
         const limit = req.query.limit || 12;
         const drawings = await getDrawingsWithFilter(filter as string, offset as number, limit as number);
@@ -18,4 +18,4 @@ export const getGalleryController = async (req: Request<any>, res: Response<any>
     } catch (e) {
         handleRequestError(e, next);
     }
-}
+};

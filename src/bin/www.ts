@@ -36,14 +36,14 @@ const onError = (error: any) => {
     }
     const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`;
     switch (error.code) {
-        case 'EACCES':
-            log('CRITICAL', `${bind} requires elevated privileges`);
-            process.exit(1);
-        case 'EADDRINUSE':
-            log('CRITICAL', `${bind} is already in use`);
-            process.exit(1);
-        default:
-            throw error;
+    case 'EACCES':
+        log('CRITICAL', `${bind} requires elevated privileges`);
+        process.exit(1);
+    case 'EADDRINUSE':
+        log('CRITICAL', `${bind} is already in use`);
+        process.exit(1);
+    default:
+        throw error;
     }
 };
 
@@ -64,9 +64,9 @@ const io = new Server(server, {
 const onConnection = (socket: Socket) => {
     socket.use(logEvent(socket));
 
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === 'production') {
         socket.data.user = (socket as any).request.userId;
-    } else socket.data.user = "DEMO";
+    } else socket.data.user = 'DEMO';
 
     try {
         channelHandler(io, socket);
@@ -83,7 +83,7 @@ const onConnection = (socket: Socket) => {
 const wrap = (middleware: any) => (socket: Socket, next: any) =>
     middleware(socket.request, {}, next);
 
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === 'production') {
     io.use(wrap(checkIfAuthenticated));
 }
 

@@ -1,6 +1,14 @@
 const corsOptions = {
     optionsSuccessStatus: 200,
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    methods: [
+        'GET',
+        'HEAD',
+        'PUT',
+        'PATCH',
+        'POST',
+        'DELETE',
+        'OPTIONS'
+    ],
     credentials: true,
     allowedHeaders: [
         'Access-Control-Allow-Credentials',
@@ -15,7 +23,7 @@ const corsOptions = {
         'X-User-Id'
     ],
     exposedHeaders: 'Location',
-    origin: ['http://localhost:4200']
+    origin: [ 'http://localhost:4200' ]
 };
 
 export default corsOptions;

@@ -54,7 +54,7 @@ async function main() {
                 }
             },
             channels: {
-                create: [{ channel_id: 'PUBLIC', type: MemberType.Owner }]
+                create: [ { channel_id: 'PUBLIC', type: MemberType.Owner } ]
             }
         }
     });
@@ -80,15 +80,15 @@ async function main() {
                 }
             },
             channels: {
-                create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
+                create: [ { channel_id: 'PUBLIC', type: MemberType.Regular } ]
             },
             collaborations: {
-                create: [{ collaboration_id: 'DEMO_COLLABORATION', type: MemberType.Owner }]
+                create: [ { collaboration_id: 'DEMO_COLLABORATION', type: MemberType.Owner } ]
             }
         }
     });
 
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV !== 'production') {
         const demoTestUser = await prisma.user.upsert({
             where: {
                 user_id: 'DEMO'
@@ -110,10 +110,10 @@ async function main() {
                     }
                 },
                 channels: {
-                    create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
+                    create: [ { channel_id: 'PUBLIC', type: MemberType.Regular } ]
                 },
                 collaborations: {
-                    create: [{ collaboration_id: 'DEMO_COLLABORATION', type: MemberType.Regular }]
+                    create: [ { collaboration_id: 'DEMO_COLLABORATION', type: MemberType.Regular } ]
                 }
             }
         });
