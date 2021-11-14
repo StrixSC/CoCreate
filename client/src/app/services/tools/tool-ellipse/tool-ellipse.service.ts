@@ -10,7 +10,6 @@ import { DrawingService } from '../../drawing/drawing.service';
 import { OffsetManagerService } from '../../offset-manager/offset-manager.service';
 import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
 import { ToolsColorService } from '../../tools-color/tools-color.service';
-import { SelectionToolService } from '../selection-tool/selection-tool.service';
 import { ToolIdConstants } from '../tool-id-constants';
 import { FilledShape } from '../tool-rectangle/filed-shape.model';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
@@ -50,7 +49,6 @@ export class ToolEllipseService implements Tools {
     private colorTool: ToolsColorService,
     private drawingService: DrawingService,
     private rendererService: RendererProviderService,
-    private selectionToolService: SelectionToolService,
     private syncService: SyncDrawingService,
   ) {
     this.strokeWidth = new FormControl(1, Validators.min(1));
@@ -114,8 +112,10 @@ export class ToolEllipseService implements Tools {
         );
       }
       this.ellipseCommand = new EllipseCommand(this.rendererService.renderer, this.ellipse, this.drawingService);
-      this.ellipseCommand.execute();
       this.syncService.sendShape(DrawingState.down, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse);
+      this.ellipseCommand.actionId = this.syncService.activeActionId;
+      this.ellipseCommand.userId = this.syncService.defaultPayload!.userId;
+      this.ellipseCommand.execute();
     }
   }
 
@@ -126,22 +126,18 @@ export class ToolEllipseService implements Tools {
     }
 
     this.isCircle = false;
-    this.ellipse = null;
     if (this.contour && this.ellipseCommand && !this.ellipseCommand.isSyncAction) {
       this.drawingService.removeObject(this.contourId);
       this.contourId = -1;
     }
     if (this.ellipseCommand) {
       const returnEllipseCommand = this.ellipseCommand;
-      returnEllipseCommand.actionId = this.syncService.activeActionId;
-      this.ellipseCommand = null;
-      const lastObj = new Array(this.drawingService.getLastObject());
       this.syncService.sendShape(DrawingState.up, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse!);
-      this.selectionToolService.setNewSelection(lastObj);
-      this.ellipse = null;
+      this.ellipseCommand = null;
       return returnEllipseCommand;
     }
 
+    this.ellipse = null;
     this.isDrawing = false;
     return;
   }

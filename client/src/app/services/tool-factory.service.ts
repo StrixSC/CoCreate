@@ -1,9 +1,11 @@
+import { DeleteCommand } from './tools/selection-tool/delete-command/delete-command';
+import { RotateTranslateCompositeCommand } from './tools/selection-tool/rotate-translate-composite-command/rotate-translate-composite-command';
+import { TranslateCommand } from './tools/selection-tool/translate-command/translate-command';
 import { SyncDrawingService } from './syncdrawing.service';
-import { ISelectionAction } from './../model/IAction.model';
+import { IDeleteAction, ISelectionAction, ITranslateAction, IResizePayload } from './../model/IAction.model';
 import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
 import { EllipseCommand } from './tools/tool-ellipse/ellipse-command';
 import { setStyle } from "src/app/utils/colors";
-import { ToolRectangleService } from "src/app/services/tools/tool-rectangle/tool-rectangle.service";
 import { RectangleCommand } from "./tools/tool-rectangle/rectangle-command";
 import { FilledShape } from "./tools/tool-rectangle/filed-shape.model";
 import { CollaborationService } from "./collaboration.service";
@@ -30,7 +32,6 @@ import { RendererProviderService } from "./renderer-provider/renderer-provider.s
   providedIn: "root",
 })
 export class ToolFactoryService {
-  private currentCommand: ICommand;
   private pendingExternalCommands: Map<string, ICommand> = new Map<string, ICommand>();
 
   tools: Record<ActionType | string, (payload: IAction) => any> = {
@@ -83,10 +84,10 @@ export class ToolFactoryService {
     Shape: (payload: IShapeAction) => {
       if (payload.state === DrawingState.down) {
         let shape = {} as FilledShape;
-        (shape.x = payload.x1),
-          (shape.y = payload.y1),
-          (shape.width = payload.x2 - payload.x1);
-        shape.height = payload.y2 - payload.x2;
+        shape.x = payload.x;
+        shape.y = payload.y;
+        shape.width = payload.x2 - payload.x;
+        shape.height = payload.y2 - payload.y;
         shape.fill = toRGBString([payload.rFill, payload.gFill, payload.bFill]);
         shape.fillOpacity = fromAlpha(payload.aFill);
         shape.stroke = toRGBString([payload.r, payload.g, payload.b]);
@@ -129,18 +130,18 @@ export class ToolFactoryService {
         if (payload.shapeType === ShapeType.Rectangle) {
           const command = this.pendingExternalCommands.get(payload.actionId) as RectangleCommand;
           if (command) {
-            command.setX(payload.x1);
-            command.setY(payload.y1);
-            command.setWidth(payload.x2 - payload.x1);
-            command.setHeight(payload.y2 - payload.y1);
+            command.setX(payload.x);
+            command.setY(payload.y);
+            command.setWidth(Math.abs(payload.x2 - payload.x));
+            command.setHeight(Math.abs(payload.y2 - payload.y));
           }
         } else {
           const command = this.pendingExternalCommands.get(payload.actionId) as EllipseCommand;
           if (command) {
-            command.setCX(payload.x1);
-            command.setCY(payload.y1);
-            command.setWidth(payload.x2 - payload.x1);
-            command.setHeight(payload.y2 - payload.y1);
+            command.setCX(payload.x);
+            command.setCY(payload.y);
+            command.setWidth(Math.abs(payload.x2 - payload.x));
+            command.setHeight(Math.abs(payload.y2 - payload.y));
           }
         }
       } else if (payload.state === DrawingState.up) {
@@ -151,35 +152,85 @@ export class ToolFactoryService {
       }
 
     },
-    Delete: () => {
-      return;
+    Delete: (payload: IDeleteAction) => {
+      const isActiveUser: boolean = (this.syncService.defaultPayload!.userId === payload.userId);
+      const object = this.drawingService.getObjectByActionId(payload.selectedActionId);
+      console.log(object);
+      if (object && !isActiveUser) {
+        const command = new DeleteCommand(this.drawingService, [object]);
+        command.execute();
+        this.addOrUpdateCollaboration(payload.userId, { data: payload, command, isUndone: false });
+      } else if (isActiveUser) {
+        this.addOrUpdateCollaboration(payload.userId, { data: payload, command: {} as DeleteCommand, isUndone: false });
+      }
     },
-    Translate: () => {
-      return;
+    Translate: (payload: ITranslateAction) => {
+      const isActiveUser: boolean = (this.syncService.defaultPayload!.userId === payload.userId);
+      if (payload.state === DrawingState.move) {
+        const ongoingAction = this.pendingExternalCommands.get(payload.actionId) as RotateTranslateCompositeCommand;
+        if (!ongoingAction) {
+          const action = this.collaborationService.getActionById(payload.selectedActionId);
+          if (action) {
+            const obj = this.drawingService.getObjectByActionId(action!.data.actionId);
+            if (obj) {
+              const command = new RotateTranslateCompositeCommand();
+              const translation = new TranslateCommand(this.rendererService.renderer, [obj]);
+              if (!isActiveUser) {
+                translation.translate(payload.xTranslate, payload.yTranslate);
+              }
+              command.addSubCommand(translation);
+              this.pendingExternalCommands.set(payload.actionId, command);
+            }
+          }
+        } else {
+          const action = this.collaborationService.getActionById(payload.selectedActionId);
+          if (action) {
+            const obj = this.drawingService.getObjectByActionId(action.data.actionId);
+            if (obj) {
+              const translationCommand = ongoingAction.subCommand[0] as TranslateCommand;
+              const prevX = translationCommand.lastXTranslate;
+              const prevY = translationCommand.lastYTranslate;
+
+              if (!isActiveUser) {
+                translationCommand.translate(prevX + payload.xTranslate, prevY + payload.yTranslate);
+              }
+            }
+          }
+        }
+      } else if (payload.state === DrawingState.up) {
+        const command = this.pendingExternalCommands.get(payload.actionId) as RotateTranslateCompositeCommand;
+        this.addOrUpdateCollaboration(payload.userId, { data: payload, command, isUndone: false })
+      }
     },
     Rotate: () => {
       return;
     },
-    Resize: () => {
+    Resize: (payload: IResizePayload) => {
+
       return;
     },
     UndoRedo: (payload: IDefaultActionPayload & IUndoRedoAction) => {
+      const isActiveUser: boolean = (this.syncService.defaultPayload!.userId === payload.userId);
       if (payload.isUndo) {
         this.collaborationService.undoUserAction(
           payload.userId,
-          payload.actionId
+          payload.actionId,
+          isActiveUser
         );
       } else {
         this.collaborationService.redoUserAction(
           payload.userId,
-          payload.actionId
+          payload.actionId,
+          isActiveUser
         );
       }
     },
     Layer: () => {
       return;
     },
-    Text: () => { },
+    Text: () => {
+      return
+    },
     'Save': (payload: { collaborationId: string, actionId: string, userId: string, actionType: string }) => {
       this.syncService.sendSelect(this.selectionService['selectedActionId'], false);
       this.syncService.sendSelect(payload.actionId, true);
@@ -210,4 +261,5 @@ export class ToolFactoryService {
     this.collaborationService.addActionToUser(userId, payload);
     this.pendingExternalCommands.delete(payload.data.actionId);
   }
+
 }

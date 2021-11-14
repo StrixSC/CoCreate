@@ -1,3 +1,4 @@
+import { DrawingState } from 'src/app/model/IAction.model';
 import { CollaborationService } from 'src/app/services/collaboration.service';
 import { SyncDrawingService } from './../../syncdrawing.service';
 import { Injectable } from '@angular/core';
@@ -93,19 +94,21 @@ export class SelectionToolService implements Tools {
       if (target.getAttribute('name') === 'pen' || target.getAttribute('name') === 'stamp' || target.getAttribute('name') === 'spray') {
         target = target.parentNode as SVGElement;
       }
-      const obj = this.drawingService.getObject(Number(target.id));
+      const actionId = target.getAttribute('actionId');
       if (event.button === LEFT_CLICK) {
-        if (obj) {
-          const userId = obj.getAttribute('userId');
-          const actionId = obj.getAttribute('actionId');
-          if (userId && actionId) {
-            const isSelected = this.collaborationService.getSelectionStatus(userId, actionId);
-            const isSelectedByMe = (this.collaborationService.getSelectedByUser(userId, actionId) === this.syncService.defaultPayload!.userId && isSelected)
-            console.log(isSelected, isSelectedByMe);
-            if (!isSelected || isSelectedByMe) {
-              this.allowMove = true;
-              this.selectedActionId = actionId;
-              this.objects.push(obj);
+        if (actionId) {
+          const obj = this.drawingService.getObjectByActionId(actionId);
+          if (obj) {
+            const userId = obj.getAttribute('userId');
+            if (userId && actionId) {
+              const isSelected = this.collaborationService.getSelectionStatus(userId, actionId);
+              const isSelectedByMe = (this.collaborationService.getSelectedByUser(userId, actionId) === this.syncService.defaultPayload!.userId && isSelected)
+              if (!isSelected || isSelectedByMe) {
+                this.objects = [];
+                this.allowMove = true;
+                this.selectedActionId = actionId;
+                this.objects.push(obj);
+              }
             }
           }
         }
@@ -151,6 +154,14 @@ export class SelectionToolService implements Tools {
       if (this.wasMoved) {
         if (this.selectionTransformService.hasCommand()) {
           returnRectangleCommand = this.selectionTransformService.getCommand();
+          const commandType = this.selectionTransformService.getCommandType();
+          if (commandType === SelectionCommandConstants.TRANSLATE) {
+            this.syncService.sendTranslate(DrawingState.up, this.selectedActionId, event.offsetX, event.offsetY);
+          } else if (commandType === SelectionCommandConstants.ROTATE) {
+
+          } else {
+
+          }
           this.selectionTransformService.endCommand();
         }
         this.wasMoved = false;
@@ -200,6 +211,7 @@ export class SelectionToolService implements Tools {
             this.selectionTransformService.translate(movementOfMagnetism.movementX, movementOfMagnetism.movementY);
           } else {
             this.selectionTransformService.translate(event.movementX, event.movementY);
+            this.syncService.sendTranslate(DrawingState.move, this.selectedActionId, event.movementX, event.movementY);
           }
           this.setSelection();
         }

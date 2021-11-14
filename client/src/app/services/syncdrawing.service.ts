@@ -31,6 +31,7 @@ export class SyncDrawingService {
   private readonly G = 1;
   private readonly B = 2;
   public activeActionId: string = "";
+  private hasStartedMovement: boolean = false;
 
   constructor(
     private socketService: SocketService
@@ -73,6 +74,7 @@ export class SyncDrawingService {
       width: pencil.strokeWidth || 1,
       isSelected: true,
       actionType: ActionType.Freedraw,
+      selectedBy: this.defaultPayload.userId,
     } as IDefaultActionPayload & IFreedrawUpAction;
 
     if (state === DrawingState.up) {
@@ -132,8 +134,8 @@ export class SyncDrawingService {
     let payload: IShapeAction = {
       ...this.defaultPayload,
       actionId: this.activeActionId,
-      x1: shape.x,
-      y1: shape.y,
+      x: shape.x,
+      y: shape.y,
       x2: shape.x + shape.width,
       y2: shape.y + shape.height,
       r: rgb[0],
@@ -148,6 +150,7 @@ export class SyncDrawingService {
       shapeType: shapeType,
       width: shape.strokeWidth,
       isSelected: true,
+      selectedBy: this.defaultPayload.userId,
       shapeStyle: shapeStyle,
       actionType: ActionType.Shape,
     };
@@ -159,30 +162,23 @@ export class SyncDrawingService {
     this.socketService.emit("shape:emit", payload);
   }
 
-  sendUndo(command: ICommand): void {
+  sendUndo(actionId: string): void {
     this.socketService.emit("undoredo:emit", {
       ...this.defaultPayload,
       actionType: ActionType.UndoRedo,
-      actionId: command.actionId,
+      actionId: actionId,
       isUndo: true,
     } as IUndoRedoAction);
   }
 
-  sendRedo(command: ICommand): void {
+  sendRedo(actionId: string): void {
     this.socketService.emit("undoredo:emit", {
       ...this.defaultPayload,
       actionType: ActionType.UndoRedo,
-      actionId: command.actionId,
+      actionId: actionId,
       isUndo: false,
     });
   }
-
-  // sendSelection(SVGElement[]) {
-  //   this.socketService.emit("selection:emit", {
-  //     ...this.defaultPayload,
-  //     isSelected: true
-  //   } as ISelectionAction);
-  // }
 
   sendSelect(actionId: string, selection: boolean): void {
     if (!actionId) return;
@@ -194,9 +190,65 @@ export class SyncDrawingService {
     } as ISelectionAction);
   }
 
+  sendTranslate(state: DrawingState, selectedActionId: string, xTranslate: number, yTranslate: number) {
+    if (!selectedActionId) {
+      return;
+    }
+
+    if (state === DrawingState.move && !this.hasStartedMovement) {
+      this.activeActionId = v4();
+      this.hasStartedMovement = true;
+    } else if (state === DrawingState.up && this.hasStartedMovement) {
+      this.hasStartedMovement = false;
+    }
+
+    this.socketService.emit('translation:emit', {
+      ...this.defaultPayload,
+      actionType: ActionType.Translate,
+      actionId: this.activeActionId,
+      selectedActionId,
+      state,
+      xTranslate,
+      yTranslate,
+    });
+  }
+
+  sendDelete(actionId: string): void {
+    if (!actionId) return;
+
+    const payload = {
+      ...this.defaultPayload,
+      actionId: v4(),
+      selectedActionId: actionId,
+      actionType: ActionType.Delete
+    }
+
+    this.socketService.emit('delete:emit', payload);
+  }
+
+  sendResize(state: DrawingState, actionId: string, xScale: number, yScale: number) {
+    if (!actionId) return;
+
+    if (state === DrawingState.move && !this.hasStartedMovement) {
+      this.activeActionId = v4();
+      this.hasStartedMovement = true;
+    } else if (state === DrawingState.up && this.hasStartedMovement) {
+      this.hasStartedMovement = false;
+    }
+
+    const payload = {
+      ...this.defaultPayload,
+      actionId: this.activeActionId,
+      selectedActionId: actionId,
+      xScale,
+      yScale
+    }
+
+    this.socketService.emit('resize:emit', payload);
+  }
+
   sendPostSaveSelect(data: { collaborationId: string, actionId: string }) {
-    const { collaborationId, actionId } = data;
-    this.sendSelect(actionId, true);
+    this.sendSelect(data.actionId, true);
   }
 
   onShape(): Observable<void> {

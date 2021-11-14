@@ -22,12 +22,18 @@ export class DeletingToolService {
 
   /// Creation et execution d'une commande de supression
   deleteSelection(): void {
+    const items = this.selectionTool.getObjectList();
+    if (items.length <= 0) {
+      return;
+    }
+
     this.deleteCommand = new DeleteCommand(
       this.drawingService,
-      this.selectionTool.getObjectList(),
+      items
     );
 
     this.commandInvoker.executeCommand(this.deleteCommand);
+    this.syncDrawingService.sendDelete(items[0].getAttribute('actionId')!);
 
     this.selectionTool.removeSelection();
   }

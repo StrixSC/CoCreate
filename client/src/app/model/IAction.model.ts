@@ -54,8 +54,8 @@ export type IFreedrawUpAction = IFreedrawAction & {
 }
 
 export type IShapeAction = IDefaultActionPayload & ISelectionAction & {
-    x1: number;
-    y1: number;
+    x: number;
+    y: number;
     x2: number;
     y2: number;
     r: number;
@@ -87,4 +87,25 @@ export type IAction = IDefaultActionPayload & (
     | IShapeAction
     | ISelectionAction
     | IUndoRedoAction
+    | ITranslateAction
+    | IDeleteAction
+    | IResizePayload
 );
+
+export type ITranslateAction = IDefaultActionPayload & {
+    xTranslate: number;
+    state: DrawingState;
+    yTranslate: number;
+    selectedActionId: string;
+}
+
+export type IDeleteAction = IDefaultActionPayload & {
+    selectedActionId: string;
+}
+
+export type IResizePayload = IDefaultActionPayload & {
+    xScale: number;
+    state: DrawingState;
+    yScale: number;
+    selectedActionId: number;
+}

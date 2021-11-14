@@ -103,6 +103,8 @@ export class EllipseCommand implements ICommand {
                 "height",
                 this.ellipseAttributes.height.toString() + "px"
             );
+            this.renderer.setAttribute(this.ellipse, 'actionId', this.actionId);
+            this.renderer.setAttribute(this.ellipse, 'userId', this.userId);
             this.renderer.setAttribute(
                 this.ellipse,
                 "rx",

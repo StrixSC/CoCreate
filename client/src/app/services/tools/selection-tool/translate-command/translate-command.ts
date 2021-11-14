@@ -4,8 +4,8 @@ import { ICommand } from 'src/app/interfaces/command.interface';
 export class TranslateCommand implements ICommand {
     private previousTransformation: Map<string, string> = new Map<string, string>();
 
-    private lastXTranslate = 0;
-    private lastYTranslate = 0;
+    public lastXTranslate = 0;
+    public lastYTranslate = 0;
     public actionId: string = "";
 
     constructor(
@@ -24,7 +24,7 @@ export class TranslateCommand implements ICommand {
 
     translate(xTranslate: number, yTranslate: number): void {
         this.lastXTranslate = xTranslate; this.lastYTranslate = yTranslate;
-        const translateString = ` translate(${xTranslate} ${yTranslate})`;
+        const translateString = `translate(${xTranslate} ${yTranslate})`;
         for (const obj of this.objectList) {
             this.renderer.setAttribute(obj,
                 'transform', translateString + this.previousTransformation.get(obj.id) as string);

@@ -1,3 +1,4 @@
+import { CollaborationService } from 'src/app/services/collaboration.service';
 import { SyncDrawingService } from './../syncdrawing.service';
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { ICommand } from '../../interfaces/command.interface';
@@ -19,7 +20,8 @@ export class CommandInvokerService {
   constructor(
     private selectionService: SelectionToolService,
     private drawingService: DrawingService,
-    private syncService: SyncDrawingService
+    private syncService: SyncDrawingService,
+    private collabService: CollaborationService
   ) {
     this.drawingService.drawingEmit.subscribe(() => {
       this.clearCommandHistory();
@@ -60,10 +62,14 @@ export class CommandInvokerService {
     if (this.canUndo) {
       const undoneCommand = this.commandsList.pop() as ICommand;
       this.selectionService.removeSelection();
-      undoneCommand.undo();
-      this.undonedCommandsList.push(undoneCommand);
-      this.commandCallEmitter.emit('undo');
-      this.syncService.sendUndo(undoneCommand);
+      const action = this.collabService.findLatestAction(this.syncService.defaultPayload!.userId);
+      if (action) {
+        this.syncService.sendSelect(action.data.actionId, false);
+        undoneCommand.undo();
+        this.undonedCommandsList.push(undoneCommand);
+        this.commandCallEmitter.emit('undo');
+        this.syncService.sendUndo(action.data.actionId);
+      }
     }
   }
 
@@ -71,12 +77,15 @@ export class CommandInvokerService {
   /// a la liste de commande redo
   redo(): void {
     if (this.canRedo) {
-      const redoneCommand = this.undonedCommandsList.pop() as ICommand;
-      this.selectionService.removeSelection();
-      redoneCommand.execute();
-      this.commandsList.push(redoneCommand);
-      this.commandCallEmitter.emit('redo');
-      this.syncService.sendRedo(redoneCommand);
+      const action = this.collabService.findLatestUndoneAction(this.syncService.defaultPayload!.userId);
+      if (action) {
+        this.selectionService.removeSelection();
+        const redoneCommand = this.undonedCommandsList.pop() as ICommand;
+        redoneCommand.execute();
+        this.commandsList.push(redoneCommand);
+        this.commandCallEmitter.emit('redo');
+        this.syncService.sendRedo(action.data.actionId);
+      }
     }
   }
 }

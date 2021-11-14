@@ -10,7 +10,6 @@ import { DrawingService } from '../../drawing/drawing.service';
 import { OffsetManagerService } from '../../offset-manager/offset-manager.service';
 import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
 import { ToolsColorService } from '../../tools-color/tools-color.service';
-import { SelectionToolService } from '../selection-tool/selection-tool.service';
 import { ToolIdConstants } from '../tool-id-constants';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { FilledShape } from './filed-shape.model';
@@ -48,7 +47,6 @@ export class ToolRectangleService implements Tools {
     private colorTool: ToolsColorService,
     private drawingService: DrawingService,
     private rendererService: RendererProviderService,
-    private selectionToolService: SelectionToolService,
     private syncService: SyncDrawingService
   ) {
     this.strokeWidth = new FormControl(1, Validators.min(1));
@@ -128,10 +126,7 @@ export class ToolRectangleService implements Tools {
     this.isSquare = false;
     if (this.rectangleCommand) {
       const returnRectangleCommand = this.rectangleCommand;
-      returnRectangleCommand.actionId = this.syncService.activeActionId;
       this.rectangleCommand = null;
-      const lastObj = new Array(this.drawingService.getLastObject());
-      this.selectionToolService.setNewSelection(lastObj);
       this.syncService.sendShape(DrawingState.up, this.rectStyle.value, ShapeType.Rectangle, this.rectangle!);
       this.isDrawing = false;
       this.rectangle = null;
