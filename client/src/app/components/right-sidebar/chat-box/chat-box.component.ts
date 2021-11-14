@@ -60,18 +60,20 @@ export class ChatBoxComponent implements OnInit, OnChanges {
 
   ngOnChanges() {
     this.chatCss = { width: "300px" };
-    this.chatBoxName = this.channel_object.name;
-    this.chatService.joinChannel(this.channel_object.channel_id);
-    this.chatService
-      .receiveMessage()
-      .subscribe((data: IReceiveMessagePayload) => {
-        this.messages.push({
-          message: data.message,
-          avatar: data.avatarUrl,
-          username: data.username,
-          time: data.createdAt,
+    if (this.channel_object) {
+      this.chatBoxName = this.channel_object.name;
+      this.chatService.joinChannel(this.channel_object.channel_id);
+      this.chatService
+        .receiveMessage()
+        .subscribe((data: IReceiveMessagePayload) => {
+          this.messages.push({
+            message: data.message,
+            avatar: data.avatarUrl,
+            username: data.username,
+            time: data.createdAt,
+          });
         });
-      });
+    }
   }
 
   sendMessage() {

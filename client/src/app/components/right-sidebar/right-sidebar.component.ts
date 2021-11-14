@@ -1,7 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { MatDialog } from "@angular/material/dialog";
-import { Observable, Subscription, merge } from "rxjs";
-import { IReceiveMessagePayload } from "src/app/model/IReceiveMessagePayload.model";
+import { Subscription } from "rxjs";
 import { ChatService } from "src/app/services/chat/chat.service";
 import { SocketService } from "src/app/services/chat/socket.service";
 import { HttpClient } from "@angular/common/http";
@@ -38,24 +36,6 @@ export class RightSidebarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.textChannels = new Map();
-
-    this.chatService
-      .listenCreatedChannels()
-      .subscribe((data: any) => console.log(data));
-
-    this.chatService.getChannels().subscribe((data) => {
-      data.forEach((element) => {
-        console.log(element);
-      });
-    });
-
-    this.http
-      .post("https://colorimage-109-3900.herokuapp.com/api/channels/create/", {
-        channelName: "general",
-      })
-      .subscribe((res) => console.log(res));
-
     this.getChannels();
   }
 
