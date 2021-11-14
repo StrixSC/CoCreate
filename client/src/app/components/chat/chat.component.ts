@@ -91,11 +91,11 @@ export class ChatComponent implements OnInit {
     this.socketService.socket.auth = {
       username,
     };
-    this.chatService.joinChannel();
+    // this.chatService.joinChannel();
   }
 
   sendMessage(): void {
-    this.chatService.sendMessage(this.message);
+    this.chatService.sendMessage("", this.message);
     this.message = "";
   }
 
