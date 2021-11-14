@@ -58,7 +58,7 @@ export class ChatComponent implements OnInit {
 
     this.messageListener = merge(
       this.chatService.userConnection(),
-      this.chatService.userDisconnect(),
+      // this.chatService.userDisconnect(),
       this.chatService.receiveMessage()
     ).subscribe((data: IReceiveMessagePayload) => {
       this.messages.push(data);

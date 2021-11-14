@@ -12,10 +12,11 @@
     </mat-grid-list>
     <br />
   </div>
-  <div class="messages_container">
+  <div class="messages_container" #messageBox>
     <div
       *ngFor="let message_ of messages"
       style="margin-bottom: 50px; width: 270px"
+      #messagesWatcher
     >
       <mat-grid-list cols="4" rowHeight="20px">
         <mat-grid-tile colspan="1" rowspan="1" style="color: white">

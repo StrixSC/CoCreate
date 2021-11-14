@@ -4,6 +4,10 @@ import {
   Input,
   OnChanges,
   AfterViewInit,
+  ViewChild,
+  ElementRef,
+  ViewChildren,
+  QueryList,
 } from "@angular/core";
 import { ChatService } from "src/app/services/chat/chat.service";
 import { HttpClient } from "@angular/common/http";
@@ -37,13 +41,13 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
   messagesList: Set<string>;
   @Input() channel_object: IChannel;
 
-  currentText: string;
+  @ViewChild("messageBox", { static: true })
+  messageBox: ElementRef<HTMLInputElement>;
 
-  tiles: MessageHeader[] = [
-    { text: "Avatar", cols: 1, rows: 1, color: "lightpink" },
-    { text: "Pritam", cols: 2, rows: 1, color: "#DDBDF1" },
-    { text: "Three", cols: 1, rows: 1, color: "lightpink" },
-  ];
+  @ViewChildren("messagesList")
+  messagesWatcher!: QueryList<ElementRef>;
+
+  currentText: string;
 
   messages: Array<Message>;
   constructor(private chatService: ChatService, private http: HttpClient) {
@@ -51,11 +55,14 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
     this.messages = [];
     this.alreadySubbed = false;
   }
+  ngAfterViewInit(): void {
+    this.messagesWatcher.changes.subscribe(() => {
+      this.scrollToBottom();
+    });
+  }
   ngOnInit(): void {
     this.chatCss = { display: "none" };
   }
-
-  ngAfterViewInit() {}
 
   getMessagesFromChannel(channelID: string) {
     this.messages = [];
@@ -82,34 +89,39 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
 
     if (this.channel_object) {
       this.getMessagesFromChannel(this.channel_object.channel_id);
-
-      if (!this.alreadySubbed) {
-        this.chatService
-          .receiveMessage()
-          .subscribe((data: IReceiveMessagePayload) => {
-            console.log(data);
-            if (
-              !this.messagesList.has(data.messageId) &&
-              data.channelId === this.channel_object.channel_id
-            ) {
-              this.messages.push({
-                message: data.message,
-                avatar: data.avatarUrl,
-                username: data.username,
-                time: data.createdAt,
-              });
-              this.messagesList.add(data.messageId);
-            }
-            console.log(this.messagesList);
-            if (this.messagesList.size > 20) {
-              this.messagesList.clear();
-            }
-          });
-      }
+      // console.log(this.channel_object.channel_id);
+      // if (!this.alreadySubbed) {
+      this.chatService
+        .receiveMessage()
+        .subscribe((data: IReceiveMessagePayload) => {
+          console.log(data.channelId);
+          console.log(this.channel_object.channel_id);
+          if (
+            !this.messagesList.has(data.messageId) &&
+            data.channelId === this.channel_object.channel_id
+          ) {
+            this.messages.push({
+              message: data.message,
+              avatar: data.avatarUrl,
+              username: data.username,
+              time: data.createdAt,
+            });
+            this.messagesList.add(data.messageId);
+          }
+          if (this.messagesList.size > 20) this.messagesList.clear();
+        });
+      //   this.alreadySubbed = true;
+      // }
       this.chatBoxName = this.channel_object.name;
       this.chatService.joinChannel(this.channel_object.channel_id);
-      console.log("changing channels");
     }
+  }
+
+  scrollToBottom(): void {
+    try {
+      this.messageBox.nativeElement.scrollTop =
+        this.messageBox.nativeElement.scrollHeight;
+    } catch (err) {}
   }
 
   sendMessage() {
@@ -122,13 +134,11 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
     }
   }
 
-  OnInit() {}
-
   popOutChat() {
     window.open(
-      "http://localhost:4200/popped-chat",
-      "C-Sharpcorner",
-      "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=800,height=1000"
+      "http://localhost:4200/popped-chat/" + this.channel_object.channel_id,
+      "_blank",
+      "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=800,height=1000,addressbar=no"
     );
     this.chatCss = { display: "none" };
   }

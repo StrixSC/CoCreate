@@ -1,16 +1,25 @@
-import { Component, OnInit } from "@angular/core";
-import { ThemePalette } from "@angular/material/core";
+import { HttpClient } from "@angular/common/http";
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnChanges,
+  OnInit,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+} from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { IChannel } from "src/app/model/IChannel.model";
+import { IReceiveMessagePayload } from "src/app/model/IReceiveMessagePayload.model";
+import { ChatService } from "src/app/services/chat/chat.service";
 
-export interface Messages {
-  text: string;
-  color: ThemePalette;
-  isMe: boolean;
-  style: {
-    height: string;
-    width: string;
-    margin?: string;
-    right?: string;
-  };
+export interface Message {
+  message: string;
+  avatar: string;
+  username: string;
+  time: string;
 }
 
 @Component({
@@ -18,96 +27,93 @@ export interface Messages {
   templateUrl: "./chat-poped-out.component.html",
   styleUrls: ["./chat-poped-out.component.scss"],
 })
-export class ChatPopedOutComponent implements OnInit {
-  socketConversation: Messages[] = [
-    {
-      text: "In some scenarios, developers might prefer that behavior over the default and would like to have the same for",
-      color: "accent",
-      isMe: false,
-      style: {
-        height: "50px",
-        width: "300px",
-        margin: "0 5 5 0",
-      },
-    },
+export class ChatPopedOutComponent implements OnInit, OnChanges, AfterViewInit {
+  chatBoxName: string;
+  alreadySubbed: boolean;
+  messagesList: Set<string>;
+  @Input() channel_object: IChannel;
 
-    {
-      text: "In some scenarios",
-      color: "warn",
-      isMe: true,
-      style: {
-        height: "50px",
-        width: "100px",
-        right: "1",
-      },
-    },
-  ];
+  @ViewChild("messageBox", { static: true })
+  messageBox: ElementRef<HTMLInputElement>;
 
-  chatBoxCSS: any = {};
+  @ViewChildren("messagesList")
+  messagesWatcher!: QueryList<ElementRef>;
+  messages: Array<Message>;
   currentText: string;
-  isChatOpen = true;
+  channel_id: string;
 
-  constructor() {
-    this.openChatBox();
+  constructor(
+    private chatService: ChatService,
+    private http: HttpClient,
+    private route: ActivatedRoute
+  ) {
+    this.messagesList = new Set();
+    this.messages = [];
+    this.alreadySubbed = false;
   }
-  ngOnDestroy(): void {
-    console.log("Destroyed!");
+  ngOnDestroy(): void {}
+
+  ngAfterViewInit(): void {
+    this.messagesWatcher.changes.subscribe(() => {
+      this.scrollToBottom();
+    });
   }
+
+  scrollToBottom(): void {
+    try {
+      this.messageBox.nativeElement.scrollTop =
+        this.messageBox.nativeElement.scrollHeight;
+    } catch (err) {}
+  }
+
+  getMessagesFromChannel(channelID: string) {
+    this.messages = [];
+    this.http
+      .get(
+        "https://colorimage-109-3900.herokuapp.com/api/channels/" +
+          channelID +
+          "/messages"
+      )
+      .subscribe((data: any) => {
+        data.forEach((m: any) => {
+          this.messages.push({
+            message: m.message_data,
+            avatar: m.avatar_url,
+            username: m.username,
+            time: m.timestamp,
+          });
+        });
+      });
+  }
+
+  ngOnChanges() {}
 
   sendMessage() {
     if (this.currentText.length > 0) {
-      this.socketConversation.push({
-        text: this.currentText,
-        color: "warn",
-        isMe: true,
-        style: {
-          height: "50px",
-          width: "100px",
-          right: "1",
-        },
-      });
+      this.chatService.sendMessage(this.channel_id, this.currentText);
       this.currentText = "";
-      window.scroll(0, 0);
     }
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.route.params.subscribe((channel: { id: string }) => {
+      this.channel_id = channel.id;
+      this.getMessagesFromChannel(this.channel_id);
+      this.scrollToBottom();
+      this.chatService.joinChannel(this.channel_id);
+      this.chatService
+        .receiveMessage()
+        .subscribe((data: IReceiveMessagePayload) => {
+          this.messages.push({
+            message: data.message,
+            avatar: data.avatarUrl,
+            username: data.username,
+            time: data.createdAt,
+          });
+          this.messagesList.add(data.messageId);
+        });
 
-  openChatBox() {
-    this.chatBoxCSS = {
-      width: "400px",
-      height: "450px",
-      "background-color": "rgb(247, 247, 247)",
-      position: "fixed",
-      bottom: "0",
-      right: "300px",
-      border: "2px solid black",
-      "border-top-left-radius": "5%",
-      "border-top-right-radius": "5%",
-      "border-bottom-left-radius": "5%",
-      overflow: "hidden",
-    };
-    this.isChatOpen = true;
-  }
-
-  minimiseChatBox() {
-    this.chatBoxCSS = {
-      width: "350px",
-      height: "40px",
-      "background-color": "rgb(247, 247, 247)",
-      position: "fixed",
-      bottom: "0",
-      right: "300px",
-      border: "2px solid black",
-    };
-    this.isChatOpen = false;
-  }
-
-  popOutChat() {
-    window.open(
-      "http://localhost:4200/popped-chat",
-      "C-Sharpcorner",
-      "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=800,height=1000"
-    );
+      this.chatBoxName = this.channel_object.name;
+    });
   }
 }

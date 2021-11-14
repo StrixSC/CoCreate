@@ -44,7 +44,7 @@ const routes: Routes = [
       authGuardPipe: redirectUnauthorizedToLogin,
     },
   },
-  { path: "popped-chat", component: ChatPopedOutComponent },
+  { path: "popped-chat/:id", component: ChatPopedOutComponent },
   { path: "chat", component: ChatComponent },
   { path: "forgot-password", component: ChangePasswordComponent },
   { path: "**", redirectTo: "" },

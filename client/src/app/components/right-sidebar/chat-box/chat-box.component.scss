@@ -18,13 +18,14 @@
 .messages_container {
   margin-left: 10px;
   margin-top: 10px;
-
-  height: 88%;
-  width: 300px;
+  font-size: 14px;
+  height: 85%;
+  width: 310px;
   border-radius: 10px;
   position: fixed;
   background-color: #36393f;
-  overflow: scroll;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .column1 {
@@ -44,8 +45,22 @@
   clear: both;
 }
 
-.messages_container::-webkit-scrollbar {
-  display: none;
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #2e3338;
+  border-radius: 10px;
+  height: 90%;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #202225;
+  border-radius: 10px;
 }
 
 .input_text {
