@@ -1,6 +1,8 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, Input, OnChanges } from "@angular/core";
 import { ChatService } from "src/app/services/chat/chat.service";
+import { HttpClient } from "@angular/common/http";
 import { Observable, Subscription } from "rxjs";
+import { IChannel } from "src/app/model/IChannel.model";
 
 export interface MessageHeader {
   color: string;
@@ -21,10 +23,13 @@ export interface Message {
   templateUrl: "./chat-box.component.html",
   styleUrls: ["./chat-box.component.scss"],
 })
-export class ChatBoxComponent implements OnInit {
+export class ChatBoxComponent implements OnInit, OnChanges {
   chatCss: any = { width: "300px" };
   chatBoxName: string;
+  @Input() channel_object: IChannel;
+
   currentText: string;
+
   tiles: MessageHeader[] = [
     { text: "Avatar", cols: 1, rows: 1, color: "lightpink" },
     { text: "Pritam", cols: 2, rows: 1, color: "#DDBDF1" },
@@ -32,7 +37,7 @@ export class ChatBoxComponent implements OnInit {
   ];
 
   messages: Array<Message>;
-  constructor(private chatService: ChatService) {
+  constructor(private chatService: ChatService, private http: HttpClient) {
     this.messages = [
       {
         message: "Bonjour comment va tu?",
@@ -47,21 +52,30 @@ export class ChatBoxComponent implements OnInit {
         time: "8:30pm",
       },
     ];
-    this.chatBoxName = "General";
   }
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.chatCss = { display: "none" };
+    this.chatService.receiveMessage().subscribe((data) => {
+      console.log(data, "from child");
+    });
+  }
 
-  updateChat() {}
+  ngOnChanges() {
+    this.chatCss = { width: "300px" };
+    this.chatBoxName = this.channel_object.name;
+    this.chatService.joinChannel(this.channel_object.channel_id);
+  }
 
   sendMessage() {
     if (this.currentText.length > 0) {
-      console.log(this.currentText);
+      // console.log(this.currentText);
       this.messages.push({
         message: this.currentText,
         avatar: "avatar",
         username: "@me",
         time: "8:30pm",
       });
+      this.chatService.sendMessage(this.currentText);
       this.currentText = "";
     }
   }

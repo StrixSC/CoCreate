@@ -1,4 +1,5 @@
 <div class="rightsidebar">
+  <app-chat-box [channel_object]="channel"></app-chat-box>
   <div class="options">
     <mat-action-list>
       <p class="channelHeaders">Recently Joined</p>
@@ -13,6 +14,14 @@
   <div class="chatbox">
     <mat-action-list>
       <p class="channelHeaders">Channels</p>
+
+      <!-- <button
+        mat-button
+        style="background-color: aqua"
+        (click)="createChannel()"
+      >
+        Create Channel
+      </button> -->
 
       <div
         class="channel_box"

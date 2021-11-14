@@ -5,24 +5,7 @@ import { IReceiveMessagePayload } from "src/app/model/IReceiveMessagePayload.mod
 import { ChatService } from "src/app/services/chat/chat.service";
 import { SocketService } from "src/app/services/chat/socket.service";
 import { HttpClient } from "@angular/common/http";
-
-export interface TextChannel {
-  channel_id: string;
-  collaboration_id: any;
-  name: string;
-  owner_username: string;
-  type: string;
-  updated_at: string;
-  style?: Object;
-  divStyle?: Object;
-}
-
-// channel_id: "PUBLIC";
-// collaboration_id: null;
-// name: "Public";
-// owner_username: "admin";
-// type: "Public";
-// updated_at: "2021-11-09T23:33:52.316Z";
+import { IChannel } from "src/app/model/IChannel.model";
 
 @Component({
   selector: "app-right-sidebar",
@@ -30,7 +13,7 @@ export interface TextChannel {
   styleUrls: ["./right-sidebar.component.scss"],
 })
 export class RightSidebarComponent implements OnInit {
-  private textChannels: Map<String, TextChannel>;
+  private textChannels: Map<String, IChannel>;
   private prevJoinedCollabChannels: Array<String> = [
     "Équipe 109",
     "Équipe 109",
@@ -42,6 +25,7 @@ export class RightSidebarComponent implements OnInit {
   selectedChannel: string;
   messageListener: Subscription;
   errorListener: Subscription;
+  channel: IChannel;
 
   constructor(
     private chatService: ChatService,
@@ -56,6 +40,16 @@ export class RightSidebarComponent implements OnInit {
   ngOnInit(): void {
     this.textChannels = new Map();
 
+    this.chatService
+      .listenCreatedChannels()
+      .subscribe((data: any) => console.log(data));
+
+    this.chatService.getChannels().subscribe((data) => {
+      data.forEach((element) => {
+        console.log(element);
+      });
+    });
+
     this.http
       .post("https://colorimage-109-3900.herokuapp.com/api/channels/create/", {
         channelName: "general",
@@ -63,33 +57,15 @@ export class RightSidebarComponent implements OnInit {
       .subscribe((res) => console.log(res));
 
     this.getChannels();
-
-    // this.messageListener = merge(
-    //   this.chatService.userConnection(),
-    //   this.chatService.userDisconnect(),
-    //   this.chatService.receiveMessage()
-    // ).subscribe((data: IReceiveMessagePayload) => {
-    //   console.log(data);
-    // });
-    // this.connectWithUsername();
-  }
-
-  connectWithUsername() {
-    const username = "demo";
-
-    this.socketService.username = username;
-    this.socketService.socket.auth = {
-      username,
-    };
-    this.chatService.joinChannel();
   }
 
   getChannels() {
     this.http
       .get("https://colorimage-109-3900.herokuapp.com/api/channels/")
       .subscribe((data: any) => {
-        data.forEach((element: TextChannel) => {
+        data.forEach((element: IChannel) => {
           this.textChannels.set(element.channel_id, element);
+          console.log(element);
         });
       });
   }
@@ -102,5 +78,28 @@ export class RightSidebarComponent implements OnInit {
       .subscribe((data: any) => {
         console.log(data);
       });
+    // this.getMessagesFromChannel(channelID);
+    this.selectedChannel = channelID;
+    if (this.textChannels.has(channelID)) {
+      this.channel = this.textChannels.get(channelID) as TextChannel;
+    }
+
+    // this.chatService.joinChannel(channelID);
+  }
+
+  getMessagesFromChannel(channelID: string) {
+    this.http
+      .get(
+        "https://colorimage-109-3900.herokuapp.com/api/channels/" +
+          channelID +
+          "/messages"
+      )
+      .subscribe((data: any) => {
+        console.log(data);
+      });
+  }
+
+  createChannel() {
+    this.chatService.createChannel("ragib");
   }
 }
