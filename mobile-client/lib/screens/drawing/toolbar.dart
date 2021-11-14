@@ -49,9 +49,10 @@ class _ToolbarState extends State<Toolbar> {
   Widget build(BuildContext context) {
     return Column(children: [
       SizedBox(
-          width: MediaQuery.of(context).size.width * 0.10,
+          width: 80,
           height: MediaQuery.of(context).size.height,
           child: Drawer(
+              elevation: 18,
               child: Container(
                   color: Colors.white24,
                   child: Column(
@@ -133,4 +134,5 @@ class _ToolbarState extends State<Toolbar> {
                   )))
         ]);
   }
+
 }
