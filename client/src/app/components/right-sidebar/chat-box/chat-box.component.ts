@@ -1,4 +1,10 @@
-import { Component, OnInit, Input, OnChanges } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  Input,
+  OnChanges,
+  AfterViewInit,
+} from "@angular/core";
 import { ChatService } from "src/app/services/chat/chat.service";
 import { HttpClient } from "@angular/common/http";
 import { Observable, Subscription } from "rxjs";
@@ -24,10 +30,11 @@ export interface Message {
   templateUrl: "./chat-box.component.html",
   styleUrls: ["./chat-box.component.scss"],
 })
-export class ChatBoxComponent implements OnInit, OnChanges {
+export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
   chatCss: any = { width: "300px" };
   chatBoxName: string;
-  previous_channel: IChannel;
+  alreadySubbed: boolean;
+  messagesList: Set<string>;
   @Input() channel_object: IChannel;
 
   currentText: string;
@@ -40,19 +47,15 @@ export class ChatBoxComponent implements OnInit, OnChanges {
 
   messages: Array<Message>;
   constructor(private chatService: ChatService, private http: HttpClient) {
+    this.messagesList = new Set();
     this.messages = [];
-    this.previous_channel = {
-      channel_id: "PUBLIC",
-      collaboration_id: "PUBLIC",
-      name: "PUBLIC",
-      owner_username: "PUBLIC",
-      type: "PUBLIC",
-      updated_at: "PUBLIC",
-    };
+    this.alreadySubbed = false;
   }
   ngOnInit(): void {
     this.chatCss = { display: "none" };
   }
+
+  ngAfterViewInit() {}
 
   getMessagesFromChannel(channelID: string) {
     this.messages = [];
@@ -62,35 +65,50 @@ export class ChatBoxComponent implements OnInit, OnChanges {
           channelID +
           "/messages"
       )
-      .subscribe((data: IReceiveMessagePayload[]) => {
-        data.forEach((message: IReceiveMessagePayload) => {
-          // console.log(message);
+      .subscribe((data: any) => {
+        data.forEach((m: any) => {
+          // this.messages.push({
+          //   message: m.message_data,
+          //   avatar: m.avatar_url,
+          //   username: m.username,
+          //   time: m.timestamp,
+          // });
         });
       });
   }
 
   ngOnChanges() {
     this.chatCss = { width: "300px" };
-    console.log("Leaving channel", this.previous_channel.name);
-    this.chatService.leaveChannel(this.previous_channel.channel_id);
 
     if (this.channel_object) {
       this.getMessagesFromChannel(this.channel_object.channel_id);
 
-      this.chatBoxName = this.channel_object.name;
-
-      this.previous_channel = this.channel_object;
-      this.chatService.joinChannel(this.channel_object.channel_id);
-      this.chatService
-        .receiveMessage()
-        .subscribe((data: IReceiveMessagePayload) => {
-          this.messages.push({
-            message: data.message,
-            avatar: data.avatarUrl,
-            username: data.username,
-            time: data.createdAt,
+      if (!this.alreadySubbed) {
+        this.chatService
+          .receiveMessage()
+          .subscribe((data: IReceiveMessagePayload) => {
+            console.log(data);
+            if (
+              !this.messagesList.has(data.messageId) &&
+              data.channelId === this.channel_object.channel_id
+            ) {
+              this.messages.push({
+                message: data.message,
+                avatar: data.avatarUrl,
+                username: data.username,
+                time: data.createdAt,
+              });
+              this.messagesList.add(data.messageId);
+            }
+            console.log(this.messagesList);
+            if (this.messagesList.size > 20) {
+              this.messagesList.clear();
+            }
           });
-        });
+      }
+      this.chatBoxName = this.channel_object.name;
+      this.chatService.joinChannel(this.channel_object.channel_id);
+      console.log("changing channels");
     }
   }
 

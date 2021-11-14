@@ -2,6 +2,8 @@ import { Component, OnInit } from "@angular/core";
 import { Subscription } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { IChannel } from "src/app/model/IChannel.model";
+import { ChatService } from "src/app/services/chat/chat.service";
+import { IReceiveMessagePayload } from "src/app/model/IReceiveMessagePayload.model";
 
 @Component({
   selector: "app-right-sidebar",
@@ -23,7 +25,7 @@ export class RightSidebarComponent implements OnInit {
   errorListener: Subscription;
   channel: IChannel;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private chatService: ChatService) {
     this.textChannels = new Map();
     this.errorListener = new Subscription();
     this.messageListener = new Subscription();
@@ -39,19 +41,11 @@ export class RightSidebarComponent implements OnInit {
       .subscribe((data: any) => {
         data.forEach((element: IChannel) => {
           this.textChannels.set(element.channel_id, element);
-          console.log(element);
         });
       });
   }
 
   changeChannel(channelID: string) {
-    this.http
-      .get(
-        "https://colorimage-109-3900.herokuapp.com/api/channels/" + channelID
-      )
-      .subscribe((data: any) => {
-        console.log(data);
-      });
     this.selectedChannel = channelID;
     if (this.textChannels.has(channelID)) {
       this.channel = this.textChannels.get(channelID) as IChannel;
