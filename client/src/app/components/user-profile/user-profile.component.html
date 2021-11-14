@@ -1,1 +1,35 @@
 
+<!--<img class="avatar" id="photo" src="../assets/105992231-1561667465295gettyimages-521697453.jpeg">-->
+    <div class="profile-header">
+    <img mat-card-avatar class="avatar" src="../assets/105992231-1561667465295gettyimages-521697453.jpeg">
+    <button mat-button class="profile-settings-btn">Profile settings
+    <mat-icon>settings</mat-icon>
+    </button>
+    </div>
+    <mat-card>
+    <mat-list class="personal-info" *ngIf="isPersonalProfile">
+        <mat-list-item>
+        <p class="info-name"><b> Name </b></p>
+        <p class="info-value">{{userName}}</p>
+        </mat-list-item>
+        <mat-divider></mat-divider>
+        <mat-list-item>
+        <p class="info-name"><b> Email </b></p>
+        <p class="info-value">{{userEmail}}</p>
+        </mat-list-item>
+        <mat-divider></mat-divider>
+        <mat-list-item>
+        <p class="info-name"><b> Username </b></p>
+        <p class="info-value">{{username}}</p>
+        </mat-list-item>
+        <mat-divider></mat-divider>
+    </mat-list>
+
+    <mat-list class="personal-info" *ngIf="!isPersonalProfile">
+    <mat-list-item>
+        <p class="info-name"><b> Username </b></p>
+        <p class="info-value">{{username}}</p>
+    </mat-list-item>
+    </mat-list>
+</mat-card>
+

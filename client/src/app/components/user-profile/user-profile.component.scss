@@ -1,0 +1,37 @@
+::ng-deep {
+    body {
+      background-color: #3399ff;
+  
+      height: 100%;
+    }
+    mat-card {
+        width: 50%;
+        margin-left: 20%;
+    }
+  }
+
+
+.info-value {
+    align-items: flex-start;
+    margin-left: 20%;
+    position: absolute;
+}
+.profile-header{
+    .avatar {
+        height: 150px;
+        width:150px;
+       
+    
+    }
+    .profile-settings-btn {
+        
+        margin-left: inherit;
+        background-color: aliceblue;
+    }
+    align-items: center;
+    width:40%;
+    margin-left: 40%;
+    margin-bottom: 5%;
+    margin-top: 5%;
+    
+}
