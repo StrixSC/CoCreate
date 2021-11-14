@@ -27,6 +27,7 @@ export interface Message {
 export class ChatBoxComponent implements OnInit, OnChanges {
   chatCss: any = { width: "300px" };
   chatBoxName: string;
+  previous_channel: IChannel;
   @Input() channel_object: IChannel;
 
   currentText: string;
@@ -39,29 +40,46 @@ export class ChatBoxComponent implements OnInit, OnChanges {
 
   messages: Array<Message>;
   constructor(private chatService: ChatService, private http: HttpClient) {
-    this.messages = [
-      {
-        message: "Bonjour comment va tu?",
-        avatar: "avatar",
-        username: "Max",
-        time: "8:30pm",
-      },
-      {
-        message: "Bien et toi?",
-        avatar: "avatar",
-        username: "Bob",
-        time: "8:30pm",
-      },
-    ];
+    this.messages = [];
+    this.previous_channel = {
+      channel_id: "PUBLIC",
+      collaboration_id: "PUBLIC",
+      name: "PUBLIC",
+      owner_username: "PUBLIC",
+      type: "PUBLIC",
+      updated_at: "PUBLIC",
+    };
   }
   ngOnInit(): void {
     this.chatCss = { display: "none" };
   }
 
+  getMessagesFromChannel(channelID: string) {
+    this.messages = [];
+    this.http
+      .get(
+        "https://colorimage-109-3900.herokuapp.com/api/channels/" +
+          channelID +
+          "/messages"
+      )
+      .subscribe((data: IReceiveMessagePayload[]) => {
+        data.forEach((message: IReceiveMessagePayload) => {
+          // console.log(message);
+        });
+      });
+  }
+
   ngOnChanges() {
     this.chatCss = { width: "300px" };
+    console.log("Leaving channel", this.previous_channel.name);
+    this.chatService.leaveChannel(this.previous_channel.channel_id);
+
     if (this.channel_object) {
+      this.getMessagesFromChannel(this.channel_object.channel_id);
+
       this.chatBoxName = this.channel_object.name;
+
+      this.previous_channel = this.channel_object;
       this.chatService.joinChannel(this.channel_object.channel_id);
       this.chatService
         .receiveMessage()
@@ -78,13 +96,6 @@ export class ChatBoxComponent implements OnInit, OnChanges {
 
   sendMessage() {
     if (this.currentText.length > 0) {
-      // console.log(this.currentText);
-      this.messages.push({
-        message: this.currentText,
-        avatar: "avatar",
-        username: "@me",
-        time: "8:30pm",
-      });
       this.chatService.sendMessage(
         this.channel_object.channel_id,
         this.currentText

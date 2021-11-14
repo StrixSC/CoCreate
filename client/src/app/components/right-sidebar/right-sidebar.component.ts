@@ -1,7 +1,5 @@
 import { Component, OnInit } from "@angular/core";
 import { Subscription } from "rxjs";
-import { ChatService } from "src/app/services/chat/chat.service";
-import { SocketService } from "src/app/services/chat/socket.service";
 import { HttpClient } from "@angular/common/http";
 import { IChannel } from "src/app/model/IChannel.model";
 
@@ -25,11 +23,7 @@ export class RightSidebarComponent implements OnInit {
   errorListener: Subscription;
   channel: IChannel;
 
-  constructor(
-    private chatService: ChatService,
-    private socketService: SocketService,
-    private http: HttpClient
-  ) {
+  constructor(private http: HttpClient) {
     this.textChannels = new Map();
     this.errorListener = new Subscription();
     this.messageListener = new Subscription();
@@ -58,28 +52,9 @@ export class RightSidebarComponent implements OnInit {
       .subscribe((data: any) => {
         console.log(data);
       });
-    // this.getMessagesFromChannel(channelID);
     this.selectedChannel = channelID;
     if (this.textChannels.has(channelID)) {
       this.channel = this.textChannels.get(channelID) as IChannel;
     }
-
-    // this.chatService.joinChannel(channelID);
-  }
-
-  getMessagesFromChannel(channelID: string) {
-    this.http
-      .get(
-        "https://colorimage-109-3900.herokuapp.com/api/channels/" +
-          channelID +
-          "/messages"
-      )
-      .subscribe((data: any) => {
-        console.log(data);
-      });
-  }
-
-  createChannel() {
-    this.chatService.createChannel("ragib");
   }
 }

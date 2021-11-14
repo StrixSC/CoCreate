@@ -28,8 +28,10 @@ export class ChatService {
     return this.socket.on("user-connection");
   }
 
-  userDisconnect(): Observable<IReceiveMessagePayload> {
-    return this.socket.on("user-disconnect");
+  leaveChannel(channel_id: string): void {
+    return this.socket.emit("channel:leave", {
+      channelId: channel_id,
+    });
   }
 
   joinChannel(channelId: string): void {
