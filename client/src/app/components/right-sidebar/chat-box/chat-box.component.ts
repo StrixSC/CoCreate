@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { ChatService } from "src/app/services/chat/chat.service";
+import { Observable, Subscription } from "rxjs";
 
 export interface MessageHeader {
   color: string;
@@ -66,6 +67,7 @@ export class ChatBoxComponent implements OnInit {
   }
 
   OnInit() {}
+
   popOutChat() {
     window.open(
       "http://localhost:4200/popped-chat",
