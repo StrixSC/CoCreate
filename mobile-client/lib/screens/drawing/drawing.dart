@@ -35,8 +35,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
   Map selectedItems = <String, String>{}; // <actionId, userId>
   bool allowMove = false;
   Offset? selectRef; // offset reference of selected item
-  Color pickerColor = const Color(0xff443a49);
-  Color currentColor = const Color(0xff443a49);
+  Color currentBodyColor = const Color(0xff443a49);
+  Color currentBorderColor = const Color(0xff443a49);
+  Color currentBackgroundColor = const Color(0xff443a49);
   List<Rect>? selectedBounds;
   int? selectedBoundIndex;
   Map resizingItems = <String, Path>{};
@@ -299,8 +300,19 @@ class _DrawingScreenState extends State<DrawingScreen> {
     return hasSelectedBound;
   }
 
-  void changeColor(Color color) {
-    setState(() => currentColor = color);
+  void changeColor(Color color, String type) {
+    switch(type) {
+      case "Body":
+        setState(() => currentBodyColor = color);
+        break;
+      case "Border":
+        setState(() => currentBorderColor = color);
+        break;
+      case "Background":
+        setState(() => currentBackgroundColor = color);
+        break;
+    }
+
   }
 
   void changeTool(String type) {
@@ -530,7 +542,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
           : details.localPosition.dy,
       'collaborationId': "DEMO_COLLABORATION",
       'state': drawingState,
-      'color': currentColor.value,
+      'color': currentBodyColor.value,
       'actionId': (drawingState == DrawingState.down)
           ? shapeID = const Uuid().v1()
           : shapeID,
@@ -553,10 +565,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'userId': _user.uid,
       'actionType': "Freedraw",
       'state': drawingState,
-      'a': currentColor.alpha,
-      'r': currentColor.red,
-      'g': currentColor.green,
-      'b': currentColor.blue,
+      'a': currentBodyColor.alpha,
+      'r': currentBodyColor.red,
+      'g': currentBodyColor.green,
+      'b': currentBodyColor.blue,
       'width': 3,
       'isSelected': (drawingState == DrawingState.up) ? "false" : true,
       'actionId': (drawingState == DrawingState.down)
