@@ -13,8 +13,9 @@ import { SocketService } from "./socket.service";
 export class ChatService {
   constructor(private socket: SocketService) {}
 
-  sendMessage(msg: string): void {
-    this.socket.emit("send-message", {
+  sendMessage(channel_id: string, msg: string): void {
+    this.socket.emit("channel:send", {
+      channelId: channel_id,
       message: msg,
     } as ISendMessagePayload);
   }

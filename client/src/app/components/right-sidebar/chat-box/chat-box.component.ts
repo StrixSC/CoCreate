@@ -3,6 +3,7 @@ import { ChatService } from "src/app/services/chat/chat.service";
 import { HttpClient } from "@angular/common/http";
 import { Observable, Subscription } from "rxjs";
 import { IChannel } from "src/app/model/IChannel.model";
+import { IReceiveMessagePayload } from "src/app/model/IReceiveMessagePayload.model";
 
 export interface MessageHeader {
   color: string;
@@ -55,15 +56,22 @@ export class ChatBoxComponent implements OnInit, OnChanges {
   }
   ngOnInit(): void {
     this.chatCss = { display: "none" };
-    this.chatService.receiveMessage().subscribe((data) => {
-      console.log(data, "from child");
-    });
   }
 
   ngOnChanges() {
     this.chatCss = { width: "300px" };
     this.chatBoxName = this.channel_object.name;
     this.chatService.joinChannel(this.channel_object.channel_id);
+    this.chatService
+      .receiveMessage()
+      .subscribe((data: IReceiveMessagePayload) => {
+        this.messages.push({
+          message: data.message,
+          avatar: data.avatarUrl,
+          username: data.username,
+          time: data.createdAt,
+        });
+      });
   }
 
   sendMessage() {
@@ -75,7 +83,10 @@ export class ChatBoxComponent implements OnInit, OnChanges {
         username: "@me",
         time: "8:30pm",
       });
-      this.chatService.sendMessage(this.currentText);
+      this.chatService.sendMessage(
+        this.channel_object.channel_id,
+        this.currentText
+      );
       this.currentText = "";
     }
   }

@@ -81,7 +81,7 @@ export class RightSidebarComponent implements OnInit {
     // this.getMessagesFromChannel(channelID);
     this.selectedChannel = channelID;
     if (this.textChannels.has(channelID)) {
-      this.channel = this.textChannels.get(channelID) as TextChannel;
+      this.channel = this.textChannels.get(channelID) as IChannel;
     }
 
     // this.chatService.joinChannel(channelID);
