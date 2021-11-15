@@ -9,14 +9,19 @@
         <mat-select formControlName='type' required>
             <mat-option>--</mat-option>
             <mat-option *ngFor="let visibility of visibilityTypes" [value]="visibility">
+                {{visibility}}
             </mat-option>
         </mat-select>
     </mat-form-field>
+    
     <br>
     <mat-form-field [style.width.%]="15">
         <mat-label>Auteur</mat-label>
         <mat-select formControlName='author_username' required>
             <mat-option>--</mat-option>
+            <mat-option *ngFor="let teamName of teamNames" [value]="teamName">
+                {{teamName}}
+            </mat-option>
         </mat-select>
       </mat-form-field>
     <br>
