@@ -2,8 +2,9 @@ import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { Subscription } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { IChannel } from "src/app/model/IChannel.model";
-import { ChatService } from "src/app/services/chat/chat.service";
+import { ChatSocketService } from "src/app/services/chat/chat.service";
 import { IReceiveMessagePayload } from "src/app/model/IReceiveMessagePayload.model";
+import { ChannelManagerService } from "src/app/services/chat/ChannelManager.service";
 
 @Component({
   selector: "app-right-sidebar",
@@ -23,7 +24,10 @@ export class RightSidebarComponent implements OnInit {
   selectedChannel: string;
   channel: IChannel;
 
-  constructor(private http: HttpClient, private chatService: ChatService) {
+  constructor(
+    private http: HttpClient,
+    private channelManager: ChannelManagerService
+  ) {
     this.textChannels = new Map();
   }
 
@@ -32,13 +36,11 @@ export class RightSidebarComponent implements OnInit {
   }
 
   getChannels() {
-    this.http
-      .get("https://colorimage-109-3900.herokuapp.com/api/channels/")
-      .subscribe((data: any) => {
-        data.forEach((element: IChannel) => {
-          this.textChannels.set(element.channel_id, element);
-        });
+    this.channelManager.GetAllChannels().subscribe((data: any) => {
+      data.forEach((element: IChannel) => {
+        this.textChannels.set(element.channel_id, element);
       });
+    });
   }
 
   changeCSS(channelID: string) {

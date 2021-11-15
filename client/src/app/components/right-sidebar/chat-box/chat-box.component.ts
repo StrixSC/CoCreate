@@ -9,7 +9,7 @@ import {
   ViewChildren,
   QueryList,
 } from "@angular/core";
-import { ChatService } from "src/app/services/chat/chat.service";
+import { ChatSocketService } from "src/app/services/chat/chat.service";
 import { HttpClient } from "@angular/common/http";
 import { Observable, Subscription } from "rxjs";
 import { IChannel } from "src/app/model/IChannel.model";
@@ -37,7 +37,7 @@ export interface Message {
   styleUrls: ["./chat-box.component.scss"],
 })
 export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
-  chatCss: any = { width: "300px" };
+  chatCss: Object = { width: "300px" };
   chatBoxName: string;
   myChannelID: string;
   messagesList: Set<string>;
@@ -53,7 +53,7 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
 
   messages: Array<Message>;
   constructor(
-    private chatService: ChatService,
+    private chatSocketService: ChatSocketService,
     private http: HttpClient,
     private channelManagerService: ChannelManagerService
   ) {
@@ -99,19 +99,21 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
         this.chatBoxName = data.name;
       });
     this.loadChannelMessages(this.channel_id);
-    this.chatService.joinChannel(this.channel_id);
+    this.chatSocketService.joinChannel(this.channel_id);
     this.listenToNewMessages();
   }
 
   listenToNewMessages() {
-    this.chatService.receiveMessage().subscribe((data) => {
-      this.messages.push({
-        message: data.message,
-        avatar: data.avatarUrl,
-        username: data.username,
-        time: data.createdAt,
+    this.chatSocketService
+      .receiveMessage()
+      .subscribe((data: IReceiveMessagePayload) => {
+        this.messages.push({
+          message: data.message,
+          avatar: data.avatarUrl,
+          username: data.username,
+          time: data.createdAt,
+        });
       });
-    });
   }
 
   ngOnChanges() {
@@ -126,15 +128,7 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
 
   sendMessage() {
     if (this.currentText.length > 0) {
-      console.log(
-        "Sending to channel: ",
-        this.chatBoxName,
-        "\nChannelID: ",
-        this.channel_id,
-        "\nMessage:",
-        this.currentText
-      );
-      this.chatService.sendMessage(this.channel_id, this.currentText);
+      this.chatSocketService.sendMessage(this.channel_id, this.currentText);
       this.currentText = "";
     }
   }

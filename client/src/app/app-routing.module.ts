@@ -5,7 +5,6 @@ import {
   redirectUnauthorizedTo,
 } from "@angular/fire/auth-guard";
 import { RouterModule, Routes } from "@angular/router";
-import { ChatComponent } from "./components/chat/chat.component";
 import { DrawingPageComponent } from "./components/drawing-page/drawing-page.component";
 import { ChangePasswordComponent } from "./components/login/change-password/change-password.component";
 import { SignUpPageComponent } from "./components/login/sign-up-page/sign-up-page.component";
@@ -45,7 +44,6 @@ const routes: Routes = [
     },
   },
   { path: "popped-chat/:id", component: ChatPopedOutComponent },
-  { path: "chat", component: ChatComponent },
   { path: "forgot-password", component: ChangePasswordComponent },
   { path: "**", redirectTo: "" },
 ];

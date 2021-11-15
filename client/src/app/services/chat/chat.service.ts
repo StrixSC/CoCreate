@@ -10,7 +10,7 @@ import { SocketService } from "./socket.service";
 @Injectable({
   providedIn: "root",
 })
-export class ChatService {
+export class ChatSocketService {
   constructor(private socket: SocketService) {}
 
   sendMessage(channel_id: string, msg: string): void {

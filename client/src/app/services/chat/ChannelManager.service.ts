@@ -1,14 +1,17 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { ChatService } from "./chat.service";
+import { ChatSocketService } from "./chat.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class ChannelManagerService {
   private myChannels: Set<string>;
-  constructor(private http: HttpClient, private chatService: ChatService) {
+  constructor(
+    private http: HttpClient,
+    private chatService: ChatSocketService
+  ) {
     this.myChannels = new Set();
   }
 

@@ -20,7 +20,6 @@ import { ColorPickerModule } from "./color-picker/color-picker.module";
 import { AlertMessageComponent } from "./components/alert-message/alert-message.component";
 import { AppComponent } from "./components/app/app.component";
 import { CanvasComponent } from "./components/canvas/canvas.component";
-import { ChatComponent } from "./components/chat/chat.component";
 import { ControlMenuComponent } from "./components/control-menu/control-menu.component";
 import { DrawingPageComponent } from "./components/drawing-page/drawing-page.component";
 import { ErrorMessageComponent } from "./components/error-message/error-message.component";
@@ -73,7 +72,6 @@ import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out
     AlertMessageComponent,
     ExportDrawingComponent,
     LoginPageComponent,
-    ChatComponent,
     DrawingPageComponent,
     WelcomePageComponent,
     SignUpPageComponent,

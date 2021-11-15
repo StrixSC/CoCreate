@@ -13,7 +13,7 @@ import {
 import { ActivatedRoute } from "@angular/router";
 import { IChannel } from "src/app/model/IChannel.model";
 import { IReceiveMessagePayload } from "src/app/model/IReceiveMessagePayload.model";
-import { ChatService } from "src/app/services/chat/chat.service";
+import { ChatSocketService } from "src/app/services/chat/chat.service";
 
 export interface Message {
   message: string;
@@ -43,7 +43,7 @@ export class ChatPopedOutComponent implements OnInit, OnChanges, AfterViewInit {
   channel_id: string;
 
   constructor(
-    private chatService: ChatService,
+    private chatService: ChatSocketService,
     private http: HttpClient,
     private route: ActivatedRoute
   ) {
