@@ -12,6 +12,7 @@ import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { OpenDrawingService } from 'src/app/services/open-drawing/open-drawing.service';
 import { Drawing } from '../../../../../common/communication/drawing';
 import { NewDrawingFormDialogComponent } from '../new-drawing-form-dialog/new-drawing-form-dialog.component';
+import { DrawingGalleryService } from 'src/app/services/drawing-gallery/drawing-gallery.service';
 
 const ONE_WEEK_NUMERIC_VALUE = 24 * 60 * 60 * 1000 * 7;
 
@@ -83,16 +84,20 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     private renderer: Renderer2,
     public dialog: MatDialog,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private drawingGalleryService: DrawingGalleryService
   ) {
-    
-
-  }
+    this.drawingGalleryService.getDrawings()
+        .subscribe((drawings: Drawing1[]) => {
+          this.datasourcePrivate.data = drawings;
+        });
+}
 
   ngOnInit(): void {
     this.paginatorPrivate._intl.itemsPerPageLabel="Dessins par page: ";
     this.paginatorPublic._intl.itemsPerPageLabel="Dessins par page: ";
     this.paginatorProtected._intl.itemsPerPageLabel="Dessins par page: ";
+    
   }
 
   ngOnDestroy(): void {
