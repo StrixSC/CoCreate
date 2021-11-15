@@ -58,6 +58,7 @@
 
 .options {
   height: 30%;
+
   background-color: #2f3136;
 }
 
@@ -65,4 +66,14 @@
   height: 65%;
   overflow: auto;
   background-color: #2f3136;
+}
+
+.left_pannel {
+  background-color: #2f3136;
+}
+
+.right_pannel {
+  background-color: #2f3136;
+  position: absolute;
+  right: 0;
 }
