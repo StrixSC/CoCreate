@@ -1,0 +1,19 @@
+.drawing-card {
+    max-width: 200px;
+    display:inline-block;
+    margin: 10px;
+    align-items: center;
+  }
+
+img {
+    max-width: 500px;
+}
+.separator {
+    margin: 0;
+    padding: 0;
+    display: block;
+}
+
+.mat-dialog-actions {
+    justify-content: flex-end; 
+  }

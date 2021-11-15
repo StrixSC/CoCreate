@@ -1,20 +1,23 @@
+<button mat-icon-button mat-dialog-close (click)="onNoClick()">
+  <mat-icon>close</mat-icon>
+</button>
 <div style="text-align: center;">
   <h1 mat-dialog-title>
-    {{drawing.name}}
+    {{drawing.title}}
   </h1>
   <mat-card-subtitle>
-    Date de création: {{drawing.creationDate}}
+    Date de création: {{drawing.created_at}}
   </mat-card-subtitle>
   <img mat-card-image class="image-preview" src={{drawing.img}}>
   <div class='"separator'></div>
     <mat-card-content>
-      Auteur: {{drawing.author}}
+      Auteur: {{drawing.author_username}}
       </mat-card-content>
       <mat-card-content>
-      Nombre de collaborateurs actifs: {{drawing.numActifCollaborators}}
+      Nombre de collaborateurs actifs: {{drawing.collaboration_count}}
     </mat-card-content>
   <mat-dialog-actions>
-      <button mat-raised-button cdkFocusInitial [mat-dialog-close]="" color="primary">Accéder au dessin</button>
+      <button mat-raised-button cdkFocusInitial color="primary">Accéder au dessin</button>
       <button class="mat-raised-button" mat-dialog-close>Annuler</button>
     </mat-dialog-actions>
 </div>

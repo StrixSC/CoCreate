@@ -11,30 +11,31 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { OpenDrawingService } from 'src/app/services/open-drawing/open-drawing.service';
 import { Drawing } from '../../../../../common/communication/drawing';
+import { NewDrawingFormDialogComponent } from '../new-drawing-form-dialog/new-drawing-form-dialog.component';
 
 const ONE_WEEK_NUMERIC_VALUE = 24 * 60 * 60 * 1000 * 7;
 
 const DATA: Drawing1[] = [
-  {id: "1", name: 'Hydrogen', visibility: 'Public', owner: 'Pati', creationDate: new Date("2019-01-16"), numActifCollaborators: 2, author: 'Flower', img:"../../../assets/img/mock-img/1.jpg"},
-  {id: "2", name: 'Helium', visibility: 'Protégé',owner: 'Pati', creationDate: new Date("2020-01-16"), numActifCollaborators: 0, author: 'Pati', img:"../../../assets/img/mock-img/2.jpg"},
-  {id: "3", name: 'Lithium', visibility: 'Privé',owner: 'Daisy', creationDate: new Date("2021-01-16"), numActifCollaborators: 1, author: 'Daisy', img:"../../../assets/img/mock-img/3.jpg"},
-  {id: "4",name: 'Beryllium', visibility: 'Public',owner: 'Tulipe', creationDate: new Date("2021-09-23"), numActifCollaborators: 0, author: 'Power', img:"../../../assets/img/mock-img/4.jpg"},
-  {id: "5",name: 'Boron', visibility: 'Protégé',owner: 'Mari', creationDate: new Date("2021-09-16"), numActifCollaborators: 0, author: 'Mari', img:"../../../assets/img/mock-img/5.jpg"},
-  {id: "6",name: 'Carbon', visibility: 'Privé',owner: 'Cherry', creationDate: new Date("2018-03-04"), numActifCollaborators: 1, author: 'Cherry', img:"../../../assets/img/mock-img/6.jpg"},
-  {id: "7",name: 'Nitrogen', visibility: 'Public',owner: 'Blossom', creationDate: new Date("2020-12-02"), numActifCollaborators: 1, author: 'Blossom', img:"../../../assets/img/mock-img/7.jpg"},
-  {id: "8",name: 'Oxygen', visibility: 'Protégé',owner: 'Berry', creationDate: new Date("2021-04-03"), numActifCollaborators: 4, author: 'Berry', img:"../../../assets/img/mock-img/8.jpg"},
-  {id: "9",name: 'Fluorine', visibility: 'Public',owner: 'Mari', creationDate: new Date("2021-08-30"), numActifCollaborators: 5, author: 'Mari', img:"../../../assets/img/mock-img/9.jpg"},
-  {id: "10",name: 'Neon', visibility: 'Privé',owner: 'Pati', creationDate: new Date("2021-03-21"), numActifCollaborators: 3, author: 'Pati', img:"../../../assets/img/mock-img/10.jpg"},
-  {id: "11",name: 'Sodium', visibility: 'Protégé',owner: 'Daisy', creationDate: new Date("2021-02-14"), numActifCollaborators: 2, author: 'Daisy', img:"../../../assets/img/mock-img/11.jpg"},
-  {id: "12",name: 'Magnesium', visibility: 'Public',owner: 'Daisy', creationDate: new Date("2020-12-25"), numActifCollaborators: 2, author: 'Daisy', img:"../../../assets/img/mock-img/12.jpg"},
-  {id: "13",name: 'Aluminum', visibility: 'Privé',owner: 'Tulipe', creationDate: new Date("2021-01-01"), numActifCollaborators: 1, author: 'Tulipe', img:"../../../assets/img/mock-img/13.jpg"},
-  {id: "14",name: 'Silicon', visibility: 'Protégé',owner: 'Heroku', creationDate: new Date("2021-08-05"), numActifCollaborators: 0, author: 'Heroku', img:"../../../assets/img/mock-img/14.jpg"},
-  {id: "15",name: 'Phosphorus', visibility: 'Public',owner: 'Stella', creationDate: new Date("2021-07-31"), numActifCollaborators: 0, author: 'Stella', img:"../../../assets/img/mock-img/15.jpg"},
-  {id: "16",name: 'Sulfur',visibility: 'Privé',owner: 'Pepsi_Hero', creationDate: new Date("2021-05-19"), numActifCollaborators: 0, author: 'Pepsi_Hero', img:"../../../assets/img/mock-img/16.jpg"},
-  {id: "17",name: 'Chlorine', visibility: 'Protégé',owner: 'Louis XIV', creationDate: new Date("2021-10-31"), numActifCollaborators: 0, author: 'Louis XIV', img:"../../../assets/img/mock-img/17.jpg"},
-  {id: "18",name: 'Argon', visibility: 'Public',owner: 'Pati', creationDate: new Date("2019-01-08"), numActifCollaborators: 2, author: 'Pati', img:"../../../assets/img/mock-img/18.jpg"},
-  {id: "19",name: 'Potassium', visibility: 'Protégé',owner: 'Pati', creationDate: new Date("2020-03-29"), numActifCollaborators: 1, author: 'Pati', img:"../../../assets/img/mock-img/19.jpg"},
-  {id: "20",name: 'Calcium',visibility: 'Privé',owner: 'Peach', creationDate: new Date("2021-06-24"), numActifCollaborators: 1, author: 'Peach', img:"../../../assets/img/mock-img/20.jpg"},
+  {drawing_id: "1", title: 'Hydrogen', type: 'Public', owner: 'Pati', created_at: "2019-01-16" , collaboration_count: 2, author_username: 'Flower', img:"../../../assets/img/mock-img/1.jpg"},
+  {drawing_id: "2", title: 'Helium', type: 'Protégé',owner: 'Pati', created_at: "2020-01-16" , collaboration_count: 0, author_username: 'Pati', img:"../../../assets/img/mock-img/2.jpg"},
+  {drawing_id: "3", title: 'Lithium', type: 'Privé',owner: 'Daisy', created_at: "2021-01-16" , collaboration_count: 1, author_username: 'Daisy', img:"../../../assets/img/mock-img/3.jpg"},
+  {drawing_id: "4",title: 'Beryllium', type: 'Public',owner: 'Tulipe', created_at: "2021-09-23" , collaboration_count: 0, author_username: 'Power', img:"../../../assets/img/mock-img/4.jpg"},
+  {drawing_id: "5",title: 'Boron', type: 'Protégé',owner: 'Mari', created_at: "2021-09-16" , collaboration_count: 0, author_username: 'Mari', img:"../../../assets/img/mock-img/5.jpg"},
+  {drawing_id: "6",title: 'Carbon', type: 'Privé',owner: 'Cherry', created_at: "2018-03-04" , collaboration_count: 1, author_username: 'Cherry', img:"../../../assets/img/mock-img/6.jpg"},
+  {drawing_id: "7",title: 'Nitrogen', type: 'Public',owner: 'Blossom', created_at: "2020-12-02" , collaboration_count: 1, author_username: 'Blossom', img:"../../../assets/img/mock-img/7.jpg"},
+  {drawing_id: "8",title: 'Oxygen', type: 'Protégé',owner: 'Berry', created_at: "2021-04-03" , collaboration_count: 4, author_username: 'Berry', img:"../../../assets/img/mock-img/8.jpg"},
+  {drawing_id: "9",title: 'Fluorine', type: 'Public',owner: 'Mari', created_at: "2021-08-30" , collaboration_count: 5, author_username: 'Mari', img:"../../../assets/img/mock-img/9.jpg"},
+  {drawing_id: "10",title: 'Neon', type: 'Privé',owner: 'Pati', created_at: "2021-03-21" , collaboration_count: 3, author_username: 'Pati', img:"../../../assets/img/mock-img/10.jpg"},
+  {drawing_id: "11",title: 'Sodium', type: 'Protégé',owner: 'Daisy', created_at: "2021-02-14" , collaboration_count: 2, author_username: 'Daisy', img:"../../../assets/img/mock-img/11.jpg"},
+  {drawing_id: "12",title: 'Magnesium', type: 'Public',owner: 'Daisy', created_at: "2020-12-25" , collaboration_count: 2, author_username: 'Daisy', img:"../../../assets/img/mock-img/12.jpg"},
+  {drawing_id: "13",title: 'Aluminum', type: 'Privé',owner: 'Tulipe', created_at: "2021-01-01" , collaboration_count: 1, author_username: 'Tulipe', img:"../../../assets/img/mock-img/13.jpg"},
+  {drawing_id: "14",title: 'Silicon', type: 'Protégé',owner: 'Heroku', created_at: "2021-08-05" , collaboration_count: 0, author_username: 'Heroku', img:"../../../assets/img/mock-img/14.jpg"},
+  {drawing_id: "15",title: 'Phosphorus', type: 'Public',owner: 'Stella', created_at: "2021-07-31" , collaboration_count: 0, author_username: 'Stella', img:"../../../assets/img/mock-img/15.jpg"},
+  {drawing_id: "16",title: 'Sulfur',type: 'Privé',owner: 'Pepsi_Hero', created_at: "2021-05-19" , collaboration_count: 0, author_username: 'Pepsi_Hero', img:"../../../assets/img/mock-img/16.jpg"},
+  {drawing_id: "17",title: 'Chlorine', type: 'Protégé',owner: 'Louis XIV', created_at: "2021-10-31" , collaboration_count: 0, author_username: 'Louis XIV', img:"../../../assets/img/mock-img/17.jpg"},
+  {drawing_id: "18",title: 'Argon', type: 'Public',owner: 'Pati', created_at: "2019-01-08" , collaboration_count: 2, author_username: 'Pati', img:"../../../assets/img/mock-img/18.jpg"},
+  {drawing_id: "19",title: 'Potassium', type: 'Protégé',owner: 'Pati', created_at: "2020-03-29" , collaboration_count: 1, author_username: 'Pati', img:"../../../assets/img/mock-img/19.jpg"},
+  {drawing_id: "20",title: 'Calcium',type: 'Privé',owner: 'Peach', created_at: "2021-06-24" , collaboration_count: 1, author_username: 'Peach', img:"../../../assets/img/mock-img/20.jpg"},
 ];
 
 @Component({
@@ -141,7 +142,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   sortPublicVisibility(drawings: Drawing1[]) : Drawing1[] {
     let sort: Drawing1[] = new Array();
     for (let drawing of drawings){
-      if(drawing.visibility ==='Public')
+      if(drawing.type ==='Public')
       {
         sort.push(drawing);
       }
@@ -152,7 +153,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   sortPrivateVisibility(drawings: Drawing1[]) : Drawing1[] {
     let sort: Drawing1[] = new Array();
     for (let drawing of drawings){
-      if(drawing.visibility ==='Privé' && drawing.author == this.user)
+      if(drawing.type ==='Privé' && drawing.author_username == this.user)
       {
         sort.push(drawing);
       }
@@ -162,7 +163,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   sortProtectedVisibility(drawings: Drawing1[]) : Drawing1[] {
     let sort: Drawing1[] = new Array();
     for (let drawing of drawings){
-      if(drawing.visibility ==='Protégé')
+      if(drawing.type ==='Protégé')
       {
         sort.push(drawing);
       }
@@ -254,6 +255,17 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
         case 2:
         !this.datasourceProtected.paginator ? this.datasourceProtected.paginator = this.paginatorProtected : null;
       }
+    });
+  }
+  openDialog(): void {
+    const dialogRef = this.dialog.open(NewDrawingFormDialogComponent,
+      {
+        autoFocus: false,
+        width: '90%', height: '90%',
+      });
+
+    dialogRef.afterClosed().subscribe(() => {
+      console.log('The dialog was closed');
     });
   }
   
