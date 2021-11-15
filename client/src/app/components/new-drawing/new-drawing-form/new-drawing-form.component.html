@@ -1,4 +1,25 @@
 <div [formGroup]='sizeForm'>
+    <mat-form-field [style.width.%]="30">
+        <mat-label>Nom du nouveau dessin</mat-label>
+        <input matInput formControlName='title' type="string" placeholder="Entrez le nom du dessin" required>
+    </mat-form-field>
+    <br>
+    <mat-form-field [style.width.%]="15">
+        <mat-label>Niveau de visibilité</mat-label>
+        <mat-select formControlName='type' required>
+            <mat-option>--</mat-option>
+            <mat-option *ngFor="let visibility of visibilityTypes" [value]="visibility">
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <br>
+    <mat-form-field [style.width.%]="15">
+        <mat-label>Auteur</mat-label>
+        <mat-select formControlName='author_username' required>
+            <mat-option>--</mat-option>
+        </mat-select>
+      </mat-form-field>
+    <br>
     <mat-form-field>
         <mat-label>Largeur</mat-label>
         <input matInput formControlName='width' type="number" placeholder="Largeur" [min]="minDimension" required>

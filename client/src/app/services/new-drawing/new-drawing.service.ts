@@ -15,6 +15,9 @@ export class NewDrawingService {
   ) {
     this.form = this.formBuilder.group({
       size: this.formBuilder.group({
+        title: this.formBuilder.control('',Validators.required),
+        type: this.formBuilder.control('',Validators.required),
+        author_username: this.formBuilder.control('',Validators.required),
         width: this.formBuilder.control(0, [Validators.required, Validators.min(0), Validators.pattern('[0-9]*')]),
         height: this.formBuilder.control(0, [Validators.required, Validators.min(0), Validators.pattern('[0-9]*')]),
       }),

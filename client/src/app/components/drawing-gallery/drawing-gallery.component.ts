@@ -13,6 +13,7 @@ import { OpenDrawingService } from 'src/app/services/open-drawing/open-drawing.s
 import { Drawing } from '../../../../../common/communication/drawing';
 import { NewDrawingFormDialogComponent } from '../new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { DrawingGalleryService } from 'src/app/services/drawing-gallery/drawing-gallery.service';
+import { NewDrawingComponent } from '../new-drawing/new-drawing.component';
 
 const ONE_WEEK_NUMERIC_VALUE = 24 * 60 * 60 * 1000 * 7;
 
@@ -263,7 +264,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     });
   }
   openDialog(): void {
-    const dialogRef = this.dialog.open(NewDrawingFormDialogComponent,
+    const dialogRef = this.dialog.open(NewDrawingComponent,
       {
         autoFocus: false,
         width: '90%', height: '90%',
