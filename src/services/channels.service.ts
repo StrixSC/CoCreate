@@ -230,10 +230,12 @@ export const getChannelMessagesById = async (id: string): Promise<MessageReturn[
         },
         where: {
             sender: {
-                channel_id: id
-            }
+                channel_id: id,
+            },
+        },
+        orderBy: {
+            created_at: "asc",
         }
-
     });
 
     return messages;
