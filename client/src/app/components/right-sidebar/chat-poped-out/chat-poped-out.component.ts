@@ -38,9 +38,11 @@ export class ChatPopedOutComponent implements OnInit, OnChanges, AfterViewInit {
 
   @ViewChildren("messagesList")
   messagesWatcher!: QueryList<ElementRef>;
+
   messages: Array<Message>;
   currentText: string;
   channel_id: string;
+  messagesSet: string;
 
   constructor(
     private chatService: ChatSocketService,

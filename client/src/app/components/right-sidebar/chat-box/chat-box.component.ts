@@ -40,7 +40,7 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
   chatCss: Object = { width: "300px" };
   chatBoxName: string;
   myChannelID: string;
-  messagesList: Set<string>;
+  messagesSet: Set<string>;
   @Input() channel_id: string;
 
   @ViewChild("messageBox", { static: true })
@@ -57,7 +57,7 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
     private http: HttpClient,
     private channelManagerService: ChannelManagerService
   ) {
-    this.messagesList = new Set();
+    this.messagesSet = new Set();
     this.messages = [];
   }
   ngAfterViewInit(): void {
@@ -91,28 +91,32 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
   initialize() {
     if (!this.channel_id) return;
     this.chatCss = { width: "300px" };
-    this.messagesList.clear();
     this.messages = [];
     this.channelManagerService
       .GetChannelById(this.channel_id)
       .subscribe((data: IChannelPayload) => {
         this.chatBoxName = data.name;
       });
+
     this.loadChannelMessages(this.channel_id);
-    this.chatSocketService.joinChannel(this.channel_id);
     this.listenToNewMessages();
   }
 
   listenToNewMessages() {
+    this.chatSocketService.joinChannel(this.channel_id);
     this.chatSocketService
       .receiveMessage()
       .subscribe((data: IReceiveMessagePayload) => {
-        this.messages.push({
-          message: data.message,
-          avatar: data.avatarUrl,
-          username: data.username,
-          time: data.createdAt,
-        });
+        if (!this.messagesSet.has(data.messageId)) {
+          this.messages.push({
+            message: data.message,
+            avatar: data.avatarUrl,
+            username: data.username,
+            time: data.createdAt,
+          });
+          this.messagesSet.add(data.messageId);
+          if (this.messagesSet.size > 20) this.messagesSet.clear();
+        }
       });
   }
 
