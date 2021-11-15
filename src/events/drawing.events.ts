@@ -6,6 +6,7 @@ import { Server, Socket } from 'socket.io';
 import { validateDrawingEvents } from './../utils/drawings';
 import { ActionType, Action } from '@prisma/client';
 import validator from 'validator';
+import log from '../utils/logger';
 
 export = (io: Server, socket: Socket) => {
     const onFreedraw = async (data: Action) => {

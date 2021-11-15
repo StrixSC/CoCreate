@@ -3,6 +3,7 @@ import { ICompleteChannelData } from '../models/ICompleteChannelData.model';
 import { IReceiveMessagePayload } from './../models/IReceiveMessagePayload.model';
 import { ISendMessagePayload } from './../models/ISendMessagePayload.model';
 import { IChannelIOPayload } from './../models/IJoinChannelPayload.model';
+import { io } from '../bin/www';
 import create, { InternalServerError } from 'http-errors';
 import { db } from '../db';
 import moment from 'moment';
@@ -30,6 +31,8 @@ export const getAllChannels = async (): Promise<IChannel[]> => {
             type: c.type,
             collaboration_id: c.collaboration_id,
             updated_at: c.updated_at,
+            member_count: c.members.length,
+            online_member_count: io.sockets.adapter.rooms.get(c.channel_id) ? io.sockets.adapter.rooms.get(c.channel_id)!.size : 0,
             owner_username:
                 c.members.find((m) => m.type === MemberType.Owner)?.member.profile?.username ||
                 'Admin'

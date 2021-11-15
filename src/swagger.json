@@ -1385,7 +1385,7 @@
                     "title": {
                         "type": "string"
                     },
-                    "collaboration_count": {
+                    "collaboratorx_count": {
                         "type": "number"
                     },
                     "max_collaborator_count": {
