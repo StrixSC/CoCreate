@@ -2,7 +2,7 @@
 <!--<img class="avatar" id="photo" src="../assets/105992231-1561667465295gettyimages-521697453.jpeg">-->
     <div class="profile-header">
     <img mat-card-avatar class="avatar" src="../assets/105992231-1561667465295gettyimages-521697453.jpeg">
-    <button mat-button class="profile-settings-btn">Profile settings
+    <button mat-button routerLink="/profile-settings" class="profile-settings-btn">Paramètres du compte
     <mat-icon>settings</mat-icon>
     </button>
     </div>
@@ -31,5 +31,11 @@
         <p class="info-value">{{username}}</p>
     </mat-list-item>
     </mat-list>
+
+    <p> Historique de connexion </p>
+    
+
+    <mat-divider></mat-divider>
+    <p> Historique de l'edition </p>
 </mat-card>
 

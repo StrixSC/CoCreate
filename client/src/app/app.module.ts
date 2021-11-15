@@ -45,6 +45,7 @@ import { WelcomeDialogModule } from './components/welcome-dialog/welcome-dialog.
 import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { StdHttpInterceptor } from './http/stdhttp.interceptor';
 import { SocketService } from './services/chat/socket.service';
+import { UserProfileSettingsComponent } from './components/user-profile-settings/user-profile-settings.component';
 
 
 @NgModule({
@@ -77,6 +78,7 @@ import { SocketService } from './services/chat/socket.service';
     SignUpPageComponent,
     UserProfileComponent,
     ChangePasswordComponent,
+    UserProfileSettingsComponent,
   ],
   imports: [
     BrowserModule,

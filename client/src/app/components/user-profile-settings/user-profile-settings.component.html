@@ -1,0 +1,32 @@
+ <div class="profile-header">
+    <img mat-card-avatar class="avatar" [src]="url" *ngIf="url;else elseBlock">
+    <ng-template #elseBlock>
+    
+    <img mat-card-avatar class="avatar" src="../assets/105992231-1561667465295gettyimages-521697453.jpeg">
+    </ng-template>
+    <input type="file" (change)="selectFile($event)">
+</div>
+ <mat-card>
+ <p class="form-title">Modification des paramètres du compte</p>
+ <mat-form-field class="example-full-width" appearance="fill">
+        <input
+          matInput
+          class="input-id-container"
+          #username="ngModel"
+          name="username"
+          [(ngModel)]="user.username"
+          placeholder="Identificateur"
+        />
+      </mat-form-field>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <input
+          matInput
+          class="input-password-container"
+          #password="ngModel"
+          name="password"
+          type="password"
+          [(ngModel)]="user.password"
+          placeholder="Mot de passe"
+        />
+        </mat-form-field>
+</mat-card>

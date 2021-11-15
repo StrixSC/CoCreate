@@ -7,6 +7,7 @@ import { ChangePasswordComponent } from './components/login/change-password/chan
 import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
 import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
+import { UserProfileSettingsComponent } from './components/user-profile-settings/user-profile-settings.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['']);
@@ -23,6 +24,7 @@ const routes: Routes = [
   }},
   { path: 'workspace', component: SidenavComponent },
   { path: 'profile', component: UserProfileComponent },
+  { path: 'profile-settings', component: UserProfileSettingsComponent},
   { path: 'drawing', component: DrawingPageComponent, canActivate: [AngularFireAuthGuard], data: {
       authGuardPipe: redirectUnauthorizedToLogin,
   }},
