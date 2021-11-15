@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:Colorimage/constants/general.dart';
@@ -24,16 +23,16 @@ class DrawingScreen extends StatefulWidget {
 }
 
 class _DrawingScreenState extends State<DrawingScreen> {
-  Map paintsMap = <String, Paint>{}; // <actionId, paint>
+  final io.Socket _socket;
+  final User _user;
   Offset endPoint = const Offset(-1, -1);
   String drawType = DrawingType.freedraw;
   String? shapeID;
   String? lastShapeID;
-  final io.Socket _socket;
-  final User _user;
-  Map actionsMap =
-      <String, Map<String, dynamic>>{}; // <actionId, <actionType, offset>>
-  Map selectedItems = <String, String>{}; // <actionId, userId>
+  Map paintsMap = <String, Paint>{};
+  Map actionsMap = <String, Map<String, dynamic>>{};
+  Map selectedItems = <String, String>{};
+  Map selectPoints = <String, List<Offset>>{};
   bool allowMove = false;
   Offset? selectRef; // offset reference of selected item
   Color currentBodyColor = const Color(0xff443a49);
@@ -43,6 +42,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   int? selectedBoundIndex;
   Map resizingItems = <String, Path>{};
   bool allowResize = false;
+
   _DrawingScreenState(this._socket, this._user);
 
   @override
@@ -54,6 +54,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
     socketShapeReception();
     socketSelectionReception();
     socketTranslationReception();
+    socketRotationReception();
   }
 
   @override
@@ -85,12 +86,17 @@ class _DrawingScreenState extends State<DrawingScreen> {
                       details.localPosition.dx, details.localPosition.dy);
                   String? selectItem = getSelectedId(selectRef!);
                   if (selectedItems.containsValue(_user.uid)) {
+                    String actionToRemove = "";
                     if (!hasSelectedBounds(details)) {
                       selectedItems.forEach((oldActionId, userId) {
                         if (userId == _user.uid && oldActionId != selectItem) {
                           socketSelectionEmission(oldActionId, false);
+                          actionToRemove = oldActionId;
                         }
                       });
+                      if (actionToRemove != "") {
+                        selectedItems.remove(actionToRemove);
+                      }
                     } else {
                       allowResize = true;
                     }
@@ -104,7 +110,14 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   }
                   break;
                 case "rotate":
-                  selectRef = details.localPosition;
+                  if (selectedItems.containsValue(_user.uid)) {
+                    selectedItems.forEach((actionId, selectedBy) {
+                      if (selectedBy == _user.uid) {
+                        socketRotationEmission(
+                            details, DrawingState.down, actionId);
+                      }
+                    });
+                  }
                   break;
               }
             },
@@ -143,57 +156,21 @@ class _DrawingScreenState extends State<DrawingScreen> {
                             actionId,
                             (details.localPosition - selectRef!).dx,
                             (details.localPosition - selectRef!).dy,
-                            DrawingState.move
-                        );
+                            DrawingState.move);
                         selectRef = details.localPosition;
                       }
                     });
                   }
                   break;
                 case "rotate":
-                  setState(() {
-                    if (selectedItems.containsValue(_user.uid)) {
-                      selectedItems.forEach((actionId, selectedBy) {
-                        if (selectedBy == _user.uid) {
-                          Path path = Path();
-                          var actionMap =
-                              actionsMap[actionId][DrawingType.freedraw];
-
-                          path.moveTo(actionMap.first.dx, actionMap.first.dy);
-                          for (int i = 1; i < actionMap.length; i++) {
-                            path.lineTo(actionMap[i].dx, actionMap[i].dy);
-                          }
-                          Offset center = path.getBounds().center;
-
-                          var angle = atan2(
-                              details.localPosition.dy - center.dy,
-                              details.localPosition.dx - center.dx);
-                          var angleRef = atan2(selectRef!.dy - center.dy,
-                              selectRef!.dx - center.dx);
-
-                          List<Offset> rotateOffset = <Offset>[];
-                          var angleVariation = angle - angleRef;
-
-                          for (var offset in (actionMap as List<Offset>)) {
-                            var angleOffset = atan2(
-                                offset.dy - center.dy, offset.dx - center.dx);
-
-                            var x = center.dx +
-                                (offset - center).distance *
-                                    cos(angleOffset + angleVariation);
-                            var y = center.dy +
-                                (offset - center).distance *
-                                    sin(angleOffset + angleVariation);
-                            rotateOffset.add(Offset(x, y));
-                          }
-                          (actionsMap[actionId] as Map<String, List<Offset>>)
-                              .update(DrawingType.freedraw,
-                                  (value) => rotateOffset);
-                          selectRef = details.localPosition;
-                        }
-                      });
-                    }
-                  });
+                  if (selectedItems.containsValue(_user.uid)) {
+                    selectedItems.forEach((actionId, selectedBy) {
+                      if (selectedBy == _user.uid) {
+                        socketRotationEmission(
+                            details, DrawingState.move, actionId);
+                      }
+                    });
+                  }
                   break;
               }
             },
@@ -223,6 +200,16 @@ class _DrawingScreenState extends State<DrawingScreen> {
                     });
                   }
                   break;
+                case "rotate":
+                  if (selectedItems.containsValue(_user.uid)) {
+                    selectedItems.forEach((actionId, selectedBy) {
+                      if (selectedBy == _user.uid) {
+                        socketRotationEmission(
+                            details, DrawingState.up, actionId);
+                      }
+                    });
+                  }
+                  break;
               }
             },
             child: Center(
@@ -246,35 +233,37 @@ class _DrawingScreenState extends State<DrawingScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(0, 80.0, 80.0, 0),
                   child: FloatingActionButton(
-                    onPressed: () { print("undo"); },
-                      child: const Icon(Icons.undo)
-                  ), ),
+                      onPressed: () {
+                        print("undo");
+                      },
+                      child: const Icon(Icons.undo)),
+                ),
               ),
               Align(
                 alignment: Alignment.topRight,
                 child: Padding(
                   padding: const EdgeInsets.only(top: 80.0),
                   child: FloatingActionButton(
-                    onPressed: () { print("redo"); },
-                      child: const Icon(Icons.redo)
-                  ), ),
+                      onPressed: () {
+                        print("redo");
+                      },
+                      child: const Icon(Icons.redo)),
+                ),
               ),
               Align(
-                alignment: Alignment.bottomRight,
-                child:  FloatingActionButton(
-                  onPressed: () =>
-                    setState(() {
+                  alignment: Alignment.bottomRight,
+                  child: FloatingActionButton(
+                    onPressed: () => setState(() {
                       // TODO: All actions need to be saved for undo redo
                       var selectedItem = selectedItems.entries.firstWhere(
-                              (selectedItem) => selectedItem.value == _user.uid);
+                          (selectedItem) => selectedItem.value == _user.uid);
                       var actionId = selectedItem.key;
                       socketDeleteEmission(actionId);
                     }),
-                  tooltip: 'Supression',
-                  child: const Icon(CupertinoIcons.archivebox_fill),
-                  backgroundColor: kErrorColor,
-                )
-              ),
+                    tooltip: 'Supression',
+                    child: const Icon(CupertinoIcons.archivebox_fill),
+                    backgroundColor: kErrorColor,
+                  )),
             ],
           ),
         ));
@@ -304,7 +293,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   }
 
   void changeColor(Color color, String type) {
-    switch(type) {
+    switch (type) {
       case "Body":
         setState(() => currentBodyColor = color);
         break;
@@ -315,7 +304,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
         setState(() => currentBackgroundColor = color);
         break;
     }
-
   }
 
   void changeTool(String type) {
@@ -360,6 +348,50 @@ class _DrawingScreenState extends State<DrawingScreen> {
     });
   }
 
+  void socketRotationReception() {
+    _socket.on('rotation:received', (data) {
+      setState(() {
+        if (data['state'] == DrawingState.down) {
+          List<Offset> points = <Offset>[];
+          points.add(Offset(data['x'], data['y']));
+          selectPoints.putIfAbsent(
+              selectedItems[data['actionId']], () => points);
+        } else if (data['state'] == DrawingState.move) {
+          Path path = Path();
+          var actionMap = actionsMap[data["actionId"]][DrawingType.freedraw];
+          path.moveTo(actionMap.first.dx, actionMap.first.dy);
+          for (int i = 1; i < actionMap.length; i++) {
+            path.lineTo(actionMap[i].dx, actionMap[i].dy);
+          }
+          Offset center = path.getBounds().center;
+          var angle = atan2(data['y'] - center.dy, data['x'] - center.dx);
+          var angleRef = atan2(selectPoints[data['userId']].last.dy - center.dy,
+              selectPoints[data['userId']].last.dx - center.dx);
+
+          List<Offset> rotateOffset = <Offset>[];
+          var angleVariation = angle - angleRef;
+
+          for (var offset in (actionMap as List<Offset>)) {
+            var angleOffset =
+                atan2(offset.dy - center.dy, offset.dx - center.dx);
+
+            var x = center.dx +
+                (offset - center).distance * cos(angleOffset + angleVariation);
+            var y = center.dy +
+                (offset - center).distance * sin(angleOffset + angleVariation);
+            rotateOffset.add(Offset(x, y));
+          }
+          (actionsMap[data["actionId"]] as Map<String, List<Offset>>)
+              .update(DrawingType.freedraw, (value) => rotateOffset);
+          (selectPoints[data['userId']] as List<Offset>)
+              .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+        } else {
+          selectPoints.remove(data['userId']);
+        }
+      });
+    });
+  }
+
   void socketResizeReception(String id, double xDelta, double yDelta) {
     setState(() {
       // selectedItems.forEach((actionId, selectedBy) {
@@ -369,15 +401,15 @@ class _DrawingScreenState extends State<DrawingScreen> {
       //         actionsMap[actionId][DrawingType.freedraw] as List<Offset>;
       //     path.moveTo(offsetList.first.dx, offsetList.first.dy);
       //
-          Offset oldRectBox = Offset(
-              selectedBounds![2].center.dx - selectedBounds![0].center.dx,
-              selectedBounds![0].center.dy - selectedBounds![6].center.dy);
+      Offset oldRectBox = Offset(
+          selectedBounds![2].center.dx - selectedBounds![0].center.dx,
+          selectedBounds![0].center.dy - selectedBounds![6].center.dy);
 
-          Path scaledPath = Path();
-          var xScale = (oldRectBox.dx - xDelta) / oldRectBox.dx;
-          var yScale = (oldRectBox.dy - yDelta) / oldRectBox.dy;
-          var xTranslation = xDelta;
-          var yTranslation = yDelta;
+      Path scaledPath = Path();
+      var xScale = (oldRectBox.dx - xDelta) / oldRectBox.dx;
+      var yScale = (oldRectBox.dy - yDelta) / oldRectBox.dy;
+      var xTranslation = xDelta;
+      var yTranslation = yDelta;
       //
       //     for (int i = 1; i < offsetList.length; i++) {
       //       path.lineTo(offsetList[i].dx, offsetList[i].dy);
@@ -398,19 +430,16 @@ class _DrawingScreenState extends State<DrawingScreen> {
           List<Offset> scaledOffsetList = <Offset>[];
           List<Offset> translateOffsetList = <Offset>[];
           for (var offset in offsetList) {
-            scaledOffsetList.add(offset.scale(
-                xScale,
-                yScale));
+            scaledOffsetList.add(offset.scale(xScale, yScale));
           }
-          for(var offset in scaledOffsetList) {
-            translateOffsetList.add(offset.translate(
-                xTranslation,
-                yTranslation));
+          for (var offset in scaledOffsetList) {
+            translateOffsetList
+                .add(offset.translate(xTranslation, yTranslation));
           }
           actionMap.update(
               DrawingType.freedraw, (value) => translateOffsetList);
-          actionsMap.update(id,
-                  (value) => actionMap as Map<String, List<Offset>>);
+          actionsMap.update(
+              id, (value) => actionMap as Map<String, List<Offset>>);
         }
       });
     });
@@ -460,32 +489,32 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
   void socketFreedrawReception() {
     _socket.on('freedraw:received', (data) {
-        setState(() {
-          if (data['state'] == DrawingState.down) {
-            Map map = <String, List<Offset>>{};
-            List<Offset> offsetList = <Offset>[];
-            offsetList.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-            map.putIfAbsent(DrawingType.freedraw, () => offsetList);
-            actionsMap.putIfAbsent(
-                data['actionId'], () => map as Map<String, List<Offset>>);
-            final paint = Paint()
-              ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
-                  data['g'] as int, data['b'] as int)
-              ..isAntiAlias = true
-              ..strokeWidth = 6.0
-              ..style = PaintingStyle.stroke;
-            paintsMap.putIfAbsent(data['actionId'], () => paint);
-          } else if (data['state'] == DrawingState.move) {
-            actionsMap.forEach((actionId, actionMap) {
-              if (actionId == data['actionId']) {
-                actionMap[DrawingType.freedraw]
-                    .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-                actionsMap.update(data['actionId'],
-                    (value) => actionMap as Map<String, List<Offset>>);
-              }
-            });
-          }
-        });
+      setState(() {
+        if (data['state'] == DrawingState.down) {
+          Map map = <String, List<Offset>>{};
+          List<Offset> offsetList = <Offset>[];
+          offsetList.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+          map.putIfAbsent(DrawingType.freedraw, () => offsetList);
+          actionsMap.putIfAbsent(
+              data['actionId'], () => map as Map<String, List<Offset>>);
+          final paint = Paint()
+            ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
+                data['g'] as int, data['b'] as int)
+            ..isAntiAlias = true
+            ..strokeWidth = 6.0
+            ..style = PaintingStyle.stroke;
+          paintsMap.putIfAbsent(data['actionId'], () => paint);
+        } else if (data['state'] == DrawingState.move) {
+          actionsMap.forEach((actionId, actionMap) {
+            if (actionId == data['actionId']) {
+              actionMap[DrawingType.freedraw]
+                  .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+              actionsMap.update(data['actionId'],
+                  (value) => actionMap as Map<String, List<Offset>>);
+            }
+          });
+        }
+      });
     });
   }
 
@@ -529,8 +558,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
     });
   }
 
-  void socketTranslationEmission(
-      String selectItem, double xTranslation, double yTranslation, String drawingState) {
+  void socketTranslationEmission(String selectItem, double xTranslation,
+      double yTranslation, String drawingState) {
     _socket.emit("translation:emit", {
       'actionId': selectItem,
       'username': _user.displayName,
@@ -550,6 +579,21 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'userId': _user.uid,
       'collaborationId': "DEMO_COLLABORATION",
       'actionType': 'Delete',
+    });
+  }
+
+  void socketRotationEmission(
+      var details, String drawingState, String actionId) {
+    _socket.emit('rotation:emit', {
+      'actionId': actionId,
+      'state': drawingState,
+      'x': (drawingState == DrawingState.up)? endPoint.dx: details
+          .localPosition.dx,
+      'y': (drawingState == DrawingState.up)? endPoint.dy: details
+          .localPosition.dy,
+      'username': _user.displayName,
+      'userId': _user.uid,
+      'collaborationId': "DEMO_COLLABORATION",
     });
   }
 
@@ -659,11 +703,11 @@ class Painter extends CustomPainter {
     actionsMap.forEach((actionId, action) {
       action.forEach((toolType, offsetList) {
         if (toolType == DrawingType.freedraw) {
-            for (var i = 0; i < offsetList.length - 1; i++) {
-              canvas.drawLine(
-                  offsetList[i], offsetList[i + 1], paintsMap[actionId]);
-            }
+          for (var i = 0; i < offsetList.length - 1; i++) {
+            canvas.drawLine(
+                offsetList[i], offsetList[i + 1], paintsMap[actionId]);
           }
+        }
         if (toolType == DrawingType.rectangle) {
           Rect rect = Rect.fromLTRB(offsetList.first.dx, offsetList.first.dy,
               offsetList.last.dx, offsetList.last.dy);
