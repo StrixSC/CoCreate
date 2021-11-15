@@ -31,20 +31,6 @@ export class ChannelManagerService {
     );
   }
 
-  // ListenChannel(channel_id: string): void {
-  //   this.chatSocketService.joinChannel(channel_id);
-  //   this.chatSocketService
-  //     .receiveMessage()
-  //     .subscribe((data: IReceiveMessagePayload) => {
-  //       this.messages.push({
-  //         message: data.message,
-  //         avatar: data.avatarUrl,
-  //         username: data.username,
-  //         time: data.createdAt,
-  //       });
-  //     });
-  // }
-
   GetChannelById(channel_id: string): Observable<any> {
     return this.http.get(
       "https://colorimage-109-3900.herokuapp.com/api/channels/" + channel_id
