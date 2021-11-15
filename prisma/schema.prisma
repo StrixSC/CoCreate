@@ -80,7 +80,8 @@ model Channel {
 
 model ChannelMember {
   index      Int        @unique @default(autoincrement())
-  channel_id String
+  
+   String
   member_id  String     @id @unique @default(uuid())
   user_id    String
   type       MemberType
