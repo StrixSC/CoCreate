@@ -1,5 +1,9 @@
 import cors from 'cors';
-import express, { NextFunction, Request, Response } from 'express';
+import express, {
+    NextFunction,
+    Request,
+    Response
+} from 'express';
 import morgan from 'morgan';
 import corsOptions from './cors';
 import create, { HttpError } from 'http-errors';
@@ -19,15 +23,24 @@ import galleryRouter from './routes/gallery.route';
 import log from './utils/logger';
 
 const REDIS_URL =
-    process.env.NODE_ENV === 'production' ? process.env.REDIS_URL : '//127.0.0.1:3003';
+    process.env.NODE_ENV === 'production'
+        ? process.env.REDIS_URL
+        : '//127.0.0.1:3003';
 const RedisStore = connect(session);
 const redisClient = redis.createClient({
     url: REDIS_URL,
-    password: process.env.REDIS_PASSWORD || 'secret'
+    password:
+        process.env.REDIS_PASSWORD || 'secret'
 });
-const getAsync = promisify(redisClient.get).bind(redisClient);
-const keysAsync = promisify(redisClient.keys).bind(redisClient);
-const setAsync = promisify(redisClient.set).bind(redisClient);
+const getAsync = promisify(redisClient.get).bind(
+    redisClient
+);
+const keysAsync = promisify(
+    redisClient.keys
+).bind(redisClient);
+const setAsync = promisify(redisClient.set).bind(
+    redisClient
+);
 
 const app = express();
 
@@ -44,12 +57,21 @@ redisClient.on('error', (err) => {
 
 redisClient.on('connect', function (err) {
     if (err) log('ERROR', err);
-    log('SUCCESS', 'Connected to redis successfully');
+    log(
+        'SUCCESS',
+        'Connected to redis successfully'
+    );
 });
 
 const corsSetup = cors(corsOptions);
 
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(
+    morgan(
+        process.env.NODE_ENV === 'production'
+            ? 'combined'
+            : 'dev'
+    )
+);
 app.use(corsSetup);
 app.options('*', corsSetup);
 app.use('/', indexRouter);
@@ -63,14 +85,31 @@ app.use(async (req, res, next) => {
     next(new create.NotFound('404'));
 });
 
-app.use((error: HttpError, req: Request, res: Response, next: NextFunction) => {
-    log('CRITICAL', error);
-    if (error instanceof HttpError) {
-        res.status(error.status).json(error);
-    } else {
+app.use(
+    (
+        error: HttpError,
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
         log('CRITICAL', error);
-        res.status(500).json(create(new create.InternalServerError()));
+        if (error instanceof HttpError) {
+            res.status(error.status).json(error);
+        } else {
+            log('CRITICAL', error);
+            res.status(500).json(
+                create(
+                    new create.InternalServerError()
+                )
+            );
+        }
     }
-});
+);
 
-export { app, redisClient, getAsync, keysAsync, setAsync };
+export {
+    app,
+    redisClient,
+    getAsync,
+    keysAsync,
+    setAsync
+};

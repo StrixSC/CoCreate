@@ -1,6 +1,8 @@
 import { Action, ActionType, ActionState } from '@prisma/client';
 import validator from 'validator';
-import log from './logger';
+
+export const DEFAULT_DRAWING_OFFSET = 0;
+export const DEFAULT_DRAWING_LIMIT = 12;
 
 const defaultStates = [ActionState.up, ActionState.down, ActionState.move];
 const defaultTypes = [
@@ -15,6 +17,48 @@ const defaultTypes = [
     ActionType.Layer,
     ActionType.UndoRedo,
 ];
+
+export enum FilterType {
+    Month = "Month",
+    DayOrKeyword = "DayOrKeyword",
+    Date = "Date",
+    NameOrKeyword = "NameOrKeyword",
+    UsernameOrKeyword = "UsernameOrKeyword",
+    Keyword = "Keyword",
+    YearOrKeyword = "YearOrKeyword"
+}
+
+export const daysArray = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31'];
+
+export const bilingualMonths = [
+    'january',
+    'janvier',
+    'february',
+    'febuary',
+    'march',
+    'mars',
+    'april',
+    'avril',
+    'mai',
+    'may',
+    'juin',
+    'june',
+    'july',
+    'juillet',
+    'august',
+    'aout',
+    'september',
+    'septembre',
+    'october',
+    'octobre',
+    'november',
+    'novembre',
+    'december',
+    'decembre'
+];
+
+export const englishLongMonths = ['january', 'febuary', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+export const frenchLongMonths = ['janvier', 'fevrier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'aout', 'september', 'octobre', 'novembre', 'decembre', 'décembre']
 
 const hasEmptyProperties = (obj: any): { result: boolean; field: string | null } => {
     for (const key in obj) {
@@ -33,7 +77,7 @@ const validateSelection = (isSelected: string | boolean) => {
         if (!validator.isIn(isSelected, ['false', 'true'])) {
             return {
                 result: false,
-                field: "isSelected is a string and does not have 'false' or 'true' as a value"
+                field: 'isSelected is a string and does not have \'false\' or \'true\' as a value'
             };
         } else {
             return { result: true, field: null };
@@ -45,7 +89,7 @@ const validateSelection = (isSelected: string | boolean) => {
     } else {
         return {
             result: false,
-            field: "isSelected must be a boolean value or a string value with  'false' or 'true' as values"
+            field: 'isSelected must be a boolean value or a string value with  \'false\' or \'true\' as values'
         };
     }
 };

@@ -1,6 +1,7 @@
+import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { IPublicUserProfile } from './../models/IUserPublicProfile';
 import { db } from '../db';
-import { MemberType } from '.prisma/client';
+import { MemberType, Log } from '.prisma/client';
 
 export const getAllPublicProfiles = async (
     offset: number,
@@ -135,4 +136,19 @@ export const getUserChannelsById = async (id: string): Promise<any> => {
             'Admin',
         is_owner: c.type === MemberType.Owner ? true : false
     }));
+};
+
+export const getUserLogs = async (userId: string, offset: number, limit: number): Promise<Log[]> => {
+    const logs = await db.log.findMany({
+        where: {
+            user_id: userId
+        },
+        orderBy: {
+            updated_at: 'desc'
+        },
+        skip: offset || DEFAULT_OFFSET_COUNT,
+        take: limit || DEFAULT_LIMIT_COUNT
+    });
+
+    return logs;
 };

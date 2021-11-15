@@ -1,4 +1,6 @@
-import { getUserChannelsById } from './../services/users.service';
+import { validationResult, matchedData } from 'express-validator';
+import { handleRequestError } from './../utils/errors';
+import { getUserChannelsById, getUserLogs } from './../services/users.service';
 import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { StatusCodes } from 'http-status-codes';
 import create from 'http-errors';
@@ -41,7 +43,7 @@ export const getPublicUserController = async (req: Request, res: Response, next:
         const username = req.params.username;
         if (!username || typeof username !== 'string')
             throw new create.BadRequest(
-                "Missing or invalid 'username' parameter. Make sure the parameter is a string and is present at the end of the uri."
+                'Missing or invalid \'username\' parameter. Make sure the parameter is a string and is present at the end of the uri.'
             );
 
         const user = await getSinglePublicProfileByUsername(req.params.username);
@@ -91,5 +93,31 @@ export const getUserChannelsController = async (
         else res.status(StatusCodes.OK).json(channels);
     } catch (e: any) {
         next(create(e.status, e.message));
+    }
+};
+
+export const getUserLogsController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const errors = validationResult(req).array();
+
+        if (errors.length > 0) {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                message: errors
+            });
+        }
+
+        const data = matchedData(req, { locations: [ 'params', 'query' ] });
+        const { id, offset, limit } = data;
+        const logs = await getUserLogs(id, offset, limit);
+
+        if (logs.length <= 0) {
+            return res.status(StatusCodes.NO_CONTENT).json(logs);
+        }
+        else {
+            return res.status(StatusCodes.OK).json(logs);
+        }
+
+    } catch (e) {
+        handleRequestError(e, next);
     }
 };
