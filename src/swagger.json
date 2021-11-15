@@ -920,6 +920,98 @@
                     }
                 }
             }
+        },
+        "/api/gallery": {
+            "get": {
+                "tags": ["Gallery"],
+                "summary": "Fetch all gallery drawings",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "required": false,
+                        "name": "filter",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter to apply"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "description": "Amount of records to skip. Use this for pagination. Defauls to 0",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "description": "Amount of records to take. Use this for pagination. Defaults to 50.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "operationId": "Fetch channel messages by id",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns an array of all the messages.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IGalleryEntry"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing query parameter format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -1263,6 +1355,41 @@
                     },
                     "updated_at": {
                         "type": "string"
+                    }
+                }
+            },
+            "IGalleryEntry": {
+                "type": "object",
+                "properties": {
+                    "collaboration_id": {
+                        "type": "string"
+                    },
+                    "drawing_id": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string"
+                    }, 
+                    "type": {
+                        "type": "string"
+                    },
+                    "author_username": {
+                        "type": "string"
+                    },
+                    "author_avatar": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "collaboration_count": {
+                        "type": "number"
+                    },
+                    "max_collaborator_count": {
+                        "type": "number"
                     }
                 }
             }
