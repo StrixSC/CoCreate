@@ -19,16 +19,20 @@ export class RightSidebarComponent implements OnInit {
     "Équipe 109",
     "Équipe 109",
   ];
-  animal: string;
-  name: string;
+
   selectedChannel: string;
   channel: IChannel;
+  chatView: boolean;
+  chatStyle: Object;
+  newChannelStyle: Object;
 
   constructor(
     private http: HttpClient,
     private channelManager: ChannelManagerService
   ) {
     this.textChannels = new Map();
+    this.chatView = true;
+    // this.newChannelStyle = { display: "none" };
   }
 
   ngOnInit(): void {
@@ -77,5 +81,11 @@ export class RightSidebarComponent implements OnInit {
     if (this.textChannels.has(channelID)) {
       this.channel = this.textChannels.get(channelID) as IChannel;
     }
+  }
+
+  newChannel() {
+    this.chatView = false;
+    this.chatStyle = { display: "none" };
+    this.newChannelStyle = {};
   }
 }

@@ -1,9 +1,14 @@
 <div class="rightsidebar">
   <div class="left_pannel">
-    <app-chat-box [channel_id]="selectedChannel"></app-chat-box>
+    <app-chat-box
+      [channel_id]="selectedChannel"
+      [ngStyle]="chatStyle"
+    ></app-chat-box>
+    <app-all-channels [ngStyle]="newChannelStyle"></app-all-channels>
   </div>
 
   <div class="right_pannel">
+    <button mat-flat-button (click)="newChannel()">Add new channel</button>
     <div class="options">
       <mat-action-list>
         <p class="channelHeaders">Recently Joined</p>
