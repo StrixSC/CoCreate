@@ -962,7 +962,7 @@
                 "operationId": "Fetch channel messages by id",
                 "responses": {
                     "200": {
-                        "description": "Success. Returns an array of all the messages.",
+                        "description": "Success. Returns an array of all the drawings/collaborations.",
                         "content": {
                             "application/json": {
                                 "schema": {
