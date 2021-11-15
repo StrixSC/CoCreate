@@ -156,15 +156,16 @@ model CollaborationMember {
 }
 
 model Collaboration {
-  index                 Int                   @unique @default(autoincrement())
-  collaboration_id      String                @id @unique @default(uuid())
-  drawing_id            String                @unique
-  created_at            DateTime              @default(now())
-  updated_at            DateTime              @updatedAt
-  collaboration_members CollaborationMember[]
-  drawing               Drawing?
-  Action                Action[]
-  type                  CollaborationType
+  index                  Int                   @unique @default(autoincrement())
+  collaboration_id       String                @id @unique @default(uuid())
+  drawing_id             String                @unique
+  created_at             DateTime              @default(now())
+  updated_at             DateTime              @updatedAt
+  collaboration_members  CollaborationMember[]
+  drawing                Drawing?
+  Action                 Action[]
+  type                   CollaborationType
+  max_collaborator_count Int                   @default(4)
 }
 
 // Enums
