@@ -31,7 +31,7 @@ export const getChannelByIdController = async (req: Request, res: Response, next
                 message: errors
             });
         }
-        const paramsData = matchedData(req, { locations: [ 'params' ] });
+        const paramsData = matchedData(req, { locations: ['params'] });
 
         const info = await getChannelById(paramsData.id);
         if (!info) {
@@ -52,7 +52,7 @@ export const createChannelController = async (req: Request, res: Response, next:
                 message: errors
             });
         }
-        const bodyData = matchedData(req, { locations: [ 'body' ] });
+        const bodyData = matchedData(req, { locations: ['body'] });
 
         const result = await createChannel(bodyData.name, req.userId);
         if (!result) throw new create.InternalServerError();
@@ -76,7 +76,8 @@ export const getChannelMessagesController = async (
                 message: errors
             });
         }
-        const paramsData = matchedData(req, { locations: [ 'params' ] });
+
+        const paramsData = matchedData(req, { locations: ['params'] });
 
         const messages = await getChannelMessagesById(paramsData.id);
         if (!messages)

@@ -19,7 +19,7 @@ router.get('/:id', checkIfAuthenticated, param('id').notEmpty().trim(), (req, re
 );
 
 // Get the list of messages of a channel
-router.get('/:id/messages', checkIfAuthenticated, (req, res, next) =>
+router.get('/:id/messages', checkIfAuthenticated, param('id'), (req, res, next) =>
     getChannelMessagesController(req, res, next)
 );
 
@@ -39,9 +39,9 @@ router.post(
 );
 
 // Update a channel's information
-router.put('/:id', checkIfAuthenticated, (req, res, next) => {});
+router.put('/:id', checkIfAuthenticated, (req, res, next) => { });
 
 // Delete a channel by its ID
-router.delete('/:id', checkIfAuthenticated, (req, res, next) => {});
+router.delete('/:id', checkIfAuthenticated, (req, res, next) => { });
 
 export default router;
