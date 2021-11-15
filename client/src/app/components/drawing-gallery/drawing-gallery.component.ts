@@ -261,7 +261,8 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     const dialogRef = this.dialog.open(NewDrawingFormDialogComponent,
       {
         autoFocus: false,
-        width: '90%', height: '90%',
+        width: '70%', height: '80%',
+        
       });
 
     dialogRef.afterClosed().subscribe(() => {

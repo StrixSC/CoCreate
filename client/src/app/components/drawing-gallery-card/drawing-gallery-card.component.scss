@@ -2,7 +2,13 @@
   max-width: 200px;
   display:inline-block;
   margin: 10px;
+  text-align: center;
   align-items: center;
+}
+
+.example-header-image {
+  background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
+  background-size: cover;
 }
 
 .drawing-card:hover .image-preview{
@@ -10,6 +16,9 @@
   transition: .5s ease;
   filter: alpha(opacity=40);
   background-color: #000;
+}
+
+.image-preview {
 }
 
 .btn {
@@ -20,7 +29,7 @@
   top: 29%;
   left: 50%;
   transform: translate(-50%, -50%);
-  -ms-transform: translate(-50%, -50%);
+  //-ms-transform: translate(-50%, -50%);
   text-align: center;
 }
 

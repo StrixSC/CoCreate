@@ -1,8 +1,13 @@
-<mat-card style="border: 1px solid #fff" class="drawing-card" *ngIf="drawing">
-  <img class="image-preview" mat-card-image src={{drawing.img}}>
+<mat-card style="border: 1px solid #fff;" class="drawing-card" *ngIf="drawing">
   <mat-card-header>
+    <div mat-card-avatar class="example-header-image"></div>
     <mat-card-title>{{drawing.title}}</mat-card-title>
     <mat-card-subtitle>{{drawing.created_at}}</mat-card-subtitle>
+  </mat-card-header>
+  <img class="image-preview" mat-card-image src={{drawing.img}}>
+  <mat-card-header>
+    <mat-card-title></mat-card-title>
+    <mat-card-subtitle>{{drawing.author_username}}</mat-card-subtitle>
   </mat-card-header>
   <mat-card-actions>
     <button class="btn" mat-raised-button color="primary" (click)="openDialog()">Aperçu du dessin</button>

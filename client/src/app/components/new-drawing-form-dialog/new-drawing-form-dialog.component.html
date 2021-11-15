@@ -1,11 +1,14 @@
-<br><br>
+<span class="icon-space"></span>
+<mat-actions>
 <button mat-icon-button mat-dialog-close (click)="onNoClick()">
     <mat-icon>close</mat-icon>
 </button>
+</mat-actions>
+<br><br>
 <h1 mat-dialog-title style="text-align: center">
     Choisissez les paramètres du nouveau dessin:
 </h1>
-<br><br>
+<br>
 <form  #form="ngForm">
 <div style="text-align: center;">
     <mat-form-field [style.width.%]="30" appearance="fill">
