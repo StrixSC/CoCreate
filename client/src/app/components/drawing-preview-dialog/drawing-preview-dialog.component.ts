@@ -22,8 +22,14 @@ export class DrawingPreviewDialogComponent  {
       this.dialogRef.close();
     }
 
+    
+
     accessDrawing() : void {
       this.router.navigateByUrl('');
+      this.dialogRef.close();
+      this.dialogRef.afterClosed().subscribe(() => {
+        console.log('The dialog was closed');
+      });
     }
 
 }

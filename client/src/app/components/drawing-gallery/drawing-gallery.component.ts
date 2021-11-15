@@ -89,7 +89,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   ) {
     this.drawingGalleryService.getDrawings()
         .subscribe((drawings: Drawing1[]) => {
-          this.datasourcePrivate.data = drawings;
+          this.datasourcePublic.data = drawings;
         });
 }
 
@@ -266,7 +266,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     const dialogRef = this.dialog.open(NewDrawingFormDialogComponent,
       {
         autoFocus: false,
-        width: '70%', height: '80%',
+        width: '90%', height: '90%',
         
       });
 

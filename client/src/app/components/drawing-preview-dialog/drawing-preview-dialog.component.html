@@ -16,8 +16,12 @@
       <mat-card-content>
       Nombre de collaborateurs actifs: {{drawing.collaboration_count}}
     </mat-card-content>
+    <mat-card-content>
+     ID du dessin: {{drawing.drawing_id}}
+     {{drawing.type}}
+    </mat-card-content>
   <mat-dialog-actions>
-      <button (click) = "accessDrawing()" mat-raised-button cdkFocusInitial color="primary">Accéder au dessin {{drawing.drawing_id}}</button>
+      <button (click) = "accessDrawing()" mat-raised-button cdkFocusInitial color="primary">Accéder au dessin</button>
       <button class="mat-raised-button" mat-dialog-close>Annuler</button>
     </mat-dialog-actions>
 </div>

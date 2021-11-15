@@ -1,10 +1,8 @@
-<br><br>
 <h1 mat-dialog-title style="text-align: center">
     Choisissez les paramètres du nouveau dessin:
 </h1>
 <form  #form="ngForm">
 <div style="text-align: center;">
-    <br>
     <mat-form-field [style.width.%]="30" appearance="fill">
         <mat-label>Nom du nouveau dessin</mat-label>
         <input [formControl]=drawingNameControl required matInput placeholder="Entrez le nom du dessin">
@@ -12,7 +10,7 @@
         
     </mat-form-field>
 
-    <br>
+    
 
     <mat-form-field [style.width.%]="15" appearance="fill">
         <mat-label>Niveau de visibilité</mat-label>
@@ -26,7 +24,7 @@
         <mat-hint>{{selectVisibilityControl.value?.name}}</mat-hint>
       </mat-form-field>
 
-      <br>
+      
 
     <mat-form-field [style.width.%]="15" appearance="fill">
         <mat-label>Auteur</mat-label>
@@ -39,8 +37,9 @@
         <mat-error *ngIf="selectVisibilityControl.hasError('required')">Veuillez choisir un auteur</mat-error>
         <mat-hint>{{teamNameControl.value?.name}}</mat-hint>
     </mat-form-field>
-    <br><br>
+    
 <button mat-raised-button color="primary">Envoyer</button>
 </div>
 </form>
+
 

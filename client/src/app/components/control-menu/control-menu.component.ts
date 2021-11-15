@@ -30,7 +30,8 @@ export class ControlMenuComponent implements OnDestroy {
     private commandInvoker: CommandInvokerService,
     private exportDialogService: ExportDialogService,
     private openDrawingService: OpenDrawingDialogService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
   }
 
@@ -74,6 +75,9 @@ export class ControlMenuComponent implements OnDestroy {
   }
   openExportMenu(): void {
     this.exportDialogService.openDialog();
+  }
+  openDrawingGallery():void{
+    this.router.navigateByUrl('gallery');
   }
 
   get canUndo(): boolean {
