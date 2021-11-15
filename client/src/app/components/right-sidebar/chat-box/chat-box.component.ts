@@ -99,10 +99,19 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
         this.chatBoxName = data.name;
       });
     this.loadChannelMessages(this.channel_id);
+    this.chatService.joinChannel(this.channel_id);
+    this.listenToNewMessages();
   }
 
-  listenToChannel() {
-    this.chatService;
+  listenToNewMessages() {
+    this.chatService.receiveMessage().subscribe((data) => {
+      this.messages.push({
+        message: data.message,
+        avatar: data.avatarUrl,
+        username: data.username,
+        time: data.createdAt,
+      });
+    });
   }
 
   ngOnChanges() {
