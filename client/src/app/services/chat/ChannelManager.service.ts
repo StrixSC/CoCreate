@@ -27,6 +27,10 @@ export class ChannelManagerService {
     );
   }
 
+  ListenChannel(): Observable<any> {
+    return this.chatService.receiveMessage();
+  }
+
   GetChannelById(channel_ID: string): Observable<any> {
     return this.http.get(
       "https://colorimage-109-3900.herokuapp.com/api/channels/" + channel_ID

@@ -77,7 +77,6 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
           "/messages"
       )
       .subscribe((data: any) => {
-        console.log(data);
         data.forEach((m: any) => {
           this.messages.push({
             message: m.message_data,
@@ -98,52 +97,16 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
       .GetChannelById(this.channel_id)
       .subscribe((data: IChannelPayload) => {
         this.chatBoxName = data.name;
-        console.log(
-          "receiving messages from ",
-          this.channel_id,
-          this.chatBoxName
-        );
       });
     this.loadChannelMessages(this.channel_id);
   }
 
-  listenToChannel() {}
-
-  // ngOnChanges() {
-  //   this.initialize();
-  //   if (this.channel_object) {
-  //     this.getMessagesFromChannel(this.myChannelID);
-
-  // this.chatService
-  //   .receiveMessage()
-  //   .subscribe((data: IReceiveMessagePayload) => {
-  //     console.log(data);
-  //     if (
-  //       !this.messagesList.has(data.messageId) &&
-  //       data.channelId === this.myChannelID
-  //     ) {
-  //       this.messages.push({
-  //         message: data.message,
-  //         avatar: data.avatarUrl,
-  //         username: data.username,
-  //         time: data.createdAt,
-  //       });
-  //       this.messagesList.add(data.messageId);
-  //     }
-  //     if (this.messagesList.size > 20) this.messagesList.clear();
-  //   });
-
-  //     this.chatBoxName = this.channel_object.name;
-  //     this.myChannelID = this.channel_object.channel_id;
-  //     this.chatService.joinChannel(this.channel_object.channel_id);
-  //   }
-  // }
+  listenToChannel() {
+    this.chatService;
+  }
 
   ngOnChanges() {
     this.initialize();
-    // this.chatService.receiveMessage().subscribe((data) => {
-    //   console.log(data);
-    // });
   }
   scrollToBottom(): void {
     try {
