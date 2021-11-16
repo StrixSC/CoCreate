@@ -74,10 +74,12 @@ export class RightSidebarComponent implements OnInit {
 
   changeChannel(channelID: string) {
     this.selectedChannel = channelID;
-    // this.changeCSS(channelID);
+    this.newChannelStyle = { display: "none" };
+    console.log("this.selectedChannel", this.selectedChannel);
+    this.exampleCss = { width: "150px" };
     if (this.textChannels.has(channelID)) {
       this.channel = this.textChannels.get(channelID) as IChannel;
-      this.newChannelStyle = { display: "none" };
+      console.log(this.channel);
       this.exampleCss = { width: "550px" };
     }
   }

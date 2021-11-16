@@ -61,12 +61,18 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
     this.messages = [];
   }
   ngAfterViewInit(): void {
+    console.log("hello");
     this.messagesWatcher.changes.subscribe(() => {
       this.scrollToBottom();
     });
   }
+
   ngOnInit(): void {
     this.chatCss = { display: "none" };
+  }
+
+  ngOnChanges() {
+    this.initialize();
   }
 
   loadChannelMessages(channelID: string) {
@@ -89,8 +95,9 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   initialize() {
-    if (!this.channel_id) return;
+    console.log("this.channel_id", this.channel_id);
     this.chatCss = { width: "450px" };
+    if (!this.channel_id) return;
     this.messages = [];
     this.channelManagerService
       .GetChannelById(this.channel_id)
@@ -120,9 +127,6 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
       });
   }
 
-  ngOnChanges() {
-    this.initialize();
-  }
   scrollToBottom(): void {
     try {
       this.messageBox.nativeElement.scrollTop =
