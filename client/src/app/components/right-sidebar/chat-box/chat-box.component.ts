@@ -37,7 +37,7 @@ export interface Message {
   styleUrls: ["./chat-box.component.scss"],
 })
 export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
-  chatCss: Object = { width: "300px" };
+  chatCss: Object = { width: "450px" };
   chatBoxName: string;
   myChannelID: string;
   messagesSet: Set<string>;
@@ -90,7 +90,7 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
 
   initialize() {
     if (!this.channel_id) return;
-    this.chatCss = { width: "300px" };
+    this.chatCss = { width: "450px" };
     this.messages = [];
     this.channelManagerService
       .GetChannelById(this.channel_id)

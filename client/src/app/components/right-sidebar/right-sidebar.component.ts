@@ -29,7 +29,7 @@ export class RightSidebarComponent implements OnInit {
   constructor(private channelManager: ChannelManagerService) {
     this.textChannels = new Map();
     this.chatView = true;
-    // this.newChannelStyle = { display: "none" };
+    this.newChannelStyle = { display: "none" };
   }
 
   ngOnInit(): void {
@@ -77,6 +77,8 @@ export class RightSidebarComponent implements OnInit {
     // this.changeCSS(channelID);
     if (this.textChannels.has(channelID)) {
       this.channel = this.textChannels.get(channelID) as IChannel;
+      this.newChannelStyle = { display: "none" };
+      this.exampleCss = { width: "550px" };
     }
   }
 
@@ -84,7 +86,6 @@ export class RightSidebarComponent implements OnInit {
     this.chatView = false;
     this.chatStyle = { display: "none" };
     this.newChannelStyle = {};
-    console.log(window.innerWidth.toString() + "px");
     const expand: string = (window.innerWidth * 0.8).toString() + "px";
     this.exampleCss = { width: expand };
   }

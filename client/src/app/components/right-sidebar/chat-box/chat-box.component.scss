@@ -1,5 +1,5 @@
 .chat_box {
-  width: 300px;
+  width: 450px;
 }
 
 .hide_all {
@@ -14,7 +14,7 @@
   bottom: -100;
   color: rgb(174, 174, 174);
   background-color: #36393f;
-  width: 300px;
+  width: 390px;
 }
 
 .messages_container {
@@ -23,30 +23,13 @@
   margin-bottom: 10%;
   font-size: 14px;
   height: 85%;
-  width: 310px;
+  width: 400px;
   border-radius: 10px;
   position: fixed;
   background-color: #36393f;
   overflow-y: scroll;
   overflow-x: hidden;
   transition: 1s;
-}
-
-.column1 {
-  float: left;
-  width: 30px;
-  padding: 10px;
-}
-.column2 {
-  float: left;
-  width: 270px;
-  padding: 10px;
-}
-
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
 }
 
 /* width */
@@ -69,7 +52,7 @@
 
 .input_text {
   padding: 10px;
-  width: 280px;
+  width: 380px;
   bottom: 0;
   position: fixed;
   margin-left: 10px;
