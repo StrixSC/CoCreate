@@ -20,6 +20,7 @@ export class AllChannelsComponent implements OnInit {
   getChannels() {
     this.channelManagerService.GetAllChannels().subscribe((data: any) => {
       data.forEach((element: IChannel) => {
+        console.log(element);
         this.all_channels.set(element.channel_id, element);
       });
     });

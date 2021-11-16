@@ -25,11 +25,8 @@ export class RightSidebarComponent implements OnInit {
   chatView: boolean;
   chatStyle: Object;
   newChannelStyle: Object;
-
-  constructor(
-    private http: HttpClient,
-    private channelManager: ChannelManagerService
-  ) {
+  exampleCss: any;
+  constructor(private channelManager: ChannelManagerService) {
     this.textChannels = new Map();
     this.chatView = true;
     // this.newChannelStyle = { display: "none" };
@@ -87,5 +84,8 @@ export class RightSidebarComponent implements OnInit {
     this.chatView = false;
     this.chatStyle = { display: "none" };
     this.newChannelStyle = {};
+    console.log(window.innerWidth.toString() + "px");
+    const expand: string = (window.innerWidth * 0.8).toString() + "px";
+    this.exampleCss = { width: expand };
   }
 }
