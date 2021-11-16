@@ -1,5 +1,5 @@
 class DrawingType {
-  static const String rectangle = "RECTANGLE";
+  static const String rectangle = "Rectangle";
   static const String ellipse = "Ellipse";
   static const String freedraw = "freedraw";
 }
