@@ -30,11 +30,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
   String? shapeID;
   String? lastShapeID;
   Map paintsMap = <String, Paint>{};
-  Map actionsMap = <String, Map<String, dynamic>>{};
+  Map actionsMap = <String, Map<String, Path>>{};
   Map selectedItems = <String, String>{};
   Map selectPoints = <String, List<Offset>>{};
   bool allowMove = false;
   Offset? selectRef; // offset reference of selected item
+  Map shapesOffsets = <String, List<Offset>>{};
   Color currentBodyColor = const Color(0xff443a49);
   Color currentBorderColor = const Color(0xff443a49);
   Color currentBackgroundColor = const Color(0xff443a49);
@@ -87,19 +88,19 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   String? selectItem = getSelectedId(selectRef!);
                   if (selectedItems.containsValue(_user.uid)) {
                     String actionToRemove = "";
-                    if (!hasSelectedBounds(details)) {
-                      selectedItems.forEach((oldActionId, userId) {
-                        if (userId == _user.uid && oldActionId != selectItem) {
-                          socketSelectionEmission(oldActionId, false);
-                          actionToRemove = oldActionId;
-                        }
-                      });
-                      if (actionToRemove != "") {
-                        selectedItems.remove(actionToRemove);
+                    // if (!hasSelectedBounds(details)) {
+                    selectedItems.forEach((oldActionId, userId) {
+                      if (userId == _user.uid && oldActionId != selectItem) {
+                        socketSelectionEmission(oldActionId, false);
+                        actionToRemove = oldActionId;
                       }
-                    } else {
-                      allowResize = true;
+                    });
+                    if (actionToRemove != "") {
+                      selectedItems.remove(actionToRemove);
                     }
+                    // } else {
+                    //   allowResize = true;
+                    // }
                   }
                   if (selectItem != null &&
                       !selectedItems.containsKey(selectItem)) {
@@ -138,18 +139,19 @@ class _DrawingScreenState extends State<DrawingScreen> {
                       details, DrawingType.ellipse, DrawingState.move);
                   break;
                 case "select":
-                  if (allowResize && selectedItems.containsValue(_user.uid)) {
-                    selectedItems.forEach((actionId, selectedBy) {
-                      if (selectedBy == _user.uid) {
-                        socketResizeReception(
-                            actionId,
-                            (details.localPosition - selectRef!).dx,
-                            (details.localPosition - selectRef!).dy);
-                        selectRef = details.localPosition;
-                      }
-                    });
-                  } else if (allowMove &&
-                      selectedItems.containsValue(_user.uid)) {
+                  // todo: ajuster pour que se soit juste avec les carré blanc
+                  // if (allowResize && selectedItems.containsValue(_user.uid)) {
+                  //   selectedItems.forEach((actionId, selectedBy) {
+                  //     if (selectedBy == _user.uid) {
+                  //       socketResizeReception(
+                  //           actionId,
+                  //           (details.localPosition - selectRef!).dx,
+                  //           (details.localPosition - selectRef!).dy);
+                  //       selectRef = details.localPosition;
+                  //     }
+                  //   });
+                  // } else
+                  if (allowMove && selectedItems.containsValue(_user.uid)) {
                     selectedItems.forEach((actionId, selectedBy) {
                       if (selectedBy == _user.uid) {
                         socketTranslationEmission(
@@ -329,18 +331,15 @@ class _DrawingScreenState extends State<DrawingScreen> {
       setState(() {
         actionsMap.forEach((actionId, actionMap) {
           if (actionId == data['actionId']) {
-            var offsetList = actionMap.values.first as List<Offset>;
-            List<Offset> translateOffsetList = <Offset>[];
-
-            for (var offset in offsetList) {
-              translateOffsetList.add(offset.translate(
-                  data['xTranslation'].toDouble(),
-                  data['yTranslation'].toDouble()));
-            }
+            var path = actionMap.values.first as Path;
+            Matrix4 matrix4 = Matrix4.translationValues(
+                data['xTranslation'].toDouble(),
+                data['yTranslation'].toDouble(),
+                0);
             actionMap.update(actionsMap[actionId].keys.first,
-                (value) => translateOffsetList);
-            actionsMap.update(data['actionId'],
-                (value) => actionMap as Map<String, List<Offset>>);
+                (value) => path.transform(matrix4.storage));
+            actionsMap.update(
+                data['actionId'], (value) => actionMap as Map<String, Path>);
           }
         });
       });
@@ -356,74 +355,22 @@ class _DrawingScreenState extends State<DrawingScreen> {
           selectPoints.putIfAbsent(
               selectedItems[data['actionId']], () => points);
         } else if (data['state'] == DrawingState.move) {
-          Path path = Path();
-          var actionOffsets = actionsMap[data["actionId"]].values.first;
-          if (actionsMap[data["actionId"]].keys.first == DrawingType.freedraw) {
-            path.moveTo(actionOffsets.first.dx, actionOffsets.first.dy);
-            for (int i = 1; i < actionOffsets.length; i++) {
-              path.lineTo(actionOffsets[i].dx, actionOffsets[i].dy);
-            }
-            Offset center = path.getBounds().center;
-            var angle = atan2(data['y'] - center.dy, data['x'] - center.dx);
-            var angleRef = atan2(
-                selectPoints[data['userId']].last.dy - center.dy,
-                selectPoints[data['userId']].last.dx - center.dx);
-
-            List<Offset> rotateOffset = <Offset>[];
-            var angleVariation = angle - angleRef;
-
-            for (var offset in (actionOffsets as List<Offset>)) {
-              var angleOffset =
-                  atan2(offset.dy - center.dy, offset.dx - center.dx);
-              var x = center.dx +
-                  (offset - center).distance *
-                      cos(angleOffset + angleVariation);
-              var y = center.dy +
-                  (offset - center).distance *
-                      sin(angleOffset + angleVariation);
-              rotateOffset.add(Offset(x, y));
-            }
-            actionsMap[data["actionId"]].update(
-                actionsMap[data["actionId"]].keys.first,
-                (value) => rotateOffset);
-            selectPoints[data['userId']]
-                .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-          }
-          //todo: maybe merge certain truc avec le freedraw en haut
-          else {
-            Rect rect = Rect.fromLTRB(
-                actionOffsets.first.dx,
-                actionOffsets.first.dy,
-                actionOffsets.last.dx,
-                actionOffsets.last.dy);
-            Offset center = rect.center;
-
-            var angle = atan2(data['y'] - center.dy, data['x'] - center.dx);
-            var angleRef = atan2(
-                selectPoints[data['userId']].last.dy - center.dy,
-                selectPoints[data['userId']].last.dx - center.dx);
-
-            List<Offset> rotateOffset = <Offset>[];
-            var angleVariation = angle - angleRef;
-
-            for (var offset in (actionOffsets as List<Offset>)) {
-              var angleOffset =
-                  atan2(offset.dy - center.dy, offset.dx - center.dx);
-              var x = center.dx +
-                  (offset - center).distance *
-                      cos(angleOffset + angleVariation);
-              var y = center.dy +
-                  (offset - center).distance *
-                      sin(angleOffset + angleVariation);
-              rotateOffset.add(Offset(x, y));
-            }
-
-            actionsMap[data["actionId"]].update(
-                actionsMap[data["actionId"]].keys.first,
-                (value) => rotateOffset);
-            selectPoints[data['userId']]
-                .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-          }
+          Path actionPath = actionsMap[data["actionId"]].values.first;
+          Offset center = actionPath.getBounds().center;
+          var angle = atan2(data['y'] - center.dy, data['x'] - center.dx);
+          var angleRef = atan2(selectPoints[data['userId']].last.dy - center.dy,
+              selectPoints[data['userId']].last.dx - center.dx);
+          var angleVariation = angle - angleRef;
+          Matrix4 matriceRotation = Matrix4.rotationZ(angleVariation);
+          actionPath = actionPath.transform(matriceRotation.storage);
+          Offset newCenter = actionPath.getBounds().center;
+          Matrix4 matriceTranslation = Matrix4.translationValues(
+              (center - newCenter).dx, (center - newCenter).dy, 0);
+          actionPath = actionPath.transform(matriceTranslation.storage);
+          actionsMap[data["actionId"]].update(
+              actionsMap[data["actionId"]].keys.first, (value) => actionPath);
+          selectPoints[data['userId']]
+              .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
         } else {
           selectPoints.remove(data['userId']);
         }
@@ -432,6 +379,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   }
 
   // todo: faire que la sélection soit un peu plus grande que la forme
+  // todo: migré vers path
   void socketResizeReception(String id, double xDelta, double yDelta) {
     setState(() {
       // selectedItems.forEach((actionId, selectedBy) {
@@ -489,12 +437,15 @@ class _DrawingScreenState extends State<DrawingScreen> {
     _socket.on('shape:received', (data) {
       setState(() {
         if (data['state'] == DrawingState.down) {
-          Map map = <String, List<Offset>>{};
-          List<Offset> offsetList = <Offset>[];
-          offsetList.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-          map.putIfAbsent(data['shapeType'], () => offsetList);
+          Map map = <String, Path>{};
+          Path path = Path();
+          List<Offset> offsets = <Offset>[];
+          offsets.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+          shapesOffsets.putIfAbsent(data['actionId'], () => offsets);
+          path.moveTo(data['x'].toDouble(), data['y'].toDouble());
+          map.putIfAbsent(data['shapeType'], () => path);
           actionsMap.putIfAbsent(
-              data['actionId'], () => map as Map<String, List<Offset>>);
+              data['actionId'], () => map as Map<String, Path>);
           final paint = Paint()
             ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
                 data['g'] as int, data['b'] as int)
@@ -508,23 +459,24 @@ class _DrawingScreenState extends State<DrawingScreen> {
         } else if (data['state'] == DrawingState.move) {
           actionsMap.forEach((actionId, actionMap) {
             if (actionId == data['actionId']) {
-              actionMap[data['shapeType']]
-                  .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-              actionsMap.update(data['actionId'],
-                  (value) => actionMap as Map<String, List<Offset>>);
+              List<Offset> offsets = shapesOffsets[actionId];
+              offsets.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+              shapesOffsets.update(actionId, (value) => offsets);
+              Rect rect = Rect.fromPoints(offsets.first, offsets.last);
+              Map map = <String, Path>{};
+              Path path = Path();
+              if (data['shapeType'] == DrawingType.ellipse) {
+                path.addOval(rect);
+              } else {
+                path.addRect(rect);
+              }
+              map.putIfAbsent(data['shapeType'], () => path);
+              actionsMap.update(
+                  data['actionId'], (value) => map as Map<String, Path>);
             }
           });
         } else {
-          actionsMap.forEach((actionId, actionMap) {
-            if (actionId == data['actionId']) {
-              List<Offset> rectOffsets = <Offset>[];
-              rectOffsets.add(actionMap.values.first.first);
-              rectOffsets.add(actionMap.values.first.last);
-              actionMap.update(data['shapeType'], (value) => rectOffsets);
-              actionsMap.update(data['actionId'],
-                  (value) => actionMap as Map<String, List<Offset>>);
-            }
-          });
+          shapesOffsets.remove(data['actionId']);
         }
       });
     });
@@ -534,12 +486,13 @@ class _DrawingScreenState extends State<DrawingScreen> {
     _socket.on('freedraw:received', (data) {
       setState(() {
         if (data['state'] == DrawingState.down) {
-          Map map = <String, List<Offset>>{};
-          List<Offset> offsetList = <Offset>[];
-          offsetList.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-          map.putIfAbsent(DrawingType.freedraw, () => offsetList);
+          Map map = <String, Path>{};
+          Path path = Path();
+          path.moveTo(data['x'].toDouble(), data['y'].toDouble());
+          path.lineTo(data['x'].toDouble() + 1, data['y'].toDouble());
+          map.putIfAbsent(DrawingType.freedraw, () => path);
           actionsMap.putIfAbsent(
-              data['actionId'], () => map as Map<String, List<Offset>>);
+              data['actionId'], () => map as Map<String, Path>);
           final paint = Paint()
             ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
                 data['g'] as int, data['b'] as int)
@@ -551,9 +504,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
           actionsMap.forEach((actionId, actionMap) {
             if (actionId == data['actionId']) {
               actionMap[DrawingType.freedraw]
-                  .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-              actionsMap.update(data['actionId'],
-                  (value) => actionMap as Map<String, List<Offset>>);
+                  .lineTo(data['x'].toDouble(), data['y'].toDouble());
+              actionsMap.update(
+                  data['actionId'], (value) => actionMap as Map<String, Path>);
             }
           });
         }
@@ -665,10 +618,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'g': currentBodyColor.green,
       'b': currentBodyColor.blue,
       'x2': (drawingState == DrawingState.up)
-          ? actionsMap[shapeID][drawType].last.dx
+          ? shapesOffsets[shapeID].last.dx
           : null,
       'y2': (drawingState == DrawingState.up)
-          ? actionsMap[shapeID][drawType].last.dx
+          ? shapesOffsets[shapeID].last.dy
           : null,
       // todo:ajouter les couleur de fill ici
       'rFill': 0,
@@ -713,13 +666,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
   String? getSelectedId(Offset offset) {
     List<String> overlapItems = <String>[];
     actionsMap.forEach((actionId, actionMap) {
-      (actionMap as Map<String, List<Offset>>).forEach((action, offsetList) {
+      (actionMap as Map<String, Path>).forEach((action, path) {
         if (action == DrawingType.freedraw) {
-          Path path = Path();
-          path.moveTo(offsetList.first.dx, offsetList.first.dy);
-          for (int i = 1; i < offsetList.length; i++) {
-            path.lineTo(offsetList[i].dx, offsetList[i].dy);
-          }
           for (int i = 0; i < path.computeMetrics().first.length; i++) {
             Tangent? tangent =
                 path.computeMetrics().first.getTangentForOffset(i.toDouble());
@@ -730,14 +678,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
           }
         } else if (action == DrawingType.rectangle ||
             action == DrawingType.ellipse) {
-          Rect rect = Rect.fromLTRB(offsetList.first.dx, offsetList.first.dy,
-              offsetList.last.dx, offsetList.last.dy);
-          Path path = Path();
-          if (action == DrawingType.rectangle) {
-            path.addRect(rect);
-          } else {
-            path.addOval(rect);
-          }
           if (path.contains(offset)) {
             overlapItems.add(actionId);
           }
@@ -766,47 +706,23 @@ class Painter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     actionsMap.forEach((actionId, action) {
-      action.forEach((toolType, offsetList) {
+      action.forEach((toolType, path) {
         if (toolType == DrawingType.freedraw) {
-          // todo: si c'est le dernier point il faut faire un dot
-          for (var i = 0; i < offsetList.length - 1; i++) {
-            canvas.drawLine(
-                offsetList[i], offsetList[i + 1], paintsMap[actionId]);
+          if ((path as Path).computeMetrics().first.length == 1) {
+            Tangent? tangent =
+                path.computeMetrics().first.getTangentForOffset(0);
+            canvas.drawPoints(
+                PointMode.points, [tangent!.position], paintsMap[actionId]);
           }
+          canvas.drawPath(path, paintsMap[actionId]);
         }
-        if (toolType == DrawingType.rectangle) {
-          Rect rect = Rect.fromLTRB(offsetList.first.dx, offsetList.first.dy,
-              offsetList.last.dx, offsetList.last.dy);
-
-          Offset center = rect.center;
-
-          Path path = Path();
-          path.addRect(rect);
-          Matrix4 matrix4 = Matrix4.rotationZ(0.785398);
-          Path rotatePath = path.transform(matrix4.storage);
-
-          Offset newCenter = rotatePath.getBounds().center;
-          vec.Vector3 replace =
-              vec.Vector3((center - newCenter).dx, (center - newCenter).dy, 0);
-
-          matrix4.setTranslation(replace);
-          rotatePath = path.transform(matrix4.storage);
-
-          canvas.drawPath(rotatePath, paintsMap[actionId]);
-        }
-        if (toolType == DrawingType.ellipse) {
-          Rect rect = Rect.fromLTRB(offsetList.first.dx, offsetList.first.dy,
-              offsetList.last.dx, offsetList.last.dy);
-          canvas.drawOval(rect, paintsMap[actionId]);
+        if (toolType == DrawingType.ellipse ||
+            toolType == DrawingType.rectangle) {
+          canvas.drawPath(path, paintsMap[actionId]);
         }
         if (selectedItems.containsKey(actionId)) {
-          Path path = Path();
-          path.moveTo(offsetList.first.dx, offsetList.first.dy);
-          for (int i = 1; i < offsetList.length; i++) {
-            path.lineTo(offsetList[i].dx, offsetList[i].dy);
-          }
-          var corners =
-              getSelectionBoundingRect(path, actionId, setCornersCallback);
+          var corners = getSelectionBoundingRect(
+              actionsMap[actionId].values.first, actionId, setCornersCallback);
           canvas.drawPath(corners["path"], corners["paint"]);
         }
       });
