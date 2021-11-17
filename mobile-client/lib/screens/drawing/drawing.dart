@@ -59,6 +59,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
     socketTranslationReception();
     socketRotationReception();
     socketDeleteReception();
+    socketResizeReception();
   }
 
   @override
@@ -150,8 +151,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   if (allowResize && selectedItems.containsValue(_user.uid)) {
                     selectedItems.forEach((actionId, selectedBy) {
                       if (selectedBy == _user.uid) {
-                        socketResizeReception(
-                            actionId, details.localPosition, selectRef!);
+                        socketResizeEmission(DrawingState.move, actionId,
+                            details.localPosition, selectRef!);
                         selectRef = details.localPosition;
                       }
                     });
@@ -388,60 +389,58 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
   // todo: faire que la sélection soit un peu plus grande que la forme
   // todo: le resize au coter opposer -> voir les corners value (vraiment elever dans le print ce qui cause erreur)
-  void socketResizeReception(
-      String id, Offset currentPosition, Offset previousPosition) {
-    setState(() {
-      selectedItems.forEach((actionId, selectedBy) {
-        if (selectedBy == _user.uid) {
-          double xDelta = (currentPosition - previousPosition).dx * 0.32;
-          double yDelta = (currentPosition - previousPosition).dy * 0.32;
-          Bounds bounds = Bounds();
-          Offset delta =
-              bounds.getDeltaFactor(selectedBoundIndex, xDelta, yDelta);
-          // print("topRight: " + selectedBounds![2].center.dx.toString());
-          // print("topLeftX: " + selectedBounds![0].center.dx.toString());
-          // print("topLeftY: " + selectedBounds![0].center.dy.toString());
-          // print("bottomLeft: " + selectedBounds![6].center.dy.toString());
-          Offset oldRectBox = Offset(
-              selectedBounds![2].center.dx - selectedBounds![0].center.dx,
-              selectedBounds![0].center.dy - selectedBounds![6].center.dy);
-          double xScale;
-          double yScale;
-          oldRectBox.dx == 0
-              ? xScale = 1.0
-              : xScale = (oldRectBox + delta).dx / oldRectBox.dx;
-          oldRectBox.dy == 0
-              ? yScale = 1.0
-              : yScale = (oldRectBox + delta).dy / oldRectBox.dy;
+  void socketResizeReception() {
+    _socket.on('resize:received', (data) {
+      setState(() {
+        selectedItems.forEach((actionId, selectedBy) {
+          if (actionId == data["actionId"]) {
+            Bounds bounds = Bounds();
+            Offset delta = bounds.getDeltaFactor(
+                selectedBoundIndex, data["x"].toDouble(), data["y"].toDouble());
+            // print("topRight: " + selectedBounds![2].center.dx.toString());
+            // print("topLeftX: " + selectedBounds![0].center.dx.toString());
+            // print("topLeftY: " + selectedBounds![0].center.dy.toString());
+            // print("bottomLeft: " + selectedBounds![6].center.dy.toString());
+            Offset oldRectBox = Offset(
+                data["oldWidth"].toDouble(), data["oldHeight"].toDouble());
+            double xScale;
+            double yScale;
+            oldRectBox.dx == 0
+                ? xScale = 1.0
+                : xScale = (oldRectBox + delta).dx / oldRectBox.dx;
+            oldRectBox.dy == 0
+                ? yScale = 1.0
+                : yScale = (oldRectBox + delta).dy / oldRectBox.dy;
 
-          // TODO: change to data["actionId"]
-          Path actionPath = actionsMap[actionId].values.first;
-          Matrix4 matrix = Matrix4.identity();
-          matrix.scale(xScale, yScale);
-          Path scaledPath = actionPath.transform(matrix.storage);
+            // TODO: change to data["actionId"]
+            Path actionPath = actionsMap[actionId].values.first;
+            Matrix4 matrix = Matrix4.identity();
+            matrix.scale(xScale, yScale);
+            Path scaledPath = actionPath.transform(matrix.storage);
 
-          // Translate to original position
-          Offset newCenter = scaledPath.getBounds().center;
-          vec.Vector3 translation = vec.Vector3(
-              (initialResizeCenter - newCenter).dx,
-              (initialResizeCenter - newCenter).dy,
-              0);
-          matrix.setTranslation(translation);
-          scaledPath = scaledPath.transform(matrix.storage);
+            // Translate to original position
+            Offset newCenter = scaledPath.getBounds().center;
+            vec.Vector3 translation = vec.Vector3(
+                data["initialCenterX"].toDouble() - newCenter.dx,
+                data["initialCenterY"].toDouble() - newCenter.dy,
+                0);
+            matrix.setTranslation(translation);
+            scaledPath = scaledPath.transform(matrix.storage);
 
-          // Translate to match bound position
-          Offset corner = bounds.getCornerFromTransformedPath(
-              selectedBoundIndex, scaledPath);
-          vec.Vector3 translation2 = vec.Vector3(
-              (corner - initialTapLocation).dx,
-              (corner - initialTapLocation).dy,
-              0);
-          matrix.setTranslation(translation2);
-          scaledPath = scaledPath.transform(matrix.storage);
+            // Translate to match bound position
+            Offset corner = bounds.getCornerFromTransformedPath(
+                selectedBoundIndex, scaledPath);
+            vec.Vector3 translation2 = vec.Vector3(
+                (corner - initialTapLocation).dx,
+                (corner - initialTapLocation).dy,
+                0);
+            matrix.setTranslation(translation2);
+            scaledPath = scaledPath.transform(matrix.storage);
 
-          actionsMap[actionId]
-              .update(actionsMap[actionId].keys.first, (value) => scaledPath);
-        }
+            actionsMap[actionId]
+                .update(actionsMap[actionId].keys.first, (value) => scaledPath);
+          }
+        });
       });
     });
   }
@@ -604,6 +603,30 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'y': (drawingState == DrawingState.up)
           ? endPoint.dy
           : details.localPosition.dy,
+      'username': _user.displayName,
+      'userId': _user.uid,
+      'collaborationId': "DEMO_COLLABORATION",
+    });
+  }
+
+  void socketResizeEmission(String drawingState, String actionId,
+      Offset currentPosition, Offset previousPosition) {
+    Offset oldRectBox = Offset(
+        selectedBounds![2].center.dx - selectedBounds![0].center.dx,
+        selectedBounds![0].center.dy - selectedBounds![6].center.dy);
+    double xDelta = (currentPosition - previousPosition).dx * 0.45;
+    double yDelta = (currentPosition - previousPosition).dy * 0.45;
+    _socket.emit('resize:emit', {
+      'actionId': actionId,
+      'selectedActionId': actionId,
+      'actionType': "Resize",
+      'x': xDelta,
+      'y': yDelta,
+      'initialCenterX': initialResizeCenter.dx,
+      'initialCenterY': initialResizeCenter.dy,
+      'oldWidth': oldRectBox.dx,
+      'oldHeight': oldRectBox.dy,
+      'boundIndex': selectedBoundIndex,
       'username': _user.displayName,
       'userId': _user.uid,
       'collaborationId': "DEMO_COLLABORATION",

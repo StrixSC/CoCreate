@@ -27,30 +27,30 @@ class Bounds {
   Offset getDeltaFactor(borderIndex, xDelta, yDelta) {
     switch (borderIndex) {
       case 0:
-        xDelta *= -1;
+        xDelta *= -1.0;
         break;
       case 1:
-        xDelta *= 0;
+        xDelta *= 0.0;
         break;
       case 2:
         break;
       case 3:
-        yDelta *= 0;
+        yDelta *= 0.0;
         break;
       case 4:
-        yDelta *= -1;
+        yDelta *= -1.0;
         break;
       case 5:
-        yDelta *= -1;
-        xDelta *= 0;
+        yDelta *= -1.0;
+        xDelta *= 0.0;
         break;
       case 6:
-        yDelta *= -1;
-        xDelta *= -1;
+        yDelta *= -1.0;
+        xDelta *= -1.0;
         break;
       case 7:
-        yDelta *= 0;
-        xDelta *= -1;
+        yDelta *= 0.0;
+        xDelta *= -1.0;
         break;
     }
     return Offset(xDelta, yDelta);
