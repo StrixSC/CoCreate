@@ -12,17 +12,6 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:uuid/uuid.dart';
 import 'package:vector_math/vector_math_64.dart' as vec;
 
-enum Bounds {
-  topLeft,
-  topCenter,
-  topRight,
-  rightCenter,
-  bottomRight,
-  bottomCenter,
-  bottomLeft,
-  leftCenter,
-}
-
 class DrawingScreen extends StatefulWidget {
   final io.Socket _socket;
   final User _user;
@@ -116,8 +105,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
                     if (hasSelectedBounds(details) && actionToRemove == "") {
                       allowResize = true;
                       initialResizeCenter = Offset(
-                          selectedBounds![Bounds.topCenter.index].center.dx,
-                          selectedBounds![Bounds.rightCenter.index].center.dy);
+                          selectedBounds![Bounds.topCenter].center.dx,
+                          selectedBounds![Bounds.rightCenter].center.dy);
                       initialTapLocation = details.localPosition;
                     }
                   }
@@ -399,7 +388,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
   // todo: faire que la sélection soit un peu plus grande que la forme
   // todo: le resize au coter opposer -> voir les corners value (vraiment elever dans le print ce qui cause erreur)
-  // todo: put switch cases in a util class
   void socketResizeReception(
       String id, Offset currentPosition, Offset previousPosition) {
     setState(() {
@@ -407,34 +395,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
         if (selectedBy == _user.uid) {
           double xDelta = (currentPosition - previousPosition).dx * 0.32;
           double yDelta = (currentPosition - previousPosition).dy * 0.32;
-          switch (selectedBoundIndex) {
-            case 0:
-              xDelta *= -1;
-              break;
-            case 1:
-              xDelta *= 0;
-              break;
-            case 2:
-              break;
-            case 3:
-              yDelta *= 0;
-              break;
-            case 4:
-              yDelta *= -1;
-              break;
-            case 5:
-              yDelta *= -1;
-              xDelta *= 0;
-              break;
-            case 6:
-              yDelta *= -1;
-              xDelta *= -1;
-              break;
-            case 7:
-              yDelta *= 0;
-              xDelta *= -1;
-              break;
-          }
+          Bounds bounds = Bounds();
+          Offset delta =
+              bounds.getDeltaFactor(selectedBoundIndex, xDelta, yDelta);
           // print("topRight: " + selectedBounds![2].center.dx.toString());
           // print("topLeftX: " + selectedBounds![0].center.dx.toString());
           // print("topLeftY: " + selectedBounds![0].center.dy.toString());
@@ -446,12 +409,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
           double yScale;
           oldRectBox.dx == 0
               ? xScale = 1.0
-              : xScale = (oldRectBox.dx + xDelta) / oldRectBox.dx;
+              : xScale = (oldRectBox + delta).dx / oldRectBox.dx;
           oldRectBox.dy == 0
               ? yScale = 1.0
-              : yScale = (oldRectBox.dy + yDelta) / oldRectBox.dy;
+              : yScale = (oldRectBox + delta).dy / oldRectBox.dy;
 
-          // TODO: change to data[actionId]
+          // TODO: change to data["actionId"]
           Path actionPath = actionsMap[actionId].values.first;
           Matrix4 matrix = Matrix4.identity();
           matrix.scale(xScale, yScale);
@@ -467,33 +430,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
           scaledPath = scaledPath.transform(matrix.storage);
 
           // Translate to match bound position
-          Offset corner = scaledPath.getBounds().center;
-          switch (selectedBoundIndex) {
-            case 0:
-              corner = scaledPath.getBounds().topLeft;
-              break;
-            case 1:
-              corner = scaledPath.getBounds().topCenter;
-              break;
-            case 2:
-              corner = scaledPath.getBounds().topRight;
-              break;
-            case 3:
-              corner = scaledPath.getBounds().centerRight;
-              break;
-            case 4:
-              corner = scaledPath.getBounds().bottomRight;
-              break;
-            case 5:
-              corner = scaledPath.getBounds().bottomCenter;
-              break;
-            case 6:
-              corner = scaledPath.getBounds().bottomLeft;
-              break;
-            case 7:
-              corner = scaledPath.getBounds().centerLeft;
-              break;
-          }
+          Offset corner = bounds.getCornerFromTransformedPath(
+              selectedBoundIndex, scaledPath);
           vec.Vector3 translation2 = vec.Vector3(
               (corner - initialTapLocation).dx,
               (corner - initialTapLocation).dy,
