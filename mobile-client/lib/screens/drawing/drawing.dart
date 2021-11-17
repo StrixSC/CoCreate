@@ -344,19 +344,22 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void socketTranslationReception() {
     _socket.on('translation:received', (data) {
       setState(() {
-        actionsMap.forEach((actionId, actionMap) {
-          if (actionId == data['actionId']) {
-            var path = actionMap.values.first as Path;
-            Matrix4 matrix4 = Matrix4.translationValues(
-                data['xTranslation'].toDouble(),
-                data['yTranslation'].toDouble(),
-                0);
-            actionMap.update(actionsMap[actionId].keys.first,
-                (value) => path.transform(matrix4.storage));
-            actionsMap.update(
-                data['actionId'], (value) => actionMap as Map<String, Path>);
-          }
-        });
+        if (data["state"] != DrawingState.up) {
+          actionsMap.forEach((actionId, actionMap) {
+            if (actionId == data['actionId'] ||
+                actionId == data['selectedActionId']) {
+              var path = actionMap.values.first as Path;
+              Matrix4 matrix4 = Matrix4.translationValues(
+                  data['xTranslation'].toDouble(),
+                  data['yTranslation'].toDouble(),
+                  0);
+              actionMap.update(actionsMap[actionId].keys.first,
+                  (value) => path.transform(matrix4.storage));
+              actionsMap.update(
+                  actionId, (value) => actionMap as Map<String, Path>);
+            }
+          });
+        }
       });
     });
   }
@@ -629,6 +632,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       double yTranslation, String drawingState) {
     _socket.emit("translation:emit", {
       'actionId': selectItem,
+      'selectedActionId': selectItem,
       'username': _user.displayName,
       'userId': _user.uid,
       'state': drawingState,
