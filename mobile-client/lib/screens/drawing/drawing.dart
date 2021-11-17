@@ -12,6 +12,17 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:uuid/uuid.dart';
 import 'package:vector_math/vector_math_64.dart' as vec;
 
+enum Bounds {
+  topLeft,
+  topCenter,
+  topRight,
+  rightCenter,
+  bottomRight,
+  bottomCenter,
+  bottomLeft,
+  leftCenter,
+}
+
 class DrawingScreen extends StatefulWidget {
   final io.Socket _socket;
   final User _user;
@@ -41,7 +52,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
   Color currentBackgroundColor = const Color(0xff443a49);
   List<Rect>? selectedBounds;
   int? selectedBoundIndex;
-  Map resizingItems = <String, Path>{};
+  Offset initialResizeCenter = const Offset(0, 0);
+  Offset initialTapLocation = const Offset(0, 0);
   bool allowResize = false;
 
   _DrawingScreenState(this._socket, this._user);
@@ -88,9 +100,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   String? selectItem = getSelectedId(selectRef!);
                   if (selectedItems.containsValue(_user.uid)) {
                     String actionToRemove = "";
-                    // if (!hasSelectedBounds(details)) {
                     selectedItems.forEach((oldActionId, userId) {
-                      if (userId == _user.uid && oldActionId != selectItem) {
+                      if (userId == _user.uid &&
+                          oldActionId != selectItem &&
+                          !hasSelectedBounds(details)) {
                         socketSelectionEmission(oldActionId, false);
                         actionToRemove = oldActionId;
                       }
@@ -98,9 +111,13 @@ class _DrawingScreenState extends State<DrawingScreen> {
                     if (actionToRemove != "") {
                       selectedItems.remove(actionToRemove);
                     }
-                    // } else {
-                    //   allowResize = true;
-                    // }
+                    if (hasSelectedBounds(details) && actionToRemove == "") {
+                      allowResize = true;
+                      initialResizeCenter = Offset(
+                          selectedBounds![Bounds.topCenter.index].center.dx,
+                          selectedBounds![Bounds.rightCenter.index].center.dy);
+                      initialTapLocation = details.localPosition;
+                    }
                   }
                   if (selectItem != null &&
                       !selectedItems.containsKey(selectItem)) {
@@ -140,18 +157,16 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   break;
                 case "select":
                   // todo: ajuster pour que se soit juste avec les carré blanc
-                  // if (allowResize && selectedItems.containsValue(_user.uid)) {
-                  //   selectedItems.forEach((actionId, selectedBy) {
-                  //     if (selectedBy == _user.uid) {
-                  //       socketResizeReception(
-                  //           actionId,
-                  //           (details.localPosition - selectRef!).dx,
-                  //           (details.localPosition - selectRef!).dy);
-                  //       selectRef = details.localPosition;
-                  //     }
-                  //   });
-                  // } else
-                  if (allowMove && selectedItems.containsValue(_user.uid)) {
+                  if (allowResize && selectedItems.containsValue(_user.uid)) {
+                    selectedItems.forEach((actionId, selectedBy) {
+                      if (selectedBy == _user.uid) {
+                        socketResizeReception(
+                            actionId, details.localPosition, selectRef!);
+                        selectRef = details.localPosition;
+                      }
+                    });
+                  } else if (allowMove &&
+                      selectedItems.containsValue(_user.uid)) {
                     selectedItems.forEach((actionId, selectedBy) {
                       if (selectedBy == _user.uid) {
                         socketTranslationEmission(
@@ -196,7 +211,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   if (selectedItems.containsValue(_user.uid)) {
                     selectedItems.forEach((actionId, selectedBy) {
                       if (selectedBy == _user.uid) {
-                        resizingItems.remove(actionId);
                         allowResize = false;
                       }
                     });
@@ -217,7 +231,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
             child: Center(
               child: CustomPaint(
                 painter: Painter(drawType, paintsMap, actionsMap, selectedItems,
-                    _user, setSelectedBounds, resizingItems),
+                    _user, setSelectedBounds),
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height,
                   width: MediaQuery.of(context).size.width,
@@ -379,55 +393,111 @@ class _DrawingScreenState extends State<DrawingScreen> {
   }
 
   // todo: faire que la sélection soit un peu plus grande que la forme
-  // todo: migré vers path
-  void socketResizeReception(String id, double xDelta, double yDelta) {
+  // todo: le resize au coter opposer -> voir les corners value (vraiment elever dans le print ce qui cause erreur)
+  // todo: put switch cases in a util class
+  void socketResizeReception(
+      String id, Offset currentPosition, Offset previousPosition) {
     setState(() {
-      // selectedItems.forEach((actionId, selectedBy) {
-      //   if (selectedBy == _user.uid) {
-      //     Path path = Path();
-      //     var offsetList =
-      //         actionsMap[actionId][DrawingType.freedraw] as List<Offset>;
-      //     path.moveTo(offsetList.first.dx, offsetList.first.dy);
-      //
-      Offset oldRectBox = Offset(
-          selectedBounds![2].center.dx - selectedBounds![0].center.dx,
-          selectedBounds![0].center.dy - selectedBounds![6].center.dy);
+      selectedItems.forEach((actionId, selectedBy) {
+        if (selectedBy == _user.uid) {
+          double xDelta = (currentPosition - previousPosition).dx * 0.32;
+          double yDelta = (currentPosition - previousPosition).dy * 0.32;
+          switch (selectedBoundIndex) {
+            case 0:
+              xDelta *= -1;
+              break;
+            case 1:
+              xDelta *= 0;
+              break;
+            case 2:
+              break;
+            case 3:
+              yDelta *= 0;
+              break;
+            case 4:
+              yDelta *= -1;
+              break;
+            case 5:
+              yDelta *= -1;
+              xDelta *= 0;
+              break;
+            case 6:
+              yDelta *= -1;
+              xDelta *= -1;
+              break;
+            case 7:
+              yDelta *= 0;
+              xDelta *= -1;
+              break;
+          }
+          // print("topRight: " + selectedBounds![2].center.dx.toString());
+          // print("topLeftX: " + selectedBounds![0].center.dx.toString());
+          // print("topLeftY: " + selectedBounds![0].center.dy.toString());
+          // print("bottomLeft: " + selectedBounds![6].center.dy.toString());
+          Offset oldRectBox = Offset(
+              selectedBounds![2].center.dx - selectedBounds![0].center.dx,
+              selectedBounds![0].center.dy - selectedBounds![6].center.dy);
+          double xScale;
+          double yScale;
+          oldRectBox.dx == 0
+              ? xScale = 1.0
+              : xScale = (oldRectBox.dx + xDelta) / oldRectBox.dx;
+          oldRectBox.dy == 0
+              ? yScale = 1.0
+              : yScale = (oldRectBox.dy + yDelta) / oldRectBox.dy;
 
-      Path scaledPath = Path();
-      var xScale = (oldRectBox.dx - xDelta) / oldRectBox.dx;
-      var yScale = (oldRectBox.dy - yDelta) / oldRectBox.dy;
-      var xTranslation = xDelta;
-      var yTranslation = yDelta;
-      //
-      //     for (int i = 1; i < offsetList.length; i++) {
-      //       path.lineTo(offsetList[i].dx, offsetList[i].dy);
-      //       scaledPath = path.transform(Float64List.fromList([
-      //         xScale,        0,             0, 0,
-      //         0,             yScale,        0, 0,
-      //         0,             0,             1, 0,
-      //         xTranslation,  yTranslation,  0, 1,
-      //       ]));
-      //     }
-      //     resizingItems.update(actionId, (dynamic val) => scaledPath,
-      //         ifAbsent: () => scaledPath);
-      //   }
-      // });
-      actionsMap.forEach((actionId, actionMap) {
-        if (actionId == id) {
-          var offsetList = actionMap[DrawingType.freedraw] as List<Offset>;
-          List<Offset> scaledOffsetList = <Offset>[];
-          List<Offset> translateOffsetList = <Offset>[];
-          for (var offset in offsetList) {
-            scaledOffsetList.add(offset.scale(xScale, yScale));
+          // TODO: change to data[actionId]
+          Path actionPath = actionsMap[actionId].values.first;
+          Matrix4 matrix = Matrix4.identity();
+          matrix.scale(xScale, yScale);
+          Path scaledPath = actionPath.transform(matrix.storage);
+
+          // Translate to original position
+          Offset newCenter = scaledPath.getBounds().center;
+          vec.Vector3 translation = vec.Vector3(
+              (initialResizeCenter - newCenter).dx,
+              (initialResizeCenter - newCenter).dy,
+              0);
+          matrix.setTranslation(translation);
+          scaledPath = scaledPath.transform(matrix.storage);
+
+          // Translate to match bound position
+          Offset corner = scaledPath.getBounds().center;
+          switch (selectedBoundIndex) {
+            case 0:
+              corner = scaledPath.getBounds().topLeft;
+              break;
+            case 1:
+              corner = scaledPath.getBounds().topCenter;
+              break;
+            case 2:
+              corner = scaledPath.getBounds().topRight;
+              break;
+            case 3:
+              corner = scaledPath.getBounds().centerRight;
+              break;
+            case 4:
+              corner = scaledPath.getBounds().bottomRight;
+              break;
+            case 5:
+              corner = scaledPath.getBounds().bottomCenter;
+              break;
+            case 6:
+              corner = scaledPath.getBounds().bottomLeft;
+              break;
+            case 7:
+              corner = scaledPath.getBounds().centerLeft;
+              break;
           }
-          for (var offset in scaledOffsetList) {
-            translateOffsetList
-                .add(offset.translate(xTranslation, yTranslation));
-          }
-          actionMap.update(
-              DrawingType.freedraw, (value) => translateOffsetList);
-          actionsMap.update(
-              id, (value) => actionMap as Map<String, List<Offset>>);
+          vec.Vector3 translation2 = vec.Vector3(
+              (corner - initialTapLocation).dx,
+              (corner - initialTapLocation).dy,
+              0);
+          matrix.setTranslation(translation2);
+          scaledPath = scaledPath.transform(matrix.storage);
+
+          actionsMap[actionId]
+              .update(actionsMap[actionId].keys.first, (value) => scaledPath);
         }
       });
     });
@@ -693,7 +763,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
 class Painter extends CustomPainter {
   Painter(this.drawType, this.paintsMap, this.actionsMap, this.selectedItems,
-      this.user, this.setCornersCallback, this.resizingItems);
+      this.user, this.setCornersCallback);
 
   Map paintsMap;
   String drawType;
@@ -701,7 +771,6 @@ class Painter extends CustomPainter {
   Map selectedItems;
   User user;
   Function setCornersCallback;
-  Map resizingItems;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -737,8 +806,8 @@ class Painter extends CustomPainter {
     Path pathCorner = Path();
     Path pathBorder = Path();
 
-    double width = 10.0;
-    double height = 10.0;
+    double width = 15.0;
+    double height = 15.0;
     List<Offset> boundingRects = [
       bounds.topLeft,
       Offset(bounds.topLeft.dx + (bounds.topRight.dx - bounds.topLeft.dx) / 2,
