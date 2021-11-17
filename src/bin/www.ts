@@ -13,6 +13,7 @@ import { logEvent } from './../middlewares/socket.middleware';
 // Events
 import drawingHandler from '../events/drawing.events';
 import channelHandler from '../events/channels.events';
+import collaborationHandler from '../events/collaboration.events';
 
 import log from '../utils/logger';
 
@@ -36,14 +37,14 @@ const onError = (error: any) => {
     }
     const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`;
     switch (error.code) {
-    case 'EACCES':
-        log('CRITICAL', `${bind} requires elevated privileges`);
-        process.exit(1);
-    case 'EADDRINUSE':
-        log('CRITICAL', `${bind} is already in use`);
-        process.exit(1);
-    default:
-        throw error;
+        case 'EACCES':
+            log('CRITICAL', `${bind} requires elevated privileges`);
+            process.exit(1);
+        case 'EADDRINUSE':
+            log('CRITICAL', `${bind} is already in use`);
+            process.exit(1);
+        default:
+            throw error;
     }
 };
 
@@ -71,6 +72,7 @@ const onConnection = (socket: Socket) => {
     try {
         channelHandler(io, socket);
         drawingHandler(io, socket);
+        collaborationHandler(io, socket);
     } catch (e) {
         handleSocketError(socket, e);
     }

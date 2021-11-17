@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import create from 'http-errors';
+import create, { HttpError } from 'http-errors';
 import { NextFunction } from 'express';
 import { dbErrorRouters } from './auth';
 import log from './logger';
@@ -35,7 +35,11 @@ export const handleRequestError = (e: any, next: NextFunction) => {
 
 export const handleSocketError = (socket: Socket, e: any): boolean => {
     log('DEBUG', e);
-    const error = `(${e.code}) - ${e.message}`;
+    let error = `(${e.code}) - ${e.message}`;
+    if (e instanceof HttpError) {
+        error = `[${e.status}]:${e.name} - ${e.message}`;
+    }
+
     if (isPrismaError(e)) {
         if (e instanceof PrismaClientKnownRequestError) {
             const error = dbErrorRouters[e.code];

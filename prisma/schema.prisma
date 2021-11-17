@@ -109,6 +109,9 @@ model Drawing {
   updated_at       DateTime      @updatedAt
   collaboration_id String        @unique
   collaboration    Collaboration @relation(fields: [collaboration_id], references: [collaboration_id], onDelete: Cascade)
+  background_color String        @default("#FFFFFF")
+  width            Int           @default(1280)
+  height           Int           @default(752)
 }
 
 model Action {
@@ -137,13 +140,13 @@ model Action {
   offsets String?
 
   // Shapes
-  x2      Float?
-  y2      Float?
-  rFill   Int?
-  gFill   Int?
-  bFill   Int?
-  aFill   Int?
-  shapeType ShapeType?  @default(Null)
+  x2         Float?
+  y2         Float?
+  rFill      Int?
+  gFill      Int?
+  bFill      Int?
+  aFill      Int?
+  shapeType  ShapeType?  @default(Null)
   shapeStyle ShapeStyle? @default(border)
 
   // Shared:
@@ -167,14 +170,14 @@ model CollaborationMember {
 model Collaboration {
   index                  Int                   @unique @default(autoincrement())
   collaboration_id       String                @id @unique @default(uuid())
-  drawing_id             String                @unique
   created_at             DateTime              @default(now())
   updated_at             DateTime              @updatedAt
   collaboration_members  CollaborationMember[]
   drawing                Drawing?
-  Action                 Action[]
+  actions                Action[]
   type                   CollaborationType
   max_collaborator_count Int                   @default(4)
+  password               String?
 }
 
 // Enums
@@ -206,7 +209,7 @@ enum ShapeType {
   Null
 }
 
-enum ShapeStyle { 
+enum ShapeStyle {
   center
   border
   fill
