@@ -49,7 +49,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
   Map shapesOffsets = <String, List<Offset>>{};
   Color currentBodyColor = const Color(0xff443a49);
   Color currentBorderColor = const Color(0xff443a49);
-  Color currentBackgroundColor = const Color(0xff443a49);
+  Color currentBackgroundColor =
+      Colors.blueGrey; // todo: white doesnt show 'B' letter
   List<Rect>? selectedBounds;
   int? selectedBoundIndex;
   Offset initialResizeCenter = const Offset(0, 0);
@@ -68,6 +69,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
     socketSelectionReception();
     socketTranslationReception();
     socketRotationReception();
+    socketDeleteReception();
   }
 
   @override
@@ -156,7 +158,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
                       details, DrawingType.ellipse, DrawingState.move);
                   break;
                 case "select":
-                  // todo: ajuster pour que se soit juste avec les carré blanc
                   if (allowResize && selectedItems.containsValue(_user.uid)) {
                     selectedItems.forEach((actionId, selectedBy) {
                       if (selectedBy == _user.uid) {
@@ -591,8 +592,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void socketDeleteReception() {
     _socket.on('delete:received', (data) {
       setState(() {
-        actionsMap.remove(data["actionId"]);
-        selectedItems.remove(data["actionId"]);
+        actionsMap.remove(data["selectedActionId"]);
+        selectedItems.remove(data["selectedActionId"]);
       });
     });
   }
@@ -646,6 +647,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void socketDeleteEmission(actionId) {
     _socket.emit('delete:emit', {
       'actionId': actionId,
+      'selectedActionId': actionId,
       'username': _user.displayName,
       'userId': _user.uid,
       'collaborationId': "DEMO_COLLABORATION",
