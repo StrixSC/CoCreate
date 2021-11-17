@@ -1,5 +1,11 @@
 # Socket Events
 
+## Disconnection:
+
+Upon user disconnection, the socket server will send the `user:disconnection` event to all rooms that the user is currently in. This can be used to set the offline or online status to users when in the chatrooms or in the collaboration sessions.
+
+<br> 
+
 # Channel Events:
 
 All events can return this error:
@@ -454,6 +460,7 @@ Data:
     userId: string,
     collaborationId: string,
     actionType: string,
+    selectedActionId: string,
     xTranslation: number,   // float
     yTranslation: number    // float
 }
@@ -467,6 +474,7 @@ Data:
 {
     actionId: string,
     isSelected: boolean,
+    selectedActionId: string,
     selectedBy: string // The userId of the user that selected the action.
 }
 ```
@@ -732,5 +740,32 @@ Response sent:
 {
 	collaborationId: string,
 	deletedAt: string // ISO Format
+}
+```
+## Leave collaboration
+
+Use this when a member wishes to leave a drawing collaboration. This is not the event that is used to disconnect a user. This will remove the drawing from the list of drawings of the user. The user must not be the owner and the drawing must not be private. 
+
+Client -> Server: `collaboration:leave`
+Server -> Client: `collaboration:left`
+
+Payload to send:
+
+```typescript
+{
+	collaborationId: string,
+	userId: string
+}
+```
+
+Response sent: 
+
+```typescript
+{
+	collaborationId: string,
+	userId: string,
+	username: string,
+	avatarUrl: string,
+	leftAt: string, // ISO Format date
 }
 ```

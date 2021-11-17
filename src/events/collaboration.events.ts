@@ -1,4 +1,4 @@
-import create from 'http-errors';
+import create, { Unauthorized } from 'http-errors';
 import { handleSocketError } from './../utils/errors';
 import { db } from './../db';
 import { Server, Socket } from 'socket.io';
@@ -128,6 +128,8 @@ export = (io: Server, socket: Socket) => {
                 });
 
                 socket.emit("collaboration:connected", generateConnectedPayload);
+            } else {
+                throw new create.Unauthorized("This user is already a member of this channel.");
             }
 
         } catch (e) {
@@ -151,7 +153,7 @@ export = (io: Server, socket: Socket) => {
             const isValid = (
                 !validator.isEmpty(title) &&
                 validator.isAlphanumeric(title) &&
-                validator.isLength(title, { max: 8, min: 256 }) &&
+                validator.isLength(title, { min: 8, max: 256 }) &&
                 validator.isIn(type, [CollaborationType.Private, CollaborationType.Protected, CollaborationType.Public])
             );
 
@@ -409,11 +411,72 @@ export = (io: Server, socket: Socket) => {
 
     }
 
+    const onLeaveCollaboration = async (payload: {
+        userId: string,
+        collaborationId: string
+    }) => {
+        try {
+            const { userId, collaborationId } = payload;
+
+            if (!userId || userId !== socket.data.user) {
+                throw new create.Unauthorized("Invalid or missing userId/provided userId does not match the session user.");
+            }
+
+            if (!collaborationId) {
+                throw new create.BadRequest("Invalid or missing collaborationId in the provided payload");
+            }
+
+            const collaboration = await db.collaborationMember.findFirst({
+                where: {
+                    collaboration_id: collaborationId,
+                    user_id: userId,
+                    collaboration: {
+                        type: {
+                            not: CollaborationType.Private
+                        }
+                    }
+                }
+            });
+
+            if (!collaboration) {
+                throw new create.Unauthorized("No members with this id could be found in this collaboration. If the drawing is private, it must be deleted instead of left.");
+            }
+
+            const updated = await db.collaborationMember.delete({
+                where: {
+                    collaboration_member_id: collaboration.collaboration_member_id,
+                },
+                include: {
+                    user: {
+                        include: {
+                            profile: true
+                        }
+                    }
+                }
+            });
+
+            if (!updated) {
+                throw new create.InternalServerError("Could not remove the user from the collaboration")
+            }
+
+            socket.to(collaboration.collaboration_id).emit("collaboration:left", {
+                userId: updated.user_id,
+                avatarUrl: updated.user.profile!.avatar_url,
+                username: updated.user.profile!.username,
+                collaborationId: updated.collaboration_id,
+                leftAt: new Date().toISOString(),
+            });
+        } catch (e) {
+            handleSocketError(socket, e);
+        }
+    }
+
     socket.on("collaboration:join", onJoinCollaboration);
     socket.on("collaboration:create", onCreateCollaboration);
     socket.on("collaboration:update", onUpdateCollaboration);
     socket.on("collaboration:delete", onDeleteCollaboration);
     socket.on("collaboration:connect", onConnectCollaboration);
+    socket.on("collaboration:leave", onLeaveCollaboration);
 }
 
 const generateConnectedPayload = (member: CollaborationMemberConnectionResponse) => ({

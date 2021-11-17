@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 import dotenv from 'dotenv';
 dotenv.config();
 import 'reflect-metadata';
@@ -14,7 +15,7 @@ import { logEvent } from './../middlewares/socket.middleware';
 import drawingHandler from '../events/drawing.events';
 import channelHandler from '../events/channels.events';
 import collaborationHandler from '../events/collaboration.events';
-
+import disconnectHandler from '../events/disconnect.event';
 import log from '../utils/logger';
 
 export const normalizePort = (val: string) => {
@@ -67,12 +68,14 @@ const onConnection = (socket: Socket) => {
 
     if (process.env.NODE_ENV === 'production') {
         socket.data.user = (socket as any).request.userId;
+        socket.data.username = (socket as any).request.username;
     } else socket.data.user = 'DEMO';
 
     try {
         channelHandler(io, socket);
         drawingHandler(io, socket);
         collaborationHandler(io, socket);
+        disconnectHandler(io, socket);
     } catch (e) {
         handleSocketError(socket, e);
     }
