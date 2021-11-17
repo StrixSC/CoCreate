@@ -228,7 +228,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   break;
               }
             },
-            child: Center(
+            child: Container(
+              color: currentBackgroundColor,
               child: CustomPaint(
                 painter: Painter(drawType, paintsMap, actionsMap, selectedItems,
                     _user, setSelectedBounds),
