@@ -1,3 +1,4 @@
+import { MatSnackBar } from '@angular/material';
 import { DrawingState } from 'src/app/model/IAction.model';
 import { CollaborationService } from 'src/app/services/collaboration.service';
 import { SyncDrawingService } from './../../syncdrawing.service';
@@ -58,6 +59,7 @@ export class SelectionToolService implements Tools {
   private firstMovementMagnetism: boolean;
 
   constructor(
+    private snackBar: MatSnackBar,
     private drawingService: DrawingService,
     private offsetManager: OffsetManagerService,
     private rendererService: RendererProviderService,
@@ -100,7 +102,7 @@ export class SelectionToolService implements Tools {
           const obj = this.drawingService.getObjectByActionId(actionId);
           if (obj) {
             const userId = obj.getAttribute('userId');
-            if (userId && actionId) {
+            if (userId) {
               const isSelected = this.collaborationService.getSelectionStatus(userId, actionId);
               const isSelectedByMe = (this.collaborationService.getSelectedByUser(userId, actionId) === this.syncService.defaultPayload!.userId && isSelected)
               if (!isSelected || isSelectedByMe) {
@@ -108,6 +110,8 @@ export class SelectionToolService implements Tools {
                 this.allowMove = true;
                 this.selectedActionId = actionId;
                 this.objects.push(obj);
+              } else {
+                this.snackBar.open('Cet élement est déjà sélectionné par un autre utilisateur.', '', { duration: 1000 });
               }
             }
           }
@@ -118,6 +122,7 @@ export class SelectionToolService implements Tools {
             this.syncService.sendSelect(this.selectedActionId, false);
           }
           this.removeSelection();
+          this.selectionTransformService.endCommand();
           return;
         }
 
@@ -521,9 +526,6 @@ export class SelectionToolService implements Tools {
   selectByActionId(actionId: string) {
     const obj = this.drawingService.getObjectByActionId(actionId);
     if (!obj) return;
-    // if (this.selectedActionId !== "") {
-    //   this.syncService.sendSelect(this.selectedActionId, false);
-    // }
     this.selectedActionId = obj.getAttribute('actionId')!;
     this.setNewSelection([obj]);
   }

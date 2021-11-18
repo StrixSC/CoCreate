@@ -155,7 +155,6 @@ export class ToolFactoryService {
     Delete: (payload: IDeleteAction) => {
       const isActiveUser: boolean = (this.syncService.defaultPayload!.userId === payload.userId);
       const object = this.drawingService.getObjectByActionId(payload.selectedActionId);
-      console.log(object);
       if (object && !isActiveUser) {
         const command = new DeleteCommand(this.drawingService, [object]);
         command.execute();
@@ -166,6 +165,7 @@ export class ToolFactoryService {
     },
     Translate: (payload: ITranslateAction) => {
       const isActiveUser: boolean = (this.syncService.defaultPayload!.userId === payload.userId);
+      console.log(payload);
       if (payload.state === DrawingState.move) {
         const ongoingAction = this.pendingExternalCommands.get(payload.actionId) as RotateTranslateCompositeCommand;
         if (!ongoingAction) {
@@ -176,7 +176,7 @@ export class ToolFactoryService {
               const command = new RotateTranslateCompositeCommand();
               const translation = new TranslateCommand(this.rendererService.renderer, [obj]);
               if (!isActiveUser) {
-                translation.translate(payload.xTranslate, payload.yTranslate);
+                translation.translate(payload.xTranslation, payload.yTranslation);
               }
               command.addSubCommand(translation);
               this.pendingExternalCommands.set(payload.actionId, command);
@@ -190,9 +190,8 @@ export class ToolFactoryService {
               const translationCommand = ongoingAction.subCommand[0] as TranslateCommand;
               const prevX = translationCommand.lastXTranslate;
               const prevY = translationCommand.lastYTranslate;
-
               if (!isActiveUser) {
-                translationCommand.translate(prevX + payload.xTranslate, prevY + payload.yTranslate);
+                translationCommand.translate(prevX + payload.xTranslation, prevY + payload.yTranslation);
               }
             }
           }

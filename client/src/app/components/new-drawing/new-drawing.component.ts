@@ -72,8 +72,8 @@ export class NewDrawingComponent implements OnInit {
     this.drawingService.isCreated = true;
     const size: { width: number, height: number } = this.newDrawingService.sizeGroup.value;
     this.drawingService.newDrawing(
-      size.width || 1000,
-      size.height || 1000,
+      size.width || 1280.0,
+      size.height || 752.0,
       {
         rgb: this.colorPickerService.rgb.value || { r: 255, g: 255, b: 255 },
         a: this.colorPickerService.a.value || 255

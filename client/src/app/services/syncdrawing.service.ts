@@ -208,8 +208,8 @@ export class SyncDrawingService {
       actionId: this.activeActionId,
       selectedActionId,
       state,
-      xTranslate,
-      yTranslate,
+      xTranslation: xTranslate,
+      yTranslation: yTranslate,
     });
   }
 

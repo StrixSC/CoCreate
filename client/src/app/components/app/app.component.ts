@@ -16,7 +16,9 @@ export class AppComponent {
   title = 'Colorimage';
   authSubscription: Subscription;
   constructor(private router: Router, private socketService: SocketService, private af: AngularFireAuth, private syncDrawing: SyncDrawingService) {
-    this.af.auth.useEmulator(environment.authEmulator)
+    if (environment.useEmulator) {
+      this.af.auth.useEmulator(environment.authEmulator)
+    }
     this.authSubscription = this.af.authState.subscribe((state) => {
       if (!state) {
         this.router.navigateByUrl('');

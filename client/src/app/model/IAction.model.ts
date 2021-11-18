@@ -93,9 +93,9 @@ export type IAction = IDefaultActionPayload & (
 );
 
 export type ITranslateAction = IDefaultActionPayload & {
-    xTranslate: number;
+    xTranslation: number;
     state: DrawingState;
-    yTranslate: number;
+    yTranslation: number;
     selectedActionId: string;
 }
 

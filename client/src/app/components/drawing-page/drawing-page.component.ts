@@ -60,7 +60,7 @@ export class DrawingPageComponent implements OnDestroy {
             return merge(
               this.syncDrawingService.onFreedraw(),
               this.syncDrawingService.onSelection(),
-              this.syncDrawingService.onShape(),
+              // this.syncDrawingService.onShape(),
               this.syncDrawingService.onUndoRedo(),
               this.syncDrawingService.onDelete(),
               this.syncDrawingService.onTranslate(),
