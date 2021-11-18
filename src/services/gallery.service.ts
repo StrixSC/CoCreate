@@ -1,4 +1,4 @@
-import { daysArray, englishLongMonths, frenchLongMonths } from './../utils/drawings';
+import { daysArray, englishLongMonths, frenchLongMonths, DEFAULT_DRAWING_OFFSET, DEFAULT_DRAWING_LIMIT } from './../utils/drawings';
 import create from 'http-errors';
 import { MemberType, Drawing, Collaboration, CollaborationMember, CollaborationType } from '.prisma/client';
 import { db } from '../db';
@@ -115,5 +115,5 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
         // return [];
     }
 
-    return returnDrawings.slice(offset, limit);
+    return returnDrawings.slice(offset || DEFAULT_DRAWING_OFFSET, limit || DEFAULT_DRAWING_LIMIT);
 }
