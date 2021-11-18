@@ -36,17 +36,17 @@ export class NewDrawingComponent implements OnInit {
   ngOnInit(): void {
     this.form = new FormGroup(
       {
-        dimension: this.newDrawingService.form,
+        drawingInformation: this.newDrawingService.form,
         color: this.colorPickerService.colorForm,
       },
     );
     this.dialogRef.disableClose = true;
-    this.dialogRef.afterOpened().subscribe(() => this.onResize());
+    //this.dialogRef.afterOpened().subscribe(() => this.onResize());
     this.colorPickerService.setFormColor(DEFAULT_RGB_COLOR, DEFAULT_ALPHA);
   }
 
-  get sizeForm(): FormGroup {
-    return (this.form.get('dimension') as FormGroup).get('size') as FormGroup;
+  get newDrawingForm(): FormGroup {
+    return (this.form.get('drawingInformation') as FormGroup).get('information') as FormGroup;
   }
 
   /// Ouvre le dialog pour l'alerte lorsque le service est creer
@@ -67,12 +67,14 @@ export class NewDrawingComponent implements OnInit {
 
   /// Cree un nouveau dessin
   private newDrawing() {
+    
+    console.log(this.form.value)
     this.gridService.activateGrid.setValue(false);
     this.drawingService.isCreated = true;
-    const size: { width: number, height: number } = this.newDrawingService.sizeGroup.value;
+    //const size: { width: 1280, height: 752 } = this.newDrawingService.drawingFormGroup.value;
     this.drawingService.newDrawing(
-      size.width,
-      size.height,
+      1280,
+      780,
       {
         rgb: this.colorPickerService.rgb.value,
         a: this.colorPickerService.a.value,
@@ -89,9 +91,9 @@ export class NewDrawingComponent implements OnInit {
   }
 
   /// Ecoute pour un changement de la grandeur du window
-  @HostListener('window:resize', ['$event'])
+  /*@HostListener('window:resize', ['$event'])
   onResize() {
     this.newDrawingService.onResize();
-  }
+  }*/
 
 }

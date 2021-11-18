@@ -1,4 +1,5 @@
 import { EventEmitter, Injectable, Output, Renderer2 } from '@angular/core';
+import { Router } from '@angular/router';
 import { DEFAULT_RGB_COLOR, RGB } from 'src/app/model/rgb.model';
 import { DEFAULT_ALPHA, RGBA } from 'src/app/model/rgba.model';
 
@@ -25,7 +26,7 @@ export class DrawingService {
 
   private objectList: Map<number, SVGElement>;
 
-  constructor() {
+  constructor(private router: Router) {
     this.objectList = new Map<number, SVGElement>();
   }
   get rgbColorString(): string {
@@ -123,8 +124,8 @@ export class DrawingService {
   setDimension(width: number, height: number) {
     this.width = width;
     this.height = height;
-    this.renderer.setAttribute(this.drawing, 'width', width.toString());
-    this.renderer.setAttribute(this.drawing, 'height', height.toString());
+    this.renderer.setAttribute(this.drawing, 'width', this.width.toString());
+    this.renderer.setAttribute(this.drawing, 'height', this.height.toString());
   }
 
   /// Change la couleur du fond d'écran
@@ -138,12 +139,14 @@ export class DrawingService {
 
   /// Fonction pour appeller la cascade de bonne fonction pour réinitialisé un nouveau dessin
   newDrawing(width: number, height: number, rgba: RGBA): void {
+    this.router.navigateByUrl('drawing');
     this.saved = false;
     this.objectList.clear();
     this.lastObjectId = 0;
     this.drawing = this.renderer.createElement('svg', 'svg');
-    this.setDimension(width, height);
+    this.setDimension(1280, 760);
     this.setDrawingColor(rgba);
+    console.log(this.drawing)
     this.drawingEmit.emit(this.drawing);
   }
 

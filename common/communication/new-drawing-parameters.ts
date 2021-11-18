@@ -8,7 +8,7 @@ export interface Drawing1 {
     owner?: string;
     author_username: string;
     author_avatar?: string;
-    collaboration_count: number;
+    collaborator_count: number;
     max_collaborator_count?: string;
     img: string;
 }
