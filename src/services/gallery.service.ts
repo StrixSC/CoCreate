@@ -1,6 +1,6 @@
 import { daysArray, englishLongMonths, frenchLongMonths } from './../utils/drawings';
 import create from 'http-errors';
-import { MemberType } from '.prisma/client';
+import { MemberType, Drawing, Collaboration, CollaborationMember, CollaborationType } from '.prisma/client';
 import { db } from '../db';
 import validator from 'validator';
 import { bilingualMonths, FilterType } from '../utils/drawings';
@@ -17,28 +17,25 @@ export const filterCallback: Record<FilterType, (filter: string, offset: number,
     YearOrKeyword: async (filter, offset, limit) => await Promise.resolve([])
 }
 
-export const getDrawings = async (filter: string, offset: number, limit: number) => {
+export const getCollaborations = async (filter: string, offset: number, limit: number) => {
     if (filter) {
-        return getDrawingsWithFilter(filter, offset, limit);
+        return getCollaborationsWithFilter(filter, offset, limit);
     }
 
-    const result = await db.drawing.findMany({
+    const result = await db.collaboration.findMany({
         skip: offset,
         take: limit,
         include: {
-            collaboration: {
+            drawing: true,
+            collaboration_members: {
                 include: {
-                    collaboration_members: {
+                    user: {
                         include: {
-                            user: {
-                                include: {
-                                    profile: true,
-                                    account: true,
-                                }
-                            }
+                            profile: true,
+                            account: true,
                         }
                     }
-                },
+                }
             }
         }
     });
@@ -50,38 +47,73 @@ export const getDrawings = async (filter: string, offset: number, limit: number)
     return result;
 };
 
-export const getDrawingsWithFilter = async (filter: string, offset: number, limit: number) => {
-    const filterCategory = getFilterCategory(filter);
-    const data = await filterCallback[filterCategory](filter, offset, limit);
-    return data;
-}
+export const getCollaborationsWithFilter = async (filter: string, offset: number, limit: number) => {
+    const allCollaborations = await db.collaboration.findMany({
+        include: {
+            drawing: true,
+            collaboration_members: {
+                include: {
+                    user: {
+                        include: {
+                            profile: true,
+                            account: true
+                        }
+                    }
+                }
+            }
+        }
+    });
 
-export const getFilterCategory = (filter: string): FilterType => {
-    if (englishLongMonths.concat(frenchLongMonths).includes(filter.toLowerCase())) {
-        return FilterType.Month
-    }
+    const filterMap = new Map<string, { index: number, data: string[] }>();
 
-    if (validator.isNumeric(filter)) {
-        if (validator.isIn(filter, daysArray) && moment(filter).day()) {
-            return FilterType.DayOrKeyword
+    for (let i = 0; i < allCollaborations.length; i++) {
+        const collaboration = allCollaborations[i];
+        let author = collaboration.collaboration_members.find((c) => c.type === MemberType.Owner);
+        let allowSearching = author!.user.account!.allow_searching;
+
+        if (!author) {
+            continue;
         }
 
-        if (moment(filter).year()) {
-            return FilterType.YearOrKeyword
+        const date = new Date(collaboration.created_at);
+        // moment.locale('fr-FR');
+        var localLocale = moment(date);
+        localLocale.locale('fr');
+        filterMap.set(collaboration.collaboration_id, {
+            index: i,
+            data: [
+                collaboration.drawing!.title,   // Drawing title
+                date.getFullYear().toString(), // Year created
+                (date.getMonth() + 1).toString(),    // Month created (in number) (+1 because months in Date() are 0 based)
+                localLocale.format('MMMM'),
+                // Intl.DateTimeFormat('', { month: "long" }).format(date).toLowerCase(), // Month created in text (fr-CA locale)
+                date.getDay().toString(),   // Day created (day number)
+                localLocale.format('dddd'),
+                // date.toLocaleDateString("fr-FR", { weekday: 'long' }).toLowerCase(),   // Day created (day name)
+                author.user.profile!.username,
+                author.user.profile!.avatar_url
+            ]
+        });
+
+        if (allowSearching) {
+            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.account!.first_name);
+            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.account!.last_name);
+            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.email);
         }
+    };
+
+    const returnDrawings: any[] = [];
+
+    for (let [key, entry] of filterMap) {
+        for (let input of entry.data) {
+            if (input.includes(filter)) {
+                returnDrawings.push(allCollaborations[entry.index]);
+                break;
+            }
+        }
+        // console.log(returnDrawings);
+        // return [];
     }
 
-    if (validator.isDate(filter, { delimiters: ['-', '/', '.', ','] })) {
-        return FilterType.Date
-    }
-
-    if (validator.isAlpha(filter)) {
-        return FilterType.NameOrKeyword
-    }
-
-    if (validator.isAlphanumeric(filter)) {
-        return FilterType.UsernameOrKeyword
-    }
-
-    return FilterType.Keyword
+    return returnDrawings.slice(offset, limit);
 }

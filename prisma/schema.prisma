@@ -32,14 +32,14 @@ model Profile {
 }
 
 model Account {
-  account_id     String   @id @unique @default(uuid())
-  user           User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  user_id        String   @unique
-  first_name     String
-  last_name      String
-  allow_searchig Boolean  @default(true)
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
+  account_id      String   @id @unique @default(uuid())
+  user            User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_id         String   @unique
+  first_name      String
+  last_name       String
+  allow_searching Boolean  @default(true)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 }
 
 model Stats {

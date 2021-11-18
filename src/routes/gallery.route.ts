@@ -16,9 +16,7 @@ router.get('/',
         .withMessage('Limit must be a numeric value')
         .toInt(),
     query('filter')
-        .optional()
-        .isAlphanumeric('fr-FR')
-        .withMessage('Filter must be an alphanumeric value'),
+        .optional(),
     (req: Request, res: Response, next: NextFunction) => getGalleryController(req, res, next));
 
 export default router;

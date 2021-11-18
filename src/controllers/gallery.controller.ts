@@ -3,7 +3,7 @@ import { validationResult, matchedData } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 import { handleRequestError } from './../utils/errors';
 import { Request, Response, NextFunction } from 'express';
-import { getDrawings } from '../services/gallery.service';
+import { getCollaborations } from '../services/gallery.service';
 
 export const getGalleryController = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -18,24 +18,32 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
         const data = matchedData(req, { locations: ['query'] });
         const { filter, offset, limit } = data;
 
-        const drawings = await getDrawings(filter, offset, limit);
+        const collaborations = await getCollaborations(filter, offset, limit);
 
-        if (drawings.length <= 0) {
+        if (collaborations.length <= 0) {
             return res.status(StatusCodes.NO_CONTENT).json([])
         }
 
-        return res.status(StatusCodes.OK).json((drawings.map((d) => ({
-            collaboration_id: d.collaboration_id,
-            drawing_id: d.drawing_id,
-            created_at: d.collaboration.created_at,
-            updated_at: d.collaboration.updated_at,
-            author_username: d.collaboration.collaboration_members.find((m: any) => m.type === MemberType.Owner)?.user.profile?.username || null,
-            author_avatar: d.collaboration.collaboration_members.find((m: any) => m.type === MemberType.Owner)?.user.profile?.avatar_url || null,
-            title: d.title,
-            type: d.collaboration.type,
-            collaborator_count: d.collaboration.collaboration_members.length,
-            max_collaborator_count: d.collaboration.max_collaborator_count
-        }))));
+        return res.status(StatusCodes.OK).json((collaborations.map((c) => {
+
+            const author = c.collaboration_members.find((m: any) => m.type === MemberType.Owner);
+            if (!author) {
+                return
+            }
+
+            return {
+                collaboration_id: c.collaboration_id,
+                title: c.drawing.title,
+                drawing_id: c.drawing.drawing_id,
+                created_at: c.created_at,
+                updated_at: c.updated_at,
+                author_username: author.user.profile!.username,
+                author_avatar: author.user.profile!.avatar_url,
+                type: c.type,
+                collaborator_count: c.collaboration_members.length,
+                max_collaborator_count: c.max_collaborator_count
+            }
+        })));
     } catch (e) {
         handleRequestError(e, next);
     }
