@@ -16,7 +16,8 @@ router.get('/',
         .withMessage('Limit must be a numeric value')
         .toInt(),
     query('filter')
-        .optional(),
+        .optional()
+        .toLowerCase(),
     (req: Request, res: Response, next: NextFunction) => getGalleryController(req, res, next));
 
 export default router;

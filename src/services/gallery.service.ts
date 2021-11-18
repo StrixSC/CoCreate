@@ -76,29 +76,36 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
         }
 
         const date = new Date(collaboration.created_at);
-        // moment.locale('fr-FR');
-        var localLocale = moment(date);
+        const localLocale = moment(date);
         localLocale.locale('fr');
+
         filterMap.set(collaboration.collaboration_id, {
             index: i,
             data: [
-                collaboration.drawing!.title,   // Drawing title
-                date.getFullYear().toString(), // Year created
-                (date.getMonth() + 1).toString(),    // Month created (in number) (+1 because months in Date() are 0 based)
-                localLocale.format('MMMM'),
-                // Intl.DateTimeFormat('', { month: "long" }).format(date).toLowerCase(), // Month created in text (fr-CA locale)
-                date.getDay().toString(),   // Day created (day number)
-                localLocale.format('dddd'),
-                // date.toLocaleDateString("fr-FR", { weekday: 'long' }).toLowerCase(),   // Day created (day name)
-                author.user.profile!.username,
-                author.user.profile!.avatar_url
+                // Drawing Title
+                collaboration.drawing!.title.toLowerCase(),
+                // Year (NUMBER, ex.: 1901)
+                date.getFullYear().toString(),
+                // Month created (in number) (+1 because months in Date() are 0 based)
+                (date.getMonth() + 1).toString(),
+                // Month created (In text, example: novembre)
+                localLocale.format('MMMM').toLowerCase(),
+                // Day of the month created (in number, example: 31);
+                date.getDay().toString(),
+                // name of the day of the month created, (example: vendredi)
+                localLocale.format('dddd').toLowerCase(),
+                // Author username
+                author.user.profile!.username.toLowerCase(),
             ]
         });
 
         if (allowSearching) {
-            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.account!.first_name);
-            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.account!.last_name);
-            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.email);
+            // First name
+            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.account!.first_name.toLowerCase());
+            // Last Name
+            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.account!.last_name.toLowerCase());
+            // Email
+            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.email.toLowerCase());
         }
     };
 
@@ -111,8 +118,6 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
                 break;
             }
         }
-        // console.log(returnDrawings);
-        // return [];
     }
 
     return returnDrawings.slice(offset || DEFAULT_DRAWING_OFFSET, limit || DEFAULT_DRAWING_LIMIT);
