@@ -394,13 +394,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
     });
   }
 
-  // todo: le resize au coter opposer -> voir les corners value (vraiment elever dans le print ce qui cause erreur)
   void socketResizeReception() {
     _socket.on('resize:received', (data) {
       setState(() {
         selectedItems.forEach((actionId, selectedBy) {
           if (actionId == data["actionId"]) {
-
             //Get the scaling of the output shape from the initShape
             Rect oldRect = actionsMap[actionId].values.first.getBounds();
             Bounds bounds = Bounds();
@@ -408,6 +406,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
             double y = data["y2"] - data["y"];
             Offset delta = bounds.getDeltaFactor(
                 data["boundIndex"], x.toDouble(), y.toDouble());
+
             double xDelta = oldRect.width + delta.dx;
             double yDelta = oldRect.height + delta.dy;
             double xScale = xDelta / oldRect.width;
@@ -420,9 +419,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
             Path scaledPath = actionPath.transform(matrixScale.storage);
 
             // Translate to match fix corner position
-            Set corners = bounds.getCornerFromTransformedPath(data["boundIndex"], scaledPath, oldRect);
+            Set corners = bounds.getCornerFromTransformedPath(
+                data["boundIndex"], scaledPath, oldRect);
             Matrix4 matrixTranslation = Matrix4.translationValues(
-                (corners.last - corners.first).dx, (corners.last - corners.first).dy, 0);
+                (corners.last - corners.first).dx,
+                (corners.last - corners.first).dy,
+                0);
             scaledPath = scaledPath.transform(matrixTranslation.storage);
 
             // Save the scaled path
