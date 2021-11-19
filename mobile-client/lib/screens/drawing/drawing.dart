@@ -387,7 +387,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
     });
   }
 
-  // todo: faire que la sélection soit un peu plus grande que la forme
   // todo: le resize au coter opposer -> voir les corners value (vraiment elever dans le print ce qui cause erreur)
   void socketResizeReception() {
     _socket.on('resize:received', (data) {
@@ -395,24 +394,18 @@ class _DrawingScreenState extends State<DrawingScreen> {
         selectedItems.forEach((actionId, selectedBy) {
           if (actionId == data["actionId"]) {
             Bounds bounds = Bounds();
+            double xDelta = (data["x2"] - data["x"]) * 0.35;
+            double yDelta = (data["y2"] - data["y"]) * 0.35;
             Offset delta = bounds.getDeltaFactor(
-                selectedBoundIndex, data["x"].toDouble(), data["y"].toDouble());
-            // print("topRight: " + selectedBounds![2].center.dx.toString());
-            // print("topLeftX: " + selectedBounds![0].center.dx.toString());
-            // print("topLeftY: " + selectedBounds![0].center.dy.toString());
-            // print("bottomLeft: " + selectedBounds![6].center.dy.toString());
-            Offset oldRectBox = Offset(
-                data["oldWidth"].toDouble(), data["oldHeight"].toDouble());
-            double xScale;
-            double yScale;
-            oldRectBox.dx == 0
-                ? xScale = 1.0
-                : xScale = (oldRectBox + delta).dx / oldRectBox.dx;
-            oldRectBox.dy == 0
-                ? yScale = 1.0
-                : yScale = (oldRectBox + delta).dy / oldRectBox.dy;
+                data["boundIndex"], xDelta.toDouble(), yDelta.toDouble());
 
-            // TODO: change to data["actionId"]
+            double width =  data["oldWidth"].toDouble();
+            double height = data["oldHeight"].toDouble();
+            Offset oldRectBox = Offset(width, height);
+            double xScale = (oldRectBox + delta).dx / oldRectBox.dx;
+            double yScale= (oldRectBox + delta).dy / oldRectBox.dy;
+
+            // Scale the path
             Path actionPath = actionsMap[actionId].values.first;
             Matrix4 matrix = Matrix4.identity();
             matrix.scale(xScale, yScale);
@@ -429,10 +422,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
             // Translate to match bound position
             Offset corner = bounds.getCornerFromTransformedPath(
-                selectedBoundIndex, scaledPath);
+                data["boundIndex"], scaledPath);
             vec.Vector3 translation2 = vec.Vector3(
-                (corner - initialTapLocation).dx,
-                (corner - initialTapLocation).dy,
+                corner.dx - data["initialBoundX"].toDouble(),
+                corner.dy - data["initialBoundY"].toDouble(),
                 0);
             matrix.setTranslation(translation2);
             scaledPath = scaledPath.transform(matrix.storage);
@@ -614,14 +607,17 @@ class _DrawingScreenState extends State<DrawingScreen> {
     Offset oldRectBox = Offset(
         selectedBounds![2].center.dx - selectedBounds![0].center.dx,
         selectedBounds![0].center.dy - selectedBounds![6].center.dy);
-    double xDelta = (currentPosition - previousPosition).dx * 0.45;
-    double yDelta = (currentPosition - previousPosition).dy * 0.45;
+    if(oldRectBox.dx != 0.0) {
     _socket.emit('resize:emit', {
       'actionId': actionId,
       'selectedActionId': actionId,
       'actionType': "Resize",
-      'x': xDelta,
-      'y': yDelta,
+      'x': previousPosition.dx,
+      'y': previousPosition.dy,
+      'x2': currentPosition.dx,
+      'y2': currentPosition.dy,
+      'initialBoundX': initialTapLocation.dx,
+      'initialBoundY': initialTapLocation.dy,
       'initialCenterX': initialResizeCenter.dx,
       'initialCenterY': initialResizeCenter.dy,
       'oldWidth': oldRectBox.dx,
@@ -630,7 +626,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'username': _user.displayName,
       'userId': _user.uid,
       'collaborationId': "DEMO_COLLABORATION",
-    });
+    });}
   }
 
   void socketShapeEmission(
@@ -769,13 +765,14 @@ class Painter extends CustomPainter {
   // todo: faire que la sélection soit un peu plus grande que la forme
   Map getSelectionBoundingRect(
       Path dragPath, String actionId, Function setCornersCallback) {
-    Rect bounds = dragPath.getBounds();
 
+    Rect bounds = dragPath.getBounds();
     Path pathCorner = Path();
     Path pathBorder = Path();
 
     double width = 15.0;
     double height = 15.0;
+
     List<Offset> boundingRects = [
       bounds.topLeft,
       Offset(bounds.topLeft.dx + (bounds.topRight.dx - bounds.topLeft.dx) / 2,
@@ -795,6 +792,7 @@ class Painter extends CustomPainter {
           bounds.bottomLeft.dy +
               (bounds.topLeft.dy - bounds.bottomLeft.dy) / 2),
     ];
+
     List<Rect> cornerRects = [];
 
     for (int i = 0; i < boundingRects.length; i++) {
@@ -817,17 +815,19 @@ class Painter extends CustomPainter {
 
     // dashed lines
     Path dashPath = Path();
-    double dashWidth = 10.0;
-    double dashSpace = 7.0;
-    for (PathMetric pathMetric in pathBorder.computeMetrics()) {
-      double distance = 0.0;
-      while (distance < pathMetric.length) {
-        dashPath.addPath(
-          pathMetric.extractPath(distance, distance + dashWidth),
-          Offset.zero,
-        );
-        distance += dashWidth;
-        distance += dashSpace;
+    if((bounds.topRight.dx - bounds.topLeft.dx) != 0) {
+      double dashWidth = 10.0;
+      double dashSpace = 7.0;
+      for (PathMetric pathMetric in pathBorder.computeMetrics()) {
+        double distance = 0.0;
+        while (distance < pathMetric.length) {
+          dashPath.addPath(
+            pathMetric.extractPath(distance, distance + dashWidth),
+            Offset.zero,
+          );
+          distance += dashWidth;
+          distance += dashSpace;
+        }
       }
     }
 
