@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:uuid/uuid.dart';
+import 'package:vector_math/vector_math_64.dart' as vec;
 
 class DrawingScreen extends StatefulWidget {
   final io.Socket _socket;
@@ -360,28 +361,39 @@ class _DrawingScreenState extends State<DrawingScreen> {
     _socket.on('rotation:received', (data) {
       setState(() {
         if (data['state'] == DrawingState.down) {
+          //create new List
           List<Offset> points = <Offset>[];
           points.add(Offset(data['x'], data['y']));
           selectPoints.putIfAbsent(
               selectedItems[data['actionId']], () => points);
         } else if (data['state'] == DrawingState.move) {
+          //get shape center
           Path actionPath = actionsMap[data["actionId"]].values.first;
           Offset center = actionPath.getBounds().center;
+
+          //calcultae angle variation
           var angle = atan2(data['y'] - center.dy, data['x'] - center.dx);
           var angleRef = atan2(selectPoints[data['userId']].last.dy - center.dy,
               selectPoints[data['userId']].last.dx - center.dx);
           var angleVariation = angle - angleRef;
+
+          //transform path with matrix of rotation
           Matrix4 matriceRotation = Matrix4.rotationZ(angleVariation);
           actionPath = actionPath.transform(matriceRotation.storage);
+
+          //transform path with matrix of translation
           Offset newCenter = actionPath.getBounds().center;
           Matrix4 matriceTranslation = Matrix4.translationValues(
               (center - newCenter).dx, (center - newCenter).dy, 0);
           actionPath = actionPath.transform(matriceTranslation.storage);
+
+          //update maps
           actionsMap[data["actionId"]].update(
               actionsMap[data["actionId"]].keys.first, (value) => actionPath);
           selectPoints[data['userId']]
               .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
         } else {
+          //clear the list at the end
           selectPoints.remove(data['userId']);
         }
       });
@@ -433,6 +445,34 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
             actionsMap[actionId]
                 .update(actionsMap[actionId].keys.first, (value) => scaledPath);
+
+            // //Get the scaling of the output shape from the initShape
+            // Rect oldRect = actionsMap[actionId].values.first.getBounds();
+            // double xDelta = oldRect.width + ((data['x2'] - data['x']));
+            // double yDelta = oldRect.height + ((data['y2'] - data['y']));
+            // double xScale = xDelta / oldRect.width;
+            // double yScale = yDelta / oldRect.height;
+            //
+            // // Scale the path
+            // Path actionPath = actionsMap[actionId].values.first;
+            // Matrix4 matrixScale = Matrix4.identity();
+            // matrixScale.scale(xScale, yScale);
+            // Path scaledPath = actionPath.transform(matrixScale.storage);
+            //
+            // // // Translate to match fix corner position
+            // //todo: hardcodé pour coin topLeft
+            // //Une idée serait de set le type de coin (topLeft, bottemCenter
+            // // etc..) en même temps que le nouveau corner dans la méthode getCornerFromTransformedPath
+            // Bounds bounds = Bounds();
+            // Offset oldCorner = oldRect.topLeft;
+            // Offset corner = bounds.getCornerFromTransformedPath(0, scaledPath);
+            // Matrix4 matriceTranslation = Matrix4.translationValues(
+            //     (oldCorner - corner).dx, (oldCorner - corner).dy, 0);
+            // scaledPath = scaledPath.transform(matriceTranslation.storage);
+            //
+            // //Save the scaled path
+            // actionsMap[actionId]
+            //     .update(actionsMap[actionId].keys.first, (value) => scaledPath);
           }
         });
       });
@@ -608,26 +648,27 @@ class _DrawingScreenState extends State<DrawingScreen> {
     Offset oldRectBox = Offset(
         selectedBounds![2].center.dx - selectedBounds![0].center.dx,
         selectedBounds![0].center.dy - selectedBounds![6].center.dy);
-    if(oldRectBox.dx != 0.0) {
-    _socket.emit('resize:emit', {
-      'actionId': actionId,
-      'selectedActionId': actionId,
-      'actionType': "Resize",
-      'x': previousPosition.dx,
-      'y': previousPosition.dy,
-      'x2': currentPosition.dx,
-      'y2': currentPosition.dy,
-      'initialBoundX': initialTapLocation.dx,
-      'initialBoundY': initialTapLocation.dy,
-      'initialCenterX': initialResizeCenter.dx,
-      'initialCenterY': initialResizeCenter.dy,
-      'oldWidth': oldRectBox.dx,
-      'oldHeight': oldRectBox.dy,
-      'boundIndex': selectedBoundIndex,
-      'username': _user.displayName,
-      'userId': _user.uid,
-      'collaborationId': "DEMO_COLLABORATION",
-    });}
+    if (oldRectBox.dx != 0.0) {
+      _socket.emit('resize:emit', {
+        'actionId': actionId,
+        'selectedActionId': actionId,
+        'actionType': "Resize",
+        'x': previousPosition.dx,
+        'y': previousPosition.dy,
+        'x2': currentPosition.dx,
+        'y2': currentPosition.dy,
+        'initialBoundX': initialTapLocation.dx,
+        'initialBoundY': initialTapLocation.dy,
+        'initialCenterX': initialResizeCenter.dx,
+        'initialCenterY': initialResizeCenter.dy,
+        'oldWidth': oldRectBox.dx,
+        'oldHeight': oldRectBox.dy,
+        'boundIndex': selectedBoundIndex,
+        'username': _user.displayName,
+        'userId': _user.uid,
+        'collaborationId': "DEMO_COLLABORATION",
+      });
+    }
   }
 
   void socketShapeEmission(
@@ -766,7 +807,6 @@ class Painter extends CustomPainter {
   // todo: faire que la sélection soit un peu plus grande que la forme
   Map getSelectionBoundingRect(
       Path dragPath, String actionId, Function setCornersCallback) {
-
     Rect bounds = dragPath.getBounds();
     Path pathCorner = Path();
     Path pathBorder = Path();
@@ -816,7 +856,7 @@ class Painter extends CustomPainter {
 
     // dashed lines
     Path dashPath = Path();
-    if((bounds.topRight.dx - bounds.topLeft.dx) != 0) {
+    if ((bounds.topRight.dx - bounds.topLeft.dx) != 0) {
       double dashWidth = 10.0;
       double dashSpace = 7.0;
       for (PathMetric pathMetric in pathBorder.computeMetrics()) {
