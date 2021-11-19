@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:uuid/uuid.dart';
-import 'package:vector_math/vector_math_64.dart' as vec;
 
 class DrawingScreen extends StatefulWidget {
   final io.Socket _socket;
@@ -271,6 +270,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
         ));
   }
 
+  //todo: faire bcp de trait rapidement bypass cette méthode. il faudrait
+  // faire comme a la sélection et retirer toute les ref a un userId
   void unselectLastShape() {
     if (selectedItems.containsKey(lastShapeID) &&
         selectedItems[lastShapeID] == _user.uid) {
