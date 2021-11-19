@@ -22,14 +22,14 @@ export class RightSidebarComponent implements OnInit {
 
   selectedChannel: string;
   channel: IChannel;
-  chatView: boolean;
+
   chatStyle: Object;
   newChannelStyle: Object;
   rightsidebarCss: any;
   divView: Object;
   constructor(private channelManager: ChannelManagerService) {
     this.textChannels = new Map();
-    this.chatView = false;
+
     this.newChannelStyle = { display: "none" };
     this.divView = { display: "none" };
   }
@@ -88,11 +88,15 @@ export class RightSidebarComponent implements OnInit {
   }
 
   newChannel() {
-    this.chatView = false;
     this.divView = { display: "none" };
     this.newChannelStyle = {};
     this.rightsidebarCss = {
       width: (window.innerWidth * 0.8).toString() + "px",
     };
+  }
+
+  closeBar() {
+    this.rightsidebarCss = { width: "150px" };
+    this.divView = { display: "none" };
   }
 }

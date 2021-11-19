@@ -8,6 +8,8 @@ import {
   ElementRef,
   ViewChildren,
   QueryList,
+  Output,
+  EventEmitter,
 } from "@angular/core";
 import { ChatSocketService } from "src/app/services/chat/chat.service";
 import { HttpClient } from "@angular/common/http";
@@ -37,10 +39,11 @@ export interface Message {
   styleUrls: ["./chat-box.component.scss"],
 })
 export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
-  chatCss: Object = { width: "450px" };
   chatBoxName: string;
   myChannelID: string;
   messagesSet: Set<string>;
+  @Output() newItemEvent = new EventEmitter<boolean>();
+
   @Input() channel_id: string;
 
   @ViewChild("messageBox", { static: true })
@@ -142,6 +145,6 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
       "_blank",
       "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=800,height=1000,addressbar=no"
     );
-    this.chatCss = { display: "none" };
+    this.newItemEvent.emit(false);
   }
 }

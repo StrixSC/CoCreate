@@ -5,6 +5,7 @@
       <app-chat-box
         [channel_id]="selectedChannel"
         [ngStyle]="chatStyle"
+        (newItemEvent)="closeBar($event)"
       ></app-chat-box>
     </div>
   </div>
