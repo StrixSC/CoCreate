@@ -14,14 +14,10 @@ export class CommandInvokerService {
   private commandsList: ICommand[] = [];
   private undonedCommandsList: ICommand[] = [];
 
-  @Output()
-  commandCallEmitter = new EventEmitter<string>();
-
   constructor(
     private selectionService: SelectionToolService,
     private drawingService: DrawingService,
-    private syncService: SyncDrawingService,
-    private collabService: CollaborationService
+    private syncService: SyncDrawingService
   ) {
     this.drawingService.drawingEmit.subscribe(() => {
       this.clearCommandHistory();
@@ -62,14 +58,10 @@ export class CommandInvokerService {
     if (this.canUndo) {
       const undoneCommand = this.commandsList.pop() as ICommand;
       this.selectionService.removeSelection();
-      const action = this.collabService.findLatestAction(this.syncService.defaultPayload!.userId);
-      if (action) {
-        this.syncService.sendSelect(action.data.actionId, false);
-        undoneCommand.undo();
-        this.undonedCommandsList.push(undoneCommand);
-        this.commandCallEmitter.emit('undo');
-        this.syncService.sendUndo(action.data.actionId);
-      }
+      undoneCommand.undo();
+      this.syncService.sendSelect(undoneCommand.actionId, false);
+      this.undonedCommandsList.push(undoneCommand);
+      this.syncService.sendUndo(undoneCommand.actionId);
     }
   }
 
@@ -77,15 +69,11 @@ export class CommandInvokerService {
   /// a la liste de commande redo
   redo(): void {
     if (this.canRedo) {
-      const action = this.collabService.findLatestUndoneAction(this.syncService.defaultPayload!.userId);
-      if (action) {
-        this.selectionService.removeSelection();
-        const redoneCommand = this.undonedCommandsList.pop() as ICommand;
-        redoneCommand.execute();
-        this.commandsList.push(redoneCommand);
-        this.commandCallEmitter.emit('redo');
-        this.syncService.sendRedo(action.data.actionId);
-      }
+      this.selectionService.removeSelection();
+      const redoneCommand = this.undonedCommandsList.pop() as ICommand;
+      redoneCommand.execute();
+      this.commandsList.push(redoneCommand);
+      this.syncService.sendRedo(redoneCommand.actionId);
     }
   }
 }

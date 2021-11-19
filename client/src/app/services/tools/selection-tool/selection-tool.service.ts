@@ -54,7 +54,7 @@ export class SelectionToolService implements Tools {
   private tmpY: number;
   private wasMoved = false;
   private isIn = false;
-  private selectedActionId: string = "";
+  public selectedActionId: string = "";
   private allowMove: boolean = false;
   private firstMovementMagnetism: boolean;
 

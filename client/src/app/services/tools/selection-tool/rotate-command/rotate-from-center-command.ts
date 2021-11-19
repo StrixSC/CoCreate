@@ -8,6 +8,7 @@ export class RotateFromCenterCommand implements ICommand {
     private lastXTranslate = 0;
     private lastYTranslate = 0;
     public actionId: string = "";
+    public userId: string = "";
 
     constructor(
         private renderer: Renderer2,

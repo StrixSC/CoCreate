@@ -10,6 +10,7 @@ export class LineCommand implements ICommand {
     private line: SVGPolylineElement;
     private markerDefs: SVGDefsElement;
     public actionId: string = "";
+    public userId: string = "";
 
     constructor(private renderer: Renderer2, private lineAttributes: Line, private drawingService: DrawingService) { }
 

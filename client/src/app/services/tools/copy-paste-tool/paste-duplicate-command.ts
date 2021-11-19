@@ -9,6 +9,7 @@ export class PasteDuplicateCommand implements ICommand {
     private defsList: Map<string, SVGElement> = new Map<string, SVGElement>();
     private lastOffset: { x: number, y: number };
     public actionId: string = "";
+    public userId: string = "";
 
     constructor(
         private renderer: Renderer2,

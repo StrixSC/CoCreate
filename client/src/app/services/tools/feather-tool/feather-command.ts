@@ -11,6 +11,7 @@ export class FeatherCommand implements ICommand {
   private feather: SVGGElement | null = null;
   private currentPath: SVGPathElement | null = null;
   public actionId: string = "";
+  public userId: string = "";
 
   constructor(
     readonly renderer: Renderer2,

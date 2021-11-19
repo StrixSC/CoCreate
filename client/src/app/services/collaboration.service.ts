@@ -1,17 +1,23 @@
 import { IAction, ISelectionAction } from './../model/IAction.model';
 import { ICommand } from 'src/app/interfaces/command.interface';
 import { Injectable } from '@angular/core';
+import { SyncCommand } from './sync/SyncCommand';
 
-export type CollaborationActionData = { data: IAction, command: ICommand, isUndone: boolean }
+export type CollaborationActionData = {
+  data: IAction,
+  command: ICommand,
+  isUndone: boolean
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class CollaborationService {
 
-  private actions: Map<string, Map<string, CollaborationActionData>>;
+  private actions: Map<string, Map<string, SyncCommand>>;
 
   constructor() {
-    this.actions = new Map<string, Map<string, CollaborationActionData>>();
+    this.actions = new Map<string, Map<string, SyncCommand>>();
   }
 
   addUser(userId: string): boolean {
@@ -19,54 +25,42 @@ export class CollaborationService {
       return false;
     }
 
-    this.actions.set(userId, new Map<string, CollaborationActionData>());
+    this.actions.set(userId, new Map<string, SyncCommand>());
     return true;
   }
 
-  getUserActions(userId: string): Map<string, CollaborationActionData> | null {
+  getUserActions(userId: string): Map<string, SyncCommand> | null {
     const userActions = this.actions.get(userId);
     if (userActions) return userActions
     else return null;
   }
 
-  addActionToUser(userId: string, action: CollaborationActionData) {
+  addCommandToUser(userId: string, command: SyncCommand) {
     if (this.userExists(userId)) {
-      this.actions.get(userId)!.set(action.data.actionId, action);
+      this.actions.get(userId)!.set(command.payload.actionId, command);
     }
 
   }
 
-  undoUserAction(userId: string, actionId: string, isActiveUser: boolean): boolean {
+  undoUserAction(userId: string, actionId: string, isActiveUser: boolean): void {
     if (!this.userExists(userId)) {
-      return false;
+      return;
     }
-
     const action = this.actions.get(userId)!.get(actionId);
-    if (action && action.isUndone === false) {
-      if (!isActiveUser) {
-        action.command.undo();
-      }
-      action.isUndone = true;
-      return true;
-    } else {
-      return false;
+    if (action && !isActiveUser) {
+      console.log(action.command);
+      action.undo();
     }
   }
 
-  redoUserAction(userId: string, actionId: string, isActiveUser: boolean): boolean {
+  redoUserAction(userId: string, actionId: string, isActiveUser: boolean): void {
     if (!this.userExists(userId)) {
-      return false;
+      return;
     }
 
     const action = this.actions.get(userId)!.get(actionId);
-    if (action && action.isUndone === true) {
-      if (!isActiveUser) {
-        action.command.execute();
-      }
-      action.isUndone = false;
-      return true;
-    } else {
-      return false;
+    if (action && !isActiveUser) {
+      action.redo();
     }
   }
 
@@ -76,97 +70,49 @@ export class CollaborationService {
 
   updateActionSelection(userId: string, actionId: string, selection: boolean, selectedBy: string) {
     if (this.actions.has(userId) && this.actions.get(userId)!.has(actionId)) {
-      (this.actions.get(userId)!.get(actionId)!.data as ISelectionAction).isSelected = selection;
-      (this.actions.get(userId)!.get(actionId)!.data as ISelectionAction).selectedBy = selectedBy;
-
+      this.actions.get(userId)!.get(actionId)!.isSelected = selection;
+      this.actions.get(userId)!.get(actionId)!.selectedBy = selectedBy;
     }
   }
 
   getSelectionStatus(userId: string, actionId: string) {
     if (this.actions.has(userId) && this.actions.get(userId)!.has(actionId)) {
-      return (this.actions.get(userId!)!.get(actionId)!.data as ISelectionAction).isSelected;
+      return this.actions.get(userId!)!.get(actionId)!.isSelected;
     } else return true;
   }
 
   getSelectedByUser(userId: string, actionId: string) {
     if (this.actions.has(userId) && this.actions.get(userId)!.has(actionId)) {
-      return (this.actions.get(userId)!.get(actionId)!.data as ISelectionAction).selectedBy;
+      return this.actions.get(userId)!.get(actionId)!.selectedBy;
     } else return '';
   }
 
   getSelectedActionByUserId(userId: string): string | null {
     if (!userId) return null;
-    let actionId = null;
 
     if (this.actions.has(userId)) {
-      this.actions.forEach((user) => {
-        user.forEach((action) => {
-          if (action.data && (action.data as ISelectionAction).selectedBy) {
-            if ((action.data as ISelectionAction).selectedBy === userId) {
-              actionId = action.data.actionId;
-            }
+      for (let [userId, actions] of this.actions) {
+        for (let [actionId, command] of actions) {
+          if (command.isSelected && command.selectedBy === userId) {
+            return actionId;
           }
-        })
-      })
+        }
+      }
     }
 
-    return actionId;
+    return null;
   }
 
-  getActionById(actionId: string): CollaborationActionData | null {
+  getActionById(actionId: string): SyncCommand | null {
     if (!actionId) return null;
-    let actionData = null;
 
-    this.actions.forEach((user) => {
-      const tmp = user.get(actionId);
+    for (let [userId, actions] of this.actions) {
+      const tmp = actions.get(actionId);
       if (tmp) {
-        actionData = tmp;
-      }
-    });
-
-    return actionData;
-  }
-
-  // Finds the latest not-undone user action. 
-  findLatestAction(userId: string): CollaborationActionData | null {
-    if (!userId) return null;
-
-    const user = this.actions.get(userId);
-    if (user) {
-      for (let action of Array.from(user).reverse()) {
-        if (!action[1].isUndone) {
-          return action[1];
-        }
+        return tmp;
       }
     }
 
     return null;
   }
-
-  // Finds the latest not-undone user action. 
-  findLatestUndoneAction(userId: string): CollaborationActionData | null {
-    if (!userId) return null;
-
-    const user = this.actions.get(userId);
-    if (user) {
-      for (let action of Array.from(user).reverse()) {
-        console.log(action);
-        if (action[1].isUndone) {
-          return action[1];
-        }
-      }
-    }
-
-    return null;
-  }
-
-  setUndone(userId: string, actionId: string): boolean {
-    const hasAction = (this.actions.has(userId) && this.actions.get(userId)!.has(actionId));
-    if (hasAction) {
-      this.actions.get(userId)!.get(actionId)!.isUndone = true;
-
-      return true;
-    } else return false;
-  }
-
 }

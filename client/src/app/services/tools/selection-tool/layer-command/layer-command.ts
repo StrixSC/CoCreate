@@ -6,6 +6,8 @@ export class LayerCommand implements ICommand {
 
     private lastAngle = 0;
     public actionId: string = "";
+    public userId: string = "";
+
     private lastXTranslate = 0;
     private lastYTranslate = 0;
 

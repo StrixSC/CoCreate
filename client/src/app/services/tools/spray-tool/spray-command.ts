@@ -7,6 +7,7 @@ import { Spray } from './spray.model';
 export class SprayCommand implements ICommand {
     private spray: SVGGElement | null = null;
     public actionId: string = "";
+    public userId: string = "";
 
     constructor(
         readonly renderer: Renderer2,

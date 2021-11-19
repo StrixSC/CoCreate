@@ -10,6 +10,7 @@ export class BrushCommand implements ICommand {
     private brush: SVGPolylineElement | null = null;
     private dot: SVGCircleElement | null = null;
     public actionId: string = "";
+    public userId: string = "";
     constructor(
         readonly renderer: Renderer2,
         private brushAttributes: Pencil,

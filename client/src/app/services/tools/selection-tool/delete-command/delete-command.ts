@@ -5,6 +5,7 @@ import { DrawingService } from '../../../drawing/drawing.service';
 export class DeleteCommand implements ICommand {
     private markerDef: SVGElement[] = [];
     public actionId: string = "";
+    public userId: string = "";
 
     constructor(
         private drawingService: DrawingService,

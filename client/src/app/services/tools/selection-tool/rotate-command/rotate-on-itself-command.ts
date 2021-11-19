@@ -8,6 +8,7 @@ export class RotateOnItselfCommand implements ICommand {
 
     private lastAngle = 0;
     public actionId: string = "";
+    public userId: string = "";
 
     constructor(
         private renderer: Renderer2,

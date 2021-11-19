@@ -9,6 +9,7 @@ export class PolygonCommand implements ICommand {
 
     private polygon: SVGPolygonElement;
     public actionId: string = "";
+    public userId: string = "";
 
     constructor(
         private renderer: Renderer2,

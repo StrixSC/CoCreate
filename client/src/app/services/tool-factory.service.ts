@@ -1,3 +1,8 @@
+import { UndoRedoSyncCommand } from './sync/UndoRedoSyncCommand';
+import { TranslateSyncCommand } from './sync/TranslateSyncCommand';
+import { DeleteSyncCommand } from './sync/DeleteSyncCommand';
+import { RectangleSyncCommand } from './sync/RectangleSyncCommand';
+import { FreedrawSyncCommand } from './sync/FreedrawSyncCommand';
 import { DeleteCommand } from './tools/selection-tool/delete-command/delete-command';
 import { RotateTranslateCompositeCommand } from './tools/selection-tool/rotate-translate-composite-command/rotate-translate-composite-command';
 import { TranslateCommand } from './tools/selection-tool/translate-command/translate-command';
@@ -18,7 +23,6 @@ import {
   ActionType,
   IAction,
   IFreedrawAction,
-  IFreedrawUpAction,
   DrawingState,
   IUndoRedoAction,
   ShapeType,
@@ -27,50 +31,31 @@ import { Injectable } from "@angular/core";
 import { Pencil } from "./tools/pencil-tool/pencil.model";
 import { PencilCommand } from "./tools/pencil-tool/pencil-command";
 import { RendererProviderService } from "./renderer-provider/renderer-provider.service";
+import { SyncCommand } from './sync/SyncCommand';
+import { EllipseSyncCommand } from './sync/EllipseSyncCommand';
+
+export interface ISavedUserAction {
+  command: SyncCommand;
+}
 
 @Injectable({
   providedIn: "root",
 })
 export class ToolFactoryService {
-  private pendingExternalCommands: Map<string, ICommand> = new Map<string, ICommand>();
+  private pendingActions: Map<string, SyncCommand> = new Map();
 
-  tools: Record<ActionType | string, (payload: IAction) => any> = {
-    Freedraw: (
-      payload: IDefaultActionPayload & IFreedrawAction & IFreedrawUpAction
-    ) => {
-      if (payload.state === DrawingState.down) {
-        let pencil: Pencil = {} as Pencil;
-        pencil.pointsList = [{ x: payload.x, y: payload.y }];
-        pencil.fill = "none";
-        pencil.fillOpacity = "none";
-        pencil.stroke = toRGBString([payload.r, payload.g, payload.b]);
-        pencil.strokeWidth = payload.width;
-        pencil.strokeOpacity = fromAlpha(payload.a);
-
-        const command = new PencilCommand(
-          this.rendererService.renderer,
-          pencil,
-          this.drawingService
-        );
-        command.actionId = payload.actionId;
-        (command as PencilCommand).userId = payload.userId;
-        this.pendingExternalCommands.set(command.actionId, command);
-        if (this.syncService.defaultPayload!.userId !== payload.userId) {
-          command.execute();
-        }
-
-      } else if (payload.state === DrawingState.move) {
-        const command = this.pendingExternalCommands.get(payload.actionId) as PencilCommand;
-        if (command) {
-          command.addPoint({
-            x: payload.x,
-            y: payload.y,
-          });
-        }
-      } else if (payload.state === DrawingState.up) {
-        const command = this.pendingExternalCommands.get(payload.actionId) as PencilCommand;
-        if (command) {
-          this.addOrUpdateCollaboration(payload.userId, { data: payload, command, isUndone: false });
+  tools: Record<ActionType | string, (payload: IAction, isActiveUser?: boolean) => any> = {
+    Freedraw: (payload: IFreedrawAction, isActiveUser: boolean) => {
+      const state = payload.state;
+      if (state === DrawingState.down) {
+        const command = new FreedrawSyncCommand(isActiveUser, payload, this.rendererService.renderer, this.drawingService);
+        command.execute();
+        this.pendingActions.set(payload.actionId, command);
+      } else {
+        const command = this.pendingActions.get(payload.actionId);
+        const res = command!.update(payload);
+        if (res) {
+          this.addOrUpdateCollaboration(res);
         }
       }
     },
@@ -81,148 +66,57 @@ export class ToolFactoryService {
 
       this.collaborationService.updateActionSelection(payload.userId, payload.actionId, payload.isSelected, payload.selectedBy || '');
     },
-    Shape: (payload: IShapeAction) => {
-      if (payload.state === DrawingState.down) {
-        let shape = {} as FilledShape;
-        shape.x = payload.x;
-        shape.y = payload.y;
-        shape.width = payload.x2 - payload.x;
-        shape.height = payload.y2 - payload.y;
-        shape.fill = toRGBString([payload.rFill, payload.gFill, payload.bFill]);
-        shape.fillOpacity = fromAlpha(payload.aFill);
-        shape.stroke = toRGBString([payload.r, payload.g, payload.b]);
-        shape.strokeOpacity = fromAlpha(payload.a);
-        shape.strokeWidth = payload.width;
+    Shape: (payload: IShapeAction, isActiveUser: boolean) => {
+      const shapeType = payload.shapeType;
+      const state = payload.state;
+      if (state === DrawingState.down) {
+        const command = shapeType === ShapeType.Ellipse
+          ? new EllipseSyncCommand(isActiveUser, payload, this.rendererService.renderer, this.drawingService)
+          : new RectangleSyncCommand(isActiveUser, payload, this.rendererService.renderer, this.drawingService)
 
-        let command: ICommand;
-        if (payload.shapeType === ShapeType.Ellipse) {
-          command = new EllipseCommand(
-            this.rendererService.renderer,
-            shape,
-            this.drawingService
-          )
-          command.isSyncAction = true;
-          command.actionId = payload.actionId;
-          (command as EllipseCommand).userId = payload.userId;
-        } else {
-          command = new RectangleCommand(
-            this.rendererService.renderer,
-            shape,
-            this.drawingService
-          );
-          command.actionId = payload.actionId;
-          (command as RectangleCommand).userId = payload.userId;
-        }
-        this.pendingExternalCommands.set(command.actionId, command);
-        setStyle(
-          shape,
-          shape.fill,
-          shape.fillOpacity,
-          shape.stroke,
-          shape.strokeOpacity,
-          payload.shapeStyle
-        );
-
-        if (this.syncService.defaultPayload!.userId !== payload.userId) {
-          command.execute();
-        };
-      } else if (payload.state === DrawingState.move) {
-        if (payload.shapeType === ShapeType.Rectangle) {
-          const command = this.pendingExternalCommands.get(payload.actionId) as RectangleCommand;
-          if (command) {
-            command.setX(payload.x);
-            command.setY(payload.y);
-            command.setWidth(Math.abs(payload.x2 - payload.x));
-            command.setHeight(Math.abs(payload.y2 - payload.y));
-          }
-        } else {
-          const command = this.pendingExternalCommands.get(payload.actionId) as EllipseCommand;
-          if (command) {
-            command.setCX(payload.x);
-            command.setCY(payload.y);
-            command.setWidth(Math.abs(payload.x2 - payload.x));
-            command.setHeight(Math.abs(payload.y2 - payload.y));
-          }
-        }
-      } else if (payload.state === DrawingState.up) {
-        const command = this.pendingExternalCommands.get(payload.actionId);
-        if (command) {
-          this.addOrUpdateCollaboration(payload.userId, { data: payload, command, isUndone: false });
-        }
-      }
-
-    },
-    Delete: (payload: IDeleteAction) => {
-      const isActiveUser: boolean = (this.syncService.defaultPayload!.userId === payload.userId);
-      const object = this.drawingService.getObjectByActionId(payload.selectedActionId);
-      if (object && !isActiveUser) {
-        const command = new DeleteCommand(this.drawingService, [object]);
         command.execute();
-        this.addOrUpdateCollaboration(payload.userId, { data: payload, command, isUndone: false });
-      } else if (isActiveUser) {
-        this.addOrUpdateCollaboration(payload.userId, { data: payload, command: {} as DeleteCommand, isUndone: false });
+        this.pendingActions.set(payload.actionId, command);
+
+      } else {
+        const command = this.pendingActions.get(payload.actionId);
+        const res = command!.update(payload);
+        if (res) {
+          this.addOrUpdateCollaboration(res);
+        }
+      }
+
+    },
+    Delete: (payload: IDeleteAction, isActiveUser: boolean) => {
+      const command = new DeleteSyncCommand(isActiveUser, payload, this.drawingService);
+      const res = command.execute();
+      if (res) {
+        this.addOrUpdateCollaboration(res);
       }
     },
-    Translate: (payload: ITranslateAction) => {
-      const isActiveUser: boolean = (this.syncService.defaultPayload!.userId === payload.userId);
-      console.log(payload);
-      if (payload.state === DrawingState.move) {
-        const ongoingAction = this.pendingExternalCommands.get(payload.actionId) as RotateTranslateCompositeCommand;
-        if (!ongoingAction) {
-          const action = this.collaborationService.getActionById(payload.selectedActionId);
-          if (action) {
-            const obj = this.drawingService.getObjectByActionId(action!.data.actionId);
-            if (obj) {
-              const command = new RotateTranslateCompositeCommand();
-              const translation = new TranslateCommand(this.rendererService.renderer, [obj]);
-              if (!isActiveUser) {
-                translation.translate(payload.xTranslation, payload.yTranslation);
-              }
-              command.addSubCommand(translation);
-              this.pendingExternalCommands.set(payload.actionId, command);
-            }
-          }
-        } else {
-          const action = this.collaborationService.getActionById(payload.selectedActionId);
-          if (action) {
-            const obj = this.drawingService.getObjectByActionId(action.data.actionId);
-            if (obj) {
-              const translationCommand = ongoingAction.subCommand[0] as TranslateCommand;
-              const prevX = translationCommand.lastXTranslate;
-              const prevY = translationCommand.lastYTranslate;
-              if (!isActiveUser) {
-                translationCommand.translate(prevX + payload.xTranslation, prevY + payload.yTranslation);
-              }
-            }
-          }
+    Translate: (payload: ITranslateAction, isActiveUser: boolean) => {
+      const state = payload.state;
+      const hasOngoingMovement = this.pendingActions.has(payload.actionId);
+      if (!hasOngoingMovement) {
+        const command = new TranslateSyncCommand(isActiveUser, payload, this.rendererService.renderer, this.drawingService);
+        command.execute();
+        this.pendingActions.set(payload.actionId, command);
+      } else {
+        const command = this.pendingActions.get(payload.actionId);
+        const res = command!.update(payload);
+        if (res) {
+          this.addOrUpdateCollaboration(res);
         }
-      } else if (payload.state === DrawingState.up) {
-        const command = this.pendingExternalCommands.get(payload.actionId) as RotateTranslateCompositeCommand;
-        this.addOrUpdateCollaboration(payload.userId, { data: payload, command, isUndone: false })
       }
     },
     Rotate: () => {
       return;
     },
-    Resize: (payload: IResizePayload) => {
-
+    Resize: () => {
       return;
     },
-    UndoRedo: (payload: IDefaultActionPayload & IUndoRedoAction) => {
-      const isActiveUser: boolean = (this.syncService.defaultPayload!.userId === payload.userId);
-      if (payload.isUndo) {
-        this.collaborationService.undoUserAction(
-          payload.userId,
-          payload.actionId,
-          isActiveUser
-        );
-      } else {
-        this.collaborationService.redoUserAction(
-          payload.userId,
-          payload.actionId,
-          isActiveUser
-        );
-      }
+    UndoRedo: (payload: IUndoRedoAction, isActiveUser: boolean) => {
+      const command = new UndoRedoSyncCommand(payload, this.collaborationService, isActiveUser);
+      command.execute();
     },
     Layer: () => {
       return;
@@ -230,8 +124,8 @@ export class ToolFactoryService {
     Text: () => {
       return
     },
-    'Save': (payload: { collaborationId: string, actionId: string, userId: string, actionType: string }) => {
-      this.syncService.sendSelect(this.selectionService['selectedActionId'], false);
+    Save: (payload: { collaborationId: string, actionId: string, userId: string, actionType: string }) => {
+      this.syncService.sendSelect(this.selectionService.selectedActionId, false);
       this.syncService.sendSelect(payload.actionId, true);
     },
   };
@@ -247,7 +141,8 @@ export class ToolFactoryService {
   create(payload: IAction): ICommand | null {
     const callback = this.tools[payload.actionType];
     if (callback) {
-      return callback(payload);
+      const isActiveUser = payload.userId === this.syncService.defaultPayload!.userId;
+      return callback(payload, isActiveUser);
     } else return null;
   }
 
@@ -255,10 +150,9 @@ export class ToolFactoryService {
     return this.create(payload);
   }
 
-  addOrUpdateCollaboration(userId: string, payload: { data: IAction, command: ICommand, isUndone: boolean }) {
-    this.collaborationService.addUser(userId);
-    this.collaborationService.addActionToUser(userId, payload);
-    this.pendingExternalCommands.delete(payload.data.actionId);
+  addOrUpdateCollaboration(command: SyncCommand) {
+    this.collaborationService.addUser(command.payload.userId);
+    this.collaborationService.addCommandToUser(command.payload.userId, command);
+    this.pendingActions.delete(command.payload.actionId);
   }
-
 }

@@ -13,9 +13,4 @@ export class LoginPageComponent {
   constructor() {
     this.username = '';
   }
-
-  // onSubmit(): void {
-  //   this.router.navigate(['/drawing'], { queryParams: { username: this.username } });
-  // }
-
 }

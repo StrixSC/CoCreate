@@ -8,6 +8,7 @@ export class BucketFillCommand implements ICommand {
 
     private bucketFill: SVGImageElement;
     public actionId: string = "";
+    public userId: string = "";
     constructor(
         readonly renderer: Renderer2,
         private bucketFillAttributes: BucketFill,

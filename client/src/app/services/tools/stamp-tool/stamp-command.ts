@@ -10,6 +10,7 @@ export class StampCommand implements ICommand {
 
     private stamp: SVGElement | null;
     public actionId: string = "";
+    public userId: string = "";
 
     constructor(
         private renderer: Renderer2,
