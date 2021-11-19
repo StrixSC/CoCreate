@@ -13,9 +13,14 @@
   position: fixed;
   bottom: -100;
   color: rgb(174, 174, 174);
+  // color: white;
   background-color: #36393f;
   width: 390px;
   transition: 0.2s;
+}
+
+.header_box button:hover {
+  color: white;
 }
 
 .messages_container {
