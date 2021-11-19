@@ -19,10 +19,10 @@ class ChatCard extends StatelessWidget {
   final VoidCallback press;
 
   getfontWeight() {
-    return chat.messages.isEmpty ? const TextStyle(fontSize: 16, fontWeight: FontWeight.w500) :
+    return chat.messages.isEmpty ? const TextStyle(fontSize: 20, fontWeight: FontWeight.w500) :
     chat.lastReadMessage == chat.messages.first.text ?
-      const TextStyle(fontSize: 16, fontWeight: FontWeight.w500) :
-      const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: kPrimaryColor);
+      const TextStyle(fontSize: 20, fontWeight: FontWeight.w500) :
+      const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: kPrimaryColor);
   }
 
   notifIcon() {

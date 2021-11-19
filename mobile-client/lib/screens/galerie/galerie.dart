@@ -1,4 +1,5 @@
 
+import 'package:Colorimage/constants/general.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +15,7 @@ class GalerieState extends State<Galerie> {
   List dataList = <_Photo>[];
   bool isLoading = false;
   int pageCount = 1;
-  List<_Photo> _dessins = [];
+  final List<_Photo> _dessins = [];
   late ScrollController _scrollController;
   static final GlobalKey<FormFieldState<String>> _searchFormKey =
       GlobalKey<FormFieldState<String>>();
@@ -44,6 +45,8 @@ class GalerieState extends State<Galerie> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: kPrimaryColor,
+            centerTitle: true,
             automaticallyImplyLeading: false,
             title: const Text("Galerie de dessins"),
             actions: <Widget>[
@@ -54,7 +57,6 @@ class GalerieState extends State<Galerie> {
                   })
             ]),
         body: Container(
-          color: Colors.white,
           child: Column(children: <Widget>[
             const SizedBox(height: 24.0),
             Container(

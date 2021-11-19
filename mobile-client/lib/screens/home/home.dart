@@ -14,6 +14,7 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Colors.red,
         drawer: SizedBox(
             width: MediaQuery.of(context).size.width * 0.70,
             child: Sidebar()),

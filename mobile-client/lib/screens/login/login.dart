@@ -1,3 +1,4 @@
+import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/messenger.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
@@ -44,7 +45,8 @@ class _LoginState extends State<Login> {
   Future<void> login(email, password) async {
     try {
       userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+          // .signInWithEmailAndPassword(email: email, password: password);
+          .signInWithEmailAndPassword(email: "pri@pri.com", password: "pri123");
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = e.message!;
@@ -104,11 +106,21 @@ class _LoginState extends State<Login> {
                 padding: EdgeInsets.only(left: 100.0, right: 100.0),
                 children: <Widget>[
                   SizedBox(height: 48.0),
-                  Text('Connexion',
+                  const Text('Connexion',
                       style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 40.0,
-                          color: primaryColor)),
+                          color: kPrimaryColor)),
+                  const Text('Connexion',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 40.0,
+                          color: Colors.white)),
+                  const Text('Connexion',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 40.0,
+                          color: Colors.white38)),
                   errorMessage.isNotEmpty
                       ? Padding(
                           padding: const EdgeInsets.fromLTRB(30, 20, 0, 0),

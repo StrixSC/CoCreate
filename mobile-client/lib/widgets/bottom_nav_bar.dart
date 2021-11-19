@@ -1,11 +1,8 @@
 import 'package:Colorimage/constants/general.dart';
-import 'package:Colorimage/models/user.dart';
 import 'package:Colorimage/screens/galerie/galerie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
-import '../screens/chat/chat.dart';
-import '../screens/chat/channel.dart';
 
 class BottomNavBar extends StatelessWidget {
   final PersistentTabController _controller;
@@ -20,7 +17,7 @@ class BottomNavBar extends StatelessWidget {
           screens: _buildScreens(context),
           items: _navBarsItems(),
           confineInSafeArea: true,
-          backgroundColor: Colors.white,
+          backgroundColor: kContentColor,
           popAllScreensOnTapOfSelectedTab: true,
           popActionScreens: PopActionScreensType.all,
           itemAnimationProperties: const ItemAnimationProperties( // Navigation Bar's items animation properties.
@@ -51,8 +48,8 @@ List<Widget> _buildScreens(context) {
 
 final bottomNavBarItems = [
   {"title": "Accueil"   , "icon": const Icon(CupertinoIcons.home)},
-  {"title": "Clavardage", "icon": const Icon(CupertinoIcons.bubble_left_bubble_right_fill)},
-  {"title": "Galerie"   , "icon": const Icon(CupertinoIcons.plus)},
+  {"title": "Feed"      , "icon": const Icon(CupertinoIcons.photo_fill_on_rectangle_fill)},
+  {"title": "Galerie"   , "icon": const Icon(CupertinoIcons.plus_rectangle_fill_on_rectangle_fill)},
   {"title": "Équipes"   , "icon": const Icon(Icons.people)},
   {"title": "Profiles"  , "icon": const Icon(CupertinoIcons.profile_circled)}
 ];
@@ -65,7 +62,7 @@ List<PersistentBottomNavBarItem> _navBarsItems() {
         icon: item["icon"] as Icon,
         iconSize: 35,
         title: item["title"] as String,
-        activeColorPrimary: CupertinoColors.activeBlue,
+        activeColorPrimary: kPrimaryColor,
         inactiveColorPrimary: CupertinoColors.systemGrey,
       )
     );
