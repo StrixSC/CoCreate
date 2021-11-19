@@ -145,6 +145,10 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
       "_blank",
       "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=800,height=1000,addressbar=no"
     );
+    this.closeChat();
+  }
+
+  closeChat() {
     this.newItemEvent.emit(false);
   }
 }
