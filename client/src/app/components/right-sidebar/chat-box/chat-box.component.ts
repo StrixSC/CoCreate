@@ -42,6 +42,7 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
   myChannelID: string;
   messagesSet: Set<string>;
   @Input() channel_id: string;
+  @Input() isChatVisible: boolean;
 
   @ViewChild("messageBox", { static: true })
   messageBox: ElementRef<HTMLInputElement>;
@@ -59,20 +60,23 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
   ) {
     this.messagesSet = new Set();
     this.messages = [];
+    this.chatCss = this.isChatVisible
+      ? { display: "block" }
+      : { display: "none" };
   }
   ngAfterViewInit(): void {
-    console.log("hello");
     this.messagesWatcher.changes.subscribe(() => {
       this.scrollToBottom();
     });
   }
 
   ngOnInit(): void {
-    this.chatCss = { display: "none" };
+    // this.chatCss = { display: "none" };
   }
 
   ngOnChanges() {
     this.initialize();
+    this.chatCss = this.isChatVisible ? { width: "-450px" } : { width: "0px" };
   }
 
   loadChannelMessages(channelID: string) {
@@ -95,8 +99,7 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   initialize() {
-    console.log("this.channel_id", this.channel_id);
-    this.chatCss = { width: "450px" };
+    // this.chatCss = { width: "450px" };
     if (!this.channel_id) return;
     this.messages = [];
     this.channelManagerService

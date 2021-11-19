@@ -26,10 +26,12 @@ export class RightSidebarComponent implements OnInit {
   chatStyle: Object;
   newChannelStyle: Object;
   exampleCss: any;
+  divView: Object;
   constructor(private channelManager: ChannelManagerService) {
     this.textChannels = new Map();
-    this.chatView = true;
+    this.chatView = false;
     this.newChannelStyle = { display: "none" };
+    this.divView = { display: "none" };
   }
 
   ngOnInit(): void {
@@ -76,17 +78,21 @@ export class RightSidebarComponent implements OnInit {
     this.selectedChannel = channelID;
     this.newChannelStyle = { display: "none" };
     console.log("this.selectedChannel", this.selectedChannel);
-    this.exampleCss = { width: "150px" };
+    // this.exampleCss = { width: "150px" };
     if (this.textChannels.has(channelID)) {
       this.channel = this.textChannels.get(channelID) as IChannel;
       console.log(this.channel);
+      this.divView = { display: "block" };
       this.exampleCss = { width: "550px" };
+    } else {
+      this.divView = { display: "none" };
     }
   }
 
   newChannel() {
     this.chatView = false;
-    this.chatStyle = { display: "none" };
+    // this.chatStyle = { width: "-100%" };
+    this.divView = { display: "none" };
     this.newChannelStyle = {};
     const expand: string = (window.innerWidth * 0.8).toString() + "px";
     this.exampleCss = { width: expand };
