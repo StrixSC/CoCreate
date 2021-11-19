@@ -1,45 +1,60 @@
 <div class="all_channels" [ngStyle]="all_channel_dynamic_css">
-  <h3 style="margin-left: 5%">Create my own channel</h3>
-  <button mat-button (click)="closeChannelBar()">
+  <!-- <h3 style="margin-left: 5%">Create my own channel</h3> -->
+  <button
+    mat-button
+    (click)="closeChannelBar()"
+    style="position: fixed; top: 0; right: 180px; top: 10px; color: white"
+  >
     <mat-icon>keyboard_arrow_right</mat-icon>
   </button>
-  <button mat-flat-button style="width: 100%">
+  <button
+    mat-stroked-button
+    style="
+      position: fixed;
+      top: 0;
+      right: 250px;
+      top: 10px;
+      color: white;
+      border-color: #282b2f;
+      background-color: #282b2f;
+    "
+  >
     <mat-icon>add</mat-icon>
     Create new channel
   </button>
-  <br />
-  <mat-divider></mat-divider>
-  <h3 style="margin-left: 5%">Join a channel</h3>
 
-  <div class="channel_box" *ngFor="let channel of all_channels | keyvalue">
-    <div class="column1">
-      <div style="font-size: 18px">
+  <h3 style="margin-left: 5%">Browse channels</h3>
+
+  <div
+    class="channel_box"
+    *ngFor="let channel of all_channels | keyvalue"
+    (click)="joinChannel(channel.value.channel_id)"
+  >
+    <div
+      class="column1"
+      [ngStyle]="channel.value.btnStyle"
+      matTooltip="Join channel"
+    >
+      <div style="font-size: 18px" [ngStyle]="channel.value.btnStyle">
         <mat-icon>public</mat-icon>{{ channel.value.name }}
       </div>
-      <div style="color: #b9bbbe">
+      <div style="color: #b9bbbe" [ngStyle]="channel.value.btnStyle">
         <mat-icon>person_outline</mat-icon>
         {{ channel.value.owner_username }}
       </div>
       <br />
-      <div style="color: #b9bbbe; font-size: 12px">
-        {{ channel.value.member_count }} Members
-      </div>
-      <div style="color: #b9bbbe; font-size: 12px">
-        {{ channel.value.online_member_count }} Online
-      </div>
-    </div>
-
-    <div class="column2">
-      <button
-        mat-flat-button
-        style="height: 100%; width: 100%"
-        class="channel_btn"
-        (click)="joinChannel(channel.value.channel_id)"
+      <div
+        style="color: #b9bbbe; font-size: 12px"
         [ngStyle]="channel.value.btnStyle"
       >
-        <mat-icon>add</mat-icon>
-        Join
-      </button>
+        {{ channel.value.member_count }} Members
+      </div>
+      <div
+        style="color: #b9bbbe; font-size: 12px"
+        [ngStyle]="channel.value.btnStyle"
+      >
+        {{ channel.value.online_member_count }} Online
+      </div>
     </div>
   </div>
 </div>

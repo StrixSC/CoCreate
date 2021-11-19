@@ -26,13 +26,12 @@ export class RightSidebarComponent implements OnInit {
 
   constructor(private channelManager: ChannelManagerService) {
     this.textChannels = new Map();
-    this.newChannelStyle = { display: "none" };
+    // this.newChannelStyle = { display: "none" };
+    this.newChannel();
     this.chatDivView = { display: "none", transition: "0.2s" };
   }
 
-  ngOnInit(): void {
-    this.getChannels();
-  }
+  ngOnInit(): void {}
 
   getChannels() {
     this.channelManager.GetAllChannels().subscribe((data: any) => {
@@ -42,32 +41,9 @@ export class RightSidebarComponent implements OnInit {
     });
   }
 
-  changeCSS(channelID: string) {
-    const prev = this.textChannels.get(this.selectedChannel) as IChannel;
-    if (prev) {
-      prev.divStyle = {
-        "margin-left": "10px",
-        "margin-right": "10px",
-        "margin-top": "-12px",
-        "background-color": "#393c43",
-        height: "30px",
-        "border-radius": "7px",
-        cursor: "pointer",
-        "animation-duration": "4s",
-      };
-      this.textChannels.set(this.selectedChannel, prev);
-    }
-
-    const next = this.textChannels.get(channelID) as IChannel;
-    if (next) {
-      next.divStyle = {
-        padding: "5px",
-        color: "white",
-        "margin-right": "5px",
-        "margin-top": "0px",
-      };
-      this.textChannels.set(channelID, next);
-    }
+  AddChannel(channel_id: IChannel) {
+    console.log("AddChannel", channel_id);
+    this.textChannels.set(channel_id.channel_id, channel_id);
   }
 
   changeChannel(channelID: string) {
@@ -90,7 +66,7 @@ export class RightSidebarComponent implements OnInit {
     this.rightsidebarCss = {
       width: width_.toString() + "px",
     };
-    this.channelBarCss = (width_ - 150).toString() + "px";
+    this.channelBarCss = (width_ - 180).toString() + "px";
   }
 
   closeBar() {

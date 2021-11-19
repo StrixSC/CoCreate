@@ -1,6 +1,5 @@
 import {
   Component,
-  OnInit,
   Input,
   OnChanges,
   AfterViewInit,
@@ -36,7 +35,7 @@ export interface Message {
   templateUrl: "./chat-box.component.html",
   styleUrls: ["./chat-box.component.scss"],
 })
-export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
+export class ChatBoxComponent implements OnChanges, AfterViewInit {
   chatBoxName: string;
   myChannelID: string;
   messagesSet: Set<string>;
@@ -66,8 +65,6 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
       this.scrollToBottom();
     });
   }
-
-  ngOnInit(): void {}
 
   ngOnChanges() {
     this.initialize();

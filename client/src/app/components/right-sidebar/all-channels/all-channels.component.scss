@@ -1,5 +1,4 @@
 .all_channels {
-  // width: 1010px;
   color: white;
   position: fixed;
   height: 100%;
@@ -17,17 +16,23 @@
 
 .channel_box {
   margin-top: 20px;
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+.channel_box:hover {
+  cursor: pointer;
 }
 
 .column1 {
   float: left;
-  margin-left: 10px;
+  margin-left: 20px;
   width: 140px;
   padding: 10px;
   height: 120px;
   margin-top: 20px;
   background-color: #282b2f;
-  border-radius: 10px 0px 0px 10px;
+  border-radius: 10px 10px 10px 10px;
   transition: 0.2s;
 }
 

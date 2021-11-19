@@ -18,7 +18,7 @@ export class AllChannelsComponent implements OnInit, OnChanges {
   all_channels: Map<string, IChannel>;
   all_channel_dynamic_css: Object;
   @Output() closeChannelsEvent = new EventEmitter<boolean>();
-
+  @Output() joinChannelEvent = new EventEmitter<IChannel>();
   @Input() channelWidth: string;
 
   constructor(private channelManagerService: ChannelManagerService) {
@@ -43,11 +43,11 @@ export class AllChannelsComponent implements OnInit, OnChanges {
   }
 
   joinChannel(key: string) {
-    console.log("joined!", key);
     let channel: IChannel | undefined = this.all_channels.get(key);
     if (channel) {
-      channel.btnStyle = { "background-color": "red" };
+      channel.btnStyle = { "background-color": "#3aa55d", color: "white" };
       this.all_channels.set(key, channel);
+      this.joinChannelEvent.emit(channel);
     }
   }
 
