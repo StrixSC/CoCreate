@@ -28,24 +28,24 @@ class Bounds {
     switch (borderIndex) {
       case 0:
         xDelta *= -1.0;
+        yDelta *= -1.0;
         break;
       case 1:
         xDelta *= 0.0;
+        yDelta *= -1.0;
         break;
       case 2:
+        yDelta *= -1.0;
         break;
       case 3:
         yDelta *= 0.0;
         break;
       case 4:
-        yDelta *= -1.0;
         break;
       case 5:
-        yDelta *= -1.0;
         xDelta *= 0.0;
         break;
       case 6:
-        yDelta *= -1.0;
         xDelta *= -1.0;
         break;
       case 7:
@@ -56,35 +56,45 @@ class Bounds {
     return Offset(xDelta, yDelta);
   }
 
-  Offset getCornerFromTransformedPath(selectedBoundIndex, scaledPath) {
+  Set getCornerFromTransformedPath(int selectedBoundIndex, Path scaledPath, Rect oldRect) {
     Offset corner = scaledPath.getBounds().center;
+    Offset oldCorner = oldRect.center;
+    // Opposed corner position
     switch (selectedBoundIndex) {
       case 0:
-        corner = scaledPath.getBounds().topLeft;
+        corner = scaledPath.getBounds().bottomRight;
+        oldCorner = oldRect.bottomRight;
         break;
       case 1:
-        corner = scaledPath.getBounds().topCenter;
+        corner = scaledPath.getBounds().bottomCenter;
+        oldCorner = oldRect.bottomCenter;
         break;
       case 2:
-        corner = scaledPath.getBounds().topRight;
+        corner = scaledPath.getBounds().bottomLeft;
+        oldCorner = oldRect.bottomLeft;
         break;
       case 3:
-        corner = scaledPath.getBounds().centerRight;
+        corner = scaledPath.getBounds().centerLeft;
+        oldCorner = oldRect.centerLeft;
         break;
       case 4:
-        corner = scaledPath.getBounds().bottomRight;
+        corner = scaledPath.getBounds().topLeft;
+        oldCorner = oldRect.topLeft;
         break;
       case 5:
-        corner = scaledPath.getBounds().bottomCenter;
+        corner = scaledPath.getBounds().topCenter;
+        oldCorner = oldRect.topCenter;
         break;
       case 6:
-        corner = scaledPath.getBounds().bottomLeft;
+        corner = scaledPath.getBounds().topRight;
+        oldCorner = oldRect.topRight;
         break;
       case 7:
-        corner = scaledPath.getBounds().centerLeft;
+        corner = scaledPath.getBounds().centerRight;
+        oldCorner = oldRect.centerRight;
         break;
     }
-    return corner;
+    return { corner, oldCorner };
   }
 }
 

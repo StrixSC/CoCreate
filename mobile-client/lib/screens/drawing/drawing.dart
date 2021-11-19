@@ -42,8 +42,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
       Colors.blueGrey; // todo: white doesnt show 'B' letter
   List<Rect>? selectedBounds;
   int? selectedBoundIndex;
-  Offset initialResizeCenter = const Offset(0, 0);
-  Offset initialTapLocation = const Offset(0, 0);
   bool allowResize = false;
 
   _DrawingScreenState(this._socket, this._user);
@@ -105,10 +103,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
                     }
                     if (hasSelectedBounds(details) && actionToRemove == "") {
                       allowResize = true;
-                      initialResizeCenter = Offset(
-                          selectedBounds![Bounds.topCenter].center.dx,
-                          selectedBounds![Bounds.rightCenter].center.dy);
-                      initialTapLocation = details.localPosition;
                     }
                   }
                   if (selectItem != null &&
@@ -406,73 +400,34 @@ class _DrawingScreenState extends State<DrawingScreen> {
       setState(() {
         selectedItems.forEach((actionId, selectedBy) {
           if (actionId == data["actionId"]) {
-            Bounds bounds = Bounds();
-            double xDelta = (data["x2"] - data["x"]) * 0.35;
-            double yDelta = (data["y2"] - data["y"]) * 0.35;
-            Offset delta = bounds.getDeltaFactor(
-                data["boundIndex"], xDelta.toDouble(), yDelta.toDouble());
 
-            double width =  data["oldWidth"].toDouble();
-            double height = data["oldHeight"].toDouble();
-            Offset oldRectBox = Offset(width, height);
-            double xScale = (oldRectBox + delta).dx / oldRectBox.dx;
-            double yScale= (oldRectBox + delta).dy / oldRectBox.dy;
+            //Get the scaling of the output shape from the initShape
+            Rect oldRect = actionsMap[actionId].values.first.getBounds();
+            Bounds bounds = Bounds();
+            double x = data["x2"] - data["x"];
+            double y = data["y2"] - data["y"];
+            Offset delta = bounds.getDeltaFactor(
+                data["boundIndex"], x.toDouble(), y.toDouble());
+            double xDelta = oldRect.width + delta.dx;
+            double yDelta = oldRect.height + delta.dy;
+            double xScale = xDelta / oldRect.width;
+            double yScale = yDelta / oldRect.height;
 
             // Scale the path
             Path actionPath = actionsMap[actionId].values.first;
-            Matrix4 matrix = Matrix4.identity();
-            matrix.scale(xScale, yScale);
-            Path scaledPath = actionPath.transform(matrix.storage);
+            Matrix4 matrixScale = Matrix4.identity();
+            matrixScale.scale(xScale, yScale);
+            Path scaledPath = actionPath.transform(matrixScale.storage);
 
-            // Translate to original position
-            Offset newCenter = scaledPath.getBounds().center;
-            vec.Vector3 translation = vec.Vector3(
-                data["initialCenterX"].toDouble() - newCenter.dx,
-                data["initialCenterY"].toDouble() - newCenter.dy,
-                0);
-            matrix.setTranslation(translation);
-            scaledPath = scaledPath.transform(matrix.storage);
+            // Translate to match fix corner position
+            Set corners = bounds.getCornerFromTransformedPath(data["boundIndex"], scaledPath, oldRect);
+            Matrix4 matrixTranslation = Matrix4.translationValues(
+                (corners.last - corners.first).dx, (corners.last - corners.first).dy, 0);
+            scaledPath = scaledPath.transform(matrixTranslation.storage);
 
-            // Translate to match bound position
-            Offset corner = bounds.getCornerFromTransformedPath(
-                data["boundIndex"], scaledPath);
-            vec.Vector3 translation2 = vec.Vector3(
-                corner.dx - data["initialBoundX"].toDouble(),
-                corner.dy - data["initialBoundY"].toDouble(),
-                0);
-            matrix.setTranslation(translation2);
-            scaledPath = scaledPath.transform(matrix.storage);
-
+            // Save the scaled path
             actionsMap[actionId]
                 .update(actionsMap[actionId].keys.first, (value) => scaledPath);
-
-            // //Get the scaling of the output shape from the initShape
-            // Rect oldRect = actionsMap[actionId].values.first.getBounds();
-            // double xDelta = oldRect.width + ((data['x2'] - data['x']));
-            // double yDelta = oldRect.height + ((data['y2'] - data['y']));
-            // double xScale = xDelta / oldRect.width;
-            // double yScale = yDelta / oldRect.height;
-            //
-            // // Scale the path
-            // Path actionPath = actionsMap[actionId].values.first;
-            // Matrix4 matrixScale = Matrix4.identity();
-            // matrixScale.scale(xScale, yScale);
-            // Path scaledPath = actionPath.transform(matrixScale.storage);
-            //
-            // // // Translate to match fix corner position
-            // //todo: hardcodé pour coin topLeft
-            // //Une idée serait de set le type de coin (topLeft, bottemCenter
-            // // etc..) en même temps que le nouveau corner dans la méthode getCornerFromTransformedPath
-            // Bounds bounds = Bounds();
-            // Offset oldCorner = oldRect.topLeft;
-            // Offset corner = bounds.getCornerFromTransformedPath(0, scaledPath);
-            // Matrix4 matriceTranslation = Matrix4.translationValues(
-            //     (oldCorner - corner).dx, (oldCorner - corner).dy, 0);
-            // scaledPath = scaledPath.transform(matriceTranslation.storage);
-            //
-            // //Save the scaled path
-            // actionsMap[actionId]
-            //     .update(actionsMap[actionId].keys.first, (value) => scaledPath);
           }
         });
       });
@@ -657,12 +612,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
         'y': previousPosition.dy,
         'x2': currentPosition.dx,
         'y2': currentPosition.dy,
-        'initialBoundX': initialTapLocation.dx,
-        'initialBoundY': initialTapLocation.dy,
-        'initialCenterX': initialResizeCenter.dx,
-        'initialCenterY': initialResizeCenter.dy,
-        'oldWidth': oldRectBox.dx,
-        'oldHeight': oldRectBox.dy,
         'boundIndex': selectedBoundIndex,
         'username': _user.displayName,
         'userId': _user.uid,
