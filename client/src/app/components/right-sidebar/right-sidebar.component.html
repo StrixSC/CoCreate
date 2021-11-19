@@ -2,6 +2,7 @@
   <div class="left_pannel">
     <app-all-channels
       [ngStyle]="newChannelStyle"
+      [channelWidth]="channelBarCss"
       (closeChannelsEvent)="closeBar($event)"
     ></app-all-channels>
     <div [ngStyle]="chatDivView">

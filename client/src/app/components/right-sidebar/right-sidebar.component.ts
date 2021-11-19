@@ -17,6 +17,7 @@ export class RightSidebarComponent implements OnInit {
   ];
 
   selectedChannel: string;
+  channelBarCss: string;
   channel: IChannel;
 
   newChannelStyle: Object;
@@ -85,9 +86,11 @@ export class RightSidebarComponent implements OnInit {
   newChannel() {
     this.chatDivView = { display: "none", transition: "0.2s" };
     this.newChannelStyle = {};
+    const width_ = window.innerWidth * 0.8;
     this.rightsidebarCss = {
-      width: (window.innerWidth * 0.8).toString() + "px",
+      width: width_.toString() + "px",
     };
+    this.channelBarCss = (width_ - 150).toString() + "px";
   }
 
   closeBar() {

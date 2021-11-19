@@ -1,10 +1,18 @@
 .all_channels {
-  width: 1010px;
+  // width: 1010px;
   color: white;
   position: fixed;
   height: 100%;
   background-color: #36393e;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.all_channels button {
+  color: rgb(174, 174, 174);
+}
+
+.all_channels button:hover {
+  color: white;
 }
 
 .channel_box {
