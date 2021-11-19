@@ -3,22 +3,13 @@ import { TranslateSyncCommand } from './sync/TranslateSyncCommand';
 import { DeleteSyncCommand } from './sync/DeleteSyncCommand';
 import { RectangleSyncCommand } from './sync/RectangleSyncCommand';
 import { FreedrawSyncCommand } from './sync/FreedrawSyncCommand';
-import { DeleteCommand } from './tools/selection-tool/delete-command/delete-command';
-import { RotateTranslateCompositeCommand } from './tools/selection-tool/rotate-translate-composite-command/rotate-translate-composite-command';
-import { TranslateCommand } from './tools/selection-tool/translate-command/translate-command';
 import { SyncDrawingService } from './syncdrawing.service';
-import { IDeleteAction, ISelectionAction, ITranslateAction, IResizePayload } from './../model/IAction.model';
+import { IDeleteAction, ISelectionAction, ITranslateAction } from './../model/IAction.model';
 import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
-import { EllipseCommand } from './tools/tool-ellipse/ellipse-command';
-import { setStyle } from "src/app/utils/colors";
-import { RectangleCommand } from "./tools/tool-rectangle/rectangle-command";
-import { FilledShape } from "./tools/tool-rectangle/filed-shape.model";
 import { CollaborationService } from "./collaboration.service";
-import { toRGBString, fromAlpha } from "./../utils/colors";
 import { ICommand } from "src/app/interfaces/command.interface";
 import { DrawingService } from "src/app/services/drawing/drawing.service";
 import {
-  IDefaultActionPayload,
   IShapeAction,
   ActionType,
   IAction,
@@ -28,8 +19,6 @@ import {
   ShapeType,
 } from "../model/IAction.model";
 import { Injectable } from "@angular/core";
-import { Pencil } from "./tools/pencil-tool/pencil.model";
-import { PencilCommand } from "./tools/pencil-tool/pencil-command";
 import { RendererProviderService } from "./renderer-provider/renderer-provider.service";
 import { SyncCommand } from './sync/SyncCommand';
 import { EllipseSyncCommand } from './sync/EllipseSyncCommand';
@@ -94,7 +83,6 @@ export class ToolFactoryService {
       }
     },
     Translate: (payload: ITranslateAction, isActiveUser: boolean) => {
-      const state = payload.state;
       const hasOngoingMovement = this.pendingActions.has(payload.actionId);
       if (!hasOngoingMovement) {
         const command = new TranslateSyncCommand(isActiveUser, payload, this.rendererService.renderer, this.drawingService);
@@ -114,8 +102,8 @@ export class ToolFactoryService {
     Resize: () => {
       return;
     },
-    UndoRedo: (payload: IUndoRedoAction, isActiveUser: boolean) => {
-      const command = new UndoRedoSyncCommand(payload, this.collaborationService, isActiveUser);
+    UndoRedo: (payload: IUndoRedoAction) => {
+      const command = new UndoRedoSyncCommand(payload, this.collaborationService, this.syncService);
       command.execute();
     },
     Layer: () => {

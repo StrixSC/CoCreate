@@ -162,20 +162,20 @@ export class SyncDrawingService {
     this.socketService.emit("shape:emit", payload);
   }
 
-  sendUndo(actionId: string): void {
+  sendUndo(): void {
     this.socketService.emit("undoredo:emit", {
       ...this.defaultPayload,
       actionType: ActionType.UndoRedo,
-      actionId: actionId,
+      actionId: v4(),
       isUndo: true,
     } as IUndoRedoAction);
   }
 
-  sendRedo(actionId: string): void {
+  sendRedo(): void {
     this.socketService.emit("undoredo:emit", {
       ...this.defaultPayload,
       actionType: ActionType.UndoRedo,
-      actionId: actionId,
+      actionId: v4(),
       isUndo: false,
     });
   }

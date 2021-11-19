@@ -38,9 +38,7 @@ export class EllipseSyncCommand extends SyncCommand {
                 this.command.actionId = this.payload.actionId;
                 this.command.isSyncAction = true;
 
-                if (!this.isActiveUser) {
-                    this.command.execute();
-                }
+                this.command.execute();
                 break;
 
             case DrawingState.move:

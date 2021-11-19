@@ -14,10 +14,14 @@ export class CommandInvokerService {
   private commandsList: ICommand[] = [];
   private undonedCommandsList: ICommand[] = [];
 
+  @Output()
+  commandCallEmitter = new EventEmitter<string>();
+
   constructor(
     private selectionService: SelectionToolService,
     private drawingService: DrawingService,
-    private syncService: SyncDrawingService
+    private syncService: SyncDrawingService,
+    private collabService: CollaborationService
   ) {
     this.drawingService.drawingEmit.subscribe(() => {
       this.clearCommandHistory();
@@ -58,10 +62,10 @@ export class CommandInvokerService {
     if (this.canUndo) {
       const undoneCommand = this.commandsList.pop() as ICommand;
       this.selectionService.removeSelection();
-      undoneCommand.undo();
       this.syncService.sendSelect(undoneCommand.actionId, false);
+      undoneCommand.undo();
       this.undonedCommandsList.push(undoneCommand);
-      this.syncService.sendUndo(undoneCommand.actionId);
+      this.commandCallEmitter.emit('undo');
     }
   }
 
@@ -73,7 +77,7 @@ export class CommandInvokerService {
       const redoneCommand = this.undonedCommandsList.pop() as ICommand;
       redoneCommand.execute();
       this.commandsList.push(redoneCommand);
-      this.syncService.sendRedo(redoneCommand.actionId);
+      this.commandCallEmitter.emit('redo');
     }
   }
 }

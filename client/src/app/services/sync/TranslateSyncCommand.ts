@@ -32,11 +32,9 @@ export class TranslateSyncCommand extends SyncCommand {
             this.command.addSubCommand(this.translateCommand);
         }
 
-        if (!this.isActiveUser) {
-            const lastX = this.translateCommand.lastXTranslate;
-            const lastY = this.translateCommand.lastYTranslate;
-            this.translateCommand.translate(lastX + this.payload.xTranslation, lastY + this.payload.yTranslation);
-        }
+        const lastX = this.translateCommand.lastXTranslate;
+        const lastY = this.translateCommand.lastYTranslate;
+        this.translateCommand.translate(lastX + this.payload.xTranslation, lastY + this.payload.yTranslation);
     }
 
     undo(): void {

@@ -10,7 +10,6 @@ import { ICommand } from 'src/app/interfaces/command.interface';
 import { Point } from 'src/app/model/point.model';
 import { Tools } from '../../../interfaces/tools.interface';
 import { DrawingService } from '../../drawing/drawing.service';
-import { KeyCodes } from '../../hotkeys/hotkeys-constants';
 import { MagnetismService } from '../../magnetism/magnetism.service';
 import { OffsetManagerService } from '../../offset-manager/offset-manager.service';
 import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
@@ -63,8 +62,6 @@ export class SelectionToolService implements Tools {
     private drawingService: DrawingService,
     private offsetManager: OffsetManagerService,
     private rendererService: RendererProviderService,
-    private gridService: GridService,
-    private magnetismService: MagnetismService,
     private selectionTransformService: SelectionTransformService,
     private syncService: SyncDrawingService,
     private collaborationService: CollaborationService,
@@ -93,9 +90,6 @@ export class SelectionToolService implements Tools {
         return;
       }
 
-      if (target.getAttribute('name') === 'pen' || target.getAttribute('name') === 'stamp' || target.getAttribute('name') === 'spray') {
-        target = target.parentNode as SVGElement;
-      }
       const actionId = target.getAttribute('actionId');
       if (event.button === LEFT_CLICK) {
         if (actionId) {
@@ -104,7 +98,7 @@ export class SelectionToolService implements Tools {
             const userId = obj.getAttribute('userId');
             if (userId) {
               const isSelected = this.collaborationService.getSelectionStatus(userId, actionId);
-              const isSelectedByMe = (this.collaborationService.getSelectedByUser(userId, actionId) === this.syncService.defaultPayload!.userId && isSelected)
+              const isSelectedByMe = this.collaborationService.isSelectedByUser(userId, actionId, this.syncService.defaultPayload!.userId);
               if (!isSelected || isSelectedByMe) {
                 this.objects = [];
                 this.allowMove = true;
@@ -151,8 +145,6 @@ export class SelectionToolService implements Tools {
         this.allowMove = false;
       }
       this.removeInversement();
-
-      // this.firstInvObj = null;
       this.isIn = false;
       this.shiftChanged = false;
       let returnRectangleCommand;
@@ -160,13 +152,15 @@ export class SelectionToolService implements Tools {
         if (this.selectionTransformService.hasCommand()) {
           returnRectangleCommand = this.selectionTransformService.getCommand();
           const commandType = this.selectionTransformService.getCommandType();
+
           if (commandType === SelectionCommandConstants.TRANSLATE) {
             this.syncService.sendTranslate(DrawingState.up, this.selectedActionId, event.offsetX, event.offsetY);
           } else if (commandType === SelectionCommandConstants.ROTATE) {
 
-          } else {
+          } else if (commandType === SelectionCommandConstants.RESIZE) {
 
           }
+
           this.selectionTransformService.endCommand();
         }
         this.wasMoved = false;
@@ -180,44 +174,17 @@ export class SelectionToolService implements Tools {
     }
   }
 
-  /// Quand le bouton de la sourie gauche est enfonce et que le bouge la sourie, soit on selectionne un objet,
-  /// soit on modifie la dimension du rectangle de selection, soit on deplace un ou plusieurs objets.
-  /// Avec le droit, on modifie la dimension du rectangle d'inversement.
   onMove(event: MouseEvent): void {
     const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
     if (this.drawingService.drawing) {
       if (event.buttons === 1) {
-
         this.wasMoved = true;
-
         if (this.selectionTransformService.getCommandType() === SelectionCommandConstants.RESIZE) {
           this.selectionTransformService.resize(event.movementX, event.movementY, offset);
           this.setSelection();
           return;
-        }
-
-        if (this.isIn) {
-          if (this.selectionTransformService.getCommandType() !== SelectionCommandConstants.TRANSLATE) {
-            this.selectionTransformService.createCommand(SelectionCommandConstants.TRANSLATE, this.rectSelection, this.objects);
-          }
-          if (this.gridService.activateMagnetism.value) {
-            let anchorPointX = 0;
-            let anchorPointY = 0;
-            if (this.gridService.anchorPointMagnetism.value > this.pointsList.length) {
-              anchorPointX = this.elementCenterPoint.x;
-              anchorPointY = this.elementCenterPoint.y;
-            } else {
-              anchorPointX = this.pointsList[(this.gridService.anchorPointMagnetism.value - 1)].x;
-              anchorPointY = this.pointsList[(this.gridService.anchorPointMagnetism.value - 1)].y;
-            }
-            const movementOfMagnetism = this.magnetismService.
-              movementMagnetism(event, anchorPointX, anchorPointY, this.firstMovementMagnetism);
-            this.firstMovementMagnetism = false;
-            this.selectionTransformService.translate(movementOfMagnetism.movementX, movementOfMagnetism.movementY);
-          } else {
-            this.selectionTransformService.translate(event.movementX, event.movementY);
-            this.syncService.sendTranslate(DrawingState.move, this.selectedActionId, event.movementX, event.movementY);
-          }
+        } else if (this.isIn) {
+          this.syncService.sendTranslate(DrawingState.move, this.selectedActionId, event.movementX, event.movementY);
           this.setSelection();
         }
       }
@@ -225,58 +192,9 @@ export class SelectionToolService implements Tools {
   }
 
   onKeyDown(event: KeyboardEvent): void {
-    if (!this.isAlt) {
-      this.isAlt = event.code === KeyCodes.altR || event.code === KeyCodes.altL;
-    }
-    if (!this.isShift) {
-      this.isShift = event.code === KeyCodes.shiftR || event.code === KeyCodes.shiftL;
-      if (this.isShift) {
-        this.shiftChanged = true;
-      }
-    }
-
-    this.wasMoved = true;
-
-    if (this.isAlt) {
-      this.selectionTransformService.setAlt(true);
-    }
-    if (this.isShift) {
-      this.selectionTransformService.setShift(true);
-      this.setSelection();
-    }
-
-    if (this.selectionTransformService.getCommandType() === SelectionCommandConstants.RESIZE) {
-      this.selectionTransformService.resizeWithLastOffset();
-      this.setSelection();
-    }
   }
 
   onKeyUp(event: KeyboardEvent): void {
-    if (this.isAlt) {
-      this.isAlt = !(event.code === KeyCodes.altR || event.code === KeyCodes.altL);
-    }
-    if (this.isShift) {
-      this.isShift = !(event.code === KeyCodes.shiftR || event.code === KeyCodes.shiftL);
-      if (!this.isShift) {
-        this.shiftChanged = true;
-      }
-    }
-
-    this.wasMoved = true;
-
-    if (!this.isAlt) {
-      this.selectionTransformService.setAlt(false);
-    }
-    if (!this.isShift) {
-      this.selectionTransformService.setShift(false);
-      this.setSelection();
-    }
-
-    if (this.selectionTransformService.getCommandType() === SelectionCommandConstants.RESIZE) {
-      this.selectionTransformService.resizeWithLastOffset();
-      this.setSelection();
-    }
-
   }
 
   pickupTool(): void {
@@ -385,7 +303,6 @@ export class SelectionToolService implements Tools {
     } else { return; }
   }
 
-  /// Methode qui suprime la selection courante .
   removeSelection(): void {
     if (this.objects[0] !== undefined) {
       this.rendererService.renderer.setProperty(this.objects[0], 'isSelected', false);
@@ -397,13 +314,14 @@ export class SelectionToolService implements Tools {
     this.rendererService.renderer.removeChild(this.drawingService.drawing, this.ctrlG);
 
     this.rendererService.renderer.setAttribute(this.rectSelection, 'points', '');
-    // if (this.drawingService.getObjectList!== undefined)
   }
+
   /// Methode pour cacher la selection en gardant en memoire les element
   hideSelection(): void {
     this.rendererService.renderer.setAttribute(this.ctrlG, 'visibility', 'hidden');
     this.rendererService.renderer.setAttribute(this.rectSelection, 'visibility', 'hidden');
   }
+
   // Rendre la selection visible
   showSelection(): void {
     this.rendererService.renderer.setAttribute(this.ctrlG, 'visibility', 'visible');
@@ -574,36 +492,5 @@ export class SelectionToolService implements Tools {
   /// Retourne le deplacement de la barre de menu.
   private xFactor(): number {
     return (this.drawingService.drawing as SVGSVGElement).getBoundingClientRect().left;
-  }
-
-  private isValidSelection(obj?: SVGElement): boolean {
-    if (this.hasSelection()) {
-      const actionId = this.objects[0].getAttribute('actionId')!;
-      const userId = this.objects[0].getAttribute('userId')!;
-      const isSelected = this.collaborationService.getSelectionStatus(userId, actionId);
-      if (!this.objects || !actionId || !userId) return false;
-
-      const isMine = userId === this.syncService.defaultPayload!.userId;
-
-      if (!isMine && isSelected) {
-        return false;
-      }
-
-      return true;
-    } else if (!this.objects.length) {
-      if (!obj) return false;
-      const actionId = obj.getAttribute('actionId');
-      const userId = obj.getAttribute('userId');
-
-      if (!actionId || !userId) return false;
-
-      const isSelected = this.collaborationService.getSelectionStatus(userId, actionId);
-      const isMine = userId === this.syncService.defaultPayload!.userId;
-      if (isSelected || !isMine) return false;
-
-      return true;
-    }
-
-    return false;
   }
 }

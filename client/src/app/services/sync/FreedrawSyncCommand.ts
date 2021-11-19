@@ -34,9 +34,7 @@ export class FreedrawSyncCommand extends SyncCommand {
                 this.command.userId = this.payload.userId;
                 this.command.actionId = this.payload.actionId;
 
-                if (!this.isActiveUser) {
-                    this.command.execute();
-                }
+                this.command.execute();
                 break;
             case DrawingState.move:
                 this.command.addPoint({ x: this.payload.x, y: this.payload.y });

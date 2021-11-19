@@ -3,10 +3,9 @@ import { ICommand } from 'src/app/interfaces/command.interface';
 import { Injectable } from '@angular/core';
 import { SyncCommand } from './sync/SyncCommand';
 
-export type CollaborationActionData = {
-  data: IAction,
-  command: ICommand,
-  isUndone: boolean
+export interface ActionData {
+  commands: SyncCommand[],
+  undoneCommands: SyncCommand[],
 }
 
 @Injectable({
@@ -14,10 +13,10 @@ export type CollaborationActionData = {
 })
 export class CollaborationService {
 
-  private actions: Map<string, Map<string, SyncCommand>>;
+  private actions: Map<string, ActionData>;
 
   constructor() {
-    this.actions = new Map<string, Map<string, SyncCommand>>();
+    this.actions = new Map<string, ActionData>();
   }
 
   addUser(userId: string): boolean {
@@ -25,42 +24,40 @@ export class CollaborationService {
       return false;
     }
 
-    this.actions.set(userId, new Map<string, SyncCommand>());
+    this.actions.set(userId, { commands: [], undoneCommands: [] });
     return true;
   }
 
-  getUserActions(userId: string): Map<string, SyncCommand> | null {
+  getUserActions(userId: string): SyncCommand[] | null {
     const userActions = this.actions.get(userId);
-    if (userActions) return userActions
+    if (userActions) return userActions.commands;
     else return null;
   }
 
   addCommandToUser(userId: string, command: SyncCommand) {
     if (this.userExists(userId)) {
-      this.actions.get(userId)!.set(command.payload.actionId, command);
+      this.actions.get(userId)!.commands.push(command);
+      this.actions.get(userId)!.undoneCommands = [];
     }
 
   }
 
-  undoUserAction(userId: string, actionId: string, isActiveUser: boolean): void {
-    if (!this.userExists(userId)) {
-      return;
+  undoUserAction(userId: string): SyncCommand | void {
+    if (this.canUndo(userId)) {
+      const undoneCommand = this.actions.get(userId)!.commands.pop();
+      undoneCommand!.undo();
+      this.actions.get(userId)!.undoneCommands.push(undoneCommand!);
+      return undoneCommand;
     }
-    const action = this.actions.get(userId)!.get(actionId);
-    if (action && !isActiveUser) {
-      console.log(action.command);
-      action.undo();
-    }
+
   }
 
-  redoUserAction(userId: string, actionId: string, isActiveUser: boolean): void {
-    if (!this.userExists(userId)) {
-      return;
-    }
-
-    const action = this.actions.get(userId)!.get(actionId);
-    if (action && !isActiveUser) {
-      action.redo();
+  redoUserAction(userId: string): SyncCommand | void {
+    if (this.canRedo(userId)) {
+      const redoneCommand = this.actions.get(userId)!.undoneCommands.pop();
+      redoneCommand!.redo();
+      this.actions.get(userId)!.commands.push(redoneCommand!);
+      return redoneCommand;
     }
   }
 
@@ -69,33 +66,59 @@ export class CollaborationService {
   }
 
   updateActionSelection(userId: string, actionId: string, selection: boolean, selectedBy: string) {
-    if (this.actions.has(userId) && this.actions.get(userId)!.has(actionId)) {
-      this.actions.get(userId)!.get(actionId)!.isSelected = selection;
-      this.actions.get(userId)!.get(actionId)!.selectedBy = selectedBy;
+    if (!this.userExists(userId)) {
+      return;
+    }
+
+    const action = this.getActionById(actionId);
+    if (action) {
+      action.isSelected = selection;
+      action.selectedBy = selectedBy;
     }
   }
 
-  getSelectionStatus(userId: string, actionId: string) {
-    if (this.actions.has(userId) && this.actions.get(userId)!.has(actionId)) {
-      return this.actions.get(userId!)!.get(actionId)!.isSelected;
-    } else return true;
+  getSelectionStatus(userId: string, actionId: string): boolean {
+    if (!this.userExists(userId)) {
+      return false;
+    }
+
+    const action = this.getActionById(actionId);
+
+    if (action) {
+      return action.isSelected;
+    }
+
+    return false;
   }
 
   getSelectedByUser(userId: string, actionId: string) {
-    if (this.actions.has(userId) && this.actions.get(userId)!.has(actionId)) {
-      return this.actions.get(userId)!.get(actionId)!.selectedBy;
-    } else return '';
+    if (!this.userExists(userId)) {
+      return false;
+    }
+
+    const action = this.getActionById(actionId);
+
+    if (action) {
+      return action.selectedBy;
+    }
+
+    return false;
+  }
+
+  isSelectedByUser(userId: string, actionId: string, selectedByUser: string): boolean {
+    const selectedBy = this.getSelectedByUser(userId, actionId);
+    if (selectedBy === selectedByUser) {
+      return true;
+    } else return false;
   }
 
   getSelectedActionByUserId(userId: string): string | null {
-    if (!userId) return null;
+    if (!userId && this.userExists(userId)) return null;
 
-    if (this.actions.has(userId)) {
-      for (let [userId, actions] of this.actions) {
-        for (let [actionId, command] of actions) {
-          if (command.isSelected && command.selectedBy === userId) {
-            return actionId;
-          }
+    for (let [userId, actionDatas] of this.actions) {
+      for (let command of actionDatas.commands) {
+        if (command.isSelected && command.selectedBy === userId) {
+          return command.payload.actionId;
         }
       }
     }
@@ -106,13 +129,30 @@ export class CollaborationService {
   getActionById(actionId: string): SyncCommand | null {
     if (!actionId) return null;
 
-    for (let [userId, actions] of this.actions) {
-      const tmp = actions.get(actionId);
+    for (let [userId, actionDatas] of this.actions) {
+      const tmp = Array().concat(actionDatas.commands, actionDatas.undoneCommands).find((c) => c.payload.actionId === actionId);
       if (tmp) {
         return tmp;
       }
+
     }
 
     return null;
+  }
+
+  canUndo(userId: string): boolean {
+    if (!this.userExists(userId)) {
+      return false;
+    }
+
+    return this.actions.get(userId)!.commands.length > 0;
+  }
+
+  canRedo(userId: string): boolean {
+    if (!this.userExists(userId)) {
+      return false;
+    }
+
+    return this.actions.get(userId)!.undoneCommands.length > 0;
   }
 }

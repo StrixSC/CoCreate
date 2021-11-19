@@ -1,3 +1,4 @@
+import { SyncDrawingService } from './../syncdrawing.service';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { NewDrawingComponent } from 'src/app/components/new-drawing/new-drawing.component';
@@ -36,9 +37,9 @@ export class HotkeysService {
     private copyPasteService: CopyPasteToolService,
     private selectionTool: SelectionToolService,
     private deletingTool: DeletingToolService,
-    private commandInvoker: CommandInvokerService,
     private openDrawingService: OpenDrawingDialogService,
-
+    private syncService: SyncDrawingService,
+    private selectionService: SelectionToolService,
     private hotkeysEmitterService: HotkeysEmitterService,
 
     private hotkeysEnablerService: HotkeysEnablerService,
@@ -136,10 +137,12 @@ export class HotkeysService {
             this.selectionTool.selectAll();
             break;
           case EmitReturn.UNDO:
-            this.commandInvoker.undo();
+            this.selectionService.removeSelection();
+            this.syncService.sendUndo();
             break;
           case EmitReturn.REDO:
-            this.commandInvoker.redo();
+            this.selectionService.removeSelection();
+            this.syncService.sendRedo();
             break;
           default:
             console.log('Warning : Hotkey callBack not implemented !');

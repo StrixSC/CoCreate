@@ -36,9 +36,6 @@ export class ToolEllipseService implements Tools {
   private strokeWidth: FormControl;
   private ellipseStyle: FormControl;
 
-  private isCircle = false;
-  private oldX = 0;
-  private oldY = 0;
   private x: number;
   private y: number;
 
@@ -82,8 +79,6 @@ export class ToolEllipseService implements Tools {
 
       this.x = offset.x;
       this.y = offset.y;
-      this.oldX = offset.x;
-      this.oldY = offset.y;
 
       this.ellipse = {
         x: this.x, y: this.y,
@@ -111,62 +106,36 @@ export class ToolEllipseService implements Tools {
           this.ellipseStyle.value
         );
       }
-      this.ellipseCommand = new EllipseCommand(this.rendererService.renderer, this.ellipse, this.drawingService);
       this.syncService.sendShape(DrawingState.down, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse);
-      this.ellipseCommand.actionId = this.syncService.activeActionId;
-      this.ellipseCommand.userId = this.syncService.defaultPayload!.userId;
-      this.ellipseCommand.execute();
     }
   }
 
   /// Quand le bouton de la sourie est relaché, l'objet courrant de l'outil est mis a null.
-  onRelease(event: MouseEvent): ICommand | void {
-    if (!this.isDrawing) {
-      return;
-    }
-
-    this.isCircle = false;
-    if (this.contour && this.ellipseCommand && !this.ellipseCommand.isSyncAction) {
-      this.drawingService.removeObject(this.contourId);
-      this.contourId = -1;
-    }
-    if (this.ellipseCommand) {
-      const returnEllipseCommand = this.ellipseCommand;
+  onRelease(): void {
+    if (this.ellipse && this.isDrawing) {
       this.syncService.sendShape(DrawingState.up, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse!);
-      this.ellipseCommand = null;
-      return returnEllipseCommand;
+      this.ellipse = null;
+      this.isDrawing = false;
     }
-
-    this.ellipse = null;
-    this.isDrawing = false;
     return;
   }
 
   /// Quand le bouton de la sourie est apuyé et on bouge celle-ci, l'objet courrant subit des modifications.
   onMove(event: MouseEvent): void {
-    if (!this.isDrawing) {
-      return;
-    }
-
     const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
-    this.setSize(offset.x, offset.y);
-    this.syncService.sendShape(DrawingState.move, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse!);
+    if (this.isDrawing && this.ellipse) {
+      const command = new EllipseCommand(this.rendererService.renderer, this.ellipse, this.drawingService);
+      this.setSize(command, offset.x, offset.y);
+      this.syncService.sendShape(DrawingState.move, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse!);
+    }
   }
 
   /// Verification de la touche shift
   onKeyDown(event: KeyboardEvent): void {
-    if (event.shiftKey) {
-      this.isCircle = true;
-      this.setSize(this.oldX, this.oldY);
-    }
   }
 
   /// Verification de la touche shift
   onKeyUp(event: KeyboardEvent): void {
-    if (!event.shiftKey) {
-      this.isCircle = false;
-      this.setSize(this.oldX, this.oldY);
-    }
   }
 
   pickupTool(): void {
@@ -177,17 +146,14 @@ export class ToolEllipseService implements Tools {
   }
 
   /// Transforme le size de l'objet courrant avec un x et un y en entrée
-  private setSize(mouseX: number, mouseY: number): void {
-    if (!this.ellipseCommand || !this.ellipse) {
+  private setSize(command: EllipseCommand, mouseX: number, mouseY: number): void {
+    if (!this.ellipse) {
       return;
     }
     let strokeFactor = 0;
     if (this.ellipse.stroke !== 'none') {
       strokeFactor = this.strokeWidth.value;
     }
-
-    this.oldX = mouseX;
-    this.oldY = mouseY;
 
     let width = Math.abs(mouseX - this.x);
     let height = Math.abs(mouseY - this.y);
@@ -201,28 +167,12 @@ export class ToolEllipseService implements Tools {
       xValue = mouseX;
     }
 
-    if (this.isCircle) {
-      const minSide = Math.min(width, height);
-      if (mouseX < this.x) {
-        xValue += (width - minSide);
-      }
-      if (mouseY < this.y) {
-        yValue += (height - minSide);
-      }
-      width = minSide;
-      height = minSide;
-    }
     xValue += width / 2;
     yValue += height / 2;
 
-    this.ellipseCommand.setCX(xValue);
-    this.ellipseCommand.setCY(yValue);
-    this.ellipseCommand.setHeight((height - strokeFactor) <= 0 ? 1 : (height - strokeFactor));
-    this.ellipseCommand.setWidth((width - strokeFactor) <= 0 ? 1 : (width - strokeFactor));
-
-    this.rendererService.renderer.setAttribute(this.contour, 'x', (xValue - width / 2).toString());
-    this.rendererService.renderer.setAttribute(this.contour, 'y', (yValue - height / 2).toString());
-    this.rendererService.renderer.setAttribute(this.contour, 'width', (width).toString());
-    this.rendererService.renderer.setAttribute(this.contour, 'height', (height).toString());
+    command.setCX(xValue);
+    command.setCY(yValue);
+    command.setHeight((height - strokeFactor) <= 0 ? 1 : (height - strokeFactor));
+    command.setWidth((width - strokeFactor) <= 0 ? 1 : (width - strokeFactor));
   }
 }

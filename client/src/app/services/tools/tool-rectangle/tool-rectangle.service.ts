@@ -96,43 +96,28 @@ export class ToolRectangleService implements Tools {
           this.rectStyle.value
         );
       }
-      this.rectangleCommand = new RectangleCommand(this.rendererService.renderer, this.rectangle, this.drawingService);
       this.syncService.sendShape(DrawingState.down, this.rectStyle.value, ShapeType.Rectangle, this.rectangle);
-      this.rectangleCommand.actionId = this.syncService.activeActionId;
-      this.rectangleCommand.userId = this.syncService.defaultPayload!.userId;
-      this.rectangleCommand.execute();
     }
   }
 
   /// Quand le bouton de la sourie est apuyé et on bouge celle-ci, l'objet courrant subit des modifications.
   onMove(event: MouseEvent): void {
-    if (!this.isDrawing) {
-      return;
-    }
-
     const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
-    if (this.rectangle && this.rectangleCommand) {
-      this.setSize(this.rectangleCommand, this.rectangle, offset.x, offset.y);
+    if (this.rectangle && this.isDrawing) {
+      const recCommand = new RectangleCommand(this.rendererService.renderer, this.rectangle, this.drawingService);
+      this.setSize(recCommand, this.rectangle, offset.x, offset.y);
+      this.syncService.sendShape(DrawingState.move, this.rectStyle.value, ShapeType.Rectangle, this.rectangle);
     }
-    this.syncService.sendShape(DrawingState.move, this.rectStyle.value, ShapeType.Rectangle, this.rectangle!);
   }
 
   /// Quand le bouton de la sourie est relaché, l'objet courrant de l'outil est mis a null.
-  onRelease(event: MouseEvent): ICommand | void {
-    if (!this.isDrawing) {
-      return;
-    }
-
+  onRelease(): void {
     this.isSquare = false;
-    if (this.rectangleCommand) {
-      const returnRectangleCommand = this.rectangleCommand;
-      this.rectangleCommand = null;
+    if (this.rectangle && this.isDrawing) {
       this.syncService.sendShape(DrawingState.up, this.rectStyle.value, ShapeType.Rectangle, this.rectangle!);
       this.isDrawing = false;
       this.rectangle = null;
-      return returnRectangleCommand;
     }
-    return;
   }
 
   /// Verification de la touche shift
@@ -158,9 +143,11 @@ export class ToolRectangleService implements Tools {
   pickupTool(): void {
     return;
   }
+
   dropTool(): void {
     return;
   }
+
   /// Transforme le size de l'objet courrant avec un x et un y en entrée
   setSize(rectangleCommand: RectangleCommand, rectangle: FilledShape, mouseX: number, mouseY: number): void {
     if (!rectangleCommand || !rectangle) {

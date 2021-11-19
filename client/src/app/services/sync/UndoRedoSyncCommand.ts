@@ -1,4 +1,5 @@
 import { CollaborationService } from 'src/app/services/collaboration.service';
+import { SyncDrawingService } from '../syncdrawing.service';
 import { IUndoRedoAction } from './../../model/IAction.model';
 import { DeleteCommand } from './../tools/selection-tool/delete-command/delete-command';
 import { SyncCommand } from './SyncCommand';
@@ -9,16 +10,23 @@ export class UndoRedoSyncCommand extends SyncCommand {
     constructor(
         public payload: IUndoRedoAction,
         private collaborationService: CollaborationService,
-        private isActiveUser: boolean
+        private syncService: SyncDrawingService,
     ) {
         super();
     }
 
     execute(): SyncCommand | void {
+        let action = {} as SyncCommand;
         if (this.payload.isUndo) {
-            this.collaborationService.undoUserAction(this.payload.userId, this.payload.actionId, this.isActiveUser);
+            action = this.collaborationService.undoUserAction(this.payload.userId) as SyncCommand;
         } else {
-            this.collaborationService.redoUserAction(this.payload.userId, this.payload.actionId, this.isActiveUser);
+            action = this.collaborationService.redoUserAction(this.payload.userId) as SyncCommand;
+        }
+
+        if (action) {
+            if (action.isSelected && action.selectedBy === this.syncService.defaultPayload!.userId) {
+                this.syncService.sendSelect(action.payload.actionId, false);
+            }
         }
     }
 
