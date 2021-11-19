@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { IChannel } from "src/app/model/IChannel.model";
 import { ChannelManagerService } from "src/app/services/chat/ChannelManager.service";
 
@@ -9,6 +9,8 @@ import { ChannelManagerService } from "src/app/services/chat/ChannelManager.serv
 })
 export class AllChannelsComponent implements OnInit {
   all_channels: Map<string, IChannel>;
+  @Output() closeChannelsEvent = new EventEmitter<boolean>();
+
   constructor(private channelManagerService: ChannelManagerService) {
     this.all_channels = new Map();
   }
@@ -32,5 +34,9 @@ export class AllChannelsComponent implements OnInit {
       channel.btnStyle = { "background-color": "red" };
       this.all_channels.set(key, channel);
     }
+  }
+
+  closeChannelBar() {
+    this.closeChannelsEvent.emit(false);
   }
 }

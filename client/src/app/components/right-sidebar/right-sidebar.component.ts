@@ -1,9 +1,5 @@
-import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
-import { Subscription } from "rxjs";
-import { HttpClient } from "@angular/common/http";
+import { Component, OnInit } from "@angular/core";
 import { IChannel } from "src/app/model/IChannel.model";
-import { ChatSocketService } from "src/app/services/chat/chat.service";
-import { IReceiveMessagePayload } from "src/app/model/IReceiveMessagePayload.model";
 import { ChannelManagerService } from "src/app/services/chat/ChannelManager.service";
 
 @Component({
@@ -23,15 +19,14 @@ export class RightSidebarComponent implements OnInit {
   selectedChannel: string;
   channel: IChannel;
 
-  chatStyle: Object;
   newChannelStyle: Object;
   rightsidebarCss: any;
-  divView: Object;
+  chatDivView: Object;
+
   constructor(private channelManager: ChannelManagerService) {
     this.textChannels = new Map();
-
     this.newChannelStyle = { display: "none" };
-    this.divView = { display: "none" };
+    this.chatDivView = { display: "none", transition: "0.2s" };
   }
 
   ngOnInit(): void {
@@ -80,15 +75,15 @@ export class RightSidebarComponent implements OnInit {
 
     if (this.textChannels.has(channelID)) {
       this.channel = this.textChannels.get(channelID) as IChannel;
-      this.divView = { display: "block" };
+      this.chatDivView = { display: "block", transition: "0.2s" };
       this.rightsidebarCss = { width: "550px" };
     } else {
-      this.divView = { display: "none" };
+      this.chatDivView = { display: "none", transition: "0.2s" };
     }
   }
 
   newChannel() {
-    this.divView = { display: "none" };
+    this.chatDivView = { display: "none", transition: "0.2s" };
     this.newChannelStyle = {};
     this.rightsidebarCss = {
       width: (window.innerWidth * 0.8).toString() + "px",
@@ -97,6 +92,7 @@ export class RightSidebarComponent implements OnInit {
 
   closeBar() {
     this.rightsidebarCss = { width: "150px" };
-    this.divView = { display: "none" };
+    this.chatDivView = { display: "none", transition: "0.2s" };
+    this.newChannelStyle = { display: "none" };
   }
 }

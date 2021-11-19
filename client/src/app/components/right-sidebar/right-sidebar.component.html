@@ -1,11 +1,14 @@
 <div class="rightsidebar" [ngStyle]="rightsidebarCss">
   <div class="left_pannel">
-    <app-all-channels [ngStyle]="newChannelStyle"></app-all-channels>
-    <div [ngStyle]="divView">
+    <app-all-channels
+      [ngStyle]="newChannelStyle"
+      (closeChannelsEvent)="closeBar($event)"
+    ></app-all-channels>
+    <div [ngStyle]="chatDivView">
       <app-chat-box
         [channel_id]="selectedChannel"
         [ngStyle]="chatStyle"
-        (newItemEvent)="closeBar($event)"
+        (closeChatEvent)="closeBar($event)"
       ></app-chat-box>
     </div>
   </div>

@@ -15,6 +15,7 @@
   color: rgb(174, 174, 174);
   background-color: #36393f;
   width: 390px;
+  transition: 0.2s;
 }
 
 .messages_container {
@@ -30,6 +31,7 @@
   overflow-y: scroll;
   overflow-x: hidden;
   transition: 1s;
+  transition: 0.2s;
 }
 
 /* width */
@@ -65,4 +67,5 @@
   font-size: 15px;
   color: white;
   background-color: #40444b;
+  transition: 0.2s;
 }

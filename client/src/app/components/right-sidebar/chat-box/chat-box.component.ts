@@ -13,8 +13,6 @@ import {
 } from "@angular/core";
 import { ChatSocketService } from "src/app/services/chat/chat.service";
 import { HttpClient } from "@angular/common/http";
-import { Observable, Subscription } from "rxjs";
-import { IChannel } from "src/app/model/IChannel.model";
 import { IReceiveMessagePayload } from "src/app/model/IReceiveMessagePayload.model";
 import { ChannelManagerService } from "src/app/services/chat/ChannelManager.service";
 import { IChannelPayload } from "src/app/model/IChannelPayload.model";
@@ -42,7 +40,7 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
   chatBoxName: string;
   myChannelID: string;
   messagesSet: Set<string>;
-  @Output() newItemEvent = new EventEmitter<boolean>();
+  @Output() closeChatEvent = new EventEmitter<boolean>();
 
   @Input() channel_id: string;
 
@@ -149,6 +147,6 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   closeChat() {
-    this.newItemEvent.emit(false);
+    this.closeChatEvent.emit(false);
   }
 }
