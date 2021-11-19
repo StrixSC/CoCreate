@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 class DrawingType {
   static const String rectangle = "Rectangle";
   static const String ellipse = "Ellipse";
-  static const String freedraw = "freedraw";
+  static const String freedraw = "Freedraw";
 }
 
 class DrawingState {
@@ -88,15 +88,16 @@ class Bounds {
   }
 }
 
-class Action {
+class ShapeAction {
   Path path;
-  Paint bodyColor;
+  Paint? bodyColor;
   Paint borderColor;
   String actionType;
   int? layer;
+  List<Offset>? shapesOffsets;
   TextPainter? text;
 
-  Action(this.path, this.actionType, this.bodyColor, this.borderColor);
+  ShapeAction(this.path, this.actionType,this.borderColor);
 
   setPath(Path newPath) {
     path = newPath;

@@ -30,7 +30,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   String? shapeID;
   String? lastShapeID;
   Map paintsMap = <String, Paint>{};
-  Map actionsMap = <String, Map<String, Path>>{};
+  Map actionsMap = <String, ShapeAction>{};
   Map selectedItems = <String, String>{};
   Map selectPoints = <String, List<Offset>>{};
   bool allowMove = false;
@@ -52,14 +52,14 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void initState() {
     super.initState();
     socketException();
-    socketSaveConfirmation();
+    // socketSaveConfirmation();
     socketFreedrawReception();
     socketShapeReception();
-    socketSelectionReception();
-    socketTranslationReception();
-    socketRotationReception();
-    socketDeleteReception();
-    socketResizeReception();
+    // socketSelectionReception();
+    // socketTranslationReception();
+    // socketRotationReception();
+    // socketDeleteReception();
+    // socketResizeReception();
   }
 
   @override
@@ -412,11 +412,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
             Offset delta = bounds.getDeltaFactor(
                 data["boundIndex"], xDelta.toDouble(), yDelta.toDouble());
 
-            double width =  data["oldWidth"].toDouble();
+            double width = data["oldWidth"].toDouble();
             double height = data["oldHeight"].toDouble();
             Offset oldRectBox = Offset(width, height);
             double xScale = (oldRectBox + delta).dx / oldRectBox.dx;
-            double yScale= (oldRectBox + delta).dy / oldRectBox.dy;
+            double yScale = (oldRectBox + delta).dy / oldRectBox.dy;
 
             // Scale the path
             Path actionPath = actionsMap[actionId].values.first;
@@ -483,46 +483,68 @@ class _DrawingScreenState extends State<DrawingScreen> {
     _socket.on('shape:received', (data) {
       setState(() {
         if (data['state'] == DrawingState.down) {
-          Map map = <String, Path>{};
-          Path path = Path();
+          //Create new list of points to keep a track
           List<Offset> offsets = <Offset>[];
           offsets.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-          shapesOffsets.putIfAbsent(data['actionId'], () => offsets);
-          path.moveTo(data['x'].toDouble(), data['y'].toDouble());
-          map.putIfAbsent(data['shapeType'], () => path);
-          actionsMap.putIfAbsent(
-              data['actionId'], () => map as Map<String, Path>);
-          final paint = Paint()
+
+          //Create the paint for the border
+          final paintBorder = Paint()
             ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
                 data['g'] as int, data['b'] as int)
             ..isAntiAlias = true
             ..strokeWidth = data['width'].toDouble()
-            ..style = (data['shapeStyle'] == "fill")
-                ? PaintingStyle.fill
-                : PaintingStyle.stroke;
-          // todo: ajouter ici les attribus de couleur pour le fill
-          paintsMap.putIfAbsent(data['actionId'], () => paint);
+            ..style = PaintingStyle.stroke;
+
+          ShapeAction shapeAction =
+              ShapeAction(Path(), data['shapeType'], paintBorder);
+
+          // Create paint of the fill if there is one
+          if (data['shapeStyle'] == "fill") {
+            final paintFill = Paint()
+              ..color = Color.fromARGB(
+                  data['aFill'] as int,
+                  data['rFill'] as int,
+                  data['gFill'] as int,
+                  data['bFill'] as int)
+              ..isAntiAlias = true
+              ..strokeWidth = data['width'].toDouble()
+              ..style = PaintingStyle.fill;
+            shapeAction.bodyColor = paintFill;
+          }
+
+          //Save the action and the offsets
+          shapeAction.shapesOffsets = offsets;
+          actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
         } else if (data['state'] == DrawingState.move) {
-          actionsMap.forEach((actionId, actionMap) {
+          actionsMap.forEach((actionId, shapeAction) {
+            //Find the action
             if (actionId == data['actionId']) {
-              List<Offset> offsets = shapesOffsets[actionId];
-              offsets.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-              shapesOffsets.update(actionId, (value) => offsets);
-              Rect rect = Rect.fromPoints(offsets.first, offsets.last);
-              Map map = <String, Path>{};
+              //Update list of points
+              shapeAction.shapesOffsets
+                  .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+
+              //Contruct the shape
+              Rect rect = Rect.fromPoints(shapeAction.shapesOffsets.first,
+                  shapeAction.shapesOffsets.last);
+
+              //Set the shape in the path
               Path path = Path();
               if (data['shapeType'] == DrawingType.ellipse) {
                 path.addOval(rect);
               } else {
                 path.addRect(rect);
               }
-              map.putIfAbsent(data['shapeType'], () => path);
+              shapeAction.path = path;
+
               actionsMap.update(
-                  data['actionId'], (value) => map as Map<String, Path>);
+                  data['actionId'], (value) => shapeAction as ShapeAction);
             }
           });
         } else {
-          shapesOffsets.remove(data['actionId']);
+          //Clear the list of points
+          ShapeAction shapeAction = actionsMap[data['actionId']];
+          shapeAction.shapesOffsets!.clear();
+          actionsMap.update(data['actionId'], (value) => shapeAction);
         }
       });
     });
@@ -532,27 +554,33 @@ class _DrawingScreenState extends State<DrawingScreen> {
     _socket.on('freedraw:received', (data) {
       setState(() {
         if (data['state'] == DrawingState.down) {
-          Map map = <String, Path>{};
+          //Create new freedraw path
           Path path = Path();
           path.moveTo(data['x'].toDouble(), data['y'].toDouble());
           path.lineTo(data['x'].toDouble() + 1, data['y'].toDouble());
-          map.putIfAbsent(DrawingType.freedraw, () => path);
-          actionsMap.putIfAbsent(
-              data['actionId'], () => map as Map<String, Path>);
+
+          //Create border color and style
           final paint = Paint()
             ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
                 data['g'] as int, data['b'] as int)
             ..isAntiAlias = true
             ..strokeWidth = data['width'].toDouble()
             ..style = PaintingStyle.stroke;
-          paintsMap.putIfAbsent(data['actionId'], () => paint);
+
+          //Merge attributes and save shape
+          ShapeAction shapeAction =
+              ShapeAction(path, data['actionType'], paint);
+          actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
         } else if (data['state'] == DrawingState.move) {
-          actionsMap.forEach((actionId, actionMap) {
+          actionsMap.forEach((actionId, shapeAction) {
+            //Get the action
             if (actionId == data['actionId']) {
-              actionMap[DrawingType.freedraw]
+              shapeAction.path
                   .lineTo(data['x'].toDouble(), data['y'].toDouble());
+
+              //Update the action
               actionsMap.update(
-                  data['actionId'], (value) => actionMap as Map<String, Path>);
+                  data['actionId'], (value) => shapeAction as ShapeAction);
             }
           });
         }
@@ -689,26 +717,25 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'y': (drawingState == DrawingState.up)
           ? endPoint.dy
           : details.localPosition.dy,
-      'a': currentBodyColor.alpha,
-      'r': currentBodyColor.red,
-      'g': currentBodyColor.green,
-      'b': currentBodyColor.blue,
+      'a': currentBorderColor.alpha,
+      'r': currentBorderColor.red,
+      'g': currentBorderColor.green,
+      'b': currentBorderColor.blue,
       'x2': (drawingState == DrawingState.up)
-          ? shapesOffsets[shapeID].last.dx
+          ? actionsMap[shapeID].shapesOffsets.last.dx
           : null,
       'y2': (drawingState == DrawingState.up)
-          ? shapesOffsets[shapeID].last.dy
+          ? actionsMap[shapeID].shapesOffsets.last.dy
           : null,
-      // todo:ajouter les couleur de fill ici
-      'rFill': 0,
-      'gFill': 0,
-      'bFill': 0,
-      'aFill': 0,
+      'rFill': currentBodyColor.red,
+      'gFill': currentBodyColor.green,
+      'bFill': currentBodyColor.blue,
+      'aFill': currentBodyColor.alpha,
       // todo:ajouter le width en bouton
-      'width': 6,
+      'width': 10,
       'shapeType': drawType,
       // todo: changer avec un bouton éventuellement
-      'shapeStyle': "border" // border | fill | center
+      'shapeStyle': "fill" // border | fill | center
     });
   }
 
@@ -780,27 +807,48 @@ class Painter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    actionsMap.forEach((actionId, action) {
-      action.forEach((toolType, path) {
-        if (toolType == DrawingType.freedraw) {
-          if ((path as Path).computeMetrics().first.length == 1) {
-            Tangent? tangent =
-                path.computeMetrics().first.getTangentForOffset(0);
-            canvas.drawPoints(
-                PointMode.points, [tangent!.position], paintsMap[actionId]);
-          }
-          canvas.drawPath(path, paintsMap[actionId]);
+    actionsMap.forEach((actionId, shapeAction) {
+      if (shapeAction.actionType == DrawingType.freedraw) {
+        //Draw a point if their is only one click
+        if (shapeAction.path.computeMetrics().first.length == 1) {
+          Tangent? tangent = shapeAction.path
+              .computeMetrics()
+              .first
+              .getTangentForOffset(0.toDouble());
+          canvas.drawPoints(
+              PointMode.points, [tangent!.position], shapeAction.borderColor);
         }
-        if (toolType == DrawingType.ellipse ||
-            toolType == DrawingType.rectangle) {
-          canvas.drawPath(path, paintsMap[actionId]);
+
+        //Draw a line
+        canvas.drawPath(shapeAction.path, shapeAction.borderColor);
+      }
+      if (shapeAction.actionType == DrawingType.ellipse) {
+        if (shapeAction.bodyColor != null) {
+          canvas.drawPath(shapeAction.path, shapeAction.bodyColor);
         }
-        if (selectedItems.containsKey(actionId)) {
-          var corners = getSelectionBoundingRect(
-              actionsMap[actionId].values.first, actionId, setCornersCallback);
-          canvas.drawPath(corners["path"], corners["paint"]);
-        }
-      });
+        canvas.drawPath(shapeAction.path, shapeAction.borderColor);
+      }
+
+      // action.forEach((toolType, path) {
+      //   if (toolType == DrawingType.freedraw) {
+      //     if ((path as Path).computeMetrics().first.length == 1) {
+      //       Tangent? tangent =
+      //           path.computeMetrics().first.getTangentForOffset(0);
+      //       canvas.drawPoints(
+      //           PointMode.points, [tangent!.position], paintsMap[actionId]);
+      //     }
+      //     canvas.drawPath(path, paintsMap[actionId]);
+      //   }
+      //   if (toolType == DrawingType.ellipse ||
+      //       toolType == DrawingType.rectangle) {
+      //     canvas.drawPath(path, paintsMap[actionId]);
+      //   }
+      //   if (selectedItems.containsKey(actionId)) {
+      //     var corners = getSelectionBoundingRect(
+      //         actionsMap[actionId].values.first, actionId, setCornersCallback);
+      //     canvas.drawPath(corners["path"], corners["paint"]);
+      //   }
+      // });
     });
   }
 
