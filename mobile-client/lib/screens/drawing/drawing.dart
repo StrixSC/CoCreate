@@ -37,10 +37,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
   Map shapesOffsets = <String, List<Offset>>{};
   Color currentBodyColor = const Color(0xff443a49);
   Color currentBorderColor = const Color(0xff443a49);
-  Color currentBackgroundColor = const Color(0xff443a49);
+  Color currentBackgroundColor =
+      Colors.blueGrey; // todo: white doesnt show 'B' letter
   List<Rect>? selectedBounds;
   int? selectedBoundIndex;
-  Map resizingItems = <String, Path>{};
+  Offset initialResizeCenter = const Offset(0, 0);
+  Offset initialTapLocation = const Offset(0, 0);
   bool allowResize = false;
 
   _DrawingScreenState(this._socket, this._user);
@@ -55,6 +57,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
     socketSelectionReception();
     socketTranslationReception();
     socketRotationReception();
+    socketDeleteReception();
+    socketResizeReception();
   }
 
   @override
@@ -87,9 +91,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   String? selectItem = getSelectedId(selectRef!);
                   if (selectedItems.containsValue(_user.uid)) {
                     String actionToRemove = "";
-                    // if (!hasSelectedBounds(details)) {
                     selectedItems.forEach((oldActionId, userId) {
-                      if (userId == _user.uid && oldActionId != selectItem) {
+                      if (userId == _user.uid &&
+                          oldActionId != selectItem &&
+                          !hasSelectedBounds(details)) {
                         socketSelectionEmission(oldActionId, false);
                         actionToRemove = oldActionId;
                       }
@@ -97,9 +102,13 @@ class _DrawingScreenState extends State<DrawingScreen> {
                     if (actionToRemove != "") {
                       selectedItems.remove(actionToRemove);
                     }
-                    // } else {
-                    //   allowResize = true;
-                    // }
+                    if (hasSelectedBounds(details) && actionToRemove == "") {
+                      allowResize = true;
+                      initialResizeCenter = Offset(
+                          selectedBounds![Bounds.topCenter].center.dx,
+                          selectedBounds![Bounds.rightCenter].center.dy);
+                      initialTapLocation = details.localPosition;
+                    }
                   }
                   if (selectItem != null &&
                       !selectedItems.containsKey(selectItem)) {
@@ -138,19 +147,16 @@ class _DrawingScreenState extends State<DrawingScreen> {
                       details, DrawingType.ellipse, DrawingState.move);
                   break;
                 case "select":
-                  // todo: ajuster pour que se soit juste avec les carré blanc
-                  // if (allowResize && selectedItems.containsValue(_user.uid)) {
-                  //   selectedItems.forEach((actionId, selectedBy) {
-                  //     if (selectedBy == _user.uid) {
-                  //       socketResizeReception(
-                  //           actionId,
-                  //           (details.localPosition - selectRef!).dx,
-                  //           (details.localPosition - selectRef!).dy);
-                  //       selectRef = details.localPosition;
-                  //     }
-                  //   });
-                  // } else
-                  if (allowMove && selectedItems.containsValue(_user.uid)) {
+                  if (allowResize && selectedItems.containsValue(_user.uid)) {
+                    selectedItems.forEach((actionId, selectedBy) {
+                      if (selectedBy == _user.uid) {
+                        socketResizeEmission(DrawingState.move, actionId,
+                            details.localPosition, selectRef!);
+                        selectRef = details.localPosition;
+                      }
+                    });
+                  } else if (allowMove &&
+                      selectedItems.containsValue(_user.uid)) {
                     selectedItems.forEach((actionId, selectedBy) {
                       if (selectedBy == _user.uid) {
                         socketTranslationEmission(
@@ -195,7 +201,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   if (selectedItems.containsValue(_user.uid)) {
                     selectedItems.forEach((actionId, selectedBy) {
                       if (selectedBy == _user.uid) {
-                        resizingItems.remove(actionId);
                         allowResize = false;
                       }
                     });
@@ -213,10 +218,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   break;
               }
             },
-            child: Center(
+            child: Container(
+              color: currentBackgroundColor,
               child: CustomPaint(
                 painter: Painter(drawType, paintsMap, actionsMap, selectedItems,
-                    _user, setSelectedBounds, resizingItems),
+                    _user, setSelectedBounds),
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height,
                   width: MediaQuery.of(context).size.width,
@@ -330,19 +336,22 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void socketTranslationReception() {
     _socket.on('translation:received', (data) {
       setState(() {
-        actionsMap.forEach((actionId, actionMap) {
-          if (actionId == data['actionId']) {
-            var path = actionMap.values.first as Path;
-            Matrix4 matrix4 = Matrix4.translationValues(
-                data['xTranslation'].toDouble(),
-                data['yTranslation'].toDouble(),
-                0);
-            actionMap.update(actionsMap[actionId].keys.first,
-                (value) => path.transform(matrix4.storage));
-            actionsMap.update(
-                data['actionId'], (value) => actionMap as Map<String, Path>);
-          }
-        });
+        if (data["state"] != DrawingState.up) {
+          actionsMap.forEach((actionId, actionMap) {
+            if (actionId == data['actionId'] ||
+                actionId == data['selectedActionId']) {
+              var path = actionMap.values.first as Path;
+              Matrix4 matrix4 = Matrix4.translationValues(
+                  data['xTranslation'].toDouble(),
+                  data['yTranslation'].toDouble(),
+                  0);
+              actionMap.update(actionsMap[actionId].keys.first,
+                  (value) => path.transform(matrix4.storage));
+              actionsMap.update(
+                  actionId, (value) => actionMap as Map<String, Path>);
+            }
+          });
+        }
       });
     });
   }
@@ -379,57 +388,53 @@ class _DrawingScreenState extends State<DrawingScreen> {
     });
   }
 
-  // todo: faire que la sélection soit un peu plus grande que la forme
-  // todo: migré vers path
-  void socketResizeReception(String id, double xDelta, double yDelta) {
-    setState(() {
-      // selectedItems.forEach((actionId, selectedBy) {
-      //   if (selectedBy == _user.uid) {
-      //     Path path = Path();
-      //     var offsetList =
-      //         actionsMap[actionId][DrawingType.freedraw] as List<Offset>;
-      //     path.moveTo(offsetList.first.dx, offsetList.first.dy);
-      //
-      Offset oldRectBox = Offset(
-          selectedBounds![2].center.dx - selectedBounds![0].center.dx,
-          selectedBounds![0].center.dy - selectedBounds![6].center.dy);
+  // todo: le resize au coter opposer -> voir les corners value (vraiment elever dans le print ce qui cause erreur)
+  void socketResizeReception() {
+    _socket.on('resize:received', (data) {
+      setState(() {
+        selectedItems.forEach((actionId, selectedBy) {
+          if (actionId == data["actionId"]) {
+            Bounds bounds = Bounds();
+            double xDelta = (data["x2"] - data["x"]) * 0.35;
+            double yDelta = (data["y2"] - data["y"]) * 0.35;
+            Offset delta = bounds.getDeltaFactor(
+                data["boundIndex"], xDelta.toDouble(), yDelta.toDouble());
 
-      Path scaledPath = Path();
-      var xScale = (oldRectBox.dx - xDelta) / oldRectBox.dx;
-      var yScale = (oldRectBox.dy - yDelta) / oldRectBox.dy;
-      var xTranslation = xDelta;
-      var yTranslation = yDelta;
-      //
-      //     for (int i = 1; i < offsetList.length; i++) {
-      //       path.lineTo(offsetList[i].dx, offsetList[i].dy);
-      //       scaledPath = path.transform(Float64List.fromList([
-      //         xScale,        0,             0, 0,
-      //         0,             yScale,        0, 0,
-      //         0,             0,             1, 0,
-      //         xTranslation,  yTranslation,  0, 1,
-      //       ]));
-      //     }
-      //     resizingItems.update(actionId, (dynamic val) => scaledPath,
-      //         ifAbsent: () => scaledPath);
-      //   }
-      // });
-      actionsMap.forEach((actionId, actionMap) {
-        if (actionId == id) {
-          var offsetList = actionMap[DrawingType.freedraw] as List<Offset>;
-          List<Offset> scaledOffsetList = <Offset>[];
-          List<Offset> translateOffsetList = <Offset>[];
-          for (var offset in offsetList) {
-            scaledOffsetList.add(offset.scale(xScale, yScale));
+            double width =  data["oldWidth"].toDouble();
+            double height = data["oldHeight"].toDouble();
+            Offset oldRectBox = Offset(width, height);
+            double xScale = (oldRectBox + delta).dx / oldRectBox.dx;
+            double yScale= (oldRectBox + delta).dy / oldRectBox.dy;
+
+            // Scale the path
+            Path actionPath = actionsMap[actionId].values.first;
+            Matrix4 matrix = Matrix4.identity();
+            matrix.scale(xScale, yScale);
+            Path scaledPath = actionPath.transform(matrix.storage);
+
+            // Translate to original position
+            Offset newCenter = scaledPath.getBounds().center;
+            vec.Vector3 translation = vec.Vector3(
+                data["initialCenterX"].toDouble() - newCenter.dx,
+                data["initialCenterY"].toDouble() - newCenter.dy,
+                0);
+            matrix.setTranslation(translation);
+            scaledPath = scaledPath.transform(matrix.storage);
+
+            // Translate to match bound position
+            Offset corner = bounds.getCornerFromTransformedPath(
+                data["boundIndex"], scaledPath);
+            vec.Vector3 translation2 = vec.Vector3(
+                corner.dx - data["initialBoundX"].toDouble(),
+                corner.dy - data["initialBoundY"].toDouble(),
+                0);
+            matrix.setTranslation(translation2);
+            scaledPath = scaledPath.transform(matrix.storage);
+
+            actionsMap[actionId]
+                .update(actionsMap[actionId].keys.first, (value) => scaledPath);
           }
-          for (var offset in scaledOffsetList) {
-            translateOffsetList
-                .add(offset.translate(xTranslation, yTranslation));
-          }
-          actionMap.update(
-              DrawingType.freedraw, (value) => translateOffsetList);
-          actionsMap.update(
-              id, (value) => actionMap as Map<String, List<Offset>>);
-        }
+        });
       });
     });
   }
@@ -518,8 +523,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void socketDeleteReception() {
     _socket.on('delete:received', (data) {
       setState(() {
-        actionsMap.remove(data["actionId"]);
-        selectedItems.remove(data["actionId"]);
+        actionsMap.remove(data["selectedActionId"]);
+        selectedItems.remove(data["selectedActionId"]);
       });
     });
   }
@@ -559,6 +564,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       double yTranslation, String drawingState) {
     _socket.emit("translation:emit", {
       'actionId': selectItem,
+      'selectedActionId': selectItem,
       'username': _user.displayName,
       'userId': _user.uid,
       'state': drawingState,
@@ -572,6 +578,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void socketDeleteEmission(actionId) {
     _socket.emit('delete:emit', {
       'actionId': actionId,
+      'selectedActionId': actionId,
       'username': _user.displayName,
       'userId': _user.uid,
       'collaborationId': "DEMO_COLLABORATION",
@@ -594,6 +601,33 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'userId': _user.uid,
       'collaborationId': "DEMO_COLLABORATION",
     });
+  }
+
+  void socketResizeEmission(String drawingState, String actionId,
+      Offset currentPosition, Offset previousPosition) {
+    Offset oldRectBox = Offset(
+        selectedBounds![2].center.dx - selectedBounds![0].center.dx,
+        selectedBounds![0].center.dy - selectedBounds![6].center.dy);
+    if(oldRectBox.dx != 0.0) {
+    _socket.emit('resize:emit', {
+      'actionId': actionId,
+      'selectedActionId': actionId,
+      'actionType': "Resize",
+      'x': previousPosition.dx,
+      'y': previousPosition.dy,
+      'x2': currentPosition.dx,
+      'y2': currentPosition.dy,
+      'initialBoundX': initialTapLocation.dx,
+      'initialBoundY': initialTapLocation.dy,
+      'initialCenterX': initialResizeCenter.dx,
+      'initialCenterY': initialResizeCenter.dy,
+      'oldWidth': oldRectBox.dx,
+      'oldHeight': oldRectBox.dy,
+      'boundIndex': selectedBoundIndex,
+      'username': _user.displayName,
+      'userId': _user.uid,
+      'collaborationId': "DEMO_COLLABORATION",
+    });}
   }
 
   void socketShapeEmission(
@@ -694,7 +728,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
 class Painter extends CustomPainter {
   Painter(this.drawType, this.paintsMap, this.actionsMap, this.selectedItems,
-      this.user, this.setCornersCallback, this.resizingItems);
+      this.user, this.setCornersCallback);
 
   Map paintsMap;
   String drawType;
@@ -702,7 +736,6 @@ class Painter extends CustomPainter {
   Map selectedItems;
   User user;
   Function setCornersCallback;
-  Map resizingItems;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -733,13 +766,14 @@ class Painter extends CustomPainter {
   // todo: faire que la sélection soit un peu plus grande que la forme
   Map getSelectionBoundingRect(
       Path dragPath, String actionId, Function setCornersCallback) {
-    Rect bounds = dragPath.getBounds();
 
+    Rect bounds = dragPath.getBounds();
     Path pathCorner = Path();
     Path pathBorder = Path();
 
-    double width = 10.0;
-    double height = 10.0;
+    double width = 15.0;
+    double height = 15.0;
+
     List<Offset> boundingRects = [
       bounds.topLeft,
       Offset(bounds.topLeft.dx + (bounds.topRight.dx - bounds.topLeft.dx) / 2,
@@ -759,6 +793,7 @@ class Painter extends CustomPainter {
           bounds.bottomLeft.dy +
               (bounds.topLeft.dy - bounds.bottomLeft.dy) / 2),
     ];
+
     List<Rect> cornerRects = [];
 
     for (int i = 0; i < boundingRects.length; i++) {
@@ -781,17 +816,19 @@ class Painter extends CustomPainter {
 
     // dashed lines
     Path dashPath = Path();
-    double dashWidth = 10.0;
-    double dashSpace = 7.0;
-    for (PathMetric pathMetric in pathBorder.computeMetrics()) {
-      double distance = 0.0;
-      while (distance < pathMetric.length) {
-        dashPath.addPath(
-          pathMetric.extractPath(distance, distance + dashWidth),
-          Offset.zero,
-        );
-        distance += dashWidth;
-        distance += dashSpace;
+    if((bounds.topRight.dx - bounds.topLeft.dx) != 0) {
+      double dashWidth = 10.0;
+      double dashSpace = 7.0;
+      for (PathMetric pathMetric in pathBorder.computeMetrics()) {
+        double distance = 0.0;
+        while (distance < pathMetric.length) {
+          dashPath.addPath(
+            pathMetric.extractPath(distance, distance + dashWidth),
+            Offset.zero,
+          );
+          distance += dashWidth;
+          distance += dashSpace;
+        }
       }
     }
 

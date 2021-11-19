@@ -22,7 +22,7 @@ class _ToolbarState extends State<Toolbar> {
 
   Color currentBodyColor = const Color(0xff443a49);
   Color currentBorderColor = const Color(0xff443a49);
-  Color currentBackgroundColor = const Color(0xff443a49);
+  Color currentBackgroundColor = Colors.blueGrey;
   String currentTool = '';
 
   final tools = [
