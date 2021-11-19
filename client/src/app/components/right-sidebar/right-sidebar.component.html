@@ -1,11 +1,10 @@
-<div class="rightsidebar" [ngStyle]="exampleCss">
+<div class="rightsidebar" [ngStyle]="rightsidebarCss">
   <div class="left_pannel">
     <app-all-channels [ngStyle]="newChannelStyle"></app-all-channels>
     <div [ngStyle]="divView">
       <app-chat-box
         [channel_id]="selectedChannel"
         [ngStyle]="chatStyle"
-        [isChatVisible]="chatView"
       ></app-chat-box>
     </div>
   </div>

@@ -25,7 +25,7 @@ export class RightSidebarComponent implements OnInit {
   chatView: boolean;
   chatStyle: Object;
   newChannelStyle: Object;
-  exampleCss: any;
+  rightsidebarCss: any;
   divView: Object;
   constructor(private channelManager: ChannelManagerService) {
     this.textChannels = new Map();
@@ -77,13 +77,11 @@ export class RightSidebarComponent implements OnInit {
   changeChannel(channelID: string) {
     this.selectedChannel = channelID;
     this.newChannelStyle = { display: "none" };
-    console.log("this.selectedChannel", this.selectedChannel);
-    // this.exampleCss = { width: "150px" };
+
     if (this.textChannels.has(channelID)) {
       this.channel = this.textChannels.get(channelID) as IChannel;
-      console.log(this.channel);
       this.divView = { display: "block" };
-      this.exampleCss = { width: "550px" };
+      this.rightsidebarCss = { width: "550px" };
     } else {
       this.divView = { display: "none" };
     }
@@ -91,10 +89,10 @@ export class RightSidebarComponent implements OnInit {
 
   newChannel() {
     this.chatView = false;
-    // this.chatStyle = { width: "-100%" };
     this.divView = { display: "none" };
     this.newChannelStyle = {};
-    const expand: string = (window.innerWidth * 0.8).toString() + "px";
-    this.exampleCss = { width: expand };
+    this.rightsidebarCss = {
+      width: (window.innerWidth * 0.8).toString() + "px",
+    };
   }
 }
