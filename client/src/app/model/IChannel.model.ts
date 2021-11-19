@@ -9,4 +9,5 @@ export interface IChannel {
   member_count: number;
   style?: Object;
   divStyle?: Object;
+  btnStyle?: Object;
 }

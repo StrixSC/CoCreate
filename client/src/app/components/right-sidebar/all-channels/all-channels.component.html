@@ -31,6 +31,8 @@
         mat-flat-button
         style="height: 100%; width: 100%"
         class="channel_btn"
+        (click)="joinChannel(channel.value.channel_id)"
+        [ngStyle]="channel.value.btnStyle"
       >
         <mat-icon>add</mat-icon>
         <!-- <mat-icon>check_circle_outline</mat-icon> -->

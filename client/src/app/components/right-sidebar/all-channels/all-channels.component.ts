@@ -20,9 +20,17 @@ export class AllChannelsComponent implements OnInit {
   getChannels() {
     this.channelManagerService.GetAllChannels().subscribe((data: any) => {
       data.forEach((element: IChannel) => {
-        console.log(element);
         this.all_channels.set(element.channel_id, element);
       });
     });
+  }
+
+  joinChannel(key: string) {
+    console.log("joined!", key);
+    let channel: IChannel | undefined = this.all_channels.get(key);
+    if (channel) {
+      channel.btnStyle = { "background-color": "red" };
+      this.all_channels.set(key, channel);
+    }
   }
 }
