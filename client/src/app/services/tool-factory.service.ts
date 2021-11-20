@@ -91,6 +91,7 @@ export class ToolFactoryService {
       } else {
         const command = this.pendingActions.get(payload.actionId);
         const res = command!.update(payload);
+        console.log(payload.state, res);
         if (res) {
           this.addOrUpdateCollaboration(res);
         }

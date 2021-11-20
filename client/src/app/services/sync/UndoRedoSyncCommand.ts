@@ -35,7 +35,7 @@ export class UndoRedoSyncCommand extends SyncCommand {
     }
 
     redo(): void {
-        this.command.execute();
+        return;
     }
 
     update(payload: IUndoRedoAction): SyncCommand | void {

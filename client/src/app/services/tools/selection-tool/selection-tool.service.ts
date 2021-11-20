@@ -19,6 +19,13 @@ import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { SelectionCommandConstants } from './command-type-constant';
 import { SelectionTransformService } from './selection-transform.service';
 
+export enum SelectionActionTypes {
+  Translate,
+  Rotate,
+  Resize,
+  None
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -40,6 +47,7 @@ export class SelectionToolService implements Tools {
     { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 },
   ];
   private elementCenterPoint: Point;
+  private activeActionType = SelectionActionTypes.None;
   private ctrlPoints: SVGRectElement[] = [];
   private ctrlG: SVGGElement;
   private rectSelection: SVGPolygonElement;
@@ -149,11 +157,10 @@ export class SelectionToolService implements Tools {
       this.shiftChanged = false;
       let returnRectangleCommand;
       if (this.wasMoved) {
-        if (this.selectionTransformService.hasCommand()) {
+        if (this.selectionTransformService.hasCommand() || this.activeActionType !== SelectionActionTypes.None) {
           returnRectangleCommand = this.selectionTransformService.getCommand();
           const commandType = this.selectionTransformService.getCommandType();
-
-          if (commandType === SelectionCommandConstants.TRANSLATE) {
+          if (this.activeActionType === SelectionActionTypes.Translate) {
             this.syncService.sendTranslate(DrawingState.up, this.selectedActionId, event.offsetX, event.offsetY);
           } else if (commandType === SelectionCommandConstants.ROTATE) {
 
@@ -185,6 +192,7 @@ export class SelectionToolService implements Tools {
           return;
         } else if (this.isIn) {
           this.syncService.sendTranslate(DrawingState.move, this.selectedActionId, event.movementX, event.movementY);
+          this.activeActionType = SelectionActionTypes.Translate;
           this.setSelection();
         }
       }
