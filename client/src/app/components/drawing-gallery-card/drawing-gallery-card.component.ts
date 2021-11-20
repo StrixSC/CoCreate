@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DrawingPreviewDialogComponent } from '../drawing-preview-dialog/drawing-preview-dialog.component';
-import { Drawing1 } from '../../../../../common/communication//new-drawing-parameters';
+import { IGalleryEntry } from '../../model/IGalleryEntry.model';
 
 @Component({
   selector: 'app-drawing-gallery-card',
@@ -10,7 +10,7 @@ import { Drawing1 } from '../../../../../common/communication//new-drawing-param
 })
 export class DrawingGalleryCardComponent {
   
-  @Input() public drawing: Drawing1;
+  @Input() public drawing: IGalleryEntry;
   constructor(public dialog: MatDialog) {}
 
   openDialog(): void {

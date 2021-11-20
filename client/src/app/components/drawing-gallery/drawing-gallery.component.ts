@@ -2,23 +2,28 @@ import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Drawing1 } from '../../../../../common/communication//new-drawing-parameters';
 import {
   MatAutocomplete, MatAutocompleteSelectedEvent, MatChipInputEvent,
   MatDialog, MatPaginator, MatTableDataSource
 } from '@angular/material';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, EMPTY, merge, Observable, of, Subscription } from 'rxjs';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { OpenDrawingService } from 'src/app/services/open-drawing/open-drawing.service';
 import { Drawing } from '../../../../../common/communication/drawing';
 import { NewDrawingFormDialogComponent } from '../new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { DrawingGalleryService } from 'src/app/services/drawing-gallery/drawing-gallery.service';
 import { NewDrawingComponent } from '../new-drawing/new-drawing.component';
+import { NewDrawingService } from 'src/app/services/new-drawing/new-drawing.service';
+import { IGalleryEntry } from '../../model/IGalleryEntry.model';
+import { SyncCollaborationService } from 'src/app/services/syncCollaboration';
+import { SocketService } from 'src/app/services/chat/socket.service';
+import { switchMap, take } from 'rxjs/operators';
+import { now } from 'moment';
 
 const ONE_WEEK_NUMERIC_VALUE = 24 * 60 * 60 * 1000 * 7;
 
-const DATA: Drawing1[] = [
-  {drawing_id: "1", title: 'Hydrogen', type: 'Public', owner: 'Pati', created_at: "2019-01-16" , collaborator_count: 2, author_username: 'Flower', img:"../../../assets/img/mock-img/1.jpg"},
+const DATA: IGalleryEntry[] = [
+  /*{drawing_id: "1", title: 'Hydrogen', type: 'Public', owner: 'Pati', created_at: "2019-01-16" , collaborator_count: 2, author_username: 'Flower', img:"../../../assets/img/mock-img/1.jpg"},
   {drawing_id: "2", title: 'Helium', type: 'Protégé',owner: 'Pati', created_at: "2020-01-16" , collaborator_count: 0, author_username: 'Pati', img:"../../../assets/img/mock-img/2.jpg"},
   {drawing_id: "3", title: 'Lithium', type: 'Privé',owner: 'Daisy', created_at: "2021-01-16" , collaborator_count: 1, author_username: 'Daisy', img:"../../../assets/img/mock-img/3.jpg"},
   {drawing_id: "4",title: 'Beryllium', type: 'Public',owner: 'Tulipe', created_at: "2021-09-23" , collaborator_count: 0, author_username: 'Power', img:"../../../assets/img/mock-img/4.jpg"},
@@ -37,7 +42,7 @@ const DATA: Drawing1[] = [
   {drawing_id: "17",title: 'Chlorine', type: 'Protégé',owner: 'Louis XIV', created_at: "2021-10-31" , collaborator_count: 0, author_username: 'Louis XIV', img:"../../../assets/img/mock-img/17.jpg"},
   {drawing_id: "18",title: 'Argon', type: 'Public',owner: 'Pati', created_at: "2019-01-08" , collaborator_count: 2, author_username: 'Pati', img:"../../../assets/img/mock-img/18.jpg"},
   {drawing_id: "19",title: 'Potassium', type: 'Protégé',owner: 'Pati', created_at: "2020-03-29" , collaborator_count: 1, author_username: 'Pati', img:"../../../assets/img/mock-img/19.jpg"},
-  {drawing_id: "20",title: 'Calcium',type: 'Privé',owner: 'Peach', created_at: "2021-06-24" , collaborator_count: 1, author_username: 'Peach', img:"../../../assets/img/mock-img/20.jpg"},
+  {drawing_id: "20",title: 'Calcium',type: 'Privé',owner: 'Peach', created_at: "2021-06-24" , collaborator_count: 1, author_username: 'Peach', img:"../../../assets/img/mock-img/20.jpg"},*/
 ];
 
 @Component({
@@ -56,11 +61,14 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   separatorKeysCodes: number[] = [ENTER, COMMA];
   pageIndex = 0;
   selectedTab = new FormControl(0);
+  errorListener: Subscription;
+  messageListener: Subscription;
+
   
   
-  datasourcePublic = new MatTableDataSource<Drawing1>(this.sortPublicVisibility(DATA));
-  datasourcePrivate = new MatTableDataSource<Drawing1>(this.sortPrivateVisibility(DATA));
-  datasourceProtected = new MatTableDataSource<Drawing1>(this.sortProtectedVisibility(DATA));
+  datasourcePublic = new MatTableDataSource<IGalleryEntry>(this.sortPublicVisibility(DATA));
+  datasourcePrivate = new MatTableDataSource<IGalleryEntry>(this.sortPrivateVisibility(DATA));
+  datasourceProtected = new MatTableDataSource<IGalleryEntry>(this.sortProtectedVisibility(DATA));
 
 
   @ViewChild('tagInput', { static: false }) tagInput: ElementRef<HTMLInputElement>;
@@ -70,14 +78,15 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   @ViewChild('paginator2', { static: true }) paginatorPublic: MatPaginator;
   @ViewChild('paginator3', { static: true }) paginatorProtected: MatPaginator;
 
-  drawings: Drawing1[] = [];
+  drawings: IGalleryEntry[] = [];
+  drawingsEntry: IGalleryEntry[] = []
 
 
   teamName: String[];
   isLoaded = false;
-  dataObsPublic: BehaviorSubject<Drawing1[]>;
-  dataObsPrivate: BehaviorSubject<Drawing1[]>;
-  dataObsProtected: BehaviorSubject<Drawing1[]>;
+  dataObsPublic: BehaviorSubject<IGalleryEntry[]>;
+  dataObsPrivate: BehaviorSubject<IGalleryEntry[]>;
+  dataObsProtected: BehaviorSubject<IGalleryEntry[]>;
 
   constructor(
     private openDrawingService: OpenDrawingService,
@@ -86,22 +95,73 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     public dialog: MatDialog,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private drawingGalleryService: DrawingGalleryService
+    private drawingGalleryService: DrawingGalleryService,
+    private newDrawingService: NewDrawingService,
+    private syncCollaboration: SyncCollaborationService,
+    private socketService: SocketService
   ) {
-    this.drawingGalleryService.getDrawings()
-        .subscribe((drawings: Drawing1[]) => {
-          this.datasourcePublic.data = drawings;
-        });
+    
 }
 
   ngOnInit(): void {
+    this.drawingGalleryService.getDrawings()
+        .subscribe((drawings: IGalleryEntry[]) => {
+          this.datasourcePublic.data = drawings;
+        });
     this.paginatorPrivate._intl.itemsPerPageLabel="Dessins par page: ";
     this.paginatorPublic._intl.itemsPerPageLabel="Dessins par page: ";
     this.paginatorProtected._intl.itemsPerPageLabel="Dessins par page: ";
     
   }
 
+  // ngOnInit() {
+  //   this.errorListener = this.socketService.socketReadyEmitter
+  //     .pipe(
+  //       take(1),
+  //       switchMap((ready: boolean) => {
+  //         if (ready) {
+  //           return merge(
+  //             this.socketService.onException(),
+  //             this.socketService.onError()
+  //           );
+  //         } else {
+  //           return of(EMPTY);
+  //         }
+  //       })
+  //     )
+  //     .subscribe((data) => {
+  //       console.log(data);
+  //     });
+
+  //   this.messageListener = this.socketService.socketReadyEmitter
+  //     .pipe(
+  //       take(1),
+  //       switchMap((ready: boolean) => {
+  //         if (ready) {
+  //           return merge(
+  //             this.syncCollaboration.onJoinCollaboration(),
+  //             this.syncCollaboration.onConnectCollaboration(),
+  //             this.syncCollaboration.onCreateCollaboration(),
+  //             this.syncCollaboration.onDeleteCollaboration(),
+  //             this.syncCollaboration.onJoinCollaboration(),
+  //             this.syncCollaboration.onUpdateCollaboration(),
+  //             this.syncCollaboration.onLoadCollaboration()
+  //           )
+  //         } else {
+  //           console.log("hey 2")
+  //           return of(EMPTY);
+  //         }
+  //       })
+  //     ).subscribe((data: any) => {
+  //       console.log('Event received');
+  //       console.log(data)
+  //     })
+  //     console.log("hey")
+  // }
+
+
   ngOnDestroy(): void {
+    if (this.errorListener) { this.errorListener.unsubscribe();}
     if (this.datasourcePublic) { this.datasourcePublic.disconnect(); }
     if (this.datasourcePrivate) { this.datasourcePrivate.disconnect(); }
     if (this.datasourceProtected) { this.datasourceProtected.disconnect(); }
@@ -112,13 +172,50 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     this.datasourcePublic.paginator = this.paginatorPublic;
     this.datasourcePrivate.paginator = this.paginatorPrivate;
     this.datasourceProtected.paginator = this.paginatorProtected;
-    // this.numPrivatePages = this.drawings.length;
-    // this.numPublicPages = this.drawings.length;
     this.dataObsPublic = this.datasourcePublic.connect();
     this.dataObsPrivate = this.datasourcePrivate.connect();
     this.dataObsProtected = this.datasourceProtected.connect();
     this.cdr.detectChanges();
   }
+
+  ngOnChanges() {
+    this.sendCreateChannel();
+  }
+
+
+  public sendCreateChannel(){
+  this.syncCollaboration.sendCreateCollaboration('user1', 'first drawing', 'Public');
+    this.syncCollaboration
+      .onCreateCollaboration()
+      .subscribe((data: IGalleryEntry) => {
+        //if (!this.messagesSet.has(data.messageId)) {
+          this.drawings.push({
+              userId: data.userId,
+              drawing_id: data.drawing_id, title: data.title, type: data.type,owner: data.author_username, created_at: now().toString() , collaborator_count: data.collaborator_count, author_username: data.author_username, img:"../../../assets/img/mock-img/2.jpg"
+            });
+          //this.messagesSet.add(data.messageId);
+          //if (this.messagesSet.size > 20) this.messagesSet.clear();
+        });
+    //});
+  }
+
+
+  /*listenToNewMessages() {
+    this.chatSocketService.joinChannel(this.channel_id);
+    this.chatSocketService
+      .receiveMessage()
+      .subscribe((data: IReceiveMessagePayload) => {
+
+          this.messages.push({
+            message: data.message,
+            avatar: data.avatarUrl,
+            username: data.username,
+            time: data.createdAt,
+          });
+        
+      });
+  }*/
+
 
   get tagCtrl(): FormControl {
     return this.openDrawingService.tagCtrl;
@@ -145,8 +242,8 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     return Math.round(new Date().getTime() - new Date(date).getTime()) > ONE_WEEK_NUMERIC_VALUE;
   }
 
-  sortPublicVisibility(drawings: Drawing1[]) : Drawing1[] {
-    let sort: Drawing1[] = new Array();
+  sortPublicVisibility(drawings: IGalleryEntry[]) : IGalleryEntry[] {
+    let sort: IGalleryEntry[] = new Array();
     for (let drawing of drawings){
       if(drawing.type ==='Public')
       {
@@ -156,8 +253,8 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     return sort;
   }
 
-  sortPrivateVisibility(drawings: Drawing1[]) : Drawing1[] {
-    let sort: Drawing1[] = new Array();
+  sortPrivateVisibility(drawings: IGalleryEntry[]) : IGalleryEntry[] {
+    let sort: IGalleryEntry[] = new Array();
     for (let drawing of drawings){
       if(drawing.type ==='Privé' && drawing.author_username == this.user)
       {
@@ -166,8 +263,8 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     }
     return sort;
   }
-  sortProtectedVisibility(drawings: Drawing1[]) : Drawing1[] {
-    let sort: Drawing1[] = new Array();
+  sortProtectedVisibility(drawings: IGalleryEntry[]) : IGalleryEntry[] {
+    let sort: IGalleryEntry[] = new Array();
     for (let drawing of drawings){
       if(drawing.type ==='Protégé')
       {
@@ -187,52 +284,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
       }
     }
   }
-
- /*async deleteDrawing(event: MouseEvent, drawing: Drawing): Promise<void> {
-    event.stopPropagation();
-    if (await this.openDrawingService.deleteDrawing(drawing)) {
-      const index = this.dataSource.data.indexOf(drawing, 0);
-      if (index > -1) {
-        this.dataSource.data.splice(index, 1);
-        this.drawingPreview = this.dataSource.data;
-        this.dataObs.next(this.dataSource.data);
-      }
-    }
-  }*/
-
-  // getBackgroundSelected(drawing: Drawing): string {
-  //   return this.openDrawingService.getBackgroundSelected(drawing);
-  // }
-
-  // selectDrawing(drawing: Drawing) {
-  //   this.openDrawingService.selectDrawing(drawing);
-  // }
-
-  // ouvre un nouveau dessin  avec l'ancien drawing
-  // accept(): void {
-  //   this.openDrawingService.accept(this.dialogRef, this.selectedTab.value);
-  // }
-
-  // close(): void {
-  //   this.openDrawingService.reset();
-  //   this.dialogRef.close();
-  // }
-
-  /*add(event: MatChipInputEvent): void {
-    this.openDrawingService.add(event, this.matAutocomplete.isOpen);
-    this.dataSource.filter = this.openDrawingService.selectedTags.toString();
-  }
-
-  remove(tag: string): void {
-    this.openDrawingService.remove(tag);
-    this.dataSource.filter = this.openDrawingService.selectedTags.toString();
-  }*/
-  // Selecting a tag from suggestion
-  /*selected(event: MatAutocompleteSelectedEvent): void {
-    this.openDrawingService.selectTag(event.option.viewValue);
-    this.tagInput.nativeElement.value = '';
-    this.dataSource.filter = this.openDrawingService.selectedTags.toString();
-  }*/
+  
   handleFile() {
     this.openDrawingService.handleFile(this.fileUploadEl.nativeElement.files);
   }
@@ -272,6 +324,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
       });
 
     dialogRef.afterClosed().subscribe(() => {
+      this.sendCreateChannel();
       console.log('The dialog was closed');
     });
   }

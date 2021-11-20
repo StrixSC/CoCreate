@@ -1,7 +1,7 @@
 <div style="text-align: center;">
     <h1 mat-dialog-title>Choisissez les paramètres du nouveau dessin :</h1>
 
-    <form [formGroup]="form" (ngSubmit)="onAccept(form.value)">
+    <form [formGroup]="form" (ngSubmit)="onAccept()">
         <div mat-dialog-content>
             <app-new-drawing-form [newDrawingForm]="newDrawingForm">
             </app-new-drawing-form>

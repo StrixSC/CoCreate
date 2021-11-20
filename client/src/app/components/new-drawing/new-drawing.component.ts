@@ -2,12 +2,15 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { ColorPickerService } from 'src/app/color-picker/color-picker.service';
 import { DEFAULT_RGB_COLOR } from 'src/app/model/rgb.model';
 import { DEFAULT_ALPHA } from 'src/app/model/rgba.model';
+import { DrawingGalleryService } from 'src/app/services/drawing-gallery/drawing-gallery.service';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { NewDrawingService } from 'src/app/services/new-drawing/new-drawing.service';
-import { GridService } from 'src/app/services/tools/grid-tool/grid.service';
+import { SyncCollaborationService } from 'src/app/services/syncCollaboration';
+//import { GridService } from 'src/app/services/tools/grid-tool/grid.service';
 import { NewDrawingAlertComponent } from './new-drawing-alert/new-drawing-alert.component';
 
 const ONE_SECOND = 1000;
@@ -29,7 +32,9 @@ export class NewDrawingComponent implements OnInit {
     private drawingService: DrawingService,
     private dialog: MatDialog,
     private colorPickerService: ColorPickerService,
-    private gridService: GridService,
+    private router: Router,
+    private drawingGalleryService: DrawingGalleryService
+    //private gridService: GridService,
   ) { }
 
   /// Créer un nouveau form avec les dimensions et la couleur
@@ -51,25 +56,30 @@ export class NewDrawingComponent implements OnInit {
 
   /// Ouvre le dialog pour l'alerte lorsque le service est creer
   onAccept(): void {
+    this.router.navigateByUrl('drawing');
     if (this.drawingService.isCreated) {
       const alert = this.dialog.open(NewDrawingAlertComponent, {
         role: 'alertdialog',
       });
       alert.afterClosed().subscribe((result: boolean) => {
         if (result) {
-          this.newDrawing();
+          //this.newDrawing();
         }
       });
     } else {
-      this.newDrawing();
+     // this.newDrawing();
     }
+
+    this.snackBar.open('Nouveau dessin créé', '', { duration: ONE_SECOND, });
+    this.newDrawingService.form.reset();
+    this.dialogRef.close();
   }
 
   /// Cree un nouveau dessin
   private newDrawing() {
     
     console.log(this.form.value)
-    this.gridService.activateGrid.setValue(false);
+    //this.gridService.activateGrid.setValue(false);
     this.drawingService.isCreated = true;
     //const size: { width: 1280, height: 752 } = this.newDrawingService.drawingFormGroup.value;
     this.drawingService.newDrawing(

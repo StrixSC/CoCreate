@@ -140,13 +140,13 @@ export class DrawingService {
   /// Fonction pour appeller la cascade de bonne fonction pour réinitialisé un nouveau dessin
   newDrawing(width: number, height: number, rgba: RGBA): void {
     this.router.navigateByUrl('drawing');
-    this.saved = false;
+    /*this.saved = false;
     this.objectList.clear();
     this.lastObjectId = 0;
-    this.drawing = this.renderer.createElement('svg', 'svg');
+    //this.drawing = this.renderer.createElement('svg', 'svg');
     this.setDimension(1280, 760);
     this.setDrawingColor(rgba);
-    console.log(this.drawing)
+    console.log(this.drawing)*/
     this.drawingEmit.emit(this.drawing);
   }
 
