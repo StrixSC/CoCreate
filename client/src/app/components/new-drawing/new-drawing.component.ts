@@ -9,7 +9,6 @@ import { DEFAULT_ALPHA } from 'src/app/model/rgba.model';
 import { DrawingGalleryService } from 'src/app/services/drawing-gallery/drawing-gallery.service';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { NewDrawingService } from 'src/app/services/new-drawing/new-drawing.service';
-import { SyncCollaborationService } from 'src/app/services/syncCollaboration';
 //import { GridService } from 'src/app/services/tools/grid-tool/grid.service';
 import { NewDrawingAlertComponent } from './new-drawing-alert/new-drawing-alert.component';
 
@@ -51,11 +50,12 @@ export class NewDrawingComponent implements OnInit {
   }
 
   get newDrawingForm(): FormGroup {
-    return (this.form.get('drawingInformation') as FormGroup).get('information') as FormGroup;
+    return (this.form.get('drawingInformation') as FormGroup).get('size') as FormGroup;
   }
 
   /// Ouvre le dialog pour l'alerte lorsque le service est creer
   onAccept(): void {
+    console.log(this.form)
     this.router.navigateByUrl('drawing');
     if (this.drawingService.isCreated) {
       const alert = this.dialog.open(NewDrawingAlertComponent, {

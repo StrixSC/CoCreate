@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/internal/Observable';
 import { WorkspaceService } from 'src/app/services/workspace/workspace.service';
 import { SocketService } from '../chat/socket.service';
 import { IGalleryEntry } from '../../model/IGalleryEntry.model'
-import { SyncCollaborationService } from '../syncCollaboration';
+import { SyncCollaborationService } from '../syncCollaboration.service';
 /// Service pour créer des nouveau canvas de dessin
 @Injectable({providedIn: 'root'})
 export class NewDrawingService {
@@ -19,13 +19,14 @@ export class NewDrawingService {
     private syncCollaborationService: SyncCollaborationService
   ) {
     this.form = this.formBuilder.group({
-      information: this.formBuilder.group({
+      size: this.formBuilder.group({
         title: this.formBuilder.control('',Validators.required),
         type: this.formBuilder.control('',Validators.required),
         author_username: this.formBuilder.control('',Validators.required),
         password: this.formBuilder.control('')
       }),
     });
+    //this.form.updateValueAndValidity;
   }
 
   get drawingFormGroup(): FormGroup {
@@ -38,8 +39,9 @@ export class NewDrawingService {
       this.drawingFormGroup.setValue({ width: this.workspaceService.width, height: this.workspaceService.height });
     }
   }*/
-   sendNewDrawingForm(): void {
-     this.syncCollaborationService.sendCreateCollaboration('demo-dessin', 'Premier dessin', "Public");
+   sendNewDrawingForm(uid: string): void {
+     console.log(this.form)
+     //this.syncCollaborationService.sendCreateCollaboration(uid, this.form.get, type);
   }
 
   receiveMessage(): Observable<IGalleryEntry> {

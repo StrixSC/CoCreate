@@ -15,10 +15,11 @@ import { DrawingGalleryService } from 'src/app/services/drawing-gallery/drawing-
 import { NewDrawingComponent } from '../new-drawing/new-drawing.component';
 import { NewDrawingService } from 'src/app/services/new-drawing/new-drawing.service';
 import { IGalleryEntry } from '../../model/IGalleryEntry.model';
-import { SyncCollaborationService } from 'src/app/services/syncCollaboration';
+import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { SocketService } from 'src/app/services/chat/socket.service';
 import { switchMap, take } from 'rxjs/operators';
 import { now } from 'moment';
+import { AngularFireAuth } from '@angular/fire/auth';
 
 const ONE_WEEK_NUMERIC_VALUE = 24 * 60 * 60 * 1000 * 7;
 
@@ -53,7 +54,7 @@ const DATA: IGalleryEntry[] = [
 
 export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  user: string= "Pati";
+  //user: string= "Pati";
   visible = true;
   selectable = true;
   removable = true;
@@ -63,6 +64,9 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   selectedTab = new FormControl(0);
   errorListener: Subscription;
   messageListener: Subscription;
+
+  private user: firebase.User;
+  private afSubscription: Subscription;
 
   
   
@@ -98,12 +102,64 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     private drawingGalleryService: DrawingGalleryService,
     private newDrawingService: NewDrawingService,
     private syncCollaboration: SyncCollaborationService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private af: AngularFireAuth
   ) {
     
 }
 
   ngOnInit(): void {
+
+    this.afSubscription = this.af.authState.subscribe(user => {
+      if(user !== null){
+      this.user = user;
+      console.log(user.uid);}
+    });
+
+    this.errorListener = this.socketService.socketReadyEmitter
+      .pipe(
+        take(1),
+        switchMap((ready: boolean) => {
+          if (ready) {
+            return merge(
+              this.socketService.onException(),
+              this.socketService.onError()
+            );
+          } else {
+            return of(EMPTY);
+          }
+        })
+      )
+      .subscribe((data) => {
+        console.log(data);
+      });
+
+    this.messageListener = this.socketService.socketReadyEmitter
+      .pipe(
+        take(1),
+        switchMap((ready: boolean) => {
+          if (ready) {
+            return merge(
+              this.syncCollaboration.onJoinCollaboration(),
+              this.syncCollaboration.onConnectCollaboration(),
+              this.syncCollaboration.onCreateCollaboration(),
+              this.syncCollaboration.onDeleteCollaboration(),
+              this.syncCollaboration.onJoinCollaboration(),
+              this.syncCollaboration.onUpdateCollaboration(),
+              this.syncCollaboration.onLoadCollaboration()
+            )
+          } else {
+            console.log("hey 2")
+            return of(EMPTY);
+          }
+        })
+      ).subscribe((data: any) => {
+        console.log('Event received');
+        console.log(data)
+      })
+      console.log("hey")
+
+
     this.drawingGalleryService.getDrawings()
         .subscribe((drawings: IGalleryEntry[]) => {
           this.datasourcePublic.data = drawings;
@@ -114,50 +170,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     
   }
 
-  // ngOnInit() {
-  //   this.errorListener = this.socketService.socketReadyEmitter
-  //     .pipe(
-  //       take(1),
-  //       switchMap((ready: boolean) => {
-  //         if (ready) {
-  //           return merge(
-  //             this.socketService.onException(),
-  //             this.socketService.onError()
-  //           );
-  //         } else {
-  //           return of(EMPTY);
-  //         }
-  //       })
-  //     )
-  //     .subscribe((data) => {
-  //       console.log(data);
-  //     });
-
-  //   this.messageListener = this.socketService.socketReadyEmitter
-  //     .pipe(
-  //       take(1),
-  //       switchMap((ready: boolean) => {
-  //         if (ready) {
-  //           return merge(
-  //             this.syncCollaboration.onJoinCollaboration(),
-  //             this.syncCollaboration.onConnectCollaboration(),
-  //             this.syncCollaboration.onCreateCollaboration(),
-  //             this.syncCollaboration.onDeleteCollaboration(),
-  //             this.syncCollaboration.onJoinCollaboration(),
-  //             this.syncCollaboration.onUpdateCollaboration(),
-  //             this.syncCollaboration.onLoadCollaboration()
-  //           )
-  //         } else {
-  //           console.log("hey 2")
-  //           return of(EMPTY);
-  //         }
-  //       })
-  //     ).subscribe((data: any) => {
-  //       console.log('Event received');
-  //       console.log(data)
-  //     })
-  //     console.log("hey")
-  // }
 
 
   ngOnDestroy(): void {
@@ -165,6 +177,9 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     if (this.datasourcePublic) { this.datasourcePublic.disconnect(); }
     if (this.datasourcePrivate) { this.datasourcePrivate.disconnect(); }
     if (this.datasourceProtected) { this.datasourceProtected.disconnect(); }
+    if(this.afSubscription) {
+      this.afSubscription.unsubscribe();
+    }
   }
 
   ngAfterViewInit(): void {
@@ -184,20 +199,19 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
 
   public sendCreateChannel(){
-  this.syncCollaboration.sendCreateCollaboration('user1', 'first drawing', 'Public');
-    this.syncCollaboration
+  this.newDrawingService.sendNewDrawingForm(this.user.uid);
+  //this.syncCollaboration.sendCreateCollaboration(this.user.uid, 'firstdrawing', 'Public');
+  this.syncCollaboration
       .onCreateCollaboration()
       .subscribe((data: IGalleryEntry) => {
-        //if (!this.messagesSet.has(data.messageId)) {
           this.drawings.push({
               userId: data.userId,
               drawing_id: data.drawing_id, title: data.title, type: data.type,owner: data.author_username, created_at: now().toString() , collaborator_count: data.collaborator_count, author_username: data.author_username, img:"../../../assets/img/mock-img/2.jpg"
             });
-          //this.messagesSet.add(data.messageId);
-          //if (this.messagesSet.size > 20) this.messagesSet.clear();
         });
-    //});
   }
+
+  
 
 
   /*listenToNewMessages() {
@@ -256,7 +270,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   sortPrivateVisibility(drawings: IGalleryEntry[]) : IGalleryEntry[] {
     let sort: IGalleryEntry[] = new Array();
     for (let drawing of drawings){
-      if(drawing.type ==='Privé' && drawing.author_username == this.user)
+      if(drawing.type ==='Privé' /*&& drawing.author_username == this.user*/)
       {
         sort.push(drawing);
       }
