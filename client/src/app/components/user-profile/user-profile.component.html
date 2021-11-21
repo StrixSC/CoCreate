@@ -1,41 +1,68 @@
 
 <!--<img class="avatar" id="photo" src="../assets/105992231-1561667465295gettyimages-521697453.jpeg">-->
     <div class="profile-header">
-    <img mat-card-avatar class="avatar" src="../assets/105992231-1561667465295gettyimages-521697453.jpeg">
+    <img mat-card-avatar class="avatar" src="../assets/105992231-1561667465295gettyimages-521697453.jpeg" alt="Avatar">
+    <!--
     <button mat-button routerLink="/profile-settings" class="profile-settings-btn">Paramètres du compte
     <mat-icon>settings</mat-icon>
     </button>
+    -->
+
+    <!-- username -->
+    <p style="margin-left: 12%; color:white" >@{{username}}</p>
     </div>
-    <mat-card>
-    <mat-list class="personal-info" *ngIf="isPersonalProfile">
-        <mat-list-item>
-        <p class="info-name"><b> Name </b></p>
-        <p class="info-value">{{userName}}</p>
-        </mat-list-item>
-        <mat-divider></mat-divider>
-        <mat-list-item>
-        <p class="info-name"><b> Email </b></p>
-        <p class="info-value">{{userEmail}}</p>
-        </mat-list-item>
-        <mat-divider></mat-divider>
-        <mat-list-item>
-        <p class="info-name"><b> Username </b></p>
-        <p class="info-value">{{username}}</p>
-        </mat-list-item>
-        <mat-divider></mat-divider>
-    </mat-list>
 
-    <mat-list class="personal-info" *ngIf="!isPersonalProfile">
-    <mat-list-item>
-        <p class="info-name"><b> Username </b></p>
-        <p class="info-value">{{username}}</p>
-    </mat-list-item>
-    </mat-list>
+    <!-- table for connection -->
+<mat-accordion>
+    <mat-expansion-panel>
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                <p> Historique de connexion </p>
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+            <table mat-table [dataSource]="logs" class="mat-elevation-z8">
+                <ng-container matColumnDef="type">
+                    <th mat-header-cell *matHeaderCellDef> Type de connexion </th>
+                    <td mat-cell *matCellDef="let element"> {{element.type}} </td>
+                </ng-container>
+                <ng-container matColumnDef="date">
+                    <th mat-header-cell *matHeaderCellDef> Date </th>
+                    <td mat-cell *matCellDef="let element"> {{element.updated_at}} </td>
+                </ng-container>
+                
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+    </mat-expansion-panel>
+</mat-accordion>
 
-    <p> Historique de connexion </p>
+<!-- table for editing -->
+<mat-accordion>
+    <mat-expansion-panel>
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                <p> Historique de l'édition </p>
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+       
+            <table mat-table [dataSource]="editLogs" class="mat-elevation-z8">
+                <ng-container matColumnDef="type">
+                    <th mat-header-cell *matHeaderCellDef> déssin édité </th>
+                    <td mat-cell *matCellDef="let element"> {{element.type}} </td>
+                </ng-container>
+                <ng-container matColumnDef="date">
+                    <th mat-header-cell *matHeaderCellDef> Date </th>
+                    <td mat-cell *matCellDef="let element"> {{element.updated_at}} </td>
+                </ng-container>
+                
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+       
+    </mat-expansion-panel>
+</mat-accordion>
+    
     
 
-    <mat-divider></mat-divider>
-    <p> Historique de l'edition </p>
-</mat-card>
+
 
