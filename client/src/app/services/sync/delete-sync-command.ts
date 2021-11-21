@@ -1,7 +1,7 @@
-import { DeleteCommand } from './../tools/selection-tool/delete-command/delete-command';
+import { DeleteCommand } from '../tools/selection-tool/delete-command/delete-command';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { IDeleteAction } from '../../model/IAction.model';
-import { SyncCommand } from './SyncCommand';
+import { SyncCommand } from './sync-command';
 
 export class DeleteSyncCommand extends SyncCommand {
     public command: DeleteCommand;

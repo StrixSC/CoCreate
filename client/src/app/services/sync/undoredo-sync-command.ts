@@ -1,8 +1,8 @@
 import { CollaborationService } from 'src/app/services/collaboration.service';
 import { SyncDrawingService } from '../syncdrawing.service';
-import { IUndoRedoAction } from './../../model/IAction.model';
-import { DeleteCommand } from './../tools/selection-tool/delete-command/delete-command';
-import { SyncCommand } from './SyncCommand';
+import { IUndoRedoAction } from '../../model/IAction.model';
+import { DeleteCommand } from '../tools/selection-tool/delete-command/delete-command';
+import { SyncCommand } from './sync-command';
 
 export class UndoRedoSyncCommand extends SyncCommand {
     public command: DeleteCommand;

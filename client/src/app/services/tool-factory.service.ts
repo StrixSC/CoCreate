@@ -1,10 +1,10 @@
-import { UndoRedoSyncCommand } from './sync/UndoRedoSyncCommand';
-import { TranslateSyncCommand } from './sync/TranslateSyncCommand';
-import { DeleteSyncCommand } from './sync/DeleteSyncCommand';
-import { RectangleSyncCommand } from './sync/RectangleSyncCommand';
-import { FreedrawSyncCommand } from './sync/FreedrawSyncCommand';
+import { UndoRedoSyncCommand } from './sync/undoredo-sync-command';
+import { TranslateSyncCommand } from './sync/translate-sync-command';
+import { DeleteSyncCommand } from './sync/delete-sync-command';
+import { RectangleSyncCommand } from './sync/rectangle-sync-command';
+import { FreedrawSyncCommand } from './sync/freedraw-sync-command';
 import { SyncDrawingService } from './syncdrawing.service';
-import { IDeleteAction, ISelectionAction, ITranslateAction } from './../model/IAction.model';
+import { IDeleteAction, ISelectionAction, ITranslateAction, IRotateAction } from './../model/IAction.model';
 import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
 import { CollaborationService } from "./collaboration.service";
 import { ICommand } from "src/app/interfaces/command.interface";
@@ -20,8 +20,9 @@ import {
 } from "../model/IAction.model";
 import { Injectable } from "@angular/core";
 import { RendererProviderService } from "./renderer-provider/renderer-provider.service";
-import { SyncCommand } from './sync/SyncCommand';
-import { EllipseSyncCommand } from './sync/EllipseSyncCommand';
+import { SyncCommand } from './sync/sync-command';
+import { EllipseSyncCommand } from './sync/ellipse-sync-command';
+import { RotateSyncCommand } from './sync/rotate-sync-command';
 
 export interface ISavedUserAction {
   command: SyncCommand;
@@ -82,23 +83,33 @@ export class ToolFactoryService {
         this.addOrUpdateCollaboration(res);
       }
     },
-    Translate: (payload: ITranslateAction, isActiveUser: boolean) => {
+    Translate: (payload: ITranslateAction) => {
       const hasOngoingMovement = this.pendingActions.has(payload.actionId);
       if (!hasOngoingMovement) {
-        const command = new TranslateSyncCommand(isActiveUser, payload, this.rendererService.renderer, this.drawingService);
+        const command = new TranslateSyncCommand(payload, this.rendererService.renderer, this.drawingService);
         command.execute();
         this.pendingActions.set(payload.actionId, command);
       } else {
         const command = this.pendingActions.get(payload.actionId);
         const res = command!.update(payload);
-        console.log(payload.state, res);
         if (res) {
           this.addOrUpdateCollaboration(res);
         }
       }
     },
-    Rotate: () => {
-      return;
+    Rotate: (payload: IRotateAction) => {
+      const hasOngoingMovement = this.pendingActions.has(payload.actionId);
+      if (!hasOngoingMovement) {
+        const command = new RotateSyncCommand(payload, this.rendererService.renderer, this.drawingService);
+        command.execute();
+        this.pendingActions.set(payload.actionId, command);
+      } else {
+        const command = this.pendingActions.get(payload.actionId);
+        const res = command!.update(payload);
+        if (res) {
+          this.addOrUpdateCollaboration(res);
+        }
+      }
     },
     Resize: () => {
       return;

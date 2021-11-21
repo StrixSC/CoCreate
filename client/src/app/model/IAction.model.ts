@@ -89,7 +89,8 @@ export type IAction = IDefaultActionPayload & (
     | IUndoRedoAction
     | ITranslateAction
     | IDeleteAction
-    | IResizePayload
+    | IResizeAction
+    | IRotateAction
 );
 
 export type ITranslateAction = IDefaultActionPayload & {
@@ -103,9 +104,15 @@ export type IDeleteAction = IDefaultActionPayload & {
     selectedActionId: string;
 }
 
-export type IResizePayload = IDefaultActionPayload & {
+export type IResizeAction = IDefaultActionPayload & {
     xScale: number;
     state: DrawingState;
     yScale: number;
     selectedActionId: number;
+}
+
+export type IRotateAction = IDefaultActionPayload & {
+    angle: number;
+    state: DrawingState;
+    selectedActionId: string;
 }

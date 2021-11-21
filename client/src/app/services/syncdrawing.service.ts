@@ -190,6 +190,28 @@ export class SyncDrawingService {
     } as ISelectionAction);
   }
 
+  sendRotate(state: DrawingState, selectedActionId: string, angle: number) {
+    if (!selectedActionId) {
+      return;
+    }
+
+    if (state === DrawingState.move && !this.hasStartedMovement) {
+      this.activeActionId = v4();
+      this.hasStartedMovement = true;
+    } else if (state === DrawingState.up && this.hasStartedMovement) {
+      this.hasStartedMovement = false;
+    }
+
+    this.socketService.emit('rotation:emit', {
+      ...this.defaultPayload,
+      actionType: ActionType.Rotate,
+      actionId: this.activeActionId,
+      selectedActionId,
+      state,
+      angle
+    })
+  }
+
   sendTranslate(state: DrawingState, selectedActionId: string, xTranslate: number, yTranslate: number) {
     if (!selectedActionId) {
       return;

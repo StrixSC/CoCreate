@@ -2,7 +2,7 @@ import { MatSnackBar } from '@angular/material';
 import { DrawingState } from 'src/app/model/IAction.model';
 import { CollaborationService } from 'src/app/services/collaboration.service';
 import { SyncDrawingService } from './../../syncdrawing.service';
-import { Injectable } from '@angular/core';
+import { ComponentFactoryResolver, Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { IconDefinition } from '@fortawesome/fontawesome-common-types';
 import { faMousePointer } from '@fortawesome/free-solid-svg-icons';
@@ -10,20 +10,37 @@ import { ICommand } from 'src/app/interfaces/command.interface';
 import { Point } from 'src/app/model/point.model';
 import { Tools } from '../../../interfaces/tools.interface';
 import { DrawingService } from '../../drawing/drawing.service';
-import { MagnetismService } from '../../magnetism/magnetism.service';
 import { OffsetManagerService } from '../../offset-manager/offset-manager.service';
 import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
-import { GridService } from '../grid-tool/grid.service';
 import { ToolIdConstants } from '../tool-id-constants';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { SelectionCommandConstants } from './command-type-constant';
 import { SelectionTransformService } from './selection-transform.service';
+
+export interface SelectionActionButton {
+  iconSrc: string;
+  iconSize: number;
+  buttonWidth: number;
+  buttonGroup: SVGGElement;
+  buttonCircle: SVGCircleElement;
+  buttonIcon: SVGImageElement;
+  stroke: string;
+  opacity: string;
+  opacityHover: string;
+  iconId: string;
+}
 
 export enum SelectionActionTypes {
   Translate,
   Rotate,
   Resize,
   None
+}
+
+export enum ActionButtonIds {
+  ClockwiseRotation = 'clockwiseRotation',
+  CounterClockwiseRotation = 'counterClockwiseRotation',
+  Delete = 'delete'
 }
 
 @Injectable({
@@ -34,10 +51,12 @@ export class SelectionToolService implements Tools {
   readonly id: number = ToolIdConstants.SELECTION_ID;
   readonly faIcon: IconDefinition = faMousePointer;
   readonly toolName = 'Sélection';
+  readonly DEFAULT_ACTION_BUTTON_WIDTH = 12.5;
+  readonly DEFAULT_ACTION_BUTTON_HEIGHT_OFFSET = 30;
+  readonly DEFAULT_BUTTON_GAP = 2;
+
   parameters: FormGroup;
 
-  private hasSelectedItems = false;
-  private isAlt = false;
   private isShift = false;
   private shiftChanged = false;
 
@@ -46,24 +65,42 @@ export class SelectionToolService implements Tools {
     { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 },
     { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 },
   ];
-  private elementCenterPoint: Point;
+  private activeAngle: number;
   private activeActionType = SelectionActionTypes.None;
   private ctrlPoints: SVGRectElement[] = [];
   private ctrlG: SVGGElement;
   private rectSelection: SVGPolygonElement;
 
+  // Action Buttons
+  private actionButtons: SelectionActionButton[] = [
+    {
+      iconSrc: '/assets/svg-icon/rotate_right_black_24dp.svg',
+      buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
+      iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 10,
+      stroke: 'black',
+      opacity: '0.25',
+      opacityHover: '0.50',
+      iconId: ActionButtonIds.ClockwiseRotation,
+    } as SelectionActionButton,
+    {
+      buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
+      iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 10,
+      stroke: 'black',
+      opacity: '0.25',
+      opacityHover: '0.50',
+      iconSrc: '/assets/svg-icon/rotate_left_black_24dp.svg',
+      iconId: ActionButtonIds.CounterClockwiseRotation
+    } as SelectionActionButton,
+  ];
+  private actionButtonGroup: SVGGElement;
   private rectInversement: SVGRectElement;
-  // private firstInvObj: SVGElement | null;
   private recStrokeWidth = 1;
 
   private objects: SVGElement[] = [];
-  private tmpX: number;
-  private tmpY: number;
   private wasMoved = false;
   private isIn = false;
   public selectedActionId: string = "";
   private allowMove: boolean = false;
-  private firstMovementMagnetism: boolean;
 
   constructor(
     private snackBar: MatSnackBar,
@@ -87,9 +124,6 @@ export class SelectionToolService implements Tools {
   onPressed(event: MouseEvent): void {
     if ((event.button === RIGHT_CLICK || event.button === LEFT_CLICK) && this.drawingService.drawing) {
       const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
-      this.tmpX = offset.x;
-      this.tmpY = offset.y;
-      this.firstMovementMagnetism = true;
       let target = event.target as SVGElement;
       if (this.ctrlPoints.includes(target as SVGRectElement)) {
         this.selectionTransformService.createCommand(
@@ -162,8 +196,8 @@ export class SelectionToolService implements Tools {
           const commandType = this.selectionTransformService.getCommandType();
           if (this.activeActionType === SelectionActionTypes.Translate) {
             this.syncService.sendTranslate(DrawingState.up, this.selectedActionId, event.offsetX, event.offsetY);
-          } else if (commandType === SelectionCommandConstants.ROTATE) {
-
+          } else if (this.activeActionType === SelectionActionTypes.Rotate) {
+            this.syncService.sendRotate(DrawingState.up, this.selectedActionId, this.activeAngle);
           } else if (commandType === SelectionCommandConstants.RESIZE) {
 
           }
@@ -178,6 +212,17 @@ export class SelectionToolService implements Tools {
 
       this.endRotation();
       this.selectionTransformService.endCommand();
+    }
+  }
+
+  hoverActionButton(id: string) {
+    const button = this.actionButtons.find((button) => button.iconId === id);
+    button!.buttonCircle.setAttribute('opacity', button!.opacityHover);
+  }
+
+  unhoverActionButton() {
+    for (let button of this.actionButtons) {
+      button.buttonCircle.setAttribute('opacity', button.opacity);
     }
   }
 
@@ -215,7 +260,6 @@ export class SelectionToolService implements Tools {
   /// Methode qui calcule la surface que le rectangle de selection doit prendre en fonction des objets selectionnes.
   private setSelection(): void {
     if (this.hasSelection()) {
-      this.hasSelectedItems = true;
       if (this.objects[0] !== undefined) {
         this.rendererService.renderer.setProperty(this.objects[0], 'isSelected', true);
       }
@@ -300,8 +344,8 @@ export class SelectionToolService implements Tools {
       this.pointsList[5].x = x + width / 2; this.pointsList[5].y = y + height;
       this.pointsList[6].x = x; this.pointsList[6].y = y + height;
       this.pointsList[7].x = x; this.pointsList[7].y = y + height / 2;
-      this.elementCenterPoint = { x: (x + width / 2), y: (y + height / 2) };
 
+      this.updateButtons(this.pointsList[1].x, this.pointsList[1].y);
       this.rendererService.renderer.setAttribute(this.rectSelection, 'points', this.pointsToString());
       for (let i = 0; i < 8; i++) {
         this.rendererService.renderer.setAttribute(this.ctrlPoints[i], 'x', `${this.pointsList[i].x + 0.5 - this.pointsSideLength / 2}`);
@@ -316,7 +360,6 @@ export class SelectionToolService implements Tools {
       this.rendererService.renderer.setProperty(this.objects[0], 'isSelected', false);
     }
     this.objects = [];
-    this.hasSelectedItems = false;
 
     this.rendererService.renderer.removeChild(this.drawingService.drawing, this.rectSelection);
     this.rendererService.renderer.removeChild(this.drawingService.drawing, this.ctrlG);
@@ -377,7 +420,78 @@ export class SelectionToolService implements Tools {
       this.rendererService.renderer.appendChild(this.ctrlG, point);
     }
 
+    this.setActionButtons();
     this.selectionTransformService.setCtrlPointList(this.ctrlPoints);
+  }
+
+  private setActionButtons() {
+    this.actionButtonGroup = this.rendererService.renderer.createElement('g', 'svg');
+    let width = 0;
+    let height = 0;
+    for (let button of this.actionButtons) {
+      this.createButton(button);
+      width += button.buttonWidth;
+      height += button.buttonWidth;
+      this.rendererService.renderer.appendChild(this.actionButtonGroup, button.buttonGroup);
+    }
+
+    this.rendererService.renderer.setAttribute(this.actionButtonGroup, 'width', width.toString());
+    this.rendererService.renderer.setAttribute(this.actionButtonGroup, 'height', height.toString());
+    this.rendererService.renderer.appendChild(this.ctrlG, this.actionButtonGroup);
+  }
+
+  private createButton(button: SelectionActionButton) {
+    button.buttonGroup = this.rendererService.renderer.createElement('g', 'svg');
+    this.rendererService.renderer.setAttribute(button.buttonGroup, 'width', button.buttonWidth.toString());
+    this.rendererService.renderer.setAttribute(button.buttonGroup, 'height', button.buttonWidth.toString());
+    this.rendererService.renderer.setAttribute(button.buttonGroup, 'iconId', button.iconId);
+
+    button.buttonCircle = this.rendererService.renderer.createElement('circle', 'svg');
+    this.rendererService.renderer.setAttribute(button.buttonCircle, 'r', button.buttonWidth.toString());
+    this.rendererService.renderer.setAttribute(button.buttonCircle, 'stroke', button.stroke.toString());
+    this.rendererService.renderer.setAttribute(button.buttonCircle, 'opacity', button.opacity.toString());
+    this.rendererService.renderer.setAttribute(button.buttonCircle, 'iconId', button.iconId);
+
+    button.buttonIcon = this.rendererService.renderer.createElement('image', 'svg');
+    this.rendererService.renderer.setAttribute(button.buttonIcon, 'href', button.iconSrc);
+    this.rendererService.renderer.setAttribute(button.buttonIcon, 'width', button.iconSize.toString());
+    this.rendererService.renderer.setAttribute(button.buttonIcon, 'height', button.iconSize.toString());
+    this.rendererService.renderer.setAttribute(button.buttonIcon, 'iconId', button.iconId);
+
+    this.rendererService.renderer.appendChild(button.buttonGroup, button.buttonCircle);
+    this.rendererService.renderer.appendChild(button.buttonGroup, button.buttonIcon);
+    this.rendererService.renderer.appendChild(this.ctrlG, button.buttonGroup)
+  }
+
+  private updateButtons(x: number, y: number) {
+    const buttonCount = this.actionButtons.length;
+    const yPos = y - this.DEFAULT_ACTION_BUTTON_HEIGHT_OFFSET;
+    for (let i = 0; i < buttonCount; i++) {
+      const button = this.actionButtons[i];
+      let xPos = x;
+      let index = i + 1;
+      let buttonWidth = (button.buttonWidth + this.DEFAULT_BUTTON_GAP) * 2;
+      const half = Math.round(buttonCount / 2);
+
+      if (index === half) {
+        xPos = x;
+      } else if (index < half) {
+        xPos = x - ((half - index) * buttonWidth);
+      } else {
+        xPos = x + ((index - half) * buttonWidth);
+      }
+
+      if (buttonCount % 2 === 0) {
+        xPos -= buttonWidth / 2;
+      }
+
+      this.rendererService.renderer.setAttribute(button.buttonGroup, 'x', xPos.toString());
+      this.rendererService.renderer.setAttribute(button.buttonGroup, 'y', yPos.toString());
+      this.rendererService.renderer.setAttribute(button.buttonCircle, 'cx', xPos.toString());
+      this.rendererService.renderer.setAttribute(button.buttonCircle, 'cy', yPos.toString());
+      this.rendererService.renderer.setAttribute(button.buttonIcon, 'x', `${xPos - button.iconSize / 2}`);
+      this.rendererService.renderer.setAttribute(button.buttonIcon, 'y', `${yPos - button.iconSize / 2}`);
+    }
   }
 
   /// Initialise le rectangle d'inversement.

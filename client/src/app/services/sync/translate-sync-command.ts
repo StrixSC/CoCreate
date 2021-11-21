@@ -1,17 +1,16 @@
 import { Renderer2 } from '@angular/core';
-import { TranslateCommand } from './../tools/selection-tool/translate-command/translate-command';
+import { TranslateCommand } from '../tools/selection-tool/translate-command/translate-command';
 import { DrawingState } from 'src/app/model/IAction.model';
-import { ITranslateAction } from './../../model/IAction.model';
-import { RotateTranslateCompositeCommand } from './../tools/selection-tool/rotate-translate-composite-command/rotate-translate-composite-command';
+import { ITranslateAction } from '../../model/IAction.model';
+import { RotateTranslateCompositeCommand } from '../tools/selection-tool/rotate-translate-composite-command/rotate-translate-composite-command';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
-import { SyncCommand } from './SyncCommand';
+import { SyncCommand } from './sync-command';
 
 export class TranslateSyncCommand extends SyncCommand {
     public command: RotateTranslateCompositeCommand;
     public translateCommand: TranslateCommand;
     private object: SVGElement | null;
     constructor(
-        private isActiveUser: boolean,
         public payload: ITranslateAction,
         private renderer: Renderer2,
         private drawingService: DrawingService

@@ -1,5 +1,5 @@
 import { ICommand } from 'src/app/interfaces/command.interface';
-import { IAction } from './../../model/IAction.model';
+import { IAction } from '../../model/IAction.model';
 
 export abstract class SyncCommand {
     public command: ICommand;

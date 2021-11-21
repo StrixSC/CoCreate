@@ -1,7 +1,7 @@
 import { IAction, ISelectionAction } from './../model/IAction.model';
 import { ICommand } from 'src/app/interfaces/command.interface';
 import { Injectable } from '@angular/core';
-import { SyncCommand } from './sync/SyncCommand';
+import { SyncCommand } from './sync/sync-command';
 
 export interface ActionData {
   commands: SyncCommand[],

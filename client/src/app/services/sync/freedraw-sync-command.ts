@@ -5,7 +5,7 @@ import { toRGBString, fromAlpha } from '../../utils/colors';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { IFreedrawAction, DrawingState } from '../../model/IAction.model';
 import { Renderer2 } from "@angular/core";
-import { SyncCommand } from './SyncCommand';
+import { SyncCommand } from './sync-command';
 
 export class FreedrawSyncCommand extends SyncCommand {
     public command: PencilCommand;

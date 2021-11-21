@@ -1,10 +1,10 @@
-import { RectangleCommand } from './../tools/tool-rectangle/rectangle-command';
-import { IShapeAction } from './../../model/IAction.model';
+import { RectangleCommand } from '../tools/tool-rectangle/rectangle-command';
+import { IShapeAction } from '../../model/IAction.model';
 import { toRGBString, fromAlpha } from '../../utils/colors';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { DrawingState } from '../../model/IAction.model';
 import { Renderer2 } from "@angular/core";
-import { SyncCommand } from './SyncCommand';
+import { SyncCommand } from './sync-command';
 import { FilledShape } from '../tools/tool-rectangle/filed-shape.model';
 
 export class RectangleSyncCommand extends SyncCommand {

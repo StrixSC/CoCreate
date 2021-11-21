@@ -13,7 +13,7 @@ import { DrawingService } from '../drawing/drawing.service';
 import { PencilToolService } from './pencil-tool/pencil-tool.service';
 // import { PipetteToolService } from './pipette-tool/pipette-tool.service';
 // import { PolygonToolService } from './polygon-tool/polygon-tool.service';
-import { SelectionToolService } from './selection-tool/selection-tool.service';
+import { SelectionToolService, ActionButtonIds } from './selection-tool/selection-tool.service';
 // import { SprayToolService } from './spray-tool/spray-tool.service';
 // import { StampToolService } from './stamp-tool/stamp-tool.service';
 import { TextToolService } from './text-tool/text-tool.service';
@@ -144,6 +144,18 @@ export class ToolsService {
       if (!tool) {
         return;
       }
+
+      if (event.target instanceof SVGImageElement || event.target instanceof SVGCircleElement) {
+        const id = (event.target as SVGElement).getAttribute('iconId');
+        if (id && Object.values(ActionButtonIds).map((c) => c.toString()).includes(id) && tool.id === ToolIdConstants.SELECTION_ID) {
+          (tool as SelectionToolService).hoverActionButton(id);
+        }
+      } else {
+        if (tool.id === ToolIdConstants.SELECTION_ID) {
+          (tool as SelectionToolService).unhoverActionButton();
+        }
+      }
+
       if (this.isPressed || tool.id === ToolIdConstants.LINE_ID || tool.id === ToolIdConstants.ERASER_ID) {
         tool.onMove(event);
       }
