@@ -2,7 +2,7 @@ import { MatSnackBar } from '@angular/material';
 import { DrawingState } from 'src/app/model/IAction.model';
 import { CollaborationService } from 'src/app/services/collaboration.service';
 import { SyncDrawingService } from './../../syncdrawing.service';
-import { ComponentFactoryResolver, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { IconDefinition } from '@fortawesome/fontawesome-common-types';
 import { faMousePointer } from '@fortawesome/free-solid-svg-icons';
@@ -54,6 +54,7 @@ export class SelectionToolService implements Tools {
   readonly DEFAULT_ACTION_BUTTON_WIDTH = 12.5;
   readonly DEFAULT_ACTION_BUTTON_HEIGHT_OFFSET = 30;
   readonly DEFAULT_BUTTON_GAP = 2;
+  readonly DEFAULT_ANGLE_SHIFT = 30;
 
   parameters: FormGroup;
 
@@ -65,7 +66,7 @@ export class SelectionToolService implements Tools {
     { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 },
     { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 },
   ];
-  private activeAngle: number;
+
   private activeActionType = SelectionActionTypes.None;
   private ctrlPoints: SVGRectElement[] = [];
   private ctrlG: SVGGElement;
@@ -89,12 +90,14 @@ export class SelectionToolService implements Tools {
       opacity: '0.25',
       opacityHover: '0.50',
       iconSrc: '/assets/svg-icon/rotate_left_black_24dp.svg',
-      iconId: ActionButtonIds.CounterClockwiseRotation
+      iconId: ActionButtonIds.CounterClockwiseRotation,
     } as SelectionActionButton,
   ];
   private actionButtonGroup: SVGGElement;
   private rectInversement: SVGRectElement;
   private recStrokeWidth = 1;
+
+  public angle: number;
 
   private objects: SVGElement[] = [];
   private wasMoved = false;
@@ -122,9 +125,26 @@ export class SelectionToolService implements Tools {
   /// soit on s'aprete a deplacer un ou plusieurs objet ou soit on enleve une selection.
   /// Avec le bouton droit, on debute une zone d'inversion.
   onPressed(event: MouseEvent): void {
+    if (this.hasSelection()) {
+      const id = (event.target as SVGElement).getAttribute('iconId');
+      if (id) {
+        const button = this.actionButtons.find((b) => b.iconId === id);
+        if (button) {
+          if (button.iconId === ActionButtonIds.ClockwiseRotation) {
+            this.rotateClockwiseIncrementally();
+          } else if (button.iconId === ActionButtonIds.CounterClockwiseRotation) {
+            this.rotateCounterClockwiseIncrementally();
+          }
+          this.setSelection();
+          return;
+        }
+      }
+    }
+
     if ((event.button === RIGHT_CLICK || event.button === LEFT_CLICK) && this.drawingService.drawing) {
       const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
       let target = event.target as SVGElement;
+
       if (this.ctrlPoints.includes(target as SVGRectElement)) {
         this.selectionTransformService.createCommand(
           SelectionCommandConstants.RESIZE, this.rectSelection, this.objects, offset, target as SVGRectElement,
@@ -146,6 +166,9 @@ export class SelectionToolService implements Tools {
                 this.allowMove = true;
                 this.selectedActionId = actionId;
                 this.objects.push(obj);
+                this.syncService.sendSelect(this.selectedActionId, true);
+                this.setSelection();
+                this.isIn = true;
               } else {
                 this.snackBar.open('Cet élement est déjà sélectionné par un autre utilisateur.', '', { duration: 1000 });
               }
@@ -164,7 +187,6 @@ export class SelectionToolService implements Tools {
 
         if (this.isInside(offset.x, offset.y)) {
           this.isIn = true;
-          this.setMouseWheelEvent();
           if (!this.selectionTransformService.hasCommand()) {
             this.selectionTransformService.setCommandType(SelectionCommandConstants.NONE);
           }
@@ -196,21 +218,17 @@ export class SelectionToolService implements Tools {
           const commandType = this.selectionTransformService.getCommandType();
           if (this.activeActionType === SelectionActionTypes.Translate) {
             this.syncService.sendTranslate(DrawingState.up, this.selectedActionId, event.offsetX, event.offsetY);
-          } else if (this.activeActionType === SelectionActionTypes.Rotate) {
-            this.syncService.sendRotate(DrawingState.up, this.selectedActionId, this.activeAngle);
           } else if (commandType === SelectionCommandConstants.RESIZE) {
 
           }
 
           this.selectionTransformService.endCommand();
         }
-        this.wasMoved = false;
 
-        this.endRotation();
+        this.wasMoved = false;
         return returnRectangleCommand;
       }
 
-      this.endRotation();
       this.selectionTransformService.endCommand();
     }
   }
@@ -245,9 +263,11 @@ export class SelectionToolService implements Tools {
   }
 
   onKeyDown(event: KeyboardEvent): void {
+    return;
   }
 
   onKeyUp(event: KeyboardEvent): void {
+    return;
   }
 
   pickupTool(): void {
@@ -255,6 +275,17 @@ export class SelectionToolService implements Tools {
   }
   dropTool(): void {
     return;
+  }
+
+  rotateClockwiseIncrementally(): void {
+    this.syncService.sendRotate(DrawingState.down, this.selectedActionId, this.DEFAULT_ANGLE_SHIFT);
+  }
+
+  rotateCounterClockwiseIncrementally(): void {
+    this.syncService.sendRotate(DrawingState.down, this.selectedActionId, -this.DEFAULT_ANGLE_SHIFT);
+  }
+
+  rotate(): void {
   }
 
   /// Methode qui calcule la surface que le rectangle de selection doit prendre en fonction des objets selectionnes.
@@ -508,7 +539,7 @@ export class SelectionToolService implements Tools {
   }
 
   private setMouseWheelEvent(): void {
-    window.addEventListener('wheel', this.rotationAction);
+    window.addEventListener('wheel', this.rotate);
   }
 
   private rotationAction(event: WheelEvent): void {
@@ -528,7 +559,7 @@ export class SelectionToolService implements Tools {
     }
   }
 
-  private endRotation(): void {
+  private removeMouseWheelEvent(): void {
     window.removeEventListener('wheel', this.rotationAction);
   }
 

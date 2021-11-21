@@ -98,18 +98,9 @@ export class ToolFactoryService {
       }
     },
     Rotate: (payload: IRotateAction) => {
-      const hasOngoingMovement = this.pendingActions.has(payload.actionId);
-      if (!hasOngoingMovement) {
-        const command = new RotateSyncCommand(payload, this.rendererService.renderer, this.drawingService);
-        command.execute();
-        this.pendingActions.set(payload.actionId, command);
-      } else {
-        const command = this.pendingActions.get(payload.actionId);
-        const res = command!.update(payload);
-        if (res) {
-          this.addOrUpdateCollaboration(res);
-        }
-      }
+      const command = new RotateSyncCommand(payload, this.rendererService.renderer, this.drawingService);
+      const res = command.execute();
+      this.addOrUpdateCollaboration(res!);
     },
     Resize: () => {
       return;
