@@ -90,7 +90,6 @@ class ChannelSocket extends SocketService {
     });
   }
 
-  // TODO : Be careful with what you receive and update (ex: collaboration_id missing)
   updatedChannel(callbackChannel) {
     socket.on('channel:updated', (data) {
       print('Socket Message : Updated channel');
