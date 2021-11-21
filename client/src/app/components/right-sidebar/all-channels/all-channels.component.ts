@@ -92,9 +92,11 @@ export class AllChannelsComponent implements OnInit, OnChanges {
     console.log(channel_id);
     let channel: IChannel | undefined = this.all_channels.get(channel_id);
     if (channel) {
-      this.deleteChannelEvent.emit(channel);
       this.channelManagerService.DeleteChannel(channel_id);
-      this.getChannels();
+      setTimeout(() => {
+        this.getChannels();
+        this.deleteChannelEvent.emit(channel);
+      }, 100);
     }
   }
 
@@ -109,11 +111,15 @@ export class AllChannelsComponent implements OnInit, OnChanges {
       this.openSnackBar("name already exists!", "close");
     } else {
       this.channelManagerService.CreateChannel(this.input_text);
-      this.channel_names.add(this.input_text);
-      this.getChannels();
-      this.openSnackBar("Channel created!", "close");
-      this.input_text = "";
-      this.browseChannels();
+
+      // Async bug. Fix later.
+      setTimeout(() => {
+        this.channel_names.add(this.input_text);
+        this.getChannels();
+        this.openSnackBar("Channel created!", "close");
+        this.input_text = "";
+        this.browseChannels();
+      }, 100);
     }
   }
 }

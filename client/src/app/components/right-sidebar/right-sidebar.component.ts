@@ -27,7 +27,6 @@ export class RightSidebarComponent implements OnInit {
   constructor(private channelManager: ChannelManagerService) {
     this.textChannels = new Map();
     this.newChannelStyle = { display: "none" };
-    // this.newChannel();
     this.chatDivView = { display: "none", transition: "0.2s" };
   }
 
