@@ -122,6 +122,7 @@ export class ToolFactoryService {
     },
     Save: (payload: { collaborationId: string, actionId: string, userId: string, actionType: string }) => {
       this.syncService.sendSelect(this.selectionService.selectedActionId, false);
+      console.log(this.selectionService.selectedActionId);
       this.syncService.sendSelect(payload.actionId, true);
     },
   };

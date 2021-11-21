@@ -177,9 +177,12 @@ export class SelectionToolService implements Tools {
               if (!isSelected || isSelectedByMe) {
                 this.objects = [];
                 this.allowMove = true;
-                this.selectedActionId = actionId;
                 this.objects.push(obj);
-                this.syncService.sendSelect(this.selectedActionId, true);
+                if (this.selectedActionId !== actionId) {
+                  this.syncService.sendSelect(this.selectedActionId, false);
+                  this.selectedActionId = actionId
+                  this.syncService.sendSelect(this.selectedActionId, true);
+                }
                 this.setSelection();
                 this.isIn = true;
               } else {
