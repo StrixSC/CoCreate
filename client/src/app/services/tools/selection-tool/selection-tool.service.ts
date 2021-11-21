@@ -53,7 +53,7 @@ export class SelectionToolService implements Tools {
   readonly toolName = 'Sélection';
   readonly DEFAULT_ACTION_BUTTON_WIDTH = 12.5;
   readonly DEFAULT_ACTION_BUTTON_HEIGHT_OFFSET = 30;
-  readonly DEFAULT_BUTTON_GAP = 2;
+  readonly DEFAULT_BUTTON_GAP = 3;
   readonly DEFAULT_ANGLE_SHIFT = 30;
 
   parameters: FormGroup;
@@ -91,6 +91,15 @@ export class SelectionToolService implements Tools {
       opacityHover: '0.50',
       iconSrc: '/assets/svg-icon/rotate_left_black_24dp.svg',
       iconId: ActionButtonIds.CounterClockwiseRotation,
+    } as SelectionActionButton,
+    {
+      buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
+      iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 10,
+      stroke: 'black',
+      opacity: '0.25',
+      opacityHover: '0.50',
+      iconSrc: '/assets/svg-icon/trash.svg',
+      iconId: ActionButtonIds.Delete,
     } as SelectionActionButton,
   ];
   private actionButtonGroup: SVGGElement;
@@ -132,10 +141,14 @@ export class SelectionToolService implements Tools {
         if (button) {
           if (button.iconId === ActionButtonIds.ClockwiseRotation) {
             this.rotateClockwiseIncrementally();
+            this.setSelection();
           } else if (button.iconId === ActionButtonIds.CounterClockwiseRotation) {
             this.rotateCounterClockwiseIncrementally();
+            this.setSelection();
+          } else if (button.iconId === ActionButtonIds.Delete) {
+            this.syncService.sendDelete(this.selectedActionId);
+            this.removeSelection();
           }
-          this.setSelection();
           return;
         }
       }
