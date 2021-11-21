@@ -46,6 +46,10 @@ export class RightSidebarComponent implements OnInit {
     this.textChannels.set(channel_id.channel_id, channel_id);
   }
 
+  DeleteChannel(channel_id: IChannel) {
+    this.textChannels.delete(channel_id.channel_id);
+  }
+
   changeChannel(channelID: string) {
     this.selectedChannel = channelID;
     this.newChannelStyle = { display: "none" };

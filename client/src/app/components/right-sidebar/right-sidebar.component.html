@@ -4,6 +4,7 @@
       [ngStyle]="newChannelStyle"
       [channelWidth]="channelBarCss"
       (joinChannelEvent)="AddChannel($event)"
+      (deleteChannelEvent)="DeleteChannel($event)"
       (closeChannelsEvent)="closeBar($event)"
     ></app-all-channels>
     <div [ngStyle]="chatDivView">

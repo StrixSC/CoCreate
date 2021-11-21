@@ -31,6 +31,7 @@ export class AllChannelsComponent implements OnInit, OnChanges {
 
   @Output() closeChannelsEvent = new EventEmitter<boolean>();
   @Output() joinChannelEvent = new EventEmitter<IChannel>();
+  @Output() deleteChannelEvent = new EventEmitter<IChannel>();
   @Input() channelWidth: string;
 
   constructor(
@@ -89,8 +90,12 @@ export class AllChannelsComponent implements OnInit, OnChanges {
 
   deleteChannel(channel_id: string) {
     console.log(channel_id);
-    this.channelManagerService.DeleteChannel(channel_id);
-    this.getChannels();
+    let channel: IChannel | undefined = this.all_channels.get(channel_id);
+    if (channel) {
+      this.deleteChannelEvent.emit(channel);
+      this.channelManagerService.DeleteChannel(channel_id);
+      this.getChannels();
+    }
   }
 
   browseChannels() {
