@@ -106,9 +106,11 @@ export type IDeleteAction = IDefaultActionPayload & {
 
 export type IResizeAction = IDefaultActionPayload & {
     xScale: number;
-    state: DrawingState;
     yScale: number;
-    selectedActionId: number;
+    xTranslate: number;
+    yTranslate: number;
+    state: DrawingState;
+    selectedActionId: string;
 }
 
 export type IRotateAction = IDefaultActionPayload & {

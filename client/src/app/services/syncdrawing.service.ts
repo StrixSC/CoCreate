@@ -248,7 +248,7 @@ export class SyncDrawingService {
     this.socketService.emit('delete:emit', payload);
   }
 
-  sendResize(state: DrawingState, actionId: string, xScale: number, yScale: number) {
+  sendResize(state: DrawingState, actionId: string, xScale: number, yScale: number, xTranslate: number, yTranslate: number) {
     if (!actionId) return;
 
     if (state === DrawingState.move && !this.hasStartedMovement) {
@@ -260,10 +260,14 @@ export class SyncDrawingService {
 
     const payload = {
       ...this.defaultPayload,
+      actionType: ActionType.Resize,
       actionId: this.activeActionId,
       selectedActionId: actionId,
       xScale,
-      yScale
+      yScale,
+      xTranslate,
+      yTranslate,
+      state
     }
 
     this.socketService.emit('resize:emit', payload);

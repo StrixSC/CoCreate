@@ -162,6 +162,8 @@ export class SelectionToolService implements Tools {
         this.selectionTransformService.createCommand(
           SelectionCommandConstants.RESIZE, this.rectSelection, this.objects, offset, target as SVGRectElement,
         );
+        this.allowMove = true;
+        this.activeActionType = SelectionActionTypes.Resize;
         return;
       }
 
@@ -181,8 +183,8 @@ export class SelectionToolService implements Tools {
                 if (this.selectedActionId !== actionId) {
                   this.syncService.sendSelect(this.selectedActionId, false);
                   this.selectedActionId = actionId
-                  this.syncService.sendSelect(this.selectedActionId, true);
                 }
+                this.syncService.sendSelect(this.selectedActionId, true);
                 this.setSelection();
                 this.isIn = true;
               } else {
@@ -227,22 +229,11 @@ export class SelectionToolService implements Tools {
       this.removeInversement();
       this.isIn = false;
       this.shiftChanged = false;
-      let returnRectangleCommand;
-      if (this.wasMoved) {
-        if (this.selectionTransformService.hasCommand() || this.activeActionType !== SelectionActionTypes.None) {
-          returnRectangleCommand = this.selectionTransformService.getCommand();
-          const commandType = this.selectionTransformService.getCommandType();
-          if (this.activeActionType === SelectionActionTypes.Translate) {
-            this.syncService.sendTranslate(DrawingState.up, this.selectedActionId, event.offsetX, event.offsetY);
-          } else if (commandType === SelectionCommandConstants.RESIZE) {
-
-          }
-
-          this.selectionTransformService.endCommand();
-        }
-
-        this.wasMoved = false;
-        return returnRectangleCommand;
+      this.wasMoved = false;
+      if (this.activeActionType === SelectionActionTypes.Translate) {
+        this.syncService.sendTranslate(DrawingState.up, this.selectedActionId, event.offsetX, event.offsetY);
+      } else if (this.activeActionType === SelectionActionTypes.Resize) {
+        this.syncService.sendResize(DrawingState.up, this.selectedActionId, 0, 0, 0, 0);
       }
 
       this.selectionTransformService.endCommand();

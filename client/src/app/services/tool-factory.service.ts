@@ -1,10 +1,11 @@
+import { ResizeSyncCommand } from './sync/resize-sync-command';
 import { UndoRedoSyncCommand } from './sync/undoredo-sync-command';
 import { TranslateSyncCommand } from './sync/translate-sync-command';
 import { DeleteSyncCommand } from './sync/delete-sync-command';
 import { RectangleSyncCommand } from './sync/rectangle-sync-command';
 import { FreedrawSyncCommand } from './sync/freedraw-sync-command';
 import { SyncDrawingService } from './syncdrawing.service';
-import { IDeleteAction, ISelectionAction, ITranslateAction, IRotateAction } from './../model/IAction.model';
+import { IDeleteAction, ISelectionAction, ITranslateAction, IRotateAction, IResizeAction } from './../model/IAction.model';
 import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
 import { CollaborationService } from "./collaboration.service";
 import { ICommand } from "src/app/interfaces/command.interface";
@@ -105,10 +106,24 @@ export class ToolFactoryService {
     Rotate: (payload: IRotateAction) => {
       const command = new RotateSyncCommand(payload, this.rendererService.renderer, this.drawingService);
       const res = command.execute();
-      this.addOrUpdateCollaboration(res!);
+      if (res) {
+        this.addOrUpdateCollaboration(res);
+      }
     },
-    Resize: () => {
-      return;
+    Resize: (payload: IResizeAction) => {
+      console.log(payload.state);
+      const hasOngoingMovement = this.pendingActions.has(payload.actionId);
+      if (!hasOngoingMovement) {
+        const command = new ResizeSyncCommand(payload, this.rendererService.renderer, this.drawingService);
+        command.execute();
+        this.pendingActions.set(payload.actionId, command);
+      } else {
+        const command = this.pendingActions.get(payload.actionId);
+        const res = command!.update(payload);
+        if (res) {
+          this.addOrUpdateCollaboration(res);
+        }
+      }
     },
     UndoRedo: (payload: IUndoRedoAction) => {
       const command = new UndoRedoSyncCommand(payload, this.collaborationService, this.syncService);
