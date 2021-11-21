@@ -1,4 +1,5 @@
 import 'package:Colorimage/utils/rest/channels_api.dart';
+import 'package:Colorimage/utils/rest/collaboration_api.dart';
 import 'package:Colorimage/utils/rest/rest_api_interceptor.dart';
 import 'package:Colorimage/utils/rest/users_api.dart';
 import 'package:http_interceptor/http/intercepted_http.dart';
@@ -9,6 +10,7 @@ class RestApi  {
   late AuthenticationAPI auth;
   late ChannelAPI channel;
   late UsersAPI user;
+  late CollaborationAPI drawing;
 
   final http = InterceptedHttp.build(interceptors: [
     RestApiInterceptor(),
@@ -18,6 +20,7 @@ class RestApi  {
     auth = AuthenticationAPI(http);
     channel = ChannelAPI(http);
     user = UsersAPI(http);
+    drawing = CollaborationAPI(http);
   }
 
 }

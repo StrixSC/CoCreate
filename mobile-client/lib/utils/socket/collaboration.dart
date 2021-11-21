@@ -97,16 +97,12 @@ class CollaborationSocket extends SocketService {
       Collaboration collaboration = Collaboration(
           collaborationId: 'id',
           actions: data["actions"],
-          title: data["title"],
-          authorUsername: data["authorUsername"],
-          authorAvatar: data["authorAvatar"],
           backgroundColor: data["backgroundColor"],
           memberCount: data["memberCount"],
           maxMemberCount: data["maxMemberCount"],
           width: data["width"],
           height: data["height"],
-          members: data["members"],
-          type: 'type');
+          members: data["members"]);
       callbackMessage('load', collaboration);
     });
   }
@@ -145,22 +141,21 @@ class CollaborationSocket extends SocketService {
       Collaboration collaboration = Collaboration(
           collaborationId: 'id',
           actions: data["actions"],
-          title: data["title"],
-          authorUsername: data["authorUsername"],
-          authorAvatar: data["authorAvatar"],
           backgroundColor: data["backgroundColor"],
           memberCount: data["memberCount"],
           maxMemberCount: data["maxMemberCount"],
           width: data["width"],
           height: data["height"],
-          members: data["members"],
-          type: 'type');
+          members: data["members"]);
       Drawing drawing = Drawing(
           drawingId: data['drawingId'],
           thumbnailUrl: data['thumbnailUrl'],
           title: data['title'],
+          authorUsername: data["authorUsername"],
+          authorAvatar: data["authorAvatar"],
           createdAt: data['createdAt'],
-          collaboration: collaboration); // "Protected", "Public" or "Private"
+          collaboration: collaboration,
+          type: 'type'); // "Protected", "Public" or "Private"
       callbackChannel('created', drawing);
     });
   }
@@ -171,23 +166,22 @@ class CollaborationSocket extends SocketService {
       Collaboration collaboration = Collaboration(
           collaborationId: 'id',
           actions: data["actions"],
-          title: data["title"],
-          authorUsername: data["authorUsername"],
-          authorAvatar: data["authorAvatar"],
           backgroundColor: data["backgroundColor"],
           memberCount: data["memberCount"],
           maxMemberCount: data["maxMemberCount"],
           width: data["width"],
           height: data["height"],
-          members: data["members"],
-          type: 'type');
+          members: data["members"]);
       Drawing drawing = Drawing(
           drawingId: data['drawingId'],
           thumbnailUrl: data['thumbnailUrl'],
           title: data['title'],
+          authorUsername: data["authorUsername"],
+          authorAvatar: data["authorAvatar"],
           createdAt: data['createdAt'],
-          collaboration: collaboration); // "Protected", "Public" or "Private"
-      callbackChannel('created', drawing);
+          collaboration: collaboration,
+          type: 'type'); // "Protected", "Public" or "Private"
+      callbackChannel('updated', drawing);
     });
   }
 
@@ -212,7 +206,7 @@ class CollaborationSocket extends SocketService {
         "avatarUrl": data["avatarUrl"],
         "leftAt": data["leftAt"], // ISO Format date
       };
-      callbackChannel('deleted', left);
+      callbackChannel('left', left);
     });
   }
 

@@ -1,7 +1,9 @@
 import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/providers/collaborator.dart';
 import 'package:Colorimage/providers/messenger.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
+import 'package:Colorimage/utils/socket/collaboration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/src/provider.dart';
@@ -60,8 +62,6 @@ class _LoginState extends State<Login> {
     var response = await rest.auth.login(token);
 
     if (response.statusCode == 202) {
-      print(response.body); // Initialize socket connection
-
       initializeSocketConnection(userCredential, token);
 
       // Fetch initial user info
@@ -69,11 +69,13 @@ class _LoginState extends State<Login> {
       context.read<Messenger>().fetchChannels();
       context.read<Messenger>().fetchAllChannels();
 
+      // Fetch initial drawings
+      context.read<Collaborator>().fetchDrawings("", 0, 12);
+
       // Home Page
       Navigator.pushNamed(context, homeRoute);
       // Navigator.pushNamed(context, drawingRoute, arguments: {'socket': context.read<Messenger>().channelSocket.socket});
 
-      print(userCredential.user);
     } else {
       print('Login request failed with status: ${response.statusCode}.');
     }
@@ -83,14 +85,15 @@ class _LoginState extends State<Login> {
     IO.Socket socket = IO.io(
         'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000"),
         IO.OptionBuilder()
-            // .setAuth({token:token})
             .setExtraHeaders({'Authorization': 'Bearer ' + token})
             .disableAutoConnect()
             .setTransports(['websocket']) // for Flutter or Dart VM
             .build());
 
+    CollaborationSocket collaborationSocket = CollaborationSocket(auth.user, socket);
     ChannelSocket channelSocket = ChannelSocket(auth.user, socket);
     context.read<Messenger>().setSocket(channelSocket);
+    context.read<Collaborator>().setSocket(collaborationSocket);
   }
 
   @override
