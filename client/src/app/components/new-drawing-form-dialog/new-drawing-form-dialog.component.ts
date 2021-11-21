@@ -2,7 +2,6 @@ import { Component, Inject } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { VisibilityType } from 'src/app/model/drawing-visibility.model';
-import { IGalleryEntry } from '../../model/IGalleryEntry.model';
 
 @Component({
   selector: 'app-new-drawing-form-dialog',

@@ -40,7 +40,7 @@ export class NewDrawingService {
     }
   }*/
    sendNewDrawingForm(uid: string): void {
-     console.log(this.form)
+     //console.log(this.form)
      //this.syncCollaborationService.sendCreateCollaboration(uid, this.form.get, type);
   }
 

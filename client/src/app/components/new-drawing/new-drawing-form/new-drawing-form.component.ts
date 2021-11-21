@@ -14,12 +14,7 @@ export class NewDrawingFormComponent {
   readonly minDimension: number = MIN_DIMENSION;
   readonly xSize: { width: number, height: number, x: number, y: number } = X_SIZE;
   /// Cree un nouveau form pour la grosseur
-  @Input()
-  newDrawingForm: FormGroup;
-  //@Input() selectedType: string;
-  //@ViewChild('password', {static: false}) type: string;
-  //@ViewChild('visibility', {static: false}) selectedType: string;
-
+  @Input() newDrawingForm: FormGroup;
     
     public visibilityTypes: String[];
     public teamNames: String[];

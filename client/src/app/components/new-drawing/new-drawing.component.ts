@@ -1,6 +1,6 @@
-import { Component, HostListener, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Component, HostListener, Inject, OnInit, ViewChild } from '@angular/core';
+import { Form, FormGroup } from '@angular/forms';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { ColorPickerService } from 'src/app/color-picker/color-picker.service';
@@ -9,6 +9,7 @@ import { DEFAULT_ALPHA } from 'src/app/model/rgba.model';
 import { DrawingGalleryService } from 'src/app/services/drawing-gallery/drawing-gallery.service';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { NewDrawingService } from 'src/app/services/new-drawing/new-drawing.service';
+import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 //import { GridService } from 'src/app/services/tools/grid-tool/grid.service';
 import { NewDrawingAlertComponent } from './new-drawing-alert/new-drawing-alert.component';
 
@@ -22,8 +23,9 @@ const ONE_SECOND = 1000;
   ],
 })
 export class NewDrawingComponent implements OnInit {
+  //@ViewChild ('form', {static: false}) form: FormGroup
   form: FormGroup;
-
+  userID: string;
   constructor(
     public dialogRef: MatDialogRef<NewDrawingComponent>,
     private snackBar: MatSnackBar,
@@ -32,9 +34,13 @@ export class NewDrawingComponent implements OnInit {
     private dialog: MatDialog,
     private colorPickerService: ColorPickerService,
     private router: Router,
-    private drawingGalleryService: DrawingGalleryService
+    private drawingGalleryService: DrawingGalleryService,
+    private syncCollaborationService: SyncCollaborationService,
+    @Inject(MAT_DIALOG_DATA) public data: any,
     //private gridService: GridService,
-  ) { }
+  ) { 
+    this.userID = data;
+  }
 
   /// Créer un nouveau form avec les dimensions et la couleur
   ngOnInit(): void {
@@ -54,9 +60,10 @@ export class NewDrawingComponent implements OnInit {
   }
 
   /// Ouvre le dialog pour l'alerte lorsque le service est creer
-  onAccept(): void {
-    console.log(this.form)
-    this.router.navigateByUrl('drawing');
+  onAccept(form: any): void {
+    let s: string = form['drawingInformation'].size.title as string;
+    let p : string = form['drawingInformation'].size.type as string;
+    this.syncCollaborationService.sendCreateCollaboration(this.userID, s, p);
     if (this.drawingService.isCreated) {
       const alert = this.dialog.open(NewDrawingAlertComponent, {
         role: 'alertdialog',
@@ -105,5 +112,6 @@ export class NewDrawingComponent implements OnInit {
   onResize() {
     this.newDrawingService.onResize();
   }*/
+
 
 }

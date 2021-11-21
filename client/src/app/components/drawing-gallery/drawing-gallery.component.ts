@@ -194,13 +194,11 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   ngOnChanges() {
-    this.sendCreateChannel();
+    this.listenCreateChannel();
   }
 
 
-  public sendCreateChannel(){
-  this.newDrawingService.sendNewDrawingForm(this.user.uid);
-  //this.syncCollaboration.sendCreateCollaboration(this.user.uid, 'firstdrawing', 'Public');
+  public listenCreateChannel(){
   this.syncCollaboration
       .onCreateCollaboration()
       .subscribe((data: IGalleryEntry) => {
@@ -209,6 +207,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
               drawing_id: data.drawing_id, title: data.title, type: data.type,owner: data.author_username, created_at: now().toString() , collaborator_count: data.collaborator_count, author_username: data.author_username, img:"../../../assets/img/mock-img/2.jpg"
             });
         });
+        //this.router.navigateByUrl("/"+this.drawings.slice(-1)[0].drawing_id);
   }
 
   
@@ -334,11 +333,11 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
       {
         autoFocus: false,
         width: '90%', height: '90%',
+        data: this.user.uid,
         
       });
 
     dialogRef.afterClosed().subscribe(() => {
-      this.sendCreateChannel();
       console.log('The dialog was closed');
     });
   }
