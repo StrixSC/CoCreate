@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  Inject,
   Input,
   OnChanges,
   OnInit,
@@ -9,6 +10,11 @@ import {
 import { IChannel } from "src/app/model/IChannel.model";
 import { ChannelManagerService } from "src/app/services/chat/ChannelManager.service";
 
+import { MatSnackBar } from "@angular/material/snack-bar";
+export interface DialogData {
+  animal: "panda" | "unicorn" | "lion";
+}
+
 @Component({
   selector: "app-all-channels",
   templateUrl: "./all-channels.component.html",
@@ -16,14 +22,32 @@ import { ChannelManagerService } from "src/app/services/chat/ChannelManager.serv
 })
 export class AllChannelsComponent implements OnInit, OnChanges {
   all_channels: Map<string, IChannel>;
+  channel_names: Set<string>;
   all_channel_dynamic_css: Object;
+
+  newChannelView: Object;
+  browseChannelView: Object;
+  input_text: string;
+
   @Output() closeChannelsEvent = new EventEmitter<boolean>();
   @Output() joinChannelEvent = new EventEmitter<IChannel>();
   @Input() channelWidth: string;
 
-  constructor(private channelManagerService: ChannelManagerService) {
+  constructor(
+    private channelManagerService: ChannelManagerService,
+    private _snackBar: MatSnackBar
+  ) {
     this.all_channels = new Map();
+    this.channel_names = new Set();
     this.all_channel_dynamic_css = { width: "1200px" };
+    this.browseChannelView = { display: "block" };
+    this.newChannelView = { display: "none" };
+  }
+
+  openSnackBar(message: string, action: string) {
+    this._snackBar.open(message, action, {
+      duration: 1000,
+    });
   }
 
   ngOnInit() {
@@ -35,9 +59,12 @@ export class AllChannelsComponent implements OnInit, OnChanges {
   }
 
   getChannels() {
+    this.all_channels.clear();
+    this.channel_names.clear();
     this.channelManagerService.GetAllChannels().subscribe((data: any) => {
       data.forEach((element: IChannel) => {
         this.all_channels.set(element.channel_id, element);
+        this.channel_names.add(element.name);
       });
     });
   }
@@ -53,5 +80,35 @@ export class AllChannelsComponent implements OnInit, OnChanges {
 
   closeChannelBar() {
     this.closeChannelsEvent.emit(false);
+  }
+
+  createNewChannel() {
+    this.browseChannelView = { display: "none" };
+    this.newChannelView = { display: "block" };
+  }
+
+  deleteChannel(channel_id: string) {
+    console.log(channel_id);
+    this.channelManagerService.DeleteChannel(channel_id);
+    this.getChannels();
+  }
+
+  browseChannels() {
+    this.browseChannelView = { display: "block" };
+    this.newChannelView = { display: "none" };
+  }
+
+  verifyText() {
+    console.log(this.input_text);
+    if (this.channel_names.has(this.input_text)) {
+      this.openSnackBar("name already exists!", "close");
+    } else {
+      this.channelManagerService.CreateChannel(this.input_text);
+      this.channel_names.add(this.input_text);
+      this.getChannels();
+      this.openSnackBar("Channel created!", "close");
+      this.input_text = "";
+      this.browseChannels();
+    }
   }
 }
