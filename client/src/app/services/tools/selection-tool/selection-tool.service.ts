@@ -594,7 +594,7 @@ export class SelectionToolService implements Tools {
     }
   }
 
-  selectByActionId(actionId: string) {
+  selectByActionId(actionId: string, username: string) {
     const obj = this.drawingService.getObjectByActionId(actionId);
     if (!obj) return;
     this.selectedActionId = obj.getAttribute('actionId')!;

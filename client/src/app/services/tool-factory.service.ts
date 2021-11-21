@@ -51,7 +51,11 @@ export class ToolFactoryService {
     },
     Select: (payload: ISelectionAction) => {
       if (payload.isSelected && payload.selectedBy === this.syncService.defaultPayload!.userId) {
-        this.selectionService.selectByActionId(payload.actionId);
+        this.selectionService.selectByActionId(payload.actionId, payload.username);
+      } else if (payload.isSelected) {
+        this.drawingService.renderSelectionIndicator(payload.actionId, true);
+      } else if (!payload.isSelected) {
+        this.drawingService.renderSelectionIndicator(payload.actionId, false);
       }
 
       this.collaborationService.updateActionSelection(payload.userId, payload.actionId, payload.isSelected, payload.selectedBy || '');

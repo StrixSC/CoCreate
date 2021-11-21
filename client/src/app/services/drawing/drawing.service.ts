@@ -130,6 +130,17 @@ export class DrawingService {
     return tmp;
   }
 
+  renderSelectionIndicator(actionId: string, add: boolean): void {
+    const obj = this.getObjectByActionId(actionId);
+    if (!obj) return;
+
+    if (add) {
+      this.renderer.setStyle(obj, 'opacity', 0.25);
+    } else {
+      this.renderer.setStyle(obj, 'opacity', 1);
+    }
+  }
+
   /// Redéfinit la dimension du dessin
   setDimension(width: number, height: number) {
     this.width = width;
