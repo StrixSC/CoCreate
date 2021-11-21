@@ -25,7 +25,6 @@ export class DeleteCommand implements ICommand {
     /// Retrait des elements de la liste du dessin
     execute(): void {
         for (const obj of this.objectList) {
-            console.log(obj);
             this.drawingService.removeObject(Number(obj.id));
 
             const positionStart: number = obj.outerHTML.indexOf('url(#', 0);

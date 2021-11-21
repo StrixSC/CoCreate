@@ -7,7 +7,6 @@ export class DeleteSyncCommand extends SyncCommand {
     public command: DeleteCommand;
 
     constructor(
-        private isActiveUser: boolean,
         public payload: IDeleteAction,
         private drawingService: DrawingService,
     ) {
@@ -18,12 +17,9 @@ export class DeleteSyncCommand extends SyncCommand {
         const object = this.drawingService.getObjectByActionId(this.payload.selectedActionId);
         if (object) {
             this.command = new DeleteCommand(this.drawingService, [object]);
-            if (!this.isActiveUser) {
-                this.command.execute();
-            }
+            this.command.execute();
+            return this;
         }
-
-        return this;
     }
 
     undo(): void {

@@ -76,9 +76,10 @@ export class ToolFactoryService {
       }
 
     },
-    Delete: (payload: IDeleteAction, isActiveUser: boolean) => {
-      const command = new DeleteSyncCommand(isActiveUser, payload, this.drawingService);
+    Delete: (payload: IDeleteAction) => {
+      const command = new DeleteSyncCommand(payload, this.drawingService);
       const res = command.execute();
+      console.log(res);
       if (res) {
         this.addOrUpdateCollaboration(res);
       }
