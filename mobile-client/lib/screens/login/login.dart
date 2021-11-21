@@ -7,6 +7,7 @@ import 'package:Colorimage/utils/socket/collaboration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/src/provider.dart';
+import 'package:translator/translator.dart';
 import '../../app.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -30,6 +31,7 @@ class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String errorMessage = "";
+  final translator = GoogleTranslator();
   late UserCredential userCredential;
 
   final logo = Hero(
@@ -50,8 +52,9 @@ class _LoginState extends State<Login> {
           // .signInWithEmailAndPassword(email: email, password: password);
           .signInWithEmailAndPassword(email: "pri@pri.com", password: "pri123");
     } on FirebaseAuthException catch (e) {
+      await translator.translate(e.message!, from: 'en', to: 'fr').then((value) => errorMessage = value.text);
       setState(() {
-        errorMessage = e.message!;
+        errorMessage;
       });
       return;
     }
@@ -187,7 +190,17 @@ class _LoginState extends State<Login> {
                       // Validate will return true if the form is valid, or false if
                       // the form is invalid.
                       if (_formKey.currentState!.validate()) {
-                        login(userController.text, passController.text);
+                        if(userController.text.isEmpty) {
+                          setState(() {
+                            errorMessage = "Veuillez saisir un courriel.";
+                          });
+                        } else if(passController.text.isEmpty) {
+                          setState(() {
+                            errorMessage = "Veuillez saisir un mot de passe.";
+                          });
+                        } else {
+                          login(userController.text, passController.text);
+                        }
                       }
                     },
                     style:
