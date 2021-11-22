@@ -24,7 +24,14 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
             return res.status(StatusCodes.NO_CONTENT).json([])
         }
 
-        return res.status(StatusCodes.OK).json((collaborations.map((c) => {
+        return res.status(StatusCodes.OK).json((collaborations.filter((c) => {
+            const author = c.collaboration_members.find((m: any) => m.type === MemberType.Owner);
+            if (!author) {
+                return
+            }
+
+            return author.user.userId === req.userId;
+        }).map((c) => {
 
             const author = c.collaboration_members.find((m: any) => m.type === MemberType.Owner);
             if (!author) {

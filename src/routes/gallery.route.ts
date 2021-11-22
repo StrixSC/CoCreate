@@ -19,7 +19,6 @@ router.get('/',
         .optional()
         .toLowerCase(),
     query('type')
-        .toLowerCase()
         .isIn(['Private', 'Public', 'Protected'])
         .withMessage('Provided type is not valid. Please ensure that the provided type is either "Public", "Private" or "Protected".'),
     (req: Request, res: Response, next: NextFunction) => getGalleryController(req, res, next));
