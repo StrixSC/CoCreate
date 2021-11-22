@@ -4,6 +4,7 @@
 node_modules/
 false/
 data
+firebase-data/
 postgresdata/
 key.json
 dist/

@@ -4,6 +4,7 @@ import { db } from './../db';
 import { Server, Socket } from 'socket.io';
 import { Action, Collaboration, CollaborationMember, CollaborationType, Drawing, MemberType, Profile, User } from '.prisma/client';
 import validator from "validator";
+import { io } from '../bin/www';
 
 type CollaborationMemberConnectionResponse = CollaborationMember & {
     user: User & {
@@ -121,13 +122,16 @@ export = (io: Server, socket: Socket) => {
                 }
 
                 // TODO: Might need to switch "socket" to "io"
-                socket.broadcast.to(collaboration.collaboration_id).emit("collaboration:joined", {
+                io.emit("collaboration:joined", {
                     userId: userId,
+                    collaborationId: member.collaboration_id,
                     username: member.user.profile!.username,
                     avatarUrl: member.user.profile!.avatar_url,
                 });
 
-                socket.emit("collaboration:connected", generateConnectedPayload);
+                socket.join(member.collaboration_id);
+
+                socket.emit("collaboration:load", generateConnectedPayload);
             } else {
                 throw new create.Unauthorized("This user is already a member of this channel.");
             }
@@ -479,26 +483,39 @@ export = (io: Server, socket: Socket) => {
     socket.on("collaboration:leave", onLeaveCollaboration);
 }
 
-const generateConnectedPayload = (member: CollaborationMemberConnectionResponse) => ({
-    actions: member.collaboration.actions,
-    memberCount: member.collaboration.collaboration_members.length,
-    maxMemberCount: member.collaboration.max_collaborator_count,
-    title: member.collaboration.drawing!.title,
-    authorUsername: member.collaboration.collaboration_members
-        .find((c) => c.type === MemberType.Owner)!.user.profile!.username || "Admin",
-    authorAvatar: member.collaboration.collaboration_members
-        .find((c) => c.type === MemberType.Owner)!.user.profile?.avatar_url || "",
-    members: member.collaboration.collaboration_members
-        .filter((m) => m.type === MemberType.Regular)
-        .map((m) => ({
-            avatarUrl: m.user.profile!.avatar_url,
-            username: m.user.profile!.username,
-        })),
-    backgroundColor: member.collaboration.drawing!.background_color,
-    width: member.collaboration.drawing!.width,
-    height: member.collaboration.drawing!.height,
+const generateConnectedPayload = (member: CollaborationMemberConnectionResponse) => {
+    const allActiveSockets = io.sockets.adapter.rooms.get(member.collaboration_id);
+    const onlineMembers = [] as string[];
+    const allSockets = io.sockets.sockets;
+    allActiveSockets!.forEach((s) => {
+        for (let [socketId, socket] of allSockets) {
+            if (socketId === s) {
+                onlineMembers.push(socket.data.user);
+            }
+        }
+    })
 
-});
+    return {
+        actions: member.collaboration.actions,
+        memberCount: member.collaboration.collaboration_members.length,
+        maxMemberCount: member.collaboration.max_collaborator_count,
+        title: member.collaboration.drawing!.title,
+        authorUsername: member.collaboration.collaboration_members
+            .find((c) => c.type === MemberType.Owner)!.user.profile!.username || "Admin",
+        authorAvatar: member.collaboration.collaboration_members
+            .find((c) => c.type === MemberType.Owner)!.user.profile?.avatar_url || "",
+        members: member.collaboration.collaboration_members
+            .filter((m) => m.type === MemberType.Regular)
+            .map((m) => ({
+                avatarUrl: m.user.profile!.avatar_url,
+                username: m.user.profile!.username,
+                isOnline: onlineMembers.includes(m.user_id) ? true : false
+            })),
+        backgroundColor: member.collaboration.drawing!.background_color,
+        width: member.collaboration.drawing!.width,
+        height: member.collaboration.drawing!.height,
+    }
+};
 
 const createCollaboration = async (userId: string, type: CollaborationType, title: string, password?: string) => {
     return db.collaboration.create({

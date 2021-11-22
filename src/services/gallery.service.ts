@@ -1,21 +1,8 @@
-import { daysArray, englishLongMonths, frenchLongMonths, DEFAULT_DRAWING_OFFSET, DEFAULT_DRAWING_LIMIT } from './../utils/drawings';
+import { DEFAULT_DRAWING_OFFSET, DEFAULT_DRAWING_LIMIT } from './../utils/drawings';
 import create from 'http-errors';
-import { MemberType, Drawing, Collaboration, CollaborationMember, CollaborationType } from '.prisma/client';
+import { MemberType } from '.prisma/client';
 import { db } from '../db';
-import validator from 'validator';
-import { bilingualMonths, FilterType } from '../utils/drawings';
 import moment from 'moment';
-import { filterByMonth } from './filtered-gallery/month';
-
-export const filterCallback: Record<FilterType, (filter: string, offset: number, limit: number) => Promise<any[]>> = {
-    Month: async (filter, offset, limit) => await filterByMonth(filter, offset, limit),
-    DayOrKeyword: async (filter, offset, limit) => await Promise.resolve([]),
-    Date: async (filter, offset, limit) => await Promise.resolve([]),
-    Keyword: async (filter, offset, limit) => await Promise.resolve([]),
-    NameOrKeyword: async (filter, offset, limit) => await Promise.resolve([]),
-    UsernameOrKeyword: async (filter, offset, limit) => await Promise.resolve([]),
-    YearOrKeyword: async (filter, offset, limit) => await Promise.resolve([])
-}
 
 export const getCollaborations = async (filter: string, offset: number, limit: number) => {
     if (filter) {

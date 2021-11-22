@@ -63,6 +63,7 @@ const io = new Server(server, {
     cors: corsOptions
 });
 
+
 const onConnection = (socket: Socket) => {
     socket.use(logEvent(socket));
 

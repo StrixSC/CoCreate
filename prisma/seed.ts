@@ -22,7 +22,6 @@ async function main() {
         update: {},
         create: {
             collaboration_id: 'DEMO_COLLABORATION',
-            drawing_id: 'DEMO_DRAWING',
             type: CollaborationType.Public,
             drawing: {
                 create: {
@@ -54,7 +53,7 @@ async function main() {
                 }
             },
             channels: {
-                create: [ { channel_id: 'PUBLIC', type: MemberType.Owner } ]
+                create: [{ channel_id: 'PUBLIC', type: MemberType.Owner }]
             }
         }
     });
@@ -80,10 +79,10 @@ async function main() {
                 }
             },
             channels: {
-                create: [ { channel_id: 'PUBLIC', type: MemberType.Regular } ]
+                create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
             },
             collaborations: {
-                create: [ { collaboration_id: 'DEMO_COLLABORATION', type: MemberType.Owner } ]
+                create: [{ collaboration_id: 'DEMO_COLLABORATION', type: MemberType.Owner }]
             }
         }
     });
@@ -110,10 +109,10 @@ async function main() {
                     }
                 },
                 channels: {
-                    create: [ { channel_id: 'PUBLIC', type: MemberType.Regular } ]
+                    create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
                 },
                 collaborations: {
-                    create: [ { collaboration_id: 'DEMO_COLLABORATION', type: MemberType.Regular } ]
+                    create: [{ collaboration_id: 'DEMO_COLLABORATION', type: MemberType.Regular }]
                 }
             }
         });

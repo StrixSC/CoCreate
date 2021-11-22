@@ -1,8 +1,7 @@
 import create from 'http-errors';
-import { compareSync, hashSync } from 'bcrypt';
 import { db } from '../db';
 import { validateRegistration } from '../utils/auth';
-import { LogType, User, MemberType, Profile, Log } from '.prisma/client';
+import { LogType, User, MemberType, Log } from '.prisma/client';
 import { IRegistrationPayload } from '../models/IRegistrationModel';
 import { admin } from '../firebase';
 import log from '../utils/logger';
@@ -70,7 +69,7 @@ export const register = async (payload: IRegistrationPayload): Promise<User | nu
                     }
                 },
                 channels: {
-                    create: [ { channel_id: 'PUBLIC', type: MemberType.Regular } ]
+                    create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
                 }
             }
         });

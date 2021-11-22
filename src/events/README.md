@@ -550,7 +550,7 @@ Client -> Server : `collaboration:join`
 
 Two events will be triggered back (Server -> Clients):
 1) `collaboration:load` : Sent to the user that triggered the event **USE THIS EVENT TO SWITCH THE VIEW TO THE DRAWING VIEW and start loading the drawing**
-2) `collaboration:joined` : Sent to all the users already members of the collaboration session
+2) `collaboration:joined` : Sent to all the users, use this to update the active members on the gallery for the given collaboration_id
 
 Payload to send: 
 
@@ -589,6 +589,7 @@ Response sent with `collaboration:joined`:
 	userId: string, // User Id of the new collaborator
 	username: string // Username of the new collaborator
 	avatarUrl: string // Avatar of the new collaborator
+    collaborationId: stirng // Collaboration/Drawing that was joined.
 }
 ```
 
