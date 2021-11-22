@@ -1,6 +1,6 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/chat.dart';
-import 'package:Colorimage/models/messenger.dart';
+import 'package:Colorimage/providers/messenger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';

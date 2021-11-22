@@ -1,4 +1,5 @@
-import 'package:Colorimage/models/user.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 

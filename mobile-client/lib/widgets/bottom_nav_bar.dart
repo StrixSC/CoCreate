@@ -1,4 +1,6 @@
+import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/user.dart';
+import 'package:Colorimage/screens/galerie/galerie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
@@ -7,8 +9,7 @@ import '../screens/chat/channel.dart';
 
 class BottomNavBar extends StatelessWidget {
   final PersistentTabController _controller;
-  final User _user;
-  BottomNavBar(this._controller, this._user);
+  BottomNavBar(this._controller);
 
   @override
   Widget build(BuildContext context) {
@@ -16,18 +17,10 @@ class BottomNavBar extends StatelessWidget {
           context,
           navBarHeight: 75,
           controller: this._controller,
-          screens: _buildScreens(context, this._user),
+          screens: _buildScreens(context),
           items: _navBarsItems(),
           confineInSafeArea: true,
-          backgroundColor: Colors.white, // Default is Colors.white.
-          handleAndroidBackButtonPress: true, // Default is true.
-          resizeToAvoidBottomInset: true, // This needs to be true if you want to move up the screen when keyboard appears. Default is true.
-          stateManagement: true, // Default is true.
-          hideNavigationBarWhenKeyboardShows: true, // Recommended to set 'resizeToAvoidBottomInset' as true while using this argument. Default is true.
-          decoration: NavBarDecoration(
-            borderRadius: BorderRadius.circular(10.0),
-            colorBehindNavBar: Colors.white,
-          ),
+          backgroundColor: Colors.white,
           popAllScreensOnTapOfSelectedTab: true,
           popActionScreens: PopActionScreensType.all,
           itemAnimationProperties: const ItemAnimationProperties( // Navigation Bar's items animation properties.
@@ -39,16 +32,16 @@ class BottomNavBar extends StatelessWidget {
             curve: Curves.ease,
             duration: Duration(milliseconds: 200),
           ),
-          navBarStyle: NavBarStyle.style3, // Choose the nav bar style with this property.
+          navBarStyle: NavBarStyle.style6, // Choose the nav bar style with this property.
         );
   }
 }
 
-List<Widget> _buildScreens(context, user) {
+List<Widget> _buildScreens(context) {
   return [
     Container(),
     Container(),
-    Container(),
+    Galerie(),
     Container(),
     Container(),
     // add screens here
@@ -56,42 +49,26 @@ List<Widget> _buildScreens(context, user) {
 }
 
 
+final bottomNavBarItems = [
+  {"title": "Accueil"   , "icon": const Icon(CupertinoIcons.home)},
+  {"title": "Clavardage", "icon": const Icon(CupertinoIcons.bubble_left_bubble_right_fill)},
+  {"title": "Galerie"   , "icon": const Icon(CupertinoIcons.plus)},
+  {"title": "Équipes"   , "icon": const Icon(Icons.people)},
+  {"title": "Profiles"  , "icon": const Icon(CupertinoIcons.profile_circled)}
+];
+
 List<PersistentBottomNavBarItem> _navBarsItems() {
-  return [
-    PersistentBottomNavBarItem(
-      icon: Icon(CupertinoIcons.home),
-      iconSize: 35,
-      title: 'Accueil',
-      activeColorPrimary: CupertinoColors.activeBlue,
-      inactiveColorPrimary: CupertinoColors.systemGrey,
-    ),
-    PersistentBottomNavBarItem(
-      icon: Icon(CupertinoIcons.bubble_left_bubble_right_fill),
-      iconSize: 35,
-      title: 'Clavardage',
-      activeColorPrimary: CupertinoColors.activeBlue,
-      inactiveColorPrimary: CupertinoColors.systemGrey,
-    ),
-    PersistentBottomNavBarItem(
-      icon: Icon(CupertinoIcons.plus),
-      iconSize: 35,
-      title: 'Gallerie',
-      activeColorPrimary: CupertinoColors.activeBlue,
-      inactiveColorPrimary: CupertinoColors.systemGrey,
-    ),
-    PersistentBottomNavBarItem(
-      icon: Icon(Icons.people),
-      iconSize: 35,
-      title: 'Équipes',
-      activeColorPrimary: CupertinoColors.activeBlue,
-      inactiveColorPrimary: CupertinoColors.systemGrey,
-    ),
-    PersistentBottomNavBarItem(
-      icon: Icon(CupertinoIcons.profile_circled),
-      iconSize: 35,
-      title: 'Profiles',
-      activeColorPrimary: CupertinoColors.activeBlue,
-      inactiveColorPrimary: CupertinoColors.systemGrey,
-    ),
-  ];
+  List<PersistentBottomNavBarItem> listBottomNavBarItems = [];
+  for(var item in bottomNavBarItems) {
+    listBottomNavBarItems.add(
+      PersistentBottomNavBarItem(
+        icon: item["icon"] as Icon,
+        iconSize: 35,
+        title: item["title"] as String,
+        activeColorPrimary: CupertinoColors.activeBlue,
+        inactiveColorPrimary: CupertinoColors.systemGrey,
+      )
+    );
+  }
+  return listBottomNavBarItems;
 }

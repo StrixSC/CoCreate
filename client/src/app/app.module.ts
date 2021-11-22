@@ -40,7 +40,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { ChatComponent } from './components/chat/chat.component';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
 import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
 import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
@@ -54,6 +53,10 @@ import { MenuPageComponent } from './components/menu-page/menu-page.component';
 import { NewDrawingFormDialogComponent } from './components/new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { CollaborationPasswordFormDialogComponent } from './components/collaboration-password-form-dialog/collaboration-password-form-dialog.component';
 import { TopBarComponent } from './components/top-bar/top-bar.component';
+import { RightSidebarComponent } from "./components/right-sidebar/right-sidebar.component";
+import { ChatBoxComponent } from "./components/right-sidebar/chat-box/chat-box.component";
+import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out/chat-poped-out.component";
+import { AllChannelsComponent } from "./components/right-sidebar/all-channels/all-channels.component";
 
 @NgModule({
   declarations: [
@@ -79,7 +82,6 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     AlertMessageComponent,
     ExportDrawingComponent,
     LoginPageComponent,
-    ChatComponent,
     DrawingPageComponent,
     WelcomePageComponent,
     SignUpPageComponent,
@@ -91,9 +93,12 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     CreateDrawingComponent,
     MenuPageComponent,
     NewDrawingFormDialogComponent,
-    ChatComponent,
     CollaborationPasswordFormDialogComponent,
     TopBarComponent,
+    RightSidebarComponent,
+    ChatBoxComponent,
+    ChatPopedOutComponent,
+    AllChannelsComponent,
   ],
   imports: [
     BrowserModule,
@@ -139,5 +144,4 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {
-}
+export class AppModule {}
