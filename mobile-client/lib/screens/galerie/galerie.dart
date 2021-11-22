@@ -37,7 +37,8 @@ class GalerieState extends State<Galerie> {
   Future<void> _fetchDrawings(int pageKey) async {
     try {
       RestApi rest = RestApi();
-      var response = await rest.drawing.fetchDrawings(null, _pageSize * pageKey, _pageSize);
+      var response = await rest.drawing
+          .fetchDrawings(null, _pageSize * pageKey, _pageSize);
       if (response.statusCode == 200) {
         var jsonResponse =
             json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
@@ -114,14 +115,15 @@ class GalerieState extends State<Galerie> {
                   autofocus: false,
                 )),
             const SizedBox(height: 24.0),
-          Expanded(child: PagedGridView<int, Drawing>(
+            Expanded(
+                child: PagedGridView<int, Drawing>(
               pagingController: _pagingController,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              childAspectRatio:  3 / 2,
+                childAspectRatio: 3 / 2,
                 crossAxisCount: 2,
                 mainAxisSpacing: 18,
                 crossAxisSpacing: 18,
-            ),
+              ),
               builderDelegate: PagedChildBuilderDelegate<Drawing>(
                 itemBuilder: (context, item, index) => _Drawing(
                   drawing: item,
@@ -212,7 +214,13 @@ class _Drawing extends StatelessWidget {
       ),
     );
 
-    return GridTile(
+    return GestureDetector(
+      onTap: () => { print(drawing.collaboration.collaborationId)},
+      child: GridTile(
+      header: Center(
+          child: Padding(
+              padding: const EdgeInsets.only(top: 10.0),
+              child: _GridTitleText(drawing.title))),
       footer: Material(
         color: Colors.transparent,
         shape: const RoundedRectangleBorder(
@@ -221,11 +229,20 @@ class _Drawing extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: GridTileBar(
           backgroundColor: Colors.black45,
-          title: _GridTitleText(drawing.title),
-          subtitle: _GridTitleText(drawing.authorUsername),
+          leading: const CircleAvatar(
+            radius: 24,
+            backgroundColor: kPrimaryColor,
+            child: Icon(Icons.group, color: Colors.black),
+          ),
+          title: _GridTitleText(drawing.authorUsername),
+          subtitle: _GridTitleText(drawing.type),
+          trailing: _GridTitleText(
+              drawing.collaboration.memberCount.toString() +
+                  "/" +
+                  drawing.collaboration.maxMemberCount.toString()),
         ),
       ),
       child: thumbnail,
-    );
+    ));
   }
 }
