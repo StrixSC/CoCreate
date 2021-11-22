@@ -1,7 +1,14 @@
+import 'dart:convert';
 
 import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/models/collaboration.dart';
+import 'package:Colorimage/models/drawing.dart';
+import 'package:Colorimage/providers/collaborator.dart';
+import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:provider/src/provider.dart';
 
 const _fontSize = 20.0;
 const padding = 30.0;
@@ -12,32 +19,57 @@ class Galerie extends StatefulWidget {
 }
 
 class GalerieState extends State<Galerie> {
-  List dataList = <_Photo>[];
-  bool isLoading = false;
-  int pageCount = 1;
-  final List<_Photo> _dessins = [];
-  late ScrollController _scrollController;
-  static final GlobalKey<FormFieldState<String>> _searchFormKey =
-      GlobalKey<FormFieldState<String>>();
-  final FocusNode _focusNode = FocusNode();
-
   TextEditingController searchController = TextEditingController();
+
+  static const _pageSize = 12;
+
+  final PagingController<int, Drawing> _pagingController =
+      PagingController(firstPageKey: 0);
 
   @override
   void initState() {
-    fetchDessins();
-    addItemIntoLisT(1);
-    _scrollController = ScrollController(initialScrollOffset: 5.0)
-      ..addListener(_scrollListener);
+    _pagingController.addPageRequestListener((pageKey) {
+      _fetchDrawings(pageKey);
+    });
+    super.initState();
   }
 
-  void fetchDessins() {
-    for (int i = 0; i < 110; i++) {
-      _dessins.add(_Photo(
-        assetName: 'assets/images/Boruto_Uzumaki_1.png',
-        title: 'Boruto Uzumaki',
-        subtitle: 'Son of Naruto Uzumaki',
-      ));
+  Future<void> _fetchDrawings(int pageKey) async {
+    try {
+      RestApi rest = RestApi();
+      var response = await rest.drawing.fetchDrawings(null, _pageSize * pageKey, _pageSize);
+      if (response.statusCode == 200) {
+        var jsonResponse =
+            json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
+        print('fetchDrawings');
+        print(jsonResponse);
+        List<Drawing> drawings = [];
+        for (var drawing in jsonResponse) {
+          Collaboration collaboration = Collaboration(
+              collaborationId: drawing["collaboration_id"],
+              memberCount: drawing["collaborator_count"],
+              maxMemberCount: drawing["max_collaborator_count"]);
+          // TODO: add updated_at && thumbnail url
+          drawings.add(Drawing(
+              drawingId: drawing['drawing_id'],
+              authorUsername: drawing["author_username"],
+              authorAvatar: drawing["author_avatar"],
+              title: drawing['title'],
+              createdAt: drawing['created_at'],
+              collaboration: collaboration,
+              type: drawing['type']));
+        }
+        final isLastPage = drawings.length < _pageSize;
+        if (isLastPage) {
+          _pagingController.appendLastPage(drawings);
+        } else {
+          final nextPageKey = pageKey + drawings.length;
+          _pagingController.appendPage(drawings, nextPageKey);
+        }
+        context.read<Collaborator>().addDrawings(drawings);
+      }
+    } catch (error) {
+      _pagingController.error = error;
     }
   }
 
@@ -45,7 +77,7 @@ class GalerieState extends State<Galerie> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: kPrimaryColor,
+            backgroundColor: kPrimaryColor,
             centerTitle: true,
             automaticallyImplyLeading: false,
             title: const Text("Galerie de dessins"),
@@ -53,7 +85,8 @@ class GalerieState extends State<Galerie> {
               IconButton(
                   icon: const Icon(CupertinoIcons.plus,
                       color: Colors.white, size: 34),
-                  onPressed: () {createDessinDialog();
+                  onPressed: () {
+                    createDessinDialog();
                   })
             ]),
         body: Container(
@@ -62,10 +95,8 @@ class GalerieState extends State<Galerie> {
             Container(
                 width: 500.0,
                 child: TextField(
-                  key: _searchFormKey,
                   style: const TextStyle(fontSize: 25),
                   controller: searchController,
-                  focusNode: _focusNode,
                   maxLines: 1,
                   decoration: InputDecoration(
                     errorStyle: const TextStyle(fontSize: 26),
@@ -83,22 +114,19 @@ class GalerieState extends State<Galerie> {
                   autofocus: false,
                 )),
             const SizedBox(height: 24.0),
-            Expanded(
-                child: GridView.count(
-              controller: _scrollController,
-              childAspectRatio: 3 / 2,
-              scrollDirection: Axis.vertical,
-              restorationId: 'grid_offset',
-              crossAxisCount: 2,
-              mainAxisSpacing: 18,
-              crossAxisSpacing: 18,
-              padding: const EdgeInsets.all(8),
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: dataList.map((value) {
-                return _GridDemoPhotoItem(
-                  photo: value,
-                );
-              }).toList(),
+          Expanded(child: PagedGridView<int, Drawing>(
+              pagingController: _pagingController,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              childAspectRatio:  3 / 2,
+                crossAxisCount: 2,
+                mainAxisSpacing: 18,
+                crossAxisSpacing: 18,
+            ),
+              builderDelegate: PagedChildBuilderDelegate<Drawing>(
+                itemBuilder: (context, item, index) => _Drawing(
+                  drawing: item,
+                ),
+              ),
             ))
           ]),
         ));
@@ -108,84 +136,44 @@ class GalerieState extends State<Galerie> {
     showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-          title: const Text(
-              'Créer un dessin'),
-          content: TextFormField(
-            style: const TextStyle(fontSize: _fontSize),
-            maxLines: 1,
-            autofocus: false,
-            decoration: InputDecoration(
-              errorStyle: const TextStyle(fontSize: _fontSize),
-              hintText: "Courriel",
-              hintStyle: const TextStyle(
-                fontSize: _fontSize,
+              title: const Text('Créer un dessin'),
+              content: TextFormField(
+                style: const TextStyle(fontSize: _fontSize),
+                maxLines: 1,
+                autofocus: false,
+                decoration: InputDecoration(
+                  errorStyle: const TextStyle(fontSize: _fontSize),
+                  hintText: "Courriel",
+                  hintStyle: const TextStyle(
+                    fontSize: _fontSize,
+                  ),
+                  contentPadding: const EdgeInsets.all(15.0),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0)),
+                ),
+                autovalidate: true,
+                // onFieldSubmitted: (value) {
+                //   if (_formKey.currentState!.validate()) {
+                //     _onSubmitTap(context, userController.text);
+                //   }
+                // },
               ),
-              contentPadding: const EdgeInsets.all(15.0),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0)),
-            ),
-            autovalidate: true,
-            // onFieldSubmitted: (value) {
-            //   if (_formKey.currentState!.validate()) {
-            //     _onSubmitTap(context, userController.text);
-            //   }
-            // },
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, 'Créer');
-              },
-              child: const Text('Créer'),
-            ),
-          ],
-        ));
-  }
-
-  _scrollListener() {
-    if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
-        !_scrollController.position.outOfRange) {
-      setState(() {
-        print("comes to bottom $isLoading");
-        isLoading = true;
-
-        if (isLoading) {
-          print("RUNNING LOAD MORE");
-
-          pageCount = pageCount + 1;
-
-          addItemIntoLisT(pageCount);
-        }
-      });
-    }
-  }
-
-  ////ADDING DATA INTO ARRAYLIST
-  void addItemIntoLisT(var pageCount) {
-    for (int i = (pageCount * 10) - 10; i < pageCount * 10; i++) {
-      dataList.add(_dessins[i]);
-      isLoading = false;
-    }
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, 'Créer');
+                  },
+                  child: const Text('Créer'),
+                ),
+              ],
+            ));
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _pagingController.dispose();
     super.dispose();
   }
-}
-
-class _Photo {
-  _Photo({
-    required this.assetName,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final String assetName;
-  final String title;
-  final String subtitle;
 }
 
 /// Allow the text size to shrink to fit in the space
@@ -204,27 +192,25 @@ class _GridTitleText extends StatelessWidget {
   }
 }
 
-class _GridDemoPhotoItem extends StatelessWidget {
-  const _GridDemoPhotoItem({
-    required this.photo,
+class _Drawing extends StatelessWidget {
+  const _Drawing({
+    required this.drawing,
   });
 
-  final _Photo photo;
+  final Drawing drawing;
 
   @override
   Widget build(BuildContext context) {
-    final Widget image = Container(
-        decoration: BoxDecoration(
-            border:
-                Border.all(width: 2.5, color: Colors.grey.withOpacity(0.2))),
-        child: Material(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-          clipBehavior: Clip.antiAlias,
-          child: Image.asset(
-            photo.assetName,
-            fit: BoxFit.cover,
-          ),
-        ));
+    final Widget thumbnail = Container(
+      decoration: BoxDecoration(
+          border: Border.all(width: 2.5, color: Colors.grey.withOpacity(0.2))),
+      child: Material(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+        clipBehavior: Clip.antiAlias,
+        child: Image.network(
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/A_black_image.jpg/640px-A_black_image.jpg'),
+      ),
+    );
 
     return GridTile(
       footer: Material(
@@ -235,11 +221,11 @@ class _GridDemoPhotoItem extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: GridTileBar(
           backgroundColor: Colors.black45,
-          title: _GridTitleText(photo.title),
-          subtitle: _GridTitleText(photo.subtitle),
+          title: _GridTitleText(drawing.title),
+          subtitle: _GridTitleText(drawing.authorUsername),
         ),
       ),
-      child: image,
+      child: thumbnail,
     );
   }
 }

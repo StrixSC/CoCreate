@@ -75,6 +75,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
           onGenerateRoute: _routes(),
           theme: ThemeData(
               primarySwatch: createMaterialColor(kPrimaryColor),
+              accentColor: kPrimaryColor2,
               canvasColor: kContentColor2,
               scaffoldBackgroundColor: kContentColor2,
               primaryColor: kPrimaryColor,

@@ -44,6 +44,11 @@ class Collaborator extends ChangeNotifier {
     notifyListeners();
   }
 
+  void addDrawings(List<Drawing> updatedDrawings) {
+    for (var element in updatedDrawings) {allDrawings.add(element); }
+    notifyListeners();
+  }
+
   void loadDrawing(Collaboration collaboration) {
     collaboration.collaborationId =
         allDrawings[currentDrawingIndex].collaboration.collaborationId;
@@ -51,17 +56,10 @@ class Collaborator extends ChangeNotifier {
     notifyListeners();
   }
 
-  // TODO: add collaboration id when ready
   void memberJoined(Member member) {
-    int index = allDrawings
-        .indexWhere((element) => element.collaboration.collaborationId == "");
-    if (index != -1) {
-      allDrawings[index].collaboration.members.add(member);
-      allDrawings[index].collaboration.memberCount++;
-      notifyListeners();
-    } else {
-      throw ("Joined member collaboration index not found.");
-    }
+    allDrawings[currentDrawingIndex].collaboration.members.add(member);
+    allDrawings[currentDrawingIndex].collaboration.memberCount++;
+    notifyListeners();
   }
 
   void memberConnected(Member member) {
@@ -124,7 +122,7 @@ class Collaborator extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchDrawings(String filter, int offset, int limit) async {
+  Future<void> fetchDrawings(String? filter, int offset, int limit) async {
     RestApi rest = RestApi();
     var response = await rest.drawing.fetchDrawings(filter, offset, limit);
     if (response.statusCode == 200) {
@@ -150,8 +148,8 @@ class Collaborator extends ChangeNotifier {
       }
       updateDrawings(drawings);
     } else {
-      print('Request failed with status: ${response.body}.');
-      updateDrawings([]);
+      print('Request failed with status: ${response.statusCode}.');
+      if(response.statusCode != 204) { updateDrawings([]); };
     }
   }
 

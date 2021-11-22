@@ -48,6 +48,7 @@ class _LoginState extends State<Login> {
 
   Future<void> login(email, password) async {
     try {
+      // TODO : Don't forget to uncomment controllers at the end
       userCredential = await FirebaseAuth.instance
           // .signInWithEmailAndPassword(email: email, password: password);
           .signInWithEmailAndPassword(email: "pri@pri.com", password: "pri123");
@@ -71,9 +72,6 @@ class _LoginState extends State<Login> {
       context.read<Messenger>().updateUser(userCredential);
       context.read<Messenger>().fetchChannels();
       context.read<Messenger>().fetchAllChannels();
-
-      // Fetch initial drawings
-      context.read<Collaborator>().fetchDrawings("", 0, 12);
 
       // Home Page
       Navigator.pushNamed(context, homeRoute);
@@ -189,18 +187,19 @@ class _LoginState extends State<Login> {
                     onPressed: () {
                       // Validate will return true if the form is valid, or false if
                       // the form is invalid.
+                      // TODO: Uncomment this
                       if (_formKey.currentState!.validate()) {
-                        if(userController.text.isEmpty) {
-                          setState(() {
-                            errorMessage = "Veuillez saisir un courriel.";
-                          });
-                        } else if(passController.text.isEmpty) {
-                          setState(() {
-                            errorMessage = "Veuillez saisir un mot de passe.";
-                          });
-                        } else {
+                        // if(userController.text.isEmpty) {
+                        //   setState(() {
+                        //     errorMessage = "Veuillez saisir un courriel.";
+                        //   });
+                        // } else if(passController.text.isEmpty) {
+                        //   setState(() {
+                        //     errorMessage = "Veuillez saisir un mot de passe.";
+                        //   });
+                        // } else {
                           login(userController.text, passController.text);
-                        }
+                        // }
                       }
                     },
                     style:
