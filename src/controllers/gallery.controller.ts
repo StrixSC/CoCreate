@@ -1,4 +1,4 @@
-import { MemberType } from '.prisma/client';
+import { MemberType, Collaboration, CollaborationType } from '.prisma/client';
 import { validationResult, matchedData } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 import { handleRequestError } from './../utils/errors';
@@ -16,9 +16,9 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
         }
 
         const data = matchedData(req, { locations: ['query'] });
-        const { filter, offset, limit } = data;
+        const { filter, offset, limit, type } = data;
 
-        const collaborations = await getCollaborations(filter, offset, limit);
+        const collaborations = await getCollaborations(filter, offset, limit, type);
 
         if (collaborations.length <= 0) {
             return res.status(StatusCodes.NO_CONTENT).json([])

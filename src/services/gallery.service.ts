@@ -1,10 +1,10 @@
 import { DEFAULT_DRAWING_OFFSET, DEFAULT_DRAWING_LIMIT } from './../utils/drawings';
 import create from 'http-errors';
-import { MemberType } from '.prisma/client';
+import { MemberType, CollaborationType } from '.prisma/client';
 import { db } from '../db';
 import moment from 'moment';
 
-export const getCollaborations = async (filter: string, offset: number, limit: number) => {
+export const getCollaborations = async (filter: string, offset: number, limit: number, type: CollaborationType) => {
     if (filter) {
         return getCollaborationsWithFilter(filter, offset, limit);
     }
@@ -24,6 +24,9 @@ export const getCollaborations = async (filter: string, offset: number, limit: n
                     }
                 }
             }
+        },
+        where: {
+            type: type,
         }
     });
 

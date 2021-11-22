@@ -957,6 +957,15 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": true,
+                        "description": "Private, Public or Protected",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "operationId": "Fetch channel messages by id",
