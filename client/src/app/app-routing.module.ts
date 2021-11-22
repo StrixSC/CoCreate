@@ -23,7 +23,7 @@ const routes: Routes = [
       authGuardPipe: redirectLoggedInToDrawing,
   }},
   { path: 'workspace', component: SidenavComponent },
-  { path: 'profile', component: UserProfileComponent },
+  { path: 'profile/:id', component: UserProfileComponent },
   { path: 'profile-settings', component: UserProfileSettingsComponent},
   { path: 'drawing', component: DrawingPageComponent, canActivate: [AngularFireAuthGuard], data: {
       authGuardPipe: redirectUnauthorizedToLogin,
@@ -31,6 +31,7 @@ const routes: Routes = [
   { path: 'chat', component: ChatComponent },
   { path: 'forgot-password', component: ChangePasswordComponent },
   { path: '**', redirectTo: '' },
+  //{par: '404',red}
 ];
 
 @NgModule({
