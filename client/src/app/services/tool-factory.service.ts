@@ -104,10 +104,25 @@ export class ToolFactoryService {
       }
     },
     Rotate: (payload: IRotateAction) => {
-      const command = new RotateSyncCommand(payload, this.rendererService.renderer, this.drawingService);
-      const res = command.execute();
-      if (res) {
-        this.addOrUpdateCollaboration(res);
+      if (payload.state === DrawingState.down) {
+        const command = new RotateSyncCommand(payload, this.rendererService.renderer, this.drawingService);
+        const res = command.execute();
+        if (res) {
+          this.addOrUpdateCollaboration(res);
+        }
+      } else {
+        const hasOngoingMovement = this.pendingActions.has(payload.actionId);
+        if (!hasOngoingMovement) {
+          const command = new RotateSyncCommand(payload, this.rendererService.renderer, this.drawingService);
+          command.execute();
+          this.pendingActions.set(payload.actionId, command);
+        } else {
+          const command = this.pendingActions.get(payload.actionId);
+          const res = command!.update(payload);
+          if (res) {
+            this.addOrUpdateCollaboration(res);
+          }
+        }
       }
     },
     Resize: (payload: IResizeAction) => {
@@ -137,7 +152,6 @@ export class ToolFactoryService {
     },
     Save: (payload: { collaborationId: string, actionId: string, userId: string, actionType: string }) => {
       this.syncService.sendSelect(this.selectionService.selectedActionId, false);
-      console.log(this.selectionService.selectedActionId);
       this.syncService.sendSelect(payload.actionId, true);
     },
   };

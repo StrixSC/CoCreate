@@ -40,6 +40,7 @@ export enum SelectionActionTypes {
 export enum ActionButtonIds {
   ClockwiseRotation = 'clockwiseRotation',
   CounterClockwiseRotation = 'counterClockwiseRotation',
+  HoldRotation = 'holdRotation',
   Delete = 'delete'
 }
 
@@ -52,6 +53,7 @@ export class SelectionToolService implements Tools {
   readonly faIcon: IconDefinition = faMousePointer;
   readonly toolName = 'Sélection';
   readonly DEFAULT_ACTION_BUTTON_WIDTH = 12.5;
+  readonly DEFAULT_ACTION_BUTTON_WIDTH_OFFSET = 30;
   readonly DEFAULT_ACTION_BUTTON_HEIGHT_OFFSET = 30;
   readonly DEFAULT_BUTTON_GAP = 3;
   readonly DEFAULT_ANGLE_SHIFT = 30;
@@ -101,18 +103,28 @@ export class SelectionToolService implements Tools {
       iconSrc: '/assets/svg-icon/trash.svg',
       iconId: ActionButtonIds.Delete,
     } as SelectionActionButton,
+    {
+      buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
+      iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 2.5,
+      stroke: 'black',
+      opacity: '0.25',
+      opacityHover: '0.50',
+      iconSrc: '/assets/svg-icon/arrow.svg',
+      iconId: ActionButtonIds.HoldRotation,
+    } as SelectionActionButton
   ];
   private actionButtonGroup: SVGGElement;
   private rectInversement: SVGRectElement;
   private recStrokeWidth = 1;
 
-  public angle: number;
+  public activeAngle: number = 0;
 
   private objects: SVGElement[] = [];
   private wasMoved = false;
   private isIn = false;
   public selectedActionId: string = "";
   private allowMove: boolean = false;
+  private isRotating: boolean = false;
 
   constructor(
     private snackBar: MatSnackBar,
@@ -148,6 +160,9 @@ export class SelectionToolService implements Tools {
           } else if (button.iconId === ActionButtonIds.Delete) {
             this.syncService.sendDelete(this.selectedActionId);
             this.removeSelection();
+          } else if (button.iconId === ActionButtonIds.HoldRotation) {
+            this.isRotating = true;
+            this.setSelection();
           }
           return;
         }
@@ -220,7 +235,15 @@ export class SelectionToolService implements Tools {
   /// et on recherche les objets a l'interieur. Avec le droit, on termine la zone d'inversement et on inverse
   /// la selection des objets se situant a l'interieur.
   onRelease(event: MouseEvent): ICommand | void {
+    if (this.isRotating) {
+      this.isRotating = false;
+      this.syncService.sendRotate(DrawingState.up, this.selectedActionId, 0);
+      this.activeActionType = SelectionActionTypes.None;
+      return;
+    }
+
     if (!this.allowMove) return;
+
     if ((event.button === RIGHT_CLICK || event.button === LEFT_CLICK) && this.drawingService.drawing) {
       if (this.objects.length > 0) {
         this.syncService.sendSelect(this.selectedActionId, true);
@@ -253,6 +276,11 @@ export class SelectionToolService implements Tools {
 
   onMove(event: MouseEvent): void {
     const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
+    if (this.isRotating) {
+      this.rotate(event);
+      return;
+    }
+
     if (this.drawingService.drawing) {
       if (event.buttons === 1) {
         this.wasMoved = true;
@@ -292,7 +320,16 @@ export class SelectionToolService implements Tools {
     this.syncService.sendRotate(DrawingState.down, this.selectedActionId, -this.DEFAULT_ANGLE_SHIFT);
   }
 
-  rotate(): void {
+  rotate(event: MouseEvent): void {
+    this.activeActionType = SelectionActionTypes.Rotate;
+    const boundingRect = this.rectSelection.getBoundingClientRect();
+    const centerX = (boundingRect.left) + (boundingRect.width / 2);
+    const centerY = (boundingRect.top) + (boundingRect.height / 2);
+    const mouseX = event.pageX - this.actionButtonGroup.getBoundingClientRect().width;
+    const mouseY = event.pageY - this.actionButtonGroup.getBoundingClientRect().height;
+    const radians = Math.atan2(mouseX - centerX, mouseY - centerY);
+    const degree = (radians * (180 / Math.PI) * -1) + 90;
+    this.syncService.sendRotate(DrawingState.move, this.selectedActionId, degree / 360);
   }
 
   /// Methode qui calcule la surface que le rectangle de selection doit prendre en fonction des objets selectionnes.

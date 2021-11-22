@@ -2,7 +2,7 @@ import { RotateOnItselfCommand } from './../tools/selection-tool/rotate-command/
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { Renderer2 } from '@angular/core';
 import { RotateTranslateCompositeCommand } from './../tools/selection-tool/rotate-translate-composite-command/rotate-translate-composite-command';
-import { IRotateAction } from '../../model/IAction.model';
+import { DrawingState, IRotateAction } from '../../model/IAction.model';
 import { SyncCommand } from './sync-command';
 
 export class RotateSyncCommand extends SyncCommand {
@@ -15,8 +15,11 @@ export class RotateSyncCommand extends SyncCommand {
     }
 
     execute(): SyncCommand | void {
+        if (this.payload.state === DrawingState.up) {
+            return this;
+        }
+
         this.object = this.drawingService.getObjectByActionId(this.payload.selectedActionId);
-        let prevRotation = this.payload.angle;
 
         if (!this.command && this.object) {
             this.command = new RotateTranslateCompositeCommand();
@@ -24,8 +27,12 @@ export class RotateSyncCommand extends SyncCommand {
             this.command.addSubCommand(this.rotateCommand);
         }
 
-        this.rotateCommand.rotate(prevRotation);
-        return this;
+        const lastAngle = this.rotateCommand.lastAngle;
+        this.rotateCommand.rotate(lastAngle + this.payload.angle);
+
+        if (this.payload.state === DrawingState.down) {
+            return this;
+        }
     }
 
     undo(): void {
