@@ -15,6 +15,7 @@ import { HttpClient } from "@angular/common/http";
 import { IReceiveMessagePayload } from "src/app/model/IReceiveMessagePayload.model";
 import { ChannelManagerService } from "src/app/services/chat/ChannelManager.service";
 import { IChannelPayload } from "src/app/model/IChannelPayload.model";
+import { IpcService } from "src/app/services/notification-manager/IPCManager.service";
 
 export interface MessageHeader {
   color: string;
@@ -55,7 +56,8 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
   constructor(
     private chatSocketService: ChatSocketService,
     private http: HttpClient,
-    private channelManagerService: ChannelManagerService
+    private channelManagerService: ChannelManagerService,
+    private ipcService: IpcService
   ) {
     this.messagesSet = new Set();
     this.messages = [];
@@ -129,6 +131,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
 
   sendMessage() {
     if (this.currentText.length > 0) {
+      this.ipcService.send(`#${this.chatBoxName}`, this.currentText);
       this.chatSocketService.sendMessage(this.channel_id, this.currentText);
       this.currentText = "";
     }

@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { IChannel } from "src/app/model/IChannel.model";
 import { ChannelManagerService } from "src/app/services/chat/ChannelManager.service";
+import { IpcService } from "src/app/services/notification-manager/IPCManager.service";
 
 @Component({
   selector: "app-right-sidebar",
@@ -26,14 +27,18 @@ export class RightSidebarComponent implements OnInit {
 
   audio: HTMLAudioElement | null;
 
-  constructor(private channelManager: ChannelManagerService) {
+  constructor(
+    private channelManager: ChannelManagerService,
+    private ipcService: IpcService
+  ) {
     this.textChannels = new Map();
     this.newChannelStyle = { display: "none" };
     this.chatDivView = { display: "none", transition: "0.2s" };
-    this.audio = new Audio();
-    this.audio.src = "../../../../assets/Audio/Track 1.mp3";
-    this.audio.load();
-    this.audio.play();
+    // this.audio = new Audio();
+    // this.audio.src = "../../../../assets/Audio/Track 1.mp3";
+    // this.audio.load();
+    // this.audio.play();
+    this.ipcService.send("#general", "hello from angular!");
   }
 
   ngOnInit(): void {}
