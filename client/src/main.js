@@ -1,5 +1,5 @@
 const { app, BrowserWindow, ipcMain, Notification } = require("electron");
-process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+
 const url = require("url");
 const path = require("path");
 

@@ -39,7 +39,7 @@ export class IpcService {
   readonly NOTIFICATION_CHANNEL = "notification";
 
   constructor() {
-    this._ipc = window.require("electron").ipcRenderer;
+    // this._ipc = window.require("electron").ipcRenderer;
   }
 
   public on(channel: string, listener: any): void {

@@ -41,7 +41,25 @@ export class RightSidebarComponent implements OnInit {
     this.ipcService.send("#general", "hello from angular!");
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.channelManager.GetUser().subscribe((user) => {
+      if (user) {
+        this.channelManager
+          .GetUserChannels(user["uid"])
+          .subscribe((channel_list: any[]) => {
+            console.log(channel_list);
+            this.connectChannels(channel_list);
+          });
+      }
+    });
+  }
+
+  connectChannels(channel_list: any[]) {
+    channel_list.forEach((channel: IChannel) => {
+      channel.channel_id;
+      this.textChannels.set(channel.channel_id, channel);
+    });
+  }
 
   getChannels() {
     this.channelManager.GetAllChannels().subscribe((data: any) => {
