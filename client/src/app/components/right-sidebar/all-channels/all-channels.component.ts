@@ -105,21 +105,23 @@ export class AllChannelsComponent implements OnInit, OnChanges {
     this.newChannelView = { display: "none" };
   }
 
+  createChannel() {
+    this.channelManagerService.CreateChannel(this.input_text);
+    setTimeout(() => {
+      this.channel_names.add(this.input_text);
+      this.getChannels();
+      this.openSnackBar("Channel created!", "close");
+      this.input_text = "";
+      this.browseChannels();
+    }, 100);
+  }
+
   verifyText() {
     console.log(this.input_text);
     if (this.channel_names.has(this.input_text)) {
       this.openSnackBar("name already exists!", "close");
     } else {
-      this.channelManagerService.CreateChannel(this.input_text);
-
-      // Async bug. Fix later.
-      setTimeout(() => {
-        this.channel_names.add(this.input_text);
-        this.getChannels();
-        this.openSnackBar("Channel created!", "close");
-        this.input_text = "";
-        this.browseChannels();
-      }, 100);
+      this.createChannel();
     }
   }
 }
