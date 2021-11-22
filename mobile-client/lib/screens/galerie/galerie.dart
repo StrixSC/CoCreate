@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/collaboration.dart';
 import 'package:Colorimage/models/drawing.dart';
@@ -7,16 +6,20 @@ import 'package:Colorimage/providers/collaborator.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/src/provider.dart';
 
 const _fontSize = 20.0;
 const padding = 30.0;
 
+
 class Galerie extends StatefulWidget {
   @override
   GalerieState createState() => GalerieState();
 }
+
+final _formKey = GlobalKey<FormBuilderState>();
 
 class GalerieState extends State<Galerie> {
   TextEditingController searchController = TextEditingController();
@@ -87,7 +90,7 @@ class GalerieState extends State<Galerie> {
                   icon: const Icon(CupertinoIcons.plus,
                       color: Colors.white, size: 34),
                   onPressed: () {
-                    createDessinDialog();
+                    // createDessinDialog();
                   })
             ]),
         body: Container(
@@ -122,7 +125,7 @@ class GalerieState extends State<Galerie> {
                 childAspectRatio: 3 / 2,
                 crossAxisCount: 2,
                 mainAxisSpacing: 18,
-                crossAxisSpacing: 18,
+                crossAxisSpacing: 5,
               ),
               builderDelegate: PagedChildBuilderDelegate<Drawing>(
                 itemBuilder: (context, item, index) => _Drawing(
@@ -134,42 +137,41 @@ class GalerieState extends State<Galerie> {
         ));
   }
 
-  createDessinDialog() async {
-    showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-              title: const Text('Créer un dessin'),
-              content: TextFormField(
-                style: const TextStyle(fontSize: _fontSize),
-                maxLines: 1,
-                autofocus: false,
-                decoration: InputDecoration(
-                  errorStyle: const TextStyle(fontSize: _fontSize),
-                  hintText: "Courriel",
-                  hintStyle: const TextStyle(
-                    fontSize: _fontSize,
-                  ),
-                  contentPadding: const EdgeInsets.all(15.0),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0)),
-                ),
-                autovalidate: true,
-                // onFieldSubmitted: (value) {
-                //   if (_formKey.currentState!.validate()) {
-                //     _onSubmitTap(context, userController.text);
-                //   }
-                // },
-              ),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, 'Créer');
-                  },
-                  child: const Text('Créer'),
-                ),
-              ],
-            ));
-  }
+  // createDessinDialog() async {
+  //   showDialog<String>(
+  //       context: context,
+  //       builder: (BuildContext context) => AlertDialog(
+  //             title: const Text('Créer un dessin'),
+  //             content:       FormBuilder(
+  //                 key: _formKey,
+  //                 child: Column(
+  //                   children: <Widget>[
+  //
+  //                     FormBuilderTextField(
+  //                       name: 'age',
+  //                       decoration: InputDecoration(
+  //                         labelText:
+  //                         'This value is passed along to the [Text.maxLines] attribute of the [Text] widget used to display the hint text.',
+  //                       ),
+  //                       onChanged: _onChanged,
+  //                       // valueTransformer: (text) => num.tryParse(text),
+  //                       validator: FormBuilderValidators.compose([
+  //                         FormBuilderValidators.required(context),
+  //                         FormBuilderValidators.numeric(context),
+  //                         FormBuilderValidators.max(context, 70),
+  //                       ]),
+  //                       keyboardType: TextInputType.number,
+  //                     ),])),
+  //             actions: <Widget>[
+  //               TextButton(
+  //                 onPressed: () {
+  //                   Navigator.pop(context, 'Créer');
+  //                 },
+  //                 child: const Text('Créer'),
+  //               ),
+  //             ],
+  //           ));
+  // }
 
   @override
   void dispose() {
@@ -201,6 +203,43 @@ class _Drawing extends StatelessWidget {
 
   final Drawing drawing;
 
+  joinDessinDialog(context) async {
+    showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Joindre le dessin'),
+          content: TextFormField(
+            style: const TextStyle(fontSize: _fontSize),
+            maxLines: 1,
+            autofocus: false,
+            decoration: InputDecoration(
+              errorStyle: const TextStyle(fontSize: _fontSize),
+              hintText: "Mot de Passe",
+              hintStyle: const TextStyle(
+                fontSize: _fontSize,
+              ),
+              contentPadding: const EdgeInsets.all(15.0),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0)),
+            ),
+            autovalidate: true,
+            // onFieldSubmitted: (value) {
+            //   if (_formKey.currentState!.validate()) {
+            //     _onSubmitTap(context, userController.text);
+            //   }
+            // },
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, 'Créer');
+              },
+              child: const Text('Joindre'),
+            ),
+          ],
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final Widget thumbnail = Container(
@@ -215,17 +254,14 @@ class _Drawing extends StatelessWidget {
     );
 
     return GestureDetector(
-      onTap: () => { print(drawing.collaboration.collaborationId)},
-      child: GridTile(
+      onTap: () => { joinDessinDialog(context) },
+      child: Padding( padding: const EdgeInsets.only(left: 10.0, right: 10.0), child:GridTile(
       header: Center(
           child: Padding(
               padding: const EdgeInsets.only(top: 10.0),
               child: _GridTitleText(drawing.title))),
       footer: Material(
         color: Colors.transparent,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(3)),
-        ),
         clipBehavior: Clip.antiAlias,
         child: GridTileBar(
           backgroundColor: Colors.black45,
@@ -243,6 +279,6 @@ class _Drawing extends StatelessWidget {
         ),
       ),
       child: thumbnail,
-    ));
+    )));
   }
 }
