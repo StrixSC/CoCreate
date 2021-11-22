@@ -11,7 +11,6 @@ export class RectangleSyncCommand extends SyncCommand {
     public command: RectangleCommand;
 
     constructor(
-        private isActiveUser: boolean,
         public payload: IShapeAction,
         private renderer: Renderer2,
         private drawingService: DrawingService,

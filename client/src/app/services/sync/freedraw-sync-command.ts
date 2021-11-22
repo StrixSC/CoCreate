@@ -11,7 +11,6 @@ export class FreedrawSyncCommand extends SyncCommand {
     public command: PencilCommand;
 
     constructor(
-        private isActiveUser: boolean,
         public payload: IFreedrawAction,
         private renderer: Renderer2,
         private drawingService: DrawingService,

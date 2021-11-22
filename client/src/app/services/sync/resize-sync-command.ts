@@ -29,7 +29,7 @@ export class ResizeSyncCommand extends SyncCommand {
         if (!this.command && this.object) {
             this.command = new ResizeCommand(this.renderer, [this.object]);
         } else {
-            this.command.resize(this.payload.xScale, this.payload.yScale, this.payload.xTranslate, this.payload.yTranslate);
+            this.command.resize(this.payload.xScale, this.payload.yScale, this.payload.xTranslation, this.payload.yTranslation);
         }
     }
 

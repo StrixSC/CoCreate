@@ -36,10 +36,10 @@ export class ToolFactoryService {
   private pendingActions: Map<string, SyncCommand> = new Map();
 
   tools: Record<ActionType | string, (payload: IAction, isActiveUser?: boolean) => any> = {
-    Freedraw: (payload: IFreedrawAction, isActiveUser: boolean) => {
+    Freedraw: (payload: IFreedrawAction) => {
       const state = payload.state;
       if (state === DrawingState.down) {
-        const command = new FreedrawSyncCommand(isActiveUser, payload, this.rendererService.renderer, this.drawingService);
+        const command = new FreedrawSyncCommand(payload, this.rendererService.renderer, this.drawingService);
         command.execute();
         this.pendingActions.set(payload.actionId, command);
       } else {
@@ -61,13 +61,13 @@ export class ToolFactoryService {
 
       this.collaborationService.updateActionSelection(payload.userId, payload.actionId, payload.isSelected, payload.selectedBy || '');
     },
-    Shape: (payload: IShapeAction, isActiveUser: boolean) => {
+    Shape: (payload: IShapeAction) => {
       const shapeType = payload.shapeType;
       const state = payload.state;
       if (state === DrawingState.down) {
         const command = shapeType === ShapeType.Ellipse
-          ? new EllipseSyncCommand(isActiveUser, payload, this.rendererService.renderer, this.drawingService)
-          : new RectangleSyncCommand(isActiveUser, payload, this.rendererService.renderer, this.drawingService)
+          ? new EllipseSyncCommand(payload, this.rendererService.renderer, this.drawingService)
+          : new RectangleSyncCommand(payload, this.rendererService.renderer, this.drawingService)
 
         command.execute();
         this.pendingActions.set(payload.actionId, command);
@@ -126,7 +126,7 @@ export class ToolFactoryService {
       }
     },
     Resize: (payload: IResizeAction) => {
-      console.log(payload.state);
+      console.log(payload);
       const hasOngoingMovement = this.pendingActions.has(payload.actionId);
       if (!hasOngoingMovement) {
         const command = new ResizeSyncCommand(payload, this.rendererService.renderer, this.drawingService);

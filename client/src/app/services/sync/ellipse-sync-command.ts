@@ -11,7 +11,6 @@ export class EllipseSyncCommand extends SyncCommand {
     public command: EllipseCommand;
 
     constructor(
-        private isActiveUser: boolean,
         public payload: IShapeAction,
         private renderer: Renderer2,
         private drawingService: DrawingService,

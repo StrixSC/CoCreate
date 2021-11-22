@@ -248,7 +248,7 @@ export class SyncDrawingService {
     this.socketService.emit('delete:emit', payload);
   }
 
-  sendResize(state: DrawingState, actionId: string, xScale: number, yScale: number, xTranslate: number, yTranslate: number) {
+  sendResize(state: DrawingState, actionId: string, xScale: number, yScale: number, xTranslation: number, yTranslation: number) {
     if (!actionId) return;
 
     if (state === DrawingState.move && !this.hasStartedMovement) {
@@ -265,8 +265,8 @@ export class SyncDrawingService {
       selectedActionId: actionId,
       xScale,
       yScale,
-      xTranslate,
-      yTranslate,
+      xTranslation,
+      yTranslation,
       state
     }
 
