@@ -18,4 +18,10 @@ export class DrawingGalleryService {
       catchError(() => of([])),
     );
   }
+
+  filter(): Observable<IGalleryEntry[]> {
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery').pipe(
+      catchError(() => of([])),
+    );
+  }
 }

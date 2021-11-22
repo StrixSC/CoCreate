@@ -63,7 +63,19 @@ export class NewDrawingComponent implements OnInit {
   onAccept(form: any): void {
     let s: string = form['drawingInformation'].size.title as string;
     let p : string = form['drawingInformation'].size.type as string;
-    this.syncCollaborationService.sendCreateCollaboration(this.userID, s, p);
+    if(p==="Protégé") { 
+      p = "Protected"; 
+      let pw: string = form['drawingInformation'].size.password as string;
+      this.syncCollaborationService.sendCreateCollaboration(this.userID, s, p, pw);
+    }
+    else if (p==="Privé") {
+      p = "Private";
+      this.syncCollaborationService.sendCreateCollaboration(this.userID, s, p);
+    }
+    else if (p === "Public") {
+      p = "Public";
+      this.syncCollaborationService.sendCreateCollaboration(this.userID, s, p);
+    }
     if (this.drawingService.isCreated) {
       const alert = this.dialog.open(NewDrawingAlertComponent, {
         role: 'alertdialog',

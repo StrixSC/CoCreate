@@ -23,29 +23,6 @@ import { AngularFireAuth } from '@angular/fire/auth';
 
 const ONE_WEEK_NUMERIC_VALUE = 24 * 60 * 60 * 1000 * 7;
 
-const DATA: IGalleryEntry[] = [
-  /*{drawing_id: "1", title: 'Hydrogen', type: 'Public', owner: 'Pati', created_at: "2019-01-16" , collaborator_count: 2, author_username: 'Flower', img:"../../../assets/img/mock-img/1.jpg"},
-  {drawing_id: "2", title: 'Helium', type: 'Protégé',owner: 'Pati', created_at: "2020-01-16" , collaborator_count: 0, author_username: 'Pati', img:"../../../assets/img/mock-img/2.jpg"},
-  {drawing_id: "3", title: 'Lithium', type: 'Privé',owner: 'Daisy', created_at: "2021-01-16" , collaborator_count: 1, author_username: 'Daisy', img:"../../../assets/img/mock-img/3.jpg"},
-  {drawing_id: "4",title: 'Beryllium', type: 'Public',owner: 'Tulipe', created_at: "2021-09-23" , collaborator_count: 0, author_username: 'Power', img:"../../../assets/img/mock-img/4.jpg"},
-  {drawing_id: "5",title: 'Boron', type: 'Protégé',owner: 'Mari', created_at: "2021-09-16" , collaborator_count: 0, author_username: 'Mari', img:"../../../assets/img/mock-img/5.jpg"},
-  {drawing_id: "6",title: 'Carbon', type: 'Privé',owner: 'Cherry', created_at: "2018-03-04" , collaborator_count: 1, author_username: 'Cherry', img:"../../../assets/img/mock-img/6.jpg"},
-  {drawing_id: "7",title: 'Nitrogen', type: 'Public',owner: 'Blossom', created_at: "2020-12-02" , collaborator_count: 1, author_username: 'Blossom', img:"../../../assets/img/mock-img/7.jpg"},
-  {drawing_id: "8",title: 'Oxygen', type: 'Protégé',owner: 'Berry', created_at: "2021-04-03" , collaborator_count: 4, author_username: 'Berry', img:"../../../assets/img/mock-img/8.jpg"},
-  {drawing_id: "9",title: 'Fluorine', type: 'Public',owner: 'Mari', created_at: "2021-08-30" , collaborator_count: 5, author_username: 'Mari', img:"../../../assets/img/mock-img/9.jpg"},
-  {drawing_id: "10",title: 'Neon', type: 'Privé',owner: 'Pati', created_at: "2021-03-21" , collaborator_count: 3, author_username: 'Pati', img:"../../../assets/img/mock-img/10.jpg"},
-  {drawing_id: "11",title: 'Sodium', type: 'Protégé',owner: 'Daisy', created_at: "2021-02-14" , collaborator_count: 2, author_username: 'Daisy', img:"../../../assets/img/mock-img/11.jpg"},
-  {drawing_id: "12",title: 'Magnesium', type: 'Public',owner: 'Daisy', created_at: "2020-12-25" , collaborator_count: 2, author_username: 'Daisy', img:"../../../assets/img/mock-img/12.jpg"},
-  {drawing_id: "13",title: 'Aluminum', type: 'Privé',owner: 'Tulipe', created_at: "2021-01-01" , collaborator_count: 1, author_username: 'Tulipe', img:"../../../assets/img/mock-img/13.jpg"},
-  {drawing_id: "14",title: 'Silicon', type: 'Protégé',owner: 'Heroku', created_at: "2021-08-05" , collaborator_count: 0, author_username: 'Heroku', img:"../../../assets/img/mock-img/14.jpg"},
-  {drawing_id: "15",title: 'Phosphorus', type: 'Public',owner: 'Stella', created_at: "2021-07-31" , collaborator_count: 0, author_username: 'Stella', img:"../../../assets/img/mock-img/15.jpg"},
-  {drawing_id: "16",title: 'Sulfur',type: 'Privé',owner: 'Pepsi_Hero', created_at: "2021-05-19" , collaborator_count: 0, author_username: 'Pepsi_Hero', img:"../../../assets/img/mock-img/16.jpg"},
-  {drawing_id: "17",title: 'Chlorine', type: 'Protégé',owner: 'Louis XIV', created_at: "2021-10-31" , collaborator_count: 0, author_username: 'Louis XIV', img:"../../../assets/img/mock-img/17.jpg"},
-  {drawing_id: "18",title: 'Argon', type: 'Public',owner: 'Pati', created_at: "2019-01-08" , collaborator_count: 2, author_username: 'Pati', img:"../../../assets/img/mock-img/18.jpg"},
-  {drawing_id: "19",title: 'Potassium', type: 'Protégé',owner: 'Pati', created_at: "2020-03-29" , collaborator_count: 1, author_username: 'Pati', img:"../../../assets/img/mock-img/19.jpg"},
-  {drawing_id: "20",title: 'Calcium',type: 'Privé',owner: 'Peach', created_at: "2021-06-24" , collaborator_count: 1, author_username: 'Peach', img:"../../../assets/img/mock-img/20.jpg"},*/
-];
-
 @Component({
   selector: 'app-drawing-gallery',
   templateUrl: './drawing-gallery.component.html',
@@ -54,7 +31,6 @@ const DATA: IGalleryEntry[] = [
 
 export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  //user: string= "Pati";
   visible = true;
   selectable = true;
   removable = true;
@@ -70,9 +46,9 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
   
   
-  datasourcePublic = new MatTableDataSource<IGalleryEntry>(this.sortPublicVisibility(DATA));
-  datasourcePrivate = new MatTableDataSource<IGalleryEntry>(this.sortPrivateVisibility(DATA));
-  datasourceProtected = new MatTableDataSource<IGalleryEntry>(this.sortProtectedVisibility(DATA));
+  datasourcePublic = new MatTableDataSource<IGalleryEntry>();
+  datasourcePrivate = new MatTableDataSource<IGalleryEntry>();
+  datasourceProtected = new MatTableDataSource<IGalleryEntry>();
 
 
   @ViewChild('tagInput', { static: false }) tagInput: ElementRef<HTMLInputElement>;
@@ -100,7 +76,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     private router: Router,
     private cdr: ChangeDetectorRef,
     private drawingGalleryService: DrawingGalleryService,
-    private newDrawingService: NewDrawingService,
     private syncCollaboration: SyncCollaborationService,
     private socketService: SocketService,
     private af: AngularFireAuth
@@ -162,7 +137,9 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
     this.drawingGalleryService.getDrawings()
         .subscribe((drawings: IGalleryEntry[]) => {
-          this.datasourcePublic.data = drawings;
+          this.datasourcePublic.data = this.sortPublicVisibility(drawings);
+          this.datasourcePrivate.data = this.sortPrivateVisibility(drawings);
+          this.datasourceProtected.data = this.sortProtectedVisibility(drawings);
         });
     this.paginatorPrivate._intl.itemsPerPageLabel="Dessins par page: ";
     this.paginatorPublic._intl.itemsPerPageLabel="Dessins par page: ";
@@ -269,7 +246,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   sortPrivateVisibility(drawings: IGalleryEntry[]) : IGalleryEntry[] {
     let sort: IGalleryEntry[] = new Array();
     for (let drawing of drawings){
-      if(drawing.type ==='Privé' /*&& drawing.author_username == this.user*/)
+      if(drawing.type ==='Private' /*&& drawing.author_username == this.user*/)
       {
         sort.push(drawing);
       }
@@ -279,7 +256,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   sortProtectedVisibility(drawings: IGalleryEntry[]) : IGalleryEntry[] {
     let sort: IGalleryEntry[] = new Array();
     for (let drawing of drawings){
-      if(drawing.type ==='Protégé')
+      if(drawing.type ==='Protected')
       {
         sort.push(drawing);
       }
