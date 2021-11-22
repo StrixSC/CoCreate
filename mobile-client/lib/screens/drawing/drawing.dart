@@ -29,13 +29,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
   String drawType = DrawingType.freedraw;
   String? shapeID;
   String? lastShapeID;
-  Map paintsMap = <String, Paint>{};
   Map actionsMap = <String, ShapeAction>{};
   Map selectedItems = <String, String>{};
-  Map selectPoints = <String, List<Offset>>{};
   bool allowMove = false;
   Offset? selectRef; // offset reference of selected item
-  Map shapesOffsets = <String, List<Offset>>{};
   Color currentBodyColor = const Color(0xff443a49);
   Color currentBorderColor = const Color(0xff443a49);
   Color currentBackgroundColor =
@@ -56,10 +53,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
     socketFreedrawReception();
     socketShapeReception();
     socketSelectionReception();
-    // socketTranslationReception();
-    // socketRotationReception();
-    // socketDeleteReception();
-    // socketResizeReception();
+    socketTranslationReception();
+    socketRotationReception();
+    socketDeleteReception();
+    socketResizeReception();
   }
 
   @override
@@ -69,177 +66,168 @@ class _DrawingScreenState extends State<DrawingScreen> {
           Toolbar(changeTool, changeColor),
           Expanded(
               child: GestureDetector(
-                onPanStart: (details) {
-                  switch (drawType) {
-                    case DrawingType.freedraw:
-                      unselectLastShape();
-                      socketFreedrawEmission(details, DrawingState.down);
-                      break;
-                    case DrawingType.rectangle:
-                      unselectLastShape();
-                      socketShapeEmission(
-                          details, DrawingType.rectangle, DrawingState.down);
-                      break;
-                    case DrawingType.ellipse:
-                      unselectLastShape();
-                      socketShapeEmission(
-                          details, DrawingType.ellipse, DrawingState.down);
-                      break;
-                    case "select":
-                      allowMove = false;
-                      selectRef = Offset(
-                          details.localPosition.dx, details.localPosition.dy);
-                      String? selectItem = getSelectedId(selectRef!);
-                      if (selectedItems.containsValue(_user.uid)) {
-                        String actionToRemove = "";
-                        selectedItems.forEach((oldActionId, userId) {
-                          if (userId == _user.uid &&
-                              oldActionId != selectItem &&
-                              !hasSelectedBounds(details)) {
-                            socketSelectionEmission(oldActionId, false);
-                            actionToRemove = oldActionId;
-                          }
-                        });
-                        if (actionToRemove != "") {
-                          selectedItems.remove(actionToRemove);
-                        }
-                        if (hasSelectedBounds(details) &&
-                            actionToRemove == "") {
-                          allowResize = true;
-                          initialResizeCenter = Offset(
-                              selectedBounds![Bounds.topCenter].center.dx,
-                              selectedBounds![Bounds.rightCenter].center.dy);
-                          initialTapLocation = details.localPosition;
-                        }
+            onPanStart: (details) {
+              switch (drawType) {
+                case DrawingType.freedraw:
+                  unselectLastShape();
+                  socketFreedrawEmission(details, DrawingState.down);
+                  break;
+                case DrawingType.rectangle:
+                  unselectLastShape();
+                  socketShapeEmission(
+                      details, DrawingType.rectangle, DrawingState.down);
+                  break;
+                case DrawingType.ellipse:
+                  unselectLastShape();
+                  socketShapeEmission(
+                      details, DrawingType.ellipse, DrawingState.down);
+                  break;
+                case "select":
+                  allowMove = false;
+                  selectRef = Offset(
+                      details.localPosition.dx, details.localPosition.dy);
+                  String? selectItem = getSelectedId(selectRef!);
+                  if (selectedItems.containsValue(_user.uid)) {
+                    String actionToRemove = "";
+                    selectedItems.forEach((oldActionId, userId) {
+                      if (userId == _user.uid &&
+                          oldActionId != selectItem &&
+                          !hasSelectedBounds(details)) {
+                        socketSelectionEmission(oldActionId, false);
+                        actionToRemove = oldActionId;
                       }
-                      if (selectItem != null &&
-                          !selectedItems.containsKey(selectItem)) {
-                        socketSelectionEmission(selectItem, true);
-                        lastShapeID = selectItem;
-                      } else {
-                        allowMove = true;
-                      }
-                      break;
-                    case "rotate":
-                      if (selectedItems.containsValue(_user.uid)) {
-                        selectedItems.forEach((actionId, selectedBy) {
-                          if (selectedBy == _user.uid) {
-                            socketRotationEmission(
-                                details, DrawingState.down, actionId);
-                          }
-                        });
-                      }
-                      break;
+                    });
+                    if (actionToRemove != "") {
+                      selectedItems.remove(actionToRemove);
+                    }
+                    if (hasSelectedBounds(details) && actionToRemove == "") {
+                      allowResize = true;
+                      initialResizeCenter = Offset(
+                          selectedBounds![Bounds.topCenter].center.dx,
+                          selectedBounds![Bounds.rightCenter].center.dy);
+                      initialTapLocation = details.localPosition;
+                    }
                   }
-                },
-                onPanUpdate: (details) {
-                  switch (drawType) {
-                    case DrawingType.freedraw:
-                      unselectLastShape();
-                      socketFreedrawEmission(details, DrawingState.move);
-                      break;
-                    case DrawingType.rectangle:
-                      unselectLastShape();
-                      socketShapeEmission(
-                          details, DrawingType.rectangle, DrawingState.move);
-                      break;
-                    case DrawingType.ellipse:
-                      unselectLastShape();
-                      socketShapeEmission(
-                          details, DrawingType.ellipse, DrawingState.move);
-                      break;
-                    case "select":
-                      if (allowResize &&
-                          selectedItems.containsValue(_user.uid)) {
-                        selectedItems.forEach((actionId, selectedBy) {
-                          if (selectedBy == _user.uid) {
-                            socketResizeEmission(DrawingState.move, actionId,
-                                details.localPosition, selectRef!);
-                            selectRef = details.localPosition;
-                          }
-                        });
-                      } else if (allowMove &&
-                          selectedItems.containsValue(_user.uid)) {
-                        selectedItems.forEach((actionId, selectedBy) {
-                          if (selectedBy == _user.uid) {
-                            socketTranslationEmission(
-                                actionId,
-                                (details.localPosition - selectRef!).dx,
-                                (details.localPosition - selectRef!).dy,
-                                DrawingState.move);
-                            selectRef = details.localPosition;
-                          }
-                        });
-                      }
-                      break;
-                    case "rotate":
-                      if (selectedItems.containsValue(_user.uid)) {
-                        selectedItems.forEach((actionId, selectedBy) {
-                          if (selectedBy == _user.uid) {
-                            socketRotationEmission(
-                                details, DrawingState.move, actionId);
-                          }
-                        });
-                      }
-                      break;
+                  if (selectItem != null &&
+                      !selectedItems.containsKey(selectItem)) {
+                    socketSelectionEmission(selectItem, true);
+                    lastShapeID = selectItem;
+                  } else {
+                    allowMove = true;
                   }
-                },
-                onPanEnd: (details) {
-                  switch (drawType) {
-                    case DrawingType.freedraw:
-                      socketFreedrawEmission(details, DrawingState.up);
-                      lastShapeID = shapeID;
-                      break;
-                    case DrawingType.rectangle:
-                      socketShapeEmission(
-                          details, DrawingType.rectangle, DrawingState.up);
-                      lastShapeID = shapeID;
-                      break;
-                    case DrawingType.ellipse:
-                      socketShapeEmission(
-                          details, DrawingType.ellipse, DrawingState.up);
-                      lastShapeID = shapeID;
-                      break;
-                    case "select":
-                      if (selectedItems.containsValue(_user.uid)) {
-                        selectedItems.forEach((actionId, selectedBy) {
-                          if (selectedBy == _user.uid) {
-                            allowResize = false;
-                          }
-                        });
+                  break;
+                case "rotate":
+                  if (selectedItems.containsValue(_user.uid)) {
+                    selectedItems.forEach((actionId, selectedBy) {
+                      if (selectedBy == _user.uid) {
+                        socketRotationEmission(
+                            details, DrawingState.down, actionId);
                       }
-                      break;
-                    case "rotate":
-                      if (selectedItems.containsValue(_user.uid)) {
-                        selectedItems.forEach((actionId, selectedBy) {
-                          if (selectedBy == _user.uid) {
-                            socketRotationEmission(
-                                details, DrawingState.up, actionId);
-                          }
-                        });
-                      }
-                      break;
+                    });
                   }
-                },
-                child: Container(
-                  color: currentBackgroundColor,
-                  child: CustomPaint(
-                    painter: Painter(
-                        drawType, paintsMap, actionsMap, selectedItems,
-                        _user, setSelectedBounds),
-                    child: SizedBox(
-                      height: MediaQuery
-                          .of(context)
-                          .size
-                          .height,
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width,
-                    ),
-                  ),
+                  break;
+              }
+            },
+            onPanUpdate: (details) {
+              switch (drawType) {
+                case DrawingType.freedraw:
+                  unselectLastShape();
+                  socketFreedrawEmission(details, DrawingState.move);
+                  break;
+                case DrawingType.rectangle:
+                  unselectLastShape();
+                  socketShapeEmission(
+                      details, DrawingType.rectangle, DrawingState.move);
+                  break;
+                case DrawingType.ellipse:
+                  unselectLastShape();
+                  socketShapeEmission(
+                      details, DrawingType.ellipse, DrawingState.move);
+                  break;
+                case "select":
+                  if (allowResize && selectedItems.containsValue(_user.uid)) {
+                    selectedItems.forEach((actionId, selectedBy) {
+                      if (selectedBy == _user.uid) {
+                        socketResizeEmission(DrawingState.move, actionId,
+                            details.localPosition, selectRef!);
+                        selectRef = details.localPosition;
+                      }
+                    });
+                  } else if (allowMove &&
+                      selectedItems.containsValue(_user.uid)) {
+                    selectedItems.forEach((actionId, selectedBy) {
+                      if (selectedBy == _user.uid) {
+                        socketTranslationEmission(
+                            actionId,
+                            (details.localPosition - selectRef!).dx,
+                            (details.localPosition - selectRef!).dy,
+                            DrawingState.move);
+                        selectRef = details.localPosition;
+                      }
+                    });
+                  }
+                  break;
+                case "rotate":
+                  if (selectedItems.containsValue(_user.uid)) {
+                    selectedItems.forEach((actionId, selectedBy) {
+                      if (selectedBy == _user.uid) {
+                        socketRotationEmission(
+                            details, DrawingState.move, actionId);
+                      }
+                    });
+                  }
+                  break;
+              }
+            },
+            onPanEnd: (details) {
+              switch (drawType) {
+                case DrawingType.freedraw:
+                  socketFreedrawEmission(details, DrawingState.up);
+                  lastShapeID = shapeID;
+                  break;
+                case DrawingType.rectangle:
+                  socketShapeEmission(
+                      details, DrawingType.rectangle, DrawingState.up);
+                  lastShapeID = shapeID;
+                  break;
+                case DrawingType.ellipse:
+                  socketShapeEmission(
+                      details, DrawingType.ellipse, DrawingState.up);
+                  lastShapeID = shapeID;
+                  break;
+                case "select":
+                  if (selectedItems.containsValue(_user.uid)) {
+                    selectedItems.forEach((actionId, selectedBy) {
+                      if (selectedBy == _user.uid) {
+                        allowResize = false;
+                      }
+                    });
+                  }
+                  break;
+                case "rotate":
+                  if (selectedItems.containsValue(_user.uid)) {
+                    selectedItems.forEach((actionId, selectedBy) {
+                      if (selectedBy == _user.uid) {
+                        socketRotationEmission(
+                            details, DrawingState.up, actionId);
+                      }
+                    });
+                  }
+                  break;
+              }
+            },
+            child: Container(
+              color: currentBackgroundColor,
+              child: CustomPaint(
+                painter: Painter(drawType, actionsMap, selectedItems, _user,
+                    setSelectedBounds),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
                 ),
-              ))
+              ),
+            ),
+          ))
         ]),
         floatingActionButton: Visibility(
           visible: selectedItems.containsValue(_user.uid),
@@ -270,15 +258,13 @@ class _DrawingScreenState extends State<DrawingScreen> {
               Align(
                   alignment: Alignment.bottomRight,
                   child: FloatingActionButton(
-                    onPressed: () =>
-                        setState(() {
-                          // TODO: All actions need to be saved for undo redo
-                          var selectedItem = selectedItems.entries.firstWhere(
-                                  (selectedItem) =>
-                              selectedItem.value == _user.uid);
-                          var actionId = selectedItem.key;
-                          socketDeleteEmission(actionId);
-                        }),
+                    onPressed: () => setState(() {
+                      // TODO: All actions need to be saved for undo redo
+                      var selectedItem = selectedItems.entries.firstWhere(
+                          (selectedItem) => selectedItem.value == _user.uid);
+                      var actionId = selectedItem.key;
+                      socketDeleteEmission(actionId);
+                    }),
                     tooltip: 'Supression',
                     child: const Icon(CupertinoIcons.archivebox_fill),
                     backgroundColor: kErrorColor,
@@ -349,18 +335,17 @@ class _DrawingScreenState extends State<DrawingScreen> {
     _socket.on('translation:received', (data) {
       setState(() {
         if (data["state"] != DrawingState.up) {
-          actionsMap.forEach((actionId, actionMap) {
+          actionsMap.forEach((actionId, shapeAction) {
             if (actionId == data['actionId'] ||
                 actionId == data['selectedActionId']) {
-              var path = actionMap.values.first as Path;
               Matrix4 matrix4 = Matrix4.translationValues(
                   data['xTranslation'].toDouble(),
                   data['yTranslation'].toDouble(),
                   0);
-              actionMap.update(actionsMap[actionId].keys.first,
-                      (value) => path.transform(matrix4.storage));
+              shapeAction.path = shapeAction.path.transform(matrix4.storage);
+
               actionsMap.update(
-                  actionId, (value) => actionMap as Map<String, Path>);
+                  actionId, (value) => shapeAction as ShapeAction);
             }
           });
         }
@@ -373,21 +358,21 @@ class _DrawingScreenState extends State<DrawingScreen> {
       setState(() {
         if (data['state'] == DrawingState.down) {
           //create new List
+          ShapeAction shapeAction = actionsMap[data['actionId']];
           List<Offset> points = <Offset>[];
           points.add(Offset(data['x'], data['y']));
-          selectPoints.putIfAbsent(
-              selectedItems[data['actionId']], () => points);
+          shapeAction.shapesOffsets = points;
+          actionsMap.update(data['actionId'], (value) => shapeAction);
         } else if (data['state'] == DrawingState.move) {
           //get shape center
-          Path actionPath = actionsMap[data["actionId"]].values.first;
-          Offset center = actionPath
-              .getBounds()
-              .center;
+          Path actionPath = actionsMap[data["actionId"]].path;
+          Offset center = actionPath.getBounds().center;
 
           //calcultae angle variation
           var angle = atan2(data['y'] - center.dy, data['x'] - center.dx);
-          var angleRef = atan2(selectPoints[data['userId']].last.dy - center.dy,
-              selectPoints[data['userId']].last.dx - center.dx);
+          var angleRef = atan2(
+              actionsMap[data['actionId']].shapesOffsets.last.dy - center.dy,
+              actionsMap[data['actionId']].shapesOffsets.last.dx - center.dx);
           var angleVariation = angle - angleRef;
 
           //transform path with matrix of rotation
@@ -395,21 +380,22 @@ class _DrawingScreenState extends State<DrawingScreen> {
           actionPath = actionPath.transform(matriceRotation.storage);
 
           //transform path with matrix of translation
-          Offset newCenter = actionPath
-              .getBounds()
-              .center;
+          Offset newCenter = actionPath.getBounds().center;
           Matrix4 matriceTranslation = Matrix4.translationValues(
               (center - newCenter).dx, (center - newCenter).dy, 0);
           actionPath = actionPath.transform(matriceTranslation.storage);
 
-          //update maps
-          actionsMap[data["actionId"]].update(
-              actionsMap[data["actionId"]].keys.first, (value) => actionPath);
-          selectPoints[data['userId']]
+          //update map
+          ShapeAction shapeAction = actionsMap[data["actionId"]];
+          shapeAction.path = actionPath;
+          shapeAction.shapesOffsets!
               .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+          actionsMap.update(data['actionId'], (value) => shapeAction);
         } else {
           //clear the list at the end
-          selectPoints.remove(data['userId']);
+          ShapeAction shapeAction = actionsMap[data["actionId"]];
+          shapeAction.shapesOffsets!.clear();
+          actionsMap.update(data['actionId'], (value) => shapeAction);
         }
       });
     });
@@ -434,15 +420,13 @@ class _DrawingScreenState extends State<DrawingScreen> {
             double yScale = (oldRectBox + delta).dy / oldRectBox.dy;
 
             // Scale the path
-            Path actionPath = actionsMap[actionId].values.first;
+            Path actionPath = actionsMap[actionId].path;
             Matrix4 matrix = Matrix4.identity();
             matrix.scale(xScale, yScale);
             Path scaledPath = actionPath.transform(matrix.storage);
 
             // Translate to original position
-            Offset newCenter = scaledPath
-                .getBounds()
-                .center;
+            Offset newCenter = scaledPath.getBounds().center;
             vec.Vector3 translation = vec.Vector3(
                 data["initialCenterX"].toDouble() - newCenter.dx,
                 data["initialCenterY"].toDouble() - newCenter.dy,
@@ -513,7 +497,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
             ..style = PaintingStyle.stroke;
 
           ShapeAction shapeAction =
-          ShapeAction(Path(), data['shapeType'], paintBorder);
+              ShapeAction(Path(), data['shapeType'], paintBorder);
 
           // Create paint of the fill if there is one
           if (data['shapeStyle'] == "fill") {
@@ -586,7 +570,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
           //Merge attributes and save shape
           ShapeAction shapeAction =
-          ShapeAction(path, data['actionType'], paint);
+              ShapeAction(path, data['actionType'], paint);
           actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
         } else if (data['state'] == DrawingState.move) {
           actionsMap.forEach((actionId, shapeAction) {
@@ -671,8 +655,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
     });
   }
 
-  void socketRotationEmission(var details, String drawingState,
-      String actionId) {
+  void socketRotationEmission(
+      var details, String drawingState, String actionId) {
     _socket.emit('rotation:emit', {
       'actionId': actionId,
       'state': drawingState,
@@ -716,8 +700,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
     }
   }
 
-  void socketShapeEmission(var details, String drawingType,
-      String drawingState) {
+  void socketShapeEmission(
+      var details, String drawingType, String drawingState) {
     _socket.emit("shape:emit", {
       'actionId': (drawingState == DrawingState.down)
           ? shapeID = const Uuid().v1()
@@ -788,22 +772,18 @@ class _DrawingScreenState extends State<DrawingScreen> {
     actionsMap.forEach((actionId, shapeAction) {
       if (shapeAction.actionType == DrawingType.freedraw) {
         for (int i = 0;
-        i < shapeAction.path
-            .computeMetrics()
-            .first
-            .length;
-        i++) {
+            i < shapeAction.path.computeMetrics().first.length;
+            i++) {
           Tangent? tangent = shapeAction.path
               .computeMetrics()
               .first
               .getTangentForOffset(i.toDouble());
           if ((tangent!.position - offset).distance.toInt() <=
-              shapeAction.path.borderColor.strokeWidth / 2) {
+              shapeAction.borderColor.strokeWidth / 2) {
             overlapItems.add(actionId);
           }
         }
-      }
-      else if (shapeAction.actionType == DrawingType.rectangle ||
+      } else if (shapeAction.actionType == DrawingType.rectangle ||
           shapeAction.actionType == DrawingType.ellipse) {
         if (shapeAction.path.contains(offset)) {
           overlapItems.add(actionId);
@@ -818,10 +798,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
 }
 
 class Painter extends CustomPainter {
-  Painter(this.drawType, this.paintsMap, this.actionsMap, this.selectedItems,
-      this.user, this.setCornersCallback);
+  Painter(this.drawType, this.actionsMap, this.selectedItems, this.user,
+      this.setCornersCallback);
 
-  Map paintsMap;
   String drawType;
   Map actionsMap;
   Map selectedItems;
@@ -833,10 +812,7 @@ class Painter extends CustomPainter {
     actionsMap.forEach((actionId, shapeAction) {
       if (shapeAction.actionType == DrawingType.freedraw) {
         //Draw a point if their is only one click
-        if (shapeAction.path
-            .computeMetrics()
-            .first
-            .length == 1) {
+        if (shapeAction.path.computeMetrics().first.length == 1) {
           Tangent? tangent = shapeAction.path
               .computeMetrics()
               .first
@@ -848,7 +824,8 @@ class Painter extends CustomPainter {
         //Draw a line
         canvas.drawPath(shapeAction.path, shapeAction.borderColor);
       }
-      if (shapeAction.actionType == DrawingType.ellipse) {
+      if (shapeAction.actionType == DrawingType.ellipse ||
+          shapeAction.actionType == DrawingType.rectangle) {
         if (shapeAction.bodyColor != null) {
           canvas.drawPath(shapeAction.path, shapeAction.bodyColor);
         }
@@ -861,90 +838,91 @@ class Painter extends CustomPainter {
         canvas.drawPath(corners["path"], corners["paint"]);
       }
     });
-}
-
-// todo: faire que la sélection soit un peu plus grande que la forme
-Map getSelectionBoundingRect(Path dragPath, String actionId,
-    Function setCornersCallback) {
-  Rect bounds = dragPath.getBounds();
-  Path pathCorner = Path();
-  Path pathBorder = Path();
-
-  double width = 15.0;
-  double height = 15.0;
-
-  List<Offset> boundingRects = [
-    bounds.topLeft,
-    Offset(bounds.topLeft.dx + (bounds.topRight.dx - bounds.topLeft.dx) / 2,
-        bounds.topLeft.dy),
-    bounds.topRight,
-    Offset(
-        bounds.topRight.dx,
-        bounds.bottomRight.dy +
-            (bounds.topRight.dy - bounds.bottomRight.dy) / 2),
-    bounds.bottomRight,
-    Offset(
-        bounds.bottomLeft.dx + (bounds.topRight.dx - bounds.topLeft.dx) / 2,
-        bounds.bottomRight.dy),
-    bounds.bottomLeft,
-    Offset(
-        bounds.bottomLeft.dx,
-        bounds.bottomLeft.dy +
-            (bounds.topLeft.dy - bounds.bottomLeft.dy) / 2),
-  ];
-
-  List<Rect> cornerRects = [];
-
-  for (int i = 0; i < boundingRects.length; i++) {
-    // rectangles
-    Rect rect = Rect.fromCenter(
-        center: boundingRects[i], width: width, height: height);
-
-    pathCorner.addRect(rect);
-    cornerRects.add(rect);
-
-    // lines between rectangles
-    if (i == boundingRects.length - 1) {
-      pathBorder.moveTo(boundingRects[i].dx, boundingRects[i].dy);
-      pathBorder.lineTo(boundingRects[0].dx, boundingRects[0].dy);
-    } else {
-      pathBorder.moveTo(boundingRects[i].dx, boundingRects[i].dy);
-      pathBorder.lineTo(boundingRects[i + 1].dx, boundingRects[i + 1].dy);
-    }
   }
 
-  // dashed lines
-  Path dashPath = Path();
-  if ((bounds.topRight.dx - bounds.topLeft.dx) != 0) {
-    double dashWidth = 10.0;
-    double dashSpace = 7.0;
-    for (PathMetric pathMetric in pathBorder.computeMetrics()) {
-      double distance = 0.0;
-      while (distance < pathMetric.length) {
-        dashPath.addPath(
-          pathMetric.extractPath(distance, distance + dashWidth),
-          Offset.zero,
-        );
-        distance += dashWidth;
-        distance += dashSpace;
+// todo: ne pas afficher les ancrages si c'est la sélection d'un autre
+  Map getSelectionBoundingRect(
+      Path dragPath, String actionId, Function setCornersCallback) {
+    Rect bounds = dragPath.getBounds();
+    Path pathCorner = Path();
+    Path pathBorder = Path();
+
+    double width = 15.0;
+    double height = 15.0;
+
+    List<Offset> boundingRects = [
+      bounds.topLeft,
+      Offset(bounds.topLeft.dx + (bounds.topRight.dx - bounds.topLeft.dx) / 2,
+          bounds.topLeft.dy),
+      bounds.topRight,
+      Offset(
+          bounds.topRight.dx,
+          bounds.bottomRight.dy +
+              (bounds.topRight.dy - bounds.bottomRight.dy) / 2),
+      bounds.bottomRight,
+      Offset(
+          bounds.bottomLeft.dx + (bounds.topRight.dx - bounds.topLeft.dx) / 2,
+          bounds.bottomRight.dy),
+      bounds.bottomLeft,
+      Offset(
+          bounds.bottomLeft.dx,
+          bounds.bottomLeft.dy +
+              (bounds.topLeft.dy - bounds.bottomLeft.dy) / 2),
+    ];
+
+    List<Rect> cornerRects = [];
+
+    for (int i = 0; i < boundingRects.length; i++) {
+      // rectangles
+      Rect rect = Rect.fromCenter(
+          center: boundingRects[i], width: width, height: height);
+
+      pathCorner.addRect(rect);
+      cornerRects.add(rect);
+
+      // lines between rectangles
+      if (i == boundingRects.length - 1) {
+        pathBorder.moveTo(boundingRects[i].dx, boundingRects[i].dy);
+        pathBorder.lineTo(boundingRects[0].dx, boundingRects[0].dy);
+      } else {
+        pathBorder.moveTo(boundingRects[i].dx, boundingRects[i].dy);
+        pathBorder.lineTo(boundingRects[i + 1].dx, boundingRects[i + 1].dy);
       }
     }
+
+    // dashed lines
+    Path dashPath = Path();
+    if ((bounds.topRight.dx - bounds.topLeft.dx) != 0) {
+      double dashWidth = 10.0;
+      double dashSpace = 7.0;
+      for (PathMetric pathMetric in pathBorder.computeMetrics()) {
+        double distance = 0.0;
+        while (distance < pathMetric.length) {
+          dashPath.addPath(
+            pathMetric.extractPath(distance, distance + dashWidth),
+            Offset.zero,
+          );
+          distance += dashWidth;
+          distance += dashSpace;
+        }
+      }
+    }
+
+    if (selectedItems[actionId] == user.uid) {
+      setCornersCallback(cornerRects);
+    }
+
+    pathCorner.addPath(dashPath, Offset.zero);
+
+    final paint = Paint()
+      ..color = Colors.black
+      ..isAntiAlias = true
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+
+    return {"path": pathCorner, "paint": paint};
   }
 
-  if (selectedItems[actionId] == user.uid) {
-    setCornersCallback(cornerRects);
-  }
-
-  pathCorner.addPath(dashPath, Offset.zero);
-
-  final paint = Paint()
-    ..color = Colors.black
-    ..isAntiAlias = true
-    ..strokeWidth = 2.0
-    ..style = PaintingStyle.stroke;
-
-  return {"path": pathCorner, "paint": paint};
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
-
-@override
-bool shouldRepaint(covariant CustomPainter oldDelegate) => true;}
