@@ -1,6 +1,5 @@
 import {
   Component,
-  OnInit,
   Input,
   OnChanges,
   AfterViewInit,
@@ -13,8 +12,6 @@ import {
 } from "@angular/core";
 import { ChatSocketService } from "src/app/services/chat/chat.service";
 import { HttpClient } from "@angular/common/http";
-import { Observable, Subscription } from "rxjs";
-import { IChannel } from "src/app/model/IChannel.model";
 import { IReceiveMessagePayload } from "src/app/model/IReceiveMessagePayload.model";
 import { ChannelManagerService } from "src/app/services/chat/ChannelManager.service";
 import { IChannelPayload } from "src/app/model/IChannelPayload.model";
@@ -38,11 +35,11 @@ export interface Message {
   templateUrl: "./chat-box.component.html",
   styleUrls: ["./chat-box.component.scss"],
 })
-export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
+export class ChatBoxComponent implements OnChanges, AfterViewInit {
   chatBoxName: string;
   myChannelID: string;
   messagesSet: Set<string>;
-  @Output() newItemEvent = new EventEmitter<boolean>();
+  @Output() closeChatEvent = new EventEmitter<boolean>();
 
   @Input() channel_id: string;
 
@@ -68,8 +65,6 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
       this.scrollToBottom();
     });
   }
-
-  ngOnInit(): void {}
 
   ngOnChanges() {
     this.initialize();
@@ -145,6 +140,10 @@ export class ChatBoxComponent implements OnInit, OnChanges, AfterViewInit {
       "_blank",
       "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=800,height=1000,addressbar=no"
     );
-    this.newItemEvent.emit(false);
+    this.closeChat();
+  }
+
+  closeChat() {
+    this.closeChatEvent.emit(false);
   }
 }
