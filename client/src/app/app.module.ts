@@ -20,7 +20,7 @@ import { ColorPickerModule } from './color-picker/color-picker.module';
 import { AlertMessageComponent } from './components/alert-message/alert-message.component';
 import { AppComponent } from './components/app/app.component';
 import { CanvasComponent } from './components/canvas/canvas.component';
-import { ChatComponent } from './components/chat/chat.component';
+//import { ChatComponent } from './components/chat/chat.component';
 import { ControlMenuComponent } from './components/control-menu/control-menu.component';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
 import { ErrorMessageComponent } from './components/error-message/error-message.component';
@@ -46,6 +46,10 @@ import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { StdHttpInterceptor } from './http/stdhttp.interceptor';
 import { SocketService } from './services/chat/socket.service';
 import { UserProfileSettingsComponent } from './components/user-profile-settings/user-profile-settings.component';
+import { RightSidebarComponent } from "./components/right-sidebar/right-sidebar.component";
+import { ChatBoxComponent } from "./components/right-sidebar/chat-box/chat-box.component";
+import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out/chat-poped-out.component";
+import { AllChannelsComponent } from "./components/right-sidebar/all-channels/all-channels.component";
 
 
 @NgModule({
@@ -72,13 +76,16 @@ import { UserProfileSettingsComponent } from './components/user-profile-settings
     AlertMessageComponent,
     ExportDrawingComponent,
     LoginPageComponent,
-    ChatComponent,
     DrawingPageComponent,
     WelcomePageComponent,
     SignUpPageComponent,
     UserProfileComponent,
     ChangePasswordComponent,
     UserProfileSettingsComponent,
+    RightSidebarComponent,
+    ChatBoxComponent,
+    ChatPopedOutComponent,
+    AllChannelsComponent,
   ],
   imports: [
     BrowserModule,
@@ -101,8 +108,7 @@ import { UserProfileSettingsComponent } from './components/user-profile-settings
     MatButtonModule,
     AppRoutingModule,
   ],
-  exports: [AppRoutingModule,
-  ],
+  exports: [AppRoutingModule],
   entryComponents: [
     NewDrawingAlertComponent,
     NewDrawingComponent,
@@ -123,5 +129,4 @@ import { UserProfileSettingsComponent } from './components/user-profile-settings
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {
-}
+export class AppModule {}
