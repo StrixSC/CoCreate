@@ -39,10 +39,6 @@ export class NewDrawingService {
       this.drawingFormGroup.setValue({ width: this.workspaceService.width, height: this.workspaceService.height });
     }
   }*/
-   sendNewDrawingForm(uid: string): void {
-     //console.log(this.form)
-     //this.syncCollaborationService.sendCreateCollaboration(uid, this.form.get, type);
-  }
 
   receiveMessage(): Observable<IGalleryEntry> {
     return this.socket.on('collaboration:created');

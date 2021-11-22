@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { IGalleryEntry } from '../../model/IGalleryEntry.model';
 
 @Component({
@@ -13,6 +14,7 @@ export class DrawingPreviewDialogComponent  {
     constructor(
       public dialogRef: MatDialogRef<DrawingPreviewDialogComponent>,
       private router: Router,
+      private syncCollaboration: SyncCollaborationService,
       @Inject(MAT_DIALOG_DATA) public data: any,
     ) {
       this.drawing = data;
@@ -22,7 +24,9 @@ export class DrawingPreviewDialogComponent  {
       this.dialogRef.close();
     }
 
-    
+    deleteDrawing(userID: string, collaborationId: string) : void {
+      this.syncCollaboration.sendDeleteCollaboration(userID, collaborationId);
+    }
 
     accessDrawing() : void {
       this.router.navigateByUrl('');

@@ -52,6 +52,8 @@ import { DrawingPreviewDialogComponent } from './components/drawing-preview-dial
 import { CreateDrawingComponent } from './components/create-drawing/create-drawing.component';
 import { MenuPageComponent } from './components/menu-page/menu-page.component';
 import { NewDrawingFormDialogComponent } from './components/new-drawing-form-dialog/new-drawing-form-dialog.component';
+import { CollaborationPasswordFormDialogComponent } from './components/collaboration-password-form-dialog/collaboration-password-form-dialog.component';
+import { TopBarComponent } from './components/top-bar/top-bar.component';
 
 @NgModule({
   declarations: [
@@ -88,7 +90,10 @@ import { NewDrawingFormDialogComponent } from './components/new-drawing-form-dia
     DrawingPreviewDialogComponent,
     CreateDrawingComponent,
     MenuPageComponent,
-    NewDrawingFormDialogComponent
+    NewDrawingFormDialogComponent,
+    ChatComponent,
+    CollaborationPasswordFormDialogComponent,
+    TopBarComponent,
   ],
   imports: [
     BrowserModule,

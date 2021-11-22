@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/internal/operators/catchError';
@@ -19,9 +19,13 @@ export class DrawingGalleryService {
     );
   }
 
-  filter(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery').pipe(
+  /*filter(offset: string, limit: string, filter?: string): Observable<IGalleryEntry[]> {
+    //let params = new HttpParams().set('filter', param);
+    let params = new HttpParams();
+    params = params.append('offset', offset);
+    params = params.append('limit', limit);
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery', {params: params}).pipe(
       catchError(() => of([])),
     );
-  }
+  }*/
 }

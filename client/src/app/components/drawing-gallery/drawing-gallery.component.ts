@@ -154,6 +154,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     if (this.datasourcePublic) { this.datasourcePublic.disconnect(); }
     if (this.datasourcePrivate) { this.datasourcePrivate.disconnect(); }
     if (this.datasourceProtected) { this.datasourceProtected.disconnect(); }
+    if(this.messageListener) { this.messageListener.unsubscribe();}
     if(this.afSubscription) {
       this.afSubscription.unsubscribe();
     }
@@ -187,7 +188,9 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
         //this.router.navigateByUrl("/"+this.drawings.slice(-1)[0].drawing_id);
   }
 
-  
+  public search() {
+    
+  }
 
 
   /*listenToNewMessages() {

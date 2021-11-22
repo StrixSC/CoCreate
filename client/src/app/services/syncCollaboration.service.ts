@@ -4,7 +4,6 @@ import { IGalleryEntry,IConnectCollaboration,ICreateCollaboration,IDeleteCollabo
 import { Observable, of, EMPTY } from "rxjs";
 import { Injectable } from "@angular/core";
 import { SocketService } from "./chat/socket.service";
-import { v4 } from "uuid";
 
 @Injectable({
   providedIn: "root",
@@ -41,12 +40,17 @@ export class SyncCollaborationService {
     return this.socketService.on("collaboration:updated");
   }
 
-  sendJoin(data: {userId: string, collaborationId: string, type: string, password?:string}){
+  sendJoin(userId: string, collaborationId: string, type: string, password?:string){
+      let data :IJoinCollaboration = {
+        userId,collaborationId,type
+      }
       this.socketService.emit('collaboration:join', data );
   }
 
-  sendConnect ( data: {userId: string, collaborationId: string})
+  sendConnect (userId: string, collaborationId: string)
   {
+    let data: IConnectCollaboration;
+    data = { userId:'jsu', collaborationId:'Public'};
     this.socketService.emit('collaboration:connect', data );   
   }
 
@@ -77,17 +81,17 @@ export class SyncCollaborationService {
     this.socketService.emit('collaboration:create', data );
   }
 
-  sendUpdateCollaboration(data: { userId: string,
+  sendUpdateCollaboration(userId: string,
 	collaborationId: string,
 	title: string,
 	type: string, 		
 	password?: string
-}) {
-    this.socketService.emit('collaboration:update', data);
+) {
+    this.socketService.emit('collaboration:update', {collaborationId,title,type});
   }
 
-  sendDeleteCollaboration(data: { userId: string, collaborationId: string}) {
-    this.socketService.emit('collaboration:delete', data);
+  sendDeleteCollaboration(userId: string, collaborationId: string) {
+    this.socketService.emit('collaboration:delete', {userId, collaborationId});
   }
 
   sendLeaveCollaboration(data: { userId: string, collaborationId: string}) {
