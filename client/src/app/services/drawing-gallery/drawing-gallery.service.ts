@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/internal/operators/catchError';
@@ -13,19 +13,30 @@ export class DrawingGalleryService {
   constructor(private http: HttpClient) { }
 
   /// Permet de recuperer les dessins sur le serveur
+  getPrivateDrawings(): Observable<IGalleryEntry[]> {
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?type=Private', ).pipe(
+      catchError(() => of([])),
+    );
+  }
+  getPublicDrawings(): Observable<IGalleryEntry[]> {
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?type=Public', ).pipe(
+      catchError(() => of([])),
+    );
+  }
+  getProtectedDrawings(): Observable<IGalleryEntry[]> {
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?type=Protected', ).pipe(
+      catchError(() => of([])),
+    );
+  }
   getDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery').pipe(
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery' ).pipe(
       catchError(() => of([])),
     );
   }
 
-  /*filter(offset: string, limit: string, filter?: string): Observable<IGalleryEntry[]> {
-    //let params = new HttpParams().set('filter', param);
-    let params = new HttpParams();
-    params = params.append('offset', offset);
-    params = params.append('limit', limit);
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery', {params: params}).pipe(
+  filter(): Observable<IGalleryEntry[]> {
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery').pipe(
       catchError(() => of([])),
     );
-  }*/
+  }
 }

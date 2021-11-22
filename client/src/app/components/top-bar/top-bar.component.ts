@@ -25,10 +25,11 @@ export class TopBarComponent implements OnInit, AfterViewInit, OnDestroy, OnChan
     this.afSubscription = this.af.authState.subscribe(user => {
       if(user){
         this.user = user;
-        console.log(this.user);
+        console.log(this.user.displayName);
         this.loading = false;
+        this.syncCollaboration.sendJoin(this.user.uid, 'DEMO_COLLABORATION', "Public");
         //this.syncCollaboration.sendJoin(this.user.uid,'DEMO_COLLABORATION','Public');
-        this.syncCollaboration.sendConnect(this.user.uid, 'cee54908-857d-49e2-9574-6e2747bc8527');
+        this.syncCollaboration.sendConnect(this.user.uid, 'DEMO_COLLABORATION');
       }
     });
     this.messageListener = this.socketService.socketReadyEmitter
@@ -61,6 +62,7 @@ export class TopBarComponent implements OnInit, AfterViewInit, OnDestroy, OnChan
   }
   ngOnChanges(){
     this.listenJoin();
+    this.listenConnect();
   }
   ngOnDestroy(){
     if(this.messageListener) { this.messageListener.unsubscribe();}
@@ -78,6 +80,13 @@ export class TopBarComponent implements OnInit, AfterViewInit, OnDestroy, OnChan
         console.log(data);    
       });
   }
+  public listenConnect(){
+    this.syncCollaboration
+        .onConnectCollaboration()
+        .subscribe((data) => {
+          console.log(data);    
+        });
+    }
 
   public updateCollaboration(paramChoice: string){
       //this.syncCollaboration.sendUpdateCollaboration(paramChoice)

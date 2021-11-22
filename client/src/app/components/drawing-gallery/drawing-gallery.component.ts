@@ -135,12 +135,18 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
       console.log("hey")
 
 
-    this.drawingGalleryService.getDrawings()
+    this.drawingGalleryService.getPublicDrawings()
         .subscribe((drawings: IGalleryEntry[]) => {
-          this.datasourcePublic.data = this.sortPublicVisibility(drawings);
-          this.datasourcePrivate.data = this.sortPrivateVisibility(drawings);
-          this.datasourceProtected.data = this.sortProtectedVisibility(drawings);
+          this.datasourcePublic.data = drawings
         });
+    this.drawingGalleryService.getPrivateDrawings()
+    .subscribe((drawings: IGalleryEntry[]) => {
+      this.datasourcePrivate.data = drawings;
+    });
+    this.drawingGalleryService.getProtectedDrawings()
+    .subscribe((drawings: IGalleryEntry[]) => {
+      this.datasourceProtected.data = drawings;
+    });
     this.paginatorPrivate._intl.itemsPerPageLabel="Dessins par page: ";
     this.paginatorPublic._intl.itemsPerPageLabel="Dessins par page: ";
     this.paginatorProtected._intl.itemsPerPageLabel="Dessins par page: ";
