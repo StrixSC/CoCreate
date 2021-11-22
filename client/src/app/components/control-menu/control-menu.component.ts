@@ -1,5 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material';
+import { Router } from '@angular/router';
 import { from, Subscription } from 'rxjs';
 import { mergeMap, switchMap, take } from 'rxjs/operators';
 import { CommandInvokerService } from 'src/app/services/command-invoker/command-invoker.service';
@@ -30,6 +31,7 @@ export class ControlMenuComponent implements OnDestroy {
     private exportDialogService: ExportDialogService,
     private openDrawingService: OpenDrawingDialogService,
     private authService: AuthService,
+    private router: Router
   ) {
   }
 
@@ -91,6 +93,10 @@ export class ControlMenuComponent implements OnDestroy {
   /// Redo
   redo(): void {
     this.commandInvoker.redo();
+  }
+
+  openProfile():void {
+    this.router.navigate(['/profile-settings'])
   }
 
   signOut(): void {

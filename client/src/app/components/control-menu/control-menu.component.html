@@ -1,6 +1,7 @@
 <div>
     <h4>Menu:</h4>
-    <button mat-flat-button id='welcome' matTooltip="Page Accueil" (click)="openWelcomeMessage()">Page
+    <button mat-flat-button id='welcome' matTooltip="Page Accueil" (click)="openProfile()">Profile</button>
+    <button mat-flat-button id='welcome' matTooltip="Page Accueil"  (click)="openProfile()">Page
         d'accueil</button>
     <button mat-flat-button id='help' matTooltip="Aide" (click)="openHelp()"> Aide</button>
     <button mat-flat-button id='drawing' matTooltip="Nouveau Dessin (CTRL+O)" (click)="openNewDrawing()">Nouveau
@@ -19,4 +20,5 @@
         [disabled]='!canRedo'>Retour à l'avant</button>
     <button mat-flat-button id='signout' matTooltip="Déconnexion" (click)="signOut()"
         >Déconnexion</button>
+
 </div>
