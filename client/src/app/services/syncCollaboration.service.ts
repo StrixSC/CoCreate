@@ -50,7 +50,7 @@ export class SyncCollaborationService {
   sendConnect (userId: string, collaborationId: string)
   {
     let data: IConnectCollaboration;
-    data = { userId:'jsu', collaborationId:'Public'};
+    data = { userId:userId, collaborationId:collaborationId};
     this.socketService.emit('collaboration:connect', data );   
   }
 

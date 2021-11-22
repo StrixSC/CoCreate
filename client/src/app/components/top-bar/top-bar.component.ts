@@ -14,33 +14,33 @@ export class TopBarComponent implements OnInit, AfterViewInit, OnDestroy, OnChan
 
   messageListener: Subscription;
 
+  public loading: boolean = false;
   private user: firebase.User;
   private afSubscription: Subscription;
   constructor(private syncCollaboration: SyncCollaborationService, private socketService: SocketService,
     private af: AngularFireAuth) { }
 
   ngOnInit() {
+    this.loading = true;
     this.afSubscription = this.af.authState.subscribe(user => {
-      if(user !== null){
-      this.user = user;
-      console.log(this.user.uid);
-      
-    //this.syncCollaboration.sendJoin(this.user.uid,'DEMO_COLLABORATION','Public');
-    this.syncCollaboration.sendConnect(this.user.uid, 'DEMO_COLLABORATION');
+      if(user){
+        this.user = user;
+        console.log(this.user);
+        this.loading = false;
+        //this.syncCollaboration.sendJoin(this.user.uid,'DEMO_COLLABORATION','Public');
+        this.syncCollaboration.sendConnect(this.user.uid, 'cee54908-857d-49e2-9574-6e2747bc8527');
       }
     });
-    console.log(this.user.uid)
     this.messageListener = this.socketService.socketReadyEmitter
       .pipe(
         take(1),
         switchMap((ready: boolean) => {
-          if (ready) {
+          if (ready && !this.loading) {
             return merge(
               this.syncCollaboration.onJoinCollaboration(),
               this.syncCollaboration.onConnectCollaboration(),
               this.syncCollaboration.onCreateCollaboration(),
               this.syncCollaboration.onDeleteCollaboration(),
-              this.syncCollaboration.onJoinCollaboration(),
               this.syncCollaboration.onUpdateCollaboration(),
               this.syncCollaboration.onLoadCollaboration()
             )
