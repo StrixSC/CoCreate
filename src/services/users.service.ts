@@ -1,3 +1,4 @@
+import create from 'http-errors';
 import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { IPublicUserProfile } from './../models/IUserPublicProfile';
 import { db } from '../db';
@@ -138,10 +139,20 @@ export const getUserChannelsById = async (id: string): Promise<any> => {
     }));
 };
 
-export const getUserLogs = async (userId: string, offset: number, limit: number): Promise<Log[]> => {
+export const getUserLogs = async (username: string, offset: number, limit: number): Promise<Log[]> => {
+    const user = await db.profile.findUnique({
+        where: {
+            username: username
+        }
+    });
+
+    if (!user) {
+        throw new create.NotFound('No user found with this username');
+    }
+
     const logs = await db.log.findMany({
         where: {
-            user_id: userId
+            user_id: user.user_id
         },
         orderBy: {
             updated_at: 'desc'

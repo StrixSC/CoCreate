@@ -27,12 +27,12 @@ router.get('/:id/channels', checkIfAuthenticated, (req, res, next) => {
     getUserChannelsController(req, res, next);
 });
 
-router.get('/:id/logs', checkIfAuthenticated, checkIfSelfRequest,
+router.get('/:id/logs', checkIfAuthenticated,
     param('id')
         .notEmpty()
         .trim()
         .isAlphanumeric()
-        .withMessage('Missing ID as url parameter.'),
+        .withMessage('Missing ID/Username as url parameter.'),
     query('offset')
         .optional()
         .isNumeric()
