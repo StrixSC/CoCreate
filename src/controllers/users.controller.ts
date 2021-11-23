@@ -1,6 +1,6 @@
 import { validationResult, matchedData } from 'express-validator';
 import { handleRequestError } from './../utils/errors';
-import { getUserChannelsById, getUserLogs } from './../services/users.service';
+import { getUserChannelsById, getUserLogs, updateUserProfile } from './../services/users.service';
 import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { StatusCodes } from 'http-status-codes';
 import create from 'http-errors';
@@ -106,7 +106,7 @@ export const getUserLogsController = async (req: Request, res: Response, next: N
             });
         }
 
-        const data = matchedData(req, { locations: [ 'params', 'query' ] });
+        const data = matchedData(req, { locations: ['params', 'query'] });
         const { id, offset, limit } = data;
         const logs = await getUserLogs(id, offset, limit);
 
@@ -121,3 +121,31 @@ export const getUserLogsController = async (req: Request, res: Response, next: N
         handleRequestError(e, next);
     }
 };
+
+export const updateUserProfileController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const errors = validationResult(req).array();
+
+        if (errors.length > 0) {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                message: errors
+            });
+        }
+
+        const data = matchedData(req, { locations: ['body'] });
+        const { username, avatarUrl } = data;
+
+        const updated = await updateUserProfile(req.userId, username, avatarUrl);
+
+        if (!updated) {
+            throw new create.InternalServerError('Something happened while processing the request. Nothing was updated.');
+        }
+
+        return res.status(StatusCodes.OK).json({
+            username: username,
+            avatarUrl: avatarUrl
+        });
+    } catch (e) {
+        handleRequestError(e, next);
+    }
+}

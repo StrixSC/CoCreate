@@ -3,6 +3,7 @@ import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { IPublicUserProfile } from './../models/IUserPublicProfile';
 import { db } from '../db';
 import { MemberType, Log } from '.prisma/client';
+import { admin } from '../firebase';
 
 export const getAllPublicProfiles = async (
     offset: number,
@@ -163,3 +164,48 @@ export const getUserLogs = async (username: string, offset: number, limit: numbe
 
     return logs;
 };
+
+export const updateUserProfile = async (userId: string, username: string, avatarUrl: string) => {
+    const [originalUser, updatedUser] = await db.$transaction([
+        db.profile.findUnique({ where: { user_id: userId } }),
+        db.profile.update({
+            where: {
+                user_id: userId
+            },
+            data: {
+                username: username,
+                avatar_url: avatarUrl
+            }
+        })
+    ]);
+
+    if (!originalUser || !updatedUser) {
+        throw new create.InternalServerError('Could not update the user in the database');
+    }
+
+    if (updatedUser) {
+        const newUser = await admin.auth().updateUser(userId, {
+            displayName: username,
+            photoURL: avatarUrl
+        });
+
+        if (newUser) {
+            return {
+                username: updatedUser.username,
+                avatarUrl: updatedUser.avatar_url
+            }
+        } else {
+            const revertedUser = await db.profile.update({
+                where: {
+                    user_id: userId
+                },
+                data: {
+                    username: originalUser.username,
+                    avatar_url: originalUser.avatar_url
+                }
+            });
+
+            throw new create.InternalServerError("Something went wrong while processing the request. No information was updated.");
+        }
+    }
+}

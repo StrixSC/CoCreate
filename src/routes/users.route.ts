@@ -5,7 +5,8 @@ import {
     getPublicUserController,
     getPublicUsersController,
     getUserChannelsController,
-    getUserLogsController
+    getUserLogsController,
+    updateUserProfileController
 } from './../controllers/users.controller';
 import { Router } from 'express';
 
@@ -43,6 +44,17 @@ router.get('/:id/logs', checkIfAuthenticated,
         .isNumeric()
         .withMessage('Limit must be a numeric value')
         .toInt(),
-    (req, res, next) => getUserLogsController(req, res, next));
+    async (req, res, next) => await getUserLogsController(req, res, next));
+
+// [Protected] Update user profile
+router.put('/profile', checkIfAuthenticated,
+    body('username')
+        .notEmpty()
+        .isAlphanumeric()
+        .withMessage('Username missing or invalid'),
+    body('avatarUrl')
+        .notEmpty()
+        .withMessage('Avatar Url missing or invalid'),
+    async (req, res, next) => await updateUserProfileController(req, res, next));
 
 export default router;

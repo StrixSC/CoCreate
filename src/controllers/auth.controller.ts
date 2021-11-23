@@ -1,3 +1,5 @@
+import { updateUserPassword } from './../services/auth.service';
+import { validationResult, matchedData } from 'express-validator';
 import { handleRequestError } from './../utils/errors';
 import { NextFunction, Request, Response } from 'express';
 import create from 'http-errors';
@@ -22,14 +24,25 @@ export const loginController = async (req: Request, res: Response, next: NextFun
     }
 };
 
-export const registerController = async (req: Request, res: Response, next: NextFunction) => {
+export const registerController = async (req: any, res: any, next: any) => {
     try {
+        const errors = validationResult(req).array();
+
+        if (errors.length > 0) {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                message: errors
+            });
+        }
+
+        const data = matchedData(req, { locations: ['body'] });
+        const { username, email, password, first_name, last_name } = data;
+
         const user = await register({
-            username: req.body.username,
-            email: req.body.email,
-            password: req.body.password,
-            first_name: req.body.first_name,
-            last_name: req.body.last_name
+            username: username,
+            email: email,
+            password: password,
+            first_name: first_name,
+            last_name: last_name
         });
 
         if (!user) {
@@ -47,10 +60,15 @@ export const logoutController = async (req: Request, res: Response, next: NextFu
     try {
         const userId = req.userId;
 
-        if (!userId) return next(new create.Unauthorized());
+        if (!userId) {
+            throw new create.Unauthorized()
+        }
 
         const log = await logout(userId);
-        if (!log) return next(new create.InternalServerError());
+
+        if (!log) {
+            throw new create.InternalServerError()
+        }
 
         return res.status(StatusCodes.OK).json({ message: 'OK' });
     } catch (e) {
@@ -80,3 +98,27 @@ export const refreshController = async (req: Request, res: Response, next: NextF
         handleRequestError(e, next);
     }
 };
+
+export const updateUserPasswordController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const errors = validationResult(req).array();
+
+        if (errors.length > 0) {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                message: errors
+            });
+        }
+
+        const data = matchedData(req, { locations: ['body'] });
+        const { password } = data;
+        const updatedUser = await updateUserPassword(req.userId, password);
+
+        if (!updatedUser) {
+            throw new create.InternalServerError('Could not update user password');
+        }
+
+        return res.status(StatusCodes.OK).json({ message: "OK" });
+    } catch (e) {
+        handleRequestError(e, next);
+    }
+}

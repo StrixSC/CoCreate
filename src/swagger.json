@@ -21,7 +21,9 @@
                         "Authorization": []
                     }
                 ],
-                "tags": ["Authentication"],
+                "tags": [
+                    "Authentication"
+                ],
                 "summary": "Log the user's connection to the database.",
                 "operationId": "login",
                 "description": "Logs the user's connection to the database.",
@@ -72,7 +74,9 @@
                         "Authorization": []
                     }
                 ],
-                "tags": ["Authentication"],
+                "tags": [
+                    "Authentication"
+                ],
                 "summary": "Log the user's disconnection to the database.",
                 "operationId": "logout",
                 "responses": {
@@ -120,7 +124,9 @@
         },
         "/auth/register": {
             "post": {
-                "tags": ["Authentication"],
+                "tags": [
+                    "Authentication"
+                ],
                 "summary": "Registers the user using the provided information",
                 "operationId": "register",
                 "description": "Registers the user using the provided information, if the email or username are not in use.",
@@ -204,6 +210,70 @@
                 }
             }
         },
+        "/auth/update/password": {
+            "put": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Updates the user's password",
+                "operationId": "updatepassword",
+                "description": "Updates the user's password.",
+                "requestBody": {
+                    "description": "Requires the email and the password of the user.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "password": {}
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Created. Password was updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "OK"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request. Invalid or missing information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing password"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected internal server error. This could be due to a problem during JWT token generation.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/users/:id": {
             "get": {
                 "parameters": [
@@ -216,7 +286,9 @@
                         }
                     }
                 ],
-                "tags": ["Users"],
+                "tags": [
+                    "Users"
+                ],
                 "summary": "Fetch all information of the user with the given id",
                 "security": [
                     {
@@ -302,7 +374,9 @@
                         }
                     }
                 ],
-                "tags": ["Users"],
+                "tags": [
+                    "Users"
+                ],
                 "summary": "Fetch all channels of a given user.",
                 "security": [
                     {
@@ -406,7 +480,9 @@
                         }
                     }
                 ],
-                "tags": ["Users"],
+                "tags": [
+                    "Users"
+                ],
                 "summary": "Fetch all logs for a given user.",
                 "security": [
                     {
@@ -501,7 +577,9 @@
                         }
                     }
                 ],
-                "tags": ["Users"],
+                "tags": [
+                    "Users"
+                ],
                 "summary": "Fetch all public profiles",
                 "operationId": "users",
                 "responses": {
@@ -559,6 +637,66 @@
                         }
                     }
                 }
+            },
+            "put": {
+                "requestBody": {
+                    "content": {
+                        "properties": {
+                            "schema": {
+                                "properties": {
+                                    "username": {},
+                                    "avatarUrl": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Fetch all public profiles",
+                "operationId": "updateprofile",
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "username":{},
+                                        "avatarUrl": {}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing username or avatar url.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/users/profile/:username": {
@@ -573,7 +711,9 @@
                         }
                     }
                 ],
-                "tags": ["Users"],
+                "tags": [
+                    "Users"
+                ],
                 "summary": "Fetch public profile of a specific user",
                 "operationId": "single user",
                 "responses": {
@@ -635,7 +775,9 @@
         },
         "/api/channels/": {
             "get": {
-                "tags": ["Channels"],
+                "tags": [
+                    "Channels"
+                ],
                 "summary": "Fetch all channels",
                 "security": [
                     {
@@ -709,7 +851,9 @@
         },
         "/api/channels/create": {
             "post": {
-                "tags": ["Channels"],
+                "tags": [
+                    "Channels"
+                ],
                 "summary": "Create new channel",
                 "security": [
                     {
@@ -775,7 +919,9 @@
         },
         "/api/channels/:id": {
             "get": {
-                "tags": ["Channels"],
+                "tags": [
+                    "Channels"
+                ],
                 "summary": "Fetch all relevant information pertaining to that channel. The request must be from a user that has access to the channel.",
                 "security": [
                     {
@@ -849,7 +995,9 @@
         },
         "/api/channels/:id/messages": {
             "get": {
-                "tags": ["Channels"],
+                "tags": [
+                    "Channels"
+                ],
                 "summary": "Fetch all messages in a channel",
                 "security": [
                     {
@@ -923,7 +1071,9 @@
         },
         "/api/gallery": {
             "get": {
-                "tags": ["Gallery"],
+                "tags": [
+                    "Gallery"
+                ],
                 "summary": "Fetch all gallery drawings",
                 "security": [
                     {
@@ -1390,7 +1540,7 @@
                     },
                     "updated_at": {
                         "type": "string"
-                    }, 
+                    },
                     "type": {
                         "type": "string"
                     },

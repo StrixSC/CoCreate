@@ -5,6 +5,7 @@ import { LogType, User, MemberType, Log } from '.prisma/client';
 import { IRegistrationPayload } from '../models/IRegistrationModel';
 import { admin } from '../firebase';
 import log from '../utils/logger';
+import { v4 } from 'uuid';
 
 export const findUserById = async (id: string): Promise<any> => {
     const user = await db.user.findUnique({
@@ -30,10 +31,6 @@ export const login = async (userId: string): Promise<Log | null> => {
 };
 
 export const register = async (payload: IRegistrationPayload): Promise<User | null> => {
-    // TODO: Express validator:
-    log('DEBUG', JSON.stringify(payload));
-    if (!validateRegistration(payload)) throw new create.BadRequest('Invalid or missing inputs');
-
     let { email, password, username, first_name, last_name } = payload;
 
     first_name = first_name.normalize();
@@ -46,20 +43,13 @@ export const register = async (payload: IRegistrationPayload): Promise<User | nu
             throw new create.Conflict('There is already a user with this username.');
         }
 
-        const firebaseUser = await admin.auth().createUser({
-            email: email,
-            password: password,
-            displayName: username
-        });
-
         const user = await db.user.create({
             data: {
                 email: email,
-                user_id: firebaseUser.uid,
                 profile: {
                     create: {
                         username: username,
-                        avatar_url: firebaseUser.photoURL || ''
+                        avatar_url: ''
                     }
                 },
                 account: {
@@ -74,7 +64,32 @@ export const register = async (payload: IRegistrationPayload): Promise<User | nu
             }
         });
 
-        return user;
+        if (!user) {
+            throw new create.InternalServerError('Could not create the database at the moment. Please try again later.')
+        }
+
+        const firebaseUser = await admin.auth().createUser({
+            uid: user.user_id,
+            email: user.email,
+            password: password,
+            displayName: username,
+        });
+
+        if (!firebaseUser) {
+            const deletedUser = await db.user.delete({
+                where: {
+                    user_id: user.user_id
+                }
+            });
+
+            if (!deletedUser) {
+                throw new create.InternalServerError('Could not delete pending created user after error with registration. Contact an administrator.')
+            }
+
+            throw new create.InternalServerError('Could not create a firebase user. Contact an administrator.')
+        }
+
+        return user
     } catch (e) {
         throw e;
     }
@@ -91,3 +106,15 @@ export const logout = async (userId: string) => {
 
     return log;
 };
+
+export const updateUserPassword = async (userId: string, password: string) => {
+    const updated = await admin.auth().updateUser(userId, {
+        password: password
+    });
+
+    if (updated) {
+        return true;
+    } else {
+        return false;
+    }
+}

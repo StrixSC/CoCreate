@@ -24,15 +24,16 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
             return res.status(StatusCodes.NO_CONTENT).json([])
         }
 
-        return res.status(StatusCodes.OK).json((collaborations.filter((c) => {
+        return res.status(StatusCodes.OK).json((collaborations).filter((c) => {
             const author = c.collaboration_members.find((m: any) => m.type === MemberType.Owner);
             if (!author) {
-                return
+                return false
             }
 
-            return author.user.userId === req.userId;
+            if (type === CollaborationType.Private) {
+                return author.user.userId === req.userId;
+            } else return true;
         }).map((c) => {
-
             const author = c.collaboration_members.find((m: any) => m.type === MemberType.Owner);
             if (!author) {
                 return
@@ -50,7 +51,7 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
                 collaborator_count: c.collaboration_members.length,
                 max_collaborator_count: c.max_collaborator_count
             }
-        })));
+        }));
     } catch (e) {
         handleRequestError(e, next);
     }
