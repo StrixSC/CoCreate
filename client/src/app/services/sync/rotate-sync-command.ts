@@ -27,9 +27,8 @@ export class RotateSyncCommand extends SyncCommand {
             this.command.addSubCommand(this.rotateCommand);
         }
 
-        const lastAngle = this.rotateCommand.lastAngle;
-        this.rotateCommand.rotate(lastAngle + this.payload.angle);
-
+        let newAngle = this.payload.angle;
+        this.rotateCommand.rotate(newAngle + this.rotateCommand.lastAngle);
         if (this.payload.state === DrawingState.down) {
             return this;
         }

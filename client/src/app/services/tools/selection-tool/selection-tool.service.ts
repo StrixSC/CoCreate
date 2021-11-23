@@ -17,6 +17,9 @@ import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { SelectionCommandConstants } from './command-type-constant';
 import { SelectionTransformService } from './selection-transform.service';
 
+const CLOCKWISE = 5;
+const COUNTER_CLOCKWISE = -5;
+
 export interface SelectionActionButton {
   iconSrc: string;
   iconSize: number;
@@ -162,6 +165,7 @@ export class SelectionToolService implements Tools {
             this.removeSelection();
           } else if (button.iconId === ActionButtonIds.HoldRotation) {
             this.isRotating = true;
+            // this.setMouseWheelEvent();
             this.setSelection();
           }
           return;
@@ -239,6 +243,7 @@ export class SelectionToolService implements Tools {
       this.isRotating = false;
       this.syncService.sendRotate(DrawingState.up, this.selectedActionId, 0);
       this.activeActionType = SelectionActionTypes.None;
+      this.removeMouseWheelEvent();
       return;
     }
 
@@ -277,7 +282,6 @@ export class SelectionToolService implements Tools {
   onMove(event: MouseEvent): void {
     const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
     if (this.isRotating) {
-      this.rotate(event);
       return;
     }
 
@@ -320,20 +324,19 @@ export class SelectionToolService implements Tools {
     this.syncService.sendRotate(DrawingState.down, this.selectedActionId, -this.DEFAULT_ANGLE_SHIFT);
   }
 
-  rotate(event: MouseEvent): void {
-    this.activeActionType = SelectionActionTypes.Rotate;
-    const boundingRect = this.rectSelection.getBoundingClientRect();
-    const centerX = (boundingRect.left) + (boundingRect.width / 2);
-    const centerY = (boundingRect.top) + (boundingRect.height / 2);
-    const mouseX = event.pageX - this.actionButtonGroup.getBoundingClientRect().width;
-    const mouseY = event.pageY - this.actionButtonGroup.getBoundingClientRect().height;
-    const radians = Math.atan2(mouseX - centerX, mouseY - centerY);
-    const degree = (radians * (180 / Math.PI) * -1) + 90;
-    this.syncService.sendRotate(DrawingState.move, this.selectedActionId, degree / 360);
+  rotate(event: WheelEvent): void {
+    if (this.isRotating) {
+      this.activeActionType = SelectionActionTypes.Rotate;
+      const side = event.deltaY > 0 ? CLOCKWISE : COUNTER_CLOCKWISE;
+      console.log(side);
+      this.syncService.sendRotate(DrawingState.move, this.selectedActionId, 1 * side);
+      event.preventDefault();
+      event.stopPropagation();
+    }
   }
 
   /// Methode qui calcule la surface que le rectangle de selection doit prendre en fonction des objets selectionnes.
-  private setSelection(): void {
+  public setSelection(): void {
     if (this.hasSelection()) {
       if (this.objects[0] !== undefined) {
         this.rendererService.renderer.setProperty(this.objects[0], 'isSelected', true);
@@ -580,10 +583,6 @@ export class SelectionToolService implements Tools {
     this.rendererService.renderer.setAttribute(this.rectInversement, 'x', '0');
     this.rendererService.renderer.setAttribute(this.rectInversement, 'y', '0');
     this.rendererService.renderer.setAttribute(this.rectInversement, 'pointer-events', 'none');
-  }
-
-  private setMouseWheelEvent(): void {
-    window.addEventListener('wheel', this.rotate);
   }
 
   private rotationAction(event: WheelEvent): void {

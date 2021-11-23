@@ -103,8 +103,8 @@ export class ToolFactoryService {
         }
       }
     },
-    Rotate: (payload: IRotateAction) => {
-      if (payload.state === DrawingState.down) {
+    Rotate: (payload: IRotateAction, isActiveUser: boolean) => {
+      if (payload.state === DrawingState.down && !payload.x && !payload.y) {
         const command = new RotateSyncCommand(payload, this.rendererService.renderer, this.drawingService);
         const res = command.execute();
         if (res) {
@@ -124,9 +124,13 @@ export class ToolFactoryService {
           }
         }
       }
+
+      if (isActiveUser) {
+        this.selectionService.setSelection();
+      }
+
     },
     Resize: (payload: IResizeAction) => {
-      console.log(payload);
       const hasOngoingMovement = this.pendingActions.has(payload.actionId);
       if (!hasOngoingMovement) {
         const command = new ResizeSyncCommand(payload, this.rendererService.renderer, this.drawingService);

@@ -161,6 +161,7 @@ export class ResizeSelectionService {
         newXScale = SCALE_INVERSER_MODIFIER * newXScale + (this.isAlt ? SCALE_POSITIONNER_MODIFIER : 0);
       }
     }
+
     return { xScale: newXScale, yScale: newYScale, xTranslate: newXTranslate, yTranslate: newYTranslate };
   }
 

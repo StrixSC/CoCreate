@@ -115,6 +115,9 @@ export type IResizeAction = IDefaultActionPayload & {
 
 export type IRotateAction = IDefaultActionPayload & {
     angle: number;
+
+    x?: number;
+    y?: number;
     state: DrawingState;
     selectedActionId: string;
 }

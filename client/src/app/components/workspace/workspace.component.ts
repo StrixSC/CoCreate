@@ -1,3 +1,5 @@
+import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
+import { ToolIdConstants } from './../../services/tools/tool-id-constants';
 import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ToolsService } from 'src/app/services/tools/tools.service';
 import { WorkspaceService } from 'src/app/services/workspace/workspace.service';
@@ -48,5 +50,11 @@ export class WorkspaceComponent implements OnInit, AfterViewInit {
   @HostListener('window:mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
     this.toolsService.onMove(event);
+  }
+
+  @HostListener('wheel', ['$event']) onMouseWheel(event: WheelEvent) {
+    if (this.toolsService.selectedToolId === ToolIdConstants.SELECTION_ID) {
+      (this.toolsService.selectedTool as SelectionToolService).rotate(event);
+    }
   }
 }
