@@ -16,14 +16,17 @@ import '../models/chat.dart';
 
 class Collaborator extends ChangeNotifier {
   UserCredential? auth;
-  List<Drawing> userDrawings = [];
-  List<Drawing> allDrawings = [];
-  List<Drawing> availableDrawings = [];
+  Map drawings = <String, Map<String, Drawing>>{}; // <type, <drawing_id, drawing>>
   bool isDrawing = false;
-  late int currentDrawingIndex = 0;
+  String currentType = "Public";
+  late String currentDrawingId = '';
   late CollaborationSocket collaborationSocket;
 
-  Collaborator(this.auth, this.allDrawings);
+  Collaborator(this.auth) {
+    drawings.putIfAbsent("Private", () => <String, Drawing>{});
+    drawings.putIfAbsent("Public", () => <String, Drawing>{});
+    drawings.putIfAbsent("Protected", () => <String, Drawing>{});
+  }
 
   void setSocket(socket) {
     collaborationSocket = socket;
@@ -39,36 +42,36 @@ class Collaborator extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateDrawings(List<Drawing> updatedDrawings) {
-    allDrawings = updatedDrawings;
+  void updateDrawings(Map<String, Drawing> updatedDrawings) {
+    drawings.update(currentType, (value) => updatedDrawings) ;
     notifyListeners();
   }
 
   void addDrawings(List<Drawing> updatedDrawings) {
-    for (var element in updatedDrawings) {allDrawings.add(element); }
+    (drawings[currentType] as List<Drawing>).addAll(updatedDrawings);
     notifyListeners();
   }
 
   void loadDrawing(Collaboration collaboration) {
-    collaboration.collaborationId =
-        allDrawings[currentDrawingIndex].collaboration.collaborationId;
-    allDrawings[currentDrawingIndex].collaboration = collaboration;
+    // Since collab id is not sent (just for local object manipulation)
+    collaboration.collaborationId = drawings[currentType][currentDrawingId].collaboration.collaborationId;
+    drawings[currentType][currentDrawingId].collaboration = collaboration;
     notifyListeners();
   }
 
   void memberJoined(Member member) {
-    allDrawings[currentDrawingIndex].collaboration.members.add(member);
-    allDrawings[currentDrawingIndex].collaboration.memberCount++;
+    drawings[currentType][currentDrawingId].collaboration.members.add(member);
+    drawings[currentType][currentDrawingId].collaboration.memberCount++;
     notifyListeners();
   }
 
   void memberConnected(Member member) {
-    int index = allDrawings[currentDrawingIndex]
+    int index = drawings[currentType][currentDrawingId]
         .collaboration
         .members
         .indexWhere((element) => element.userId == member.userId);
     if (index != -1) {
-      allDrawings[currentDrawingIndex].collaboration.members[index].isActive =
+      drawings[currentType][currentDrawingId].collaboration.members[index].isActive =
           true;
       notifyListeners();
     } else {
@@ -77,22 +80,20 @@ class Collaborator extends ChangeNotifier {
   }
 
   void drawingCreated(Drawing drawing) {
-    allDrawings.add(drawing);
+    (drawings[currentType] as Map<String, Drawing>).putIfAbsent(drawing.drawingId, () => drawing);
     notifyListeners();
   }
 
   void updatedDrawing(Drawing drawing) {
-    allDrawings.add(drawing);
+    drawings[currentType][currentDrawingId] = drawing;
     notifyListeners();
   }
 
   void deletedDrawing(Map delete) {
     String collaborationId = delete["collaborationId"];
     String deletedAt = delete["deletedAt"];
-    int index = allDrawings.indexWhere(
-        (element) => element.collaboration.collaborationId == collaborationId);
-    if (index != -1) {
-      allDrawings.removeAt(index);
+    dynamic object = (drawings[currentType] as Map<String, Drawing>).remove(collaborationId);
+    if (object != null) {
       notifyListeners();
     } else {
       throw ("Delete drawing collaboration index not found.");
@@ -107,50 +108,21 @@ class Collaborator extends ChangeNotifier {
     String username = left["username"];
     String avatarUrl = left["avatarUrl"];
     String leftAt = left["leftAt"];
-    int index = allDrawings.indexWhere(
-        (element) => element.collaboration.collaborationId == collaborationId);
+    int index = drawings[currentType][currentDrawingId]
+        .collaboration
+        .members
+        .indexWhere((element) => element.userId == userId);
     if (index != -1) {
-      allDrawings[index]
+      drawings[currentType][currentDrawingId]
           .collaboration
           .members
           .removeWhere((member) => member.userId == userId);
-      allDrawings[index].collaboration.memberCount--;
+      drawings[currentType][currentDrawingId].collaboration.memberCount--;
       notifyListeners();
     } else {
       throw ("Left member collaboration index not found.");
     }
     notifyListeners();
-  }
-
-  Future<void> fetchDrawings(String? filter, int offset, int limit) async {
-    RestApi rest = RestApi();
-    var response = await rest.drawing.fetchDrawings(filter, offset, limit);
-    if (response.statusCode == 200) {
-      var jsonResponse =
-          json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
-      print('fetchDrawings');
-      print(jsonResponse);
-      List<Drawing> drawings = [];
-      for (var drawing in jsonResponse) {
-        Collaboration collaboration = Collaboration(
-            collaborationId: drawing["collaboration_id"],
-            memberCount: drawing["collaborator_count"],
-            maxMemberCount: drawing["max_collaborator_count"]);
-        // TODO: add updated_at && thumbnail url
-        allDrawings.add(Drawing(
-            drawingId: drawing['drawing_id'],
-            authorUsername: drawing["author_username"],
-            authorAvatar: drawing["author_avatar"],
-            title: drawing['title'],
-            createdAt: drawing['created_at'],
-            collaboration: collaboration,
-            type: drawing['type']));
-      }
-      updateDrawings(drawings);
-    } else {
-      print('Request failed with status: ${response.statusCode}.');
-      if(response.statusCode != 204) { updateDrawings([]); };
-    }
   }
 
   void callbackChannel(eventType, data) {

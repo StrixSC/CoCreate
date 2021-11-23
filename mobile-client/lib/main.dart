@@ -15,7 +15,7 @@ Future main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => Messenger(null, [], [])),
-      ChangeNotifierProvider(create: (_) => Collaborator(null, []))
+      ChangeNotifierProvider(create: (_) => Collaborator(null))
     ],
     builder: (context, child) {
       return App();

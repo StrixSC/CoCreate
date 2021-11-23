@@ -41,7 +41,7 @@ class GalerieState extends State<Galerie> {
     try {
       RestApi rest = RestApi();
       var response = await rest.drawing
-          .fetchDrawings(null, _pageSize * pageKey, _pageSize);
+          .fetchDrawings(null, _pageSize * pageKey, _pageSize, "Public");
       if (response.statusCode == 200) {
         var jsonResponse =
             json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
@@ -123,7 +123,7 @@ class GalerieState extends State<Galerie> {
               pagingController: _pagingController,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 childAspectRatio: 3 / 2,
-                crossAxisCount: 2,
+                crossAxisCount: 3,
                 mainAxisSpacing: 18,
                 crossAxisSpacing: 5,
               ),

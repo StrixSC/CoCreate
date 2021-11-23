@@ -13,10 +13,11 @@ class CollaborationAPI {
   // filter : Filter to apply
   // offset : Amount of records to skip. Use this for pagination. Defauls to 0
   // limit  : Amount of records to take. Use this for pagination. Defaults to 50.
-  Future<Response> fetchDrawings(String? filter, int offset, int limit) async {
+  Future<Response> fetchDrawings(String? filter, int offset, int limit, String type) async {
     final queryParameters = {
       'offset': offset.toString(),
       'limit': limit.toString(),
+      'type': type,
     };
     if (filter != null) {
       queryParameters['filter'] = filter;
