@@ -78,6 +78,43 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
       }
   }
 
+  TabBar get _tabBar => TabBar(
+    indicatorWeight: 5.0,
+    controller: _tabController,
+    tabs: [
+      Tab(
+      child: Row(
+      mainAxisSize: MainAxisSize.min,
+        children: const [
+          Icon(Icons.public),
+          SizedBox(width: 8),
+          Text('Publique', style: TextStyle(fontSize: 18)),
+        ],
+      ),
+      ),
+      Tab(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.shield),
+            SizedBox(width: 8),
+            Text('Protégé', style: TextStyle(fontSize: 18)),
+          ],
+        ),
+      ),
+      Tab(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.remove_red_eye_sharp),
+            SizedBox(width: 8),
+            Text('Privé', style: TextStyle(fontSize: 18)),
+          ],
+        ),
+      ),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,21 +131,11 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
                   // createDessinDialog();
                 })
           ],
-          bottom: TabBar(
-            controller: _tabController,
-            tabs: const <Widget>[
-              Tab(
-                icon: Icon(Icons.cloud_outlined),
-              ),
-              Tab(
-                icon: Icon(Icons.beach_access_sharp),
-              ),
-              Tab(
-                icon: Icon(Icons.brightness_5_sharp),
-              ),
-            ],
-          ),
-        ),
+          bottom: PreferredSize(
+    preferredSize: _tabBar.preferredSize,
+    child: ColoredBox(
+    color: kContentColor, child: _tabBar
+        ))),
         body: TabBarView(controller: _tabController, children: [
           gallerieView(pagingControllers["Public"]),
           gallerieView(pagingControllers["Protected"]),
