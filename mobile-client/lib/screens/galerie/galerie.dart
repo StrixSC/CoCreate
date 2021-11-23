@@ -170,11 +170,12 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
             )),
         const SizedBox(height: 24.0),
         Expanded(
-            child: PagedGridView<int, Drawing>(
+            child: OrientationBuilder(
+        builder: (context, orientation) { return PagedGridView<int, Drawing>(
               pagingController: pagingController,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 childAspectRatio: 3 / 2,
-                crossAxisCount: 3,
+                crossAxisCount: orientation == Orientation.portrait ? 2 : 3,
                 mainAxisSpacing: 18,
                 crossAxisSpacing: 5,
               ),
@@ -184,7 +185,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
                       drawing: item,
                     ),
               ),
-            ))
+            );}))
       ]),
     );
   }
