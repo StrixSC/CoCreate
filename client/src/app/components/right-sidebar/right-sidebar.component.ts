@@ -10,13 +10,7 @@ import { IpcService } from "src/app/services/notification-manager/IPCManager.ser
 })
 export class RightSidebarComponent implements OnInit {
   private textChannels: Map<String, IChannel>;
-  private prevJoinedCollabChannels: Array<String> = [
-    "Équipe 109",
-    "Équipe 109",
-    "Équipe 109",
-    "Équipe 109",
-  ];
-
+  my_channels_load: Set<string>; // Current user channels on load.
   selectedChannel: string;
   channelBarCss: string;
   channel: IChannel;
@@ -32,6 +26,7 @@ export class RightSidebarComponent implements OnInit {
     private ipcService: IpcService
   ) {
     this.textChannels = new Map();
+    this.my_channels_load = new Set();
     this.newChannelStyle = { display: "none" };
     this.chatDivView = { display: "none", transition: "0.2s" };
     // this.audio = new Audio();
@@ -55,10 +50,16 @@ export class RightSidebarComponent implements OnInit {
   }
 
   connectChannels(channel_list: any[]) {
+    const channels = new Array<string>();
+
     channel_list.forEach((channel: IChannel) => {
-      channel.channel_id;
+      channels.push(channel.channel_id);
       this.textChannels.set(channel.channel_id, channel);
+      this.my_channels_load.add(channel.channel_id);
     });
+
+    localStorage.setItem("on_load_channels", JSON.stringify(channels));
+    // this.my_channels_load = channels;
   }
 
   getChannels() {

@@ -39,7 +39,8 @@ export class IpcService {
   readonly NOTIFICATION_CHANNEL = "notification";
 
   constructor() {
-    // this._ipc = window.require("electron").ipcRenderer;
+    if (window.require) this._ipc = window.require("electron").ipcRenderer;
+    else console.error("NOTIFICATIONS WILL NOT WORK ON WEB BROWSER!");
   }
 
   public on(channel: string, listener: any): void {

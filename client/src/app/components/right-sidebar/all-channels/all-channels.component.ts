@@ -22,6 +22,7 @@ export interface DialogData {
 })
 export class AllChannelsComponent implements OnInit, OnChanges {
   all_channels: Map<string, IChannel>;
+
   channel_names: Set<string>;
   all_channel_dynamic_css: Object;
 
@@ -53,6 +54,18 @@ export class AllChannelsComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.getChannels();
+    this.syncChannels();
+  }
+
+  syncChannels() {
+    var retrievedData = localStorage.getItem("on_load_channels");
+    if (retrievedData) {
+      const my_channels = JSON.parse(retrievedData) as Array<string>;
+      my_channels.forEach((channel_id: string) => {
+        console.log("joining", channel_id);
+        this.joinChannel(channel_id);
+      });
+    }
   }
 
   ngOnChanges() {
