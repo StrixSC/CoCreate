@@ -18,21 +18,25 @@ const routes: Routes = [
       authGuardPipe: redirectLoggedInToDrawing,
     },
   },
-  { path: 'register', component: SignUpPageComponent, canActivate: [AngularFireAuthGuard], data: {
+  {
+    path: 'register', component: SignUpPageComponent, canActivate: [AngularFireAuthGuard], data: {
       authGuardPipe: redirectLoggedInToDrawing,
-  }},
+    }
+  },
   { path: 'workspace', component: SidenavComponent },
   { path: 'profile', component: UserProfileComponent },
-  { path: 'drawing', component: DrawingPageComponent, canActivate: [AngularFireAuthGuard], data: {
+  {
+    path: 'drawing', component: DrawingPageComponent, canActivate: [AngularFireAuthGuard], data: {
       authGuardPipe: redirectUnauthorizedToLogin,
-  }},
+    }
+  },
   { path: 'chat', component: ChatComponent },
   { path: 'forgot-password', component: ChangePasswordComponent },
   { path: '**', redirectTo: '' },
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, { useHash: true })],
   exports: [RouterModule],
 })
 export class AppRoutingModule { }
