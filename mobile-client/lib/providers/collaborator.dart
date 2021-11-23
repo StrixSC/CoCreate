@@ -48,7 +48,10 @@ class Collaborator extends ChangeNotifier {
   }
 
   void addDrawings(List<Drawing> updatedDrawings) {
-    (drawings[currentType] as List<Drawing>).addAll(updatedDrawings);
+    for(var drawing in updatedDrawings) {
+      (drawings[currentType] as Map<String, Drawing>).putIfAbsent(drawing.drawingId, () => drawing);
+    }
+
     notifyListeners();
   }
 

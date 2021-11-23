@@ -21,30 +21,32 @@ class Galerie extends StatefulWidget {
 
 final _formKey = GlobalKey<FormBuilderState>();
 
-class GalerieState extends State<Galerie> {
+class GalerieState extends State<Galerie> with TickerProviderStateMixin {
+  Map pagingControllers = <String, PagingController<int, Drawing>>{};
   TextEditingController searchController = TextEditingController();
-
+  late TabController _tabController;
   static const _pageSize = 12;
 
-  final PagingController<int, Drawing> _pagingController =
-      PagingController(firstPageKey: 0);
+  GalerieState() {
+    pagingControllers.putIfAbsent("Private", () => PagingController<int, Drawing>(firstPageKey: 0));
+    pagingControllers.putIfAbsent("Public", () => PagingController<int, Drawing>(firstPageKey: 0));
+    pagingControllers.putIfAbsent("Protected", () => PagingController<int, Drawing>(firstPageKey: 0));
+  }
 
   @override
   void initState() {
-    _pagingController.addPageRequestListener((pageKey) {
-      _fetchDrawings(pageKey);
-    });
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    pagingControllers.forEach((key, value) { value.addPageRequestListener((pageKey) { _fetchDrawings(pageKey, key);}); });
   }
 
-  Future<void> _fetchDrawings(int pageKey) async {
-    try {
+  Future<void> _fetchDrawings(int pageKey, String type) async {
       RestApi rest = RestApi();
       var response = await rest.drawing
-          .fetchDrawings(null, _pageSize * pageKey, _pageSize, "Public");
+          .fetchDrawings(null, pageKey, _pageSize, type);
       if (response.statusCode == 200) {
         var jsonResponse =
-            json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
+        json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
         print('fetchDrawings');
         print(jsonResponse);
         List<Drawing> drawings = [];
@@ -65,62 +67,84 @@ class GalerieState extends State<Galerie> {
         }
         final isLastPage = drawings.length < _pageSize;
         if (isLastPage) {
-          _pagingController.appendLastPage(drawings);
+          pagingControllers[type].appendLastPage(drawings);
         } else {
           final nextPageKey = pageKey + drawings.length;
-          _pagingController.appendPage(drawings, nextPageKey);
+          pagingControllers[type].appendPage(drawings, nextPageKey);
         }
         context.read<Collaborator>().addDrawings(drawings);
+      } else if (response.statusCode == 204) {
+        print(response.body);
       }
-    } catch (error) {
-      _pagingController.error = error;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-            backgroundColor: kPrimaryColor,
-            centerTitle: true,
-            automaticallyImplyLeading: false,
-            title: const Text("Galerie de dessins"),
-            actions: <Widget>[
-              IconButton(
-                  icon: const Icon(CupertinoIcons.plus,
-                      color: Colors.white, size: 34),
-                  onPressed: () {
-                    // createDessinDialog();
-                  })
-            ]),
-        body: Container(
-          child: Column(children: <Widget>[
-            const SizedBox(height: 24.0),
-            Container(
-                width: 500.0,
-                child: TextField(
-                  style: const TextStyle(fontSize: 25),
-                  controller: searchController,
-                  maxLines: 1,
-                  decoration: InputDecoration(
-                    errorStyle: const TextStyle(fontSize: 26),
-                    hintText: "Filtrer les dessins selon un attribut",
-                    hintStyle: const TextStyle(
-                      fontSize: 26,
-                    ),
-                    contentPadding: const EdgeInsets.all(15),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(0)),
-                    prefixIcon: const Icon(Icons.search),
-                  ),
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  autofocus: false,
-                )),
-            const SizedBox(height: 24.0),
-            Expanded(
-                child: PagedGridView<int, Drawing>(
-              pagingController: _pagingController,
+          backgroundColor: kPrimaryColor,
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          title: const Text("Galerie de dessins"),
+          actions: <Widget>[
+            IconButton(
+                icon: const Icon(CupertinoIcons.plus,
+                    color: Colors.white, size: 34),
+                onPressed: () {
+                  // createDessinDialog();
+                })
+          ],
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const <Widget>[
+              Tab(
+                icon: Icon(Icons.cloud_outlined),
+              ),
+              Tab(
+                icon: Icon(Icons.beach_access_sharp),
+              ),
+              Tab(
+                icon: Icon(Icons.brightness_5_sharp),
+              ),
+            ],
+          ),
+        ),
+        body: TabBarView(controller: _tabController, children: [
+          gallerieView(pagingControllers["Public"]),
+          gallerieView(pagingControllers["Protected"]),
+          gallerieView(pagingControllers["Private"]),
+        ]));
+  }
+
+  gallerieView(pagingController) {
+    return Container(
+      child: Column(children: <Widget>[
+        const SizedBox(height: 24.0),
+        Container(
+            width: 500.0,
+            child: TextField(
+              style: const TextStyle(fontSize: 25),
+              controller: searchController,
+              maxLines: 1,
+              decoration: InputDecoration(
+                errorStyle: const TextStyle(fontSize: 26),
+                hintText: "Filtrer les dessins selon un attribut",
+                hintStyle: const TextStyle(
+                  fontSize: 26,
+                ),
+                contentPadding: const EdgeInsets.all(15),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(0)),
+                prefixIcon: const Icon(Icons.search),
+              ),
+              enableSuggestions: false,
+              autocorrect: false,
+              autofocus: false,
+            )),
+        const SizedBox(height: 24.0),
+        Expanded(
+            child: PagedGridView<int, Drawing>(
+              pagingController: pagingController,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 childAspectRatio: 3 / 2,
                 crossAxisCount: 3,
@@ -128,14 +152,21 @@ class GalerieState extends State<Galerie> {
                 crossAxisSpacing: 5,
               ),
               builderDelegate: PagedChildBuilderDelegate<Drawing>(
-                itemBuilder: (context, item, index) => _Drawing(
-                  drawing: item,
-                ),
+                itemBuilder: (context, item, index) =>
+                    _Drawing(
+                      drawing: item,
+                    ),
               ),
             ))
-          ]),
-        ));
+      ]),
+    );
   }
+  @override
+  void dispose() {
+    pagingControllers.forEach((key, value) {value.dispose();});
+    super.dispose();
+  }
+}
 
   // createDessinDialog() async {
   //   showDialog<String>(
@@ -172,13 +203,6 @@ class GalerieState extends State<Galerie> {
   //             ],
   //           ));
   // }
-
-  @override
-  void dispose() {
-    _pagingController.dispose();
-    super.dispose();
-  }
-}
 
 /// Allow the text size to shrink to fit in the space
 class _GridTitleText extends StatelessWidget {
