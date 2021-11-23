@@ -123,7 +123,5 @@ class ChannelSocket extends SocketService {
     updatedChannel(callbackChannel);
 
     deletedChannel(callbackChannel);
-
-    print("initialized socket events");
   }
 }

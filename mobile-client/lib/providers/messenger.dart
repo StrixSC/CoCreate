@@ -25,11 +25,12 @@ class Messenger extends ChangeNotifier {
 
   void setSocket(socket) {
     channelSocket = socket;
-    if(socket.socket.connected) {
-        print("Channel socket events initialized");
-        channelSocket.initializeChannelSocketEvents(callbackChannel);
-        joinAllUserChannels();
-    }
+    channelSocket.socket.on('connect', (_) {
+      print("Channel socket events initialized");
+      channelSocket.initializeChannelSocketEvents(callbackChannel);
+      joinAllUserChannels();
+    });
+
     notifyListeners();
   }
 
