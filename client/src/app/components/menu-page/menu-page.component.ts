@@ -1,18 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { AuthService } from './../../services/auth.service';
+import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-menu-page',
   templateUrl: './menu-page.component.html',
   styleUrls: ['./menu-page.component.scss']
 })
-export class MenuPageComponent {
+export class MenuPageComponent implements OnDestroy {
 
-  constructor(private router: Router) { }
+  authSubscription: Subscription
+  constructor(private auth: AuthService, private router: Router) { }
 
-  
-  openDrawingGallery() : void {
+  openDrawingGallery(): void {
     this.router.navigateByUrl("gallery")
   }
 
+  ngOnDestroy(): void {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
+  }
+
+  logout() {
+    this.authSubscription = this.auth.signOut().subscribe(() => {
+      this.router.navigateByUrl('auth');
+    });
+  }
 }

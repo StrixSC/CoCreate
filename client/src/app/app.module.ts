@@ -1,10 +1,11 @@
+import { RegisterComponent } from './components/register/register.component';
+import { AuthWrapperComponent } from './components/auth-wrapper/auth-wrapper.component';
 import { LandingPageComponent } from './components/landing-page/landing-page.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 import { OfflineComponent } from './components/offline/offline.component';
 import { LoginComponent } from './components/login/login.component';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { MatCardModule } from '@angular/material/card';
 import { NgModule } from '@angular/core';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
@@ -40,7 +41,6 @@ import { SocketService } from './services/chat/socket.service';
 import { ErrorMessageComponent } from './components/error-message/error-message.component';
 import { ToolParameterModule } from './components/tool-parameters/tool-parameter.module';
 import { AppRoutingModule } from './app-routing.module';
-import { LoginPageComponent } from './components/login/login-page/login-page.component';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -86,7 +86,6 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     ErrorMessageComponent,
     AlertMessageComponent,
     ExportDrawingComponent,
-    LoginPageComponent,
     DrawingPageComponent,
     WelcomePageComponent,
     SignUpPageComponent,
@@ -101,6 +100,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     DrawingPreviewDialogComponent,
     CreateDrawingComponent,
     MenuPageComponent,
+    RegisterComponent,
     NewDrawingFormDialogComponent,
     CollaborationPasswordFormDialogComponent,
     TopBarComponent,
@@ -108,6 +108,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     ChatBoxComponent,
     ChatPopedOutComponent,
     AllChannelsComponent,
+    AuthWrapperComponent
   ],
   imports: [
     BrowserModule,

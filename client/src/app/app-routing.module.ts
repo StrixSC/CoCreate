@@ -1,3 +1,5 @@
+import { RegisterComponent } from './components/register/register.component';
+import { AuthWrapperComponent } from './components/auth-wrapper/auth-wrapper.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 import { OfflineComponent } from './components/offline/offline.component';
 import { LandingPageComponent } from './components/landing-page/landing-page.component';
@@ -9,43 +11,30 @@ import { AngularFireAuthGuard, redirectLoggedInTo, redirectUnauthorizedTo } from
 import { RouterModule, Routes } from '@angular/router';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
-import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
 import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out/chat-poped-out.component";
 
-const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo([""]);
+const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(["auth"]);
 const redirectLoggedInToMenu = () => redirectLoggedInTo(["menu"]);
 
 const routes: Routes = [
   {
-    path: "", children: [
+    path: "", canActivate: [AngularFireAuthGuard], data: {
+      authGuardPipe: redirectUnauthorizedToLogin,
+    }, children: [
       {
-        path: "",
-        component: WelcomePageComponent,
-        canActivate: [AngularFireAuthGuard],
-        data: {
-          authGuardPipe: redirectLoggedInToMenu,
-        },
+        path: '', component: MenuPageComponent
       },
       { path: "workspace", component: SidenavComponent },
       { path: "profile", component: UserProfileComponent },
       {
         path: "drawing",
         component: DrawingPageComponent,
-        canActivate: [AngularFireAuthGuard],
-
       },
       {
-        path: 'gallery', component: DrawingGalleryComponent, canActivate: [AngularFireAuthGuard], data: {
-          authGuardPipe: redirectUnauthorizedToLogin,
-        }
-      },
-      {
-        path: 'menu', component: MenuPageComponent, canActivate: [AngularFireAuthGuard], data: {
-          authGuardPipe: redirectUnauthorizedToLogin,
-        }
+        path: 'gallery', component: DrawingGalleryComponent
       },
       { path: 'forgot-password', component: ChangePasswordComponent },
       { path: "popped-chat/:id", component: ChatPopedOutComponent },
@@ -53,19 +42,23 @@ const routes: Routes = [
   },
   {
     path: "auth",
-    component: LandingPageComponent,
-    canActivate: [AngularFireAuthGuard],
-    data: {
-      authGuardPipe: redirectLoggedInToMenu
-    },
+    component: AuthWrapperComponent,
+    // canActivate: [AngularFireAuthGuard],
+    // data: {
+    // authGuardPipe: redirectLoggedInToMenu
+    // },
     children: [
+      {
+        path: "",
+        component: LandingPageComponent,
+      },
       {
         path: "login",
         component: LoginComponent,
       },
       {
         path: "register",
-        component: SignUpPageComponent,
+        component: RegisterComponent,
       },
       {
         path: "forgot-password",
