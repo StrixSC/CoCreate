@@ -37,6 +37,16 @@ fa-icon {
   cursor: pointer;
 }
 
+.spinner {
+  width: 30px;
+  height: 30px;
+}
+
+.accent {
+  background-color: blue;
+  color: white;
+}
+
 .error-flash {
   display: flex;
   max-width: 300px;

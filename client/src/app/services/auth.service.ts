@@ -10,11 +10,15 @@ import * as firebase from 'firebase';
 })
 export class AuthService {
 
-  activeUser: firebase.auth.UserCredential;
+  activeUser: firebase.User | null = null;
   constructor(private af: AngularFireAuth, private http: HttpClient) { }
 
   signIn(user: { email: string, password: string }): Observable<firebase.auth.UserCredential> {
     return from(this.af.auth.signInWithEmailAndPassword(user.email, user.password));
+  }
+
+  get authState(): Observable<any> {
+    return this.af.authState;
   }
 
   logUserConnection() {

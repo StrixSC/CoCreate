@@ -62,7 +62,10 @@
         </mat-form-field>
 
         <div>
-            <button color="primary" class="form-field" type="submit" mat-raised-button>Inscription</button>
+            <button color="primary" class="form-field" type="submit" mat-raised-button>
+                <mat-spinner *ngIf="isLoading" class="spinner"></mat-spinner>
+                <ng-container *ngIf="!isLoading">Inscription</ng-container>
+            </button>
         </div>
         <div class="pt-1">
             <button color="cancel" class="form-field" mat-raised-button routerLink="/auth/menu">Retour</button>

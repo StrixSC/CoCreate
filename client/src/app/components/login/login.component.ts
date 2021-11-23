@@ -45,9 +45,9 @@ export class LoginComponent implements OnInit {
       this.authSubscription = this.auth.signIn({
         email: this.email,
         password: this.password
-      }).subscribe((user) => {
-        if (user) {
-          this.auth.activeUser = user;
+      }).subscribe((state) => {
+        if (state && state.user) {
+          this.auth.activeUser = state.user;
           this.isLoading = false;
           this.router.navigateByUrl('/');
         } else {

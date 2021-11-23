@@ -1,3 +1,4 @@
+import { TopBarComponent } from './components/top-bar/top-bar.component';
 import { RegisterComponent } from './components/register/register.component';
 import { AuthWrapperComponent } from './components/auth-wrapper/auth-wrapper.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
@@ -21,11 +22,11 @@ const redirectLoggedInToMenu = () => redirectLoggedInTo(["menu"]);
 
 const routes: Routes = [
   {
-    path: "", canActivate: [AngularFireAuthGuard], data: {
+    path: "", component: TopBarComponent, canActivate: [AngularFireAuthGuard], data: {
       authGuardPipe: redirectUnauthorizedToLogin,
     }, children: [
       {
-        path: '', component: MenuPageComponent
+        path: "", component: MenuPageComponent
       },
       { path: "workspace", component: SidenavComponent },
       { path: "profile", component: UserProfileComponent },

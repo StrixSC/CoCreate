@@ -20,7 +20,7 @@
         </mat-form-field>
         <div>
             <button color="primary" class="form-field" type="submit" mat-raised-button>
-                <mat-spinner *ngIf="isLoading"></mat-spinner>
+                <mat-spinner *ngIf="isLoading" class="spinner"></mat-spinner>
                 <ng-container *ngIf="!isLoading">Connexion</ng-container>
             </button>
         </div>
