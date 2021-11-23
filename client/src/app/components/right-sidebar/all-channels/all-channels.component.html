@@ -1,0 +1,42 @@
+<div class="all_channels">
+  <h3 style="margin-left: 5%">Create my own channel</h3>
+  <button mat-flat-button style="width: 100%">
+    <mat-icon>add</mat-icon>
+    Create new channel
+  </button>
+  <br />
+  <mat-divider></mat-divider>
+  <h3 style="margin-left: 5%">Join a channel</h3>
+
+  <div class="channel_box" *ngFor="let channel of all_channels | keyvalue">
+    <div class="column1">
+      <div style="font-size: 18px">
+        <mat-icon>public</mat-icon>{{ channel.value.name }}
+      </div>
+      <div style="color: #b9bbbe">
+        <mat-icon>person_outline</mat-icon>
+        {{ channel.value.owner_username }}
+      </div>
+      <br />
+      <div style="color: #b9bbbe; font-size: 12px">
+        {{ channel.value.member_count }} Members
+      </div>
+      <div style="color: #b9bbbe; font-size: 12px">
+        {{ channel.value.online_member_count }} Online
+      </div>
+    </div>
+
+    <div class="column2">
+      <button
+        mat-flat-button
+        style="height: 100%; width: 100%"
+        class="channel_btn"
+        (click)="joinChannel(channel.value.channel_id)"
+        [ngStyle]="channel.value.btnStyle"
+      >
+        <mat-icon>add</mat-icon>
+        Join
+      </button>
+    </div>
+  </div>
+</div>

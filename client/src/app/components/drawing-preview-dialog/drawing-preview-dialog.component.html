@@ -1,0 +1,26 @@
+<button mat-icon-button mat-dialog-close (click)="onNoClick()">
+  <mat-icon>close</mat-icon>
+</button>
+<div style="text-align: center;">
+  <h1 mat-dialog-title>
+    {{drawing.title}}
+  </h1>
+  <mat-card-subtitle>
+    Date de création: {{drawing.created_at.substring(0,10)}} à {{drawing.created_at.substring(12,16)}}
+  </mat-card-subtitle>
+  <img mat-card-image class="image-preview" src="../../../assets/img/mock-img/10.jpg">
+  <div class='"separator'></div>
+    <mat-card-content>
+      Auteur: {{drawing.author_username}}
+      </mat-card-content>
+      <mat-card-content>
+    </mat-card-content>
+    <mat-card-content>
+     ID du dessin: {{drawing.collaboration_id}}
+    </mat-card-content>
+  <mat-dialog-actions>
+      <button (click) = "accessDrawing()" mat-raised-button cdkFocusInitial color="primary">Accéder au dessin</button>
+      <button (click) = "deleteDrawing()" mat-raised-button color="primary">Supprimer le dessin</button>
+      <button class="mat-raised-button" mat-dialog-close>Annuler</button>
+    </mat-dialog-actions>
+</div>

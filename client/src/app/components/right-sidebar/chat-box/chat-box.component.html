@@ -1,0 +1,47 @@
+<div [ngStyle]="chatCss">
+  <div class="header_box">
+    <mat-grid-list cols="4" rowHeight="50px">
+      <mat-grid-tile colspan="3" rowspan="1">
+        <p style="font-size: 20px">{{ "#" + chatBoxName }}</p>
+      </mat-grid-tile>
+      <mat-grid-tile colspan="1" rowspan="1">
+        <button mat-button (click)="popOutChat()">
+          <mat-icon>launch</mat-icon>
+        </button>
+      </mat-grid-tile>
+    </mat-grid-list>
+    <br />
+  </div>
+  <div class="messages_container" #messageBox>
+    <div
+      *ngFor="let message_ of messages"
+      style="margin-bottom: 50px; width: 270px"
+      #messagesWatcher
+    >
+      <mat-grid-list cols="4" rowHeight="20px">
+        <mat-grid-tile colspan="1" rowspan="1" style="color: white">
+          {{ message_.avatar }}
+        </mat-grid-tile>
+
+        <mat-grid-tile colspan="2" rowspan="1" style="color: white">
+          {{ message_.username }}
+        </mat-grid-tile>
+
+        <mat-grid-tile colspan="1" rowspan="1" style="color: white">
+          {{ message_.time }}
+        </mat-grid-tile>
+      </mat-grid-list>
+
+      <div style="padding: 10px; color: white; word-wrap: break-word">
+        {{ message_.message }}
+      </div>
+    </div>
+  </div>
+  <input
+    class="input_text"
+    placeholder="Aa"
+    type="text"
+    [(ngModel)]="currentText"
+    (keyup.enter)="sendMessage()"
+  />
+</div>

@@ -1,0 +1,42 @@
+<div class="rightsidebar" [ngStyle]="rightsidebarCss">
+  <div class="left_pannel">
+    <app-all-channels [ngStyle]="newChannelStyle"></app-all-channels>
+    <div [ngStyle]="divView">
+      <app-chat-box
+        [channel_id]="selectedChannel"
+        [ngStyle]="chatStyle"
+        (newItemEvent)="closeBar($event)"
+      ></app-chat-box>
+    </div>
+  </div>
+
+  <div class="right_pannel">
+    <button mat-flat-button (click)="newChannel()">Add new channel</button>
+    <div class="options">
+      <mat-action-list>
+        <p class="channelHeaders">Recently Joined</p>
+        <div class="channel_box" *ngFor="let room of prevJoinedCollabChannels">
+          <p class="channels">
+            {{ room }}
+          </p>
+        </div>
+      </mat-action-list>
+    </div>
+
+    <div class="chatbox">
+      <mat-action-list>
+        <p class="channelHeaders">Channels</p>
+        <div
+          class="channel_box"
+          *ngFor="let channel of textChannels | keyvalue"
+          (click)="changeChannel(channel.key)"
+          [ngStyle]="channel.value.divStyle"
+        >
+          <p class="channels" [ngStyle]="channel.value.style">
+            {{ channel.value.name }}
+          </p>
+        </div>
+      </mat-action-list>
+    </div>
+  </div>
+</div>

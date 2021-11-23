@@ -1,0 +1,23 @@
+<mat-card fxLayoutAlign="center" style="border: 1px solid #fff;" class="drawing-card" *ngIf="drawing">
+  <mat-card-header>
+    <div mat-card-avatar class="example-header-image"></div>
+    <mat-card-title>{{drawing.title}}</mat-card-title>
+    <mat-card-subtitle>{{drawing.created_at.substring(0,10)}} à {{drawing.created_at.substring(12,16)}}</mat-card-subtitle>
+  </mat-card-header>
+  <img *ngIf="drawing.type !== 'Protected'" class="image-preview" mat-card-image src="../../../assets/img/mock-img/10.jpg">
+  <img *ngIf="drawing.type === 'Protected'" class="image-preview" mat-card-image src="../../../assets/img/mock-img/21.jpg">
+  
+  <button mat-icon-button  *ngIf="drawing.type === 'Protected'" class="lock" mat-card-image src=""></button>
+  <mat-card-header>
+    <mat-card-title></mat-card-title>
+    <mat-card-subtitle>Auteur: {{drawing.author_username}}</mat-card-subtitle>
+    <mat-card-subtitle>Collaborateurs actifs: {{drawing.collaborator_count}}</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-actions>
+    <button mat-raised-button class="lock" color="primary" (click)="openDialog()" *ngIf="drawing.type === 'Protected'">
+      <mat-icon>lock</mat-icon>
+    </button>
+    <button *ngIf="drawing.type !== 'Protected'" class="btn" mat-raised-button color="primary" (click)="openDialog()">Aperçu du dessin</button>
+  </mat-card-actions>
+</mat-card>
+

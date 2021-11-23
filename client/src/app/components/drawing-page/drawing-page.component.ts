@@ -2,20 +2,21 @@ import { SelectionToolService } from 'src/app/services/tools/selection-tool/sele
 import { ToolFactoryService } from './../../services/tool-factory.service';
 import { SyncDrawingService } from '../../services/syncdrawing.service';
 import { switchMap, take } from "rxjs/operators";
-import { Component, OnDestroy } from "@angular/core";
+import { AfterViewInit, Component, OnDestroy, OnInit } from "@angular/core";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { merge, Subscription, of, EMPTY } from "rxjs";
 import { HotkeysService } from "src/app/services/hotkeys/hotkeys.service";
 import { NewDrawingComponent } from "../new-drawing/new-drawing.component";
 import { WelcomeDialogComponent } from "../welcome-dialog/welcome-dialog/welcome-dialog.component";
 import { SocketService } from "./../../services/chat/socket.service";
+import { SyncCollaborationService } from "src/app/services/syncCollaboration.service";
 
 @Component({
   selector: "app-drawing-page",
   styleUrls: ["./drawing-page.component.scss"],
   templateUrl: "./drawing-page.component.html",
 })
-export class DrawingPageComponent implements OnDestroy {
+export class DrawingPageComponent implements OnDestroy, OnInit {
   welcomeDialogRef: MatDialogRef<WelcomeDialogComponent>;
   welcomeDialogSub: Subscription;
   errorListener: Subscription;
