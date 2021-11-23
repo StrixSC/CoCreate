@@ -43,10 +43,10 @@ const routes: Routes = [
   {
     path: "auth",
     component: AuthWrapperComponent,
-    // canActivate: [AngularFireAuthGuard],
-    // data: {
-    // authGuardPipe: redirectLoggedInToMenu
-    // },
+    canActivate: [AngularFireAuthGuard],
+    data: {
+      authGuardPipe: redirectLoggedInToMenu
+    },
     children: [
       {
         path: "",
