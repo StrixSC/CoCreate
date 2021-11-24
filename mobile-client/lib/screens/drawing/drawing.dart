@@ -40,12 +40,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
   List<Rect>? selectedBounds;
   int? selectedBoundIndex;
   bool allowResize = false;
+  List<Set<ShapeAction>> undoList = [];
 
   _DrawingScreenState(this._socket, this._user);
 
   @override
   void initState() {
-    super.initState();
     socketException();
     socketSaveConfirmation();
     socketFreedrawReception();
@@ -100,6 +100,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
                     }
                     if (hasSelectedBounds(details) && actionToRemove == "") {
                       allowResize = true;
+                      socketResizeEmission(DrawingState.down, lastShapeID!,
+                          details.localPosition, selectRef!);
                     }
                   }
                   if (selectItem != null &&
@@ -114,8 +116,14 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   if (selectedItems.containsValue(_user.uid)) {
                     selectedItems.forEach((actionId, selectedBy) {
                       if (selectedBy == _user.uid) {
-                        socketRotationEmission(
-                            details, DrawingState.down, actionId);
+                        ShapeAction shapeAction = actionsMap[actionId];
+                        undoList.add({shapeAction.copy()});
+                        List<Offset> points = <Offset>[];
+                        points.add(Offset(details.localPosition.dx,
+                            details.localPosition.dy));
+                        shapeAction.shapesOffsets = points;
+                        shapeAction.angle = 0;
+                        actionsMap.update(actionId, (value) => shapeAction);
                       }
                     });
                   }
@@ -166,7 +174,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
                     selectedItems.forEach((actionId, selectedBy) {
                       if (selectedBy == _user.uid) {
                         socketRotationEmission(
-                            details, DrawingState.move, actionId);
+                            details, DrawingState.move, actionId, false);
+                        ShapeAction shapeAction = actionsMap[actionId];
+                        shapeAction.shapesOffsets!.add(Offset(
+                            details.localPosition.dx,
+                            details.localPosition.dy));
+                        actionsMap.update(actionId, (value) => shapeAction);
                       }
                     });
                   }
@@ -194,6 +207,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
                     selectedItems.forEach((actionId, selectedBy) {
                       if (selectedBy == _user.uid) {
                         allowResize = false;
+                        socketResizeEmission(DrawingState.up, actionId,
+                            Offset.zero, Offset.zero);
                       }
                     });
                   }
@@ -202,8 +217,13 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   if (selectedItems.containsValue(_user.uid)) {
                     selectedItems.forEach((actionId, selectedBy) {
                       if (selectedBy == _user.uid) {
-                        socketRotationEmission(
-                            details, DrawingState.up, actionId);
+                        //clear the list at the end
+                        ShapeAction shapeAction = actionsMap[actionId];
+                        shapeAction.shapesOffsets!.clear();
+                        actionsMap.update(actionId, (value) => shapeAction);
+                        Set<ShapeAction> tempFirst = undoList.removeLast();
+                        tempFirst.add(shapeAction.copy());
+                        undoList.add(tempFirst);
                       }
                     });
                   }
@@ -233,7 +253,15 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   padding: const EdgeInsets.fromLTRB(0, 80.0, 80.0, 0),
                   child: FloatingActionButton(
                       onPressed: () {
-                        print("undo");
+                        setState(() {
+                          Set<ShapeAction> undoAction = undoList.removeLast();
+                          socketRotationEmission(
+                              -undoAction.last.angle!,
+                              DrawingState.move,
+                              undoAction.first.actionId,
+                              true);
+                          print("undo");
+                        });
                       },
                       child: const Icon(Icons.undo)),
                 ),
@@ -350,27 +378,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void socketRotationReception() {
     _socket.on('rotation:received', (data) {
       setState(() {
-        if (data['state'] == DrawingState.down) {
-          //create new List
-          ShapeAction shapeAction = actionsMap[data['actionId']];
-          List<Offset> points = <Offset>[];
-          points.add(Offset(data['x'], data['y']));
-          shapeAction.shapesOffsets = points;
-          actionsMap.update(data['actionId'], (value) => shapeAction);
-        } else if (data['state'] == DrawingState.move) {
-          //get shape center
-          Path actionPath = actionsMap[data["actionId"]].path;
+        if (data['state'] == DrawingState.move) {
+          Path actionPath = actionsMap[data['selectedActionId']].path;
           Offset center = actionPath.getBounds().center;
 
-          //calcultae angle variation
-          var angle = atan2(data['y'] - center.dy, data['x'] - center.dx);
-          var angleRef = atan2(
-              actionsMap[data['actionId']].shapesOffsets.last.dy - center.dy,
-              actionsMap[data['actionId']].shapesOffsets.last.dx - center.dx);
-          var angleVariation = angle - angleRef;
-
           //transform path with matrix of rotation
-          Matrix4 matriceRotation = Matrix4.rotationZ(angleVariation);
+          Matrix4 matriceRotation = Matrix4.rotationZ(data['angle'].toDouble());
           actionPath = actionPath.transform(matriceRotation.storage);
 
           //transform path with matrix of translation
@@ -380,58 +393,60 @@ class _DrawingScreenState extends State<DrawingScreen> {
           actionPath = actionPath.transform(matriceTranslation.storage);
 
           //update map
-          ShapeAction shapeAction = actionsMap[data["actionId"]];
+          ShapeAction shapeAction = actionsMap[data['selectedActionId']];
           shapeAction.path = actionPath;
-          shapeAction.shapesOffsets!
-              .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
-          actionsMap.update(data['actionId'], (value) => shapeAction);
-        } else {
-          //clear the list at the end
-          ShapeAction shapeAction = actionsMap[data["actionId"]];
-          shapeAction.shapesOffsets!.clear();
-          actionsMap.update(data['actionId'], (value) => shapeAction);
+          actionsMap.update(data['selectedActionId'], (value) => shapeAction);
         }
       });
     });
   }
 
-  // todo: le resize au coter opposer -> voir les corners value (vraiment elever dans le print ce qui cause erreur)
+  double calculateAngleVariation(String actionId, Offset currentOffset) {
+    Path actionPath = actionsMap[actionId].path;
+    Offset center = actionPath.getBounds().center;
+
+    var angle =
+        atan2(currentOffset.dy - center.dy, currentOffset.dx - center.dx);
+
+    var angleRef = atan2(actionsMap[actionId].shapesOffsets.last.dy - center.dy,
+        actionsMap[actionId].shapesOffsets.last.dx - center.dx);
+    var angleVariation = angle - angleRef;
+    actionsMap[actionId].angle += angleVariation;
+    return angleVariation;
+  }
+
+  // todo: migrate all this in a switch method and use only scale + translation
   void socketResizeReception() {
     _socket.on('resize:received', (data) {
       setState(() {
         selectedItems.forEach((actionId, selectedBy) {
-          if (actionId == data["actionId"]) {
-            //Get the scaling of the output shape from the initShape
-            Rect oldRect = actionsMap[actionId].values.first.getBounds();
-            Bounds bounds = Bounds();
-            double x = data["x2"] - data["x"];
-            double y = data["y2"] - data["y"];
-            Offset delta = bounds.getDeltaFactor(
-                data["boundIndex"], x.toDouble(), y.toDouble());
+          if (data['selectedActionId'] == actionId) {
+            if (data['state'] == DrawingState.down) {
+              actionsMap[actionId].oldShape = actionsMap[actionId].path;
+            } else if (data['state'] == DrawingState.move) {
+              Path actionPath = actionsMap[actionId].oldShape;
+              Matrix4 matrixScale = Matrix4.identity();
+              matrixScale.scale(
+                  data['xScale'].toDouble(), data['yScale'].toDouble());
+              Path scaledPath = actionPath.transform(matrixScale.storage);
 
-            double xDelta = oldRect.width + delta.dx;
-            double yDelta = oldRect.height + delta.dy;
-            double xScale = xDelta / oldRect.width;
-            double yScale = yDelta / oldRect.height;
+              // // Translate to match fix corner position
+              Matrix4 matrixTranslation;
+              matrixTranslation = Matrix4.translationValues(
+                  data['xTranslation'].toDouble(),
+                  // 0,
+                  data['yTranslation'].toDouble(),
+                  // 0,
+                  0);
+              scaledPath = scaledPath.transform(matrixTranslation.storage);
 
-            // Scale the path
-            Path actionPath = actionsMap[actionId].values.first;
-            Matrix4 matrixScale = Matrix4.identity();
-            matrixScale.scale(xScale, yScale);
-            Path scaledPath = actionPath.transform(matrixScale.storage);
-
-            // Translate to match fix corner position
-            Set corners = bounds.getCornerFromTransformedPath(
-                data["boundIndex"], scaledPath, oldRect);
-            Matrix4 matrixTranslation = Matrix4.translationValues(
-                (corners.last - corners.first).dx,
-                (corners.last - corners.first).dy,
-                0);
-            scaledPath = scaledPath.transform(matrixTranslation.storage);
-
-            // Save the scaled path
-            actionsMap[actionId]
-                .update(actionsMap[actionId].keys.first, (value) => scaledPath);
+              // Save the scaled path
+              ShapeAction shapeAction = actionsMap[actionId];
+              shapeAction.path = scaledPath;
+              actionsMap.update(actionId, (value) => shapeAction);
+            } else if (data['state'] == DrawingState.up) {
+              actionsMap[actionId].delta = Offset.zero;
+            }
           }
         });
       });
@@ -454,8 +469,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
             ..strokeWidth = data['width'].toDouble()
             ..style = PaintingStyle.stroke;
 
-          ShapeAction shapeAction =
-              ShapeAction(Path(), data['shapeType'], paintBorder);
+          ShapeAction shapeAction = ShapeAction(
+              Path(), data['shapeType'], paintBorder, data['actionId']);
 
           // Create paint of the fill if there is one
           if (data['shapeStyle'] == "fill") {
@@ -528,7 +543,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
           //Merge attributes and save shape
           ShapeAction shapeAction =
-              ShapeAction(path, data['actionType'], paint);
+              ShapeAction(path, data['actionType'], paint, data['actionId']);
           actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
         } else if (data['state'] == DrawingState.move) {
           actionsMap.forEach((actionId, shapeAction) {
@@ -614,16 +629,16 @@ class _DrawingScreenState extends State<DrawingScreen> {
   }
 
   void socketRotationEmission(
-      var details, String drawingState, String actionId) {
+      var details, String drawingState, String actionId, bool isUndo) {
     _socket.emit('rotation:emit', {
       'actionId': actionId,
+      'selectedActionId': actionId,
+      'actionType': "Rotate",
       'state': drawingState,
-      'x': (drawingState == DrawingState.up)
-          ? endPoint.dx
-          : details.localPosition.dx,
-      'y': (drawingState == DrawingState.up)
-          ? endPoint.dy
-          : details.localPosition.dy,
+      'angle': (isUndo)
+          ? details
+          : calculateAngleVariation(actionId,
+              Offset(details.localPosition.dx, details.localPosition.dy)),
       'username': _user.displayName,
       'userId': _user.uid,
       'collaborationId': "DEMO_COLLABORATION",
@@ -632,32 +647,34 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
   void socketResizeEmission(String drawingState, String actionId,
       Offset currentPosition, Offset previousPosition) {
-    Offset oldRectBox = Offset(
-        selectedBounds![2].center.dx - selectedBounds![0].center.dx,
-        selectedBounds![0].center.dy - selectedBounds![6].center.dy);
-    if (oldRectBox.dx != 0.0) {
-      _socket.emit('resize:emit', {
-        'actionId': actionId,
-        'selectedActionId': actionId,
-        'actionType': "Resize",
-        'x': previousPosition.dx,
-        'y': previousPosition.dy,
-        'x2': currentPosition.dx,
-        'y2': currentPosition.dy,
-        'initialBoundX': initialTapLocation.dx,
-        'initialBoundY': initialTapLocation.dy,
-        'initialCenterX': initialResizeCenter.dx,
-        'initialCenterY': initialResizeCenter.dy,
-        'oldWidth': oldRectBox.dx,
-        'oldHeight': oldRectBox.dy,
-        'boundIndex': selectedBoundIndex,
-        'username': _user.displayName,
-        'userId': _user.uid,
-        'collaborationId': "DEMO_COLLABORATION",
-      });
+    Bounds bounds = Bounds();
+    Offset varDelta = currentPosition - previousPosition;
+    if (drawingState == DrawingState.down) {
+      actionsMap[actionId].oldShape = actionsMap[actionId].path;
+    } else if (drawingState == DrawingState.move) {
+      bounds.setResizeData(actionsMap, actionId, selectedBoundIndex!, varDelta);
     }
+
+    _socket.emit('resize:emit', {
+      'actionId': actionId,
+      'actionType': "Resize",
+      'selectedActionId': actionId,
+      'username': _user.displayName,
+      'userId': _user.uid,
+      'collaborationId': "DEMO_COLLABORATION",
+      'xScale':
+          (drawingState == DrawingState.move) ? bounds.xScale : 1.toDouble(),
+      'yScale':
+          (drawingState == DrawingState.move) ? bounds.yScale : 1.toDouble(),
+      'xTranslation':
+          (drawingState == DrawingState.move) ? bounds.xTranslation : 0,
+      'yTranslation':
+          (drawingState == DrawingState.move) ? bounds.yTranslation : 0,
+      'state': drawingState,
+    });
   }
 
+  //todo: tous les emit de selection doivent avoir : selectedActionId
   void socketShapeEmission(
       var details, String drawingType, String drawingState) {
     _socket.emit("shape:emit", {
@@ -711,10 +728,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'userId': _user.uid,
       'actionType': "Freedraw",
       'state': drawingState,
-      'a': currentBodyColor.alpha,
-      'r': currentBodyColor.red,
-      'g': currentBodyColor.green,
-      'b': currentBodyColor.blue,
+      'a': currentBorderColor.alpha,
+      'r': currentBorderColor.red,
+      'g': currentBorderColor.green,
+      'b': currentBorderColor.blue,
       'width': 6,
       // TODO: ADD OFFSET FOR DATABASE SAVE
       // 'offset': (drawingState == DrawingState.up) ? actionsMap[]
@@ -769,36 +786,91 @@ class Painter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     actionsMap.forEach((actionId, shapeAction) {
       if (shapeAction.actionType == DrawingType.freedraw) {
-        //Draw a point if their is only one click
-        if (shapeAction.path.computeMetrics().first.length == 1) {
-          Tangent? tangent = shapeAction.path
-              .computeMetrics()
-              .first
-              .getTangentForOffset(0.toDouble());
-          canvas.drawPoints(
-              PointMode.points, [tangent!.position], shapeAction.borderColor);
-        }
+        if (selectedItems.containsKey(actionId) &&
+            selectedItems[actionId] == user.uid) {
+          //if it's my selection we put borders
 
-        //Draw a line
-        canvas.drawPath(shapeAction.path, shapeAction.borderColor);
+          if (shapeAction.path.computeMetrics().first.length <= 1) {
+            Tangent? tangent = shapeAction.path
+                .computeMetrics()
+                .first
+                .getTangentForOffset(0.toDouble());
+            canvas.drawPoints(
+                PointMode.points, [tangent!.position], shapeAction.borderColor);
+          } else {
+            canvas.drawPath(shapeAction.path, shapeAction.borderColor);
+          }
+          var corners = getSelectionBoundingRect(
+              shapeAction.path, actionId, setCornersCallback);
+          canvas.drawPath(corners["path"], corners["paint"]);
+        } else if (selectedItems.containsKey(actionId)) {
+          //if it's someone else selection we put opacity
+          shapeAction.borderColor.color =
+              shapeAction.borderColor.color.withOpacity(0.3);
+
+          if (shapeAction.path.computeMetrics().first.length == 1) {
+            Tangent? tangent = shapeAction.path
+                .computeMetrics()
+                .first
+                .getTangentForOffset(0.toDouble());
+            canvas.drawPoints(
+                PointMode.points, [tangent!.position], shapeAction.borderColor);
+          } else {
+            canvas.drawPath(shapeAction.path, shapeAction.borderColor);
+          }
+        } else {
+          shapeAction.borderColor.color =
+              shapeAction.borderColor.color.withOpacity(1.0);
+
+          //Draw a point if their is only one click
+          if (shapeAction.path.computeMetrics().first.length == 1) {
+            Tangent? tangent = shapeAction.path
+                .computeMetrics()
+                .first
+                .getTangentForOffset(0.toDouble());
+            canvas.drawPoints(
+                PointMode.points, [tangent!.position], shapeAction.borderColor);
+          } else {
+            canvas.drawPath(shapeAction.path, shapeAction.borderColor);
+          }
+        }
       }
       if (shapeAction.actionType == DrawingType.ellipse ||
           shapeAction.actionType == DrawingType.rectangle) {
-        if (shapeAction.bodyColor != null) {
-          canvas.drawPath(shapeAction.path, shapeAction.bodyColor);
+        if (selectedItems.containsKey(actionId) &&
+            selectedItems[actionId] == user.uid) {
+          //if it's my selection we put borders
+          if (shapeAction.bodyColor != null) {
+            canvas.drawPath(shapeAction.path, shapeAction.bodyColor);
+          }
+          canvas.drawPath(shapeAction.path, shapeAction.borderColor);
+          var corners = getSelectionBoundingRect(
+              shapeAction.path, actionId, setCornersCallback);
+          canvas.drawPath(corners["path"], corners["paint"]);
+        } else if (selectedItems.containsKey(actionId)) {
+          //if it's someone else selection we put opacity
+          if (shapeAction.bodyColor != null) {
+            shapeAction.bodyColor.color =
+                shapeAction.bodyColor.color.withOpacity(0.3);
+            canvas.drawPath(shapeAction.path, shapeAction.bodyColor);
+          }
+          shapeAction.borderColor.color =
+              shapeAction.borderColor.color.withOpacity(0.3);
+          canvas.drawPath(shapeAction.path, shapeAction.borderColor);
+        } else {
+          if (shapeAction.bodyColor != null) {
+            shapeAction.bodyColor.color =
+                shapeAction.bodyColor.color.withOpacity(1.0);
+            canvas.drawPath(shapeAction.path, shapeAction.bodyColor);
+          }
+          shapeAction.borderColor.color =
+              shapeAction.borderColor.color.withOpacity(1.0);
+          canvas.drawPath(shapeAction.path, shapeAction.borderColor);
         }
-        canvas.drawPath(shapeAction.path, shapeAction.borderColor);
-      }
-
-      if (selectedItems.containsKey(actionId)) {
-        var corners = getSelectionBoundingRect(
-            shapeAction.path, actionId, setCornersCallback);
-        canvas.drawPath(corners["path"], corners["paint"]);
       }
     });
   }
 
-// todo: ne pas afficher les ancrages si c'est la sélection d'un autre
   Map getSelectionBoundingRect(
       Path dragPath, String actionId, Function setCornersCallback) {
     Rect bounds = dragPath.getBounds();
