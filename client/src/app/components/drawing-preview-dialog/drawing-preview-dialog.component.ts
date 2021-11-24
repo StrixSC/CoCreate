@@ -1,6 +1,11 @@
+import { DrawingType } from 'src/app/model/drawing-visibility.model';
+import { ICollaborationJoinPayload, ICollaborationConnectPayload } from './../../model/ICollaboration.model';
+import { AuthService } from './../../services/auth.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { IGalleryEntry } from '../../model/IGalleryEntry.model';
 
@@ -9,31 +14,48 @@ import { IGalleryEntry } from '../../model/IGalleryEntry.model';
   templateUrl: './drawing-preview-dialog.component.html',
   styleUrls: ['./drawing-preview-dialog.component.scss']
 })
-export class DrawingPreviewDialogComponent  {
-    drawing: IGalleryEntry;
-    constructor(
-      public dialogRef: MatDialogRef<DrawingPreviewDialogComponent>,
-      private router: Router,
-      private syncCollaboration: SyncCollaborationService,
-      @Inject(MAT_DIALOG_DATA) public data: any,
-    ) {
-      this.drawing = data;
-    }
-  
-    onNoClick(): void {
-      this.dialogRef.close();
-    }
+export class DrawingPreviewDialogComponent {
+  drawing: IGalleryEntry;
+  exceptionSubscription: Subscription;
+  isLoading: boolean = false;
 
-    deleteDrawing(userID: string, collaborationId: string) : void {
-      this.syncCollaboration.sendDeleteCollaboration(userID, collaborationId);
-    }
+  constructor(
+    public dialogRef: MatDialogRef<DrawingPreviewDialogComponent>,
+    private syncService: SyncCollaborationService,
+    private snackbar: MatSnackBar,
+    private auth: AuthService,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+  ) {
+    this.drawing = data;
+  }
 
-    accessDrawing() : void {
-      this.router.navigateByUrl('');
-      this.dialogRef.close();
-      this.dialogRef.afterClosed().subscribe(() => {
-        console.log('The dialog was closed');
-      });
+  ngOnInit(): void {
+    this.exceptionSubscription = this.syncService.onCollaborationException().subscribe((message: any) => {
+      this.snackbar.open(message.message, '', { duration: 5000 });
+      this.isLoading = false;
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.exceptionSubscription) {
+      this.exceptionSubscription.unsubscribe();
     }
+  }
+
+  onSubmit(): void {
+    this.isLoading = true;
+    const payload = {
+      userId: this.auth.activeUser!.uid,
+      collaborationId: this.drawing.collaboration_id,
+      type: this.drawing.type,
+      password: '',
+    } as ICollaborationJoinPayload
+
+    if (this.drawing.type === DrawingType.Private) {
+      this.syncService.sendConnectCollaboration(payload);
+    } else {
+      this.syncService.sendJoinCollaboration(payload);
+    }
+  }
 
 }

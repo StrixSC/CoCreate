@@ -14,23 +14,29 @@ export class DrawingGalleryService {
 
   /// Permet de recuperer les dessins sur le serveur
   getPrivateDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?type=Private', ).pipe(
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?type=Private',).pipe(
       catchError(() => of([])),
     );
   }
   getPublicDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?type=Public', ).pipe(
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?type=Public',).pipe(
       catchError(() => of([])),
     );
   }
   getProtectedDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?type=Protected', ).pipe(
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?type=Protected',).pipe(
       catchError(() => of([])),
     );
   }
   getDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery' ).pipe(
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery').pipe(
       catchError(() => of([])),
+    );
+  }
+
+  getMyDrawings(): Observable<IGalleryEntry[]> {
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/users/gallery').pipe(
+      catchError(() => of([]))
     );
   }
 

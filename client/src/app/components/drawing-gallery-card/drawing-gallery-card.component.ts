@@ -1,5 +1,10 @@
+import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
+import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
+import { DrawingService } from 'src/app/services/drawing/drawing.service';
+import { ICollaborationLoadResponse } from './../../model/ICollaboration.model';
 import { Component, Input } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DrawingPreviewDialogComponent } from '../drawing-preview-dialog/drawing-preview-dialog.component';
 import { IGalleryEntry } from '../../model/IGalleryEntry.model';
 import { CollaborationPasswordFormDialogComponent } from '../collaboration-password-form-dialog/collaboration-password-form-dialog.component';
@@ -10,31 +15,35 @@ import { CollaborationPasswordFormDialogComponent } from '../collaboration-passw
   styleUrls: ['./drawing-gallery-card.component.scss']
 })
 export class DrawingGalleryCardComponent {
-  
+
+  private loadSubscription: Subscription;
+  dialogRef: MatDialogRef<DrawingPreviewDialogComponent | CollaborationPasswordFormDialogComponent>
   @Input() public drawing: IGalleryEntry;
-  constructor(public dialog: MatDialog) {}
+  constructor(private syncService: SyncCollaborationService, private router: Router, public dialog: MatDialog, private drawingService: DrawingService) { }
+
+  ngOnInit(): void {
+    this.loadSubscription = this.syncService.onLoadCollaboration().subscribe((data) => this.onLoad(data))
+  }
 
   openDialog(): void {
-    if(this.drawing.type!=="Protected") {
-      const dialogRef = this.dialog.open(DrawingPreviewDialogComponent,
-      {
-        data: this.drawing
-      });
-
-      dialogRef.afterClosed().subscribe(() => {
-        console.log('The dialog was closed');
-      });
+    if (this.drawing.type !== "Protected") {
+      this.dialogRef = this.dialog.open(DrawingPreviewDialogComponent,
+        {
+          data: this.drawing
+        });
     }
-    else if(this.drawing.type==="Protected") {
-      const dialogRef = this.dialog.open(CollaborationPasswordFormDialogComponent,
-      {
-        data: this.drawing
-      });
-
-      dialogRef.afterClosed().subscribe(() => {
-        console.log('The dialog was closed');
-      });
+    else if (this.drawing.type === "Protected") {
+      this.dialogRef = this.dialog.open(CollaborationPasswordFormDialogComponent,
+        {
+          data: this.drawing
+        });
     }
 
+  }
+
+  onLoad(data: ICollaborationLoadResponse) {
+    if (this.dialogRef) this.dialogRef.close();
+    this.drawingService.activeDrawingData = data;
+    this.router.navigateByUrl('drawing');
   }
 }

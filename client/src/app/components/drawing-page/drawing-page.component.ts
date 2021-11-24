@@ -29,7 +29,7 @@ export class DrawingPageComponent implements OnDestroy, OnInit {
     private hotkeyService: HotkeysService,
     private socketService: SocketService,
     private selectionService: SelectionToolService,
-    private toolFactory: ToolFactoryService
+    private toolFactory: ToolFactoryService,
   ) {
     this.hotkeyService.hotkeysListener();
   }

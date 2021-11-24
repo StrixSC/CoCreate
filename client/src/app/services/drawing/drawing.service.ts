@@ -1,3 +1,4 @@
+import { ICollaborationLoadResponse } from './../../model/ICollaboration.model';
 import { EventEmitter, Injectable, Output, Renderer2 } from '@angular/core';
 import { Router } from '@angular/router';
 import { DEFAULT_RGB_COLOR, RGB } from 'src/app/model/rgb.model';
@@ -8,6 +9,8 @@ import { DEFAULT_ALPHA, RGBA } from 'src/app/model/rgba.model';
   providedIn: 'root',
 })
 export class DrawingService {
+
+  activeDrawingData: ICollaborationLoadResponse | null;
 
   @Output()
   drawingEmit = new EventEmitter<SVGElement>();
@@ -29,6 +32,7 @@ export class DrawingService {
   constructor(private router: Router) {
     this.objectList = new Map<number, SVGElement>();
   }
+
   get rgbColorString(): string {
     return 'rgb(' + this.color.r + ',' + this.color.g + ',' + this.color.b + ')';
   }

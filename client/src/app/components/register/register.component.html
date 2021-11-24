@@ -25,8 +25,8 @@
             <mat-error *ngIf="registerForm.get('password').hasError('minlength')">
                 Le mot de passe doit être entre 8 et 256 caractères.
             </mat-error>
-            <mat-error *ngIf="registerForm.get('password').hasError('maxLength')">
-                Le mot de passe doit être maximum 256 caractères
+            <mat-error *ngIf="registerForm.get('password').hasError('maxlength')">
+                Le mot de passe doit être entre 8 et 256 caractères.
             </mat-error>
         </mat-form-field>
 

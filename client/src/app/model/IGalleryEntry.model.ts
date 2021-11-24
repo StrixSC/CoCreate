@@ -1,7 +1,7 @@
 export interface IGalleryEntry {
     drawing_id: string;
     collaboration_id?: string;
-    userId: string
+    userId?: string
     type: string;
     title: string;
     created_at: string;
@@ -10,18 +10,18 @@ export interface IGalleryEntry {
     author_username: string;
     author_avatar?: string;
     collaborator_count: number;
-    max_collaborator_count?: string;
+    max_collaborator_count?: number;
     img: string;
 }
 export interface IConnectCollaboration {
     userId: string;
-	collaborationId: string;
+    collaborationId: string;
 }
 export interface ICreateCollaboration {
     userId: string,
-	title: string,
-	type: string, 		// "Protected" or "Public" or "Private"
-	password?: string 	// Mandatory if the type is "Protected"
+    title: string,
+    type: string, 		// "Protected" or "Public" or "Private"
+    password?: string 	// Mandatory if the type is "Protected"
 }
 export interface IDeleteCollaboration {
     userId: string,
@@ -29,18 +29,18 @@ export interface IDeleteCollaboration {
 }
 export interface IJoinCollaboration {
     userId: string;
-	collaborationId: string;
-	type: string;	// "Protected", "Public" or "Private"
-	password?: string; // Mandatory if the type is "Protected"
+    collaborationId: string;
+    type: string;	// "Protected", "Public" or "Private"
+    password?: string; // Mandatory if the type is "Protected"
 }
-export interface ILeaveCollaboration{
-	collaborationId: string,
-	userId: string
+export interface ILeaveCollaboration {
+    collaborationId: string,
+    userId: string
 }
 export interface IUpdateCollaboration {
     userId: string,
-	collaborationId: string,
-	title: string,
-	type: string, 		// "Protected" or "Public" or "Private"
-	password?: string 	// Mandatory if the type is "Protected"
+    collaborationId: string,
+    title: string,
+    type: string, 		// "Protected" or "Public" or "Private"
+    password?: string 	// Mandatory if the type is "Protected"
 }

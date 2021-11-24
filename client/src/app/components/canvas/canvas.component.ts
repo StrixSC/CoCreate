@@ -1,3 +1,5 @@
+import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material';
 import { AfterViewInit, Component, ElementRef, Renderer2, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
@@ -15,8 +17,15 @@ export class CanvasComponent implements AfterViewInit {
   svg: SVGElement;
   sub: Subscription;
 
-  constructor(private drawingService: DrawingService, public renderer: Renderer2) {
+  constructor(private drawingService: DrawingService, public renderer: Renderer2, private snackbar: MatSnackBar, private router: Router) {
     this.drawingService.renderer = this.renderer;
+  }
+
+  ngOnInit(): void {
+    if (!this.drawingService.activeDrawingData) {
+      this.snackbar.open(`Oops, quelque chose s'est produit lors de la génération du dessin. SVP Essayez à nouveau!`);
+      this.router.navigateByUrl('');
+    }
   }
 
   /// À l'initialisation, le canvas s'abonne au service de dessin pour reçevoir en string le svg

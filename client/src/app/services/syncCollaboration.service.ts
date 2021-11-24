@@ -1,6 +1,7 @@
+import { AuthService } from './auth.service';
+import { ICollaborationJoinPayload, ICollaborationConnectPayload, ICollaborationCreatePayload, ICollaborationUpdatePayload, ICollaborationDeletePayload } from './../model/ICollaboration.model';
 import {
-  IGalleryEntry, IConnectCollaboration, ICreateCollaboration, IDeleteCollaboration, IJoinCollaboration,
-  ILeaveCollaboration, IUpdateCollaboration
+  IGalleryEntry, IConnectCollaboration, ICreateCollaboration
 } from "../model/IGalleryEntry.model";
 import { Observable, of, EMPTY } from "rxjs";
 import { Injectable } from "@angular/core";
@@ -10,93 +11,89 @@ import { SocketService } from "./chat/socket.service";
   providedIn: "root",
 })
 export class SyncCollaborationService {
-  defaultPayload: IGalleryEntry | null;
-
   constructor(
+    private authService: AuthService,
     private socketService: SocketService
-  ) {
-    this.defaultPayload = null;
-  }
+  ) { }
 
   onCreateCollaboration(): Observable<ICreateCollaboration> {
     return this.socketService.on("collaboration:created");
   }
+
   onJoinCollaboration(): Observable<any> {
     return this.socketService.on("collaboration:joined");
   }
+
   onLeaveCollaboration(): Observable<any> {
     return this.socketService.on("collaboration:left");
   }
+
   onDeleteCollaboration(): Observable<any> {
     return this.socketService.on("collaboration:deleted");
   }
+
   onConnectCollaboration(): Observable<any> {
     return this.socketService.on("collaboration:connected");
   }
+
   onLoadCollaboration(): Observable<any> {
     return this.socketService.on("collaboration:load");
   }
+
   onUpdateCollaboration(): Observable<any> {
     return this.socketService.on("collaboration:updated");
   }
 
-  sendJoin(userId: string, collaborationId: string, type: string, password?: string) {
-    let data: IJoinCollaboration = {
-      userId, collaborationId, type
+  sendJoinCollaboration(data: ICollaborationJoinPayload) {
+    if (!this.authService.activeUser) {
+      return;
     }
-    this.socketService.emit('collaboration:join', data);
+
+    this.socketService.emit('collaboration:join', { ...data, userId: this.authService.activeUser.uid });
   }
 
-  sendConnect(userId: string, collaborationId: string) {
-    let data: IConnectCollaboration;
-    data = { userId: userId, collaborationId: collaborationId };
-    this.socketService.emit('collaboration:connect', data);
+  sendConnectCollaboration(data: ICollaborationConnectPayload) {
+    if (!this.authService.activeUser) {
+      return;
+    }
+
+    this.socketService.emit('collaboration:join', { ...data, userId: this.authService.activeUser.uid });
   }
 
-  sendCreateCollaboration(
-    userID: string,
-    title: string,
-    type: string,
-    password?: string,
-  ): void {
-    let data: ICreateCollaboration;
-    if (type === "Protected") {
-      data = {
-        userId: userID,
-        title: title,
-        type: type,
-        password: password,
-      }
-
+  sendCreateCollaboration(data: ICollaborationCreatePayload): void {
+    if (!this.authService.activeUser) {
+      return;
     }
-    else {
-      data = {
-        userId: userID,
-        title: title,
-        type: type
-      }
-
-    }
-    console.log(data)
 
     this.socketService.emit('collaboration:create', data);
   }
 
-  sendUpdateCollaboration(userId: string,
-    collaborationId: string,
-    title: string,
-    type: string,
-    password?: string
-  ) {
-    this.socketService.emit('collaboration:update', { collaborationId, title, type });
+  sendUpdateCollaboration(data: ICollaborationUpdatePayload) {
+    if (!this.authService.activeUser) {
+      return;
+    }
+
+    this.socketService.emit('collaboration:update', data);
   }
 
-  sendDeleteCollaboration(userId: string, collaborationId: string) {
-    this.socketService.emit('collaboration:delete', { userId, collaborationId });
+  sendDeleteCollaboration(data: ICollaborationDeletePayload) {
+    if (!this.authService.activeUser) {
+      return;
+    }
+
+    this.socketService.emit('collaboration:delete', { ...data, userId: this.authService.activeUser.uid });
   }
 
   sendLeaveCollaboration(data: { userId: string, collaborationId: string }) {
-    this.socketService.emit('collaboration:leave', data);
+    if (!this.authService.activeUser) {
+      return;
+    }
+
+    this.socketService.emit('collaboration:leave', { ...data, userId: this.authService.activeUser.uid });
+  }
+
+  onCollaborationException(): Observable<any> {
+    return this.socketService.on('collaboration:exception');
   }
 
 }
