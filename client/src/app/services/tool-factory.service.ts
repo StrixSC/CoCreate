@@ -104,7 +104,7 @@ export class ToolFactoryService {
       }
     },
     Rotate: (payload: IRotateAction, isActiveUser: boolean) => {
-      if (payload.state === DrawingState.down && !payload.x && !payload.y) {
+      if (payload.state === DrawingState.down) {
         const command = new RotateSyncCommand(payload, this.rendererService.renderer, this.drawingService);
         const res = command.execute();
         if (res) {
@@ -112,6 +112,7 @@ export class ToolFactoryService {
         }
       } else {
         const hasOngoingMovement = this.pendingActions.has(payload.actionId);
+        payload = { ...payload, angle: payload.angle * 180 / Math.PI }
         if (!hasOngoingMovement) {
           const command = new RotateSyncCommand(payload, this.rendererService.renderer, this.drawingService);
           command.execute();

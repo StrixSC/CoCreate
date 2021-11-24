@@ -39,8 +39,8 @@ export class DrawingLoadService {
 
   private callbacks: Record<ActionType, (payload: IAction) => any> = {
     Freedraw: (payload: IFreedrawUpLoadAction) => {
-      const command = new LoadFreedrawCommand(payload, this.drawingService, this.drawingService.renderer);
-      command.load();
+      // const command = new LoadFreedrawCommand(payload, this.drawingService, this.drawingService.renderer);
+      // command.load();
     },
     Shape: () => { },
     Select: () => { },

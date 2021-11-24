@@ -329,7 +329,7 @@ export class SelectionToolService implements Tools {
       this.activeActionType = SelectionActionTypes.Rotate;
       const side = event.deltaY > 0 ? CLOCKWISE : COUNTER_CLOCKWISE;
       console.log(side);
-      this.syncService.sendRotate(DrawingState.move, this.selectedActionId, 1 * side);
+      this.syncService.sendRotate(DrawingState.move, this.selectedActionId, (side * Math.PI / 180));
       event.preventDefault();
       event.stopPropagation();
     }
