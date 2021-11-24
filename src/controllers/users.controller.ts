@@ -1,7 +1,8 @@
-import { CollaborationType, MemberType } from '.prisma/client';
+import { getCollaborations } from './../services/gallery.service';
+import { Account, Collaboration, CollaborationMember, CollaborationType, Drawing, MemberType, Profile, User } from '.prisma/client';
 import { validationResult, matchedData } from 'express-validator';
 import { handleRequestError } from './../utils/errors';
-import { getUserChannelsById, getUserLogs, updateUserProfile, getMemberCollaborations } from './../services/users.service';
+import { getUserChannelsById, getUserLogs, updateUserProfile } from './../services/users.service';
 import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { StatusCodes } from 'http-status-codes';
 import create from 'http-errors';
@@ -151,7 +152,7 @@ export const updateUserProfileController = async (req: Request, res: Response, n
     }
 }
 
-export const getMemberCollaborationsController = async (req: Request, res: Response, next: NextFunction) => {
+export const getMemberCollaborationsController = async (req: any, res: any, next: any) => {
     try {
         const errors = validationResult(req).array();
 
@@ -164,12 +165,25 @@ export const getMemberCollaborationsController = async (req: Request, res: Respo
         const data = matchedData(req, { locations: ['query'] });
         const { filter, offset, limit } = data;
 
-        const collaborations = await getMemberCollaborations(req.userId, filter, offset, limit);
+        const collaborations = await getCollaborations(filter, offset, limit) as (Collaboration & {
+            drawing: Drawing | null;
+            collaboration_members: (CollaborationMember & {
+                user: User & {
+                    profile: Profile | null;
+                    account: Account | null;
+                };
+            })[];
+        })[];
 
+        console.log(collaborations);
         if (collaborations.length <= 0) {
             return res.status(StatusCodes.NO_CONTENT).json([])
         }
-        return res.status(StatusCodes.OK).json((collaborations).map((c) => {
+
+        return res.status(StatusCodes.OK).json((collaborations).filter((c) => {
+            const foundMember = c.collaboration_members.find((c: any) => c.user_id === req.userId);
+            return foundMember ? true : false;
+        }).map((c) => {
             const author = c.collaboration_members.find((m: any) => m.type === MemberType.Owner);
             if (!author) {
                 return
@@ -177,8 +191,8 @@ export const getMemberCollaborationsController = async (req: Request, res: Respo
 
             return {
                 collaboration_id: c.collaboration_id,
-                title: c.drawing.title,
-                drawing_id: c.drawing.drawing_id,
+                title: c.drawing!.title,
+                drawing_id: c.drawing!.drawing_id,
                 created_at: c.created_at,
                 updated_at: c.updated_at,
                 author_username: author.user.profile!.username,

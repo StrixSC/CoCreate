@@ -4,22 +4,20 @@ import log from '../utils/logger';
 import { admin, getAuthToken } from '../firebase';
 
 export const checkIfAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-    if (process.env.NODE_ENV === 'production' || process.env.ENABLE_AUTH) {
-        getAuthToken(req, res, async () => {
-            try {
-                const { authToken } = req;
-                if (!authToken) {
-                    throw new create.BadRequest('Invalid or missing auth token');
-                }
-                const userInfo = await admin.auth().verifyIdToken(authToken);
-                req.userId = userInfo.uid;
-                return next();
-            } catch (e) {
-                log('DEBUG', 'CHECK AUTHENTICATED ERROR', e);
-                return next(new create.Unauthorized());
+    getAuthToken(req, res, async () => {
+        try {
+            const { authToken } = req;
+            if (!authToken) {
+                throw new create.BadRequest('Invalid or missing auth token');
             }
-        });
-    } else return next();
+            const userInfo = await admin.auth().verifyIdToken(authToken);
+            req.userId = userInfo.uid;
+
+            return next();
+        } catch (e) {
+            return next(new create.Unauthorized());
+        }
+    });
 };
 
 export const checkIfSelfRequest = (req: Request, res: Response, next: NextFunction) => {

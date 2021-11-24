@@ -4,7 +4,7 @@ import { MemberType, CollaborationType } from '.prisma/client';
 import { db } from '../db';
 import moment from 'moment';
 
-export const getCollaborations = async (filter: string, offset: number, limit: number, type: CollaborationType) => {
+export const getCollaborations = async (filter: string, offset: number, limit: number, type?: CollaborationType) => {
     if (filter) {
         return getCollaborationsWithFilter(filter, offset, limit, type);
     }
@@ -24,7 +24,9 @@ export const getCollaborations = async (filter: string, offset: number, limit: n
             }
         },
         where: {
-            type: type,
+            type: {
+                in: type ? [type] : [CollaborationType.Private, CollaborationType.Protected, CollaborationType.Public]
+            }
         },
         skip: offset ? offset : DEFAULT_DRAWING_OFFSET,
         take: limit ? limit : DEFAULT_DRAWING_LIMIT
@@ -37,7 +39,7 @@ export const getCollaborations = async (filter: string, offset: number, limit: n
     return result;
 };
 
-export const getCollaborationsWithFilter = async (filter: string, offset: number, limit: number, type: CollaborationType) => {
+export const getCollaborationsWithFilter = async (filter: string, offset: number, limit: number, type?: CollaborationType) => {
     let allCollaborations = await db.collaboration.findMany({
         include: {
             drawing: true,
@@ -53,7 +55,9 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
             }
         },
         where: {
-            type: type,
+            type: {
+                in: type ? [type] : [CollaborationType.Private, CollaborationType.Protected, CollaborationType.Public]
+            }
         }
     });
 

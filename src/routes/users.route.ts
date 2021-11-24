@@ -1,4 +1,4 @@
-import { body, param, query } from 'express-validator';
+import { body, query } from 'express-validator';
 import { checkIfAuthenticated, checkIfSelfRequest } from './../middlewares/auth.middleware';
 import {
     getCompleteUserController,
@@ -67,6 +67,6 @@ router.get('/gallery', checkIfAuthenticated,
     query('filter')
         .optional()
         .toLowerCase(),
-    (req, res, next) => getMemberCollaborationsController(req, res, next));
+    async (req, res, next) => await getMemberCollaborationsController(req, res, next));
 
 export default router;

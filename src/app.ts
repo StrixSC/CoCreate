@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes';
 import cors from 'cors';
 import express, {
     NextFunction,
@@ -76,9 +77,9 @@ app.use(corsSetup);
 app.options('*', corsSetup);
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
-app.use('/api/users', usersRouter);
 app.use('/api/channels', channelsRouter);
 app.use('/api/gallery', galleryRouter);
+app.use('/api/users', usersRouter);
 app.use('/docs', serve, setup(swaggerDoc));
 
 app.use(async (req, res, next) => {
@@ -97,7 +98,7 @@ app.use(
             res.status(error.status).json(error);
         } else {
             log('CRITICAL', error);
-            res.status(500).json(
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
                 create(
                     new create.InternalServerError()
                 )

@@ -16,7 +16,6 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
         }
 
         const data = matchedData(req, { locations: ['query'] });
-        console.log(data);
         const { filter, offset, limit, type } = data;
 
         let collaborations = await getCollaborations(filter, offset, limit, type) as (Collaboration & {

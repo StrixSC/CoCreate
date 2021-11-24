@@ -57,6 +57,32 @@ export = (io: Server, socket: Socket) => {
                     },
                     collaboration_id: collaboration.collaboration_id
                 },
+                include: {
+                    user: {
+                        include: {
+                            profile: true
+                        }
+                    },
+                    collaboration: {
+                        include: {
+                            drawing: true,
+                            actions: {
+                                where: {
+                                    collaborationId: collaborationId
+                                }
+                            },
+                            collaboration_members: {
+                                include: {
+                                    user: {
+                                        include: {
+                                            profile: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             });
 
             if (!member) {
@@ -134,9 +160,12 @@ export = (io: Server, socket: Socket) => {
 
                 socket.join(member.collaboration_id);
 
-                socket.emit("collaboration:load", generateConnectedPayload);
+                const data = generateConnectedPayload(member);
+                socket.emit("collaboration:load", data);
             } else {
-                throw new create.Unauthorized("This user is already a member of this collaboration.");
+                socket.join(member.collaboration_id);
+                const data = generateConnectedPayload(member);
+                socket.emit("collaboration:load", data);
             }
 
         } catch (e) {
@@ -442,9 +471,9 @@ export = (io: Server, socket: Socket) => {
             });
 
             socket.join(member.collaboration_id);
-
-            socket.emit("collaboration:load", generateConnectedPayload(member))
-
+            const data = generateConnectedPayload(member);
+            console.log('sending data to connected member')
+            socket.emit("collaboration:load", data);
         } catch (e) {
             handleSocketError(socket, e, ExceptionType.Collaboration);
         }
@@ -532,6 +561,7 @@ const generateConnectedPayload = (member: CollaborationMemberConnectionResponse)
     })
 
     return {
+        collaborationId: member.collaboration.collaboration_id,
         actions: member.collaboration.actions,
         memberCount: member.collaboration.collaboration_members.length,
         maxMemberCount: member.collaboration.max_collaborator_count,
