@@ -6,39 +6,10 @@ import moment from 'moment';
 
 export const getCollaborations = async (filter: string, offset: number, limit: number, type: CollaborationType) => {
     if (filter) {
-        return getCollaborationsWithFilter(filter, offset, limit);
+        return getCollaborationsWithFilter(filter, offset, limit, type);
     }
 
-    const result = await db.collaboration.findMany({
-        skip: offset,
-        take: limit,
-        include: {
-            drawing: true,
-            collaboration_members: {
-                include: {
-                    user: {
-                        include: {
-                            profile: true,
-                            account: true,
-                        }
-                    }
-                }
-            }
-        },
-        where: {
-            type: type,
-        }
-    });
-
-    if (!result) {
-        throw new create.InternalServerError("Error getting drawings from database");
-    }
-
-    return result;
-};
-
-export const getCollaborationsWithFilter = async (filter: string, offset: number, limit: number) => {
-    const allCollaborations = await db.collaboration.findMany({
+    let result = await db.collaboration.findMany({
         include: {
             drawing: true,
             collaboration_members: {
@@ -51,6 +22,38 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
                     }
                 }
             }
+        },
+        where: {
+            type: type,
+        },
+        skip: offset ? offset : DEFAULT_DRAWING_OFFSET,
+        take: limit ? limit : DEFAULT_DRAWING_LIMIT
+    });
+
+    if (!result) {
+        throw new create.InternalServerError("Error getting drawings from database");
+    }
+
+    return result;
+};
+
+export const getCollaborationsWithFilter = async (filter: string, offset: number, limit: number, type: CollaborationType) => {
+    let allCollaborations = await db.collaboration.findMany({
+        include: {
+            drawing: true,
+            collaboration_members: {
+                include: {
+                    user: {
+                        include: {
+                            profile: true,
+                            account: true
+                        }
+                    }
+                }
+            }
+        },
+        where: {
+            type: type,
         }
     });
 
@@ -58,7 +61,7 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
 
     for (let i = 0; i < allCollaborations.length; i++) {
         const collaboration = allCollaborations[i];
-        let author = collaboration.collaboration_members.find((c) => c.type === MemberType.Owner);
+        let author = collaboration.collaboration_members.find((c: any) => c.type === MemberType.Owner);
         let allowSearching = author!.user.account!.allow_searching;
 
         if (!author) {

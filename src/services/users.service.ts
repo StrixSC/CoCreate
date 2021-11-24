@@ -1,9 +1,11 @@
+import { DEFAULT_DRAWING_OFFSET, DEFAULT_DRAWING_LIMIT } from './../utils/drawings';
 import create from 'http-errors';
 import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { IPublicUserProfile } from './../models/IUserPublicProfile';
 import { db } from '../db';
 import { MemberType, Log } from '.prisma/client';
 import { admin } from '../firebase';
+import moment from 'moment';
 
 export const getAllPublicProfiles = async (
     offset: number,
@@ -140,10 +142,10 @@ export const getUserChannelsById = async (id: string): Promise<any> => {
     }));
 };
 
-export const getUserLogs = async (username: string, offset: number, limit: number): Promise<Log[]> => {
+export const getUserLogs = async (userId: string, offset: number, limit: number): Promise<Log[]> => {
     const user = await db.profile.findUnique({
         where: {
-            username: username
+            user_id: userId
         }
     });
 
@@ -208,4 +210,124 @@ export const updateUserProfile = async (userId: string, username: string, avatar
             throw new create.InternalServerError("Something went wrong while processing the request. No information was updated.");
         }
     }
+}
+
+export const getMemberCollaborations = async (userId: string, filter: string, offset: number, limit: number) => {
+    if (filter) {
+        return getMemberCollaborationsWithFilter(userId, filter, offset, limit);
+    }
+
+    const result = await db.collaboration.findMany({
+        skip: offset,
+        take: limit,
+        include: {
+            drawing: true,
+            collaboration_members: {
+                include: {
+                    user: {
+                        include: {
+                            profile: true,
+                            account: true,
+                        }
+                    }
+                }
+            }
+        },
+        where: {
+            collaboration_members: {
+                some: {
+                    user_id: userId
+                }
+            }
+        }
+    });
+
+    if (!result) {
+        throw new create.InternalServerError("Error getting drawings from database");
+    }
+
+    return result;
+};
+
+export const getMemberCollaborationsWithFilter = async (userId: string, filter: string, offset: number, limit: number) => {
+    const allCollaborations = await db.collaboration.findMany({
+        where: {
+            collaboration_members: {
+                some: {
+                    user_id: userId
+                }
+            }
+        },
+        include: {
+            drawing: true,
+            collaboration_members: {
+                include: {
+                    user: {
+                        include: {
+                            profile: true,
+                            account: true
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const filterMap = new Map<string, { index: number, data: string[] }>();
+
+    for (let i = 0; i < allCollaborations.length; i++) {
+        const collaboration = allCollaborations[i];
+        let author = collaboration.collaboration_members.find((c) => c.type === MemberType.Owner);
+        let allowSearching = author!.user.account!.allow_searching;
+
+        if (!author) {
+            continue;
+        }
+
+        const date = new Date(collaboration.created_at);
+        const localLocale = moment(date);
+        localLocale.locale('fr');
+
+        filterMap.set(collaboration.collaboration_id, {
+            index: i,
+            data: [
+                // Drawing Title
+                collaboration.drawing!.title.toLowerCase(),
+                // Year (NUMBER, ex.: 1901)
+                date.getFullYear().toString(),
+                // Month created (in number) (+1 because months in Date() are 0 based)
+                (date.getMonth() + 1).toString(),
+                // Month created (In text, example: novembre)
+                localLocale.format('MMMM').toLowerCase(),
+                // Day of the month created (in number, example: 31);
+                date.getDay().toString(),
+                // name of the day of the month created, (example: vendredi)
+                localLocale.format('dddd').toLowerCase(),
+                // Author username
+                author.user.profile!.username.toLowerCase(),
+            ]
+        });
+
+        if (allowSearching) {
+            // First name
+            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.account!.first_name.toLowerCase());
+            // Last Name
+            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.account!.last_name.toLowerCase());
+            // Email
+            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.email.toLowerCase());
+        }
+    };
+
+    const returnDrawings: any[] = [];
+
+    for (let [key, entry] of filterMap) {
+        for (let input of entry.data) {
+            if (input.includes(filter)) {
+                returnDrawings.push(allCollaborations[entry.index]);
+                break;
+            }
+        }
+    }
+
+    return returnDrawings.slice(offset || DEFAULT_DRAWING_OFFSET, limit || DEFAULT_DRAWING_LIMIT);
 }

@@ -2,6 +2,7 @@ import { body, param, query } from 'express-validator';
 import { checkIfAuthenticated, checkIfSelfRequest } from './../middlewares/auth.middleware';
 import {
     getCompleteUserController,
+    getMemberCollaborationsController,
     getPublicUserController,
     getPublicUsersController,
     getUserChannelsController,
@@ -28,12 +29,7 @@ router.get('/:id/channels', checkIfAuthenticated, (req, res, next) => {
     getUserChannelsController(req, res, next);
 });
 
-router.get('/:id/logs', checkIfAuthenticated,
-    param('id')
-        .notEmpty()
-        .trim()
-        .isAlphanumeric()
-        .withMessage('Missing ID/Username as url parameter.'),
+router.get('/logs', checkIfAuthenticated,
     query('offset')
         .optional()
         .isNumeric()
@@ -56,5 +52,21 @@ router.put('/profile', checkIfAuthenticated,
         .notEmpty()
         .withMessage('Avatar Url missing or invalid'),
     async (req, res, next) => await updateUserProfileController(req, res, next));
+
+router.get('/gallery', checkIfAuthenticated,
+    query('offset')
+        .optional()
+        .isNumeric()
+        .withMessage('Offset must be a numeric value')
+        .toInt(),
+    query('limit')
+        .optional()
+        .isNumeric()
+        .withMessage('Limit must be a numeric value')
+        .toInt(),
+    query('filter')
+        .optional()
+        .toLowerCase(),
+    (req, res, next) => getMemberCollaborationsController(req, res, next));
 
 export default router;

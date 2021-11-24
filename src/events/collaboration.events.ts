@@ -1,3 +1,4 @@
+import { ExceptionType } from './../models/Exceptions.enum';
 import create, { Unauthorized } from 'http-errors';
 import { handleSocketError } from './../utils/errors';
 import { db } from './../db';
@@ -35,8 +36,8 @@ export = (io: Server, socket: Socket) => {
                 throw new create.Unauthorized("Provided user Id does not match the session user id.");
             }
 
-            if (type === CollaborationType.Private || (type === CollaborationType.Protected && !password)) {
-                throw new create.Unauthorized("Provided type is either private or is protected but no password has been provided");
+            if (type === CollaborationType.Protected && !password) {
+                throw new create.Unauthorized("Provided type is protected but no password has been provided");
             }
 
             const collaboration = await db.collaboration.findFirst({
@@ -122,22 +123,24 @@ export = (io: Server, socket: Socket) => {
                 }
 
                 // TODO: Might need to switch "socket" to "io"
-                io.emit("collaboration:joined", {
-                    userId: userId,
-                    collaborationId: member.collaboration_id,
-                    username: member.user.profile!.username,
-                    avatarUrl: member.user.profile!.avatar_url,
-                });
+                if (collaboration.type !== CollaborationType.Private) {
+                    io.emit("collaboration:joined", {
+                        userId: userId,
+                        collaborationId: member.collaboration_id,
+                        username: member.user.profile!.username,
+                        avatarUrl: member.user.profile!.avatar_url,
+                    });
+                }
 
                 socket.join(member.collaboration_id);
 
                 socket.emit("collaboration:load", generateConnectedPayload);
             } else {
-                throw new create.Unauthorized("This user is already a member of this channel.");
+                throw new create.Unauthorized("This user is already a member of this collaboration.");
             }
 
         } catch (e) {
-            return handleSocketError(socket, e);
+            return handleSocketError(socket, e, ExceptionType.Collaboration);
         }
     }
 
@@ -150,13 +153,10 @@ export = (io: Server, socket: Socket) => {
         try {
             const { userId, title, type, password } = payload;
 
-            if (!userId || userId !== socket.data.user) {
-                throw new create.Unauthorized('Provided UserId does not match session user');
-            }
+            console.log(payload);
 
             const isValid = (
                 !validator.isEmpty(title) &&
-                validator.isAlphanumeric(title) &&
                 validator.isLength(title, { min: 8, max: 256 }) &&
                 validator.isIn(type, [CollaborationType.Private, CollaborationType.Protected, CollaborationType.Public])
             );
@@ -167,15 +167,25 @@ export = (io: Server, socket: Socket) => {
 
             if (type === CollaborationType.Private) {
                 const collaboration = await createCollaboration(userId, CollaborationType.Private, title);
+
+                const author = collaboration.collaboration_members.find((m) => m.type === MemberType.Owner);
+
+                if (!author) {
+                    throw new create.InternalServerError('Error while establishing author');
+                }
+
                 socket.emit("collaboration:created", {
-                    drawingId: collaboration.drawing!.drawing_id,
-                    thumbnailUrl: collaboration.drawing!.thumbnail_url,
-                    memberCount: collaboration.collaboration_members.length,
-                    maxMemberCount: 1,
                     collaborationId: collaboration.collaboration_id,
                     title: collaboration.drawing!.title,
+                    thumbnailUrl: collaboration.drawing!.thumbnail_url,
+                    type: collaboration.type,
+                    currentCollaboratorCount: collaboration.collaboration_members.length,
+                    maxCollaboratorCount: collaboration.max_collaborator_count,
+                    updatedAt: collaboration.updated_at,
+                    drawingId: collaboration.drawing!.drawing_id,
                     createdAt: collaboration.created_at,
-                    type: collaboration.type
+                    authorUsername: author.user.profile!.username,
+                    authorAvatarUrl: author.user.profile!.avatar_url,
                 });
             } else {
                 if (
@@ -189,19 +199,28 @@ export = (io: Server, socket: Socket) => {
                     throw new create.InternalServerError("Could not create drawing/collaboration. Internal server error.");
                 }
 
+                const author = collaboration.collaboration_members.find((m) => m.type === MemberType.Owner);
+
+                if (!author) {
+                    throw new create.InternalServerError('Error while establishing author');
+                }
+
                 io.emit("collaboration:created", {
-                    drawingId: collaboration.drawing!.drawing_id,
-                    thumbnailUrl: collaboration.drawing!.thumbnail_url,
-                    memberCount: collaboration.collaboration_members.length,
-                    maxMemberCount: collaboration.max_collaborator_count,
                     collaborationId: collaboration.collaboration_id,
                     title: collaboration.drawing!.title,
+                    thumbnailUrl: collaboration.drawing!.thumbnail_url,
+                    type: collaboration.type,
+                    currentCollaboratorCount: collaboration.collaboration_members.length,
+                    maxCollaboratorCount: collaboration.max_collaborator_count,
+                    updatedAt: collaboration.updated_at,
+                    drawingId: collaboration.drawing!.drawing_id,
                     createdAt: collaboration.created_at,
-                    type: collaboration.type
+                    authorUsername: author.user.profile!.username,
+                    authorAvatarUrl: author.user.profile!.avatar_url,
                 });
             }
         } catch (e) {
-            handleSocketError(socket, e);
+            handleSocketError(socket, e, ExceptionType.Collaboration);
         }
     }
 
@@ -253,7 +272,7 @@ export = (io: Server, socket: Socket) => {
                 io.emit('collaboration:deleted', response)
             }
         } catch (e) {
-            handleSocketError(socket, e);
+            handleSocketError(socket, e, ExceptionType.Collaboration);
         }
     }
 
@@ -267,12 +286,18 @@ export = (io: Server, socket: Socket) => {
         try {
             const { userId, title, type, password, collaborationId } = payload;
 
-            if (!userId || userId !== socket.data.user) {
-                throw new create.Unauthorized("Invalid or missing userId or provided userId does not match the current session user id");
-            }
-
             if (!type || !title) {
                 throw new create.BadRequest("Invalid or missing type or title.");
+            }
+
+            const isValid = (
+                !validator.isEmpty(title) &&
+                validator.isLength(title, { min: 8, max: 256 }) &&
+                validator.isIn(type, [CollaborationType.Private, CollaborationType.Protected, CollaborationType.Public])
+            );
+
+            if (!isValid) {
+                throw new create.BadRequest("Title must be a non-empty alphanumeric value with a length between 8 and 256. The type must be either Public, Protected or Private");
             }
 
             if (type === CollaborationType.Protected) {
@@ -326,13 +351,24 @@ export = (io: Server, socket: Socket) => {
                 throw new create.InternalServerError("Could not update the drawing/collaboration: Internal Server Error");
             }
 
+            const author = updated.collaboration_members.find((m) => m.type === MemberType.Owner);
+
+            if (!author) {
+                throw new create.InternalServerError('Error while establishing author');
+            }
+
             const response = {
                 collaborationId: updated.collaboration_id,
                 title: updated.drawing!.title,
                 thumbnailUrl: updated.drawing!.thumbnail_url,
                 type: updated.type,
-                memberCount: updated.collaboration_members.length,
+                currentCollaboratorCount: updated.collaboration_members.length,
+                maxCollaboratorCount: updated.max_collaborator_count,
                 updatedAt: updated.updated_at,
+                drawingId: updated.drawing!.drawing_id,
+                createdAt: updated.created_at,
+                authorUsername: author.user.profile!.username,
+                authorAvatarUrl: author.user.profile!.avatar_url,
             }
 
             if (updated.type === CollaborationType.Private && type === CollaborationType.Private) {
@@ -342,7 +378,7 @@ export = (io: Server, socket: Socket) => {
             }
 
         } catch (e) {
-            handleSocketError(socket, e);
+            handleSocketError(socket, e, ExceptionType.Collaboration);
         }
     }
 
@@ -410,7 +446,7 @@ export = (io: Server, socket: Socket) => {
             socket.emit("collaboration:load", generateConnectedPayload(member))
 
         } catch (e) {
-            handleSocketError(socket, e);
+            handleSocketError(socket, e, ExceptionType.Collaboration);
         }
 
     }
@@ -471,7 +507,7 @@ export = (io: Server, socket: Socket) => {
                 leftAt: new Date().toISOString(),
             });
         } catch (e) {
-            handleSocketError(socket, e);
+            handleSocketError(socket, e, ExceptionType.Collaboration);
         }
     }
 
@@ -538,7 +574,15 @@ const createCollaboration = async (userId: string, type: CollaborationType, titl
         },
         include: {
             drawing: true,
-            collaboration_members: true
+            collaboration_members: {
+                include: {
+                    user: {
+                        include: {
+                            profile: true
+                        }
+                    }
+                }
+            }
         }
     })
 }

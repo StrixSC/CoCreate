@@ -63,11 +63,10 @@ const io = new Server(server, {
     cors: corsOptions
 });
 
-
 const onConnection = (socket: Socket) => {
     socket.use(logEvent(socket));
 
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' || process.env.ENABLE_AUTH) {
         socket.data.user = (socket as any).request.userId;
         socket.data.username = (socket as any).request.username;
     } else socket.data.user = 'DEMO';
@@ -89,7 +88,7 @@ const onConnection = (socket: Socket) => {
 const wrap = (middleware: any) => (socket: Socket, next: any) =>
     middleware(socket.request, {}, next);
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production' || process.env.ENABLE_AUTH) {
     io.use(wrap(checkIfAuthenticated));
 }
 

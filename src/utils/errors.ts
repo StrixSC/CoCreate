@@ -1,3 +1,4 @@
+import { ExceptionType } from './../models/Exceptions.enum';
 import { Socket } from 'socket.io';
 import create, { HttpError } from 'http-errors';
 import { NextFunction } from 'express';
@@ -33,7 +34,7 @@ export const handleRequestError = (e: any, next: NextFunction) => {
     next(create(e.status, e.message));
 };
 
-export const handleSocketError = (socket: Socket, e: any): boolean => {
+export const handleSocketError = (socket: Socket, e: any, exceptionType?: ExceptionType): boolean => {
     log('DEBUG', e);
     let error = `(${e.code}) - ${e.message}`;
     if (e instanceof HttpError) {
@@ -47,5 +48,11 @@ export const handleSocketError = (socket: Socket, e: any): boolean => {
         }
         return socket.emit('exception', create(create.InternalServerError));
     }
-    return socket.emit('exception', create(error));
-};
+
+    if (exceptionType) {
+        console.log('helloworld');
+        return socket.emit(exceptionType, create(error));
+    } else {
+        return socket.emit('exception', create(error));
+    };
+}

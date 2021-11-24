@@ -4,7 +4,7 @@ import log from '../utils/logger';
 import { admin, getAuthToken } from '../firebase';
 
 export const checkIfAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' || process.env.ENABLE_AUTH) {
         getAuthToken(req, res, async () => {
             try {
                 const { authToken } = req;

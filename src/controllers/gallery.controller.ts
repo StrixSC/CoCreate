@@ -1,4 +1,4 @@
-import { MemberType, Collaboration, CollaborationType } from '.prisma/client';
+import { MemberType, Collaboration, CollaborationType, Drawing, Account, CollaborationMember, Profile, User } from '.prisma/client';
 import { validationResult, matchedData } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 import { handleRequestError } from './../utils/errors';
@@ -16,22 +16,31 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
         }
 
         const data = matchedData(req, { locations: ['query'] });
+        console.log(data);
         const { filter, offset, limit, type } = data;
 
-        const collaborations = await getCollaborations(filter, offset, limit, type);
+        let collaborations = await getCollaborations(filter, offset, limit, type) as (Collaboration & {
+            drawing: Drawing | null;
+            collaboration_members: (CollaborationMember & {
+                user: User & {
+                    profile: Profile | null;
+                    account: Account | null;
+                };
+            })[];
+        })[]
 
         if (collaborations.length <= 0) {
             return res.status(StatusCodes.NO_CONTENT).json([])
         }
 
         return res.status(StatusCodes.OK).json((collaborations).filter((c) => {
-            const author = c.collaboration_members.find((m: any) => m.type === MemberType.Owner);
-            if (!author) {
-                return false
-            }
-
             if (type === CollaborationType.Private) {
-                return author.user.userId === req.userId;
+                return (
+                    c.type === type &&
+                    c.collaboration_members.length === 1 &&
+                    c.collaboration_members[0].user_id === req.userId &&
+                    c.collaboration_members[0].type === MemberType.Owner
+                )
             } else return true;
         }).map((c) => {
             const author = c.collaboration_members.find((m: any) => m.type === MemberType.Owner);
@@ -41,8 +50,8 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
 
             return {
                 collaboration_id: c.collaboration_id,
-                title: c.drawing.title,
-                drawing_id: c.drawing.drawing_id,
+                title: c.drawing!.title,
+                drawing_id: c.drawing!.drawing_id,
                 created_at: c.created_at,
                 updated_at: c.updated_at,
                 author_username: author.user.profile!.username,

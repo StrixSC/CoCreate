@@ -449,18 +449,9 @@
                 }
             }
         },
-        "/api/users/:id/logs": {
+        "/api/users/logs": {
             "get": {
                 "parameters": [
-                    {
-                        "required": true,
-                        "name": "id",
-                        "in": "path",
-                        "description": "Id of the user for whom to fetch the logs.",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
                     {
                         "name": "offset",
                         "in": "query",
@@ -483,7 +474,7 @@
                 "tags": [
                     "Users"
                 ],
-                "summary": "Fetch all logs for a given user.",
+                "summary": "Fetch all logs for the requesting authorized user.",
                 "security": [
                     {
                         "Authorization": []

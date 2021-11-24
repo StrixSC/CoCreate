@@ -1,10 +1,11 @@
+import { checkIfAuthenticated } from './../middlewares/auth.middleware';
 import { Router, Request, Response, NextFunction } from 'express';
-import { query } from 'express-validator';
+import { query, param } from 'express-validator';
 import { getGalleryController } from '../controllers/gallery.controller';
 
 const router = Router();
 
-router.get('/',
+router.get('/', checkIfAuthenticated,
     query('offset')
         .optional()
         .isNumeric()

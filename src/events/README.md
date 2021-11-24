@@ -4,7 +4,7 @@
 
 Upon user disconnection, the socket server will send the `user:disconnection` event to all rooms that the user is currently in. This can be used to set the offline or online status to users when in the chatrooms or in the collaboration sessions.
 
-<br> 
+<br>
 
 # Channel Events:
 
@@ -544,15 +544,16 @@ Data:
 
 ## Join Collaboration
 
-#### Use this route to join a collaboration for the first time. The next times you want to connect to  the collaboration, use the "Connect" events instead.
+#### Use this route to join a collaboration for the first time. The next times you want to connect to the collaboration, use the "Connect" events instead.
 
 Client -> Server : `collaboration:join`
 
 Two events will be triggered back (Server -> Clients):
-1) `collaboration:load` : Sent to the user that triggered the event **USE THIS EVENT TO SWITCH THE VIEW TO THE DRAWING VIEW and start loading the drawing**
-2) `collaboration:joined` : Sent to all the users, use this to update the active members on the gallery for the given collaboration_id
 
-Payload to send: 
+1. `collaboration:load` : Sent to the user that triggered the event **USE THIS EVENT TO SWITCH THE VIEW TO THE DRAWING VIEW and start loading the drawing**
+2. `collaboration:joined` : Sent to all the users, use this to update the active members on the gallery for the given collaboration_id
+
+Payload to send:
 
 ```typescript
 {
@@ -580,7 +581,7 @@ Response sent with `collaboration:load`:
 }
 ```
 
-* View [here](https://gitlab.com/polytechnique-montr-al/log3900/21-3/equipe-109/colorimage-server/-/blob/main/prisma/schema.prisma#L114) for the list of attributes of the Action interface.
+-   View [here](https://gitlab.com/polytechnique-montr-al/log3900/21-3/equipe-109/colorimage-server/-/blob/main/prisma/schema.prisma#L114) for the list of attributes of the Action interface.
 
 Response sent with `collaboration:joined`:
 
@@ -593,17 +594,16 @@ Response sent with `collaboration:joined`:
 }
 ```
 
-
 ## Connect to collaboration
 
 #### Use this event to connect to an already joined collaboration:
 
 Client -> Server : `collaboration:connect`
 
-1) Server -> Client: `collaboration:load` (This is only sent to the user that sent the initial request)
-2) Server -> Client: `collaboratoin:connected` (This is only sent to the users that are already loaded in the collaboration/drawing)
+1. Server -> Client: `collaboration:load` (This is only sent to the user that sent the initial request)
+2. Server -> Client: `collaboratoin:connected` (This is only sent to the users that are already loaded in the collaboration/drawing)
 
-Payload to send: 
+Payload to send:
 
 ```typescript
 {
@@ -629,7 +629,7 @@ Response sent with `collaboration:load`:
 }
 ```
 
-* View [here](https://gitlab.com/polytechnique-montr-al/log3900/21-3/equipe-109/colorimage-server/-/blob/main/prisma/schema.prisma#L114) for the list of attributes of the Action interface.
+-   View [here](https://gitlab.com/polytechnique-montr-al/log3900/21-3/equipe-109/colorimage-server/-/blob/main/prisma/schema.prisma#L114) for the list of attributes of the Action interface.
 
 Response sent with `collaboration:connected`:
 
@@ -637,7 +637,7 @@ Response sent with `collaboration:connected`:
 {
 	userId: string,		// user id of the member that connected
 	username: string,	// Username of the member that connected
-	avatarUrl: string,	// Avatar of the member that connected 
+	avatarUrl: string,	// Avatar of the member that connected
 	type: string		// Type of the member that connected ("Owner"/"Member")
 }
 ```
@@ -650,11 +650,12 @@ Client -> Server: `collaboration:create`
 Server -> Client: `collaboration:created`
 
 If a password is given, it must be:
-- Between 4 and 256 characters
-- Alphanumeric (No symbols)
-- Non-empty
 
-Payload to send: 
+-   Between 4 and 256 characters
+-   Alphanumeric (No symbols)
+-   Non-empty
+
+Payload to send:
 
 ```typescript
 {
@@ -669,14 +670,17 @@ Response sent:
 
 ```typescript
 {
-	drawingId: string,
-	thumbnailUrl: string,
-	memberCount: number,
-	maxMemberCount: number,
-	collaborationId: string,
-	title: string,
-	createdAt: Date // ISO Format,
-	type: string // "Protected", "Public" or "Private"
+    collaborationId: string,
+    title: string,
+    thumbnailUrl: string,
+    type: string, // Private, Protected or Public
+    currentCollaboratorCount: number,
+    maxCollaboratorCount: number,
+    updatedAt: string,
+    drawingId: string,
+    createdAt: string,
+    authorUsername: string,
+    authorAvatarUrl: string
 }
 ```
 
@@ -688,11 +692,12 @@ Client -> Server: `collaboration:update`
 Server -> Client: `collaboration:updated`
 
 If a password is given, it must be:
-- Between 4 and 256 characters
-- Alphanumeric (No symbols)
-- Non-empty
 
-Payload to send: 
+-   Between 4 and 256 characters
+-   Alphanumeric (No symbols)
+-   Non-empty
+
+Payload to send:
 
 ```typescript
 {
@@ -708,14 +713,17 @@ Response sent:
 
 ```typescript
 {
-	drawingId: string,
-	thumbnailUrl: string,
-	memberCount: number,
-	maxMemberCount: number,
-	collaborationId: string,
-	title: string,
-	updatedAt: Date // ISO Format,
-	type: string // "Private", "Protected", "Public"
+    collaborationId: string,
+    title: string,
+    thumbnailUrl: string,
+    type: string, // Private, Protected or Public
+    currentCollaboratorCount: number,
+    maxCollaboratorCount: number,
+    updatedAt: string,
+    drawingId: string,
+    createdAt: string,
+    authorUsername: string,
+    authorAvatarUrl: string
 }
 ```
 
@@ -724,9 +732,9 @@ Response sent:
 Use this to delete the drawing/collaboration. This could be done from the gallery or from the drawing view itself. The deleting user must be the owner.
 
 Client -> Server: `collaboration:delete`
-Server -> Client: `collaboration:deleted` 
+Server -> Client: `collaboration:deleted`
 
-Payload to send: 
+Payload to send:
 
 ```typescript
 {
@@ -735,7 +743,7 @@ Payload to send:
 }
 ```
 
-Response sent: 
+Response sent:
 
 ```typescript
 {
@@ -743,9 +751,10 @@ Response sent:
 	deletedAt: string // ISO Format
 }
 ```
+
 ## Leave collaboration
 
-Use this when a member wishes to leave a drawing collaboration. This is not the event that is used to disconnect a user. This will remove the drawing from the list of drawings of the user. The user must not be the owner and the drawing must not be private. 
+Use this when a member wishes to leave a drawing collaboration. This is not the event that is used to disconnect a user. This will remove the drawing from the list of drawings of the user. The user must not be the owner and the drawing must not be private.
 
 Client -> Server: `collaboration:leave`
 Server -> Client: `collaboration:left`
@@ -759,7 +768,7 @@ Payload to send:
 }
 ```
 
-Response sent: 
+Response sent:
 
 ```typescript
 {
