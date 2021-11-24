@@ -1,6 +1,7 @@
 import { IAction } from './IAction.model';
 export interface ICollaborationLoadResponse {
     actions: IAction[],
+    collaborationId: string;
     memberCount: number,
     maxMemberCount: number,
     title: string,

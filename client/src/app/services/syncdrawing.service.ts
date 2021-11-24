@@ -1,3 +1,4 @@
+import { AuthService } from './auth.service';
 import { CollaborationService } from './collaboration.service';
 import { FilledShape } from "./tools/tool-rectangle/filed-shape.model";
 import {
@@ -34,9 +35,18 @@ export class SyncDrawingService {
   private hasStartedMovement: boolean = false;
 
   constructor(
+    private auth: AuthService,
     private socketService: SocketService
   ) {
     this.defaultPayload = null;
+  }
+
+  updatedDefaultPayload(collaborationId: string): void {
+    this.defaultPayload = {
+      userId: this.auth.activeUser!.uid,
+      collaborationId: collaborationId,
+      username: this.auth.activeUser!.displayName!
+    } as IDefaultActionPayload
   }
 
   onFreedraw(): Observable<any> {

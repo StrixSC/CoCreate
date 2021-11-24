@@ -1,3 +1,4 @@
+import { Point } from 'src/app/model/point.model';
 import { RendererProviderService } from 'src/app/services/renderer-provider/renderer-provider.service';
 import { DrawingState } from "./../../../model/IAction.model";
 import { SyncDrawingService } from "../../syncdrawing.service";
@@ -27,6 +28,7 @@ export class PencilToolService implements Tools {
   private strokeWidth: FormControl;
   private pencil: Pencil | null;
   parameters: FormGroup;
+  private activePointsList: Point[] = [];
   coords: ISendCoordPayload;
   isDrawing: boolean;
 
@@ -70,6 +72,7 @@ export class PencilToolService implements Tools {
           this.pencil.stroke = this.colorTool.secondaryColorString;
           this.pencil.strokeOpacity = this.colorTool.secondaryAlpha.toString();
         }
+        this.activePointsList.push(offset);
         this.syncDrawingService.sendFreedraw(DrawingState.down, this.pencil);
         this.isDrawing = true;
       }
@@ -80,6 +83,7 @@ export class PencilToolService implements Tools {
   onMove(event: MouseEvent): void {
     if (this.isDrawing && this.pencil) {
       this.pencil.pointsList = [{ x: event.offsetX, y: event.offsetY }];
+      this.activePointsList.push({ x: event.offsetX, y: event.offsetY });
       this.syncDrawingService.sendFreedraw(DrawingState.move, this.pencil);
     }
   }
@@ -87,6 +91,8 @@ export class PencilToolService implements Tools {
   /// Réinitialisation de l'outil après avoir laisser le clique de la souris
   onRelease(event: MouseEvent): void | ICommand {
     if (this.isDrawing && this.pencil) {
+      this.pencil.pointsList = this.activePointsList;
+      this.activePointsList = [];
       this.syncDrawingService.sendFreedraw(DrawingState.up, this.pencil);
       this.isDrawing = false;
     }

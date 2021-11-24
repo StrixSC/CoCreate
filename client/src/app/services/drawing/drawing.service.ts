@@ -169,8 +169,8 @@ export class DrawingService {
     this.drawing = this.renderer.createElement('svg', 'svg');
     this.setDimension(width, height);
     this.setDrawingColor(rgba);
-    console.log(this.drawing);
     this.drawingEmit.emit(this.drawing);
+    this.isCreated = true;
   }
 
   /// Permer l'ouverture d'un dessin sous la forme du model Drawing

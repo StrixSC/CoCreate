@@ -50,7 +50,11 @@ export type IFreedrawAction = ISelectionAction & IDefaultActionPayload & {
 }
 
 export type IFreedrawUpAction = IFreedrawAction & {
-    offsets: Point[];
+    offsets: Point[]
+}
+
+export type IFreedrawUpLoadAction = IFreedrawAction & {
+    offsets: string;
 }
 
 export type IShapeAction = IDefaultActionPayload & ISelectionAction & {
