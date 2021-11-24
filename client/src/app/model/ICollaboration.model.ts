@@ -1,5 +1,6 @@
+import { IAction } from './IAction.model';
 export interface ICollaborationLoadResponse {
-    actions: any[],
+    actions: IAction[],
     memberCount: number,
     maxMemberCount: number,
     title: string,

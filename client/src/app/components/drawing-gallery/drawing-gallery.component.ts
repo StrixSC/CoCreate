@@ -270,7 +270,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   onCreate() {
-    if (this.dialogRef) this.dialogRef.close();
+    this.dialogRef.close();
     this.snackbar.open('Nouveau dessin créé avec succès!', '', { duration: 5000 });
     this.fetchAllDrawings();
   }
@@ -295,19 +295,20 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
   fetchAllDrawings(): void {
     this.drawingsSubscription = merge(
-      this.drawingGalleryService.getPublicDrawings(),
-      this.drawingGalleryService.getPrivateDrawings(),
-      this.drawingGalleryService.getProtectedDrawings(),
-      this.drawingGalleryService.getMyDrawings()
-    ).subscribe((drawings: IGalleryEntry[]) => {
-      if (drawings && drawings.length > 0) {
-        const drawingType = drawings[0].type;
-        if (drawingType === DrawingType.Protected) {
-          this.datasourceProtected.data = drawings;
-        } else if (drawingType === DrawingType.Private) {
-          this.datasourcePrivate.data = drawings;
+      this.drawingGalleryService.getPublicDrawings().pipe(map((d) => ({ drawings: d, galleryType: DrawingType.Public }))),
+      this.drawingGalleryService.getPrivateDrawings().pipe(map((d) => ({ drawings: d, galleryType: DrawingType.Private }))),
+      this.drawingGalleryService.getProtectedDrawings().pipe(map((d) => ({ drawings: d, galleryType: DrawingType.Protected }))),
+      this.drawingGalleryService.getMyDrawings().pipe(map((d) => ({ drawings: d, galleryType: 'Self' })))
+    ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string }) => {
+      if (d.drawings && d.drawings.length > 0) {
+        if (d.galleryType === DrawingType.Protected) {
+          this.datasourceProtected.data = d.drawings;
+        } else if (d.galleryType === DrawingType.Private) {
+          this.datasourcePrivate.data = d.drawings;
+        } else if (d.galleryType === DrawingType.Public) {
+          this.datasourcePublic.data = d.drawings;
         } else {
-          this.datasourcePublic.data = drawings;
+          this.datasourceSelf.data = d.drawings
         }
       }
     });

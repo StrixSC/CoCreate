@@ -26,7 +26,6 @@ export class PencilToolService implements Tools {
   readonly id = ToolIdConstants.PENCIL_ID;
   private strokeWidth: FormControl;
   private pencil: Pencil | null;
-  private pencilCommand: PencilCommand | null;
   parameters: FormGroup;
   coords: ISendCoordPayload;
   isDrawing: boolean;

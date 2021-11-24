@@ -1,3 +1,4 @@
+import { DrawingLoadService } from './../../services/drawing-load.service';
 import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
@@ -19,10 +20,20 @@ export class DrawingGalleryCardComponent {
   private loadSubscription: Subscription;
   dialogRef: MatDialogRef<DrawingPreviewDialogComponent | CollaborationPasswordFormDialogComponent>
   @Input() public drawing: IGalleryEntry;
-  constructor(private syncService: SyncCollaborationService, private router: Router, public dialog: MatDialog, private drawingService: DrawingService) { }
+  constructor(private syncService: SyncCollaborationService, private router: Router, public dialog: MatDialog, private drawingLoader: DrawingLoadService) { }
 
   ngOnInit(): void {
-    this.loadSubscription = this.syncService.onLoadCollaboration().subscribe((data) => this.onLoad(data))
+    this.loadSubscription = this.syncService.onLoadCollaboration().subscribe((data) => {
+      if (data) {
+        this.onLoad(data)
+      }
+    })
+  }
+
+  ngOnDestroy(): void {
+    if (this.loadSubscription) {
+      this.loadSubscription.unsubscribe()
+    }
   }
 
   openDialog(): void {
@@ -42,8 +53,10 @@ export class DrawingGalleryCardComponent {
   }
 
   onLoad(data: ICollaborationLoadResponse) {
-    if (this.dialogRef) this.dialogRef.close();
-    this.drawingService.activeDrawingData = data;
-    this.router.navigateByUrl('drawing');
+    if (this.dialogRef) {
+      this.dialogRef.close();
+      this.drawingLoader.activeDrawingData = data;
+      this.router.navigateByUrl(`drawing/${this.drawing.collaboration_id}`);
+    }
   }
 }

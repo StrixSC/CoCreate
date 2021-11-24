@@ -39,7 +39,7 @@ export class SyncDrawingService {
     this.defaultPayload = null;
   }
 
-  onFreedraw(): Observable<void> {
+  onFreedraw(): Observable<any> {
     return this.socketService.on("freedraw:received");
   }
 
@@ -277,15 +277,15 @@ export class SyncDrawingService {
     this.sendSelect(data.actionId, true);
   }
 
-  onShape(): Observable<void> {
+  onShape(): Observable<any> {
     return this.socketService.on("shape:received");
   }
 
-  onSelection(): Observable<void> {
+  onSelection(): Observable<any> {
     return this.socketService.on("selection:received");
   }
 
-  onUndoRedo(): Observable<void> {
+  onUndoRedo(): Observable<any> {
     return this.socketService.on("undoredo:received");
   }
 

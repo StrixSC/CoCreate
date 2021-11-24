@@ -31,7 +31,7 @@ const routes: Routes = [
       { path: "workspace", component: SidenavComponent },
       { path: "profile", component: UserProfileComponent },
       {
-        path: "drawing",
+        path: "drawing/:id",
         component: DrawingPageComponent,
       },
       {

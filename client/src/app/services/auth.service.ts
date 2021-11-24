@@ -1,7 +1,7 @@
 import { environment } from './../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
-import { Observable, from } from "rxjs";
+import { Observable, from, BehaviorSubject } from "rxjs";
 import { AngularFireAuth } from '@angular/fire/auth';
 import * as firebase from 'firebase';
 
@@ -40,5 +40,4 @@ export class AuthService {
   logUserDisconnection() {
     return this.http.get(environment.serverURL + '/auth/logout');
   }
-
 }

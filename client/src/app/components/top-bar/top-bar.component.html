@@ -1,25 +1,36 @@
-<mat-toolbar class="mat-elevation-z8 md-medium-tall" color="primary">
-  <mat-toolbar-row class="mat-elevation-z8">
-    <span routerLink="" matRipple class="clickable title-button">Colorimage</span>
-    <span class="example-spacer"></span>
-    <div *ngIf="!isLoading && auth.activeUser">
-      <button mat-button [matMenuTriggerFor]="menu">{{ auth.activeUser.displayName | uppercase }} </button>
-      <mat-menu #menu="matMenu">
-        <button mat-menu-item routerLink="profile">Profile</button>
-        <button mat-menu-item routerLink="account">Informations de compte</button>
-        <hr>
-        <button mat-menu-item (click)="logout()">Déconnexion</button>
-      </mat-menu>
-    </div>
-    <div *ngIf="isLoading || !auth.activeUser" class="spinner">
-      <mat-spinner></mat-spinner>
-    </div>
-  </mat-toolbar-row>
-</mat-toolbar>
+  <mat-toolbar class="mat-elevation-z8 md-medium-tall" color="primary">
+    <mat-toolbar-row class="mat-elevation-z8">
+      <span routerLink="" matRipple class="clickable title-button">Colorimage</span>
+      <span class="example-spacer"></span>
+      <div *ngIf="!isLoading && auth.activeUser">
+        <button mat-button [matMenuTriggerFor]="menu">{{ auth.activeUser.displayName | uppercase }} </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item routerLink="profile">Profile</button>
+          <button mat-menu-item routerLink="account">Informations de compte</button>
+          <hr>
+          <button mat-menu-item (click)="logout()">Déconnexion</button>
+        </mat-menu>
+      </div>
+      <div *ngIf="isLoading || !auth.activeUser" class="spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+    </mat-toolbar-row>
+  </mat-toolbar>
+  <router-outlet *ngIf="!isLoading"></router-outlet>
 
-<router-outlet></router-outlet>
+<div class="center-wrapper" *ngIf="isLoading">
+  <div class="spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+</div>
+
 
 <style>
+  .center-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   .example-spacer {
     flex: 1 1 auto;
   }

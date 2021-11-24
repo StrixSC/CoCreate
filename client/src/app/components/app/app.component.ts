@@ -31,7 +31,6 @@ export class AppComponent {
           actionId: '',
           actionType: ActionType.Freedraw
         }
-        console.log(this.syncDrawing.defaultPayload);
         this.socketService.setupSocketConnection();
       }
     });

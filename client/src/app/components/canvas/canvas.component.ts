@@ -1,10 +1,20 @@
+import { ICollaborationLoadResponse } from './../../model/ICollaboration.model';
+import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
+import { ActivatedRoute } from '@angular/router';
+import { DrawingLoadService } from './../../services/drawing-load.service';
+import { ToolFactoryService } from './../../services/tool-factory.service';
+import { SyncDrawingService } from './../../services/syncdrawing.service';
 import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material';
 import { AfterViewInit, Component, ElementRef, Renderer2, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 
-/// S'occupe d'afficher le svg dans un component
+export enum EventTypes {
+  Exception = 'Exception',
+  Error = 'Error',
+  Action = 'Action'
+}
+
 @Component({
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
@@ -17,15 +27,8 @@ export class CanvasComponent implements AfterViewInit {
   svg: SVGElement;
   sub: Subscription;
 
-  constructor(private drawingService: DrawingService, public renderer: Renderer2, private snackbar: MatSnackBar, private router: Router) {
+  constructor(private drawingService: DrawingService, public renderer: Renderer2) {
     this.drawingService.renderer = this.renderer;
-  }
-
-  ngOnInit(): void {
-    if (!this.drawingService.activeDrawingData) {
-      this.snackbar.open(`Oops, quelque chose s'est produit lors de la génération du dessin. SVP Essayez à nouveau!`);
-      this.router.navigateByUrl('');
-    }
   }
 
   /// À l'initialisation, le canvas s'abonne au service de dessin pour reçevoir en string le svg

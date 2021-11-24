@@ -35,7 +35,7 @@ export interface IDefaultActionPayload {
     username: string;
     userId: string;
     collaborationId: string;
-    actionType: ActionType
+    actionType: ActionType;
 }
 
 export type IFreedrawAction = ISelectionAction & IDefaultActionPayload & {
@@ -80,6 +80,7 @@ export type ISelectionAction = IDefaultActionPayload & {
 
 export type IUndoRedoAction = IDefaultActionPayload & {
     isUndo: boolean;
+    selectedActionId?: string;
 }
 
 export type IAction = IDefaultActionPayload & (
