@@ -1137,9 +1137,6 @@
                             }
                         }
                     },
-                    "204": {
-                        "description": "No Content. The request was successful, but no data could be found."
-                    },
                     "400": {
                         "description": "Bad Request. Invalid or missing query parameter format.",
                         "content": {
@@ -1258,9 +1255,6 @@
                                 }
                             }
                         }
-                    },
-                    "204": {
-                        "description": "No Content. The request was successful, but no data could be found."
                     },
                     "400": {
                         "description": "Bad Request. Invalid or missing query parameter format.",

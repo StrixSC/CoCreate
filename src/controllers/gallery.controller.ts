@@ -21,7 +21,7 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
         let result = await getCollaborations(filter, offset, limit, type, req.userId, true);
 
         if (result.collaborations.length <= 0) {
-            return res.status(StatusCodes.NO_CONTENT).json({
+            return res.status(StatusCodes.OK).json({
                 drawings: [],
                 offset: result.offset,
                 limit: result.limit,
@@ -69,7 +69,7 @@ export const getMyGalleryController = async (req: Request, res: Response, next: 
         let result = await getCollaborations(filter, offset, limit, type, req.userId, false);
 
         if (result.collaborations.length <= 0) {
-            return res.status(StatusCodes.NO_CONTENT).json({
+            return res.status(StatusCodes.OK).json({
                 drawings: [],
                 offset: result.offset,
                 limit: result.limit,
