@@ -8,7 +8,10 @@ import { environment } from 'src/environments/environment';
 })
 export class UserService {
   constructor(private httpClient:HttpClient) { }
-  getLogs(username:string): Observable<any> {
-    return this.httpClient.get(environment.serverURL+`/api/users/${username}` + '/logs');
+  getLogs(): Observable<any> { 
+    return this.httpClient.get(environment.serverURL+"/api/users/logs");
+  }
+  updateProfile(profileUpdateBody:any):Observable<any> {
+    return this.httpClient.put<any>(environment.serverURL+"/api/users/profile",profileUpdateBody)
   }
 }

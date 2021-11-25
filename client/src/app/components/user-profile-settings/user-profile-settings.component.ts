@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { User } from 'firebase';
+import { UserService } from 'src/app/services/user.service';
 
 @Component({
   selector: 'app-user-profile-settings',
@@ -12,7 +13,9 @@ export class UserProfileSettingsComponent implements OnInit {
   user = {
   username: '',
   password: '',} ;
-  constructor() { }
+  constructor(private userService:UserService) { 
+
+  }
 
   ngOnInit() {
   }
@@ -38,8 +41,17 @@ export class UserProfileSettingsComponent implements OnInit {
 		reader.onload = (_event) => {
 			this.msg = "";
 			this.url = reader.result; 
-      console.log(this.url)
+      //console.log(this.url)
 		}
 	}
-
+	updateProfile(updateProfileBody:any){
+		//const updateProfileBodyString = updateProfileBody.toString()
+		//const updateProfileBodyJSON=JSON.parse(updateProfileBodyString)
+		this.userService.updateProfile(updateProfileBody).subscribe((res)=>{
+			console.log(res)
+		})
+	}
+	onSubmit() {
+		this.updateProfile({"username":this.user.username,"avatarUrl":this.url})
+	}
 }
