@@ -29,7 +29,7 @@ export const getCollaborations = async (filter: string, offset: number, limit: n
         },
         where: {
             type: {
-                in: type
+                in: type ? type : [CollaborationType.Protected, CollaborationType.Public]
             },
             collaboration_members: {
                 some: {
