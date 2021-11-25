@@ -18,31 +18,13 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
         const data = matchedData(req, { locations: ['query'] });
         const { filter, offset, limit, type } = data;
 
-        let collaborations = await getCollaborations(filter, offset, limit, type) as (Collaboration & {
-            drawing: Drawing | null;
-            collaboration_members: (CollaborationMember & {
-                user: User & {
-                    profile: Profile | null;
-                    account: Account | null;
-                };
-            })[];
-        })[]
+        let result = await getCollaborations(filter, offset, limit, type, req.userId, true);
 
-        if (collaborations.length <= 0) {
+        if (result.collaborations.length <= 0) {
             return res.status(StatusCodes.NO_CONTENT).json([])
         }
-        console.log(collaborations.length);
 
-        return res.status(StatusCodes.OK).json((collaborations).filter((c) => {
-            if (type === CollaborationType.Private) {
-                return (
-                    c.type === type &&
-                    c.collaboration_members.length === 1 &&
-                    c.collaboration_members[0].user_id === req.userId &&
-                    c.collaboration_members[0].type === MemberType.Owner
-                )
-            } else return true;
-        }).map((c) => {
+        const returnArray = result.collaborations.map((c) => {
             const author = c.collaboration_members.find((m: any) => m.type === MemberType.Owner);
             if (!author) {
                 return
@@ -58,9 +40,10 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
                 author_avatar: author.user.profile!.avatar_url,
                 type: c.type,
                 collaborator_count: c.collaboration_members.length,
-                max_collaborator_count: c.max_collaborator_count
+                max_collaborator_count: c.max_collaborator_count,
             }
-        }));
+        })
+        return res.status(StatusCodes.OK).json({ drawings: returnArray, total_drawing_count: result.total, offset: result.offset, limit: result.limit });
     } catch (e) {
         handleRequestError(e, next);
     }
@@ -78,22 +61,13 @@ export const getMyGalleryController = async (req: Request, res: Response, next: 
 
         const data = matchedData(req, { locations: ['query'] });
         const { filter, offset, limit, type } = data;
-        let collaborations = await getCollaborations(filter, offset, limit, type, req.userId) as (Collaboration & {
-            drawing: Drawing | null;
-            collaboration_members: (CollaborationMember & {
-                user: User & {
-                    profile: Profile | null;
-                    account: Account | null;
-                };
-            })[];
-        })[]
+        let result = await getCollaborations(filter, offset, limit, type, req.userId, false);
 
-        if (collaborations.length <= 0) {
+        if (result.collaborations.length <= 0) {
             return res.status(StatusCodes.NO_CONTENT).json([])
         }
 
-        console.log(collaborations.length);
-        return res.status(StatusCodes.OK).json((collaborations).map((c) => {
+        const returnArray = result.collaborations.map((c) => {
             const author = c.collaboration_members.find((m: any) => m.type === MemberType.Owner);
             if (!author) {
                 return
@@ -109,9 +83,11 @@ export const getMyGalleryController = async (req: Request, res: Response, next: 
                 author_avatar: author.user.profile!.avatar_url,
                 type: c.type,
                 collaborator_count: c.collaboration_members.length,
-                max_collaborator_count: c.max_collaborator_count
+                max_collaborator_count: c.max_collaborator_count,
+
             }
-        }));
+        })
+        return res.status(StatusCodes.OK).json({ drawings: returnArray, total_drawing_count: result.total, offset: result.offset, limit: result.limit });
     } catch (e) {
         handleRequestError(e, next);
     }

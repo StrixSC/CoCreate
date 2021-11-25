@@ -1102,8 +1102,8 @@
                     {
                         "name": "type",
                         "in": "query",
-                        "required": true,
-                        "description": "Private, Public or Protected",
+                        "required": false,
+                        "description": "Private, Public or Protected. Gets drawings of any type if not mentionned",
                         "schema": {
                             "type": "string"
                         }
@@ -1116,7 +1116,145 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/IGalleryEntry"
+                                    "properties": {
+                                        "total_drawing_count": {
+                                            "type": "integer"
+                                        },
+                                        "offset": {
+                                            "type": "number"
+                                        },
+                                        "limit": {
+                                            "type": "number"
+                                        },
+                                        "drawings": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/IGalleryEntry"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content. The request was successful, but no data could be found."
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing query parameter format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/gallery/mine": {
+            "get": {
+                "tags": [
+                    "Gallery"
+                ],
+                "summary": "Fetch all gallery drawings for which the requesting user is a member of.",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "required": false,
+                        "name": "filter",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter to apply"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "description": "Amount of records to skip. Use this for pagination. Defauls to 0",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "description": "Amount of records to take. Use this for pagination. Defaults to 50.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "description": "Private, Public or Protected. Gets drawings of any type if not mentionned",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "operationId": "Fetch user gallery drawings",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns an array of all the drawings/collaborations.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_drawing_count": {
+                                            "type": "integer"
+                                        },
+                                        "offset": {
+                                            "type": "number"
+                                        },
+                                        "limit": {
+                                            "type": "number"
+                                        },
+                                        "drawings": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/IGalleryEntry"
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }

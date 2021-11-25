@@ -4,9 +4,13 @@ import { MemberType, CollaborationType } from '.prisma/client';
 import { db } from '../db';
 import moment from 'moment';
 
-export const getCollaborations = async (filter: string, offset: number, limit: number, type?: CollaborationType, userId?: string) => {
+export const getCollaborations = async (filter: string, offset: number, limit: number, type?: CollaborationType, userId?: string, excludeUser?: boolean) => {
+
+    offset = offset ? offset : DEFAULT_DRAWING_OFFSET;
+    limit = limit ? limit : DEFAULT_DRAWING_LIMIT;
+
     if (filter) {
-        return getCollaborationsWithFilter(filter, offset, limit, type, userId);
+        return getCollaborationsWithFilter(filter, offset, limit, type, userId, excludeUser);
     }
 
     let result = await db.collaboration.findMany({
@@ -29,22 +33,23 @@ export const getCollaborations = async (filter: string, offset: number, limit: n
             },
             collaboration_members: {
                 some: {
-                    user_id: userId
+                    user_id: excludeUser ? undefined : userId
+                },
+                none: {
+                    user_id: excludeUser ? userId : ''
                 }
             }
         },
-        skip: offset ? offset : DEFAULT_DRAWING_OFFSET,
-        take: limit ? limit : DEFAULT_DRAWING_LIMIT
     });
 
     if (!result) {
         throw new create.InternalServerError("Error getting drawings from database");
     }
 
-    return result;
+    return { collaborations: result.slice(offset, limit), offset: offset, limit, total: result.length };
 };
 
-export const getCollaborationsWithFilter = async (filter: string, offset: number, limit: number, type?: CollaborationType, userId?: string) => {
+export const getCollaborationsWithFilter = async (filter: string, offset: number, limit: number, type?: CollaborationType, userId?: string, excludeUser?: boolean) => {
     let allCollaborations = await db.collaboration.findMany({
         include: {
             drawing: true,
@@ -65,7 +70,10 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
             },
             collaboration_members: {
                 some: {
-                    user_id: userId
+                    user_id: excludeUser ? undefined : userId
+                },
+                none: {
+                    user_id: excludeUser ? userId : ''
                 }
             }
         }
@@ -103,8 +111,26 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
                 localLocale.format('dddd').toLowerCase(),
                 // Author username
                 author.user.profile!.username.toLowerCase(),
+                // Type
+                collaboration.type.toLowerCase()
+                // Type in french:
             ]
         });
+
+        if (collaboration.type === CollaborationType.Protected) {
+            filterMap.get(collaboration.collaboration_id)!.data.push('protégé');
+            filterMap.get(collaboration.collaboration_id)!.data.push('protege');
+            filterMap.get(collaboration.collaboration_id)!.data.push('protége');
+            filterMap.get(collaboration.collaboration_id)!.data.push('protegé');
+        } else if (collaboration.type === CollaborationType.Private) {
+            filterMap.get(collaboration.collaboration_id)!.data.push('privé');
+            filterMap.get(collaboration.collaboration_id)!.data.push('prive');
+            filterMap.get(collaboration.collaboration_id)!.data.push('privée');
+            filterMap.get(collaboration.collaboration_id)!.data.push('privee');
+        } else if (collaboration.type === CollaborationType.Public) {
+            filterMap.get(collaboration.collaboration_id)!.data.push('public');
+            filterMap.get(collaboration.collaboration_id)!.data.push('publique');
+        }
 
         if (allowSearching) {
             // First name
@@ -127,5 +153,5 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
         }
     }
 
-    return returnDrawings.slice(offset || DEFAULT_DRAWING_OFFSET, limit || DEFAULT_DRAWING_LIMIT);
+    return { collaborations: returnDrawings.slice(offset, limit), offset: offset, limit, total: returnDrawings.length };
 }

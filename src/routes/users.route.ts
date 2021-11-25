@@ -2,7 +2,6 @@ import { body, query } from 'express-validator';
 import { checkIfAuthenticated, checkIfSelfRequest } from './../middlewares/auth.middleware';
 import {
     getCompleteUserController,
-    getMemberCollaborationsController,
     getPublicUserController,
     getPublicUsersController,
     getUserChannelsController,
@@ -52,21 +51,5 @@ router.put('/profile', checkIfAuthenticated,
         .notEmpty()
         .withMessage('Avatar Url missing or invalid'),
     async (req, res, next) => await updateUserProfileController(req, res, next));
-
-router.get('/gallery', checkIfAuthenticated,
-    query('offset')
-        .optional()
-        .isNumeric()
-        .withMessage('Offset must be a numeric value')
-        .toInt(),
-    query('limit')
-        .optional()
-        .isNumeric()
-        .withMessage('Limit must be a numeric value')
-        .toInt(),
-    query('filter')
-        .optional()
-        .toLowerCase(),
-    async (req, res, next) => await getMemberCollaborationsController(req, res, next));
 
 export default router;
