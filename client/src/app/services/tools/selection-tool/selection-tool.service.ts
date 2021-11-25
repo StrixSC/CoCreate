@@ -181,6 +181,7 @@ export class SelectionToolService implements Tools {
         this.selectionTransformService.createCommand(
           SelectionCommandConstants.RESIZE, this.rectSelection, this.objects, offset, target as SVGRectElement,
         );
+        this.syncService.sendResize(DrawingState.down, this.selectedActionId, 1, 1, 0, 0);
         this.allowMove = true;
         this.activeActionType = SelectionActionTypes.Resize;
         return;

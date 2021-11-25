@@ -264,9 +264,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   onLoad(data: ICollaborationLoadResponse) {
-    if (this.dialogRef) this.dialogRef.close();
-    this.drawingService.activeDrawingData = data;
-    this.router.navigateByUrl('drawing');
   }
 
   onCreate() {

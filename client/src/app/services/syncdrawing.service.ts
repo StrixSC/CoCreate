@@ -261,11 +261,8 @@ export class SyncDrawingService {
   sendResize(state: DrawingState, actionId: string, xScale: number, yScale: number, xTranslation: number, yTranslation: number) {
     if (!actionId) return;
 
-    if (state === DrawingState.move && !this.hasStartedMovement) {
+    if (state === DrawingState.down) {
       this.activeActionId = v4();
-      this.hasStartedMovement = true;
-    } else if (state === DrawingState.up && this.hasStartedMovement) {
-      this.hasStartedMovement = false;
     }
 
     const payload = {
