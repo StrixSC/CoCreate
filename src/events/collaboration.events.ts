@@ -155,6 +155,7 @@ export = (io: Server, socket: Socket) => {
                         collaborationId: member.collaboration_id,
                         username: member.user.profile!.username,
                         avatarUrl: member.user.profile!.avatar_url,
+                        drawingId: member.collaboration.drawing!.drawing_id,
                     });
                 }
 
@@ -167,7 +168,7 @@ export = (io: Server, socket: Socket) => {
                     userId: member.user.user_id,
                     username: member.user.profile!.username,
                     avatarUrl: member.user.profile!.avatar_url,
-                    type: member.type
+                    type: member.type,
                 });
                 socket.join(member.collaboration_id);
                 const data = generateConnectedPayload(member);

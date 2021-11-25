@@ -591,6 +591,7 @@ Response sent with `collaboration:joined`:
 	username: string // Username of the new collaborator
 	avatarUrl: string // Avatar of the new collaborator
     collaborationId: stirng // Collaboration/Drawing that was joined.
+    drawingId: string // Drawing ID of the drawing associated to the collaboration
 }
 ```
 
