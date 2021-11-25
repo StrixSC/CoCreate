@@ -97,6 +97,8 @@ class _LoginState extends State<Login> {
     context.read<Collaborator>().setSocket(collaborationSocket);
   }
 
+  var _scrollController = new ScrollController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

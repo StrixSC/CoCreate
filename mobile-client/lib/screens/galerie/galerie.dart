@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:http/src/response.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/src/provider.dart';
 
@@ -25,7 +26,9 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
   Map pagingControllers = <String, PagingController<int, Drawing>>{};
   Map searchControllers = <String, TextEditingController>{};
   late TabController _tabController;
+  final _scrollController = ScrollController();
   static const _pageSize = 12;
+
 
   GalerieState() {
     for (var type in TYPES) {
@@ -43,12 +46,34 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
       value.addPageRequestListener((pageKey) {
         _fetchDrawings(pageKey, key, null);
       });
+      value.addStatusListener((status) {
+        if (status == PagingStatus.completed) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                "Il n'y a plus de dessins disponibles",
+              ),
+              action: SnackBarAction(
+                label: 'Ok', onPressed: () {  },
+              ),
+            ),
+          );
+        }
+      });
+      });
+    // Setup the listener.
+    _scrollController.addListener(() {
+      if (_scrollController.position.atEdge) {
+        if (_scrollController.position.pixels == 0) {
+          // You're at the top.
+        } else {
+          // You're at the bottom.
+          String section = context.read<Collaborator>().currentType;
+          var pageKey = (pagingControllers[section] as PagingController).itemList!.length;
+          _fetchDrawings(pageKey, section, null);
+        }
+      }
     });
-  }
-
-  reinitialisePagingController(String type) {
-    pagingControllers.update(
-        type, (value) => PagingController<int, Drawing>(firstPageKey: 0));
   }
 
   Future<void> _fetchDrawings(int pageKey, String section, String? type) async {
@@ -57,7 +82,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
     if (filter.isEmpty) {
       filter = null;
     }
-    var response;
+    Response response;
     if(section == 'Available') {
       response =
       await rest.drawing.fetchDrawings(filter, pageKey, _pageSize, type);
@@ -65,6 +90,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
       response =
       await rest.drawing.fetchUserDrawings(filter, pageKey, _pageSize, type);
     }
+
     if (response.statusCode == 200) {
       var jsonResponse =
           json.decode(response.body); //Map<String, dynamic>;
@@ -188,7 +214,16 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
             )),
         const SizedBox(height: 24.0),
         Expanded(child: OrientationBuilder(builder: (context, orientation) {
-          return PagedGridView<int, Drawing>(
+          return RefreshIndicator(
+              onRefresh: () => Future.sync(
+                () {                String type = context.read<Collaborator>().currentType;
+                  pagingControllers[type].refresh();},
+          ),
+          child: PagedGridView<int, Drawing>(
+            showNewPageProgressIndicatorAsGridChild: false,
+            showNewPageErrorIndicatorAsGridChild: false,
+            showNoMoreItemsIndicatorAsGridChild: false,
+            scrollController: _scrollController,
             pagingController: pagingController,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               childAspectRatio: 3 / 2,
@@ -201,7 +236,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
                 drawing: item,
               ),
             ),
-          );
+          ));
         }))
       ]),
     );
