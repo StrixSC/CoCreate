@@ -8,5 +8,6 @@
         "editor.formatOnPaste": true,
         "editor.formatOnSave": true,
     },
-    "editor.maxTokenizationLineLength": 300000
+    "editor.maxTokenizationLineLength": 300000,
+    "debug.javascript.usePreview": false,
 }

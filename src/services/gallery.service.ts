@@ -46,7 +46,7 @@ export const getCollaborations = async (filter: string, offset: number, limit: n
         throw new create.InternalServerError("Error getting drawings from database");
     }
 
-    return { collaborations: result.slice(offset, limit), offset: offset, limit, total: result.length };
+    return { collaborations: result.slice(offset, limit + offset), offset: offset, limit, total: result.length };
 };
 
 export const getCollaborationsWithFilter = async (filter: string, offset: number, limit: number, type?: CollaborationType, userId?: string, excludeUser?: boolean) => {
@@ -153,5 +153,5 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
         }
     }
 
-    return { collaborations: returnDrawings.slice(offset, limit), offset: offset, limit, total: returnDrawings.length };
+    return { collaborations: returnDrawings.slice(offset, limit + offset), offset: offset, limit, total: returnDrawings.length };
 }
