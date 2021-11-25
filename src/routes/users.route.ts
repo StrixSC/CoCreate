@@ -48,7 +48,7 @@ router.put('/profile', checkIfAuthenticated,
         .isAlphanumeric()
         .withMessage('Username missing or invalid'),
     body('avatarUrl')
-        .notEmpty()
+        .isString()
         .withMessage('Avatar Url missing or invalid'),
     async (req, res, next) => await updateUserProfileController(req, res, next));
 

@@ -188,7 +188,7 @@ export const updateUserProfile = async (userId: string, username: string, avatar
     if (updatedUser) {
         const newUser = await admin.auth().updateUser(userId, {
             displayName: username,
-            photoURL: avatarUrl
+            photoURL: avatarUrl ? null : avatarUrl
         });
 
         if (newUser) {
