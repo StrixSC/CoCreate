@@ -163,6 +163,12 @@ export = (io: Server, socket: Socket) => {
                 const data = generateConnectedPayload(member);
                 socket.emit("collaboration:load", data);
             } else {
+                socket.broadcast.to(member.collaboration_id).emit("collaboration:connected", {
+                    userId: member.user.user_id,
+                    username: member.user.profile!.username,
+                    avatarUrl: member.user.profile!.avatar_url,
+                    type: member.type
+                });
                 socket.join(member.collaboration_id);
                 const data = generateConnectedPayload(member);
                 socket.emit("collaboration:load", data);
@@ -472,7 +478,6 @@ export = (io: Server, socket: Socket) => {
 
             socket.join(member.collaboration_id);
             const data = generateConnectedPayload(member);
-            console.log('sending data to connected member')
             socket.emit("collaboration:load", data);
         } catch (e) {
             handleSocketError(socket, e, ExceptionType.Collaboration);

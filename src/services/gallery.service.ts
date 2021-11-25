@@ -4,9 +4,9 @@ import { MemberType, CollaborationType } from '.prisma/client';
 import { db } from '../db';
 import moment from 'moment';
 
-export const getCollaborations = async (filter: string, offset: number, limit: number, type?: CollaborationType) => {
+export const getCollaborations = async (filter: string, offset: number, limit: number, type?: CollaborationType, userId?: string) => {
     if (filter) {
-        return getCollaborationsWithFilter(filter, offset, limit, type);
+        return getCollaborationsWithFilter(filter, offset, limit, type, userId);
     }
 
     let result = await db.collaboration.findMany({
@@ -25,7 +25,12 @@ export const getCollaborations = async (filter: string, offset: number, limit: n
         },
         where: {
             type: {
-                in: type ? [type] : [CollaborationType.Private, CollaborationType.Protected, CollaborationType.Public]
+                in: type
+            },
+            collaboration_members: {
+                some: {
+                    user_id: userId
+                }
             }
         },
         skip: offset ? offset : DEFAULT_DRAWING_OFFSET,
@@ -39,7 +44,7 @@ export const getCollaborations = async (filter: string, offset: number, limit: n
     return result;
 };
 
-export const getCollaborationsWithFilter = async (filter: string, offset: number, limit: number, type?: CollaborationType) => {
+export const getCollaborationsWithFilter = async (filter: string, offset: number, limit: number, type?: CollaborationType, userId?: string) => {
     let allCollaborations = await db.collaboration.findMany({
         include: {
             drawing: true,
@@ -56,7 +61,12 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
         },
         where: {
             type: {
-                in: type ? [type] : [CollaborationType.Private, CollaborationType.Protected, CollaborationType.Public]
+                in: type
+            },
+            collaboration_members: {
+                some: {
+                    user_id: userId
+                }
             }
         }
     });
