@@ -217,7 +217,12 @@ class _ChatScreenState extends State<ChatScreen> {
             icon: const Tooltip(
                 message: 'Se déconnecter',
                 child: Icon(Icons.arrow_back, color: Colors.white, size: 30)),
-            onPressed: () => context.read<Messenger>().toggleSelection()),
+            onPressed: () {
+              messenger.userChannels[widget.channelIndex].lastReadMessage =
+                  messenger
+                      .userChannels[widget.channelIndex].messages.last.text;
+              context.read<Messenger>().toggleSelection();
+            }),
         title: const Text(
           '',
           style: TextStyle(fontSize: 25, color: Colors.blue),

@@ -20,7 +20,7 @@ class ChatCard extends StatelessWidget {
 
   getfontWeight() {
     return chat.messages.isEmpty ? const TextStyle(fontSize: 20, fontWeight: FontWeight.w500) :
-    chat.lastReadMessage == chat.messages.first.text ?
+    chat.lastReadMessage == chat.messages.last.text ?
       const TextStyle(fontSize: 20, fontWeight: FontWeight.w500) :
       const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: kPrimaryColor);
   }
@@ -98,7 +98,7 @@ class ChatCard extends StatelessWidget {
               ),
             ),
               notifIcon(),
-              if(chat.name != "Canal Publique" && user.displayName == chat.ownerUsername)
+              if(chat.name != "Public" && user.displayName == chat.ownerUsername)
                 IconButton(
                   iconSize: 28,
                   icon: const Icon(Icons.highlight_remove),

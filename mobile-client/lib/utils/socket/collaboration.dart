@@ -5,6 +5,7 @@ import 'package:Colorimage/screens/chat/chat.dart';
 import 'package:Colorimage/utils/socket/socket_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:vector_math/vector_math.dart';
 
 class CollaborationSocket extends SocketService {
   CollaborationSocket(User user, IO.Socket socket) : super(user, socket);
@@ -111,6 +112,7 @@ class CollaborationSocket extends SocketService {
     socket.on('collaboration:joined', (data) {
       print('Collaboration Joined');
       Member member = Member(
+        drawingId: data['drawingId'],
         userId: data['userId'],
         username: data['username'],
         avatarUrl: data['avatarUrl'],
@@ -139,14 +141,11 @@ class CollaborationSocket extends SocketService {
     socket.on('collaboration:created', (data) {
       print('Collaboration Created');
       Collaboration collaboration = Collaboration(
-          collaborationId: 'id',
-          actions: data["actions"],
-          backgroundColor: data["backgroundColor"],
+          collaborationId: data["collaborationId"],
+          actions: [],
           memberCount: data["memberCount"],
           maxMemberCount: data["maxMemberCount"],
-          width: data["width"],
-          height: data["height"],
-          members: data["members"]);
+          members: []);
       Drawing drawing = Drawing(
           drawingId: data['drawingId'],
           thumbnailUrl: data['thumbnailUrl'],

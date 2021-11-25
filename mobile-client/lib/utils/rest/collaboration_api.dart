@@ -13,16 +13,34 @@ class CollaborationAPI {
   // filter : Filter to apply
   // offset : Amount of records to skip. Use this for pagination. Defauls to 0
   // limit  : Amount of records to take. Use this for pagination. Defaults to 50.
-  Future<Response> fetchDrawings(String? filter, int offset, int limit, String type) async {
+  Future<Response> fetchDrawings(String? filter, int offset, int limit, String? type) async {
     final queryParameters = {
       'offset': offset.toString(),
       'limit': limit.toString(),
-      'type': type,
     };
+    if (type != null) {
+      queryParameters['type'] = type;
+    }
     if (filter != null) {
       queryParameters['filter'] = filter;
     }
     var url = Uri.http(_url!, '/api/gallery/', queryParameters);
+    var response = await http.get(url);
+    return response;
+  }
+
+  Future<Response> fetchUserDrawings(String? filter, int offset, int limit, String? type) async {
+    final queryParameters = {
+      'offset': offset.toString(),
+      'limit': limit.toString(),
+    };
+    if (type != null) {
+      queryParameters['type'] = type;
+    }
+    if (filter != null) {
+      queryParameters['filter'] = filter;
+    }
+    var url = Uri.http(_url!, '/api/gallery/mine', queryParameters);
     var response = await http.get(url);
     return response;
   }

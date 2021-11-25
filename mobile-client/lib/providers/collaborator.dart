@@ -17,16 +17,17 @@ import '../models/chat.dart';
 class Collaborator extends ChangeNotifier {
   UserCredential? auth;
   Map drawings =
-      <String, Map<String, Drawing>>{}; // <type, <drawing_id, drawing>>
+      <String, Map<String, Drawing>>{}; // <section, <drawing_id, drawing>>
+  Map allDrawings = <String, Drawing>{}; // drawings not joined yet
+  Map userDrawings = <String, Drawing>{}; // drawings already joined
   bool isDrawing = false;
-  String currentType = "Public";
+  String currentType = "Available"; // sections : Available, Joined
   late String currentDrawingId = '';
   late CollaborationSocket collaborationSocket;
 
   Collaborator(this.auth) {
-    drawings.putIfAbsent("Private", () => <String, Drawing>{});
-    drawings.putIfAbsent("Public", () => <String, Drawing>{});
-    drawings.putIfAbsent("Protected", () => <String, Drawing>{});
+    drawings.putIfAbsent("Available", () => <String, Drawing>{});
+    drawings.putIfAbsent("Joined", () => <String, Drawing>{});
   }
 
   void setSocket(socket) {
@@ -66,9 +67,11 @@ class Collaborator extends ChangeNotifier {
   }
 
   void memberJoined(Member member) {
-    drawings[currentType][currentDrawingId].collaboration.members.add(member);
-    drawings[currentType][currentDrawingId].collaboration.memberCount++;
-    notifyListeners();
+    if(drawings[currentType].containsKey(member.drawingId)) {
+      drawings[currentType][currentDrawingId].collaboration.members.add(member);
+      drawings[currentType][currentDrawingId].collaboration.memberCount++;
+      notifyListeners();
+    }
   }
 
   void memberConnected(Member member) {

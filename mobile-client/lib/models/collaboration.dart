@@ -24,13 +24,16 @@ class Member {
   String? userId = "";
   String? avatarUrl = "";
   String? type = "";
+  String? drawingId = "";
   bool? isActive = false;
 
+
   Member({
-    required this.username,
-    required this.userId,
-    required this.avatarUrl,
-    required this.type,
-    required this.isActive,
+    this.username,
+    this.userId,
+    this.avatarUrl,
+    this.type,
+    this.isActive,
+    this.drawingId = "",
   });
 }

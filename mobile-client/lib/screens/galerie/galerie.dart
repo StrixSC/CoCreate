@@ -7,12 +7,14 @@ import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/src/provider.dart';
 
 const _fontSize = 20.0;
 const padding = 30.0;
-const TYPES = ["Public", "Protected", "Private"];
+const TYPES = ["Available", "Joined"];
+final _formKey = GlobalKey<FormBuilderState>();
 
 class Galerie extends StatefulWidget {
   @override
@@ -36,10 +38,10 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     pagingControllers.forEach((key, value) {
       value.addPageRequestListener((pageKey) {
-        _fetchDrawings(pageKey, key);
+        _fetchDrawings(pageKey, key, null);
       });
     });
   }
@@ -49,19 +51,26 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
         type, (value) => PagingController<int, Drawing>(firstPageKey: 0));
   }
 
-  Future<void> _fetchDrawings(int pageKey, String type) async {
+  Future<void> _fetchDrawings(int pageKey, String section, String? type) async {
     RestApi rest = RestApi();
-    String? filter = (searchControllers[type] as TextEditingController).text;
+    String? filter = (searchControllers[section] as TextEditingController).text;
     if (filter.isEmpty) {
       filter = null;
     }
-    var response =
-        await rest.drawing.fetchDrawings(filter, pageKey, _pageSize, type);
+    var response;
+    if(section == 'Available') {
+      response =
+      await rest.drawing.fetchDrawings(filter, pageKey, _pageSize, type);
+    } else {
+      response =
+      await rest.drawing.fetchUserDrawings(filter, pageKey, _pageSize, type);
+    }
     if (response.statusCode == 200) {
       var jsonResponse =
-          json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
+          json.decode(response.body); //Map<String, dynamic>;
       List<Drawing> drawings = [];
-      for (var drawing in jsonResponse) {
+      var resp = jsonResponse['drawings'];
+      for (var drawing in resp) {
         Collaboration collaboration = Collaboration(
             collaborationId: drawing["collaboration_id"],
             memberCount: drawing["collaborator_count"],
@@ -78,10 +87,10 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
       }
       final isLastPage = drawings.length < _pageSize;
       if (isLastPage) {
-        pagingControllers[type].appendLastPage(drawings);
+        pagingControllers[section].appendLastPage(drawings);
       } else {
         final nextPageKey = pageKey + drawings.length;
-        pagingControllers[type].appendPage(drawings, nextPageKey);
+        pagingControllers[section].appendPage(drawings, nextPageKey);
       }
       context.read<Collaborator>().addDrawings(drawings);
     } else if (response.statusCode == 204) {
@@ -101,7 +110,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
               children: const [
                 Icon(Icons.public),
                 SizedBox(width: 8),
-                Text('Publique', style: TextStyle(fontSize: 18)),
+                Text('Dessins Disponibles', style: TextStyle(fontSize: 18)),
               ],
             ),
           ),
@@ -109,19 +118,9 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: const [
-                Icon(Icons.shield),
+                Icon(Icons.adb_sharp),
                 SizedBox(width: 8),
-                Text('Protégé', style: TextStyle(fontSize: 18)),
-              ],
-            ),
-          ),
-          Tab(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.remove_red_eye_sharp),
-                SizedBox(width: 8),
-                Text('Privé', style: TextStyle(fontSize: 18)),
+                Text('Mes Dessins', style: TextStyle(fontSize: 18)),
               ],
             ),
           ),
@@ -141,7 +140,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
                   icon: const Icon(CupertinoIcons.plus,
                       color: Colors.white, size: 34),
                   onPressed: () {
-                    // createDessinDialog();
+                    createDessinDialog();
                   })
             ],
             bottom: PreferredSize(
@@ -149,11 +148,9 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
                 child: ColoredBox(color: kContentColor, child: _tabBar))),
         body: TabBarView(controller: _tabController, children: [
           gallerieView(
-              pagingControllers["Public"], searchControllers["Public"]),
+              pagingControllers["Available"], searchControllers["Available"]),
           gallerieView(
-              pagingControllers["Protected"], searchControllers["Protected"]),
-          gallerieView(
-              pagingControllers["Private"], searchControllers["Private"]),
+              pagingControllers["Joined"], searchControllers["Joined"]),
         ]));
   }
 
@@ -217,43 +214,45 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
     });
     super.dispose();
   }
-}
 
-// createDessinDialog() async {
-//   showDialog<String>(
-//       context: context,
-//       builder: (BuildContext context) => AlertDialog(
-//             title: const Text('Créer un dessin'),
-//             content:       FormBuilder(
-//                 key: _formKey,
-//                 child: Column(
-//                   children: <Widget>[
-//
-//                     FormBuilderTextField(
-//                       name: 'age',
-//                       decoration: InputDecoration(
-//                         labelText:
-//                         'This value is passed along to the [Text.maxLines] attribute of the [Text] widget used to display the hint text.',
-//                       ),
-//                       onChanged: _onChanged,
-//                       // valueTransformer: (text) => num.tryParse(text),
-//                       validator: FormBuilderValidators.compose([
-//                         FormBuilderValidators.required(context),
-//                         FormBuilderValidators.numeric(context),
-//                         FormBuilderValidators.max(context, 70),
-//                       ]),
-//                       keyboardType: TextInputType.number,
-//                     ),])),
-//             actions: <Widget>[
-//               TextButton(
-//                 onPressed: () {
-//                   Navigator.pop(context, 'Créer');
-//                 },
-//                 child: const Text('Créer'),
-//               ),
-//             ],
-//           ));
-// }
+  createDessinDialog() async {
+    showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              title: const Text('Créer un dessin'),
+              content: Container(width: 1000, child:FormBuilder(
+                  key: _formKey,
+                  child: Column(children: <Widget>[
+                    FormBuilderTextField(
+                      name: 'Titre',
+                      decoration: const InputDecoration(
+                        labelText:
+                            'Veuillez entrer le titre du dessin',
+                      ),
+                      onChanged: (value) => { print(_formKey.currentState!.fields['Titre']!.value) },
+                      // valueTransformer: (text) => num.tryParse(text),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(context),
+                      ]),
+                      keyboardType: TextInputType.text,
+                    ),
+                  ]))),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    _formKey.currentState!.save();
+                    if (_formKey.currentState!.validate()) {
+                      print(_formKey.currentState!.value);
+                    } else {
+                      print("validation failed");
+                    }
+                  },
+                  child: const Text('Créer'),
+                ),
+              ],
+            ));
+  }
+}
 
 /// Allow the text size to shrink to fit in the space
 class _GridTitleText extends StatelessWidget {
@@ -307,7 +306,7 @@ class _Drawing extends StatelessWidget {
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
-                    Navigator.pop(context, 'Créer');
+                    Navigator.pop(context, 'Joindre');
                   },
                   child: const Text('Joindre'),
                 ),
