@@ -1,6 +1,6 @@
 import { DEFAULT_DRAWING_OFFSET, DEFAULT_DRAWING_LIMIT } from './../utils/drawings';
 import create from 'http-errors';
-import { MemberType, CollaborationType } from '.prisma/client';
+import { MemberType, CollaborationType, Drawing } from '.prisma/client';
 import { db } from '../db';
 import moment from 'moment';
 
@@ -29,7 +29,7 @@ export const getCollaborations = async (filter: string, offset: number, limit: n
         },
         where: {
             type: {
-                in: type ? type : [CollaborationType.Protected, CollaborationType.Public]
+                in: excludeUser ? (type ? [type] : [CollaborationType.Protected, CollaborationType.Public]) : type
             },
             collaboration_members: {
                 some: {
@@ -66,7 +66,7 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
         },
         where: {
             type: {
-                in: type
+                in: excludeUser ? (type ? [type] : [CollaborationType.Protected, CollaborationType.Public]) : type
             },
             collaboration_members: {
                 some: {
