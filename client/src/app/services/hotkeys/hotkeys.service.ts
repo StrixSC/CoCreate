@@ -1,3 +1,5 @@
+import { AuthService } from './../auth.service';
+import { CollaborationService } from 'src/app/services/collaboration.service';
 import { SyncDrawingService } from './../syncdrawing.service';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
@@ -41,7 +43,8 @@ export class HotkeysService {
     private syncService: SyncDrawingService,
     private selectionService: SelectionToolService,
     private hotkeysEmitterService: HotkeysEmitterService,
-
+    private collabService: CollaborationService,
+    private auth: AuthService,
     private hotkeysEnablerService: HotkeysEnablerService,
   ) {
     this.subscribeToHotkeys();
@@ -137,12 +140,10 @@ export class HotkeysService {
             this.selectionTool.selectAll();
             break;
           case EmitReturn.UNDO:
-            this.selectionService.removeSelection();
-            this.syncService.sendUndo();
+            this.collabService.undoUserAction(this.auth.activeUser!.uid);
             break;
           case EmitReturn.REDO:
-            this.selectionService.removeSelection();
-            this.syncService.sendRedo();
+            this.collabService.redoUserAction(this.auth.activeUser!.uid);
             break;
           default:
             console.log('Warning : Hotkey callBack not implemented !');

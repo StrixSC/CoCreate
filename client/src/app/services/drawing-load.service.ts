@@ -6,9 +6,8 @@ import { ActionType } from 'src/app/model/IAction.model';
 import { ICommand } from 'src/app/interfaces/command.interface';
 import { SyncDrawingService } from './syncdrawing.service';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
-import { IAction, IFreedrawAction, IFreedrawUpAction, IFreedrawUpLoadAction } from './../model/IAction.model';
+import { IAction, IFreedrawUpLoadAction } from './../model/IAction.model';
 import { ToolFactoryService } from './tool-factory.service';
-import { ActionData } from './collaboration.service';
 import { ICollaborationLoadResponse } from './../model/ICollaboration.model';
 import { Injectable, Renderer2 } from '@angular/core';
 

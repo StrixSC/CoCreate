@@ -5,7 +5,7 @@ import { DeleteSyncCommand } from './sync/delete-sync-command';
 import { RectangleSyncCommand } from './sync/rectangle-sync-command';
 import { FreedrawSyncCommand } from './sync/freedraw-sync-command';
 import { SyncDrawingService } from './syncdrawing.service';
-import { IDeleteAction, ISelectionAction, ITranslateAction, IRotateAction, IResizeAction } from './../model/IAction.model';
+import { IDeleteAction, ISelectionAction, ITranslateAction, IRotateAction, IResizeAction, IFreedrawUpAction, IFreedrawUpLoadAction } from './../model/IAction.model';
 import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
 import { CollaborationService } from "./collaboration.service";
 import { ICommand } from "src/app/interfaces/command.interface";
@@ -36,17 +36,25 @@ export class ToolFactoryService {
   private pendingActions: Map<string, SyncCommand> = new Map();
 
   tools: Record<ActionType | string, (payload: IAction, isActiveUser?: boolean) => any> = {
-    Freedraw: (payload: IFreedrawAction) => {
+    Freedraw: (payload: IFreedrawAction & IFreedrawUpLoadAction & IFreedrawUpAction) => {
       const state = payload.state;
-      if (state === DrawingState.down) {
-        const command = new FreedrawSyncCommand(payload, this.rendererService.renderer, this.drawingService);
-        command.execute();
-        this.pendingActions.set(payload.actionId, command);
-      } else {
-        const command = this.pendingActions.get(payload.actionId);
-        const res = command!.update(payload);
+      if (payload.isUndoRedo) {
+        const command = new FreedrawSyncCommand(payload, this.rendererService.renderer, this.drawingService, this.syncService);
+        const res = command.execute();
         if (res) {
-          this.addOrUpdateCollaboration(res);
+          this.addOrUpdateCollaboration(command);
+        }
+      } else {
+        if (state === DrawingState.down) {
+          const command = new FreedrawSyncCommand(payload, this.rendererService.renderer, this.drawingService, this.syncService);
+          command.execute();
+          this.pendingActions.set(payload.actionId, command);
+        } else {
+          const command = this.pendingActions.get(payload.actionId);
+          const res = command!.update(payload);
+          if (res) {
+            this.addOrUpdateCollaboration(res);
+          }
         }
       }
     },
@@ -84,8 +92,7 @@ export class ToolFactoryService {
     Delete: (payload: IDeleteAction) => {
       const command = new DeleteSyncCommand(payload, this.drawingService);
       const res = command.execute();
-      console.log(res);
-      if (res) {
+      if (res && !payload.isUndoRedo) {
         this.addOrUpdateCollaboration(res);
       }
     },

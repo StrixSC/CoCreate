@@ -35,7 +35,7 @@ export class DrawingGalleryService {
   }
 
   getMyDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/users/gallery').pipe(
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery/mine').pipe(
       catchError(() => of([]))
     );
   }

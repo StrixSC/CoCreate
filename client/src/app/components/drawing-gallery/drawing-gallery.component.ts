@@ -292,10 +292,10 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
   fetchAllDrawings(): void {
     this.drawingsSubscription = merge(
-      this.drawingGalleryService.getPublicDrawings().pipe(map((d) => ({ drawings: d, galleryType: DrawingType.Public }))),
-      this.drawingGalleryService.getPrivateDrawings().pipe(map((d) => ({ drawings: d, galleryType: DrawingType.Private }))),
-      this.drawingGalleryService.getProtectedDrawings().pipe(map((d) => ({ drawings: d, galleryType: DrawingType.Protected }))),
-      this.drawingGalleryService.getMyDrawings().pipe(map((d) => ({ drawings: d, galleryType: 'Self' })))
+      this.drawingGalleryService.getPublicDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: DrawingType.Public }))),
+      this.drawingGalleryService.getPrivateDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: DrawingType.Private }))),
+      this.drawingGalleryService.getProtectedDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: DrawingType.Protected }))),
+      this.drawingGalleryService.getMyDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: 'Self' })))
     ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string }) => {
       if (d.drawings && d.drawings.length > 0) {
         if (d.galleryType === DrawingType.Protected) {

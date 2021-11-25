@@ -53,7 +53,7 @@ export class SyncDrawingService {
     return this.socketService.on("freedraw:received");
   }
 
-  sendFreedraw(state: DrawingState, pencil: Pencil) {
+  sendFreedraw(state: DrawingState, pencil: Pencil, isUndoRedo?: boolean) {
     if (!this.defaultPayload || !pencil) {
       return;
     }
@@ -61,7 +61,7 @@ export class SyncDrawingService {
     let rgb = [0, 0, 0];
     let alpha = 255;
 
-    if (state === DrawingState.down) {
+    if (state === DrawingState.down || isUndoRedo) {
       this.activeActionId = v4();
     }
 
@@ -85,6 +85,7 @@ export class SyncDrawingService {
       isSelected: true,
       actionType: ActionType.Freedraw,
       selectedBy: this.defaultPayload.userId,
+      isUndoRedo: isUndoRedo
     } as IDefaultActionPayload & IFreedrawUpAction;
 
     if (state === DrawingState.up) {
@@ -245,14 +246,15 @@ export class SyncDrawingService {
     });
   }
 
-  sendDelete(actionId: string): void {
+  sendDelete(actionId: string, isUndoRedo?: boolean): void {
     if (!actionId) return;
 
     const payload = {
       ...this.defaultPayload,
       actionId: v4(),
       selectedActionId: actionId,
-      actionType: ActionType.Delete
+      actionType: ActionType.Delete,
+      isUndoRedo: isUndoRedo ? true : false
     }
 
     this.socketService.emit('delete:emit', payload);

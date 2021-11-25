@@ -37,7 +37,6 @@ export class CollaborationService {
   addCommandToUser(userId: string, command: SyncCommand) {
     if (this.userExists(userId)) {
       this.actions.get(userId)!.commands.push(command);
-      this.actions.get(userId)!.undoneCommands = [];
     }
 
   }

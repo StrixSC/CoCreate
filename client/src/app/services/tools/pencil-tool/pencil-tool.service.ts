@@ -73,7 +73,7 @@ export class PencilToolService implements Tools {
           this.pencil.strokeOpacity = this.colorTool.secondaryAlpha.toString();
         }
         this.activePointsList.push(offset);
-        this.syncDrawingService.sendFreedraw(DrawingState.down, this.pencil);
+        this.syncDrawingService.sendFreedraw(DrawingState.down, this.pencil, false);
         this.isDrawing = true;
       }
     }

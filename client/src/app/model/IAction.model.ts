@@ -51,6 +51,7 @@ export type IFreedrawAction = ISelectionAction & IDefaultActionPayload & {
 
 export type IFreedrawUpAction = IFreedrawAction & {
     offsets: Point[]
+    isUndoRedo: boolean;
 }
 
 export type IFreedrawUpLoadAction = IFreedrawAction & {
@@ -107,6 +108,7 @@ export type ITranslateAction = IDefaultActionPayload & {
 
 export type IDeleteAction = IDefaultActionPayload & {
     selectedActionId: string;
+    isUndoRedo: boolean
 }
 
 export type IResizeAction = IDefaultActionPayload & {
