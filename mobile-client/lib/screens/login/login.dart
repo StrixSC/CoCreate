@@ -148,7 +148,7 @@ class _LoginState extends State<Login> {
                       ),
                       contentPadding: const EdgeInsets.all(padding),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0)),
+                          borderRadius: BorderRadius.circular(3.0)),
                     ),
                     autovalidate: true,
                     // onFieldSubmitted: (value) {
@@ -172,7 +172,7 @@ class _LoginState extends State<Login> {
                           ),
                           contentPadding: const EdgeInsets.all(padding),
                           border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0)),
+                              borderRadius: BorderRadius.circular(3.0)),
                         ),
                         obscureText: true,
                         enableSuggestions: false,

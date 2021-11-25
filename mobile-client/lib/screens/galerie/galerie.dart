@@ -29,6 +29,9 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
   final _scrollController = ScrollController();
   static const _pageSize = 12;
 
+  String dropDownValueType = 'Public';
+  String dropDownValueAuthor = 'Moi';
+
   GalerieState() {
     for (var type in TYPES) {
       pagingControllers.putIfAbsent(
@@ -178,12 +181,13 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
                 child: ColoredBox(color: kContentColor, child: _tabBar))),
         body: TabBarView(
             physics: const NeverScrollableScrollPhysics(),
-            controller: _tabController, children: [
-          gallerieView(
-              pagingControllers["Available"], searchControllers["Available"]),
-          gallerieView(
-              pagingControllers["Joined"], searchControllers["Joined"]),
-        ]));
+            controller: _tabController,
+            children: [
+              gallerieView(pagingControllers["Available"],
+                  searchControllers["Available"]),
+              gallerieView(
+                  pagingControllers["Joined"], searchControllers["Joined"]),
+            ]));
   }
 
   gallerieView(pagingController, searchController) {
@@ -286,27 +290,51 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
     showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-              title: const Text('Créer un dessin'),
-              content: Container(
-                  width: 1000,
-                  child: FormBuilder(
-                      key: _formKey,
-                      child: Column(children: <Widget>[
-                        FormBuilderTextField(
-                          name: 'Titre',
-                          decoration: const InputDecoration(
-                            labelText: 'Veuillez entrer le titre du dessin',
-                          ),
-                          onChanged: (value) => {
-                            print(_formKey.currentState!.fields['Titre']!.value)
-                          },
-                          // valueTransformer: (text) => num.tryParse(text),
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(context),
-                          ]),
-                          keyboardType: TextInputType.text,
-                        ),
-                      ]))),
+              title: const Center(
+                  child: Padding(
+                      padding: EdgeInsets.only(top: 20.0),
+                      child: Text('Créer un dessin'))),
+              content: Column(children: [
+                Expanded(
+                    child: SizedBox(
+                        width: 1000,
+                        child: ListView(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.only(
+                                left: 100.0, right: 100.0),
+                            children: <Widget>[
+                              FormBuilder(
+                                  key: _formKey,
+                                  child: Column(children: <Widget>[
+                                    const SizedBox(height: 28.0),
+                                    dropDown(
+                                        ['Moi', 'Équipe'],
+                                        dropDownValueAuthor,
+                                        'Choisir un auteur'),
+                                    // TODO: Add teams when ready
+                                    dropDownValueAuthor == 'Équipe'
+                                        ? dropDown(
+                                            ['Moi', 'Équipe'],
+                                            dropDownValueAuthor,
+                                            'Choisir un auteur')
+                                        : const SizedBox.shrink(),
+                                    const SizedBox(height: 48.0),
+                                    formField('Titre',
+                                        'Veuillez entrez le titre du dessin'),
+                                    const SizedBox(height: 48.0),
+                                    formField('Nombre de membres maximum',
+                                        'Veuillez entrez choisir un auteur'),
+                                    const SizedBox(height: 48.0),
+                                    dropDown(
+                                        ['Public', 'Protégé', 'Privée'],
+                                        dropDownValueType,
+                                        'Choisir un type de dessins'),
+                                    const SizedBox(height: 48.0),
+                                    formField('Mot de passe',
+                                        'Veuillez entrez choisir un mot de passe'),
+                                  ]))
+                            ])))
+              ]),
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
@@ -321,6 +349,56 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
                 ),
               ],
             ));
+  }
+
+  formField(String hintText, String label) {
+    return TextFormField(
+      obscureText: hintText == 'Mot de passe',
+      enableSuggestions: hintText != 'Mot de passe',
+      style: const TextStyle(fontSize: _fontSize),
+      keyboardType: hintText == 'Nombre de membres maximum'
+          ? TextInputType.number
+          : TextInputType.text,
+      maxLines: 1,
+      autofocus: false,
+      decoration: InputDecoration(
+        errorStyle: const TextStyle(fontSize: _fontSize),
+        hintText: hintText,
+        hintStyle: const TextStyle(
+          fontSize: _fontSize,
+        ),
+        contentPadding: const EdgeInsets.all(padding),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(3.0)),
+      ),
+      autovalidate: true,
+    );
+  }
+
+  dropDown(List<String> items, value, inputHint) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+      DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          labelText: inputHint,
+          labelStyle: const TextStyle(fontSize: _fontSize),
+          border: const OutlineInputBorder(),
+        ),
+        icon: const Align(
+            alignment: Alignment.topRight,
+            child: Icon(Icons.arrow_downward, size: 35.0)),
+        onChanged: (String? newValue) {
+          setState(() {
+            value = newValue!;
+          });
+        },
+        items: items.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        style: TextStyle(fontSize: _fontSize, fontWeight: FontWeight.w300),
+      )
+    ]);
   }
 }
 
