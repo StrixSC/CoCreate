@@ -44,31 +44,10 @@ class Bounds {
         yScale = yDelta / actionsMap[actionId].oldShape.getBounds().height;
 
         Path actionPath = actionsMap[actionId].oldShape;
-        Matrix4 matrixScale = Matrix4.identity();
-        matrixScale.scale(xScale, yScale);
-        Path scaledPath = actionPath.transform(matrixScale.storage);
-        if (xScale! < 0 && yScale! < 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().right -
-              scaledPath.getBounds().left;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().bottom -
-              scaledPath.getBounds().top;
-        } else if (xScale! < 0 && yScale! > 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().right -
-              scaledPath.getBounds().left;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().bottom -
-              scaledPath.getBounds().bottom;
-        }
-        if (xScale! > 0 && yScale! < 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().right -
-              scaledPath.getBounds().right;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().bottom -
-              scaledPath.getBounds().top;
-        } else if (xScale! > 0 && yScale! > 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().right -
-              scaledPath.getBounds().right;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().bottom -
-              scaledPath.getBounds().bottom;
-        }
+        xTranslation =
+            actionPath.getBounds().topLeft.dx + actionPath.getBounds().width;
+        yTranslation =
+            actionPath.getBounds().topLeft.dy + actionPath.getBounds().height;
         break;
       case 1:
         double yDelta = actionsMap[actionId].oldShape.getBounds().height -
@@ -77,18 +56,9 @@ class Bounds {
         xScale = 1;
 
         Path actionPath = actionsMap[actionId].oldShape;
-        Matrix4 matrixScale = Matrix4.identity();
-        matrixScale.scale(xScale, yScale);
-        Path scaledPath = actionPath.transform(matrixScale.storage);
-        if (yScale! < 0) {
-          yTranslation = actionsMap[actionId].oldShape.getBounds().bottom -
-              scaledPath.getBounds().top;
-          xTranslation = 0;
-        } else {
-          xTranslation = 0;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().bottom -
-              scaledPath.getBounds().bottom;
-        }
+        xTranslation = actionPath.getBounds().topLeft.dx;
+        yTranslation =
+            actionPath.getBounds().topLeft.dy + actionPath.getBounds().height;
         break;
       case 2:
         double xDelta = actionsMap[actionId].oldShape.getBounds().width +
@@ -100,31 +70,9 @@ class Bounds {
         yScale = yDelta / actionsMap[actionId].oldShape.getBounds().height;
 
         Path actionPath = actionsMap[actionId].oldShape;
-        Matrix4 matrixScale = Matrix4.identity();
-        matrixScale.scale(xScale, yScale);
-        Path scaledPath = actionPath.transform(matrixScale.storage);
-        if (xScale! < 0 && yScale! < 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().left -
-              scaledPath.getBounds().right;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().bottom -
-              scaledPath.getBounds().top;
-        } else if (xScale! < 0 && yScale! > 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().left -
-              scaledPath.getBounds().right;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().bottom -
-              scaledPath.getBounds().bottom;
-        }
-        if (xScale! > 0 && yScale! < 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().left -
-              scaledPath.getBounds().left;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().bottom -
-              scaledPath.getBounds().top;
-        } else if (xScale! > 0 && yScale! > 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().left -
-              scaledPath.getBounds().left;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().bottom -
-              scaledPath.getBounds().bottom;
-        }
+        xTranslation = actionPath.getBounds().topLeft.dx;
+        yTranslation =
+            actionPath.getBounds().topLeft.dy + actionPath.getBounds().height;
         break;
       case 3:
         double xDelta = actionsMap[actionId].oldShape.getBounds().width +
@@ -133,19 +81,8 @@ class Bounds {
         yScale = 1;
 
         Path actionPath = actionsMap[actionId].oldShape;
-        Matrix4 matrixScale = Matrix4.identity();
-        matrixScale.scale(xScale, yScale);
-        Path scaledPath = actionPath.transform(matrixScale.storage);
-
-        if (xScale! < 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().left -
-              scaledPath.getBounds().right;
-          yTranslation = 0;
-        } else {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().left -
-              scaledPath.getBounds().left;
-          yTranslation = 0;
-        }
+        xTranslation = actionPath.getBounds().topLeft.dx;
+        yTranslation = actionPath.getBounds().topLeft.dy;
         break;
       case 4:
         double xDelta = actionsMap[actionId].oldShape.getBounds().width +
@@ -157,31 +94,8 @@ class Bounds {
         yScale = yDelta / actionsMap[actionId].oldShape.getBounds().height;
 
         Path actionPath = actionsMap[actionId].oldShape;
-        Matrix4 matrixScale = Matrix4.identity();
-        matrixScale.scale(xScale, yScale);
-        Path scaledPath = actionPath.transform(matrixScale.storage);
-        if (xScale! < 0 && yScale! < 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().right -
-              scaledPath.getBounds().left;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().top -
-              scaledPath.getBounds().bottom;
-        } else if (xScale! < 0 && yScale! > 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().left -
-              scaledPath.getBounds().right;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().top -
-              scaledPath.getBounds().top;
-        }
-        if (xScale! > 0 && yScale! < 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().right -
-              scaledPath.getBounds().right;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().top -
-              scaledPath.getBounds().bottom;
-        } else if (xScale! > 0 && yScale! > 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().left -
-              scaledPath.getBounds().left;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().top -
-              scaledPath.getBounds().top;
-        }
+        xTranslation = actionPath.getBounds().topLeft.dx;
+        yTranslation = actionPath.getBounds().topLeft.dy;
         break;
       case 5:
         double yDelta = actionsMap[actionId].oldShape.getBounds().height +
@@ -190,18 +104,8 @@ class Bounds {
         xScale = 1;
 
         Path actionPath = actionsMap[actionId].oldShape;
-        Matrix4 matrixScale = Matrix4.identity();
-        matrixScale.scale(xScale, yScale);
-        Path scaledPath = actionPath.transform(matrixScale.storage);
-        if (yScale! < 0) {
-          yTranslation = actionsMap[actionId].oldShape.getBounds().top -
-              scaledPath.getBounds().bottom;
-          xTranslation = 0;
-        } else {
-          xTranslation = 0;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().top -
-              scaledPath.getBounds().top;
-        }
+        xTranslation = actionPath.getBounds().topLeft.dx;
+        yTranslation = actionPath.getBounds().topLeft.dy;
         break;
       case 6:
         double xDelta = actionsMap[actionId].oldShape.getBounds().width -
@@ -213,31 +117,9 @@ class Bounds {
         yScale = yDelta / actionsMap[actionId].oldShape.getBounds().height;
 
         Path actionPath = actionsMap[actionId].oldShape;
-        Matrix4 matrixScale = Matrix4.identity();
-        matrixScale.scale(xScale, yScale);
-        Path scaledPath = actionPath.transform(matrixScale.storage);
-        if (xScale! < 0 && yScale! < 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().right -
-              scaledPath.getBounds().left;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().top -
-              scaledPath.getBounds().bottom;
-        } else if (xScale! < 0 && yScale! > 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().right -
-              scaledPath.getBounds().left;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().top -
-              scaledPath.getBounds().top;
-        }
-        if (xScale! > 0 && yScale! < 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().right -
-              scaledPath.getBounds().right;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().top -
-              scaledPath.getBounds().bottom;
-        } else if (xScale! > 0 && yScale! > 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().right -
-              scaledPath.getBounds().right;
-          yTranslation = actionsMap[actionId].oldShape.getBounds().top -
-              scaledPath.getBounds().top;
-        }
+        xTranslation =
+            actionPath.getBounds().topLeft.dx + actionPath.getBounds().width;
+        yTranslation = actionPath.getBounds().topLeft.dy;
         break;
       case 7:
         double xDelta = actionsMap[actionId].oldShape.getBounds().width -
@@ -246,23 +128,15 @@ class Bounds {
         yScale = 1;
 
         Path actionPath = actionsMap[actionId].oldShape;
-        Matrix4 matrixScale = Matrix4.identity();
-        matrixScale.scale(xScale, yScale);
-        Path scaledPath = actionPath.transform(matrixScale.storage);
-        if (xScale! < 0) {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().right -
-              scaledPath.getBounds().left;
-          yTranslation = 0;
-        } else {
-          xTranslation = actionsMap[actionId].oldShape.getBounds().right -
-              scaledPath.getBounds().right;
-          yTranslation = 0;
-        }
+        xTranslation =
+            actionPath.getBounds().topLeft.dx + actionPath.getBounds().width;
+        yTranslation = actionPath.getBounds().topLeft.dy;
         break;
     }
   }
 }
 
+//todo: regroup undoRedo elements
 class ShapeAction {
   Path path;
   Paint? bodyColor;
@@ -275,7 +149,8 @@ class ShapeAction {
   Offset delta = Offset.zero;
   TextPainter? text;
   String actionId;
-  double? angle;
+  double angle = 0;
+  Offset translate = Offset.zero;
 
   ShapeAction(this.path, this.actionType, this.borderColor, this.actionId);
 
@@ -294,6 +169,8 @@ class ShapeAction {
   ShapeAction copy() {
     ShapeAction copy = ShapeAction(path, actionType, borderColor, actionId);
     copy.angle = angle;
+    copy.translate = translate;
+    copy.bodyColor = bodyColor;
     return copy;
   }
 }

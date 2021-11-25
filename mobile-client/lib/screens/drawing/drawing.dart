@@ -40,7 +40,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
   List<Rect>? selectedBounds;
   int? selectedBoundIndex;
   bool allowResize = false;
-  List<Set<ShapeAction>> undoList = [];
+
+  //todo: doit géré ne modification d'un autre user. maybe delete tout les ref
+  List<ShapeAction> undoList = [];
+  List<ShapeAction> redoList = [];
 
   _DrawingScreenState(this._socket, this._user);
 
@@ -117,12 +120,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
                     selectedItems.forEach((actionId, selectedBy) {
                       if (selectedBy == _user.uid) {
                         ShapeAction shapeAction = actionsMap[actionId];
-                        undoList.add({shapeAction.copy()});
                         List<Offset> points = <Offset>[];
                         points.add(Offset(details.localPosition.dx,
                             details.localPosition.dy));
                         shapeAction.shapesOffsets = points;
-                        shapeAction.angle = 0;
                         actionsMap.update(actionId, (value) => shapeAction);
                       }
                     });
@@ -163,7 +164,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
                             actionId,
                             (details.localPosition - selectRef!).dx,
                             (details.localPosition - selectRef!).dy,
-                            DrawingState.move);
+                            DrawingState.move,
+                            false);
                         selectRef = details.localPosition;
                       }
                     });
@@ -190,16 +192,22 @@ class _DrawingScreenState extends State<DrawingScreen> {
               switch (drawType) {
                 case DrawingType.freedraw:
                   socketFreedrawEmission(details, DrawingState.up);
+                  ShapeAction shapeAction = actionsMap[shapeID];
+                  undoList.add(shapeAction.copy());
                   lastShapeID = shapeID;
                   break;
                 case DrawingType.rectangle:
                   socketShapeEmission(
                       details, DrawingType.rectangle, DrawingState.up);
+                  ShapeAction shapeAction = actionsMap[shapeID];
+                  undoList.add(shapeAction.copy());
                   lastShapeID = shapeID;
                   break;
                 case DrawingType.ellipse:
                   socketShapeEmission(
                       details, DrawingType.ellipse, DrawingState.up);
+                  ShapeAction shapeAction = actionsMap[shapeID];
+                  undoList.add(shapeAction.copy());
                   lastShapeID = shapeID;
                   break;
                 case "select":
@@ -207,6 +215,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
                     selectedItems.forEach((actionId, selectedBy) {
                       if (selectedBy == _user.uid) {
                         allowResize = false;
+                        ShapeAction shapeAction = actionsMap[actionId];
+                        undoList.add(shapeAction.copy());
+                        shapeAction.translate = Offset.zero;
                         socketResizeEmission(DrawingState.up, actionId,
                             Offset.zero, Offset.zero);
                       }
@@ -220,10 +231,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
                         //clear the list at the end
                         ShapeAction shapeAction = actionsMap[actionId];
                         shapeAction.shapesOffsets!.clear();
+                        undoList.add(shapeAction.copy());
+                        shapeAction.angle = 0;
                         actionsMap.update(actionId, (value) => shapeAction);
-                        Set<ShapeAction> tempFirst = undoList.removeLast();
-                        tempFirst.add(shapeAction.copy());
-                        undoList.add(tempFirst);
                       }
                     });
                   }
@@ -244,7 +254,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
           ))
         ]),
         floatingActionButton: Visibility(
-          visible: selectedItems.containsValue(_user.uid),
+          visible: undoList.isNotEmpty,
           child: Stack(
             children: <Widget>[
               Align(
@@ -254,12 +264,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   child: FloatingActionButton(
                       onPressed: () {
                         setState(() {
-                          Set<ShapeAction> undoAction = undoList.removeLast();
-                          socketRotationEmission(
-                              -undoAction.last.angle!,
-                              DrawingState.move,
-                              undoAction.first.actionId,
-                              true);
+                          undoActionChooser();
                           print("undo");
                         });
                       },
@@ -272,6 +277,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   padding: const EdgeInsets.only(top: 80.0),
                   child: FloatingActionButton(
                       onPressed: () {
+                        redoActionChooser();
                         print("redo");
                       },
                       child: const Icon(Icons.redo)),
@@ -281,7 +287,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   alignment: Alignment.bottomRight,
                   child: FloatingActionButton(
                     onPressed: () => setState(() {
-                      // TODO: All actions need to be saved for undo redo
+                      // TODO: add this in undo
                       var selectedItem = selectedItems.entries.firstWhere(
                           (selectedItem) => selectedItem.value == _user.uid);
                       var actionId = selectedItem.key;
@@ -294,6 +300,35 @@ class _DrawingScreenState extends State<DrawingScreen> {
             ],
           ),
         ));
+  }
+
+  void undoActionChooser() {
+    ShapeAction undoAction = undoList.removeLast();
+    redoList.add(undoAction);
+    if (undoAction.angle != 0) {
+      socketRotationEmission(
+          -undoAction.angle, DrawingState.move, undoAction.actionId, true);
+    } else if (undoAction.translate != Offset.zero) {
+      socketTranslationEmission(undoAction.actionId, -undoAction.translate.dx,
+          -undoAction.translate.dy, DrawingState.move, true);
+    } else {
+      socketDeleteEmission(undoAction.actionId);
+    }
+  }
+
+  //todo: adapt redo of freedraw
+  void redoActionChooser() {
+    ShapeAction redoAction = redoList.removeLast();
+    undoList.add(redoAction);
+    if (redoAction.angle != 0) {
+      socketRotationEmission(
+          redoAction.angle, DrawingState.move, redoAction.actionId, true);
+    } else if (redoAction.translate != Offset.zero) {
+      socketTranslationEmission(redoAction.actionId, redoAction.translate.dx,
+          redoAction.translate.dy, DrawingState.move, true);
+    } else if (redoAction.actionType == "Freedraw") {
+      // socketFreedrawEmission(details, DrawingState.down);
+    }
   }
 
   //todo: faire bcp de trait rapidement bypass cette méthode. il faudrait
@@ -415,7 +450,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
     return angleVariation;
   }
 
-  // todo: migrate all this in a switch method and use only scale + translation
   void socketResizeReception() {
     _socket.on('resize:received', (data) {
       setState(() {
@@ -425,20 +459,26 @@ class _DrawingScreenState extends State<DrawingScreen> {
               actionsMap[actionId].oldShape = actionsMap[actionId].path;
             } else if (data['state'] == DrawingState.move) {
               Path actionPath = actionsMap[actionId].oldShape;
+
+              Matrix4 matrixTranslation;
+              matrixTranslation = Matrix4.translationValues(
+                  -data['xTranslation'].toDouble(),
+                  -data['yTranslation'].toDouble(),
+                  0);
+              Path scaledPath = actionPath.transform(matrixTranslation.storage);
+
               Matrix4 matrixScale = Matrix4.identity();
               matrixScale.scale(
                   data['xScale'].toDouble(), data['yScale'].toDouble());
-              Path scaledPath = actionPath.transform(matrixScale.storage);
+              scaledPath = scaledPath.transform(matrixScale.storage);
 
               // // Translate to match fix corner position
-              Matrix4 matrixTranslation;
-              matrixTranslation = Matrix4.translationValues(
+              Matrix4 matrixTranslation2;
+              matrixTranslation2 = Matrix4.translationValues(
                   data['xTranslation'].toDouble(),
-                  // 0,
                   data['yTranslation'].toDouble(),
-                  // 0,
                   0);
-              scaledPath = scaledPath.transform(matrixTranslation.storage);
+              scaledPath = scaledPath.transform(matrixTranslation2.storage);
 
               // Save the scaled path
               ShapeAction shapeAction = actionsMap[actionId];
@@ -603,7 +643,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
   }
 
   void socketTranslationEmission(String selectItem, double xTranslation,
-      double yTranslation, String drawingState) {
+      double yTranslation, String drawingState, bool isUndo) {
+    if (!isUndo) {
+      actionsMap[selectItem].translate += Offset(xTranslation, yTranslation);
+    }
     _socket.emit("translation:emit", {
       'actionId': selectItem,
       'selectedActionId': selectItem,
