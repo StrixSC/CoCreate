@@ -39,6 +39,15 @@ class Collaborator extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setCurrentType(type) {
+    currentType = type;
+    notifyListeners();
+  }
+
+  bool isEmpty() {
+    return drawings[currentType].isEmpty;
+  }
+
   void updateUser(UserCredential updatedUser) {
     auth = updatedUser;
     notifyListeners();

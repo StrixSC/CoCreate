@@ -29,7 +29,6 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
   final _scrollController = ScrollController();
   static const _pageSize = 12;
 
-
   GalerieState() {
     for (var type in TYPES) {
       pagingControllers.putIfAbsent(
@@ -54,13 +53,14 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
                 "Il n'y a plus de dessins disponibles",
               ),
               action: SnackBarAction(
-                label: 'Ok', onPressed: () {  },
+                label: 'Ok',
+                onPressed: () {},
               ),
             ),
           );
         }
       });
-      });
+    });
     // Setup the listener.
     _scrollController.addListener(() {
       if (_scrollController.position.atEdge) {
@@ -68,8 +68,10 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
           // You're at the top.
         } else {
           // You're at the bottom.
+          print('bottom');
           String section = context.read<Collaborator>().currentType;
-          var pageKey = (pagingControllers[section] as PagingController).itemList!.length;
+          var pageKey =
+              (pagingControllers[section] as PagingController).itemList!.length;
           _fetchDrawings(pageKey, section, null);
         }
       }
@@ -78,22 +80,24 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
 
   Future<void> _fetchDrawings(int pageKey, String section, String? type) async {
     RestApi rest = RestApi();
+    print(pageKey);
+    print(section);
+    print(type);
     String? filter = (searchControllers[section] as TextEditingController).text;
     if (filter.isEmpty) {
       filter = null;
     }
     Response response;
-    if(section == 'Available') {
+    if (section == 'Available') {
       response =
-      await rest.drawing.fetchDrawings(filter, pageKey, _pageSize, type);
+          await rest.drawing.fetchDrawings(filter, pageKey, _pageSize, type);
     } else {
-      response =
-      await rest.drawing.fetchUserDrawings(filter, pageKey, _pageSize, type);
+      response = await rest.drawing
+          .fetchUserDrawings(filter, pageKey, _pageSize, type);
     }
 
     if (response.statusCode == 200) {
-      var jsonResponse =
-          json.decode(response.body); //Map<String, dynamic>;
+      var jsonResponse = json.decode(response.body); //Map<String, dynamic>;
       List<Drawing> drawings = [];
       var resp = jsonResponse['drawings'];
       for (var drawing in resp) {
@@ -172,7 +176,9 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
             bottom: PreferredSize(
                 preferredSize: _tabBar.preferredSize,
                 child: ColoredBox(color: kContentColor, child: _tabBar))),
-        body: TabBarView(controller: _tabController, children: [
+        body: TabBarView(
+            physics: const NeverScrollableScrollPhysics(),
+            controller: _tabController, children: [
           gallerieView(
               pagingControllers["Available"], searchControllers["Available"]),
           gallerieView(
@@ -216,27 +222,53 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
         Expanded(child: OrientationBuilder(builder: (context, orientation) {
           return RefreshIndicator(
               onRefresh: () => Future.sync(
-                () {                String type = context.read<Collaborator>().currentType;
-                  pagingControllers[type].refresh();},
-          ),
-          child: PagedGridView<int, Drawing>(
-            showNewPageProgressIndicatorAsGridChild: false,
-            showNewPageErrorIndicatorAsGridChild: false,
-            showNoMoreItemsIndicatorAsGridChild: false,
-            scrollController: _scrollController,
-            pagingController: pagingController,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              childAspectRatio: 3 / 2,
-              crossAxisCount: orientation == Orientation.portrait ? 2 : 3,
-              mainAxisSpacing: 18,
-              crossAxisSpacing: 5,
-            ),
-            builderDelegate: PagedChildBuilderDelegate<Drawing>(
-              itemBuilder: (context, item, index) => _Drawing(
-                drawing: item,
-              ),
-            ),
-          ));
+                    () {
+                      String type = context.read<Collaborator>().currentType;
+                      pagingControllers[type].refresh();
+                    },
+                  ),
+              child: PagedGridView<int, Drawing>(
+                showNewPageProgressIndicatorAsGridChild: false,
+                showNewPageErrorIndicatorAsGridChild: false,
+                showNoMoreItemsIndicatorAsGridChild: false,
+                scrollController: _scrollController,
+                pagingController: pagingController,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  childAspectRatio: 3 / 2,
+                  crossAxisCount: orientation == Orientation.portrait ? 2 : 3,
+                  mainAxisSpacing: 18,
+                  crossAxisSpacing: 5,
+                ),
+                builderDelegate: PagedChildBuilderDelegate<Drawing>(
+                  noItemsFoundIndicatorBuilder: (context) =>
+                      context.watch<Collaborator>().currentType == 'Available'
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                  Center(
+                                      child: Text('🧐',
+                                          style: TextStyle(fontSize: 50))),
+                                  SizedBox(height: 24.0),
+                                  Center(
+                                      child: Text(
+                                          'Aucun dessin disponible. Veuillez en créer un.'))
+                                ])
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                  Center(
+                                      child: Text('😭',
+                                          style: TextStyle(fontSize: 50))),
+                                  SizedBox(height: 24.0),
+                                  Center(
+                                      child: Text(
+                                          'Vous faites partie de aucun dessin.'))
+                                ]),
+                  itemBuilder: (context, item, index) => _Drawing(
+                    drawing: item,
+                  ),
+                ),
+              ));
         }))
       ]),
     );
@@ -255,23 +287,26 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
         context: context,
         builder: (BuildContext context) => AlertDialog(
               title: const Text('Créer un dessin'),
-              content: Container(width: 1000, child:FormBuilder(
-                  key: _formKey,
-                  child: Column(children: <Widget>[
-                    FormBuilderTextField(
-                      name: 'Titre',
-                      decoration: const InputDecoration(
-                        labelText:
-                            'Veuillez entrer le titre du dessin',
-                      ),
-                      onChanged: (value) => { print(_formKey.currentState!.fields['Titre']!.value) },
-                      // valueTransformer: (text) => num.tryParse(text),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(context),
-                      ]),
-                      keyboardType: TextInputType.text,
-                    ),
-                  ]))),
+              content: Container(
+                  width: 1000,
+                  child: FormBuilder(
+                      key: _formKey,
+                      child: Column(children: <Widget>[
+                        FormBuilderTextField(
+                          name: 'Titre',
+                          decoration: const InputDecoration(
+                            labelText: 'Veuillez entrer le titre du dessin',
+                          ),
+                          onChanged: (value) => {
+                            print(_formKey.currentState!.fields['Titre']!.value)
+                          },
+                          // valueTransformer: (text) => num.tryParse(text),
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(context),
+                          ]),
+                          keyboardType: TextInputType.text,
+                        ),
+                      ]))),
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
