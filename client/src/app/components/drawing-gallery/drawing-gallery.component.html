@@ -19,8 +19,14 @@
         </button>
         <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
       </mat-form-field>
+      <mat-form-field>
+        <mat-label>Type de dessins</mat-label>
+        <mat-select [(ngModel)]="selectedOption" (selectionChange)="search($event.value); handlePageEvent($event, false)">
+          <mat-option *ngFor="let type of visibilityFilter" [value]="type.key">{{type.value}}</mat-option>
+        </mat-select>
+      </mat-form-field>
 
-      <mat-paginator #paginator4 (page)="handlePageEvent($event)"
+      <mat-paginator #paginator4 (page)="handlePageEvent($event, true)"
       [length]="length"
       [pageSize]="pageSize"
       [showFirstLastButtons]="showFirstLastButtons"
@@ -45,6 +51,13 @@
           <mat-icon>search</mat-icon>
         </button>
         <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Type</mat-label>
+        <mat-select>
+          <mat-option>None</mat-option>
+          <mat-option *ngFor="let type of visibilityTypes" [value]="type.key">{{type.value}}</mat-option>
+        </mat-select>
       </mat-form-field>
 
       <mat-paginator #paginatorAll (page)="handleAllPageEvent($event)"

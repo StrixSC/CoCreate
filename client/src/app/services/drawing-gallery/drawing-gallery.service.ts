@@ -39,6 +39,34 @@ export class DrawingGalleryService {
     );
   }
 
+  getTypeDrawings(offset: number, type?: string): Observable<IGalleryEntry[]> {
+    if(offset === undefined) offset = 0;
+    if(type !== 'All') {
+      return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery?offset=${offset}?type=${type}`).pipe(
+      catchError(() => of([])),
+      );
+    }
+    else  {
+        return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery?offset=${offset}`).pipe(
+        catchError(() => of([])),
+      );
+    }
+  }
+
+  getTypeMyDrawings(offset: number, type?: string): Observable<IGalleryEntry[]> {
+    if(isNaN(offset)) offset = 0;
+    if(type !== "All" ) {
+      return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery/mine?offset=${offset}&type=${type}`).pipe(
+        catchError(() => of([])),
+      );
+    }
+    else {
+      return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery/mine?offset=${offset}`).pipe(
+        catchError(() => of([])),
+      );
+    }
+  }
+
   getMyDrawings(): Observable<IGalleryEntry[]> {
     return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery/mine?offset=0').pipe(
       catchError(() => of([]))

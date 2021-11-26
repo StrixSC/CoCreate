@@ -62,16 +62,19 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   datasourceSelf = new MatTableDataSource<IGalleryEntry>([]);
   datasourceAll = new MatTableDataSource<IGalleryEntry>([]);
   showFirstLastButtons = true;
-  length = 500;
+  length = 100;
   pageSize = 12;
   pageIndex = 0;
-  lengthAll = 500;
+  lengthAll = 100;
   pageSizeAll = 12;
   pageIndexAll = 0;
   teamName: String[];
   isLoaded = false;
   dataObsSelf: BehaviorSubject<IGalleryEntry[]>;
   dataObsAll: BehaviorSubject<IGalleryEntry[]>;
+
+  
+  selectedOption: string = 'All';
 
   private drawingsSubscription: Subscription;
 
@@ -83,6 +86,26 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   drawings: IGalleryEntry[] = [];
   drawingsEntry: IGalleryEntry[] = []
   
+  public visibilityFilter: { key: string, value: string }[] =
+    [
+      {
+        key: 'All',
+        value: "Tous les types",
+      },
+      {
+        key: DrawingType.Public,
+        value: "Public",
+      },
+      {
+        key: DrawingType.Private,
+        value: "Privé",
+      },
+      {
+        key: DrawingType.Protected,
+        value: "Protégé"
+      }
+    ];
+
   handlerCallbacks: Record<GalleryEvents, (data: any) => any> = {
     Connect: (data: ICollaborationConnectResponse) => this.onConnect(data),
     Join: (data: ICollaborationJoinResponse) => this.onJoin(data),
@@ -166,10 +189,12 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
   ngOnChanges() {
     this.listenCreateChannel();
+
   }
 
-  public search() {
-
+  public search(value: any) {
+    this.selectedOption = value
+    console.log(this.selectedOption)
   }
 
   initializePagination() : void {
@@ -267,13 +292,20 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     this.fetchAllDrawings();
   }
 
-  handlePageEvent(event: PageEvent) {
-    
-    this.length = event.length
-    this.pageSize = event.pageSize;
-    this.pageIndex = event.pageIndex;
+  handlePageEvent(event: PageEvent, paginate: boolean) {
+    if(!paginate)
+    {
+      this.length = 100;
+      this.pageSize = 12;
+      this.pageIndex = 0;
+    }
+    else {
+      this.length = event.length
+      this.pageSize = event.pageSize;
+      this.pageIndex = event.pageIndex;
+    }
     this.drawingsSubscription = merge(
-      this.drawingGalleryService.getNextMyDrawings( event.pageSize * event.pageIndex).pipe(map((d: any) => ({ drawings: d.drawings})))
+      this.drawingGalleryService.getTypeMyDrawings( event.pageSize * event.pageIndex, this.selectedOption).pipe(map((d: any) => ({ drawings: d.drawings})))
      ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string }) => {
       if (d.drawings && d.drawings.length > 0) {
         {
