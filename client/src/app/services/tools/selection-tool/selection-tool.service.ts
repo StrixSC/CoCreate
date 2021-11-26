@@ -666,9 +666,13 @@ export class SelectionToolService implements Tools {
     this.setNewSelection(this.objects);
   }
 
-  public sendUnselect(): void {
-    if (this.hasSelection()) {
+  public sendUnselect(actionId?: string): void {
+    if (this.hasSelection() && !actionId) {
       this.syncService.sendSelect(this.selectedActionId, false);
+      this.removeSelection();
+    } else if (actionId) {
+      this.syncService.sendSelect(actionId, false);
+      this.removeSelection();
     }
   }
 

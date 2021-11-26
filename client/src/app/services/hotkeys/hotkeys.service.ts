@@ -149,12 +149,9 @@ export class HotkeysService {
               this.selectionService.sendUnselect();
               this.canUndoRedo = false;
               let undoAction = this.collabService.undoUserAction();
-              // if (undoAction) {
-              //   if (undoAction.isSelected && undoAction.selectedBy === this.syncService.defaultPayload!.userId) {
-              //     this.syncService.sendSelect(undoAction.payload.actionId, false);
-              //     this.selectionService.removeSelection();
-              //   }
-              // }
+              if (undoAction && undoAction.isSelected && undoAction.selectedBy === this.syncService.defaultPayload!.userId) {
+                this.selectionService.sendUnselect(undoAction.command.actionId);
+              }
             }
             break;
           case EmitReturn.REDO:
@@ -166,12 +163,9 @@ export class HotkeysService {
               this.selectionService.sendUnselect();
               this.canUndoRedo = false;
               let redoAction = this.collabService.redoUserAction();
-              // if (redoAction) {
-              //   if (redoAction.isSelected && redoAction.selectedBy === this.syncService.defaultPayload!.userId) {
-              //     this.syncService.sendSelect(redoAction.payload.actionId, false);
-              //     this.selectionService.removeSelection();
-              //   }
-              // }
+              if (redoAction && redoAction.isSelected && redoAction.selectedBy === this.syncService.defaultPayload!.userId) {
+                this.selectionService.sendUnselect(redoAction.command.actionId);
+              }
             }
             break;
           default:

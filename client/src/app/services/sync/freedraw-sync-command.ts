@@ -1,7 +1,6 @@
-import { v4 } from 'uuid';
-import { IFreedrawUpAction, IFreedrawUpLoadAction } from './../../model/IAction.model';
+import { Point } from 'src/app/model/point.model';
+import { IFreedrawUpAction } from './../../model/IAction.model';
 import { SyncDrawingService } from './../syncdrawing.service';
-import { CollaborationService } from 'src/app/services/collaboration.service';
 import { PencilCommand } from '../tools/pencil-tool/pencil-command';
 import { Pencil } from '../tools/pencil-tool/pencil.model';
 import { toRGBString, fromAlpha } from '../../utils/colors';

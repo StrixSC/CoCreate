@@ -113,8 +113,7 @@ export class ToolFactoryService {
 
   onDelete(payload: IDeleteAction, isActiveUser: boolean) {
     const drawnAction = this.collaborationService.getActionById(payload.selectedActionId);
-    const addToUndos = !payload.isUndoRedo && isActiveUser;
-    console.log(drawnAction);
+    const addToUndos = false;
     if (drawnAction) {
       const command = new DeleteSyncCommand(payload, this.drawingService, drawnAction);
       const res = command.execute();
@@ -271,17 +270,49 @@ export class ToolFactoryService {
   }
 
   onResize(payload: IResizeAction, isActiveUser: boolean) {
-    const hasOngoingMovement = this.pendingActions.has(payload.actionId);
-    if (!hasOngoingMovement) {
-      const command = new ResizeSyncCommand(payload, this.rendererService.renderer, this.drawingService);
-      command.execute();
-      this.pendingActions.set(payload.actionId, command);
-    } else {
-      const command = this.pendingActions.get(payload.actionId);
-      const res = command!.update(payload);
-      if (res) {
-        this.addOrUpdateCollaboration(res, false);
-      }
+    let hasOngoingMovement: boolean = false;
+    const addToUndos = false;
+    const state = payload.state;
+    switch (state) {
+      case DrawingState.down:
+        const command = new ResizeSyncCommand(payload, this.rendererService.renderer, this.drawingService, this.syncService);
+        const res = command.execute();
+        if (res) {
+          this.addOrUpdateCollaboration(res, false);
+        }
+        break;
+
+      case DrawingState.move:
+        hasOngoingMovement = this.pendingActions.has(payload.actionId);
+        if (!hasOngoingMovement) {
+          const command = new ResizeSyncCommand(payload, this.rendererService.renderer, this.drawingService, this.syncService);
+          command.execute();
+          this.pendingActions.set(payload.actionId, command);
+        } else {
+          if (payload.isUndoRedo) {
+            const command = new ResizeSyncCommand(payload, this.rendererService.renderer, this.drawingService, this.syncService);
+            command.isFlatAction = true;
+            const res = command.execute();
+            if (res) {
+              this.addOrUpdateCollaboration(res, addToUndos);
+            }
+          } else {
+            const command = this.pendingActions.get(payload.actionId);
+            command!.update(payload);
+          }
+        }
+        break;
+
+      case DrawingState.up:
+        hasOngoingMovement = this.pendingActions.has(payload.actionId);
+        if (hasOngoingMovement) {
+          const command = this.pendingActions.get(payload.actionId);
+          const res = command!.update(payload);
+          if (res) {
+            this.addOrUpdateCollaboration(res, addToUndos);
+          }
+        }
+        break;
     }
   }
 

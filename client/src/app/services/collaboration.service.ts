@@ -62,7 +62,7 @@ export class CollaborationService {
   redoUserAction(): SyncCommand | void {
     if (this.canRedo()) {
       const redoneCommand = this.redos.pop();
-      redoneCommand!.redo(this.findTransformations(redoneCommand!.command.actionId));
+      redoneCommand!.redo();
       this.undos.push(redoneCommand!);
       return redoneCommand;
     }

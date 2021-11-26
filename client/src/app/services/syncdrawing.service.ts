@@ -1,5 +1,4 @@
 import { AuthService } from './auth.service';
-import { CollaborationService } from './collaboration.service';
 import { FilledShape } from "./tools/tool-rectangle/filed-shape.model";
 import {
   IUndoRedoAction,
@@ -10,8 +9,7 @@ import {
 } from "./../model/IAction.model";
 import { fromRGB, fromOpacity } from "../utils/colors";
 import { Pencil } from "./tools/pencil-tool/pencil.model";
-import { ICommand } from "src/app/interfaces/command.interface";
-import { Observable, of, EMPTY } from "rxjs";
+import { Observable } from "rxjs";
 import {
   DrawingState,
   IFreedrawUpAction,
@@ -281,7 +279,7 @@ export class SyncDrawingService {
   sendResize(state: DrawingState, actionId: string, xScale: number, yScale: number, xTranslation: number, yTranslation: number, isUndoRedo?: boolean) {
     if (!actionId) return;
 
-    if (state === DrawingState.down) {
+    if (state === DrawingState.down || isUndoRedo) {
       this.activeActionId = v4();
     }
 
@@ -294,7 +292,8 @@ export class SyncDrawingService {
       yScale,
       xTranslation,
       yTranslation,
-      state
+      state,
+      isUndoRedo
     }
 
     this.socketService.emit('resize:emit', payload);

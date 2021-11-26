@@ -30,9 +30,8 @@ export class DeleteSyncCommand extends SyncCommand {
     }
 
     redo(): void {
-        const obj = this.command.objectList[0];
-        console.log(obj);
-        this.drawnAction.undo();
+        const object = this.command.objectList[0];
+        this.drawnAction.undo(object);
     }
 
     update(payload: IDeleteAction): SyncCommand | void {
