@@ -75,6 +75,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
   
   selectedOption: string = 'All';
+  selectedAllOption: string = 'All';
 
   private drawingsSubscription: Subscription;
 
@@ -99,6 +100,22 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
       {
         key: DrawingType.Private,
         value: "Privé",
+      },
+      {
+        key: DrawingType.Protected,
+        value: "Protégé"
+      }
+    ];
+
+    public visibilityAllFilter: { key: string, value: string }[] =
+    [
+      {
+        key: 'All',
+        value: "Tous les types",
+      },
+      {
+        key: DrawingType.Public,
+        value: "Public",
       },
       {
         key: DrawingType.Protected,
@@ -192,9 +209,13 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
   }
 
-  public search(value: any) {
+  public searchMyDrawings(value: any) {
     this.selectedOption = value
     console.log(this.selectedOption)
+  }
+  public searchAllDrawings(value: any) {
+    this.selectedAllOption = value
+    console.log(this.selectedAllOption)
   }
 
   initializePagination() : void {
@@ -315,12 +336,22 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     });
   }
 
-  handleAllPageEvent(event: PageEvent) {
-    this.lengthAll = event.length;
-    this.pageSizeAll = event.pageSize;
-    this.pageIndexAll = event.pageIndex;
+  handleAllPageEvent(event: PageEvent, paginate: boolean) {
+
+    if(!paginate)
+    {
+      this.lengthAll = 100;
+      this.pageSizeAll = 12;
+      this.pageIndexAll = 0;
+    }
+    else {
+      this.lengthAll = event.length
+      this.pageSizeAll = event.pageSize;
+      this.pageIndexAll = event.pageIndex;
+    }
+
     this.drawingsSubscription = merge(
-      this.drawingGalleryService.getNextDrawings( event.pageSize * event.pageIndex).pipe(map((d: any) => ({ drawings: d.drawings})))
+      this.drawingGalleryService.getTypeDrawings( event.pageSize * event.pageIndex, this.selectedAllOption).pipe(map((d: any) => ({ drawings: d.drawings})))
      ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string }) => {
       if (d.drawings && d.drawings.length > 0) {
         {

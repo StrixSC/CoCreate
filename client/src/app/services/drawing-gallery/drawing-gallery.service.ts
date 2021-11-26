@@ -40,9 +40,9 @@ export class DrawingGalleryService {
   }
 
   getTypeDrawings(offset: number, type?: string): Observable<IGalleryEntry[]> {
-    if(offset === undefined) offset = 0;
+    if(isNaN(offset)) offset = 0;
     if(type !== 'All') {
-      return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery?offset=${offset}?type=${type}`).pipe(
+      return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery?offset=${offset}&type=${type}`).pipe(
       catchError(() => of([])),
       );
     }
