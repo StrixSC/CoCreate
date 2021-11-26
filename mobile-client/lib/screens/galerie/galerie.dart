@@ -71,7 +71,6 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
           // You're at the top.
         } else {
           // You're at the bottom.
-          print('bottom');
           String section = context.read<Collaborator>().currentType;
           var pageKey =
               (pagingControllers[section] as PagingController).itemList!.length;
@@ -83,9 +82,6 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
 
   Future<void> _fetchDrawings(int pageKey, String section, String? type) async {
     RestApi rest = RestApi();
-    print(pageKey);
-    print(section);
-    print(type);
     String? filter = (searchControllers[section] as TextEditingController).text;
     if (filter.isEmpty) {
       filter = null;
@@ -351,29 +347,6 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
             ));
   }
 
-  formField(String hintText, String label) {
-    return TextFormField(
-      obscureText: hintText == 'Mot de passe',
-      enableSuggestions: hintText != 'Mot de passe',
-      style: const TextStyle(fontSize: _fontSize),
-      keyboardType: hintText == 'Nombre de membres maximum'
-          ? TextInputType.number
-          : TextInputType.text,
-      maxLines: 1,
-      autofocus: false,
-      decoration: InputDecoration(
-        errorStyle: const TextStyle(fontSize: _fontSize),
-        hintText: hintText,
-        hintStyle: const TextStyle(
-          fontSize: _fontSize,
-        ),
-        contentPadding: const EdgeInsets.all(padding),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(3.0)),
-      ),
-      autovalidate: true,
-    );
-  }
-
   dropDown(List<String> items, value, inputHint) {
     return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
       DropdownButtonFormField<String>(
@@ -402,6 +375,29 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
   }
 }
 
+formField(String hintText, String label) {
+  return TextFormField(
+    obscureText: hintText == 'Mot de passe',
+    enableSuggestions: hintText != 'Mot de passe',
+    style: const TextStyle(fontSize: _fontSize),
+    keyboardType: hintText == 'Nombre de membres maximum'
+        ? TextInputType.number
+        : TextInputType.text,
+    maxLines: 1,
+    autofocus: false,
+    decoration: InputDecoration(
+      errorStyle: const TextStyle(fontSize: _fontSize),
+      hintText: hintText,
+      hintStyle: const TextStyle(
+        fontSize: _fontSize,
+      ),
+      contentPadding: const EdgeInsets.all(padding),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(3.0)),
+    ),
+    autovalidate: true,
+  );
+}
+
 /// Allow the text size to shrink to fit in the space
 class _GridTitleText extends StatelessWidget {
   const _GridTitleText(this.text);
@@ -426,31 +422,43 @@ class _Drawing extends StatelessWidget {
   final Drawing drawing;
 
   joinDessinDialog(context) async {
+    final Widget thumbnail = getThumbnail();
     showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-              title: const Text('Joindre le dessin'),
-              content: TextFormField(
-                style: const TextStyle(fontSize: _fontSize),
-                maxLines: 1,
-                autofocus: false,
-                decoration: InputDecoration(
-                  errorStyle: const TextStyle(fontSize: _fontSize),
-                  hintText: "Mot de Passe",
-                  hintStyle: const TextStyle(
-                    fontSize: _fontSize,
-                  ),
-                  contentPadding: const EdgeInsets.all(15.0),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0)),
-                ),
-                autovalidate: true,
-                // onFieldSubmitted: (value) {
-                //   if (_formKey.currentState!.validate()) {
-                //     _onSubmitTap(context, userController.text);
-                //   }
-                // },
-              ),
+              title: Center(child: Text('Joindre ${drawing.title} ?')),
+              content: Column(children:[
+                Expanded(
+                    child: Row(
+                        children: <Widget>[
+                      SizedBox(width: 600, child: gridTileJoin(thumbnail)),
+                      SizedBox(
+                          width: 400,
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 48.0),
+                                richTextWhitePurple(
+                                    'Auteur : ', drawing.authorUsername),
+                                const SizedBox(height: 48.0),
+                                richTextWhitePurple('Type    : ', drawing.type),
+                                const SizedBox(height: 48.0),
+                                richTextWhitePurple(
+                                    'Nombre de membres: ',
+                                    drawing.collaboration.memberCount
+                                        .toString()),
+                                const SizedBox(height: 48.0),
+                                richTextWhitePurple(
+                                    'Nombre de membres max: ',
+                                    drawing.collaboration.maxMemberCount
+                                        .toString()),
+                                const SizedBox(height: 28.0),
+                                drawing.type == 'Protected'
+                                    ? formField('Mot de passe',
+                                        'Veuillez entrez le titre du dessin')
+                                    : const SizedBox.shrink(),
+                              ]))
+                    ]))]),
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
@@ -464,7 +472,52 @@ class _Drawing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget thumbnail = Container(
+    final Widget thumbnail = getThumbnail();
+
+    return GestureDetector(
+        onTap: () => {joinDessinDialog(context)}, child: gridTile(thumbnail));
+  }
+
+  gridTile(thumbnail) {
+    return Padding(
+        padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+        child: GridTile(
+          header: Center(
+              child: Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: _GridTitleText(drawing.title))),
+          footer: Material(
+            color: Colors.transparent,
+            clipBehavior: Clip.antiAlias,
+            child: GridTileBar(
+              backgroundColor: Colors.black45,
+              leading: const CircleAvatar(
+                radius: 24,
+                backgroundColor: kPrimaryColor,
+                child: Icon(Icons.group, color: Colors.black),
+              ),
+              title: _GridTitleText(drawing.authorUsername),
+              subtitle: _GridTitleText(drawing.type),
+              trailing: _GridTitleText(
+                  drawing.collaboration.memberCount.toString() +
+                      "/" +
+                      drawing.collaboration.maxMemberCount.toString()),
+            ),
+          ),
+          child: thumbnail,
+        ));
+  }
+
+  gridTileJoin(thumbnail) {
+    return Padding(
+        padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+        child: GridTile(
+          child: thumbnail,
+        ));
+  }
+
+  getThumbnail() {
+    return Container(
       decoration: BoxDecoration(
           border: Border.all(width: 2.5, color: Colors.grey.withOpacity(0.2))),
       child: Material(
@@ -474,35 +527,19 @@ class _Drawing extends StatelessWidget {
             'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/A_black_image.jpg/640px-A_black_image.jpg'),
       ),
     );
+  }
 
-    return GestureDetector(
-        onTap: () => {joinDessinDialog(context)},
-        child: Padding(
-            padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-            child: GridTile(
-              header: Center(
-                  child: Padding(
-                      padding: const EdgeInsets.only(top: 10.0),
-                      child: _GridTitleText(drawing.title))),
-              footer: Material(
-                color: Colors.transparent,
-                clipBehavior: Clip.antiAlias,
-                child: GridTileBar(
-                  backgroundColor: Colors.black45,
-                  leading: const CircleAvatar(
-                    radius: 24,
-                    backgroundColor: kPrimaryColor,
-                    child: Icon(Icons.group, color: Colors.black),
-                  ),
-                  title: _GridTitleText(drawing.authorUsername),
-                  subtitle: _GridTitleText(drawing.type),
-                  trailing: _GridTitleText(
-                      drawing.collaboration.memberCount.toString() +
-                          "/" +
-                          drawing.collaboration.maxMemberCount.toString()),
-                ),
-              ),
-              child: thumbnail,
-            )));
+  richTextWhitePurple(String text1, String text2) {
+    return RichText(
+      text: TextSpan(
+        // Note: Styles for TextSpans must be explicitly defined.
+        // Child text spans will inherit styles from parent
+        style: const TextStyle(fontSize: 30.0),
+        children: <TextSpan>[
+          TextSpan(text: text1),
+          TextSpan(text: text2, style: TextStyle(fontWeight: FontWeight.bold, color: kPrimaryColor)),
+        ],
+      ),
+    );
   }
 }
