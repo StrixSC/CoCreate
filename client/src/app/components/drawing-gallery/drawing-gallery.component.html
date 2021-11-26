@@ -8,7 +8,7 @@
   </mat-toolbar-row>
 </mat-toolbar>
 
-<mat-tab-group #tabGroup class="centerTab" (selectedIndexChange)="setPagination($event)">
+<mat-tab-group #tabGroup class="centerTab">
   <mat-tab class="drawing-list" label="Mes Dessins">
     <div>
       <mat-form-field [style.width.%]="50">
@@ -20,31 +20,16 @@
         <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
       </mat-form-field>
 
-      <mat-paginator #paginator4 [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
+      <mat-paginator #paginator4 (page)="handlePageEvent($event)"
+      [length]="length"
+      [pageSize]="pageSize"
+      [showFirstLastButtons]="showFirstLastButtons"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndex"
+      aria-label="Select page"></mat-paginator>
 
       <div class="margin-center">
         <app-drawing-gallery-card *ngFor="let drawing of dataObsSelf | async" [drawing]="drawing">
-        </app-drawing-gallery-card>
-      </div>
-    </div>
-  </mat-tab>
-  
-  <mat-tab class="drawing-list" label="Dessins privés">
-    <br>
-    <div>
-      <mat-form-field [style.width.%]="50">
-        <mat-label>Recherche</mat-label>
-        <input matInput placeholder="Entrez un mot-clé">
-        <button mat-button matPrefix mat-icon-button>
-          <mat-icon>search</mat-icon>
-        </button>
-        <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
-      </mat-form-field>
-
-      <mat-paginator #paginator [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
-
-      <div class="margin-center">
-        <app-drawing-gallery-card *ngFor="let drawing of dataObsPrivate | async" [drawing]="drawing">
         </app-drawing-gallery-card>
       </div>
     </div>
@@ -62,33 +47,21 @@
         <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
       </mat-form-field>
 
-      <mat-paginator #paginator2 [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
+      <mat-paginator #paginatorAll (page)="handleAllPageEvent($event)"
+      [length]="lengthAll"
+      [pageSize]="pageSizeAll"
+      [showFirstLastButtons]="showFirstLastButtons"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndexAll"
+      aria-label="Select page"></mat-paginator>
+
 
       <div class="margin-center">
-        <app-drawing-gallery-card *ngFor="let drawing of dataObsPublic | async" [drawing]="drawing">
+        <app-drawing-gallery-card *ngFor="let drawing of dataObsAll | async" [drawing]="drawing">
         </app-drawing-gallery-card>
       </div>
     </div>
   </mat-tab>
-  <mat-tab class="drawing-list" label="Dessins protégés">
-    <br>
-    <div>
-      <mat-form-field [style.width.%]="50">
-        <mat-label>Recherche</mat-label>
-        <input matInput placeholder="Entrez un mot-clé">
-        <button mat-button matPrefix mat-icon-button>
-          <mat-icon>search</mat-icon>
-        </button>
-        <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
-      </mat-form-field>
-
-      <mat-paginator #paginator3 [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
-
-      <div class="margin-center">
-        <app-drawing-gallery-card *ngFor="let drawing of dataObsProtected | async" [drawing]="drawing">
-        </app-drawing-gallery-card>
-      </div>
-    </div>
-  </mat-tab>
+  
   
 </mat-tab-group>

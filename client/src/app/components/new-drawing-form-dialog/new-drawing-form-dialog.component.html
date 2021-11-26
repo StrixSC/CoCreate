@@ -53,7 +53,7 @@
             </mat-error>
         </mat-form-field>
         <div>
-            <button type="submit" mat-raised-button color="primary" class="form-field">
+            <button type="submit" mat-raised-button color="primary" (click)="sendCreateCollaboration(newDrawingForm.value)" class="form-field">
                 <mat-spinner *ngIf="isLoading" class="spinner"></mat-spinner>
                 <ng-container *ngIf="!isLoading">Soumettre</ng-container>
             </button>

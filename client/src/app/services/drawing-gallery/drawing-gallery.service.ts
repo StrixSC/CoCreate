@@ -19,7 +19,7 @@ export class DrawingGalleryService {
     );
   }
   getPublicDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?type=Public',).pipe(
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery',).pipe(
       catchError(() => of([])),
     );
   }
@@ -29,14 +29,25 @@ export class DrawingGalleryService {
     );
   }
   getDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery').pipe(
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?offset=0').pipe(
+      catchError(() => of([])),
+    );
+  }
+  getNextDrawings(offset: number): Observable<IGalleryEntry[]> {
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery?offset=${offset}`).pipe(
       catchError(() => of([])),
     );
   }
 
   getMyDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/users/gallery').pipe(
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery/mine?offset=0').pipe(
       catchError(() => of([]))
+    );
+  }
+
+  getNextMyDrawings(offset: number): Observable<IGalleryEntry[]> {
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery/mine?offset=${offset}`).pipe(
+      catchError(() => of([])),
     );
   }
 

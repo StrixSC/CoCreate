@@ -84,6 +84,16 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
     });
   }
 
+  sendCreateCollaboration(form: any) {
+    console.log(form.author)
+    let data : ICollaborationCreatePayload = {
+      userId: form.author,
+      title: form.title,
+      type: form.type
+
+    }
+    this.syncCollaborationService.sendCreateCollaboration(data)
+  }
   onNoClick(): void {
     this.dialogRef.close();
   }
