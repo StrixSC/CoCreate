@@ -22,10 +22,11 @@ export = (io: Server, socket: Socket) => {
             if (data.state === 'up') {
                 const dbAction = await db.action.create({
                     data: {
+                        isUndoRedo: data.isUndoRedo,
                         actionType: data.actionType,
                         userId: data.userId || 'DEMO',
                         username: data.username,
-                        collaborationId: data.collaborationId, 
+                        collaborationId: data.collaborationId,
                         actionId: data.actionId,
                         a: data.a,
                         r: data.r,
@@ -54,33 +55,36 @@ export = (io: Server, socket: Socket) => {
                     actionId: dbAction.actionId,
                     userId: dbAction.userId,
                     actionType: 'Save',
-                    username: dbAction.username
+                    username: dbAction.username,
+                    isUndoRedo: data.isUndoRedo
                 });
 
                 return io.emit('freedraw:received', {
+                    ...data,
                     actionId: dbAction.actionId,
                     username: dbAction.username,
                     userId: dbAction.userId,
                     actionType: dbAction.actionType,
                     state: dbAction.state,
                     isSelected: dbAction.isSelected,
-                    offsets: dbAction.offsets,
+                    offsets: data.offsets ? data.offsets : [],
                     r: dbAction.r,
                     g: dbAction.g,
                     b: dbAction.b,
                     a: dbAction.a,
                     width: dbAction.width,
                     collaborationId: dbAction.collaborationId,
-                    timestamp: dbAction.createdAt
+                    timestamp: dbAction.createdAt,
                 });
             }
 
             // TODO: Collaboration rooms. io.to(collaborationId).emit('freedraw:received', {});
-            io.emit('freedraw:received', {
+            io.to(data.collaborationId).emit('freedraw:received', {
+                ...data,
                 actionType: data.actionType,
                 userId: data.userId || 'DEMO',
                 username: data.username,
-                collaborationId: data.collaborationId, 
+                collaborationId: data.collaborationId,
                 actionId: data.actionId,
                 a: data.a,
                 r: data.r,
@@ -127,7 +131,8 @@ export = (io: Server, socket: Socket) => {
                     actionId: dbAction.actionId,
                     userId: dbAction.userId,
                     actionType: 'Save',
-                    username: dbAction.username
+                    username: dbAction.username,
+                    isUndoRedo: data.isUndoRedo
                 });
 
                 io.emit('shape:received', {

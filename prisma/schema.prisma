@@ -153,6 +153,7 @@ model Action {
   state      ActionState?
   isSelected Boolean?
   selectedBy String       @default("")
+  isUndoRedo Boolean?     @default(false)
 }
 
 model CollaborationMember {

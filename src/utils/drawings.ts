@@ -161,10 +161,6 @@ const typesCallbacks: Record<
             }
         }
 
-        // if (!validator.isInt(action.color!.toString())) {
-        //     return { result: false, field: 'Color' };
-        // }
-
         if (!validator.isFloat(action.width!.toString())) {
             return { result: false, field: 'Width' };
         }

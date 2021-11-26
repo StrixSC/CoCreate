@@ -77,9 +77,9 @@ app.use(corsSetup);
 app.options('*', corsSetup);
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
+app.use('/api/users', usersRouter);
 app.use('/api/channels', channelsRouter);
 app.use('/api/gallery', galleryRouter);
-app.use('/api/users', usersRouter);
 app.use('/docs', serve, setup(swaggerDoc));
 
 app.use(async (req, res, next) => {
