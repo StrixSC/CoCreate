@@ -79,7 +79,7 @@ export = (io: Server, socket: Socket) => {
             }
 
             // TODO: Collaboration rooms. io.to(collaborationId).emit('freedraw:received', {});
-            io.to(data.collaborationId).emit('freedraw:received', {
+            io.emit('freedraw:received', {
                 ...data,
                 actionType: data.actionType,
                 userId: data.userId || 'DEMO',
