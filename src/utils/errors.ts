@@ -50,7 +50,6 @@ export const handleSocketError = (socket: Socket, e: any, exceptionType?: Except
     }
 
     if (exceptionType) {
-        console.log('helloworld');
         return socket.emit(exceptionType, create(error));
     } else {
         return socket.emit('exception', create(error));

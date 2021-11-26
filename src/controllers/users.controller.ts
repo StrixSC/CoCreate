@@ -29,7 +29,6 @@ export const getPublicUsersController = async (req: Request, res: Response, next
                 'Limit or offset query have invalid formats. Please use valid unsigned integers.'
             );
 
-        console.log(intLimit, intOffset);
         const users = await getAllPublicProfiles(intOffset, intLimit);
 
         if (!users) throw new create.InternalServerError('Internal Server Error');

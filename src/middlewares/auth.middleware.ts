@@ -12,10 +12,9 @@ export const checkIfAuthenticated = (req: Request, res: Response, next: NextFunc
             }
             const userInfo = await admin.auth().verifyIdToken(authToken);
             req.userId = userInfo.uid;
-
-            return next();
+            next();
         } catch (e) {
-            return next(new create.Unauthorized());
+            next(new create.Unauthorized());
         }
     });
 };
@@ -26,7 +25,7 @@ export const checkIfSelfRequest = (req: Request, res: Response, next: NextFuncti
 
     if (process.env.NODE_ENV === 'production') {
         if (userId === id) {
-            return next();
-        } else return next(new create.Unauthorized('You are not authorized to view data about this user.'));
-    } else return next();
+            next();
+        } else next(new create.Unauthorized('You are not authorized to view data about this user.'));
+    } else next();
 };

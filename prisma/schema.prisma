@@ -149,6 +149,14 @@ model Action {
   shapeType  ShapeType?  @default(Null)
   shapeStyle ShapeStyle? @default(border)
 
+  // Selection Actions (Translate, Rotate, Resize, Delete)
+  selectedActionId String @default("")
+  xTranslation     Float? @default(0)
+  yTranslation     Float? @default(0)
+  xScale           Float? @default(1)
+  yScale           Float? @default(1)
+  angle            Float? @default(0)
+
   // Shared:
   state      ActionState?
   isSelected Boolean?

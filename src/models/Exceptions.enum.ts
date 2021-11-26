@@ -1,3 +1,4 @@
 export enum ExceptionType {
-    Collaboration = "collaboration:exception"
+    Collaboration = "collaboration:exception",
+    Drawing = "drawing:exception"
 }

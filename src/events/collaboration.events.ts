@@ -189,8 +189,6 @@ export = (io: Server, socket: Socket) => {
         try {
             const { userId, title, type, password } = payload;
 
-            console.log(payload);
-
             const isValid = (
                 !validator.isEmpty(title) &&
                 validator.isLength(title, { min: 8, max: 256 }) &&
