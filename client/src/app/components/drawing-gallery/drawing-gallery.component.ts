@@ -59,21 +59,8 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   errorListener: Subscription;
   messageListener: Subscription;
   dialogRef: MatDialogRef<NewDrawingFormDialogComponent>;
-
-  private drawingsSubscription: Subscription;
-
   datasourceSelf = new MatTableDataSource<IGalleryEntry>([]);
   datasourceAll = new MatTableDataSource<IGalleryEntry>([]);
-
-  @ViewChild('tagInput', { static: false }) tagInput: ElementRef<HTMLInputElement>;
-  @ViewChild('auto', { static: false }) matAutocomplete: MatAutocomplete;
-  @ViewChild('fileUpload', { static: false }) fileUploadEl: ElementRef;
-  @ViewChild('paginator4', { static: true }) paginatorSelf: MatPaginator;
-  @ViewChild('paginatorAll', { static: true }) paginatorAll: MatPaginator;
-
-  drawings: IGalleryEntry[] = [];
-  drawingsEntry: IGalleryEntry[] = []
-  
   showFirstLastButtons = true;
   length = 500;
   pageSize = 12;
@@ -81,12 +68,21 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   lengthAll = 500;
   pageSizeAll = 12;
   pageIndexAll = 0;
-
   teamName: String[];
   isLoaded = false;
   dataObsSelf: BehaviorSubject<IGalleryEntry[]>;
   dataObsAll: BehaviorSubject<IGalleryEntry[]>;
 
+  private drawingsSubscription: Subscription;
+
+  @ViewChild('tagInput', { static: false }) tagInput: ElementRef<HTMLInputElement>;
+  @ViewChild('auto', { static: false }) matAutocomplete: MatAutocomplete;
+  @ViewChild('fileUpload', { static: false }) fileUploadEl: ElementRef;  
+  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+
+  drawings: IGalleryEntry[] = [];
+  drawingsEntry: IGalleryEntry[] = []
+  
   handlerCallbacks: Record<GalleryEvents, (data: any) => any> = {
     Connect: (data: ICollaborationConnectResponse) => this.onConnect(data),
     Join: (data: ICollaborationJoinResponse) => this.onJoin(data),
@@ -147,8 +143,8 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
         }
       })
 
-    this.paginatorSelf._intl.itemsPerPageLabel = "Dessins par page: ";
-    this.paginatorAll._intl.itemsPerPageLabel = "Dessins par page: ";
+    this.initializePagination();
+
   }
 
   ngOnDestroy(): void {
@@ -174,6 +170,14 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
   public search() {
 
+  }
+
+  initializePagination() : void {
+    this.paginator._intl.itemsPerPageLabel = "Dessins par page: ";
+    this.paginator._intl.nextPageLabel = "Page suivante";
+    this.paginator._intl.lastPageLabel = "Dernière page";
+    this.paginator._intl.previousPageLabel = "Page précédente"
+    this.paginator._intl.firstPageLabel = "Première page"
   }
 
   get tagCtrl(): FormControl {
@@ -212,19 +216,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     }
   }
 
-  setPagination(index: any): void {
-    setTimeout(() => {
-      switch (index) {
-        case 0:
-          !this.datasourceSelf.paginator ? this.datasourceSelf.paginator = this.paginatorSelf : null;
-          break;
-        case 1:
-          !this.datasourceAll.paginator ? this.datasourceAll.paginator = this.paginatorAll : null;
-          break;
-      }
-    });
-  }
-
   openDialog(): void {
     if (!this.auth.activeUser) {
       return;
@@ -248,7 +239,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
   onLoad(data: ICollaborationLoadResponse) {
     if (this.dialogRef) this.dialogRef.close();
-    //this.drawingService.activeDrawingData = data;
     this.router.navigateByUrl('drawing');
   }
 
