@@ -53,7 +53,7 @@ export class SyncDrawingService {
     return this.socketService.on("freedraw:received");
   }
 
-  sendFreedraw(state: DrawingState, pencil: Pencil, isUndoRedo?: boolean) {
+  sendFreedraw(state: DrawingState, pencil: Pencil, isUndoRedo?: boolean, actionId?: string) {
     if (!this.defaultPayload || !pencil) {
       return;
     }
@@ -61,7 +61,7 @@ export class SyncDrawingService {
     let rgb = [0, 0, 0];
     let alpha = 255;
 
-    if (state === DrawingState.down || isUndoRedo) {
+    if (state === DrawingState.down) {
       this.activeActionId = v4();
     }
 
@@ -71,6 +71,10 @@ export class SyncDrawingService {
 
     if (pencil.strokeOpacity !== "none") {
       alpha = fromOpacity(pencil.strokeOpacity);
+    }
+
+    if (actionId) {
+      this.activeActionId = actionId
     }
 
     let payload = {
@@ -85,7 +89,7 @@ export class SyncDrawingService {
       isSelected: true,
       actionType: ActionType.Freedraw,
       selectedBy: this.defaultPayload.userId,
-      isUndoRedo: isUndoRedo
+      isUndoRedo: isUndoRedo ? true : false,
     } as IDefaultActionPayload & IFreedrawUpAction;
 
     if (state === DrawingState.up) {
@@ -110,7 +114,9 @@ export class SyncDrawingService {
     state: DrawingState,
     shapeStyle: ShapeStyle,
     shapeType: ShapeType,
-    shape: FilledShape
+    shape: FilledShape,
+    isUndoRedo?: boolean,
+    actionId?: string
   ) {
     if (!this.defaultPayload || !shapeType || !shape) {
       return;
@@ -142,6 +148,10 @@ export class SyncDrawingService {
       fillAlpha = fromOpacity(shape.fillOpacity);
     }
 
+    if (actionId) {
+      this.activeActionId = actionId
+    }
+
     let payload: IShapeAction = {
       ...this.defaultPayload,
       actionId: this.activeActionId,
@@ -164,6 +174,7 @@ export class SyncDrawingService {
       selectedBy: this.defaultPayload.userId,
       shapeStyle: shapeStyle,
       actionType: ActionType.Shape,
+      isUndoRedo: isUndoRedo ? true : false,
     };
 
     if (state === DrawingState.up) {
@@ -201,7 +212,7 @@ export class SyncDrawingService {
     } as ISelectionAction);
   }
 
-  sendRotate(state: DrawingState, selectedActionId: string, angle: number) {
+  sendRotate(state: DrawingState, selectedActionId: string, angle: number, isUndoRedo?: boolean) {
     if (!selectedActionId) {
       return;
     }
@@ -219,11 +230,12 @@ export class SyncDrawingService {
       actionId: this.activeActionId,
       selectedActionId,
       state,
-      angle
-    })
+      angle,
+      isUndoRedo: isUndoRedo ? true : false
+    });
   }
 
-  sendTranslate(state: DrawingState, selectedActionId: string, xTranslate: number, yTranslate: number) {
+  sendTranslate(state: DrawingState, selectedActionId: string, xTranslate: number, yTranslate: number, isUndoRedo?: boolean) {
     if (!selectedActionId) {
       return;
     }
@@ -235,6 +247,11 @@ export class SyncDrawingService {
       this.hasStartedMovement = false;
     }
 
+    if (isUndoRedo) {
+      this.hasStartedMovement = false;
+      this.activeActionId = v4();
+    }
+
     this.socketService.emit('translation:emit', {
       ...this.defaultPayload,
       actionType: ActionType.Translate,
@@ -243,6 +260,7 @@ export class SyncDrawingService {
       state,
       xTranslation: xTranslate,
       yTranslation: yTranslate,
+      isUndoRedo: isUndoRedo ? true : false,
     });
   }
 
@@ -254,13 +272,13 @@ export class SyncDrawingService {
       actionId: v4(),
       selectedActionId: actionId,
       actionType: ActionType.Delete,
-      isUndoRedo: isUndoRedo ? true : false
+      isUndoRedo: isUndoRedo ? true : false,
     }
 
     this.socketService.emit('delete:emit', payload);
   }
 
-  sendResize(state: DrawingState, actionId: string, xScale: number, yScale: number, xTranslation: number, yTranslation: number) {
+  sendResize(state: DrawingState, actionId: string, xScale: number, yScale: number, xTranslation: number, yTranslation: number, isUndoRedo?: boolean) {
     if (!actionId) return;
 
     if (state === DrawingState.down) {

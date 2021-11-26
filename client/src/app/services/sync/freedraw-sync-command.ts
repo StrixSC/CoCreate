@@ -1,3 +1,4 @@
+import { v4 } from 'uuid';
 import { IFreedrawUpAction, IFreedrawUpLoadAction } from './../../model/IAction.model';
 import { SyncDrawingService } from './../syncdrawing.service';
 import { CollaborationService } from 'src/app/services/collaboration.service';
@@ -12,8 +13,9 @@ import { SyncCommand } from './sync-command';
 export class FreedrawSyncCommand extends SyncCommand {
     public command: PencilCommand;
     private pencil: Pencil;
+    public isFlatAction: boolean = false;
     constructor(
-        public payload: IFreedrawAction & IFreedrawUpLoadAction & IFreedrawUpAction,
+        public payload: IFreedrawAction & IFreedrawUpAction,
         private renderer: Renderer2,
         private drawingService: DrawingService,
         private syncService: SyncDrawingService
@@ -34,16 +36,16 @@ export class FreedrawSyncCommand extends SyncCommand {
                 this.command.addPoint({ x: this.payload.x, y: this.payload.y });
                 break;
             case DrawingState.up:
-                if (!this.payload.isUndoRedo) {
+                if (!this.isFlatAction) {
                     return this;
                 } else {
                     this.setupCommand();
-                    console.log(this.payload.offsets);
                     this.pencil.pointsList = this.payload.offsets;
                     this.command = new PencilCommand(this.renderer, this.pencil, this.drawingService);
                     this.command.userId = this.payload.userId;
                     this.command.actionId = this.payload.actionId;
                     this.command.execute();
+                    return this;
                 }
         }
     }
@@ -53,10 +55,10 @@ export class FreedrawSyncCommand extends SyncCommand {
     }
 
     redo(): void {
-        this.syncService.sendFreedraw(DrawingState.up, this.command.pencilAttributes, true);
+        this.syncService.sendFreedraw(DrawingState.up, this.command.pencilAttributes, true, this.payload.actionId);
     }
 
-    update(payload: IFreedrawAction & IFreedrawUpAction & IFreedrawUpLoadAction): SyncCommand | void {
+    update(payload: IFreedrawAction & IFreedrawUpAction): SyncCommand | void {
         this.payload = payload;
         return this.execute();
     }

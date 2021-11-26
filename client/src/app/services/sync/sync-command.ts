@@ -9,5 +9,5 @@ export abstract class SyncCommand {
     abstract undo(): void;
     abstract execute(): SyncCommand | void;
     abstract update(payload: IAction): SyncCommand | void;
-    abstract redo(): void;
+    abstract redo(transformations?: SyncCommand[]): void;
 }

@@ -8,8 +8,8 @@ export class DeleteCommand implements ICommand {
     public userId: string = "";
 
     constructor(
-        private drawingService: DrawingService,
-        private objectList: SVGElement[],
+        public drawingService: DrawingService,
+        public objectList: SVGElement[],
     ) { }
 
     /// Rajout des elements suprimé

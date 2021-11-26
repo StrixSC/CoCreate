@@ -83,7 +83,7 @@ export class DrawingPageComponent {
         this.syncDrawingService.onActionSave().pipe(map((d) => ({ ...d, eventType: EventTypes.Action })))
       ).subscribe((data: any & { eventType: string }) => {
         if (data.eventType === EventTypes.Action) {
-          console.log('Event received from user', data.username, 'with type', data.actionType);
+          console.log('Event received from user', data.username, 'with type', data.actionType, 'with actionId =', data.actionId, '\nIt is selecting', data.selectedActionId ? data.selectedActionId : 'Nothing');
           this.toolFactory.handleEvent(data);
         } else {
           if (data.eventType === EventTypes.Error) {

@@ -36,6 +36,7 @@ export interface IDefaultActionPayload {
     userId: string;
     collaborationId: string;
     actionType: ActionType;
+    isUndoRedo?: boolean;
 }
 
 export type IFreedrawAction = ISelectionAction & IDefaultActionPayload & {
@@ -51,7 +52,6 @@ export type IFreedrawAction = ISelectionAction & IDefaultActionPayload & {
 
 export type IFreedrawUpAction = IFreedrawAction & {
     offsets: Point[]
-    isUndoRedo: boolean;
 }
 
 export type IFreedrawUpLoadAction = IFreedrawAction & {
@@ -97,6 +97,7 @@ export type IAction = IDefaultActionPayload & (
     | IDeleteAction
     | IResizeAction
     | IRotateAction
+    | ISaveAction
 );
 
 export type ITranslateAction = IDefaultActionPayload & {
@@ -108,7 +109,6 @@ export type ITranslateAction = IDefaultActionPayload & {
 
 export type IDeleteAction = IDefaultActionPayload & {
     selectedActionId: string;
-    isUndoRedo: boolean
 }
 
 export type IResizeAction = IDefaultActionPayload & {
@@ -127,4 +127,13 @@ export type IRotateAction = IDefaultActionPayload & {
     y?: number;
     state: DrawingState;
     selectedActionId: string;
+}
+
+export type ISaveAction = IDefaultActionPayload &
+{
+    collaborationId: string,
+    actionId: string,
+    userId: string,
+    actionType: string,
+    isUndoRedo: boolean
 }

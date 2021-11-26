@@ -1,15 +1,44 @@
-import { FreedrawSyncCommand } from './sync/freedraw-sync-command';
+import { ICollaborationLoadResponse } from 'src/app/model/ICollaboration.model';
+import { TranslateCommand } from './tools/selection-tool/translate-command/translate-command';
+import { FilledShape } from './tools/tool-rectangle/filed-shape.model';
+import { EllipseCommand } from './tools/tool-ellipse/ellipse-command';
 import { toRGBString, fromAlpha } from './../utils/colors';
 import { Pencil } from './tools/pencil-tool/pencil.model';
 import { PencilCommand } from './tools/pencil-tool/pencil-command';
-import { ActionType } from 'src/app/model/IAction.model';
-import { ICommand } from 'src/app/interfaces/command.interface';
-import { SyncDrawingService } from './syncdrawing.service';
+import { ActionType, ShapeType } from 'src/app/model/IAction.model';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
-import { IAction, IFreedrawUpLoadAction } from './../model/IAction.model';
+import { IAction, IFreedrawUpLoadAction, IShapeAction, ITranslateAction } from './../model/IAction.model';
 import { ToolFactoryService } from './tool-factory.service';
-import { ICollaborationLoadResponse } from './../model/ICollaboration.model';
 import { Injectable, Renderer2 } from '@angular/core';
+
+class LoadEllipseCommand {
+  command: EllipseCommand;
+
+  constructor(
+    public payload: IShapeAction,
+    private drawingService: DrawingService,
+    private renderer: Renderer2,
+  ) {
+    let shape = {} as FilledShape;
+    shape.x = this.payload.x;
+    shape.y = this.payload.y;
+    shape.width = this.payload.x2 - this.payload.x;
+    shape.height = this.payload.y2 - this.payload.y;
+    shape.fill = toRGBString([this.payload.rFill, this.payload.gFill, this.payload.bFill]);
+    shape.fillOpacity = fromAlpha(this.payload.aFill);
+    shape.stroke = toRGBString([this.payload.r, this.payload.g, this.payload.b]);
+    shape.strokeOpacity = fromAlpha(this.payload.a);
+    shape.strokeWidth = this.payload.width;
+    this.command = new EllipseCommand(this.renderer, shape, this.drawingService);
+    this.command.userId = this.payload.userId;
+    this.command.actionId = this.payload.actionId;
+    this.command.isSyncAction = true;
+  }
+
+  load(): void {
+    this.command.execute();
+  }
+}
 
 class LoadFreedrawCommand {
   command: PencilCommand;
@@ -31,19 +60,37 @@ class LoadFreedrawCommand {
   }
 }
 
+class LoadTranslationCommand {
+  command: TranslateCommand;
+  constructor(public payload: ITranslateAction, private drawingService: DrawingService, private renderer: Renderer2) {
+
+  }
+
+  load(): void {
+    return;
+  }
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class DrawingLoadService {
-
   private callbacks: Record<ActionType, (payload: IAction) => any> = {
     Freedraw: (payload: IFreedrawUpLoadAction) => {
-      // const command = new LoadFreedrawCommand(payload, this.drawingService, this.drawingService.renderer);
-      // command.load();
+      const command = new LoadFreedrawCommand(payload, this.drawingService, this.drawingService.renderer);
+      command.load();
     },
-    Shape: () => { },
+    Shape: (payload: IShapeAction) => {
+      if (payload.shapeType === ShapeType.Ellipse) {
+        const command = new LoadEllipseCommand(payload, this.drawingService, this.drawingService.renderer);
+        command.load();
+      }
+    },
     Select: () => { },
-    Translate: () => { },
+    Translate: (payload: ITranslateAction) => {
+      const command = new LoadTranslationCommand(payload, this.drawingService, this.drawingService.renderer);
+      command.load();
+    },
     Rotate: () => { },
     Delete: () => { },
     Resize: () => { },
@@ -67,11 +114,11 @@ export class DrawingLoadService {
 
       if (this.drawingService.isCreated) {
         for (let action of this.activeDrawingData.actions) {
-          this.callbacks[action.actionType](action);
+          // this.callbacks[action.actionType](action);
         }
 
         for (let action of this.pendingActions) {
-          this.toolFactoryService.handleEvent(action);
+          // this.toolFactoryService.handleEvent(action);
         }
       }
 

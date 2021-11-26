@@ -79,24 +79,24 @@ export class SelectionToolService implements Tools {
 
   // Action Buttons
   private actionButtons: SelectionActionButton[] = [
-    {
-      iconSrc: '/assets/svg-icon/rotate_right_black_24dp.svg',
-      buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
-      iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 10,
-      stroke: 'black',
-      opacity: '0.25',
-      opacityHover: '0.50',
-      iconId: ActionButtonIds.ClockwiseRotation,
-    } as SelectionActionButton,
-    {
-      buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
-      iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 10,
-      stroke: 'black',
-      opacity: '0.25',
-      opacityHover: '0.50',
-      iconSrc: '/assets/svg-icon/rotate_left_black_24dp.svg',
-      iconId: ActionButtonIds.CounterClockwiseRotation,
-    } as SelectionActionButton,
+    // {
+    //   iconSrc: '/assets/svg-icon/rotate_right_black_24dp.svg',
+    //   buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
+    //   iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 10,
+    //   stroke: 'black',
+    //   opacity: '0.25',
+    //   opacityHover: '0.50',
+    //   iconId: ActionButtonIds.ClockwiseRotation,
+    // } as SelectionActionButton,
+    // {
+    //   buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
+    //   iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 10,
+    //   stroke: 'black',
+    //   opacity: '0.25',
+    //   opacityHover: '0.50',
+    //   iconSrc: '/assets/svg-icon/rotate_left_black_24dp.svg',
+    //   iconId: ActionButtonIds.CounterClockwiseRotation,
+    // } as SelectionActionButton,
     {
       buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
       iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 10,
@@ -260,9 +260,9 @@ export class SelectionToolService implements Tools {
       this.shiftChanged = false;
       this.wasMoved = false;
       if (this.activeActionType === SelectionActionTypes.Translate) {
-        this.syncService.sendTranslate(DrawingState.up, this.selectedActionId, event.offsetX, event.offsetY);
+        this.syncService.sendTranslate(DrawingState.up, this.selectedActionId, 0, 0, false);
       } else if (this.activeActionType === SelectionActionTypes.Resize) {
-        this.syncService.sendResize(DrawingState.up, this.selectedActionId, 0, 0, 0, 0);
+        this.syncService.sendResize(DrawingState.up, this.selectedActionId, 1, 1, 0, 0, false);
       }
 
       this.selectionTransformService.endCommand();
@@ -294,7 +294,7 @@ export class SelectionToolService implements Tools {
           this.setSelection();
           return;
         } else if (this.isIn) {
-          this.syncService.sendTranslate(DrawingState.move, this.selectedActionId, event.movementX, event.movementY);
+          this.syncService.sendTranslate(DrawingState.move, this.selectedActionId, event.movementX, event.movementY, false);
           this.activeActionType = SelectionActionTypes.Translate;
           this.setSelection();
         }
@@ -664,6 +664,12 @@ export class SelectionToolService implements Tools {
   setSelectionWidth(): void {
     this.objects[0].style.strokeWidth = '100px';
     this.setNewSelection(this.objects);
+  }
+
+  public sendUnselect(): void {
+    if (this.hasSelection()) {
+      this.syncService.sendSelect(this.selectedActionId, false);
+    }
   }
 
   /// Verifie si le curseur se situe a l'interieur de la selection.

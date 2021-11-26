@@ -1,11 +1,13 @@
-import { IAction, ISelectionAction } from './../model/IAction.model';
+import { ResizeSyncCommand } from './sync/resize-sync-command';
+import { RotateSyncCommand } from './sync/rotate-sync-command';
+import { TranslateSyncCommand } from './sync/translate-sync-command';
+import { IAction, ISelectionAction, ITranslateAction, IRotateAction, IResizeAction } from './../model/IAction.model';
 import { ICommand } from 'src/app/interfaces/command.interface';
 import { Injectable } from '@angular/core';
 import { SyncCommand } from './sync/sync-command';
 
 export interface ActionData {
   commands: SyncCommand[],
-  undoneCommands: SyncCommand[],
 }
 
 @Injectable({
@@ -14,6 +16,8 @@ export interface ActionData {
 export class CollaborationService {
 
   private actions: Map<string, ActionData>;
+  private undos: SyncCommand[] = [];
+  private redos: SyncCommand[] = [];
 
   constructor() {
     this.actions = new Map<string, ActionData>();
@@ -24,7 +28,7 @@ export class CollaborationService {
       return false;
     }
 
-    this.actions.set(userId, { commands: [], undoneCommands: [] });
+    this.actions.set(userId, { commands: [] });
     return true;
   }
 
@@ -34,28 +38,32 @@ export class CollaborationService {
     else return null;
   }
 
-  addCommandToUser(userId: string, command: SyncCommand) {
+  addCommandToUser(userId: string, command: SyncCommand, addToUndos: boolean) {
     if (this.userExists(userId)) {
       this.actions.get(userId)!.commands.push(command);
+      if (addToUndos) {
+        this.undos.push(command);
+        this.redos = [];
+      }
     }
 
   }
 
-  undoUserAction(userId: string): SyncCommand | void {
-    if (this.canUndo(userId)) {
-      const undoneCommand = this.actions.get(userId)!.commands.pop();
+  undoUserAction(): SyncCommand | void {
+    if (this.canUndo()) {
+      const undoneCommand = this.undos.pop();
       undoneCommand!.undo();
-      this.actions.get(userId)!.undoneCommands.push(undoneCommand!);
+      this.redos.push(undoneCommand!);
       return undoneCommand;
     }
 
   }
 
-  redoUserAction(userId: string): SyncCommand | void {
-    if (this.canRedo(userId)) {
-      const redoneCommand = this.actions.get(userId)!.undoneCommands.pop();
-      redoneCommand!.redo();
-      this.actions.get(userId)!.commands.push(redoneCommand!);
+  redoUserAction(): SyncCommand | void {
+    if (this.canRedo()) {
+      const redoneCommand = this.redos.pop();
+      redoneCommand!.redo(this.findTransformations(redoneCommand!.command.actionId));
+      this.undos.push(redoneCommand!);
       return redoneCommand;
     }
   }
@@ -129,7 +137,7 @@ export class CollaborationService {
     if (!actionId) return null;
 
     for (let [userId, actionDatas] of this.actions) {
-      const tmp = Array().concat(actionDatas.commands, actionDatas.undoneCommands).find((c) => c.payload.actionId === actionId);
+      const tmp = actionDatas.commands.find((c) => c.payload.actionId === actionId);
       if (tmp) {
         return tmp;
       }
@@ -139,19 +147,25 @@ export class CollaborationService {
     return null;
   }
 
-  canUndo(userId: string): boolean {
-    if (!this.userExists(userId)) {
-      return false;
+  findTransformations(actionId: string): SyncCommand[] {
+    let transformations: SyncCommand[] = [];
+    for (let [userId, actionDatas] of this.actions) {
+      const tmp = actionDatas.commands.filter((c) => {
+        if (c instanceof TranslateSyncCommand || c instanceof RotateSyncCommand || c instanceof ResizeSyncCommand) {
+          return c.payload.selectedActionId === actionId
+        } else return false;
+      })
+      transformations = Array().concat(transformations, tmp);
     }
 
-    return this.actions.get(userId)!.commands.length > 0;
+    return transformations;
   }
 
-  canRedo(userId: string): boolean {
-    if (!this.userExists(userId)) {
-      return false;
-    }
+  canUndo(): boolean {
+    return this.undos.length > 0;
+  }
 
-    return this.actions.get(userId)!.undoneCommands.length > 0;
+  canRedo(): boolean {
+    return this.redos.length > 0;
   }
 }

@@ -111,6 +111,7 @@ export class ControlMenuComponent implements OnDestroy {
 
   getActions(): void {
     console.log(this.collaborationService['actions']);
+    console.log(this.collaborationService['undos'], this.collaborationService['redos']);
   }
 
   ngOnDestroy(): void {

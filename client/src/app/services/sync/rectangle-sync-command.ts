@@ -1,3 +1,5 @@
+import { v4 } from 'uuid';
+import { SyncDrawingService } from './../syncdrawing.service';
 import { RectangleCommand } from '../tools/tool-rectangle/rectangle-command';
 import { IShapeAction } from '../../model/IAction.model';
 import { toRGBString, fromAlpha } from '../../utils/colors';
@@ -9,11 +11,14 @@ import { FilledShape } from '../tools/tool-rectangle/filed-shape.model';
 
 export class RectangleSyncCommand extends SyncCommand {
     public command: RectangleCommand;
+    public isFlatAction: boolean;
+    private shape: FilledShape;
 
     constructor(
         public payload: IShapeAction,
         private renderer: Renderer2,
         private drawingService: DrawingService,
+        private syncService: SyncDrawingService
     ) {
         super();
     }
@@ -21,18 +26,8 @@ export class RectangleSyncCommand extends SyncCommand {
     execute(): SyncCommand | void {
         switch (this.payload.state) {
             case DrawingState.down:
-                let shape = {} as FilledShape;
-                shape.x = this.payload.x;
-                shape.y = this.payload.y;
-                shape.width = this.payload.x2 - this.payload.x;
-                shape.height = this.payload.y2 - this.payload.y;
-                shape.fill = toRGBString([this.payload.rFill, this.payload.gFill, this.payload.bFill]);
-                shape.fillOpacity = fromAlpha(this.payload.aFill);
-                shape.stroke = toRGBString([this.payload.r, this.payload.g, this.payload.b]);
-                shape.strokeOpacity = fromAlpha(this.payload.a);
-                shape.strokeWidth = this.payload.width;
-
-                this.command = new RectangleCommand(this.renderer, shape, this.drawingService);
+                this.setupShape();
+                this.command = new RectangleCommand(this.renderer, this.shape, this.drawingService);
                 this.command.userId = this.payload.userId;
                 this.command.actionId = this.payload.actionId;
 
@@ -47,20 +42,45 @@ export class RectangleSyncCommand extends SyncCommand {
                 break;
 
             case DrawingState.up:
-                return this;
+                if (!this.isFlatAction) {
+                    return this;
+                } else {
+                    this.setupShape();
+                    this.command = new RectangleCommand(this.renderer, this.shape, this.drawingService);
+                    this.command.userId = this.payload.userId;
+                    this.command.actionId = this.payload.actionId;
+                    this.command.execute();
+                    return this;
+                }
         }
     }
 
     undo(): void {
-        this.command.undo();
+        this.syncService.sendDelete(this.payload.actionId, true);
     }
 
     redo(): void {
-        this.command.execute();
+        this.syncService.activeActionId = v4();
+        this.command.actionId = this.syncService.activeActionId;
+        this.payload.actionId = this.syncService.activeActionId;
+        this.syncService.sendShape(DrawingState.up, this.payload.shapeStyle, this.payload.shapeType, this.shape, true);
     }
 
     update(payload: IShapeAction): SyncCommand | void {
         this.payload = payload;
         return this.execute();
+    }
+
+    setupShape(): void {
+        this.shape = {} as FilledShape;
+        this.shape.x = this.payload.x;
+        this.shape.y = this.payload.y;
+        this.shape.width = this.payload.x2 - this.payload.x;
+        this.shape.height = this.payload.y2 - this.payload.y;
+        this.shape.fill = toRGBString([this.payload.rFill, this.payload.gFill, this.payload.bFill]);
+        this.shape.fillOpacity = fromAlpha(this.payload.aFill);
+        this.shape.stroke = toRGBString([this.payload.r, this.payload.g, this.payload.b]);
+        this.shape.strokeOpacity = fromAlpha(this.payload.a);
+        this.shape.strokeWidth = this.payload.width;
     }
 }

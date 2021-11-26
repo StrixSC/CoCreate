@@ -19,15 +19,17 @@ import { ToolsService } from '../tools/tools.service';
 import { EmitReturn } from './hotkeys-constants';
 import { HotkeysEmitterService } from './hotkeys-emitter/hotkeys-emitter.service';
 import { HotkeysEnablerService } from './hotkeys-enabler.service';
+import { interval, timer, Subscription } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HotkeysService {
-
+  readonly CLOCK = 0;
   private toolSelectorList: Map<string, number> = new Map<string, number>();
   hotkey: Map<string, any> = new Map<string, any>();
-
+  timer: Subscription;
+  canUndoRedo: boolean;
   constructor(
     private dialog: MatDialog,
     private sideNavService: SidenavService,
@@ -48,7 +50,9 @@ export class HotkeysService {
     private hotkeysEnablerService: HotkeysEnablerService,
   ) {
     this.subscribeToHotkeys();
-
+    this.timer = interval(this.CLOCK).subscribe(() => {
+      this.canUndoRedo = true;
+    })
     this.toolSelectorList.set(EmitReturn.PENCIL, ToolIdConstants.PENCIL_ID);
     this.toolSelectorList.set(EmitReturn.BRUSH, ToolIdConstants.BRUSH_ID);
     this.toolSelectorList.set(EmitReturn.APPLICATEUR, ToolIdConstants.APPLIER_ID);
@@ -136,14 +140,39 @@ export class HotkeysService {
           case EmitReturn.DELETE:
             this.deletingTool.deleteSelection();
             break;
-          case EmitReturn.SELECTALL:
-            this.selectionTool.selectAll();
-            break;
           case EmitReturn.UNDO:
-            this.collabService.undoUserAction(this.auth.activeUser!.uid);
+            if (!this.canUndoRedo) {
+              return;
+            }
+
+            if (this.collabService.canUndo()) {
+              this.selectionService.sendUnselect();
+              this.canUndoRedo = false;
+              let undoAction = this.collabService.undoUserAction();
+              // if (undoAction) {
+              //   if (undoAction.isSelected && undoAction.selectedBy === this.syncService.defaultPayload!.userId) {
+              //     this.syncService.sendSelect(undoAction.payload.actionId, false);
+              //     this.selectionService.removeSelection();
+              //   }
+              // }
+            }
             break;
           case EmitReturn.REDO:
-            this.collabService.redoUserAction(this.auth.activeUser!.uid);
+            if (!this.canUndoRedo) {
+              return;
+            }
+
+            if (this.collabService.canRedo()) {
+              this.selectionService.sendUnselect();
+              this.canUndoRedo = false;
+              let redoAction = this.collabService.redoUserAction();
+              // if (redoAction) {
+              //   if (redoAction.isSelected && redoAction.selectedBy === this.syncService.defaultPayload!.userId) {
+              //     this.syncService.sendSelect(redoAction.payload.actionId, false);
+              //     this.selectionService.removeSelection();
+              //   }
+              // }
+            }
             break;
           default:
             console.log('Warning : Hotkey callBack not implemented !');
