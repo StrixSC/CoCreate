@@ -24,9 +24,8 @@ export class MenuPageComponent implements OnDestroy {
     }
   }
 
-  logout() {
-    this.authSubscription = this.auth.signOut().subscribe(() => {
-      this.router.navigateByUrl('auth');
-    });
+  async logout() {
+    await this.auth.signOut().toPromise();
+    this.router.navigate(['auth']);
   }
 }
