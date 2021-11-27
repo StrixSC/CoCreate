@@ -7,7 +7,6 @@ import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:http/src/response.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/src/provider.dart';
@@ -25,18 +24,20 @@ class Galerie extends StatefulWidget {
 class GalerieState extends State<Galerie> with TickerProviderStateMixin {
   Map pagingControllers = <String, PagingController<int, Drawing>>{};
   Map searchControllers = <String, TextEditingController>{};
+  Map scrollControllers = <String, ScrollController>{};
   late TabController _tabController;
-  final _scrollController = ScrollController();
   static const _pageSize = 12;
 
-  String dropDownValueType = 'Public';
-  String dropDownValueAuthor = 'Moi';
+  static String dropDownValueTypeCreate = 'Public';
+  static String dropDownValueAuthor = 'Moi';
+  static String dropDownValueType = 'Aucun';
 
   GalerieState() {
     for (var type in TYPES) {
       pagingControllers.putIfAbsent(
           type, () => PagingController<int, Drawing>(firstPageKey: 0));
       searchControllers.putIfAbsent(type, () => TextEditingController());
+      scrollControllers.putIfAbsent(type, () => ScrollController());
     }
   }
 
@@ -46,10 +47,11 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
     _tabController = TabController(length: 2, vsync: this);
     pagingControllers.forEach((key, value) {
       value.addPageRequestListener((pageKey) {
-        _fetchDrawings(pageKey, key, null);
+        _fetchDrawings(pageKey, key, dropDownValueType);
       });
       value.addStatusListener((status) {
         if (status == PagingStatus.completed) {
+          ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Text(
@@ -65,24 +67,30 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
       });
     });
     // Setup the listener.
-    _scrollController.addListener(() {
-      if (_scrollController.position.atEdge) {
-        if (_scrollController.position.pixels == 0) {
-          // You're at the top.
-        } else {
-          // You're at the bottom.
-          String section = context.read<Collaborator>().currentType;
-          var pageKey =
-              (pagingControllers[section] as PagingController).itemList!.length;
-          _fetchDrawings(pageKey, section, null);
+    scrollControllers.forEach((key, value) {
+      value.addListener(() {
+        if (value.position.atEdge) {
+          if (value.position.pixels == 0) {
+            // You're at the top.
+          } else {
+            // You're at the bottom.
+            String section = context.read<Collaborator>().currentType;
+            var pageKey = (pagingControllers[section] as PagingController)
+                .itemList!
+                .length;
+            _fetchDrawings(pageKey, section, dropDownValueType);
+          }
         }
-      }
+      });
     });
   }
 
   Future<void> _fetchDrawings(int pageKey, String section, String? type) async {
     RestApi rest = RestApi();
     String? filter = (searchControllers[section] as TextEditingController).text;
+    if (type == 'Aucun') {
+      type = null;
+    }
     if (filter.isEmpty) {
       filter = null;
     }
@@ -130,8 +138,15 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
   TabBar get _tabBar => TabBar(
         indicatorWeight: 5.0,
         controller: _tabController,
-        onTap: (value) =>
-            {context.read<Collaborator>().currentType = TYPES[value]},
+        onTap: (value) {
+          setState(() {
+            dropDownValueType = 'Aucun';
+            searchControllers.update(
+                TYPES[value], (value) => TextEditingController());
+            pagingControllers[TYPES[value]].refresh();
+          });
+          context.read<Collaborator>().setCurrentType(TYPES[value]);
+        },
         tabs: [
           Tab(
             child: Row(
@@ -159,6 +174,8 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: const Key('Gallery'),
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
             backgroundColor: kPrimaryColor,
             centerTitle: true,
@@ -187,38 +204,53 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
   }
 
   gallerieView(pagingController, searchController) {
-    return Container(
-      child: Column(children: <Widget>[
-        const SizedBox(height: 24.0),
-        Container(
-            width: 500.0,
-            child: TextField(
-              style: const TextStyle(fontSize: 25),
-              controller: searchController,
-              onChanged: (text) {
-                String type = context.read<Collaborator>().currentType;
-                pagingControllers[type].refresh();
-                setState(() {
-                  pagingControllers;
-                });
-              },
-              maxLines: 1,
-              decoration: InputDecoration(
-                errorStyle: const TextStyle(fontSize: 26),
-                hintText: "Filtrer les dessins selon un attribut",
-                hintStyle: const TextStyle(
-                  fontSize: 26,
-                ),
-                contentPadding: const EdgeInsets.all(15),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(0)),
-                prefixIcon: const Icon(Icons.search),
-              ),
-              enableSuggestions: false,
-              autocorrect: false,
-              autofocus: false,
-            )),
-        const SizedBox(height: 24.0),
+    return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+      return Column(children: <Widget>[
+        const SizedBox(height: 40.0),
+        SizedBox(
+            width: 1050.0,
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                      width: 500,
+                      child: TextField(
+                        style: const TextStyle(fontSize: 25),
+                        controller: searchController,
+                        onChanged: (text) {
+                          String type =
+                              context.read<Collaborator>().currentType;
+                          pagingControllers[type].refresh();
+                          setState(() {
+                            pagingControllers;
+                          });
+                        },
+                        maxLines: 1,
+                        decoration: InputDecoration(
+                          errorStyle: const TextStyle(fontSize: 26),
+                          hintText: "Filtrer les dessins selon un attribut",
+                          hintStyle: const TextStyle(
+                            fontSize: 26,
+                          ),
+                          contentPadding: const EdgeInsets.all(15),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(0)),
+                          prefixIcon: const Icon(Icons.search),
+                        ),
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        autofocus: false,
+                      )),
+                  // const SizedBox(width: 24.0),
+                  SizedBox(
+                      width: 500,
+                      child: dropDown(
+                          ['Aucun', 'Public', 'Protégé', 'Privée'],
+                          dropDownValueType,
+                          'Filtrer selon un type de dessins'))
+                ])),
+        const SizedBox(height: 40.0),
         Expanded(child: OrientationBuilder(builder: (context, orientation) {
           return RefreshIndicator(
               onRefresh: () => Future.sync(
@@ -231,7 +263,8 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
                 showNewPageProgressIndicatorAsGridChild: false,
                 showNewPageErrorIndicatorAsGridChild: false,
                 showNoMoreItemsIndicatorAsGridChild: false,
-                scrollController: _scrollController,
+                scrollController:
+                    scrollControllers[context.read<Collaborator>().currentType],
                 pagingController: pagingController,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   childAspectRatio: 3 / 2,
@@ -270,8 +303,8 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
                 ),
               ));
         }))
-      ]),
-    );
+      ]);
+    });
   }
 
   @override
@@ -323,7 +356,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
                                     const SizedBox(height: 48.0),
                                     dropDown(
                                         ['Public', 'Protégé', 'Privée'],
-                                        dropDownValueType,
+                                        dropDownValueTypeCreate,
                                         'Choisir un type de dessins'),
                                     const SizedBox(height: 48.0),
                                     formField('Mot de passe',
@@ -350,6 +383,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
   dropDown(List<String> items, value, inputHint) {
     return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
       DropdownButtonFormField<String>(
+        value: value,
         decoration: InputDecoration(
           labelText: inputHint,
           labelStyle: const TextStyle(fontSize: _fontSize),
@@ -360,6 +394,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
             child: Icon(Icons.arrow_downward, size: 35.0)),
         onChanged: (String? newValue) {
           setState(() {
+            pagingControllers[context.read<Collaborator>().currentType].refresh();
             value = newValue!;
           });
         },
@@ -427,38 +462,38 @@ class _Drawing extends StatelessWidget {
         context: context,
         builder: (BuildContext context) => AlertDialog(
               title: Center(child: Text('Joindre ${drawing.title} ?')),
-              content: Column(children:[
+              content: Column(children: [
                 Expanded(
-                    child: Row(
-                        children: <Widget>[
-                      SizedBox(width: 600, child: gridTileJoin(thumbnail)),
-                      SizedBox(
-                          width: 400,
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 48.0),
-                                richTextWhitePurple(
-                                    'Auteur : ', drawing.authorUsername),
-                                const SizedBox(height: 48.0),
-                                richTextWhitePurple('Type    : ', drawing.type),
-                                const SizedBox(height: 48.0),
-                                richTextWhitePurple(
-                                    'Nombre de membres: ',
-                                    drawing.collaboration.memberCount
-                                        .toString()),
-                                const SizedBox(height: 48.0),
-                                richTextWhitePurple(
-                                    'Nombre de membres max: ',
-                                    drawing.collaboration.maxMemberCount
-                                        .toString()),
-                                const SizedBox(height: 28.0),
-                                drawing.type == 'Protected'
-                                    ? formField('Mot de passe',
-                                        'Veuillez entrez le titre du dessin')
-                                    : const SizedBox.shrink(),
-                              ]))
-                    ]))]),
+                    child: Row(children: <Widget>[
+                  SizedBox(width: 600, child: gridTileJoin(thumbnail)),
+                  SizedBox(
+                      width: 400,
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 48.0),
+                            richTextWhitePurple(
+                                'Auteur : ', drawing.authorUsername),
+                            const SizedBox(height: 48.0),
+                            richTextWhitePurple('Type    : ', drawing.type),
+                            const SizedBox(height: 48.0),
+                            richTextWhitePurple('Nombre de membres: ',
+                                drawing.collaboration.memberCount.toString()),
+                            const SizedBox(height: 48.0),
+                            richTextWhitePurple(
+                                'Nombre de membres max: ',
+                                drawing.collaboration.maxMemberCount
+                                    .toString()),
+                            const SizedBox(height: 48.0),
+                            richTextWhitePurple('Créé le: ', drawing.createdAt),
+                            const SizedBox(height: 28.0),
+                            drawing.type == 'Protected'
+                                ? formField('Mot de passe',
+                                    'Veuillez entrez le titre du dessin')
+                                : const SizedBox.shrink(),
+                          ]))
+                ]))
+              ]),
               actions: <Widget>[
                 TextButton(
                   onPressed: () {
@@ -537,7 +572,10 @@ class _Drawing extends StatelessWidget {
         style: const TextStyle(fontSize: 30.0),
         children: <TextSpan>[
           TextSpan(text: text1),
-          TextSpan(text: text2, style: TextStyle(fontWeight: FontWeight.bold, color: kPrimaryColor)),
+          TextSpan(
+              text: text2,
+              style:
+                  TextStyle(fontWeight: FontWeight.bold, color: kPrimaryColor)),
         ],
       ),
     );
