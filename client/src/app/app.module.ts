@@ -1,3 +1,4 @@
+import { AvatarDialogComponent } from './components/avatar-dialog/avatar-dialog.component';
 import { RegisterComponent } from './components/register/register.component';
 import { AuthWrapperComponent } from './components/auth-wrapper/auth-wrapper.component';
 import { LandingPageComponent } from './components/landing-page/landing-page.component';
@@ -76,6 +77,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     ToolsColorComponent,
     ToolsColorPickerComponent,
     ParameterMenuComponent,
+    AvatarDialogComponent,
     WorkspaceComponent,
     SidenavComponent,
     CanvasComponent,
@@ -140,6 +142,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     ToolsColorPickerComponent,
     WorkspaceComponent,
     ControlMenuComponent,
+    AvatarDialogComponent,
     SaveDrawingComponent,
     NewDrawingFormDialogComponent,
     ExportDrawingComponent,

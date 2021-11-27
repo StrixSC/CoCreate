@@ -1,0 +1,58 @@
+<div class="avatar-main-container">
+    <div *ngIf="!isLoading" class="avatars-container">
+        <div [class.selected]="i === selectedIndex" matRipple (click)="selectAvatarByIndex(i)"
+            *ngFor="let avatar of avatars; index as i" class="avatar">
+            <img [src]="avatar" class="avatar-img">
+        </div>
+    </div>
+
+    <div class="buttons-container">
+        <button (click)="close()" color="secondary" mat-raised-button>Retour</button>
+        <button (click)="close(selectedIndex)" color="primary" mat-raised-button>Choisir</button>
+    </div>
+</div>
+<div class="spinner" *ngIf="isLoading">
+    <mat-spinner></mat-spinner>
+</div>
+
+<style>
+    .avatars-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        overflow-y: scroll;
+    }
+
+    .avatar {
+        max-width: 30%;
+        border: 3px solid transparent;
+        border-radius: 5px;
+    }
+
+    .avatar-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .selected {
+        border: 3px dashed black;
+    }
+    
+    .buttons-container {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .avatar-main-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding-bottom: 1rem;
+        align-items: center;
+        height: 100%;
+    }
+</style>
