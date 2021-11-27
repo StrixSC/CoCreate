@@ -108,7 +108,8 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     ChatBoxComponent,
     ChatPopedOutComponent,
     AllChannelsComponent,
-    AuthWrapperComponent
+    AuthWrapperComponent,
+    AllChannelsComponent,
   ],
   imports: [
     BrowserModule,
