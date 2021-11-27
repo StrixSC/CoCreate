@@ -10,7 +10,7 @@ import { ICollaborationLoadResponse } from 'src/app/model/ICollaboration.model';
 import { TranslateCommand } from './tools/selection-tool/translate-command/translate-command';
 import { FilledShape } from './tools/tool-rectangle/filed-shape.model';
 import { EllipseCommand } from './tools/tool-ellipse/ellipse-command';
-import { toRGBString, fromAlpha } from './../utils/colors';
+import { toRGBString, hexToRgb, fromAlpha } from './../utils/colors';
 import { Pencil } from './tools/pencil-tool/pencil.model';
 import { PencilCommand } from './tools/pencil-tool/pencil-command';
 import { ActionType, IDeleteAction, ShapeType } from 'src/app/model/IAction.model';
@@ -116,7 +116,7 @@ export class DrawingLoadService {
       command.execute();
     },
     Delete: (payload: IDeleteAction) => {
-      const command = new DeleteSyncCommand(payload, this.drawingService);
+      const command = new DeleteSyncCommand(payload, this.drawingService, null);
       command.execute();
     },
     Resize: (payload: IResizeAction) => {
@@ -142,10 +142,18 @@ export class DrawingLoadService {
 
   loadDrawing(): void {
     if (this.activeDrawingData) {
-      this.drawingService.newDrawing(1280, 752, {
-        rgb: { r: 255, g: 255, b: 255 },
-        a: 1,
-      });
+      const convertedHex = hexToRgb(this.activeDrawingData.backgroundColor);
+      if (!convertedHex) {
+        this.drawingService.newDrawing(1280, 752, {
+          rgb: { r: 255, g: 255, b: 255 },
+          a: 1,
+        });
+      } else {
+        this.drawingService.newDrawing(1280, 752, {
+          rgb: { r: convertedHex.r, g: convertedHex.g, b: convertedHex.b },
+          a: 1
+        });
+      }
 
       this.isLoading = false;
       this.isLoaded = true;
