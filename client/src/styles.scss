@@ -38,8 +38,10 @@ fa-icon {
 }
 
 .spinner {
-  width: 30px;
-  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0.25rem;
 }
 
 .accent {

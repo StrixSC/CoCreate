@@ -91,7 +91,10 @@
 
             <div>
                 <button [disabled]="!isValid()" color="primary" class="form-field" type="submit" mat-raised-button>
-                    <mat-spinner *ngIf="isLoading" class="spinner"></mat-spinner>
+                    <div class="spinner" *ngIf="isLoading">
+                        <mat-spinner [diameter]="35" color="accent" class="spinner">
+                        </mat-spinner>
+                    </div>
                     <ng-container *ngIf="!isLoading">Inscription</ng-container>
                 </button>
             </div>
