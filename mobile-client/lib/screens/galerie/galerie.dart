@@ -26,7 +26,8 @@ class Galerie extends StatefulWidget {
   GalerieState createState() => GalerieState();
 }
 
-class GalerieState extends State<Galerie> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin  {
+class GalerieState extends State<Galerie>
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   Map pagingControllers = <String, PagingController<int, Drawing>>{};
   Map searchControllers = <String, TextEditingController>{};
   Map scrollControllers = <String, ScrollController>{};
@@ -85,7 +86,8 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin, Automat
             var pageKey = (pagingControllers[section] as PagingController)
                 .itemList!
                 .length;
-            _fetchDrawings(pageKey, section, dropDownControllers[context.read<Collaborator>().currentType]);
+            _fetchDrawings(pageKey, section,
+                dropDownControllers[context.read<Collaborator>().currentType]);
           }
         }
       });
@@ -261,8 +263,10 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin, Automat
                       width: 500,
                       child: dropDown(
                           ['Aucun', 'Public', 'Protégé', 'Privée'],
-                          dropDownControllers[context.watch<Collaborator>().currentType],
-                          'Filtrer selon un type de dessins'))
+                          dropDownControllers[
+                              context.watch<Collaborator>().currentType],
+                          'Filtrer selon un type de dessins',
+                          'gallery'))
                 ])),
         const SizedBox(height: 40.0),
         Expanded(child: OrientationBuilder(builder: (context, orientation) {
@@ -328,6 +332,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin, Automat
     });
     super.dispose();
   }
+
   @override
   bool get wantKeepAlive => true;
 
@@ -355,28 +360,30 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin, Automat
                                     dropDown(
                                         ['Moi', 'Équipe'],
                                         dropDownValueAuthor,
-                                        'Choisir un auteur'),
+                                        'Choisir un auteur',
+                                        'Auteur'),
                                     // TODO: Add teams when ready
-                                    dropDownValueAuthor == 'Équipe'
-                                        ? dropDown(
-                                            ['Moi', 'Équipe'],
-                                            dropDownValueAuthor,
-                                            'Choisir un auteur')
-                                        : const SizedBox.shrink(),
                                     const SizedBox(height: 48.0),
-                                    formField('Titre',
-                                        'Veuillez entrez le titre du dessin', titreController),
+                                    formField(
+                                        'Titre',
+                                        'Veuillez entrez le titre du dessin',
+                                        titreController),
                                     const SizedBox(height: 48.0),
-                                    formField('Nombre de membres maximum',
-                                        'Veuillez entrez choisir un auteur', memberController),
+                                    formField(
+                                        'Nombre de membres maximum',
+                                        'Veuillez entrez choisir un auteur',
+                                        memberController),
                                     const SizedBox(height: 48.0),
                                     dropDown(
                                         ['Public', 'Protégé', 'Privée'],
                                         dropDownValueTypeCreate,
-                                        'Choisir un type de dessins'),
+                                        'Choisir un type de dessins',
+                                        'Type'),
                                     const SizedBox(height: 48.0),
-                                    formField('Mot de passe',
-                                        'Veuillez entrez choisir un mot de passe', passController),
+                                    formField(
+                                        'Mot de passe',
+                                        'Veuillez entrez choisir un mot de passe',
+                                        passController),
                                   ]))
                             ])))
               ]),
@@ -385,7 +392,9 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin, Automat
                   onPressed: () {
                     _formKey.currentState!.save();
                     if (_formKey.currentState!.validate()) {
-                      print(titreController);
+                      print(dropDownValueTypeCreate);
+                      print(dropDownValueAuthor);
+                      // context.read<Collaborator>().collaborationSocket.createCollaboration(title, type, password);
                     } else {
                       print("validation failed");
                     }
@@ -396,29 +405,37 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin, Automat
             ));
   }
 
-  dropDown(List<String> items, value, inputHint) {
+  dropDown(List<String> items, value, inputHint, String location) {
     return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
       DropdownButtonFormField<String>(
         value: value,
         decoration: InputDecoration(
           labelText: inputHint,
           labelStyle: const TextStyle(fontSize: _fontSize),
-          border:
-              const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.zero)),
+          border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.zero)),
         ),
         icon: const Align(
             alignment: Alignment.topRight,
             child: Icon(Icons.arrow_downward, size: 35.0)),
         onChanged: (String? newValue) {
-          if(items.length == 4) {
+          if (location == 'gallery') {
             setState(() {
-              dropDownControllers.update(context.read<Collaborator>().currentType, (value) => newValue!);
+              dropDownControllers.update(
+                  context.read<Collaborator>().currentType,
+                  (value) => newValue!);
               pagingControllers[context.read<Collaborator>().currentType]
                   .refresh();
             });
+          } else if (location == 'Auteur') {
+            setState(() {
+              dropDownValueAuthor = newValue!;
+            });
+          } else if (location == 'Type') {
+            setState(() {
+              dropDownValueTypeCreate = newValue!;
+            });
           }
-          else { value = newValue!; }
-
         },
         items: items.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
@@ -426,7 +443,8 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin, Automat
             child: Text(value),
           );
         }).toList(),
-        style: const TextStyle(fontSize: _fontSize, fontWeight: FontWeight.w300),
+        style:
+            const TextStyle(fontSize: _fontSize, fontWeight: FontWeight.w300),
       )
     ]);
   }
@@ -522,8 +540,10 @@ class _Drawing extends StatelessWidget {
                             richTextWhitePurple('Créé le: ', drawing.createdAt),
                             const SizedBox(height: 28.0),
                             drawing.type == 'Protected'
-                                ? formField('Mot de passe',
-                                    'Veuillez entrez le titre du dessin', passController)
+                                ? formField(
+                                    'Mot de passe',
+                                    'Veuillez entrez le titre du dessin',
+                                    passController)
                                 : const SizedBox.shrink(),
                           ]))
                 ])))
