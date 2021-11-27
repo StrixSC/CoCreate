@@ -68,7 +68,10 @@ export = (io: Server, socket: Socket) => {
                             drawing: true,
                             actions: {
                                 where: {
-                                    collaborationId: collaborationId
+                                    collaborationId: collaborationId,
+                                },
+                                orderBy: {
+                                    createdAt: "asc"
                                 }
                             },
                             collaboration_members: {
@@ -128,6 +131,9 @@ export = (io: Server, socket: Socket) => {
                                 actions: {
                                     where: {
                                         collaborationId: collaborationId
+                                    },
+                                    orderBy: {
+                                        createdAt: "asc"
                                     }
                                 },
                                 collaboration_members: {
@@ -448,6 +454,9 @@ export = (io: Server, socket: Socket) => {
                             actions: {
                                 where: {
                                     collaborationId: collaborationId
+                                },
+                                orderBy: {
+                                    createdAt: "asc"
                                 }
                             },
                             collaboration_members: {

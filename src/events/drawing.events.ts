@@ -6,6 +6,7 @@ import { handleFreedraw } from "./handlers/freedraw.handler"
 import { handleSelection } from "./handlers/selection.handler"
 import { handleRotation } from "./handlers/rotation.handler"
 import { handleResize } from "./handlers/resize.handler";
+import { handleDelete } from './handlers/delete.handler';
 
 export = (io: Server, socket: Socket) => {
     const onFreedraw = async (data: Action) => handleFreedraw(io, socket, data);
@@ -14,15 +15,9 @@ export = (io: Server, socket: Socket) => {
     const onTranslation = async (data: Action) => handleTranslation(io, socket, data);
     const onRotation = async (data: Action) => handleRotation(io, socket, data);
     const onResize = async (data: Action) => handleResize(io, socket, data);
-
+    const onDelete = async (data: Action) => handleDelete(io, socket, data);
     const onUndo = async (data: Action) => {
         io.emit('undoredo:received', {
-            ...data
-        } as Action);
-    };
-
-    const onDelete = async (data: Action) => {
-        io.emit('delete:received', {
             ...data
         } as Action);
     };
