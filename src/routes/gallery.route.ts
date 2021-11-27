@@ -23,7 +23,7 @@ router.get('/', checkIfAuthenticated,
     query('type')
         .optional()
         .isIn(['Public', 'Protected'])
-        .withMessage('Provided type is not valid. Please ensure that the provided type is either "Public", "Private" or "Protected".'),
+        .withMessage('Provided type is not valid. Please ensure that the provided type is either "Public" or "Protected".'),
     (req: Request, res: Response, next: NextFunction) => getGalleryController(req, res, next));
 
 router.get('/mine', checkIfAuthenticated,
