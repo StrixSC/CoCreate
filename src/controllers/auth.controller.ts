@@ -1,4 +1,4 @@
-import { updateUserPassword } from './../services/auth.service';
+import { registerWithFileUpload, updateUserPassword } from './../services/auth.service';
 import { validationResult, matchedData } from 'express-validator';
 import { handleRequestError } from './../utils/errors';
 import { NextFunction, Request, Response } from 'express';
@@ -26,6 +26,7 @@ export const loginController = async (req: Request, res: Response, next: NextFun
 
 export const registerController = async (req: any, res: any, next: any) => {
     try {
+
         const errors = validationResult(req).array();
 
         if (errors.length > 0) {
@@ -36,18 +37,27 @@ export const registerController = async (req: any, res: any, next: any) => {
 
         const data = matchedData(req, { locations: ['body'] });
         const { username, email, password, first_name, last_name } = data;
+        const payload = { username, email, password, first_name, last_name }
+        const file = req.files[0];
+        const avatar_url = data.avatar_url;
 
-        const user = await register({
-            username: username,
-            email: email,
-            password: password,
-            first_name: first_name,
-            last_name: last_name
-        });
+        if (!username || !email || !password || !first_name || !last_name) {
+            throw new create.BadRequest("Invalid or missing field");
+        }
+
+        let user = null;
+        if (file) {
+            user = await registerWithFileUpload(payload, file);
+        } else if (avatar_url) {
+            user = await register(payload, avatar_url)
+        } else {
+            throw new create.BadRequest('Missing or invalid file or avatar_url');
+        }
 
         if (!user) {
             throw new create.InternalServerError('Could not create user');
         }
+
         return res
             .status(StatusCodes.CREATED)
             .send({ message: 'The user has been created successfully!' });

@@ -17,6 +17,8 @@ import authRouter from './routes/auth.route';
 import usersRouter from './routes/users.route';
 import channelsRouter from './routes/channels.route';
 import galleryRouter from './routes/gallery.route';
+import publicRouter from './routes/public.route';
+
 import log from './utils/logger';
 
 const app = express();
@@ -41,6 +43,7 @@ app.use(corsSetup);
 app.options('*', corsSetup);
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
+app.use('/api/public', publicRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/channels', channelsRouter);
 app.use('/api/gallery', galleryRouter);

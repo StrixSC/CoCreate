@@ -48,4 +48,7 @@ export const getAuthToken = (
     next();
 };
 
-export { admin };
+const bucket = admin.storage().bucket();
+const auth = admin.auth();
+
+export { admin, bucket, auth };

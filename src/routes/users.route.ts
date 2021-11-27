@@ -35,6 +35,7 @@ router.put('/profile', checkIfAuthenticated,
     body('avatarUrl')
         .optional()
         .isString()
+        .isURL()
         .withMessage('Avatar Url missing or invalid'),
     (req, res, next) => updateUserProfileController(req, res, next));
 

@@ -1,11 +1,10 @@
-import { DEFAULT_DRAWING_OFFSET, DEFAULT_DRAWING_LIMIT } from './../utils/drawings';
 import create from 'http-errors';
 import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { IPublicUserProfile } from './../models/IUserPublicProfile';
 import { db } from '../db';
 import { MemberType, Log, Avatar } from '.prisma/client';
-import { admin } from '../firebase';
-import moment from 'moment';
+import { admin, auth } from '../firebase';
+import { uploadToBucket } from '../utils/users';
 
 export const getAllPublicProfiles = async (
     offset: number,
@@ -229,4 +228,108 @@ export const getUserAvatars = async (userId: string): Promise<Avatar[]> => {
 
     return avatars;
 
+}
+
+export const uploadAndUpdateUserAvatar = async (userId: string, file: Express.Multer.File) => {
+
+    const { url, bucketFile } = await uploadToBucket(userId, file);
+
+    if (!url) {
+        throw new create.InternalServerError('An error has occurred while uploading avatar');
+    }
+
+    const uploadedAvatar = await db.avatar.create({
+        data: {
+            user_id: userId,
+            isPublic: false,
+            avatar_url: url
+        }
+    });
+
+    if (!uploadedAvatar) {
+        bucketFile.delete({ ignoreNotFound: true }, (err) => {
+            if (err) {
+                throw new create.InternalServerError(err.message);
+            }
+
+            throw new create.InternalServerError('An error occurred while uploading the file. Operation reverted.');
+        });
+    } else {
+        const previousProfile = await db.profile.findUnique({
+            where: { user_id: userId }
+        });
+
+        if (!previousProfile) {
+            await db.avatar.delete({
+                where: {
+                    avatar_id: uploadedAvatar.avatar_id
+                }
+            });
+
+            bucketFile.delete({ ignoreNotFound: true }, (err) => {
+                if (err) {
+                    throw new create.InternalServerError(err.message);
+                }
+
+                throw new create.InternalServerError('An error occurred while uploading the file. Operation reverted.');
+            });
+        }
+
+        const updatedProfile = await db.profile.update({
+            where: {
+                user_id: userId,
+            },
+            data: {
+                avatar_url: uploadedAvatar.avatar_url
+            }
+        });
+
+        if (!updatedProfile) {
+            await db.avatar.delete({
+                where: {
+                    avatar_id: uploadedAvatar.avatar_id
+                }
+            });
+
+            bucketFile.delete({ ignoreNotFound: true }, (err) => {
+                if (err) {
+                    throw new create.InternalServerError(err.message);
+                }
+
+                throw new create.InternalServerError('An error occurred while uploading the file. Operation reverted.');
+            });
+        } else {
+            const updatedAuthProfile = await auth.updateUser(userId, {
+                photoURL: updatedProfile.avatar_url
+            });
+
+            if (!updatedAuthProfile) {
+                await db.avatar.delete({
+                    where: {
+                        avatar_id: uploadedAvatar.avatar_id
+                    }
+                });
+
+                await db.profile.update({
+                    where: {
+                        user_id: userId
+                    },
+                    data: {
+                        avatar_url: previousProfile!.avatar_url
+                    }
+                });
+
+                bucketFile.delete({ ignoreNotFound: true }, (err) => {
+                    if (err) {
+                        throw new create.InternalServerError(err.message);
+                    }
+
+                    throw new create.InternalServerError('An error occurred while uploading the file. Operation reverted.');
+                });
+            } else {
+                throw new create.InternalServerError('Avatar uploaded successfully and updated user avatar!');
+            }
+
+        }
+    }
 }

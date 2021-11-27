@@ -1,9 +1,10 @@
+import { uploadToBucket } from './../utils/users';
 import create from 'http-errors';
 import { db } from '../db';
 import { validateRegistration } from '../utils/auth';
 import { LogType, User, MemberType, Log } from '.prisma/client';
 import { IRegistrationPayload } from '../models/IRegistrationModel';
-import { admin } from '../firebase';
+import { admin, bucket } from '../firebase';
 import log from '../utils/logger';
 import { v4 } from 'uuid';
 
@@ -30,26 +31,28 @@ export const login = async (userId: string): Promise<Log | null> => {
     return log;
 };
 
-export const register = async (payload: IRegistrationPayload): Promise<User | null> => {
-    let { email, password, username, first_name, last_name } = payload;
-
-    first_name = first_name.normalize();
-    last_name = last_name.normalize();
-
+export const register = async (payload: IRegistrationPayload, avatar_url: string, uid?: string): Promise<User | null> => {
     try {
+        let { email, password, username, first_name, last_name } = payload;
+
+        first_name = first_name.normalize();
+        last_name = last_name.normalize();
+
         const usernameFound = await db.profile.findFirst({ where: { username: username } });
 
         if (usernameFound) {
             throw new create.Conflict('There is already a user with this username.');
         }
 
+        console.log(payload, uid);
         const user = await db.user.create({
             data: {
+                user_id: uid ? uid : v4(),
                 email: email,
                 profile: {
                     create: {
                         username: username,
-                        avatar_url: ''
+                        avatar_url: avatar_url
                     }
                 },
                 account: {
@@ -60,6 +63,9 @@ export const register = async (payload: IRegistrationPayload): Promise<User | nu
                 },
                 channels: {
                     create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
+                },
+                avatars: {
+                    create: [{ avatar_url: avatar_url, isPublic: false }]
                 }
             }
         });
@@ -73,13 +79,14 @@ export const register = async (payload: IRegistrationPayload): Promise<User | nu
             email: user.email,
             password: password,
             displayName: username,
+            photoURL: avatar_url
         });
 
         if (!firebaseUser) {
             const deletedUser = await db.user.delete({
                 where: {
                     user_id: user.user_id
-                }
+                },
             });
 
             if (!deletedUser) {
@@ -94,6 +101,26 @@ export const register = async (payload: IRegistrationPayload): Promise<User | nu
         throw e;
     }
 };
+
+export const registerWithFileUpload = async (payload: IRegistrationPayload, file: Express.Multer.File) => {
+    try {
+        const userId = v4();
+        const { url, bucketFile } = await uploadToBucket(userId, file);
+
+        if (!url || !bucketFile) {
+            throw new create.InternalServerError('Something happened while uploading avatar');
+        }
+
+        const user = register(payload, url, userId);
+        if (!user) {
+            throw new create.InternalServerError('Failed to create user, operation reverted');
+        } else {
+            return user;
+        }
+    } catch (e) {
+        throw e;
+    }
+}
 
 export const logout = async (userId: string) => {
     const log = await db.log.create({

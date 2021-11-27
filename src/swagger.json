@@ -133,7 +133,7 @@
                 "requestBody": {
                     "description": "Requires the email and the password of the user.",
                     "content": {
-                        "application/json": {
+                        "multipart/formdata": {
                             "schema": {
                                 "$ref": "#/components/schemas/IRegistrationPayload"
                             }
@@ -169,7 +169,7 @@
                         }
                     },
                     "406": {
-                        "description": "Not acceptable. Username or email are already taken.",
+                        "description": "User is already authentified. Logout must be done first ",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1453,6 +1453,14 @@
                     "last_name": {
                         "type": "string",
                         "description": "The last name of the registering user."
+                    },
+                    "avatar_url": {
+                        "type": "string",
+                        "description": "Optional. Use this field if the user selected an avatar from a publicly available list of avatars"
+                    },
+                    "avatar": {
+                        "type": "object",
+                        "description": "Use this field for the uploaded File. The file must be of type JPEG or PNG."
                     }
                 }
             },

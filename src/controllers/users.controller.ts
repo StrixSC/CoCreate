@@ -12,10 +12,7 @@ import {
     getSinglePublicProfileByUsername,
     getCompleteUser
 } from '../services/users.service';
-import moment from 'moment';
 
-const bucket = admin.storage().bucket();
-const auth = admin.auth();
 
 export const getPublicUsersController = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -157,126 +154,7 @@ export const updateUserProfileController = async (req: Request, res: Response, n
 
 export const uploadAndChangeUserAvatarController = async (req: any, res: any, next: any) => {
     try {
-        const file = req.file as Express.Multer.File;
-        const userId = req.userId;
-        const timestamp = moment().toDate().toISOString();
-        const type = file.originalname.split('.')[1];
 
-        if (!type) {
-            throw new create.BadRequest('Invalid type associated with filename. Please ensure the filename has a valid name, followed by a "." and a valid type.')
-        }
-
-        const fileName = `${userId}_${timestamp}.${type}`;
-        const bucketFile = bucket.file(`${userId}/` + fileName);
-
-        await bucketFile.save(file.buffer, {
-            contentType: file.mimetype,
-            gzip: true
-        });
-
-        const [url] = await bucketFile.getSignedUrl({
-            action: "read",
-            expires: "01-01-2050"
-        })
-
-        if (!url) {
-            throw new create.InternalServerError('An error has occurred while uploading avatar');
-        }
-
-        const uploadedAvatar = await db.avatar.create({
-            data: {
-                user_id: userId,
-                isPublic: false,
-                avatar_url: url
-            }
-        });
-
-        if (!uploadedAvatar) {
-            bucketFile.delete({ ignoreNotFound: true }, (err) => {
-                if (err) {
-                    throw new create.InternalServerError(err.message);
-                }
-
-                return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 'message': 'An error occurred while uploading the file. Operation reverted.' })
-            });
-        } else {
-            const previousProfile = await db.profile.findUnique({
-                where: { user_id: userId }
-            });
-
-            if (!previousProfile) {
-                await db.avatar.delete({
-                    where: {
-                        avatar_id: uploadedAvatar.avatar_id
-                    }
-                });
-
-                bucketFile.delete({ ignoreNotFound: true }, (err) => {
-                    if (err) {
-                        throw new create.InternalServerError(err.message);
-                    }
-
-                    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 'message': 'An error occurred while uploading the file. Operation reverted.' })
-                });
-            }
-
-            const updatedProfile = await db.profile.update({
-                where: {
-                    user_id: userId,
-                },
-                data: {
-                    avatar_url: uploadedAvatar.avatar_url
-                }
-            });
-
-            if (!updatedProfile) {
-                await db.avatar.delete({
-                    where: {
-                        avatar_id: uploadedAvatar.avatar_id
-                    }
-                });
-
-                bucketFile.delete({ ignoreNotFound: true }, (err) => {
-                    if (err) {
-                        throw new create.InternalServerError(err.message);
-                    }
-
-                    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 'message': 'An error occurred while uploading the file. Operation reverted.' })
-                });
-            } else {
-                const updatedAuthProfile = await auth.updateUser(userId, {
-                    photoURL: updatedProfile.avatar_url
-                });
-
-                if (!updatedAuthProfile) {
-                    await db.avatar.delete({
-                        where: {
-                            avatar_id: uploadedAvatar.avatar_id
-                        }
-                    });
-
-                    await db.profile.update({
-                        where: {
-                            user_id: userId
-                        },
-                        data: {
-                            avatar_url: previousProfile!.avatar_url
-                        }
-                    });
-
-                    bucketFile.delete({ ignoreNotFound: true }, (err) => {
-                        if (err) {
-                            throw new create.InternalServerError(err.message);
-                        }
-
-                        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 'message': 'An error occurred while uploading the file. Operation reverted.' })
-                    });
-                } else {
-                    res.status(StatusCodes.OK).json({ 'message': 'Avatar uploaded successfully and updated user avatar!' })
-                }
-
-            }
-        }
     } catch (e) {
         handleRequestError(e, next);
     }

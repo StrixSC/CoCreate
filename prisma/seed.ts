@@ -1,8 +1,10 @@
+import { v4 } from 'uuid';
 import { ChannelType, CollaborationType, MemberType } from '.prisma/client';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
+
     const publicChannel = await prisma.channel.upsert({
         where: {
             channel_id: 'PUBLIC'
@@ -56,6 +58,16 @@ async function main() {
                 create: [{ channel_id: 'PUBLIC', type: MemberType.Owner }]
             }
         }
+    });
+
+
+    const publicAvatars = await prisma.avatar.createMany({
+        data: [
+            { index: 1, avatar_id: 'PUBLIC_1', user_id: "ADMIN", isPublic: true, avatar_url: "https://firebasestorage.googleapis.com/v0/b/colorimage-f380e.appspot.com/o/public%2Fbird.jpg?alt=media&token=4f73cbdd-3cfe-4fe7-a871-51ed9bc3c604" },
+            { index: 2, avatar_id: 'PUBLIC_2', user_id: "ADMIN", isPublic: true, avatar_url: "https://firebasestorage.googleapis.com/v0/b/colorimage-f380e.appspot.com/o/public%2Fe4a49a16ff18697f5dd98a9af4015bfd.jpg?alt=media&token=75c8f7b4-3764-4ccb-b9e3-3243eb0dfd48" },
+            { index: 3, avatar_id: 'PUBLIC_3', user_id: "ADMIN", isPublic: true, avatar_url: "https://firebasestorage.googleapis.com/v0/b/colorimage-f380e.appspot.com/o/public%2FSeagull.jpg?alt=media&token=b902e745-748e-431e-9b03-66936e829d80" },
+        ],
+        skipDuplicates: true
     });
 
     const demoUser = await prisma.user.upsert({

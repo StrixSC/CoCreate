@@ -120,7 +120,7 @@ model Avatar {
   avatar_id  String  @id @unique @default(uuid())
   isPublic   Boolean @default(false)
   user_id    String
-  user       User    @relation(fields: [user_id], references: [user_id])
+  user       User   @relation(fields: [user_id], references: [user_id])
   avatar_url String
 }
 
