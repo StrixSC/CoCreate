@@ -4,12 +4,9 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { NewDrawingFormDialogComponent } from './../new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { ICollaborationConnectResponse, ICollaborationDeleteResponse, ICollaborationJoinResponse, ICollaborationLeaveResponse, ICollaborationUpdateResponse, ICollaborationCreateResponse, ICollaborationLoadResponse } from './../../model/ICollaboration.model';
 import { AuthService } from './../../services/auth.service';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  MatAutocomplete,
-  MatDialog, MatPaginator, MatTableDataSource, PageEvent
-} from '@angular/material';
+import { MatDialog, MatPaginator, MatTableDataSource, PageEvent } from '@angular/material';
 import { BehaviorSubject, EMPTY, merge, of, Subscription } from 'rxjs';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { DrawingGalleryService } from 'src/app/services/drawing-gallery/drawing-gallery.service';
@@ -47,30 +44,23 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   dialogRef: MatDialogRef<NewDrawingFormDialogComponent>;
   datasourceSelf = new MatTableDataSource<IGalleryEntry>([]);
   datasourceAll = new MatTableDataSource<IGalleryEntry>([]);
+  dataObsSelf: BehaviorSubject<IGalleryEntry[]>;
+  dataObsAll: BehaviorSubject<IGalleryEntry[]>;
   showFirstLastButtons = true;
-  length: number;
-  pageSize = 12;
-  pageIndex = 0;
+  lengthSelf: number;
+  pageSizeSelf = 12;
+  pageIndexSelf = 0;
   lengthAll: number;
   pageSizeAll = 12;
   pageIndexAll = 0;
-  teamName: String[];
-  isLoaded = false;
-  dataObsSelf: BehaviorSubject<IGalleryEntry[]>;
-  dataObsAll: BehaviorSubject<IGalleryEntry[]>;
-
   
   selectedOption: string = 'All';
-  selectedAllOption: string = 'All';
-  allDrawingFilter: string = '';
-  myDrawingFilter: string = '';
+  selectedOptionAll: string = 'All';
+  drawingFilterSelf: string = '';
+  drawingFilterAll: string = '';
 
 
   private drawingsSubscription: Subscription;
-
-  @ViewChild('tagInput', { static: false }) tagInput: ElementRef<HTMLInputElement>;
-  @ViewChild('auto', { static: false }) matAutocomplete: MatAutocomplete;
-  @ViewChild('fileUpload', { static: false }) fileUploadEl: ElementRef;  
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
 
   drawingsEntry: IGalleryEntry[] = []
@@ -159,8 +149,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
               this.syncCollaboration.onDeleteCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Delete }))),
               this.syncCollaboration.onUpdateCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Update }))),
               this.syncCollaboration.onLoadCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Load })))
-            
-         
       ).subscribe((data: object & { eventType: GalleryEvents }) => {
         if (data && data.eventType) {
           this.handlerCallbacks[data.eventType](data);
@@ -193,15 +181,15 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   searchAllDrawings(value: any) {
-    this.selectedAllOption = value;
+    this.selectedOptionAll = value;
   }
 
   setFilterMyDrawings(value: any) : void {
-    this.myDrawingFilter = value;
+    this.drawingFilterSelf = value;
   }
 
   setFilterAll(value: any) : void {
-    this.allDrawingFilter = value;
+    this.drawingFilterAll = value;
   }
 
   initializePagination() : void {
@@ -265,18 +253,18 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   handlePageEvent(event: PageEvent, paginate: boolean) {
     if(!paginate)
     {
-      this.pageSize = 12;
-      this.pageIndex = 0;
+      this.pageSizeSelf = 12;
+      this.pageIndexSelf = 0;
     }
     else {
-      this.pageSize = event.pageSize;
-      this.pageIndex = event.pageIndex;
+      this.pageSizeSelf = event.pageSize;
+      this.pageIndexSelf = event.pageIndex;
     }
     this.drawingsSubscription = merge(
-      this.drawingGalleryService.getTypeMyDrawings( event.pageSize * event.pageIndex, this.selectedOption, this.myDrawingFilter).pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count})))
+      this.drawingGalleryService.getTypeMyDrawings( event.pageSize * event.pageIndex, this.selectedOption, this.drawingFilterSelf).pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count})))
      ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string, count: number }) => {
       this.datasourceSelf.data = d.drawings;
-      this.length = d.count;
+      this.lengthSelf = d.count;
     });
   }
 
@@ -294,23 +282,22 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     this.drawingsSubscription = merge(
-      this.drawingGalleryService.getTypeDrawings( event.pageSize * event.pageIndex, this.selectedAllOption, this.allDrawingFilter).pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count})))
+      this.drawingGalleryService.getTypeDrawings( event.pageSize * event.pageIndex, this.selectedOptionAll, this.drawingFilterAll).pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count})))
      ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string, count: number }) => {
-
           this.datasourceAll.data = d.drawings;
           this.lengthAll = d.count;
-  
-  });}
+    });
+  }
   
   fetchAllDrawings(): void {
     this.drawingsSubscription = merge(
-      this.drawingGalleryService.getDrawings().pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count}))),
+      this.drawingGalleryService.getAllDrawings().pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count}))),
       this.drawingGalleryService.getMyDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: 'Self', count: d.total_drawing_count})))
     ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string, count: number }) => {
       if (d.drawings && d.drawings.length > 0) {
         if (d.galleryType === 'Self') {
           this.datasourceSelf.data = d.drawings;
-          this.length = d.count;
+          this.lengthSelf = d.count;
         } else {
           this.datasourceAll.data = d.drawings;
           this.lengthAll = d.count;

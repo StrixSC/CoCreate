@@ -28,12 +28,11 @@
       </mat-form-field>
 
       <mat-paginator #paginator4 (page)="handlePageEvent($event, true)"
-      [length]="length"
-      [pageSize]="pageSize"
+      [length]="lengthSelf"
+      [pageSize]="pageSizeSelf"
       [showFirstLastButtons]="showFirstLastButtons"
       [pageSizeOptions]="pageSizeOptions"
-      [pageIndex]="pageIndex"
-      aria-label="Select page"></mat-paginator>
+      [pageIndex]="pageIndexSelf"></mat-paginator>
 
       <div class="margin-center">
         <app-drawing-gallery-card *ngFor="let drawing of dataObsSelf | async" [drawing]="drawing">
@@ -55,7 +54,7 @@
       </mat-form-field>
       <mat-form-field>
         <mat-label>Type de dessins</mat-label>
-        <mat-select [(ngModel)]="selectedAllOption" (selectionChange)="searchAllDrawings($event.value); handleAllPageEvent($event, false)">
+        <mat-select [(ngModel)]="selectedOptionAll" (selectionChange)="searchAllDrawings($event.value); handleAllPageEvent($event, false)">
           <mat-option *ngFor="let type of visibilityAllFilter" [value]="type.key">{{type.value}}</mat-option>
         </mat-select>
       </mat-form-field>
@@ -65,8 +64,7 @@
       [pageSize]="pageSizeAll"
       [showFirstLastButtons]="showFirstLastButtons"
       [pageSizeOptions]="pageSizeOptions"
-      [pageIndex]="pageIndexAll"
-      aria-label="Select page"></mat-paginator>
+      [pageIndex]="pageIndexAll"></mat-paginator>
 
 
       <div class="margin-center">
@@ -75,6 +73,5 @@
       </div>
     </div>
   </mat-tab>
-  
   
 </mat-tab-group>

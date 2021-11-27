@@ -13,7 +13,7 @@ export class DrawingGalleryService {
   constructor(private http: HttpClient) { }
 
   /// Permet de recuperer les dessins sur le serveur
-  getDrawings(): Observable<IGalleryEntry[]> {
+  getAllDrawings(): Observable<IGalleryEntry[]> {
     return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?offset=0').pipe(
       catchError(() => of([])),
     );
