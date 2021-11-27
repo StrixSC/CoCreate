@@ -76,6 +76,9 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   
   selectedOption: string = 'All';
   selectedAllOption: string = 'All';
+  allDrawingFilter: string = '';
+  myDrawingFilter: string = '';
+
 
   private drawingsSubscription: Subscription;
 
@@ -218,6 +221,14 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     console.log(this.selectedAllOption)
   }
 
+  setFilterMyDrawings(value: any) : void {
+    this.myDrawingFilter = value;
+  }
+
+  setFilterAll(value: any) : void {
+    this.allDrawingFilter = value;
+  }
+
   initializePagination() : void {
     this.paginator._intl.itemsPerPageLabel = "Dessins par page: ";
     this.paginator._intl.nextPageLabel = "Page suivante";
@@ -326,13 +337,9 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
       this.pageIndex = event.pageIndex;
     }
     this.drawingsSubscription = merge(
-      this.drawingGalleryService.getTypeMyDrawings( event.pageSize * event.pageIndex, this.selectedOption).pipe(map((d: any) => ({ drawings: d.drawings})))
+      this.drawingGalleryService.getTypeMyDrawings( event.pageSize * event.pageIndex, this.selectedOption, this.myDrawingFilter).pipe(map((d: any) => ({ drawings: d.drawings})))
      ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string }) => {
-      if (d.drawings && d.drawings.length > 0) {
-        {
-          this.datasourceSelf.data = d.drawings;
-        }
-      }
+      this.datasourceSelf.data = d.drawings;
     });
   }
 
