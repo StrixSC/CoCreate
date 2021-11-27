@@ -57,7 +57,6 @@ class Collaborator extends ChangeNotifier {
 
   String convertToEnglish(frenchType) {
     String englishType = 'Aucun';
-    print('1');
     switch(frenchType) {
       case 'Public':
         englishType = 'Public';

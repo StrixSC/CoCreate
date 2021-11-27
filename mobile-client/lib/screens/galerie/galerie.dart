@@ -22,10 +22,11 @@ class Galerie extends StatefulWidget {
   GalerieState createState() => GalerieState();
 }
 
-class GalerieState extends State<Galerie> with TickerProviderStateMixin {
+class GalerieState extends State<Galerie> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin  {
   Map pagingControllers = <String, PagingController<int, Drawing>>{};
   Map searchControllers = <String, TextEditingController>{};
   Map scrollControllers = <String, ScrollController>{};
+  Map dropDownControllers = <String, String>{};
   late TabController _tabController;
   static const _pageSize = 12;
 
@@ -39,6 +40,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
           type, () => PagingController<int, Drawing>(firstPageKey: 0));
       searchControllers.putIfAbsent(type, () => TextEditingController());
       scrollControllers.putIfAbsent(type, () => ScrollController());
+      dropDownControllers.putIfAbsent(type, () => 'Aucun');
     }
   }
 
@@ -79,7 +81,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
             var pageKey = (pagingControllers[section] as PagingController)
                 .itemList!
                 .length;
-            _fetchDrawings(pageKey, section, dropDownValueType);
+            _fetchDrawings(pageKey, section, dropDownControllers[context.read<Collaborator>().currentType]);
           }
         }
       });
@@ -88,6 +90,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
 
   Future<void> _fetchDrawings(int pageKey, String section, String? type) async {
     RestApi rest = RestApi();
+    type = dropDownControllers[context.read<Collaborator>().currentType];
     type = (context.read<Collaborator>().convertToEnglish(type));
     String? filter = (searchControllers[section] as TextEditingController).text;
     if (type == 'Aucun') {
@@ -97,7 +100,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
       filter = null;
     }
     Response response;
-    if (section == 'Available') {
+    if (section == 'Available' && type != 'Private') {
       response =
           await rest.drawing.fetchDrawings(filter, pageKey, _pageSize, type);
     } else {
@@ -134,6 +137,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
       }
       context.read<Collaborator>().addDrawings(drawings);
     } else if (response.statusCode == 204) {
+      print('bruh');
       print(response.body);
     }
   }
@@ -142,12 +146,12 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
         indicatorWeight: 5.0,
         controller: _tabController,
         onTap: (value) {
-          setState(() {
-            dropDownValueType = 'Aucun';
-            searchControllers.update(
-                TYPES[value], (value) => TextEditingController());
-            pagingControllers[TYPES[value]].refresh();
-          });
+          // setState(() {
+          //   dropDownValueType = 'Aucun';
+          //   searchControllers.update(
+          //       TYPES[value], (value) => TextEditingController());
+          //   pagingControllers[TYPES[value]].refresh();
+          // });
           context.read<Collaborator>().setCurrentType(TYPES[value]);
         },
         tabs: [
@@ -250,7 +254,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
                       width: 500,
                       child: dropDown(
                           ['Aucun', 'Public', 'Protégé', 'Privée'],
-                          dropDownValueType,
+                          dropDownControllers[context.watch<Collaborator>().currentType],
                           'Filtrer selon un type de dessins'))
                 ])),
         const SizedBox(height: 40.0),
@@ -317,6 +321,8 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
     });
     super.dispose();
   }
+  @override
+  bool get wantKeepAlive => true;
 
   createDessinDialog() async {
     showDialog<String>(
@@ -368,12 +374,13 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
                             ])))
               ]),
               actions: <Widget>[
-                TextButton(
+                ElevatedButton(
                   onPressed: () {
                     _formKey.currentState!.save();
                     if (_formKey.currentState!.validate()) {
-                      print(_formKey.currentState!.value);
+                      print(_formKey.currentContext);
                     } else {
+                      print(_formKey.currentContext);
                       print("validation failed");
                     }
                   },
@@ -391,17 +398,21 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
           labelText: inputHint,
           labelStyle: const TextStyle(fontSize: _fontSize),
           border:
-              OutlineInputBorder(borderRadius: BorderRadius.all(Radius.zero)),
+              const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.zero)),
         ),
         icon: const Align(
             alignment: Alignment.topRight,
             child: Icon(Icons.arrow_downward, size: 35.0)),
         onChanged: (String? newValue) {
-          setState(() {
-            dropDownValueType = newValue!;
-            pagingControllers[context.read<Collaborator>().currentType]
-                .refresh();
-          });
+          if(items.length == 4) {
+            setState(() {
+              dropDownControllers.update(context.read<Collaborator>().currentType, (value) => newValue!);
+              pagingControllers[context.read<Collaborator>().currentType]
+                  .refresh();
+            });
+          }
+          else { value = newValue!; }
+
         },
         items: items.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
@@ -409,7 +420,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
             child: Text(value),
           );
         }).toList(),
-        style: TextStyle(fontSize: _fontSize, fontWeight: FontWeight.w300),
+        style: const TextStyle(fontSize: _fontSize, fontWeight: FontWeight.w300),
       )
     ]);
   }
@@ -434,7 +445,12 @@ formField(String hintText, String label) {
       contentPadding: const EdgeInsets.all(padding),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(3.0)),
     ),
-    autovalidate: true,
+    validator: (value) {
+      if (value == null || value.isEmpty) {
+        return 'Veuillez remplir cette option svp.';
+      }
+      return null;
+    },
   );
 }
 
@@ -473,7 +489,7 @@ class _Drawing extends StatelessWidget {
                         child: Row(children: <Widget>[
                   SizedBox(width: 680, child: gridTileJoin(thumbnail)),
                   SizedBox(
-                      width: 400,
+                      width: 300,
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -505,7 +521,7 @@ class _Drawing extends StatelessWidget {
                 ])))
               ]),
               actions: <Widget>[
-                TextButton(
+                ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context, 'Joindre');
                   },
