@@ -383,10 +383,10 @@ class GalerieState extends State<Galerie>
                                         'Choisir un type de dessins',
                                         'Type'),
                                     const SizedBox(height: 48.0),
-                                    formField(
+                                    dropDownValueTypeCreate == 'Protégé' ? formField(
                                         'Mot de passe',
                                         'Veuillez entrez choisir un mot de passe',
-                                        passController),
+                                        passController) : const SizedBox.shrink(),
                                   ]))
                             ])))
               ]),
