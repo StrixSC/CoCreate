@@ -53,8 +53,7 @@ export class ResizeSyncCommand extends SyncCommand {
     }
 
     undo(): void {
-        console.log(this.totalXScale, this.totalXTranslation, this.totalYScale, this.totalYTranslation);
-        this.syncService.sendResize(DrawingState.move, this.payload.selectedActionId, -1 * this.totalXScale, -1 * this.totalYScale, -1 * this.totalXTranslation, -1 * this.totalYTranslation, true);
+        this.syncService.sendResize(DrawingState.move, this.payload.selectedActionId, 1 / this.totalXScale, 1 / this.totalYScale, -1 * this.totalXTranslation, -1 * this.totalYTranslation, true);
     }
 
     redo(): void {

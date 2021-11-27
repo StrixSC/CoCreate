@@ -66,7 +66,6 @@ export class ToolFactoryService {
   }
 
   handleEvent(payload: IAction): ICommand | null {
-    console.log(payload);
     return this.create(payload);
   }
 
@@ -115,12 +114,10 @@ export class ToolFactoryService {
   onDelete(payload: IDeleteAction, isActiveUser: boolean) {
     const drawnAction = this.collaborationService.getActionById(payload.selectedActionId);
     const addToUndos = false;
-    if (drawnAction) {
-      const command = new DeleteSyncCommand(payload, this.drawingService, drawnAction);
-      const res = command.execute();
-      if (res) {
-        this.addOrUpdateCollaboration(res, addToUndos);
-      }
+    const command = new DeleteSyncCommand(payload, this.drawingService, drawnAction);
+    const res = command.execute();
+    if (res) {
+      this.addOrUpdateCollaboration(res, addToUndos);
     }
   }
 
