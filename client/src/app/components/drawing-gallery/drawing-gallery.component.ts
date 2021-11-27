@@ -212,13 +212,12 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
   }
 
-  public searchMyDrawings(value: any) {
-    this.selectedOption = value
-    console.log(this.selectedOption)
+  searchMyDrawings(value: any) {
+    this.selectedOption = value;
   }
-  public searchAllDrawings(value: any) {
-    this.selectedAllOption = value
-    console.log(this.selectedAllOption)
+  
+  searchAllDrawings(value: any) {
+    this.selectedAllOption = value;
   }
 
   setFilterMyDrawings(value: any) : void {
@@ -358,13 +357,11 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     this.drawingsSubscription = merge(
-      this.drawingGalleryService.getTypeDrawings( event.pageSize * event.pageIndex, this.selectedAllOption).pipe(map((d: any) => ({ drawings: d.drawings})))
+      this.drawingGalleryService.getTypeDrawings( event.pageSize * event.pageIndex, this.selectedAllOption, this.allDrawingFilter).pipe(map((d: any) => ({ drawings: d.drawings})))
      ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string }) => {
-      if (d.drawings && d.drawings.length > 0) {
-        {
+      
           this.datasourceAll.data = d.drawings;
-        }
-      }
+  
   });}
   
   fetchAllDrawings(): void {

@@ -46,7 +46,7 @@
     <div>
       <mat-form-field [style.width.%]="50">
         <mat-label>Recherche</mat-label>
-        <input (keydown.enter)="setFilterAll($event.target.value)" matInput placeholder="Entrez un mot-clé">
+        <input (keydown.enter)="setFilterAll($event.target.value); handleAllPageEvent($event, false)" matInput placeholder="Entrez un mot-clé">
         <button mat-button matPrefix mat-icon-button>
           <mat-icon>search</mat-icon>
         </button>
