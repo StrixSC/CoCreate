@@ -9,7 +9,8 @@
 </mat-toolbar>
 
 <mat-tab-group #tabGroup class="centerTab">
-  <mat-tab class="drawing-list" label="Mes Dessins">
+  <mat-tab class="drawing-list" label="Mes Dessins & Dessins Rejoints">
+    <br>
     <div>
       <mat-form-field [style.width.%]="50">
         <mat-label>Recherche</mat-label>
@@ -53,7 +54,7 @@
         <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
       </mat-form-field>
       <mat-form-field>
-        <mat-label>Type</mat-label>
+        <mat-label>Type de dessins</mat-label>
         <mat-select [(ngModel)]="selectedAllOption" (selectionChange)="searchAllDrawings($event.value); handleAllPageEvent($event, false)">
           <mat-option *ngFor="let type of visibilityAllFilter" [value]="type.key">{{type.value}}</mat-option>
         </mat-select>

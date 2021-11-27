@@ -13,7 +13,7 @@ import {
 import { BehaviorSubject, EMPTY, merge, of, Subscription } from 'rxjs';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { DrawingGalleryService } from 'src/app/services/drawing-gallery/drawing-gallery.service';
-import { ICreateCollaboration, IGalleryEntry } from '../../model/IGalleryEntry.model';
+import { IGalleryEntry } from '../../model/IGalleryEntry.model';
 import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { SocketService } from 'src/app/services/chat/socket.service';
 import { switchMap, take, map } from 'rxjs/operators';
@@ -48,10 +48,10 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   datasourceSelf = new MatTableDataSource<IGalleryEntry>([]);
   datasourceAll = new MatTableDataSource<IGalleryEntry>([]);
   showFirstLastButtons = true;
-  length = 100;
+  length: number;
   pageSize = 12;
   pageIndex = 0;
-  lengthAll = 100;
+  lengthAll: number;
   pageSizeAll = 12;
   pageIndexAll = 0;
   teamName: String[];
@@ -188,11 +188,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     this.cdr.detectChanges();
   }
 
-  ngOnChanges() {
-    this.listenCreateChannel();
-
-  }
-
   searchMyDrawings(value: any) {
     this.selectedOption = value;
   }
@@ -246,7 +241,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   onCreate() {
     this.dialogRef.close();
     this.snackbar.open('Nouveau dessin créé avec succès!', '', { duration: 5000 });
-    this.syncCollaboration.onCreateCollaboration();
     this.fetchAllDrawings();
   }
 
@@ -271,19 +265,18 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   handlePageEvent(event: PageEvent, paginate: boolean) {
     if(!paginate)
     {
-      this.length = 100;
       this.pageSize = 12;
       this.pageIndex = 0;
     }
     else {
-      this.length = event.length
       this.pageSize = event.pageSize;
       this.pageIndex = event.pageIndex;
     }
     this.drawingsSubscription = merge(
-      this.drawingGalleryService.getTypeMyDrawings( event.pageSize * event.pageIndex, this.selectedOption, this.myDrawingFilter).pipe(map((d: any) => ({ drawings: d.drawings})))
-     ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string }) => {
+      this.drawingGalleryService.getTypeMyDrawings( event.pageSize * event.pageIndex, this.selectedOption, this.myDrawingFilter).pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count})))
+     ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string, count: number }) => {
       this.datasourceSelf.data = d.drawings;
+      this.length = d.count;
     });
   }
 
@@ -291,7 +284,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
     if(!paginate)
     {
-      this.lengthAll = 100;
       this.pageSizeAll = 12;
       this.pageIndexAll = 0;
     }
@@ -302,34 +294,29 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     this.drawingsSubscription = merge(
-      this.drawingGalleryService.getTypeDrawings( event.pageSize * event.pageIndex, this.selectedAllOption, this.allDrawingFilter).pipe(map((d: any) => ({ drawings: d.drawings})))
-     ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string }) => {
-      
+      this.drawingGalleryService.getTypeDrawings( event.pageSize * event.pageIndex, this.selectedAllOption, this.allDrawingFilter).pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count})))
+     ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string, count: number }) => {
+
           this.datasourceAll.data = d.drawings;
+          this.lengthAll = d.count;
   
   });}
   
   fetchAllDrawings(): void {
     this.drawingsSubscription = merge(
-      this.drawingGalleryService.getDrawings().pipe(map((d: any) => ({ drawings: d.drawings}))),
-      this.drawingGalleryService.getMyDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: 'Self' })))
-    ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string }) => {
+      this.drawingGalleryService.getDrawings().pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count}))),
+      this.drawingGalleryService.getMyDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: 'Self', count: d.total_drawing_count})))
+    ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string, count: number }) => {
       if (d.drawings && d.drawings.length > 0) {
         if (d.galleryType === 'Self') {
           this.datasourceSelf.data = d.drawings;
+          this.length = d.count;
         } else {
           this.datasourceAll.data = d.drawings;
+          this.lengthAll = d.count;
         }
       }
     });
-  }
-
-  public listenCreateChannel(){
-    this.syncCollaboration
-        .onCreateCollaboration()
-        .subscribe((data: ICreateCollaboration) => {
-           console.log(data)
-          });
   }
   
 }
