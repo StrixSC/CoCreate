@@ -51,7 +51,7 @@ class _LoginState extends State<Login> {
       // TODO : Don't forget to uncomment controllers at the end
       userCredential = await FirebaseAuth.instance
           // .signInWithEmailAndPassword(email: email, password: password);
-          .signInWithEmailAndPassword(email: "pri@pri.com", password: "pri123");
+          .signInWithEmailAndPassword(email: "pri@pri.com", password: "pripri123");
     } on FirebaseAuthException catch (e) {
       await translator.translate(e.message!, from: 'en', to: 'fr').then((value) => errorMessage = value.text);
       setState(() {

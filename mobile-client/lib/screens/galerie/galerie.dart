@@ -115,10 +115,12 @@ class GalerieState extends State<Galerie>
     }
 
     if (response.statusCode == 200) {
+      print(response.body);
       var jsonResponse = json.decode(response.body); //Map<String, dynamic>;
       List<Drawing> drawings = [];
       var resp = jsonResponse['drawings'];
       for (var drawing in resp) {
+        if (drawing != null) {
         Collaboration collaboration = Collaboration(
             collaborationId: drawing["collaboration_id"],
             memberCount: drawing["collaborator_count"],
@@ -133,6 +135,7 @@ class GalerieState extends State<Galerie>
                 .format(DateTime.parse(drawing['created_at'])),
             collaboration: collaboration,
             type: drawing['type']));
+        }
       }
       final isLastPage = drawings.length < _pageSize;
       if (isLastPage) {
