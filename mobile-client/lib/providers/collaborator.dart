@@ -39,6 +39,22 @@ class Collaborator extends ChangeNotifier {
     notifyListeners();
   }
 
+  String convertToFrench(englishType) {
+    String frenchType = 'Public';
+    switch(englishType) {
+      case 'Public':
+        frenchType = 'Public';
+        break;
+      case 'Protected':
+        frenchType = 'Protégé';
+        break;
+      case 'Private':
+        frenchType = 'Privée';
+        break;
+    }
+    return frenchType;
+  }
+
   void setCurrentType(type) {
     currentType = type;
     notifyListeners();

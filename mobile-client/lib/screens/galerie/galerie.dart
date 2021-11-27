@@ -10,6 +10,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:http/src/response.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/src/provider.dart';
+import 'package:intl/intl.dart';
 
 const _fontSize = 20.0;
 const padding = 30.0;
@@ -118,7 +119,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
             authorUsername: drawing["author_username"],
             authorAvatar: drawing["author_avatar"],
             title: drawing['title'],
-            createdAt: drawing['created_at'],
+            createdAt: DateFormat('yyyy-MM-dd kk:mm').format(DateTime.parse(drawing['created_at'])),
             collaboration: collaboration,
             type: drawing['type']));
       }
@@ -475,7 +476,7 @@ class _Drawing extends StatelessWidget {
                             richTextWhitePurple(
                                 'Auteur : ', drawing.authorUsername),
                             const SizedBox(height: 48.0),
-                            richTextWhitePurple('Type    : ', drawing.type),
+                            richTextWhitePurple('Type    : ', context.read<Collaborator>().convertToFrench(drawing.type)),
                             const SizedBox(height: 48.0),
                             richTextWhitePurple('Nombre de membres: ',
                                 drawing.collaboration.memberCount.toString()),
@@ -507,13 +508,14 @@ class _Drawing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String type = context.read<Collaborator>().convertToFrench(drawing.type);
     final Widget thumbnail = getThumbnail();
 
     return GestureDetector(
-        onTap: () => {joinDessinDialog(context)}, child: gridTile(thumbnail));
+        onTap: () => {joinDessinDialog(context)}, child: gridTile(thumbnail, type));
   }
 
-  gridTile(thumbnail) {
+  gridTile(thumbnail, type) {
     return Padding(
         padding: const EdgeInsets.only(left: 10.0, right: 10.0),
         child: GridTile(
@@ -532,7 +534,7 @@ class _Drawing extends StatelessWidget {
                 child: Icon(Icons.group, color: Colors.black),
               ),
               title: _GridTitleText(drawing.authorUsername),
-              subtitle: _GridTitleText(drawing.type),
+              subtitle: _GridTitleText(type),
               trailing: _GridTitleText(
                   drawing.collaboration.memberCount.toString() +
                       "/" +
@@ -569,7 +571,7 @@ class _Drawing extends StatelessWidget {
       text: TextSpan(
         // Note: Styles for TextSpans must be explicitly defined.
         // Child text spans will inherit styles from parent
-        style: const TextStyle(fontSize: 30.0),
+        style: const TextStyle(fontSize: 22.0),
         children: <TextSpan>[
           TextSpan(text: text1),
           TextSpan(
