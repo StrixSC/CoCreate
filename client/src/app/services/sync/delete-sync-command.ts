@@ -1,5 +1,3 @@
-import { ActionData } from './../collaboration.service';
-import { SyncDrawingService } from './../syncdrawing.service';
 import { DeleteCommand } from '../tools/selection-tool/delete-command/delete-command';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { IDeleteAction } from '../../model/IAction.model';
@@ -11,7 +9,7 @@ export class DeleteSyncCommand extends SyncCommand {
     constructor(
         public payload: IDeleteAction,
         private drawingService: DrawingService,
-        private drawnAction: SyncCommand
+        private drawnAction?: SyncCommand
     ) {
         super();
     }
@@ -26,12 +24,16 @@ export class DeleteSyncCommand extends SyncCommand {
     }
 
     undo(): void {
-        this.drawnAction.redo();
+        if (this.drawnAction) {
+            this.drawnAction!.redo();
+        }
     }
 
     redo(): void {
-        const object = this.command.objectList[0];
-        this.drawnAction.undo(object);
+        if (this.drawnAction) {
+            const object = this.command.objectList[0];
+            this.drawnAction!.undo(object);
+        }
     }
 
     update(payload: IDeleteAction): SyncCommand | void {

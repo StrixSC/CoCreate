@@ -79,24 +79,6 @@ export class SelectionToolService implements Tools {
 
   // Action Buttons
   private actionButtons: SelectionActionButton[] = [
-    // {
-    //   iconSrc: '/assets/svg-icon/rotate_right_black_24dp.svg',
-    //   buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
-    //   iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 10,
-    //   stroke: 'black',
-    //   opacity: '0.25',
-    //   opacityHover: '0.50',
-    //   iconId: ActionButtonIds.ClockwiseRotation,
-    // } as SelectionActionButton,
-    // {
-    //   buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
-    //   iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 10,
-    //   stroke: 'black',
-    //   opacity: '0.25',
-    //   opacityHover: '0.50',
-    //   iconSrc: '/assets/svg-icon/rotate_left_black_24dp.svg',
-    //   iconId: ActionButtonIds.CounterClockwiseRotation,
-    // } as SelectionActionButton,
     {
       buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
       iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 10,

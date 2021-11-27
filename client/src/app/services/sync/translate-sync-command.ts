@@ -24,7 +24,7 @@ export class TranslateSyncCommand extends SyncCommand {
     ) {
         super();
     }
-
+    //cd328914-d4df-4b0b-89b5-9b67ddb7b415
     execute(): SyncCommand | void {
         if (this.payload.state === DrawingState.move && this.isFlatAction) {
             this.object = this.drawingService.getObjectByActionId(this.payload.selectedActionId);

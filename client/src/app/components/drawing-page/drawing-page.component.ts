@@ -68,7 +68,7 @@ export class DrawingPageComponent {
       this.drawingLoader.loadDrawing();
       this.syncDrawingService.updatedDefaultPayload(this.drawingLoader.activeDrawingData!.collaborationId);
       this.listener = merge(
-        this.socketService.onException().pipe(map((d) => ({ ...d, eventType: EventTypes.Exception }))),
+        this.socketService.on('drawing:exception').pipe(map((d) => ({ ...d, eventType: EventTypes.Exception }))),
         this.socketService.onError().pipe(map((d) => ({ ...d, eventType: EventTypes.Error }))),
         this.syncDrawingService.onFreedraw().pipe(map((d) => ({ ...d, eventType: EventTypes.Action }))),
         this.syncDrawingService.onSelection().pipe(map((d) => ({ ...d, eventType: EventTypes.Action }))),

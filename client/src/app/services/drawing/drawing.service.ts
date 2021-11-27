@@ -60,7 +60,6 @@ export class DrawingService {
   }
 
   addLayer(id: number): void {
-    // console.log(this.renderer.nextSibling(this.objectList.get(id)));
     if (this.renderer.nextSibling(this.objectList.get(id)).getAttribute('id') !== 'gridRect') {
       let tempStrate: string;
       let siblingStrate: string;
@@ -77,7 +76,6 @@ export class DrawingService {
       console.log('Stop');
       return;
     }
-    console.log(this.drawing);
   }
 
   removeLayer(id: number): void {
@@ -105,9 +103,7 @@ export class DrawingService {
     if (!obj.id) {
       this.lastObjectId++;
       this.numberOfStrates++;
-
       this.renderer.setProperty(obj, 'id', this.lastObjectId);
-      // this.renderer.setProperty(obj, 'isSelected', true);
       this.renderer.setAttribute(obj, 'strate', this.numberOfStrates.toString());
     }
     const id: number = Number(obj.id);
@@ -169,8 +165,8 @@ export class DrawingService {
     this.drawing = this.renderer.createElement('svg', 'svg');
     this.setDimension(width, height);
     this.setDrawingColor(rgba);
-    this.drawingEmit.emit(this.drawing);
     this.isCreated = true;
+    this.drawingEmit.emit(this.drawing);
   }
 
   /// Permer l'ouverture d'un dessin sous la forme du model Drawing

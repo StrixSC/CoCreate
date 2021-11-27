@@ -66,6 +66,7 @@ export class ToolFactoryService {
   }
 
   handleEvent(payload: IAction): ICommand | null {
+    console.log(payload);
     return this.create(payload);
   }
 
