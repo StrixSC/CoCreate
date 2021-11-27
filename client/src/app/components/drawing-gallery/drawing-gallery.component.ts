@@ -4,25 +4,19 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { NewDrawingFormDialogComponent } from './../new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { ICollaborationConnectResponse, ICollaborationDeleteResponse, ICollaborationJoinResponse, ICollaborationLeaveResponse, ICollaborationUpdateResponse, ICollaborationCreateResponse, ICollaborationLoadResponse } from './../../model/ICollaboration.model';
 import { AuthService } from './../../services/auth.service';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   MatAutocomplete,
   MatDialog, MatPaginator, MatTableDataSource, PageEvent
 } from '@angular/material';
-import { BehaviorSubject, EMPTY, merge, Observable, of, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, merge, of, Subscription } from 'rxjs';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
-import { OpenDrawingService } from 'src/app/services/open-drawing/open-drawing.service';
-import { Drawing } from '../../../../../common/communication/drawing';
 import { DrawingGalleryService } from 'src/app/services/drawing-gallery/drawing-gallery.service';
-import { NewDrawingComponent } from '../new-drawing/new-drawing.component';
 import { ICreateCollaboration, IGalleryEntry } from '../../model/IGalleryEntry.model';
 import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { SocketService } from 'src/app/services/chat/socket.service';
 import { switchMap, take, map } from 'rxjs/operators';
-import { now } from 'moment';
 
 export enum DrawingTypes {
   Protected = 'Protected',
@@ -40,8 +34,6 @@ export enum GalleryEvents {
   Create = 'Create',
 }
 
-const ONE_WEEK_NUMERIC_VALUE = 24 * 60 * 60 * 1000 * 7;
-
 @Component({
   selector: 'app-drawing-gallery',
   templateUrl: './drawing-gallery.component.html',
@@ -50,12 +42,6 @@ const ONE_WEEK_NUMERIC_VALUE = 24 * 60 * 60 * 1000 * 7;
 
 export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  visible = true;
-  selectable = true;
-  removable = true;
-  addOnBlur = false;
-  separatorKeysCodes: number[] = [ENTER, COMMA];
-  selectedTab = new FormControl(0);
   errorListener: Subscription;
   messageListener: Subscription;
   dialogRef: MatDialogRef<NewDrawingFormDialogComponent>;
@@ -87,7 +73,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   @ViewChild('fileUpload', { static: false }) fileUploadEl: ElementRef;  
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
 
-  drawings: IGalleryEntry[] = [];
   drawingsEntry: IGalleryEntry[] = []
   
   public visibilityFilter: { key: string, value: string }[] =
@@ -138,9 +123,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
   constructor(
     private snackbar: MatSnackBar,
-    private openDrawingService: OpenDrawingService,
     public drawingService: DrawingService,
-    private renderer: Renderer2,
     public dialog: MatDialog,
     private cdr: ChangeDetectorRef,
     private drawingGalleryService: DrawingGalleryService,
@@ -148,9 +131,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     private socketService: SocketService,
     private auth: AuthService,
     private router: Router
-  ) {
-
-  }
+  ) {}
 
   ngOnInit(): void {
     this.errorListener = this.socketService.socketReadyEmitter
@@ -215,7 +196,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   searchMyDrawings(value: any) {
     this.selectedOption = value;
   }
-  
+
   searchAllDrawings(value: any) {
     this.selectedAllOption = value;
   }
@@ -234,42 +215,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     this.paginator._intl.lastPageLabel = "Dernière page";
     this.paginator._intl.previousPageLabel = "Page précédente"
     this.paginator._intl.firstPageLabel = "Première page"
-  }
-
-  get tagCtrl(): FormControl {
-    return this.openDrawingService.tagCtrl;
-  }
-
-  get errorOpenFile() {
-    return this.openDrawingService.errorDialog;
-  }
-  get filteredTags(): Observable<string[]> {
-    return this.openDrawingService.filteredTags;
-  }
-  get selectedTags(): string[] {
-    return this.openDrawingService.selectedTags;
-  }
-  get allTags(): string[] {
-    return this.openDrawingService.allTags;
-
-  }
-  get selectedDrawing(): Drawing | null {
-    return this.openDrawingService.selectedDrawing;
-  }
-
-  isOneWeekOld(date: number) {
-    return Math.round(new Date().getTime() - new Date(date).getTime()) > ONE_WEEK_NUMERIC_VALUE;
-  }
-
-  getLocalThumbnail() {
-    const container: HTMLElement | null = document.getElementById('localFileThumbnail');
-    if (container) {
-      const svgThumbnail: Element | null = container.children.item(0);
-      if (svgThumbnail) {
-        this.renderer.setAttribute(svgThumbnail, 'viewBox', `0 0 800 800`);
-        svgThumbnail.innerHTML = `${this.openDrawingService.localDrawingThumbnail}`;
-      }
-    }
   }
 
   openDialog(): void {
