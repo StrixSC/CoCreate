@@ -120,7 +120,8 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
             authorUsername: drawing["author_username"],
             authorAvatar: drawing["author_avatar"],
             title: drawing['title'],
-            createdAt: DateFormat('yyyy-MM-dd kk:mm').format(DateTime.parse(drawing['created_at'])),
+            createdAt: DateFormat('yyyy-MM-dd kk:mm')
+                .format(DateTime.parse(drawing['created_at'])),
             collaboration: collaboration,
             type: drawing['type']));
       }
@@ -389,7 +390,8 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
         decoration: InputDecoration(
           labelText: inputHint,
           labelStyle: const TextStyle(fontSize: _fontSize),
-          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.zero)),
+          border:
+              OutlineInputBorder(borderRadius: BorderRadius.all(Radius.zero)),
         ),
         icon: const Align(
             alignment: Alignment.topRight,
@@ -397,7 +399,8 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
         onChanged: (String? newValue) {
           setState(() {
             dropDownValueType = newValue!;
-            pagingControllers[context.read<Collaborator>().currentType].refresh();
+            pagingControllers[context.read<Collaborator>().currentType]
+                .refresh();
           });
         },
         items: items.map<DropdownMenuItem<String>>((String value) {
@@ -466,8 +469,9 @@ class _Drawing extends StatelessWidget {
               title: Center(child: Text('Joindre ${drawing.title} ?')),
               content: Column(children: [
                 Expanded(
-                    child: Row(children: <Widget>[
-                  SizedBox(width: 600, child: gridTileJoin(thumbnail)),
+                    child: SingleChildScrollView(
+                        child: Row(children: <Widget>[
+                  SizedBox(width: 680, child: gridTileJoin(thumbnail)),
                   SizedBox(
                       width: 400,
                       child: Column(
@@ -477,7 +481,11 @@ class _Drawing extends StatelessWidget {
                             richTextWhitePurple(
                                 'Auteur : ', drawing.authorUsername),
                             const SizedBox(height: 48.0),
-                            richTextWhitePurple('Type    : ', context.read<Collaborator>().convertToFrench(drawing.type)),
+                            richTextWhitePurple(
+                                'Type    : ',
+                                context
+                                    .read<Collaborator>()
+                                    .convertToFrench(drawing.type)),
                             const SizedBox(height: 48.0),
                             richTextWhitePurple('Nombre de membres: ',
                                 drawing.collaboration.memberCount.toString()),
@@ -494,7 +502,7 @@ class _Drawing extends StatelessWidget {
                                     'Veuillez entrez le titre du dessin')
                                 : const SizedBox.shrink(),
                           ]))
-                ]))
+                ])))
               ]),
               actions: <Widget>[
                 TextButton(
@@ -513,7 +521,8 @@ class _Drawing extends StatelessWidget {
     final Widget thumbnail = getThumbnail();
 
     return GestureDetector(
-        onTap: () => {joinDessinDialog(context)}, child: gridTile(thumbnail, type));
+        onTap: () => {joinDessinDialog(context)},
+        child: gridTile(thumbnail, type));
   }
 
   gridTile(thumbnail, type) {
