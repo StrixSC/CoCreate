@@ -84,12 +84,12 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
     for (let i = 0; i < allCollaborations.length; i++) {
         const collaboration = allCollaborations[i];
         let author = collaboration.collaboration_members.find((c: any) => c.type === MemberType.Owner);
-        let allowSearching = author!.user.account!.allow_searching;
 
         if (!author) {
             continue;
         }
 
+        let allowSearching = author!.user.account!.allow_searching;
         const date = new Date(collaboration.created_at);
         const localLocale = moment(date);
         localLocale.locale('fr');
