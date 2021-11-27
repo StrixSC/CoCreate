@@ -88,6 +88,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
 
   Future<void> _fetchDrawings(int pageKey, String section, String? type) async {
     RestApi rest = RestApi();
+    type = (context.read<Collaborator>().convertToEnglish(type));
     String? filter = (searchControllers[section] as TextEditingController).text;
     if (type == 'Aucun') {
       type = null;
@@ -388,15 +389,15 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin {
         decoration: InputDecoration(
           labelText: inputHint,
           labelStyle: const TextStyle(fontSize: _fontSize),
-          border: const OutlineInputBorder(),
+          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.zero)),
         ),
         icon: const Align(
             alignment: Alignment.topRight,
             child: Icon(Icons.arrow_downward, size: 35.0)),
         onChanged: (String? newValue) {
           setState(() {
+            dropDownValueType = newValue!;
             pagingControllers[context.read<Collaborator>().currentType].refresh();
-            value = newValue!;
           });
         },
         items: items.map<DropdownMenuItem<String>>((String value) {

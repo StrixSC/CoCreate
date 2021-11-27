@@ -40,7 +40,7 @@ class Collaborator extends ChangeNotifier {
   }
 
   String convertToFrench(englishType) {
-    String frenchType = 'Public';
+    String frenchType = 'Aucun';
     switch(englishType) {
       case 'Public':
         frenchType = 'Public';
@@ -53,6 +53,23 @@ class Collaborator extends ChangeNotifier {
         break;
     }
     return frenchType;
+  }
+
+  String convertToEnglish(frenchType) {
+    String englishType = 'Aucun';
+    print('1');
+    switch(frenchType) {
+      case 'Public':
+        englishType = 'Public';
+        break;
+      case 'Protégé':
+        englishType = 'Protected';
+        break;
+      case 'Privée':
+        englishType = 'Private';
+        break;
+    }
+    return englishType;
   }
 
   void setCurrentType(type) {
