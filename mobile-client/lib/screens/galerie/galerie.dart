@@ -17,6 +17,10 @@ const padding = 30.0;
 const TYPES = ["Available", "Joined"];
 final _formKey = GlobalKey<FormBuilderState>();
 
+TextEditingController titreController = TextEditingController();
+TextEditingController passController = TextEditingController();
+TextEditingController memberController = TextEditingController();
+
 class Galerie extends StatefulWidget {
   @override
   GalerieState createState() => GalerieState();
@@ -193,6 +197,9 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin, Automat
                   icon: const Icon(CupertinoIcons.plus,
                       color: Colors.white, size: 34),
                   onPressed: () {
+                    titreController.clear();
+                    passController.clear();
+                    memberController.clear();
                     createDessinDialog();
                   })
             ],
@@ -358,10 +365,10 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin, Automat
                                         : const SizedBox.shrink(),
                                     const SizedBox(height: 48.0),
                                     formField('Titre',
-                                        'Veuillez entrez le titre du dessin'),
+                                        'Veuillez entrez le titre du dessin', titreController),
                                     const SizedBox(height: 48.0),
                                     formField('Nombre de membres maximum',
-                                        'Veuillez entrez choisir un auteur'),
+                                        'Veuillez entrez choisir un auteur', memberController),
                                     const SizedBox(height: 48.0),
                                     dropDown(
                                         ['Public', 'Protégé', 'Privée'],
@@ -369,7 +376,7 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin, Automat
                                         'Choisir un type de dessins'),
                                     const SizedBox(height: 48.0),
                                     formField('Mot de passe',
-                                        'Veuillez entrez choisir un mot de passe'),
+                                        'Veuillez entrez choisir un mot de passe', passController),
                                   ]))
                             ])))
               ]),
@@ -378,9 +385,8 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin, Automat
                   onPressed: () {
                     _formKey.currentState!.save();
                     if (_formKey.currentState!.validate()) {
-                      print(_formKey.currentContext);
+                      print(titreController);
                     } else {
-                      print(_formKey.currentContext);
                       print("validation failed");
                     }
                   },
@@ -426,8 +432,9 @@ class GalerieState extends State<Galerie> with TickerProviderStateMixin, Automat
   }
 }
 
-formField(String hintText, String label) {
+formField(String hintText, String label, TextEditingController textController) {
   return TextFormField(
+    controller: textController,
     obscureText: hintText == 'Mot de passe',
     enableSuggestions: hintText != 'Mot de passe',
     style: const TextStyle(fontSize: _fontSize),
@@ -449,6 +456,7 @@ formField(String hintText, String label) {
       if (value == null || value.isEmpty) {
         return 'Veuillez remplir cette option svp.';
       }
+      _formKey.currentState!.save();
       return null;
     },
   );
@@ -515,7 +523,7 @@ class _Drawing extends StatelessWidget {
                             const SizedBox(height: 28.0),
                             drawing.type == 'Protected'
                                 ? formField('Mot de passe',
-                                    'Veuillez entrez le titre du dessin')
+                                    'Veuillez entrez le titre du dessin', passController)
                                 : const SizedBox.shrink(),
                           ]))
                 ])))
@@ -537,7 +545,10 @@ class _Drawing extends StatelessWidget {
     final Widget thumbnail = getThumbnail();
 
     return GestureDetector(
-        onTap: () => {joinDessinDialog(context)},
+        onTap: () {
+          passController.clear();
+          joinDessinDialog(context);
+        },
         child: gridTile(thumbnail, type));
   }
 
