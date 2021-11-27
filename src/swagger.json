@@ -546,6 +546,118 @@
                 }
             }
         },
+        "/api/users/upload/avatar": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Upload and update a user avatar by file",
+                "operationId": "upload-update-avatar",
+                "description": "Uploads the avatar to firebase and updates the user ",
+                "requestBody": {
+                    "description": "Requires the file uploaded with the keyword 'avatar'",
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "avatar": {
+                                        "description": "The new avatar to upload and attribute to the requesting user."
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Avatar uploaded and updated successfully!",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request. Invalid or missing information. The filetype must be a valid image and have a valid extension and a valid name.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected internal server error. This could either be a failed upload to the storage, failed update on the database or failed update on the firebase user. Eitherway, the operation has been reverted.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/avatars": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Fetch all available user avatars",
+                "operationId": "users",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns an array of all user's available avatars.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "avatars": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "description": "Url of the avatar"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Either the user is not logged in, or the JWT token is expired. In case of the latter, refreshing your browser should regenerate a valid token.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/users/profile": {
             "get": {
                 "parameters": [
@@ -654,7 +766,7 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "username":{},
+                                        "username": {},
                                         "avatarUrl": {}
                                     }
                                 }

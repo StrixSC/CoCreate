@@ -2,21 +2,11 @@ import { Action, ActionType } from "@prisma/client";
 import { Server, Socket } from "socket.io";
 import { db } from "../../db";
 import { SocketEventError } from "../../socket";
-import { validateDrawingEvents } from "../../utils/drawings";
 import { handleSocketError } from "../../utils/errors";
-import validator from 'validator';
 import { ExceptionType } from "../../models/Exceptions.enum";
 
 export const handleSelection = async (io: Server, socket: Socket, data: Action) => {
     try {
-        const validated = validateDrawingEvents(ActionType.Select, data);
-        if (!validated.result) {
-            throw new SocketEventError(
-                `Could not trigger action: Selection data error on: ${validated.field}`,
-                'E2201'
-            );
-        }
-
         const action = await db.action.findFirst({
             where: {
                 actionId: data.actionId,

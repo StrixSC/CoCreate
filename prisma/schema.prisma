@@ -18,6 +18,7 @@ model User {
   channels       ChannelMember[]
   actions        Action[]
   collaborations CollaborationMember[]
+  avatars        Avatar[]
 }
 
 model Profile {
@@ -112,6 +113,15 @@ model Drawing {
   background_color String        @default("#FFFFFF")
   width            Int           @default(1280)
   height           Int           @default(752)
+}
+
+model Avatar {
+  index      Int     @unique @default(autoincrement())
+  avatar_id  String  @id @unique @default(uuid())
+  isPublic   Boolean @default(false)
+  user_id    String
+  user       User    @relation(fields: [user_id], references: [user_id])
+  avatar_url String
 }
 
 model Action {

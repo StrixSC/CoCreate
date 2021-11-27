@@ -1,20 +1,31 @@
+import { imageFilter } from './../middlewares/users.middleware';
 import { body, query } from 'express-validator';
+import multer from 'multer';
+
 import { checkIfAuthenticated, checkIfSelfRequest } from './../middlewares/auth.middleware';
 import {
     getCompleteUserController,
     getPublicUserController,
     getPublicUsersController,
+    getUserAvatarsController,
     getUserChannelsController,
     getUserLogsController,
-    updateUserProfileController
+    updateUserProfileController,
+    uploadAndChangeUserAvatarController
 } from './../controllers/users.controller';
 import { Router } from 'express';
 
 const router = Router();
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage, fileFilter: imageFilter }).single('avatar');
 
 // Get public information of all users
 router.get('/profile', (req, res, next) => getPublicUsersController(req, res, next));
 
+router.post('/upload/avatar', checkIfAuthenticated, upload,
+    (req, res, next) => uploadAndChangeUserAvatarController(req, res, next));
+
+router.get('/avatars', checkIfAuthenticated, (req, res, next) => getUserAvatarsController(req, res, next))
 // [Protected] Update user profile
 router.put('/profile', checkIfAuthenticated,
     body('username')

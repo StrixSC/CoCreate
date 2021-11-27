@@ -3,7 +3,7 @@ import create from 'http-errors';
 import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { IPublicUserProfile } from './../models/IUserPublicProfile';
 import { db } from '../db';
-import { MemberType, Log } from '.prisma/client';
+import { MemberType, Log, Avatar } from '.prisma/client';
 import { admin } from '../firebase';
 import moment from 'moment';
 
@@ -215,4 +215,18 @@ export const updateUserProfile = async (userId: string, username: string, avatar
             throw new create.InternalServerError("Something went wrong while processing the request. No information was updated.");
         }
     }
+}
+
+export const getUserAvatars = async (userId: string): Promise<Avatar[]> => {
+    const avatars = await db.avatar.findMany({
+        where: {
+            OR: [
+                { user_id: userId },
+                { isPublic: true }
+            ]
+        }
+    });
+
+    return avatars;
+
 }

@@ -15,6 +15,8 @@ declare global {
 }
 
 admin.initializeApp({
+    projectId: "colorimage-f380e",
+    storageBucket: "colorimage-f380e.appspot.com",
     credential: admin.credential.cert(
         JSON.parse(
             Buffer.from(
