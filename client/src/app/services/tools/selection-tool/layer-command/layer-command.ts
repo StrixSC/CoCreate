@@ -5,6 +5,9 @@ export class LayerCommand implements ICommand {
     private previousTransformation: Map<string, string> = new Map<string, string>();
 
     private lastAngle = 0;
+    public actionId: string = "";
+    public userId: string = "";
+
     private lastXTranslate = 0;
     private lastYTranslate = 0;
 

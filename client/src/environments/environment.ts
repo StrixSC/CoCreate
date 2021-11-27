@@ -3,9 +3,12 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  serverURL: "https://colorimage-109-3900.herokuapp.com",
+  // serverURL: "https://colorimage-109-3900.herokuapp.com",
+  serverURL: "http://localhost:3000",
+  authEmulator: "http://localhost:9099",
+  useEmulator: true,
   firebaseConfig: {
-  apiKey: 'AIzaSyCfef5WBapS3mTkp_swLaXZVQ6haiwH6hA',
+    apiKey: 'AIzaSyCfef5WBapS3mTkp_swLaXZVQ6haiwH6hA',
     authDomain: 'colorimage-f380e.firebaseapp.com',
     projectId: 'colorimage-f380e',
     storageBucket: 'colorimage-f380e.appspot.com',
