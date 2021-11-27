@@ -25,12 +25,8 @@ export class AuthService {
     return this.http.get(environment.serverURL + '/auth/login');
   }
 
-  register(payload: any): Observable<any> {
-    return this.http.post(environment.serverURL + '/auth/register', JSON.stringify(payload), {
-      headers: {
-        'Content-Type': "application/json"
-      }
-    });
+  register(fd: FormData): Observable<any> {
+    return this.http.post(environment.serverURL + '/auth/register', fd);
   }
 
   signOut(): Observable<any> {
@@ -39,5 +35,9 @@ export class AuthService {
 
   logUserDisconnection() {
     return this.http.get(environment.serverURL + '/auth/logout');
+  }
+
+  getPublicAvatars(): Observable<any> {
+    return this.http.get(environment.serverURL + '/api/public/avatars');
   }
 }
