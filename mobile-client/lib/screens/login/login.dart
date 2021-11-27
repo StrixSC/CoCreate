@@ -70,6 +70,7 @@ class _LoginState extends State<Login> {
 
       // Fetch initial user info
       context.read<Messenger>().updateUser(userCredential);
+      context.read<Collaborator>().updateUser(userCredential);
       context.read<Messenger>().fetchChannels();
       context.read<Messenger>().fetchAllChannels();
 

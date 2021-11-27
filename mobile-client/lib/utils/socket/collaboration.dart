@@ -36,18 +36,18 @@ class CollaborationSocket extends SocketService {
         {'userId': user.uid, 'collaborationId': collaborationId});
   }
 
-  createCollaboration(String title, String type, String? password) {
+  createCollaboration(String authorId, String title, String type, String? password) {
     print('Create Collab');
     if (type == "Protected") {
       socket.emit('collaboration:create', {
-        'userId': user.uid,
+        'userId': authorId,
         'title': title,
         'type': type,
         'password': password
       });
     } else {
-      socket.emit('channel:create', {
-        'userId': user.uid,
+      socket.emit('collaboration:create', {
+        'userId': authorId,
         'title': title,
         'type': type,
       });
@@ -66,7 +66,7 @@ class CollaborationSocket extends SocketService {
         'password': password
       });
     } else {
-      socket.emit('channel:update', {
+      socket.emit('collaboration:update', {
         'userId': user.uid,
         'collaborationId': collaborationId,
         'title': title,
@@ -143,8 +143,8 @@ class CollaborationSocket extends SocketService {
       Collaboration collaboration = Collaboration(
           collaborationId: data["collaborationId"],
           actions: [],
-          memberCount: data["memberCount"],
-          maxMemberCount: data["maxMemberCount"],
+          memberCount: 1,
+          maxMemberCount: 4, //data["maxMemberCount"],
           members: []);
       Drawing drawing = Drawing(
           drawingId: data['drawingId'],

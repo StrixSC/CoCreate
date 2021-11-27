@@ -24,6 +24,7 @@ class Collaborator extends ChangeNotifier {
   String currentType = "Available"; // sections : Available, Joined
   late String currentDrawingId = '';
   late CollaborationSocket collaborationSocket;
+  late Map pagingControllers;
 
   Collaborator(this.auth) {
     drawings.putIfAbsent("Available", () => <String, Drawing>{});
@@ -134,6 +135,8 @@ class Collaborator extends ChangeNotifier {
   void drawingCreated(Drawing drawing) {
     (drawings[currentType] as Map<String, Drawing>)
         .putIfAbsent(drawing.drawingId, () => drawing);
+    print('nice');
+    pagingControllers[currentType].refresh();
     notifyListeners();
   }
 

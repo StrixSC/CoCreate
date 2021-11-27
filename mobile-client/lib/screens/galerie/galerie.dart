@@ -52,6 +52,7 @@ class GalerieState extends State<Galerie>
   @override
   void initState() {
     super.initState();
+    context.read<Collaborator>().pagingControllers = pagingControllers;
     _tabController = TabController(length: 2, vsync: this);
     pagingControllers.forEach((key, value) {
       value.addPageRequestListener((pageKey) {
@@ -121,20 +122,20 @@ class GalerieState extends State<Galerie>
       var resp = jsonResponse['drawings'];
       for (var drawing in resp) {
         if (drawing != null) {
-        Collaboration collaboration = Collaboration(
-            collaborationId: drawing["collaboration_id"],
-            memberCount: drawing["collaborator_count"],
-            maxMemberCount: drawing["max_collaborator_count"]);
-        // TODO: add updated_at && thumbnail url
-        drawings.add(Drawing(
-            drawingId: drawing['drawing_id'],
-            authorUsername: drawing["author_username"],
-            authorAvatar: drawing["author_avatar"],
-            title: drawing['title'],
-            createdAt: DateFormat('yyyy-MM-dd kk:mm')
-                .format(DateTime.parse(drawing['created_at'])),
-            collaboration: collaboration,
-            type: drawing['type']));
+          Collaboration collaboration = Collaboration(
+              collaborationId: drawing["collaboration_id"],
+              memberCount: drawing["collaborator_count"],
+              maxMemberCount: drawing["max_collaborator_count"]);
+          // TODO: add updated_at && thumbnail url
+          drawings.add(Drawing(
+              drawingId: drawing['drawing_id'],
+              authorUsername: drawing["author_username"],
+              authorAvatar: drawing["author_avatar"],
+              title: drawing['title'],
+              createdAt: DateFormat('yyyy-MM-dd kk:mm')
+                  .format(DateTime.parse(drawing['created_at'])),
+              collaboration: collaboration,
+              type: drawing['type']));
         }
       }
       final isLastPage = drawings.length < _pageSize;
@@ -383,10 +384,12 @@ class GalerieState extends State<Galerie>
                                         'Choisir un type de dessins',
                                         'Type'),
                                     const SizedBox(height: 48.0),
-                                    dropDownValueTypeCreate == 'Protégé' ? formField(
-                                        'Mot de passe',
-                                        'Veuillez entrez choisir un mot de passe',
-                                        passController) : const SizedBox.shrink(),
+                                    dropDownValueTypeCreate == 'Protégé'
+                                        ? formField(
+                                            'Mot de passe',
+                                            'Veuillez entrez choisir un mot de passe',
+                                            passController)
+                                        : const SizedBox.shrink(),
                                   ]))
                             ])))
               ]),
@@ -397,10 +400,40 @@ class GalerieState extends State<Galerie>
                     if (_formKey.currentState!.validate()) {
                       print(dropDownValueTypeCreate);
                       print(dropDownValueAuthor);
-                      // context.read<Collaborator>().collaborationSocket.createCollaboration(title, type, password);
+                      var type = context
+                          .read<Collaborator>()
+                          .convertToEnglish(dropDownValueTypeCreate);
+                      // TODO: Change to take teams into consideration
+                      var authorId;
+                      dropDownValueAuthor == 'Moi'
+                          ? authorId =
+                              context.read<Collaborator>().auth!.user!.uid
+                          : authorId = 123;
+                      var title = titreController.value.text;
+                      var password = passController.value.text;
+                      if(type == 'Protected') {
+                        context.read<Collaborator>().collaborationSocket.createCollaboration(authorId, title, type, password);
+                      } {
+                        context.read<Collaborator>().collaborationSocket.createCollaboration(authorId, title, type, null);
+                      }
                     } else {
                       print("validation failed");
                     }
+                    showDialog<String>(
+                        context: context,
+                        builder: (BuildContext context) => AlertDialog(
+                          title: Text('Bravo! Votre dessin à été créer avec succès.'),
+                          content: const Text('Amusez-vous! 😄'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context, 'Ok');
+                              },
+                              child: const Text('Ok'),
+                            ),
+                          ],
+                        ));
+                    Navigator.of(context).pop();
                   },
                   child: const Text('Créer'),
                 ),
@@ -474,7 +507,21 @@ formField(String hintText, String label, TextEditingController textController) {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(3.0)),
     ),
     validator: (value) {
-      if (value == null || value.isEmpty) {
+      if(textController == titreController) {
+        if(value!.length < 8) {
+          return 'Le titre doit avoir 8 caractères au minimum';
+        }
+      }
+      if(textController == passController) {
+        // alphanumeric
+        RegExp regExp = RegExp(r'^[a-zA-Z0-9]+$');
+        if(value!.length < 4) {
+          return 'Le mot de passe doit avoir 4 caractères au minimum';
+        } else if(regExp.hasMatch(value)) {
+          return 'Votre mot de passe doit être alphanumérique';
+        }
+      }
+      else if (value == null || value.isEmpty) {
         return 'Veuillez remplir cette option svp.';
       }
       _formKey.currentState!.save();
