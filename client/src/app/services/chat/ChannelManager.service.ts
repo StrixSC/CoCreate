@@ -17,6 +17,10 @@ export class ChannelManagerService {
     this.myChannels = new Set();
   }
 
+  CreateChannel(channel_name: string) {
+    this.chatSocketService.createChannel(channel_name);
+  }
+
   JoinChannel(channelId: string) {
     if (this.myChannels.has(channelId)) return;
     this.myChannels.add(channelId);
@@ -24,6 +28,10 @@ export class ChannelManagerService {
 
   removeChannel(channelId: string) {
     this.myChannels.delete(channelId);
+  }
+
+  DeleteChannel(channel_id: string) {
+    this.chatSocketService.deleteChannel(channel_id);
   }
 
   GetAllChannels(): Observable<any> {
