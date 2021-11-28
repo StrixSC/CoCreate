@@ -139,19 +139,20 @@ class CollaborationSocket extends SocketService {
 
   created(callbackChannel) {
     socket.on('collaboration:created', (data) {
+      print(data);
       print('Collaboration Created');
       Collaboration collaboration = Collaboration(
           collaborationId: data["collaborationId"],
           actions: [],
-          memberCount: 1,
-          maxMemberCount: 4, //data["maxMemberCount"],
+          memberCount:  data['currentCollaboratorCount'],
+          maxMemberCount: data['maxCollaboratorCount'], //data["maxMemberCount"],
           members: []);
       Drawing drawing = Drawing(
           drawingId: data['drawingId'],
           thumbnailUrl: data['thumbnailUrl'],
           title: data['title'],
           authorUsername: data["authorUsername"],
-          authorAvatar: data["authorAvatar"],
+          authorAvatar: data["authorAvatarUrl"].toString(),
           createdAt: data['createdAt'],
           collaboration: collaboration,
           type: 'type'); // "Protected", "Public" or "Private"
@@ -176,7 +177,7 @@ class CollaborationSocket extends SocketService {
           thumbnailUrl: data['thumbnailUrl'],
           title: data['title'],
           authorUsername: data["authorUsername"],
-          authorAvatar: data["authorAvatar"],
+          authorAvatar: data["authorAvatarUrl"],
           createdAt: data['createdAt'],
           collaboration: collaboration,
           type: 'type'); // "Protected", "Public" or "Private"

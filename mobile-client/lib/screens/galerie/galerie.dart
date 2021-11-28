@@ -419,6 +419,8 @@ class GalerieState extends State<Galerie>
                     } else {
                       print("validation failed");
                     }
+
+                    Navigator.of(context).pop();
                     showDialog<String>(
                         context: context,
                         builder: (BuildContext context) => AlertDialog(
@@ -433,7 +435,6 @@ class GalerieState extends State<Galerie>
                             ),
                           ],
                         ));
-                    Navigator.of(context).pop();
                   },
                   child: const Text('Créer'),
                 ),
@@ -512,13 +513,20 @@ formField(String hintText, String label, TextEditingController textController) {
           return 'Le titre doit avoir 8 caractères au minimum';
         }
       }
-      if(textController == passController) {
+      else if(textController == passController) {
         // alphanumeric
         RegExp regExp = RegExp(r'^[a-zA-Z0-9]+$');
         if(value!.length < 4) {
           return 'Le mot de passe doit avoir 4 caractères au minimum';
         } else if(regExp.hasMatch(value)) {
-          return 'Votre mot de passe doit être alphanumérique';
+          return 'Votre mot de passe doit être alphanWumérique';
+        }
+      }
+      else if(textController == memberController) {
+        if(int.tryParse(value!) == null) {
+          return 'Veuillez entrez un nombre maximal valide (i.e. 1, 2, 3...256) ';
+        } else if(int.parse(value) == 0) {
+          return 'Le nombre maximal ne peut pas être vide.';
         }
       }
       else if (value == null || value.isEmpty) {
