@@ -4,6 +4,7 @@ import 'package:Colorimage/models/collaboration.dart';
 import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/models/user.dart';
 import 'package:Colorimage/screens/chat/chat.dart';
+import 'package:Colorimage/screens/galerie/galerie.dart';
 import 'package:Colorimage/utils/rest/channels_api.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/utils/rest/users_api.dart';
@@ -42,7 +43,7 @@ class Collaborator extends ChangeNotifier {
 
   String convertToFrench(englishType) {
     String frenchType = 'Aucun';
-    switch(englishType) {
+    switch (englishType) {
       case 'Public':
         frenchType = 'Public';
         break;
@@ -58,7 +59,7 @@ class Collaborator extends ChangeNotifier {
 
   String convertToEnglish(frenchType) {
     String englishType = 'Aucun';
-    switch(frenchType) {
+    switch (frenchType) {
       case 'Public':
         englishType = 'Public';
         break;
@@ -109,7 +110,7 @@ class Collaborator extends ChangeNotifier {
   }
 
   void memberJoined(Member member) {
-    if(drawings[currentType].containsKey(member.drawingId)) {
+    if (drawings[currentType].containsKey(member.drawingId)) {
       drawings[currentType][currentDrawingId].collaboration.members.add(member);
       drawings[currentType][currentDrawingId].collaboration.memberCount++;
       notifyListeners();
@@ -135,7 +136,6 @@ class Collaborator extends ChangeNotifier {
   void drawingCreated(Drawing drawing) {
     (drawings[currentType] as Map<String, Drawing>)
         .putIfAbsent(drawing.drawingId, () => drawing);
-    print('nice');
     pagingControllers[currentType].refresh();
     notifyListeners();
   }
@@ -148,13 +148,20 @@ class Collaborator extends ChangeNotifier {
   void deletedDrawing(Map delete) {
     String collaborationId = delete["collaborationId"];
     String deletedAt = delete["deletedAt"];
-    dynamic object =
-        (drawings[currentType] as Map<String, Drawing>).remove(collaborationId);
-    if (object != null) {
-      notifyListeners();
-    } else {
-      throw ("Delete drawing collaboration index not found.");
+    var toRemove = [];
+    for (var type in TYPES) {
+      (drawings[type] as Map<String, Drawing>).forEach((key, value) {
+        if ((drawings[type][key] as Drawing).collaboration.collaborationId ==
+            collaborationId) {
+          toRemove.add(key);
+        }
+      });
     }
+    for (var type in TYPES) {
+      (drawings[type] as Map<String, Drawing>)
+          .removeWhere((key, value) => toRemove.contains(key));
+    }
+    pagingControllers[currentType].refresh();
     notifyListeners();
   }
 

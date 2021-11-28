@@ -396,58 +396,67 @@ class GalerieState extends State<Galerie>
                             ])))
               ]),
               actions: <Widget>[
-                ElevatedButton(
-                  onPressed: () {
-                    _formKey.currentState!.save();
-                    if (_formKey.currentState!.validate()) {
-                      print(dropDownValueTypeCreate);
-                      print(dropDownValueAuthor);
-                      var type = context
-                          .read<Collaborator>()
-                          .convertToEnglish(dropDownValueTypeCreate);
-                      // TODO: Change to take teams into consideration
-                      var authorId;
-                      dropDownValueAuthor == 'Moi'
-                          ? authorId =
-                              context.read<Collaborator>().auth!.user!.uid
-                          : authorId = 123;
-                      var title = titreController.value.text;
-                      var password = passController.value.text;
-                      if (type == 'Protected') {
-                        context
-                            .read<Collaborator>()
-                            .collaborationSocket
-                            .createCollaboration(
-                                authorId, title, type, password);
-                      }
-                      {
-                        context
-                            .read<Collaborator>()
-                            .collaborationSocket
-                            .createCollaboration(authorId, title, type, null);
-                      }
-                      Navigator.of(context).pop();
-                      showDialog<String>(
-                          context: context,
-                          builder: (BuildContext context) => AlertDialog(
-                                title: Text(
-                                    'Bravo! Votre dessin à été créer avec succès.'),
-                                content: const Text('Amusez-vous! 😄'),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context, 'Ok');
-                                    },
-                                    child: const Text('Ok'),
-                                  ),
-                                ],
-                              ));
-                    } else {
-                      print("validation failed");
-                    }
-                  },
-                  child: const Text('Créer'),
-                ),
+                Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
+                    child: Container(
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _formKey.currentState!.save();
+                            if (_formKey.currentState!.validate()) {
+                              print(dropDownValueTypeCreate);
+                              print(dropDownValueAuthor);
+                              var type = context
+                                  .read<Collaborator>()
+                                  .convertToEnglish(dropDownValueTypeCreate);
+                              // TODO: Change to take teams into consideration
+                              var authorId;
+                              dropDownValueAuthor == 'Moi'
+                                  ? authorId = context
+                                      .read<Collaborator>()
+                                      .auth!
+                                      .user!
+                                      .uid
+                                  : authorId = 123;
+                              var title = titreController.value.text;
+                              var password = passController.value.text;
+                              if (type == 'Protected') {
+                                context
+                                    .read<Collaborator>()
+                                    .collaborationSocket
+                                    .createCollaboration(
+                                        authorId, title, type, password);
+                              }
+                              {
+                                context
+                                    .read<Collaborator>()
+                                    .collaborationSocket
+                                    .createCollaboration(
+                                        authorId, title, type, null);
+                              }
+                              Navigator.of(context).pop();
+                              showDialog<String>(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      AlertDialog(
+                                        title: Text(
+                                            'Bravo! Votre dessin à été créer avec succès.'),
+                                        content: const Text('Amusez-vous! 😄'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context, 'Ok');
+                                            },
+                                            child: const Text('Ok'),
+                                          ),
+                                        ],
+                                      ));
+                            } else {
+                              print("validation failed");
+                            }
+                          },
+                          child: const Text('Créer'),
+                        ))),
               ],
             ));
   }
@@ -608,7 +617,10 @@ class _Drawing extends StatelessWidget {
                                       'Créé le: ', drawing.createdAt),
                                   const SizedBox(height: 28.0),
                                   drawing.type == 'Protected' &&
-                                      context.read<Collaborator>().drawings['Joined'][drawing.drawingId] ==
+                                          context
+                                                      .read<Collaborator>()
+                                                      .drawings['Joined']
+                                                  [drawing.drawingId] ==
                                               null
                                       ? formField(
                                           'Mot de passe',
@@ -623,18 +635,94 @@ class _Drawing extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context, 'Delete');
-                        },
-                        child: const Text('Delete'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context, 'Joindre');
-                        },
-                        child: const Text('Joindre'),
-                      ),
+                      drawing.authorUsername ==
+                              context
+                                  .read<Collaborator>()
+                                  .auth!
+                                  .user!
+                                  .displayName
+                          ? Padding(
+                              padding: EdgeInsets.fromLTRB(25.0, 0, 0, 20.0),
+                              child: Container(
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                                Colors.red)),
+                                    onPressed: () {
+                                      Navigator.pop(context, 'Delete');
+                                      showDialog<String>(
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              AlertDialog(
+                                                title: Text(
+                                                    'Êtes-vous certain de vouloir supprimer ce dessin?.'),
+                                                content: const Text(
+                                                    'Vous pourrez plus le ré-obtenir! 😧'),
+                                                actions: <Widget>[
+                                                  ElevatedButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(
+                                                          context, 'Annuler');
+                                                    },
+                                                    child:
+                                                        const Text('Annuler'),
+                                                  ),
+                                                  ElevatedButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(
+                                                          context, 'Oui');
+                                                      context
+                                                          .read<Collaborator>()
+                                                          .collaborationSocket
+                                                          .deleteCollaboration(
+                                                              drawing
+                                                                  .collaboration
+                                                                  .collaborationId);
+                                                      showDialog<String>(
+                                                          context: context,
+                                                          builder: (BuildContext
+                                                                  context) =>
+                                                              AlertDialog(
+                                                                title: const Text(
+                                                                    'Votre dessin à été supprimer avec succès.'),
+                                                                content: const Text(
+                                                                    'Créez-en un autre! 😄'),
+                                                                actions: <
+                                                                    Widget>[
+                                                                  TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.pop(
+                                                                          context,
+                                                                          'Ok');
+                                                                    },
+                                                                    child:
+                                                                        const Text(
+                                                                            'Ok'),
+                                                                  ),
+                                                                ],
+                                                              ));
+                                                    },
+                                                    child: const Text('Oui'),
+                                                  ),
+                                                ],
+                                              ));
+                                    },
+                                    child: const Text('Supprimer'),
+                                  )))
+                          : const SizedBox.shrink(),
+                      Padding(
+                          padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
+                          child: Container(
+                              height: 50,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context, 'Joindre');
+                                },
+                                child: const Text('Joindre'),
+                              ))),
                     ],
                   )
                 ]));
@@ -709,7 +797,7 @@ class _Drawing extends StatelessWidget {
                             style: TextStyle(fontSize: 20.0)),
                         const SizedBox(height: 10),
                         Text(
-                            "Membres: " +
+                            "Collaborateurs actifs: " +
                                 drawing.collaboration.memberCount.toString() +
                                 "/" +
                                 drawing.collaboration.maxMemberCount.toString(),
