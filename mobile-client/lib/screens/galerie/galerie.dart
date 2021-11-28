@@ -162,6 +162,7 @@ class GalerieState extends State<Galerie>
           //       TYPES[value], (value) => TextEditingController());
           //   pagingControllers[TYPES[value]].refresh();
           // });
+          scrollControllers[TYPES[value]] = ScrollController();
           context.read<Collaborator>().setCurrentType(TYPES[value]);
         },
         tabs: [
@@ -416,25 +417,24 @@ class GalerieState extends State<Galerie>
                       } {
                         context.read<Collaborator>().collaborationSocket.createCollaboration(authorId, title, type, null);
                       }
+                      Navigator.of(context).pop();
+                      showDialog<String>(
+                          context: context,
+                          builder: (BuildContext context) => AlertDialog(
+                            title: Text('Bravo! Votre dessin à été créer avec succès.'),
+                            content: const Text('Amusez-vous! 😄'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context, 'Ok');
+                                },
+                                child: const Text('Ok'),
+                              ),
+                            ],
+                          ));
                     } else {
                       print("validation failed");
                     }
-
-                    Navigator.of(context).pop();
-                    showDialog<String>(
-                        context: context,
-                        builder: (BuildContext context) => AlertDialog(
-                          title: Text('Bravo! Votre dessin à été créer avec succès.'),
-                          content: const Text('Amusez-vous! 😄'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context, 'Ok');
-                              },
-                              child: const Text('Ok'),
-                            ),
-                          ],
-                        ));
                   },
                   child: const Text('Créer'),
                 ),
@@ -518,8 +518,8 @@ formField(String hintText, String label, TextEditingController textController) {
         RegExp regExp = RegExp(r'^[a-zA-Z0-9]+$');
         if(value!.length < 4) {
           return 'Le mot de passe doit avoir 4 caractères au minimum';
-        } else if(regExp.hasMatch(value)) {
-          return 'Votre mot de passe doit être alphanWumérique';
+        } else if(!regExp.hasMatch(value)) {
+          return 'Votre mot de passe ne peut pas contenir de symbole!';
         }
       }
       else if(textController == memberController) {
