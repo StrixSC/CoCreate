@@ -573,61 +573,71 @@ class _Drawing extends StatelessWidget {
     showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-              title: Center(child: Text(drawing.title)),
-              content: Column(children: [
-                Expanded(
-                    child: SingleChildScrollView(
-                        child: Row(children: <Widget>[
-                  SizedBox(width: 680, child: gridTileJoin(thumbnail)),
-                  SizedBox(
-                      width: 300,
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 48.0),
-                            richTextWhitePurple(
-                                'Auteur : ', drawing.authorUsername),
-                            const SizedBox(height: 48.0),
-                            richTextWhitePurple(
-                                'Type    : ',
-                                context
-                                    .read<Collaborator>()
-                                    .convertToFrench(drawing.type)),
-                            const SizedBox(height: 48.0),
-                            richTextWhitePurple('Nombre de membres: ',
-                                drawing.collaboration.memberCount.toString()),
-                            const SizedBox(height: 48.0),
-                            richTextWhitePurple(
-                                'Nombre de membres max: ',
-                                drawing.collaboration.maxMemberCount
-                                    .toString()),
-                            const SizedBox(height: 48.0),
-                            richTextWhitePurple('Créé le: ', drawing.createdAt),
-                            const SizedBox(height: 28.0),
-                            drawing.type == 'Protected'
-                                ? formField(
-                                    'Mot de passe',
-                                    'Veuillez entrez le titre du dessin',
-                                    passController)
-                                : const SizedBox.shrink(),
-                          ]))
-                ])))
-              ]),
-              actions: <Widget>[
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, 'Delete');
-                  },
-                  child: const Text('Delete'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, 'Joindre');
-                  },
-                  child: const Text('Joindre'),
-                ),
-              ],
-            ));
+                title: Center(child: Text(drawing.title)),
+                content: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SingleChildScrollView(
+                          child: Row(children: <Widget>[
+                        SizedBox(width: 680, child: gridTileJoin(thumbnail)),
+                        SizedBox(
+                            width: 300,
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  richTextWhitePurple(
+                                      'Auteur : ', drawing.authorUsername),
+                                  const SizedBox(height: 48.0),
+                                  richTextWhitePurple(
+                                      'Type    : ',
+                                      context
+                                          .read<Collaborator>()
+                                          .convertToFrench(drawing.type)),
+                                  const SizedBox(height: 48.0),
+                                  richTextWhitePurple(
+                                      'Nombre de membres: ',
+                                      drawing.collaboration.memberCount
+                                          .toString()),
+                                  const SizedBox(height: 48.0),
+                                  richTextWhitePurple(
+                                      'Nombre de membres max: ',
+                                      drawing.collaboration.maxMemberCount
+                                          .toString()),
+                                  const SizedBox(height: 48.0),
+                                  richTextWhitePurple(
+                                      'Créé le: ', drawing.createdAt),
+                                  const SizedBox(height: 28.0),
+                                  drawing.type == 'Protected' &&
+                                      context.read<Collaborator>().drawings['Joined'][drawing.drawingId] ==
+                                              null
+                                      ? formField(
+                                          'Mot de passe',
+                                          'Veuillez entrez le titre du dessin',
+                                          passController)
+                                      : const SizedBox.shrink(),
+                                ]))
+                      ]))
+                    ]),
+                actions: <Widget>[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context, 'Delete');
+                        },
+                        child: const Text('Delete'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context, 'Joindre');
+                        },
+                        child: const Text('Joindre'),
+                      ),
+                    ],
+                  )
+                ]));
   }
 
   @override
@@ -664,7 +674,8 @@ class _Drawing extends StatelessWidget {
                                     child: CircleAvatar(
                                       radius: 24,
                                       backgroundColor: kPrimaryColor,
-                                      backgroundImage: NetworkImage(drawing.authorAvatar),
+                                      backgroundImage:
+                                          NetworkImage(drawing.authorAvatar),
                                     ))
                               ]),
                               Column(
@@ -674,16 +685,16 @@ class _Drawing extends StatelessWidget {
                                     Row(children: [
                                       SizedBox(
                                           width: 300,
-                                          child:Text(drawing.title,
-                                                  style: TextStyle(
-                                                      fontSize: 20.0,
+                                          child: Text(drawing.title,
+                                              style: TextStyle(
+                                                  fontSize: 20.0,
                                                   fontWeight: FontWeight.bold)))
                                     ]),
                                     Row(children: [
                                       SizedBox(
                                           width: 300,
-                                          child:Text(drawing.createdAt,
-                                          style: TextStyle(fontSize: 20.0)))
+                                          child: Text(drawing.createdAt,
+                                              style: TextStyle(fontSize: 20.0)))
                                     ])
                                   ]),
                             ])),
@@ -697,13 +708,13 @@ class _Drawing extends StatelessWidget {
                         Text('Auteur: ' + drawing.authorUsername,
                             style: TextStyle(fontSize: 20.0)),
                         const SizedBox(height: 10),
-                        Text("Membres: " +
-                            drawing.collaboration.memberCount.toString() +
-                            "/" +
-                            drawing.collaboration.maxMemberCount.toString(),
+                        Text(
+                            "Membres: " +
+                                drawing.collaboration.memberCount.toString() +
+                                "/" +
+                                drawing.collaboration.maxMemberCount.toString(),
                             style: TextStyle(fontSize: 20.0)),
-                      ])))
-              ));
+                      ])))));
     });
   }
 
@@ -723,28 +734,30 @@ class _Drawing extends StatelessWidget {
             fit: BoxFit.fill,
             child: drawing.type == 'Protected'
                 ? ClipRRect(
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
-                child: Image.asset('assets/images/default_thumbnail.png'),
-              ),
-            )
+                    child: ImageFiltered(
+                      imageFilter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+                      child: Image.asset('assets/images/default_thumbnail.png'),
+                    ),
+                  )
                 : Image.asset('assets/images/default_thumbnail.png')));
   }
 
   richTextWhitePurple(String text1, String text2) {
-    return RichText(
-      text: TextSpan(
-        // Note: Styles for TextSpans must be explicitly defined.
-        // Child text spans will inherit styles from parent
-        style: const TextStyle(fontSize: 22.0),
-        children: <TextSpan>[
-          TextSpan(text: text1),
-          TextSpan(
-              text: text2,
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: kPrimaryColor)),
-        ],
-      ),
-    );
+    return Padding(
+        padding: EdgeInsets.only(left: 15.0),
+        child: RichText(
+          text: TextSpan(
+            // Note: Styles for TextSpans must be explicitly defined.
+            // Child text spans will inherit styles from parent
+            style: const TextStyle(fontSize: 22.0),
+            children: <TextSpan>[
+              TextSpan(text: text1),
+              TextSpan(
+                  text: text2,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: kPrimaryColor)),
+            ],
+          ),
+        ));
   }
 }

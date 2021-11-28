@@ -18,8 +18,8 @@ class Collaborator extends ChangeNotifier {
   UserCredential? auth;
   Map drawings =
       <String, Map<String, Drawing>>{}; // <section, <drawing_id, drawing>>
-  Map allDrawings = <String, Drawing>{}; // drawings not joined yet
-  Map userDrawings = <String, Drawing>{}; // drawings already joined
+  // Map allDrawings = <String, Drawing>{}; // drawings not joined yet
+  // Map userDrawings = <String, Drawing>{}; // drawings already joined
   bool isDrawing = false;
   String currentType = "Available"; // sections : Available, Joined
   late String currentDrawingId = '';
