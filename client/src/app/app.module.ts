@@ -1,3 +1,5 @@
+import { TeamViewerComponent } from './components/team-viewer/team-viewer.component';
+import { TeamPageComponent } from './components/team-page/team-page.component';
 import { AvatarDialogComponent } from './components/avatar-dialog/avatar-dialog.component';
 import { RegisterComponent } from './components/register/register.component';
 import { AuthWrapperComponent } from './components/auth-wrapper/auth-wrapper.component';
@@ -84,6 +86,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     ControlMenuComponent,
     ParameterDirective,
     SaveDrawingComponent,
+    TeamViewerComponent,
     OpenDrawingComponent,
     ErrorMessageComponent,
     AlertMessageComponent,
@@ -92,6 +95,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     WelcomePageComponent,
     SignUpPageComponent,
     UserProfileComponent,
+    TeamPageComponent,
     ChangePasswordComponent,
     DrawingGalleryComponent,
     DrawingGalleryCardComponent,
