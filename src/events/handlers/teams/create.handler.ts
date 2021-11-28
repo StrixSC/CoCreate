@@ -49,7 +49,7 @@ const createTeam = async (userId: string, teamName: string, bio: string, maxMemb
         const response = await axios.get(avatarUrl);
 
         if (response) {
-            let redirectedAvatarUrl = response.request.res.responseUrl;
+            redirectedAvatarUrl = response.request.res.responseUrl;
             console.log(redirectedAvatarUrl);
         }
     } catch (e) {
@@ -63,6 +63,7 @@ const createTeam = async (userId: string, teamName: string, bio: string, maxMemb
             avatar_url: redirectedAvatarUrl,
             mascot: mascot,
             mascot_url: avatarUrl,
+            bio: bio,
             password: password,
             team_members: {
                 create: [

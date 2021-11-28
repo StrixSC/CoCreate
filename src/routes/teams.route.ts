@@ -39,11 +39,14 @@ interface TeamResponse {
     teamName: string,
     bio: string,
     maxMemberCount: number,
+    currentMemberCount: number,
     type: string,
     avatarUrl: string,
     mascot: string,
     authorUsername: string,
     authorAvatarUrl: string,
+    teamMembers: { avatarUrl: string, username: string, type: MemberType }[],
+    isMember: boolean,
 }
 
 router.get('/', checkIfAuthenticated, (req, res, next) => getTeamsController(req, res, next));
@@ -87,6 +90,8 @@ const getTeamsController = async (req: Request, res: Response, next: NextFunctio
                     return;
                 };
 
+                const isMember = d.team_members.find((tm) => tm.user_id === req.userId);
+
                 return {
                     authorUsername: author.user.profile!.username,
                     authorAvatarUrl: author.user.profile!.avatar_url,
@@ -97,7 +102,10 @@ const getTeamsController = async (req: Request, res: Response, next: NextFunctio
                     teamId: d.team_id,
                     type: d.type,
                     mascot: d.mascot,
+                    currentMemberCount: d.team_members.length,
                     teamName: d.team_name,
+                    teamMembers: d.team_members.map((t) => ({ username: t.user.profile?.username, avatarUrl: t.user.profile!.avatar_url, type: t.type })),
+                    isMember: isMember ? true : false,
                 } as TeamResponse
             }),
             offset: result.offset,
