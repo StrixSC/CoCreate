@@ -2,13 +2,13 @@
     <img mat-card-avatar class="avatar" [src]="url" *ngIf="url;else elseBlock">
     <ng-template #elseBlock>
     
-    <img mat-card-avatar class="avatar" src="../assets/105992231-1561667465295gettyimages-521697453.jpeg">
+    <img mat-card-avatar class="avatar" src={{url}}>
     </ng-template>
     <button mat-raised-button>
     <input type="file" id="img" (change)="selectFile($event)" style="display:none;">
     <label  for="img">choisir un avatar</label>
     </button>
-
+  <button mat-raised-button (click)="openDialog()">Pick one</button>
 </div>
  <mat-card>
  <p class="form-title">Modification des paramètres du compte</p>
@@ -33,6 +33,7 @@
           placeholder="Mot de passe"
         />
         </mat-form-field>
+            
 
-        <button mat-raised-button routerLink="/profile-settings" class="profile-settings-btn" (click)="onSubmit()">submit</button>
+        <button mat-raised-button class="profile-settings-btn" (click)="onSubmit()">submit</button>
 </mat-card>

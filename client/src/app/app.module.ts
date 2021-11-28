@@ -4,7 +4,7 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFireAuthGuardModule } from '@angular/fire/auth-guard';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBarContainer } from '@angular/material';
+import { MatDialog, MatDialogRef, MatSnackBarContainer } from '@angular/material';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -50,6 +50,7 @@ import { RightSidebarComponent } from "./components/right-sidebar/right-sidebar.
 import { ChatBoxComponent } from "./components/right-sidebar/chat-box/chat-box.component";
 import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out/chat-poped-out.component";
 import { AllChannelsComponent } from "./components/right-sidebar/all-channels/all-channels.component";
+import { AvatarDialogComponent } from './components/avatar-dialog/avatar-dialog.component';
 
 
 @NgModule({
@@ -86,6 +87,8 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     ChatBoxComponent,
     ChatPopedOutComponent,
     AllChannelsComponent,
+    AvatarDialogComponent,
+   
   ],
   imports: [
     BrowserModule,
@@ -107,6 +110,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     MatIconModule,
     MatButtonModule,
     AppRoutingModule,
+  
   ],
   exports: [AppRoutingModule],
   entryComponents: [
@@ -121,6 +125,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     ErrorMessageComponent,
     AlertMessageComponent,
     MatSnackBarContainer,
+    AvatarDialogComponent
   ],
   providers: [
     FileReader,

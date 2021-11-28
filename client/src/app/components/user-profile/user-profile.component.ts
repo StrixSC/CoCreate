@@ -73,7 +73,8 @@ export class UserProfileComponent  implements OnInit, OnDestroy{
       if(!this.username) {
         // redirect 404;
       }
-      this.userService.getLogs(this.username).subscribe((logs: Log[]) => {
+      this.userService.getLogs().subscribe((logs: Log[]) => {
+        console.log(logs)
         this.logs = logs;
         this.loading = false;
         this.editLogs = logs.filter((l) => l.drawing_id);

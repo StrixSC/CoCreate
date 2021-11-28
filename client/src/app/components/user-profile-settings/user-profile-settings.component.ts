@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog, MatDialogRef } from '@angular/material';
 import { User } from 'firebase';
 import { UserService } from 'src/app/services/user.service';
+import { AvatarDialogComponent } from '../avatar-dialog/avatar-dialog.component';
 
 @Component({
   selector: 'app-user-profile-settings',
@@ -8,12 +10,12 @@ import { UserService } from 'src/app/services/user.service';
   styleUrls: ['./user-profile-settings.component.scss']
 })
 export class UserProfileSettingsComponent implements OnInit {
-  url: any; //Angular 11, for stricter type
+  url: any="../assets/105992231-1561667465295gettyimages-521697453.jpeg"; //Angular 11, for stricter type
 	msg = "";
   user = {
   username: '',
   password: '',} ;
-  constructor(private userService:UserService) { 
+  constructor(private userService:UserService,public dialog: MatDialog) { 
 
   }
 
@@ -54,4 +56,11 @@ export class UserProfileSettingsComponent implements OnInit {
 	onSubmit() {
 		this.updateProfile({"username":this.user.username,"avatarUrl":this.url})
 	}
+	openDialog(): void {
+		 this.dialog.open(AvatarDialogComponent, {
+		  width: '25px',height:'25px'
+		});
+	}
 }
+
+
