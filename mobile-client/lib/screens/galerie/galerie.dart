@@ -652,80 +652,114 @@ class _Drawing extends StatelessWidget {
                                                 Colors.red)),
                                     onPressed: () {
                                       Navigator.pop(context, 'Delete');
-                                      showDialog<String>(
-                                          context: context,
-                                          builder: (BuildContext context) =>
-                                              AlertDialog(
-                                                title: Text(
-                                                    'Êtes-vous certain de vouloir supprimer ce dessin?.'),
-                                                content: const Text(
-                                                    'Vous pourrez plus le ré-obtenir! 😧'),
-                                                actions: <Widget>[
-                                                  ElevatedButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(
-                                                          context, 'Annuler');
-                                                    },
-                                                    child:
-                                                        const Text('Annuler'),
-                                                  ),
-                                                  ElevatedButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(
-                                                          context, 'Oui');
-                                                      context
-                                                          .read<Collaborator>()
-                                                          .collaborationSocket
-                                                          .deleteCollaboration(
-                                                              drawing
-                                                                  .collaboration
-                                                                  .collaborationId);
-                                                      showDialog<String>(
-                                                          context: context,
-                                                          builder: (BuildContext
-                                                                  context) =>
-                                                              AlertDialog(
-                                                                title: const Text(
-                                                                    'Votre dessin à été supprimer avec succès.'),
-                                                                content: const Text(
-                                                                    'Créez-en un autre! 😄'),
-                                                                actions: <
-                                                                    Widget>[
-                                                                  TextButton(
-                                                                    onPressed:
-                                                                        () {
-                                                                      Navigator.pop(
-                                                                          context,
-                                                                          'Ok');
-                                                                    },
-                                                                    child:
-                                                                        const Text(
-                                                                            'Ok'),
-                                                                  ),
-                                                                ],
-                                                              ));
-                                                    },
-                                                    child: const Text('Oui'),
-                                                  ),
-                                                ],
-                                              ));
+                                      alert(context, 'supprimer');
                                     },
                                     child: const Text('Supprimer'),
                                   )))
                           : const SizedBox.shrink(),
-                      Padding(
+                      context.read<Collaborator>().currentType == 'Available'
+                          ? Padding(
+                              padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
+                              child: Container(
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context, 'Joindre');
+                                    },
+                                    child: const Text('Joindre'),
+                                  )))
+                          : Padding(
+                              padding: EdgeInsets.fromLTRB(0, 0, 25.0, 0.0),
+                              child: Container(
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context, 'Quitter');
+                                      alert(context, 'quitter');
+                                    },
+                                    child: const Text('Quitter'),
+                                  ))),
+                      context.read<Collaborator>().currentType == 'Available'
+                          ?  SizedBox.shrink():Padding(
                           padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
                           child: Container(
                               height: 50,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.pop(context, 'Joindre');
+                                  Navigator.pop(context, 'Se connecter');
                                 },
-                                child: const Text('Joindre'),
-                              ))),
+                                child: const Text('Se connecter'),
+                              ))) ,
                     ],
                   )
                 ]));
+  }
+
+  alert(context, type) {
+    return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) =>
+            AlertDialog(
+              title: Text(
+                  'Êtes-vous certain de vouloir ${type} ce dessin?.'),
+              content: Text(
+                  type == 'supprimer'? 'Vous pourrez plus le ré-obtenir! 😧' :
+                'Il sera possible de le rejoindre plus tard si il est pas supprimer 😄'),
+              actions: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(
+                        context, 'Annuler');
+                  },
+                  child:
+                  const Text('Annuler'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(
+                        context, 'Oui');
+                    type == 'supprimer' ? context
+                        .read<Collaborator>()
+                        .collaborationSocket
+                        .deleteCollaboration(
+                        drawing
+                            .collaboration
+                            .collaborationId) : context
+                        .read<Collaborator>()
+                        .collaborationSocket
+                        .leaveCollaboration(
+                        drawing
+                            .collaboration
+                            .collaborationId);
+                    showDialog<String>(
+                        context: context,
+                        builder: (BuildContext
+                        context) =>
+                            AlertDialog(
+                              title: Text(
+                                  'Le dessin à été ${type} avec succès.'),
+                              content: const Text(
+                                  'Créez-en un autre! 😄'),
+                              actions: <
+                                  Widget>[
+                                TextButton(
+                                  onPressed:
+                                      () {
+                                    Navigator.pop(
+                                        context,
+                                        'Ok');
+                                  },
+                                  child:
+                                  const Text(
+                                      'Ok'),
+                                ),
+                              ],
+                            ));
+                  },
+                  child: const Text('Oui'),
+                ),
+              ],
+            ));
   }
 
   @override

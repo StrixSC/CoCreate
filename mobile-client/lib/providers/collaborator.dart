@@ -172,6 +172,43 @@ class Collaborator extends ChangeNotifier {
     String username = left["username"];
     String avatarUrl = left["avatarUrl"];
     String leftAt = left["leftAt"];
+
+    var drawingId = '';
+    for (var type in TYPES) {
+      (drawings[type] as Map<String, Drawing>).forEach((key, value) {
+        if ((drawings[type][key] as Drawing).collaboration.collaborationId ==
+            collaborationId) {
+          drawingId = key;
+        }
+      });
+    }
+    for (var type in TYPES) {
+      if(type == 'Available') {
+        (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
+          value.collaboration.members.removeWhere((item) =>
+          item.userId == userId);
+          value.collaboration.memberCount--;
+          return value;
+        });
+
+      } else {
+        if(userId == auth!.user!.uid) {
+          (drawings[type] as Map<String, Drawing>)
+              .removeWhere((key, value) => drawingId == key);
+        } else {
+          (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
+            value.collaboration.members.removeWhere((item) =>
+            item.userId == userId);
+            value.collaboration.memberCount--;
+            return value;
+          });
+        }
+      }
+    }
+    print('Lefttttttttta');
+    pagingControllers[currentType].refresh();
+    notifyListeners();
+
     int index = drawings[currentType][currentDrawingId]
         .collaboration
         .members
@@ -183,10 +220,7 @@ class Collaborator extends ChangeNotifier {
           .removeWhere((member) => member.userId == userId);
       drawings[currentType][currentDrawingId].collaboration.memberCount--;
       notifyListeners();
-    } else {
-      throw ("Left member collaboration index not found.");
     }
-    notifyListeners();
   }
 
   void callbackChannel(eventType, data) {
