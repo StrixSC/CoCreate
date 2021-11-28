@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/collaboration.dart';
 import 'package:Colorimage/models/drawing.dart';
@@ -290,7 +291,7 @@ class GalerieState extends State<Galerie>
                     scrollControllers[context.read<Collaborator>().currentType],
                 pagingController: pagingController,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  childAspectRatio: 3 / 2,
+                  childAspectRatio: (270.0 / 220.0),
                   crossAxisCount: orientation == Orientation.portrait ? 2 : 3,
                   mainAxisSpacing: 18,
                   crossAxisSpacing: 5,
@@ -412,26 +413,35 @@ class GalerieState extends State<Galerie>
                           : authorId = 123;
                       var title = titreController.value.text;
                       var password = passController.value.text;
-                      if(type == 'Protected') {
-                        context.read<Collaborator>().collaborationSocket.createCollaboration(authorId, title, type, password);
-                      } {
-                        context.read<Collaborator>().collaborationSocket.createCollaboration(authorId, title, type, null);
+                      if (type == 'Protected') {
+                        context
+                            .read<Collaborator>()
+                            .collaborationSocket
+                            .createCollaboration(
+                                authorId, title, type, password);
+                      }
+                      {
+                        context
+                            .read<Collaborator>()
+                            .collaborationSocket
+                            .createCollaboration(authorId, title, type, null);
                       }
                       Navigator.of(context).pop();
                       showDialog<String>(
                           context: context,
                           builder: (BuildContext context) => AlertDialog(
-                            title: Text('Bravo! Votre dessin à été créer avec succès.'),
-                            content: const Text('Amusez-vous! 😄'),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, 'Ok');
-                                },
-                                child: const Text('Ok'),
-                              ),
-                            ],
-                          ));
+                                title: Text(
+                                    'Bravo! Votre dessin à été créer avec succès.'),
+                                content: const Text('Amusez-vous! 😄'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context, 'Ok');
+                                    },
+                                    child: const Text('Ok'),
+                                  ),
+                                ],
+                              ));
                     } else {
                       print("validation failed");
                     }
@@ -508,28 +518,25 @@ formField(String hintText, String label, TextEditingController textController) {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(3.0)),
     ),
     validator: (value) {
-      if(textController == titreController) {
-        if(value!.length < 8) {
+      if (textController == titreController) {
+        if (value!.length < 8) {
           return 'Le titre doit avoir 8 caractères au minimum';
         }
-      }
-      else if(textController == passController) {
+      } else if (textController == passController) {
         // alphanumeric
         RegExp regExp = RegExp(r'^[a-zA-Z0-9]+$');
-        if(value!.length < 4) {
+        if (value!.length < 4) {
           return 'Le mot de passe doit avoir 4 caractères au minimum';
-        } else if(!regExp.hasMatch(value)) {
+        } else if (!regExp.hasMatch(value)) {
           return 'Votre mot de passe ne peut pas contenir de symbole!';
         }
-      }
-      else if(textController == memberController) {
-        if(int.tryParse(value!) == null) {
+      } else if (textController == memberController) {
+        if (int.tryParse(value!) == null) {
           return 'Veuillez entrez un nombre maximal valide (i.e. 1, 2, 3...256) ';
-        } else if(int.parse(value) == 0) {
+        } else if (int.parse(value) == 0) {
           return 'Le nombre maximal ne peut pas être vide.';
         }
-      }
-      else if (value == null || value.isEmpty) {
+      } else if (value == null || value.isEmpty) {
         return 'Veuillez remplir cette option svp.';
       }
       _formKey.currentState!.save();
@@ -566,7 +573,7 @@ class _Drawing extends StatelessWidget {
     showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-              title: Center(child: Text('Joindre ${drawing.title} ?')),
+              title: Center(child: Text(drawing.title)),
               content: Column(children: [
                 Expanded(
                     child: SingleChildScrollView(
@@ -609,6 +616,12 @@ class _Drawing extends StatelessWidget {
               actions: <Widget>[
                 ElevatedButton(
                   onPressed: () {
+                    Navigator.pop(context, 'Delete');
+                  },
+                  child: const Text('Delete'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
                     Navigator.pop(context, 'Joindre');
                   },
                   child: const Text('Joindre'),
@@ -631,33 +644,68 @@ class _Drawing extends StatelessWidget {
   }
 
   gridTile(thumbnail, type) {
-    return Padding(
-        padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-        child: GridTile(
-          header: Center(
-              child: Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: _GridTitleText(drawing.title))),
-          footer: Material(
-            color: Colors.transparent,
-            clipBehavior: Clip.antiAlias,
-            child: GridTileBar(
-              backgroundColor: Colors.black45,
-              leading: const CircleAvatar(
-                radius: 24,
-                backgroundColor: kPrimaryColor,
-                child: Icon(Icons.group, color: Colors.black),
-              ),
-              title: _GridTitleText(drawing.authorUsername),
-              subtitle: _GridTitleText(type),
-              trailing: _GridTitleText(
-                  drawing.collaboration.memberCount.toString() +
-                      "/" +
-                      drawing.collaboration.maxMemberCount.toString()),
-            ),
-          ),
-          child: thumbnail,
-        ));
+    return OrientationBuilder(builder: (context, orientation) {
+      return Center(
+          child: Padding(
+              padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+              child: Container(
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          width: 2.5, color: Colors.grey.withOpacity(0.1))),
+                  child: Container(
+                      color: kContentColor,
+                      child: Column(children: <Widget>[
+                        Container(
+                            height: 80.0,
+                            child: Row(children: [
+                              Column(children: const [
+                                Padding(
+                                    padding: EdgeInsets.all(15.0),
+                                    child: CircleAvatar(
+                                      radius: 24,
+                                      backgroundColor: kPrimaryColor,
+                                      child: Icon(Icons.group,
+                                          color: Colors.black),
+                                    ))
+                              ]),
+                              Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Row(children: [
+                                      SizedBox(
+                                          width: 300,
+                                          child:Text(drawing.title,
+                                                  style: TextStyle(
+                                                      fontSize: 20.0,
+                                                  fontWeight: FontWeight.bold)))
+                                    ]),
+                                    Row(children: [
+                                      SizedBox(
+                                          width: 300,
+                                          child:Text(drawing.createdAt,
+                                          style: TextStyle(fontSize: 20.0)))
+                                    ])
+                                  ]),
+                            ])),
+                        Container(
+                            width: 400,
+                            height: 175,
+                            child: GridTile(
+                              child: thumbnail,
+                            )),
+                        const SizedBox(height: 10),
+                        Text('Auteur: ' + drawing.authorUsername,
+                            style: TextStyle(fontSize: 20.0)),
+                        const SizedBox(height: 10),
+                        Text("Membres: " +
+                            drawing.collaboration.memberCount.toString() +
+                            "/" +
+                            drawing.collaboration.maxMemberCount.toString(),
+                            style: TextStyle(fontSize: 20.0)),
+                      ])))
+              ));
+    });
   }
 
   gridTileJoin(thumbnail) {
@@ -669,16 +717,19 @@ class _Drawing extends StatelessWidget {
   }
 
   getThumbnail() {
-    return Container(
-      decoration: BoxDecoration(
-          border: Border.all(width: 2.5, color: Colors.grey.withOpacity(0.2))),
-      child: Material(
+    return Material(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
         clipBehavior: Clip.antiAlias,
-        child: Image.network(
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/A_black_image.jpg/640px-A_black_image.jpg'),
-      ),
-    );
+        child: FittedBox(
+            fit: BoxFit.fill,
+            child: drawing.type == 'Protected'
+                ? ClipRRect(
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+                child: Image.asset('assets/images/default_thumbnail.png'),
+              ),
+            )
+                : Image.asset('assets/images/default_thumbnail.png')));
   }
 
   richTextWhitePurple(String text1, String text2) {
