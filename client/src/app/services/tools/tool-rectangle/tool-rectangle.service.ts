@@ -1,3 +1,5 @@
+import { DrawingState, ShapeType, ShapeStyle } from './../../../model/IAction.model';
+import { SyncDrawingService } from './../../syncdrawing.service';
 import { Injectable } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { IconDefinition } from '@fortawesome/fontawesome-common-types';
@@ -8,11 +10,11 @@ import { DrawingService } from '../../drawing/drawing.service';
 import { OffsetManagerService } from '../../offset-manager/offset-manager.service';
 import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
 import { ToolsColorService } from '../../tools-color/tools-color.service';
-import { SelectionToolService } from '../selection-tool/selection-tool.service';
 import { ToolIdConstants } from '../tool-id-constants';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { FilledShape } from './filed-shape.model';
 import { RectangleCommand } from './rectangle-command';
+import { setStyle } from 'src/app/utils/colors';
 
 /// Outil pour créer des rectangle, click suivis de bouge suivis de relache crée le rectangle
 /// et avec shift créer un carrée
@@ -38,12 +40,14 @@ export class ToolRectangleService implements Tools {
   private x: number;
   private y: number;
 
+  private isDrawing: boolean = false;
+
   constructor(
     private offsetManager: OffsetManagerService,
     private colorTool: ToolsColorService,
     private drawingService: DrawingService,
     private rendererService: RendererProviderService,
-    private selectionToolService: SelectionToolService,
+    private syncService: SyncDrawingService
   ) {
     this.strokeWidth = new FormControl(1, Validators.min(1));
     this.rectStyle = new FormControl('fill');
@@ -56,7 +60,12 @@ export class ToolRectangleService implements Tools {
   /// Quand le bouton de la sourie est enfoncé, on crée un rectangle et on le retourne
   /// en sortie et est inceré dans l'objet courrant de l'outil.
   onPressed(event: MouseEvent): void {
+    if (this.isDrawing) {
+      return;
+    }
+
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
+      this.isDrawing = true;
       const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
       this.x = offset.x;
       this.y = offset.y;
@@ -69,50 +78,55 @@ export class ToolRectangleService implements Tools {
         fill: 'none', stroke: 'none', fillOpacity: 'none', strokeOpacity: 'none',
       };
       if (event.button === LEFT_CLICK) {
-        this.setStyle(
+        setStyle(
+          this.rectangle,
           this.colorTool.primaryColorString,
           this.colorTool.primaryAlpha.toString(),
           this.colorTool.secondaryColorString,
           this.colorTool.secondaryAlpha.toString(),
+          this.rectStyle.value
         );
       } else {
-        this.setStyle(
+        setStyle(
+          this.rectangle,
           this.colorTool.secondaryColorString,
           this.colorTool.secondaryAlpha.toString(),
           this.colorTool.primaryColorString,
           this.colorTool.primaryAlpha.toString(),
+          this.rectStyle.value
         );
       }
-      this.rectangleCommand = new RectangleCommand(this.rendererService.renderer, this.rectangle, this.drawingService);
-      this.rectangleCommand.execute();
+      this.syncService.sendShape(DrawingState.down, this.rectStyle.value, ShapeType.Rectangle, this.rectangle);
     }
-  }
-
-  /// Quand le bouton de la sourie est relaché, l'objet courrant de l'outil est mis a null.
-  onRelease(event: MouseEvent): ICommand | void {
-    this.isSquare = false;
-    this.rectangle = null;
-    if (this.rectangleCommand) {
-      const returnRectangleCommand = this.rectangleCommand;
-      this.rectangleCommand = null;
-      const lastObj = new Array(this.drawingService.getLastObject());
-      this.selectionToolService.setNewSelection(lastObj);
-      return returnRectangleCommand;
-    }
-    return;
   }
 
   /// Quand le bouton de la sourie est apuyé et on bouge celle-ci, l'objet courrant subit des modifications.
   onMove(event: MouseEvent): void {
     const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
-    this.setSize(offset.x, offset.y);
+    if (this.rectangle && this.isDrawing) {
+      const recCommand = new RectangleCommand(this.rendererService.renderer, this.rectangle, this.drawingService);
+      this.setSize(recCommand, this.rectangle, offset.x, offset.y);
+      this.syncService.sendShape(DrawingState.move, this.rectStyle.value, ShapeType.Rectangle, this.rectangle);
+    }
+  }
+
+  /// Quand le bouton de la sourie est relaché, l'objet courrant de l'outil est mis a null.
+  onRelease(): void {
+    this.isSquare = false;
+    if (this.rectangle && this.isDrawing) {
+      this.syncService.sendShape(DrawingState.up, this.rectStyle.value, ShapeType.Rectangle, this.rectangle!);
+      this.isDrawing = false;
+      this.rectangle = null;
+    }
   }
 
   /// Verification de la touche shift
   onKeyDown(event: KeyboardEvent): void {
     if (event.shiftKey) {
       this.isSquare = true;
-      this.setSize(this.oldX, this.oldY);
+      if (this.rectangleCommand && this.rectangle) {
+        this.setSize(this.rectangleCommand, this.rectangle, this.oldX, this.oldY);
+      }
     }
   }
 
@@ -120,23 +134,27 @@ export class ToolRectangleService implements Tools {
   onKeyUp(event: KeyboardEvent): void {
     if (!event.shiftKey) {
       this.isSquare = false;
-      this.setSize(this.oldX, this.oldY);
+      if (this.rectangleCommand && this.rectangle) {
+        this.setSize(this.rectangleCommand, this.rectangle, this.oldX, this.oldY);
+      }
     }
   }
 
   pickupTool(): void {
     return;
   }
+
   dropTool(): void {
     return;
   }
+
   /// Transforme le size de l'objet courrant avec un x et un y en entrée
-  private setSize(mouseX: number, mouseY: number): void {
-    if (!this.rectangleCommand || !this.rectangle) {
+  setSize(rectangleCommand: RectangleCommand, rectangle: FilledShape, mouseX: number, mouseY: number): void {
+    if (!rectangleCommand || !rectangle) {
       return;
     }
     let strokeFactor = 0;
-    if (this.rectangle.stroke !== 'none') {
+    if (rectangle.stroke !== 'none') {
       strokeFactor = this.strokeWidth.value;
     }
 
@@ -167,41 +185,14 @@ export class ToolRectangleService implements Tools {
       height = minSide;
     }
 
-    this.rectangleCommand.setX(
+    rectangleCommand.setX(
       (width - strokeFactor) <= 0 ? xValue + strokeFactor / 2 + (width - strokeFactor) : xValue + strokeFactor / 2);
-    this.rectangleCommand.setY(
+    rectangleCommand.setY(
       (height - strokeFactor) <= 0 ? yValue + strokeFactor / 2 + (height - strokeFactor) : yValue + strokeFactor / 2);
-    this.rectangleCommand.setHeight((height - strokeFactor) <= 0 ? 1 : (height - strokeFactor));
-    this.rectangleCommand.setWidth((width - strokeFactor) <= 0 ? 1 : (width - strokeFactor));
+    rectangleCommand.setHeight((height - strokeFactor) <= 0 ? 1 : (height - strokeFactor));
+    rectangleCommand.setWidth((width - strokeFactor) <= 0 ? 1 : (width - strokeFactor));
   }
 
   /// Pour definir le style du rectangle (complet, contour, centre)
-  private setStyle(primaryColor: string, primaryAlpha: string, secondaryColor: string, secondaryAlpha: string): void {
-    if (!this.rectangle) {
-      return;
-    }
-    switch (this.rectStyle.value) {
-      case 'center':
-        this.rectangle.fill = primaryColor;
-        this.rectangle.fillOpacity = primaryAlpha;
-        this.rectangle.stroke = 'none';
-        this.rectangle.strokeOpacity = 'none';
-        break;
-
-      case 'border':
-        this.rectangle.fill = 'none';
-        this.rectangle.fillOpacity = 'none';
-        this.rectangle.stroke = secondaryColor;
-        this.rectangle.strokeOpacity = secondaryAlpha;
-        break;
-
-      case 'fill':
-        this.rectangle.fill = primaryColor;
-        this.rectangle.fillOpacity = primaryAlpha;
-        this.rectangle.stroke = secondaryColor;
-        this.rectangle.strokeOpacity = secondaryAlpha;
-        break;
-    }
-  }
 
 }

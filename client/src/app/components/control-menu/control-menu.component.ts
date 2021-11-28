@@ -2,7 +2,8 @@ import { Component, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import { from, Subscription } from 'rxjs';
-import { mergeMap, switchMap, take } from 'rxjs/operators';
+import { CollaborationService } from 'src/app/services/collaboration.service';
+import { mergeMap, take } from 'rxjs/operators';
 import { CommandInvokerService } from 'src/app/services/command-invoker/command-invoker.service';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { ExportDialogService } from 'src/app/services/export-dialog/export-dialog.service';
@@ -31,6 +32,7 @@ export class ControlMenuComponent implements OnDestroy {
     private exportDialogService: ExportDialogService,
     private openDrawingService: OpenDrawingDialogService,
     private authService: AuthService,
+    private collaborationService: CollaborationService,
     private router: Router
   ) {
   }
@@ -76,6 +78,9 @@ export class ControlMenuComponent implements OnDestroy {
   openExportMenu(): void {
     this.exportDialogService.openDialog();
   }
+  openDrawingGallery(): void {
+    this.router.navigateByUrl('gallery');
+  }
 
   get canUndo(): boolean {
     return this.commandInvoker.canUndo;
@@ -84,7 +89,6 @@ export class ControlMenuComponent implements OnDestroy {
   get canRedo(): boolean {
     return this.commandInvoker.canRedo;
   }
-
   /// Undo
   undo(): void {
     this.commandInvoker.undo();
@@ -101,12 +105,17 @@ export class ControlMenuComponent implements OnDestroy {
 
   signOut(): void {
     this.authService.logUserDisconnection()
-    .pipe(
-      mergeMap(() => from(this.authService.signOut())), 
-      take(1)
-    ).subscribe((d) => {
-      console.log('Sign out successful!');
-    });
+      .pipe(
+        mergeMap(() => from(this.authService.signOut())),
+        take(1)
+      ).subscribe((d: any) => {
+        console.log('Sign out successful!');
+      });
+  }
+
+  getActions(): void {
+    console.log(this.collaborationService['actions']);
+    console.log(this.collaborationService['undos'], this.collaborationService['redos']);
   }
 
   ngOnDestroy(): void {

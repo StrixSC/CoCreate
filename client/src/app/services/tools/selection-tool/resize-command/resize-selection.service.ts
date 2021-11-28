@@ -1,3 +1,5 @@
+import { DrawingState } from 'src/app/model/IAction.model';
+import { SyncDrawingService } from './../../../syncdrawing.service';
 import { Injectable } from '@angular/core';
 import { ICommand } from 'src/app/interfaces/command.interface';
 import { Point } from 'src/app/model/point.model';
@@ -36,6 +38,7 @@ export class ResizeSelectionService {
   constructor(
     private rendererService: RendererProviderService,
     private drawingService: DrawingService,
+    private syncService: SyncDrawingService
   ) { }
 
   setCtrlPointList(ctrlPointList: SVGRectElement[]): void {
@@ -119,7 +122,10 @@ export class ResizeSelectionService {
         scaleReturn.yTranslate += this.yInverser * this.oldRectBox.height / 2;
       }
 
-      this.resizeCommand.resize(scaleReturn.xScale, scaleReturn.yScale, scaleReturn.xTranslate, scaleReturn.yTranslate);
+      const actionId = this.objectList[0].getAttribute('actionId');
+      if (actionId) {
+        this.syncService.sendResize(DrawingState.move, actionId, scaleReturn.xScale, scaleReturn.yScale, scaleReturn.xTranslate, scaleReturn.yTranslate);
+      }
     }
   }
 
@@ -155,6 +161,7 @@ export class ResizeSelectionService {
         newXScale = SCALE_INVERSER_MODIFIER * newXScale + (this.isAlt ? SCALE_POSITIONNER_MODIFIER : 0);
       }
     }
+
     return { xScale: newXScale, yScale: newYScale, xTranslate: newXTranslate, yTranslate: newYTranslate };
   }
 

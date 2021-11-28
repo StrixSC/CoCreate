@@ -1,0 +1,34 @@
+<button mat-icon-button mat-dialog-close (click)="dialogRef.close()">
+  <mat-icon>close</mat-icon>
+</button>
+<div style="text-align: center;">
+  <h1 mat-dialog-title>
+    {{drawing.title}}
+  </h1>
+  <mat-card-subtitle>
+    Créé le {{ drawing.created_at | date:'short' }}
+  </mat-card-subtitle>
+  <img mat-card-image class="image-preview" src="../../../assets/img/mock-img/10.jpg">
+  <div class='"separator'></div>
+  <mat-card-content>
+    Auteur: {{drawing.author_username}}
+  </mat-card-content>
+  <mat-card-content>
+  </mat-card-content>
+  <mat-dialog-actions class="actions">
+    <div>
+      <button [disabled]="isLoading" (click)="onSubmit()" mat-raised-button cdkFocusInitial color="primary">
+        Rejoindre le dessin
+      </button>
+    </div>
+  </mat-dialog-actions>
+</div>
+
+<style>
+  .actions {
+    display: flex;
+    justify-content: space-around;
+    gap: 1rem;
+    padding: 1rem;
+  }
+</style>

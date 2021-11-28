@@ -1,4 +1,4 @@
-import 'package:Colorimage/models/messenger.dart';
+import 'package:Colorimage/providers/messenger.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/src/provider.dart';
 import '../../models/chat.dart';
@@ -35,7 +35,7 @@ class _ChannelState extends State<Channel> {
                   ? const Center(
                       child: Text(
                       "Joignez un canal pour discuter avec vos amis! 😄",
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w500),
                     ))
                   : ListView.builder(
@@ -43,7 +43,7 @@ class _ChannelState extends State<Channel> {
                       itemCount: context.read<Messenger>().userChannels.length,
                       itemBuilder: (context, index) => ChatCard(
                           chat: context.watch<Messenger>().userChannels[index],
-                          user: context.watch<Messenger>().user,
+                          user: context.watch<Messenger>().auth!.user!,
                           press: () {
                             context.read<Messenger>().toggleSelection();
                             context
@@ -75,7 +75,7 @@ class _ChannelState extends State<Channel> {
             ElevatedButton(
                 onPressed: () {
                   context.read<Messenger>().getAvailableChannels();
-                  joinChannelDialog(context.read<Messenger>().user);
+                  joinChannelDialog(context.read<Messenger>().auth!.user);
                 },
                 child: const Text(
                   'Joindre un canal',
@@ -110,19 +110,6 @@ class _ChannelState extends State<Channel> {
     );
     if (text != null) {
       context.read<Messenger>().channelSocket.createChannel(text[0]);
-      // ChannelAPI channels_api = ChannelAPI(context.read<Messenger>().user);
-      // Map data = {'name': text};
-      // var body = json.encode(data);
-      // var response = await channels_api.createChannel(body);
-      // if (response.statusCode == 200) {
-      //   print('response:' + response.body);
-      //   var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
-      //   print('create: ' + jsonResponse["message"]);
-      //   showSnackBarAsBottomSheet(context, 'Channel was successfully reated :)');
-      //   context.read<Messenger>().socket.createChannel(text);
-      // } else {
-      //   print('Create request failed with status: ${response.statusCode}.');
-      // }
     }
   }
 
@@ -138,7 +125,7 @@ class _ChannelState extends State<Channel> {
           chat: item,
           user: user,
           press: () {
-            context.watch<Messenger>().channelSocket.joinChannel(item.id);
+            context.read<Messenger>().channelSocket.joinChannel(item.id);
           }),
       emptyBuilder: (context) => Column(
           crossAxisAlignment: CrossAxisAlignment.center,

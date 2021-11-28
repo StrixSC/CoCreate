@@ -7,6 +7,8 @@ import { FilledShape } from './filed-shape.model';
 export class RectangleCommand implements ICommand {
 
     private rectangle: SVGRectElement;
+    public actionId: string = "";
+    public userId: string = "";
 
     constructor(
         readonly renderer: Renderer2,
@@ -58,6 +60,8 @@ export class RectangleCommand implements ICommand {
             this.renderer.setAttribute(this.rectangle, 'y', this.rectangleAttributes.y.toString() + 'px');
             this.renderer.setAttribute(this.rectangle, 'width', this.rectangleAttributes.width.toString() + 'px');
             this.renderer.setAttribute(this.rectangle, 'height', this.rectangleAttributes.height.toString() + 'px');
+            this.renderer.setAttribute(this.rectangle, 'actionId', this.actionId);
+            this.renderer.setAttribute(this.rectangle, 'userId', this.userId);
             this.renderer.setStyle(this.rectangle, 'stroke-width', this.rectangleAttributes.strokeWidth.toString() + 'px');
             this.renderer.setStyle(this.rectangle, 'fill', this.rectangleAttributes.fill);
             this.renderer.setStyle(this.rectangle, 'stroke', this.rectangleAttributes.stroke);
