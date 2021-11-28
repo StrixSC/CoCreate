@@ -658,14 +658,13 @@ class _Drawing extends StatelessWidget {
                         Container(
                             height: 80.0,
                             child: Row(children: [
-                              Column(children: const [
+                              Column(children: [
                                 Padding(
                                     padding: EdgeInsets.all(15.0),
                                     child: CircleAvatar(
                                       radius: 24,
                                       backgroundColor: kPrimaryColor,
-                                      child: Icon(Icons.group,
-                                          color: Colors.black),
+                                      backgroundImage: NetworkImage(drawing.authorAvatar),
                                     ))
                               ]),
                               Column(
