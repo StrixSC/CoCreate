@@ -1,19 +1,22 @@
-import { Action, ActionType } from "@prisma/client";
-import { Server, Socket } from "socket.io"
-import { db } from "../../db";
-import { ExceptionType } from "../../models/Exceptions.enum";
-import { DrawingState } from "../../models/IAction.model";
-import { SocketEventError } from "../../socket";
-import { validateDrawingEvents } from "../../utils/drawings";
-import { handleSocketError } from "../../utils/errors";
+import { Action } from '.prisma/client';
+import { db } from './../../../db';
+import { DrawingState } from './../../../models/IAction.model';
+import { SocketEventError } from '../../../socket';
+import { ExceptionType } from '../../../models/Exceptions.enum';
+import { handleSocketError } from './../../../utils/errors';
+import { Socket, Server } from 'socket.io';
 
-export const handleFreedraw = async (io: Server, socket: Socket, data: Action) => {
+export const handleShape = async (io: Server, socket: Socket, data: Action) => {
     try {
-        if (data.state === DrawingState.Up) {
+        if (data.state === DrawingState.Down || data.state === DrawingState.Move) {
+            io.emit('shape:received', {
+                ...data,
+                isSelected: !!data.isSelected,
+            });
+        } else if (data.state === DrawingState.Up) {
             const dbAction = await db.action.create({
                 data: {
                     ...data,
-                    offsets: JSON.stringify(data.offsets),
                     isSelected: !!data.isSelected
                 }
             });
@@ -21,7 +24,7 @@ export const handleFreedraw = async (io: Server, socket: Socket, data: Action) =
             if (!dbAction) {
                 throw new SocketEventError(
                     'Could not trigger the action: Internal Socket Server Error',
-                    'E2002'
+                    'E2102'
                 );
             }
 
@@ -34,11 +37,7 @@ export const handleFreedraw = async (io: Server, socket: Socket, data: Action) =
                 isUndoRedo: data.isUndoRedo
             });
 
-            return io.emit('freedraw:received', {
-                ...data,
-            });
-        } else {
-            io.emit('freedraw:received', {
+            io.emit('shape:received', {
                 ...data,
             });
         }

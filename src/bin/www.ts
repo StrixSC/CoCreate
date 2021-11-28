@@ -16,6 +16,7 @@ import drawingHandler from '../events/drawing.events';
 import channelHandler from '../events/channels.events';
 import collaborationHandler from '../events/collaboration.events';
 import disconnectHandler from '../events/disconnect.event';
+import teamsHandler from '../events/teams.events';
 import log from '../utils/logger';
 
 export const normalizePort = (val: string) => {
@@ -75,7 +76,9 @@ const onConnection = (socket: Socket) => {
         channelHandler(io, socket);
         drawingHandler(io, socket);
         collaborationHandler(io, socket);
+        teamsHandler(io, socket);
         disconnectHandler(io, socket);
+
     } catch (e) {
         handleSocketError(socket, e);
     }

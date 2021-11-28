@@ -8,17 +8,19 @@ generator client {
 }
 
 model User {
-  index          Int                   @unique @default(autoincrement())
-  user_id        String                @id @unique @default(uuid())
-  email          String                @unique
-  profile        Profile?
-  stats          Stats?
-  account        Account?
-  logs           Log[]
-  channels       ChannelMember[]
-  actions        Action[]
-  collaborations CollaborationMember[]
-  avatars        Avatar[]
+  index                   Int                   @unique @default(autoincrement())
+  user_id                 String                @id @unique @default(uuid())
+  email                   String                @unique
+  profile                 Profile?
+  stats                   Stats?
+  account                 Account?
+  logs                    Log[]
+  channels                ChannelMember[]
+  actions                 Action[]
+  collaborations          CollaborationMember[]
+  avatars                 Avatar[]
+  authored_collaborations Author[]
+  teams                   TeamMember[]
 }
 
 model Profile {
@@ -120,7 +122,7 @@ model Avatar {
   avatar_id  String  @id @unique @default(uuid())
   isPublic   Boolean @default(false)
   user_id    String
-  user       User   @relation(fields: [user_id], references: [user_id])
+  user       User    @relation(fields: [user_id], references: [user_id])
   avatar_url String
 }
 
@@ -197,6 +199,48 @@ model Collaboration {
   type                   CollaborationType
   max_collaborator_count Int                   @default(4)
   password               String?
+  author                 Author                @relation(fields: [author_id], references: [author_id], onDelete: Cascade)
+  author_id              String
+}
+
+model Team {
+  index             Int          @unique @default(autoincrement())
+  team_id           String       @id @unique @default(uuid())
+  team_members      TeamMember[]
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  team_name         String       @unique
+  bio               String       @default("")
+  max_member_count  Int          @default(4)
+  type              TeamType
+  authored_drawings Author[]
+  password          String?      @default("")
+  mascot            String       @default("")
+  mascot_url        String       @default("")
+  avatar_url        String       @default("")
+}
+
+model TeamMember {
+  index          Int        @unique @default(autoincrement())
+  team_member_id String     @id @unique @default(uuid())
+  user_id        String
+  team_id        String
+  user           User       @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  team           Team       @relation(fields: [team_id], references: [team_id], onDelete: Cascade)
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @updatedAt
+  type           MemberType @default(Regular)
+}
+
+model Author {
+  index          Int             @unique @default(autoincrement())
+  author_id      String          @id @unique @default(uuid())
+  is_team        Boolean
+  team_id        String?
+  user_id        String?
+  user           User?           @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  team           Team?           @relation(fields: [team_id], references: [team_id], onDelete: Cascade)
+  collaborations Collaboration[]
 }
 
 // Enums
@@ -251,4 +295,9 @@ enum CollaborationType {
   Private
   Public
   Protected
+}
+
+enum TeamType {
+  Protected
+  Public
 }

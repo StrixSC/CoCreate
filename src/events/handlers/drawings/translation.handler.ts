@@ -1,11 +1,11 @@
-import { handleSocketError } from './../../utils/errors';
+import { handleSocketError } from './../../../utils/errors';
 import { Action, ActionType } from "@prisma/client";
 import { Server, Socket } from "socket.io";
-import { db } from "../../db";
-import { ExceptionType } from "../../models/Exceptions.enum";
-import { DrawingState } from "../../models/IAction.model";
-import { SocketEventError } from "../../socket";
-import { validateDrawingEvents } from "../../utils/drawings";
+import { db } from "../../../db";
+import { ExceptionType } from "../../../models/Exceptions.enum";
+import { DrawingState } from "../../../models/IAction.model";
+import { SocketEventError } from "../../../socket";
+import { validateDrawingEvents } from "../../../utils/drawings";
 
 export const handleTranslation = async (io: Server, socket: Socket, data: Action) => {
     try {

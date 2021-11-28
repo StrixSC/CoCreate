@@ -1,3 +1,4 @@
+import { v4 } from 'uuid';
 import { ExceptionType } from './../models/Exceptions.enum';
 import create, { Unauthorized } from 'http-errors';
 import { handleSocketError } from './../utils/errors';
@@ -188,12 +189,14 @@ export = (io: Server, socket: Socket) => {
 
     const onCreateCollaboration = async (payload: {
         userId: string,
+        creatorId: string,
+        isTeam: boolean,
         title: string,
         type: CollaborationType,
         password?: string
     }): Promise<void> => {
         try {
-            const { userId, title, type, password } = payload;
+            const { userId, creatorId, isTeam, title, type, password } = payload;
 
             const isValid = (
                 !validator.isEmpty(title) &&
@@ -206,27 +209,27 @@ export = (io: Server, socket: Socket) => {
             }
 
             if (type === CollaborationType.Private) {
-                const collaboration = await createCollaboration(userId, CollaborationType.Private, title);
+                const data = await createCollaboration2(userId, creatorId, isTeam, type, title, password);
 
-                const author = collaboration.collaboration_members.find((m) => m.type === MemberType.Owner);
-
-                if (!author) {
-                    throw new create.InternalServerError('Error while establishing author');
+                if (!data.collaboration) {
+                    throw new create.InternalServerError('Error while establishing author and collaboration');
                 }
 
-                socket.emit("collaboration:created", {
-                    collaborationId: collaboration.collaboration_id,
-                    title: collaboration.drawing!.title,
-                    thumbnailUrl: collaboration.drawing!.thumbnail_url,
-                    type: collaboration.type,
-                    currentCollaboratorCount: collaboration.collaboration_members.length,
-                    maxCollaboratorCount: collaboration.max_collaborator_count,
-                    updatedAt: collaboration.updated_at,
-                    drawingId: collaboration.drawing!.drawing_id,
-                    createdAt: collaboration.created_at,
-                    authorUsername: author.user.profile!.username,
-                    authorAvatarUrl: author.user.profile!.avatar_url,
-                });
+                const response = {
+                    collaborationId: data.collaboration.collaboration_id,
+                    title: data.title,
+                    thumbnailUrl: data.thumbnail_url,
+                    type: data.collaboration.type,
+                    currentCollaboratorCount: data.currentMemberCount,
+                    maxCollaboratorCount: data.maxMemberCount,
+                    updatedAt: data.collaboration.updated_at,
+                    drawingId: data.collaboration.drawing!.drawing_id,
+                    createdAt: data.collaboration.created_at,
+                    authorUsername: data.author_username,
+                    authorAvatarUrl: data.author_avatar_url,
+                }
+
+                socket.emit("collaboration:created", response);
             } else {
                 if (
                     type === CollaborationType.Protected &&
@@ -234,29 +237,24 @@ export = (io: Server, socket: Socket) => {
                 ) {
                     throw new create.BadRequest("Collaboration type protected was given but no password (or an empty password) was given with the request.");
                 }
-                const collaboration = await createCollaboration(userId, type, title, password);
-                if (!collaboration) {
+                const data = await createCollaboration2(userId, creatorId, isTeam, type, title, password);
+
+                if (!data || !data.collaboration) {
                     throw new create.InternalServerError("Could not create drawing/collaboration. Internal server error.");
                 }
 
-                const author = collaboration.collaboration_members.find((m) => m.type === MemberType.Owner);
-
-                if (!author) {
-                    throw new create.InternalServerError('Error while establishing author');
-                }
-
                 io.emit("collaboration:created", {
-                    collaborationId: collaboration.collaboration_id,
-                    title: collaboration.drawing!.title,
-                    thumbnailUrl: collaboration.drawing!.thumbnail_url,
-                    type: collaboration.type,
-                    currentCollaboratorCount: collaboration.collaboration_members.length,
-                    maxCollaboratorCount: collaboration.max_collaborator_count,
-                    updatedAt: collaboration.updated_at,
-                    drawingId: collaboration.drawing!.drawing_id,
-                    createdAt: collaboration.created_at,
-                    authorUsername: author.user.profile!.username,
-                    authorAvatarUrl: author.user.profile!.avatar_url,
+                    collaborationId: data.collaboration.collaboration_id,
+                    title: data.title,
+                    thumbnailUrl: data.thumbnail_url,
+                    type: data.collaboration.type,
+                    currentCollaboratorCount: data.currentMemberCount,
+                    maxCollaboratorCount: data.maxMemberCount,
+                    updatedAt: data.collaboration.updated_at,
+                    drawingId: data.collaboration.drawing!.drawing_id,
+                    createdAt: data.collaboration.created_at,
+                    authorUsername: data.author_username,
+                    authorAvatarUrl: data.author_avatar_url,
                 });
             }
         } catch (e) {
@@ -597,35 +595,138 @@ const generateConnectedPayload = (member: CollaborationMemberConnectionResponse)
 };
 
 const createCollaboration = async (userId: string, type: CollaborationType, title: string, password?: string) => {
-    return db.collaboration.create({
+    const collab_id = v4();
+    const author_id = v4();
+
+    return db.user.update({
+        where: {
+            user_id: userId,
+        },
         data: {
-            type: type,
-            password: type === CollaborationType.Protected ? password : undefined,
-            drawing: {
+            authored_collaborations: {
                 create: {
-                    title: title,
-                }
-            },
-            collaboration_members: {
-                create: [
-                    {
-                        type: MemberType.Owner,
-                        user_id: userId,
+                    author_id: author_id,
+                    is_team: false,
+                    collaborations: {
+                        create: {
+                            collaboration_id: collab_id,
+                            type: type,
+                            password: type === CollaborationType.Protected ? password : undefined,
+                            drawing: {
+                                create: {
+                                    title: title,
+                                }
+                            },
+                            collaboration_members: {
+                                create: [
+                                    {
+                                        type: MemberType.Owner,
+                                        user_id: userId,
+                                    }
+                                ]
+                            },
+                        }
                     }
-                ]
+                }
             }
         },
         include: {
-            drawing: true,
-            collaboration_members: {
+            profile: true,
+            account: true,
+            authored_collaborations: {
+                where: {
+                    author_id: author_id,
+                },
                 include: {
-                    user: {
+                    collaborations: {
+                        where: {
+                            collaboration_id: collab_id,
+                        },
                         include: {
-                            profile: true
+                            drawing: true,
+                            collaboration_members: {
+                                include: {
+                                    user: {
+                                        include: {
+                                            profile: true,
+                                            account: true
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     })
+}
+
+const createCollaboration2 = async (user_id: string, creatorId: string, isTeam: boolean, type: CollaborationType, title: string, password?: string) => {
+    const collab_id = v4();
+
+    const author = await db.author.create({
+        data: {
+            is_team: isTeam,
+            user_id: isTeam ? null : creatorId,
+            team_id: isTeam ? creatorId : null,
+            collaborations: {
+                create: [{
+                    collaboration_id: collab_id,
+                    type: type,
+                    password: password,
+                    drawing: {
+                        create: {
+                            title: title,
+                        }
+                    },
+                    collaboration_members: {
+                        create: [
+                            {
+                                type: MemberType.Owner,
+                                user_id: user_id
+                            }
+                        ]
+                    }
+                }]
+            }
+        },
+        include: {
+            user: {
+                include: {
+                    profile: true,
+                    account: true,
+                }
+            },
+            team: true,
+            collaborations: {
+                where: {
+                    collaboration_id: collab_id,
+                },
+                include: {
+                    drawing: true,
+                    collaboration_members: true,
+                }
+            }
+        }
+    });
+
+    if (!author) {
+        throw new create.InternalServerError('Error while creating author and collaboration');
+    }
+
+    const author_team_data = author.team;
+    const author_user_data = author.user;
+
+    const returnData = {
+        collaboration: author.collaborations[0],
+        author_username: author.is_team ? author_team_data!.team_name : author_user_data!.profile!.username,
+        author_avatar_url: author.is_team ? author_team_data!.avatar_url : author_user_data!.profile!.avatar_url,
+        maxMemberCount: author.collaborations[0].max_collaborator_count,
+        currentMemberCount: author.collaborations[0].collaboration_members.length,
+        title: author.collaborations[0].drawing!.title,
+        thumbnail_url: author.collaborations[0].drawing!.thumbnail_url
+    }
+
+    return returnData;
 }

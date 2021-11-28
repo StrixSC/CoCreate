@@ -1,12 +1,12 @@
 import { Server, Socket } from 'socket.io';
 import { Action } from '@prisma/client';
-import { handleTranslation } from './handlers/translation.handler';
-import { handleShape } from './handlers/shape.handler';
-import { handleFreedraw } from "./handlers/freedraw.handler"
-import { handleSelection } from "./handlers/selection.handler"
-import { handleRotation } from "./handlers/rotation.handler"
-import { handleResize } from "./handlers/resize.handler";
-import { handleDelete } from './handlers/delete.handler';
+import { handleTranslation } from './handlers/drawings/translation.handler';
+import { handleShape } from './handlers/drawings/shape.handler';
+import { handleFreedraw } from "./handlers/drawings/freedraw.handler"
+import { handleSelection } from "./handlers/drawings/selection.handler"
+import { handleRotation } from "./handlers/drawings/rotation.handler"
+import { handleResize } from "./handlers/drawings/resize.handler";
+import { handleDelete } from './handlers/drawings/delete.handler';
 
 export = (io: Server, socket: Socket) => {
     const onFreedraw = async (data: Action) => handleFreedraw(io, socket, data);

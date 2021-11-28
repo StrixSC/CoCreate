@@ -1,23 +1,18 @@
-import { Action } from "@prisma/client";
-import { Server, Socket } from "socket.io"
-import validator from "validator";
-import { db } from "../../db";
-import { ExceptionType } from "../../models/Exceptions.enum";
-import { DrawingState } from "../../models/IAction.model";
-import { SocketEventError } from "../../socket";
-import { handleSocketError } from "../../utils/errors";
+import { DrawingState } from './../../../models/IAction.model';
+import { SocketEventError } from './../../../socket';
+import { db } from '../../../db';
+import { handleSocketError } from '../../../utils/errors';
+import { Action } from '.prisma/client';
+import { Server, Socket } from 'socket.io';
+import { ExceptionType } from '../../../models/Exceptions.enum';
 
-export const handleShape = async (io: Server, socket: Socket, data: Action) => {
+export const handleFreedraw = async (io: Server, socket: Socket, data: Action) => {
     try {
-        if (data.state === DrawingState.Down || data.state === DrawingState.Move) {
-            io.emit('shape:received', {
-                ...data,
-                isSelected: !!data.isSelected,
-            });
-        } else if (data.state === DrawingState.Up) {
+        if (data.state === DrawingState.Up) {
             const dbAction = await db.action.create({
                 data: {
                     ...data,
+                    offsets: JSON.stringify(data.offsets),
                     isSelected: !!data.isSelected
                 }
             });
@@ -25,7 +20,7 @@ export const handleShape = async (io: Server, socket: Socket, data: Action) => {
             if (!dbAction) {
                 throw new SocketEventError(
                     'Could not trigger the action: Internal Socket Server Error',
-                    'E2102'
+                    'E2002'
                 );
             }
 
@@ -38,7 +33,11 @@ export const handleShape = async (io: Server, socket: Socket, data: Action) => {
                 isUndoRedo: data.isUndoRedo
             });
 
-            io.emit('shape:received', {
+            return io.emit('freedraw:received', {
+                ...data,
+            });
+        } else {
+            io.emit('freedraw:received', {
                 ...data,
             });
         }

@@ -40,6 +40,9 @@ export const getCollaborations = async (filter: string, offset: number, limit: n
                 }
             }
         },
+        orderBy: {
+            created_at: "desc"
+        }
     });
 
     if (!result) {
@@ -76,6 +79,9 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
                     user_id: excludeUser ? userId : ''
                 }
             }
+        },
+        orderBy: {
+            created_at: "desc"
         }
     });
 

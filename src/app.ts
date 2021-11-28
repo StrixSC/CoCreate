@@ -18,6 +18,7 @@ import usersRouter from './routes/users.route';
 import channelsRouter from './routes/channels.route';
 import galleryRouter from './routes/gallery.route';
 import publicRouter from './routes/public.route';
+import teamsRouter from './routes/teams.route';
 
 import log from './utils/logger';
 
@@ -47,6 +48,7 @@ app.use('/api/public', publicRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/channels', channelsRouter);
 app.use('/api/gallery', galleryRouter);
+app.use('/api/teams', teamsRouter)
 app.use('/docs', serve, setup(swaggerDoc));
 
 app.use(async (req, res, next) => {
