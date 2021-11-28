@@ -106,7 +106,13 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
                 // Month created (In text, example: novembre)
                 localLocale.format('MMMM').toLowerCase(),
                 // Day of the month created (in number, example: 31);
-                date.getDay().toString(),
+                localLocale.date().toString(),
+                // Hour created (24H format)
+                localLocale.hour().toString(),
+                // Hour created (12H format)
+                localLocale.format('hh').toString(),
+                // Minutes
+                localLocale.minutes().toString(),
                 // name of the day of the month created, (example: vendredi)
                 localLocale.format('dddd').toLowerCase(),
                 // Author username
