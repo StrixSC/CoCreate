@@ -583,12 +583,12 @@ class _Drawing extends StatelessWidget {
         context: context,
         builder: (BuildContext context) => AlertDialog(
                 title: Center(child: Text(drawing.title)),
-                content: Column(
+                content: SingleChildScrollView(
+                    child:Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SingleChildScrollView(
-                          child: Row(children: <Widget>[
-                        SizedBox(width: 680, child: gridTileJoin(thumbnail)),
+                      Row(children: <Widget>[
+                        Expanded(child: SizedBox(width: 680, child: gridTileJoin(thumbnail))),
                         SizedBox(
                             width: 300,
                             child: Column(
@@ -622,14 +622,18 @@ class _Drawing extends StatelessWidget {
                                                       .drawings['Joined']
                                                   [drawing.drawingId] ==
                                               null
-                                      ? formField(
-                                          'Mot de passe',
-                                          'Veuillez entrez le titre du dessin',
-                                          passController)
+                                      ? FormBuilder(
+                                          key: _formKey,
+                                          child: Column(children: <Widget>[
+                                            formField(
+                                                'Mot de passe',
+                                                'Veuillez entrez le titre du dessin',
+                                                passController)
+                                          ]))
                                       : const SizedBox.shrink(),
                                 ]))
-                      ]))
-                    ]),
+                      ])
+                    ])),
                 actions: <Widget>[
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -664,7 +668,12 @@ class _Drawing extends StatelessWidget {
                                   height: 50,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      Navigator.pop(context, 'Joindre');
+                                      _formKey.currentState!.save();
+                                      if (_formKey.currentState!.validate()) {
+                                        Navigator.pop(context, 'Joindre');
+                                      }else {
+                                        print('Join validation failed');
+                                      }
                                     },
                                     child: const Text('Joindre'),
                                   )))
@@ -680,16 +689,17 @@ class _Drawing extends StatelessWidget {
                                     child: const Text('Quitter'),
                                   ))),
                       context.read<Collaborator>().currentType == 'Available'
-                          ?  SizedBox.shrink():Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
-                          child: Container(
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context, 'Se connecter');
-                                },
-                                child: const Text('Se connecter'),
-                              ))) ,
+                          ? SizedBox.shrink()
+                          : Padding(
+                              padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
+                              child: Container(
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context, 'Se connecter');
+                                    },
+                                    child: const Text('Se connecter'),
+                                  ))),
                     ],
                   )
                 ]));
@@ -698,60 +708,44 @@ class _Drawing extends StatelessWidget {
   alert(context, type) {
     return showDialog<String>(
         context: context,
-        builder: (BuildContext context) =>
-            AlertDialog(
-              title: Text(
-                  'Êtes-vous certain de vouloir ${type} ce dessin?.'),
-              content: Text(
-                  type == 'supprimer'? 'Vous pourrez plus le ré-obtenir! 😧' :
-                'Il sera possible de le rejoindre plus tard si il est pas supprimer 😄'),
+        builder: (BuildContext context) => AlertDialog(
+              title: Text('Êtes-vous certain de vouloir ${type} ce dessin?.'),
+              content: Text(type == 'supprimer'
+                  ? 'Vous pourrez plus le ré-obtenir! 😧'
+                  : 'Il sera possible de le rejoindre plus tard si il est pas supprimer 😄'),
               actions: <Widget>[
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(
-                        context, 'Annuler');
+                    Navigator.pop(context, 'Annuler');
                   },
-                  child:
-                  const Text('Annuler'),
+                  child: const Text('Annuler'),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(
-                        context, 'Oui');
-                    type == 'supprimer' ? context
-                        .read<Collaborator>()
-                        .collaborationSocket
-                        .deleteCollaboration(
-                        drawing
-                            .collaboration
-                            .collaborationId) : context
-                        .read<Collaborator>()
-                        .collaborationSocket
-                        .leaveCollaboration(
-                        drawing
-                            .collaboration
-                            .collaborationId);
+                    Navigator.pop(context, 'Oui');
+                    type == 'supprimer'
+                        ? context
+                            .read<Collaborator>()
+                            .collaborationSocket
+                            .deleteCollaboration(
+                                drawing.collaboration.collaborationId)
+                        : context
+                            .read<Collaborator>()
+                            .collaborationSocket
+                            .leaveCollaboration(
+                                drawing.collaboration.collaborationId);
                     showDialog<String>(
                         context: context,
-                        builder: (BuildContext
-                        context) =>
-                            AlertDialog(
-                              title: Text(
-                                  'Le dessin à été ${type} avec succès.'),
-                              content: const Text(
-                                  'Créez-en un autre! 😄'),
-                              actions: <
-                                  Widget>[
+                        builder: (BuildContext context) => AlertDialog(
+                              title:
+                                  Text('Le dessin à été ${type} avec succès.'),
+                              content: const Text('Créez-en un autre! 😄'),
+                              actions: <Widget>[
                                 TextButton(
-                                  onPressed:
-                                      () {
-                                    Navigator.pop(
-                                        context,
-                                        'Ok');
+                                  onPressed: () {
+                                    Navigator.pop(context, 'Ok');
                                   },
-                                  child:
-                                  const Text(
-                                      'Ok'),
+                                  child: const Text('Ok'),
                                 ),
                               ],
                             ));
