@@ -4,7 +4,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { NewDrawingFormDialogComponent } from './../new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { ICollaborationConnectResponse, ICollaborationDeleteResponse, ICollaborationJoinResponse, ICollaborationLeaveResponse, ICollaborationUpdateResponse, ICollaborationCreateResponse, ICollaborationLoadResponse } from './../../model/ICollaboration.model';
 import { AuthService } from './../../services/auth.service';
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog, MatPaginator, MatTableDataSource, PageEvent } from '@angular/material';
 import { BehaviorSubject, EMPTY, merge, of, Subscription } from 'rxjs';
@@ -38,7 +38,8 @@ export enum GalleryEvents {
 })
 
 export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit {
-
+  @Input() self = 'self';
+  @Input() all = 'all';
   errorListener: Subscription;
   messageListener: Subscription;
   dialogRef: MatDialogRef<NewDrawingFormDialogComponent>;
@@ -305,5 +306,12 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
       }
     });
   }
-  
+  clearFilterAll() {
+    this.drawingFilterAll = '';
+    this.handleAllPageEvent(new PageEvent, false);
+  }
+  clearFilterSelf() {
+    this.drawingFilterSelf = '';
+    this.handlePageEvent(new PageEvent, false);
+  }
 }

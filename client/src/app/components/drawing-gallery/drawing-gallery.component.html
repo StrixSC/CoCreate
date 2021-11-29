@@ -14,9 +14,12 @@
     <div>
       <mat-form-field [style.width.%]="50">
         <mat-label>Recherche</mat-label>
-        <input (keydown.enter)="setFilterMyDrawings($event.target.value); handlePageEvent($event, false)" matInput placeholder="Entrez un mot-clé">
+        <input type="text" [(ngModel)]="drawingFilterSelf" (keyup)="setFilterMyDrawings($event.target.value); handlePageEvent($event, false)" matInput placeholder="Entrez un mot-clé">
         <button mat-button matPrefix mat-icon-button>
           <mat-icon>search</mat-icon>
+        </button>
+        <button *ngIf="drawingFilterSelf!==''"  mat-icon-button matTooltip="Effacer la recherche" matSuffix (click)="clearFilterSelf()">
+          <mat-icon>clear</mat-icon>
         </button>
         <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
       </mat-form-field>
@@ -40,7 +43,7 @@
       [pageIndex]="pageIndexSelf"></mat-paginator>
 
       <div class="margin-center">
-        <app-drawing-gallery-card *ngFor="let drawing of dataObsSelf | async" [drawing]="drawing">
+        <app-drawing-gallery-card fxLayout="row wrap" fxLayoutAlign="space-evenly none" fxfill fxLayoutGap *ngFor="let drawing of dataObsSelf | async" [drawing]="drawing">
         </app-drawing-gallery-card>
       </div>
     </div>
@@ -78,9 +81,12 @@
     <div>
       <mat-form-field [style.width.%]="50">
         <mat-label>Recherche</mat-label>
-        <input (keydown.enter)="setFilterAll($event.target.value); handleAllPageEvent($event, false)" matInput placeholder="Entrez un mot-clé">
+        <input type="text" [(ngModel)]="drawingFilterAll" (keyup)="setFilterAll($event.target.value); handleAllPageEvent($event, false)" matInput placeholder="Entrez un mot-clé">
         <button mat-button matPrefix mat-icon-button>
           <mat-icon>search</mat-icon>
+        </button>
+        <button *ngIf="drawingFilterAll!==''" mat-icon-button matTooltip="Effacer la recherche" matSuffix (click)="clearFilterAll()">
+          <mat-icon>clear</mat-icon>
         </button>
         <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
       </mat-form-field>
@@ -105,7 +111,7 @@
 
 
       <div class="margin-center">
-        <app-drawing-gallery-card *ngFor="let drawing of dataObsAll | async" [drawing]="drawing">
+        <app-drawing-gallery-card fxLayout="row" fxLayout.xs="column" *ngFor="let drawing of dataObsAll | async" [drawing]="drawing">
         </app-drawing-gallery-card>
       </div>
     </div>

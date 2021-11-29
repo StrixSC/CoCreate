@@ -6,9 +6,9 @@
     {{drawing.title}}
   </h1>
   <mat-card-subtitle>
-    Créé le {{ drawing.created_at | date:'short' }}
+    Mise à jour le {{ drawing.updated_at | date:'short' }}
   </mat-card-subtitle>
-  <img mat-card-image class="image-preview" src="../../../assets/img/mock-img/10.jpg">
+  <img mat-card-image class="image-preview" src="../../../assets/default-image.png">
   <div class='"separator'></div>
   <mat-card-content>
     Auteur: {{drawing.author_username}}
