@@ -3,4 +3,5 @@ export enum ExceptionType {
     Drawing = "drawing:exception",
     Teams_Create = "teams:create:exception",
     Teams_Join = "teams:join:exception",
+    User_Init = "user:init:exception",
 }

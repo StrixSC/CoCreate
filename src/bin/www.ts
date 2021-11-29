@@ -15,7 +15,7 @@ import { logEvent } from './../middlewares/socket.middleware';
 import drawingHandler from '../events/drawing.events';
 import channelHandler from '../events/channels.events';
 import collaborationHandler from '../events/collaboration.events';
-import disconnectHandler from '../events/disconnect.event';
+import disconnectHandler from '../events/connection.events';
 import teamsHandler from '../events/teams.events';
 import log from '../utils/logger';
 
