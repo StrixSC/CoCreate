@@ -1,3 +1,4 @@
+import { TeamInfoComponent } from './components/team-info/team-info.component';
 import { TeamPasswordDialogComponent } from './components/team-password-dialog/team-password-dialog.component';
 import { AngularFireStorageModule } from '@angular/fire/storage';
 import { CreateTeamDialogComponent } from './components/create-team-dialog/create-team-dialog.component';
@@ -118,6 +119,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     AllChannelsComponent,
     AuthWrapperComponent,
     AllChannelsComponent,
+    TeamInfoComponent,
     TeamPasswordDialogComponent,
   ],
   imports: [
@@ -148,6 +150,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     NewDrawingAlertComponent,
     NewDrawingComponent,
     TeamPasswordDialogComponent,
+    TeamInfoComponent,
     ToolsColorPickerComponent,
     WorkspaceComponent,
     ControlMenuComponent,

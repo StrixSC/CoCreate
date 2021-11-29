@@ -1,3 +1,4 @@
+import { TeamInfoComponent } from './../team-info/team-info.component';
 import { AuthService } from './../../services/auth.service';
 import { TeamPasswordDialogComponent } from './../team-password-dialog/team-password-dialog.component';
 import { Subscription, merge } from 'rxjs';
@@ -198,15 +199,17 @@ export class TeamPageComponent implements OnInit {
     }
     query = query.substr(0, query.length - 1); // remove the last & or the ? if no params.
     this.isLoading = true;
-    this.teamService.fetchTeams(query).subscribe((d: any) => {
+    const teamSub = this.teamService.fetchTeams(query).subscribe((d: any) => {
       this.activeTotal = d.total;
       this.activeOffset = d.offset;
       this.activeLimit = d.limit;
       this.teams = d.teams;
       this.isLoading = false;
+      teamSub.unsubscribe();
     }, (error) => {
       this.isLoading = false;
       this.snackBar.dismiss();
+      teamSub.unsubscribe();
       this.snackBar.open("Une erreur s'est produite lors de la requête, veuillez essayez à nouveau...", 'OK', { duration: 5000 });
     })
   }
@@ -233,6 +236,19 @@ export class TeamPageComponent implements OnInit {
     if (this.joinFinishedSubscription) {
       this.joinErrorSubscription.unsubscribe();
     }
+  }
+
+  leaveTeam(team: TeamResponse): void {
+
+  }
+
+  openInfo(team: TeamResponse): void {
+    this.dialog.open(TeamInfoComponent, { ...this.dialogOptions, data: team }).afterClosed().subscribe((data) => {
+      if (data) {
+        this.resetPaginationValues();
+        this.submitSearch();
+      }
+    });
   }
 
   resetPaginationValues(): void {

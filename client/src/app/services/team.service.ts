@@ -15,6 +15,10 @@ export class TeamService {
     return this.http.get(environment.serverURL + '/api/teams' + query);
   }
 
+  fetchTeamById(teamId: string) {
+    return this.http.get(environment.serverURL + '/api/teams/' + teamId);
+  }
+
   sendJoin(data: any): void {
     this.socketService.emit('teams:join', data);
   }
