@@ -9,7 +9,7 @@ PersistentTabController _controller =
     new PersistentTabController(initialIndex: 0);
 
 class Home extends StatelessWidget {
-  Home();
+  const Home({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
