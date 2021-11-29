@@ -12,6 +12,7 @@ import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:Colorimage/utils/socket/collaboration.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import '../models/chat.dart';
 
@@ -19,13 +20,13 @@ class Collaborator extends ChangeNotifier {
   UserCredential? auth;
   Map drawings =
       <String, Map<String, Drawing>>{}; // <section, <drawing_id, drawing>>
-  // Map allDrawings = <String, Drawing>{}; // drawings not joined yet
-  // Map userDrawings = <String, Drawing>{}; // drawings already joined
   bool isDrawing = false;
   String currentType = "Available"; // sections : Available, Joined
   late String currentDrawingId = '';
   late CollaborationSocket collaborationSocket;
   late Map pagingControllers;
+
+  late Function navigate;
 
   Collaborator(this.auth) {
     drawings.putIfAbsent("Available", () => <String, Drawing>{});
@@ -106,15 +107,25 @@ class Collaborator extends ChangeNotifier {
     collaboration.collaborationId =
         drawings[currentType][currentDrawingId].collaboration.collaborationId;
     drawings[currentType][currentDrawingId].collaboration = collaboration;
+    navigate();
     notifyListeners();
   }
 
   void memberJoined(Member member) {
+    if(member.userId == auth!.user!.uid) {
+
+    } else {
+
+    }
     if (drawings[currentType].containsKey(member.drawingId)) {
       drawings[currentType][currentDrawingId].collaboration.members.add(member);
       drawings[currentType][currentDrawingId].collaboration.memberCount++;
       notifyListeners();
     }
+    for (var type in TYPES) {
+      pagingControllers[type].refresh();
+    }
+      notifyListeners();
   }
 
   void memberConnected(Member member) {
@@ -134,8 +145,13 @@ class Collaborator extends ChangeNotifier {
   }
 
   void drawingCreated(Drawing drawing) {
-    (drawings[currentType] as Map<String, Drawing>)
-        .putIfAbsent(drawing.drawingId, () => drawing);
+    if(drawing.authorUsername == auth!.user!.displayName) {
+      (drawings['Joined'] as Map<String, Drawing>)
+          .putIfAbsent(drawing.drawingId, () => drawing);
+    } else {
+      (drawings['Available'] as Map<String, Drawing>)
+          .putIfAbsent(drawing.drawingId, () => drawing);
+    }
     pagingControllers[currentType].refresh();
     notifyListeners();
   }

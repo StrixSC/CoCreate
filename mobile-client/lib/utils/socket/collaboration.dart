@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:Colorimage/models/chat.dart';
 import 'package:Colorimage/models/collaboration.dart';
 import 'package:Colorimage/models/drawing.dart';
@@ -7,12 +9,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:vector_math/vector_math.dart';
 
+class HexColor extends Color {
+  static int _getColorFromHex(String hexColor) {
+    hexColor = hexColor.toUpperCase().replaceAll("#", "");
+    if (hexColor.length == 6) {
+      hexColor = "FF" + hexColor;
+    }
+    return int.parse(hexColor, radix: 16);
+  }
+
+  HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
+}
+
 class CollaborationSocket extends SocketService {
   CollaborationSocket(User user, IO.Socket socket) : super(user, socket);
 
   // Emits
-  joinCollaboration(
-      String userId, String collaborationId, String type, String? password) {
+  joinCollaboration(String collaborationId, String type, String? password) {
     print("Join Collab: $collaborationId");
     if (type == "Protected") {
       socket.emit('collaboration:join', {
@@ -36,7 +49,8 @@ class CollaborationSocket extends SocketService {
         {'userId': user.uid, 'collaborationId': collaborationId});
   }
 
-  createCollaboration(String authorId, String title, String type, String? password) {
+  createCollaboration(
+      String authorId, String title, String type, String? password) {
     print('Create Collab');
     if (type == "Protected") {
       socket.emit('collaboration:create', {
@@ -95,15 +109,20 @@ class CollaborationSocket extends SocketService {
   load(callbackMessage) {
     socket.on('collaboration:load', (data) {
       print('Collaboration Load');
+      List<Member> members = [];
+      for (var element in (data["members"] as List<dynamic>)) {
+        members.add(Member(
+            username: element["username"], avatarUrl: element["avatarUrl"]));
+      }
       Collaboration collaboration = Collaboration(
           collaborationId: 'id',
           actions: data["actions"],
-          backgroundColor: data["backgroundColor"],
+          backgroundColor: HexColor(data["backgroundColor"]),
           memberCount: data["memberCount"],
           maxMemberCount: data["maxMemberCount"],
           width: data["width"],
           height: data["height"],
-          members: data["members"]);
+          members: members);
       callbackMessage('load', collaboration);
     });
   }
@@ -144,9 +163,18 @@ class CollaborationSocket extends SocketService {
       Collaboration collaboration = Collaboration(
           collaborationId: data["collaborationId"],
           actions: [],
-          memberCount:  data['currentCollaboratorCount'],
-          maxMemberCount: data['maxCollaboratorCount'], //data["maxMemberCount"],
-          members: []);
+          memberCount: data['currentCollaboratorCount'],
+          maxMemberCount: data['maxCollaboratorCount'],
+          members: [
+            Member(
+              drawingId: data['drawingId'],
+              userId: '',
+              username: data["authorUsername"],
+              avatarUrl: data["authorAvatarUrl"].toString(),
+              type: data['type'],
+              isActive: false,
+            )
+          ]); //data["maxMemberCount"],);
       Drawing drawing = Drawing(
           drawingId: data['drawingId'],
           thumbnailUrl: data['thumbnailUrl'],
@@ -155,7 +183,7 @@ class CollaborationSocket extends SocketService {
           authorAvatar: data["authorAvatarUrl"].toString(),
           createdAt: data['createdAt'],
           collaboration: collaboration,
-          type: 'type'); // "Protected", "Public" or "Private"
+          type: data['type']); // "Protected", "Public" or "Private"
       callbackChannel('created', drawing);
     });
   }

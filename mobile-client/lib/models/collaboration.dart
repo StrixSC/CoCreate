@@ -5,7 +5,7 @@ class Collaboration {
   List actions; // change this to List<Action> when Action is ready
   Color backgroundColor;
   int memberCount, maxMemberCount, width, height;
-  List<Member> members;
+  List<Member> members = [];
 
   Collaboration({
     this.collaborationId = 'NO ID AVAILABLE',
@@ -15,7 +15,7 @@ class Collaboration {
     this.maxMemberCount = 0,
     this.width = 1280,
     this.height = 750,
-    this.members = const [],
+    required this.members,
   });
 }
 

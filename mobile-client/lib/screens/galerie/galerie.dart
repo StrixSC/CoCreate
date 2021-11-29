@@ -54,6 +54,7 @@ class GalerieState extends State<Galerie>
   void initState() {
     super.initState();
     context.read<Collaborator>().pagingControllers = pagingControllers;
+    context.read<Collaborator>().navigate = navigateToDrawing;
     _tabController = TabController(length: 2, vsync: this);
     pagingControllers.forEach((key, value) {
       value.addPageRequestListener((pageKey) {
@@ -96,6 +97,10 @@ class GalerieState extends State<Galerie>
     });
   }
 
+  navigateToDrawing() {
+    print('should navigate to drawing');
+  }
+
   Future<void> _fetchDrawings(int pageKey, String section, String? type) async {
     RestApi rest = RestApi();
     type = dropDownControllers[context.read<Collaborator>().currentType];
@@ -126,7 +131,9 @@ class GalerieState extends State<Galerie>
           Collaboration collaboration = Collaboration(
               collaborationId: drawing["collaboration_id"],
               memberCount: drawing["collaborator_count"],
-              maxMemberCount: drawing["max_collaborator_count"]);
+              maxMemberCount: drawing["max_collaborator_count"],
+              members: [],
+          );
           // TODO: add updated_at && thumbnail url
           drawings.add(Drawing(
               drawingId: drawing['drawing_id'],
@@ -584,11 +591,13 @@ class _Drawing extends StatelessWidget {
         builder: (BuildContext context) => AlertDialog(
                 title: Center(child: Text(drawing.title)),
                 content: SingleChildScrollView(
-                    child:Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
                       Row(children: <Widget>[
-                        Expanded(child: SizedBox(width: 680, child: gridTileJoin(thumbnail))),
+                        Expanded(
+                            child: SizedBox(
+                                width: 680, child: gridTileJoin(thumbnail))),
                         SizedBox(
                             width: 300,
                             child: Column(
@@ -656,7 +665,7 @@ class _Drawing extends StatelessWidget {
                                                 Colors.red)),
                                     onPressed: () {
                                       Navigator.pop(context, 'Delete');
-                                      alert(context, 'supprimer');
+                                      alert(context, 'supprimer', 'Vous pourrez plus le ré-obtenir! 😧', 'Créez-en un autre! 😄');
                                     },
                                     child: const Text('Supprimer'),
                                   )))
@@ -668,12 +677,32 @@ class _Drawing extends StatelessWidget {
                                   height: 50,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      _formKey.currentState!.save();
-                                      if (_formKey.currentState!.validate()) {
-                                        Navigator.pop(context, 'Joindre');
-                                      }else {
-                                        print('Join validation failed');
+                                      context
+                                          .read<Collaborator>()
+                                          .currentDrawingId = drawing.drawingId;
+                                      if (drawing.type == 'Protected') {
+                                        _formKey.currentState!.save();
+                                        if (_formKey.currentState!.validate()) {
+                                          context
+                                              .read<Collaborator>()
+                                              .collaborationSocket
+                                              .joinCollaboration(
+                                                  drawing.collaboration
+                                                      .collaborationId,
+                                                  drawing.type,
+                                                  passController.value.text);
+                                        }
+                                      } else {
+                                        context
+                                            .read<Collaborator>()
+                                            .collaborationSocket
+                                            .joinCollaboration(
+                                            drawing.collaboration
+                                                .collaborationId,
+                                            drawing.type,
+                                            null);
                                       }
+                                      Navigator.pop(context, 'Joindre');
                                     },
                                     child: const Text('Joindre'),
                                   )))
@@ -684,7 +713,7 @@ class _Drawing extends StatelessWidget {
                                   child: ElevatedButton(
                                     onPressed: () {
                                       Navigator.pop(context, 'Quitter');
-                                      alert(context, 'quitter');
+                                      alert(context, 'quitter', 'Il sera possible de le rejoindre plus tard si il est pas supprimer 😄', 'Aller joindre des dessins!');
                                     },
                                     child: const Text('Quitter'),
                                   ))),
@@ -697,6 +726,15 @@ class _Drawing extends StatelessWidget {
                                   child: ElevatedButton(
                                     onPressed: () {
                                       Navigator.pop(context, 'Se connecter');
+                                      context
+                                          .read<Collaborator>()
+                                          .currentDrawingId = drawing.drawingId;
+                                      context
+                                          .read<Collaborator>()
+                                          .collaborationSocket
+                                          .connectCollaboration(
+                                          drawing.collaboration
+                                              .collaborationId);
                                     },
                                     child: const Text('Se connecter'),
                                   ))),
@@ -705,14 +743,12 @@ class _Drawing extends StatelessWidget {
                 ]));
   }
 
-  alert(context, type) {
+  alert(context, type, consequence, result) {
     return showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
               title: Text('Êtes-vous certain de vouloir ${type} ce dessin?.'),
-              content: Text(type == 'supprimer'
-                  ? 'Vous pourrez plus le ré-obtenir! 😧'
-                  : 'Il sera possible de le rejoindre plus tard si il est pas supprimer 😄'),
+              content: Text(consequence),
               actions: <Widget>[
                 ElevatedButton(
                   onPressed: () {
@@ -739,7 +775,7 @@ class _Drawing extends StatelessWidget {
                         builder: (BuildContext context) => AlertDialog(
                               title:
                                   Text('Le dessin à été ${type} avec succès.'),
-                              content: const Text('Créez-en un autre! 😄'),
+                              content: Text(result),
                               actions: <Widget>[
                                 TextButton(
                                   onPressed: () {
