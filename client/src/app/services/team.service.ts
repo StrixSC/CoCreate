@@ -15,6 +15,10 @@ export class TeamService {
     return this.http.get(environment.serverURL + '/api/teams' + query);
   }
 
+  sendJoin(data: any): void {
+    this.socketService.emit('teams:join', data);
+  }
+
   sendCreateTeam(data: any): void {
     this.socketService.emit('teams:create', data);
   }
@@ -23,8 +27,20 @@ export class TeamService {
     return this.socketService.on('teams:created');
   }
 
+  onJoin(): Observable<any> {
+    return this.socketService.on('teams:joined');
+  }
+
+  onJoinFinished(): Observable<any> {
+    return this.socketService.on('teams:join:finished');
+  }
+
   onCreationFinished(): Observable<any> {
     return this.socketService.on('teams:create:finished');
+  }
+
+  onJoinException(): Observable<any> {
+    return this.socketService.on('teams:join:exception');
   }
 
   onCreationException(): Observable<any> {

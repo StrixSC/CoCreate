@@ -1,12 +1,117 @@
+<mat-toolbar color="secondary">
+    <mat-toolbar-row>
+        <h1>Équipes</h1>
+        <span class="example-spacer"></span>
+        <button class="accent" mat-raised-button (click)="openCreateTeamDialog()">Créer une équipe</button>
+        <button matTooltip="Retour au menu" routerLink="" mat-icon-button>
+            <mat-icon>exit_to_app</mat-icon>
+        </button>
+    </mat-toolbar-row>
+</mat-toolbar>
+
 <div class="team-page-main-wrapper">
+    <form class="search-form" [formGroup]="searchForm">
+        <div class="filter-section">
+            <mat-form-field class="filter-input">
+                <mat-label>Recherche</mat-label>
+                <input (input)="filterDrawing()" formControlName="query" matInput placeholder="Entrez un mot-clé">
+                <button mat-button matPrefix mat-icon-button>
+                    <mat-icon>search</mat-icon>
+                </button>
+                <mat-hint>Le mot-clé doit être un attribut de l'equipe</mat-hint>
+            </mat-form-field>
+        </div>
+        <div class="parameters-section">
+            <div>
+                <mat-form-field class="pb-1 form-field clickable">
+                    <mat-label>Type</mat-label>
+                    <mat-select (selectionChange)="changeType($event)" formControlName='type'>
+                        <mat-option *ngFor="let type of types" [value]="type.key">
+                            {{ type.value }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div class="flip-switches-container">
+                <div>
+                    <mat-slide-toggle #fullTeamSwitch (change)="filterFullTeams($event)">Filtrer les équipes complètes
+                    </mat-slide-toggle>
+                </div>
+                <div>
+                    <mat-slide-toggle #myTeamSwitch (change)="filterMyTeams($event)">Afficher les équipes dont je suis
+                        membre</mat-slide-toggle>
+                </div>
+                <div>
+                    <mat-slide-toggle #myCreatedTeamSwitch (change)="filterMyCreatedTeams($event)">Afficher uniquement
+                        les équipes créées par moi</mat-slide-toggle>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <mat-paginator [length]="totalTeamLength" [pageSizeOptions]="[10, 25, 50, 100]" aria-label="Choisir la page">
+    </mat-paginator>
+
+
     <div *ngIf="!isLoading" class="team-page-container">
-        <div class="team-card" *ngFor="let team of mockTeams; index as i">
-        </div>
+        <mat-card class="team-card" *ngFor="let team of teams; index as i">
+            <h2 class="team-name">
+                <span *ngIf="team.teamName.length >= 10">
+                    {{ team.teamName | slice:0:25 }}...
+                </span>
+                <span *ngIf="team.teamName.length < 10">
+                    {{ team.teamName }}
+                </span>
+            </h2>
+            <div [style.background-image]="'url(' + team.avatarUrl + ')'" class="team-card-img-container">
+            </div>
+            <mat-card-content>
+                <div *ngIf="team.bio" class="bio">
+                    <h2 class="bio-header">Biographie</h2>
+                    <p class="bio-content">
+                        {{ team.bio }}
+                    </p>
+                </div>
+                <div *ngIf="!team.bio" class="no-bio">
+                    <p>
+                        <i>Aucune biographie...</i>
+                    </p>
+                </div>
+            </mat-card-content>
+
+            <div *ngIf="team.currentMemberCount < team.maxMemberCount" class="member-count-container">
+                Nombre de membres: {{ team.currentMemberCount }}/{{team.maxMemberCount}}
+            </div>
+            <mat-card-actions class="actions-container" *ngIf="!team.isMember && !team.isOwner">
+                <button [disabled]="buttonsLoading" (click)="onJoin(team)" *ngIf="team.currentMemberCount < team.maxMemberCount" mat-stroked-button>
+                    <div class="spinner" *ngIf="buttonsLoading">
+                        <mat-spinner [diameter]="25" color="accent" class="spinner"></mat-spinner>
+                    </div>
+                    <div *ngIf="!buttonsLoading">
+                        Rejoindre
+                    </div>
+                </button>
+                <button disabled class="full-team-container" *ngIf="team.currentMemberCount >= team.maxMemberCount"
+                    mat-button>
+                    Équipe Complète
+                </button>
+            </mat-card-actions>
+            <mat-card-actions class="actions-container" *ngIf="team.isMember && !team.isOwner">
+                <button disabled class="team-joined-container" mat-button>
+                    Vous êtes déjà membre de cette équipe!
+                </button>
+            </mat-card-actions>
+            <mat-card-actions class="actions-container" *ngIf="team.isOwner">
+                <button disabled class="team-owner-container" mat-button>
+                    Vous êtes propriétaire de cette équipe!
+                </button>
+            </mat-card-actions>
+        </mat-card>
     </div>
-    <div class="spinner-container" *ngIf="isLoading">
-        <div class="spinner">
-            <mat-spinner [diameter]="35" color="accent"></mat-spinner>
-        </div>
+</div>
+<div class="spinner-container" *ngIf="isLoading">
+    <div class="spinner">
+        <mat-spinner [diameter]="35" color="accent"></mat-spinner>
     </div>
 </div>
 
@@ -16,18 +121,137 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100%;
-        width: 100%;
+        flex-direction: column;
+        gap: 2rem;
+        padding: 2rem 0rem;
+    }
+
+    .actions-container {
+        display: flex;
+        justify-content: center;
     }
 
     .team-page-container {
         display: flex;
         justify-content: center;
         gap: 1rem;
+        max-width: 75%;
         flex-wrap: wrap;
     }
-    
+
+    .bio-content {
+        word-break: break-word;
+        max-height: 100px;
+        overflow-y: auto;
+    }
+
+    .no-bio {
+        opacity: 0.5;
+        display: flex;
+        justify-content: center;
+        height: 100%;
+        align-items: center;
+    }
+
+
+
+    .team-name {}
+
+    .flip-switches-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .example-spacer {
+        flex: 1 1 auto;
+    }
+
+
+    .bio-header {
+        font-weight: 200;
+    }
+
+    .parameters-section {
+        display: flex;
+        justify-content: flex-start;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-section {
+        display: flex;
+    }
+
+    .filter-input {
+        width: 100%;
+    }
+
+    .member-count-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: Roboto, "Helvetica Neue", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .full-team-container {
+        color: var(--error-color) !important;
+        cursor: not-allowed !important;
+    }
+
+    .team-joined-container {
+        color: var(--secondary-color) !important;
+        cursor: default
+    }
+
+    .team-owner-container {
+        color: var(--primary-color) !important;
+        cursor: default
+    }
+
     .team-card {
-        min-width: 30%;
+        max-width: 300px;
+        min-width: 300px;
+    }
+
+    .team-card-img-container {
+        height: 200px;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+
+    .team-card-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .search-form {
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .bio {
+        min-height: 40px;
+        overflow-y: none;
+    }
+
+    .mat-card {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mat-card-header {
+        flex-shrink: 0;
+    }
+
+    .mat-card-content {
+        flex-grow: 1;
+        overflow: auto;
     }
 </style>
