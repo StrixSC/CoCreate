@@ -1,3 +1,5 @@
+import { CollaborationService } from 'src/app/services/collaboration.service';
+import { SyncDrawingService } from './../../../syncdrawing.service';
 import { Injectable } from '@angular/core';
 import { ICommand } from 'src/app/interfaces/command.interface';
 import { RendererProviderService } from 'src/app/services/renderer-provider/renderer-provider.service';

@@ -24,13 +24,10 @@ export class WelcomePageComponent {
     if (this.loading) { return; }
     this.loading = true;
 
-    this.loginSubscription = this.authService.signIn(this.user).pipe(mergeMap((data) => {
-      return this.authService.logUserConnection();
-    })).subscribe((data) => {
+    this.loginSubscription = this.authService.signIn(this.user).subscribe((data) => {
       this.loading = false;
       this.router.navigateByUrl('drawing');
     }, (error) => {
-      console.error(error);
       this.loading = false;
     });
   }

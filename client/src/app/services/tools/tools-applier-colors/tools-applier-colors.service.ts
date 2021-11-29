@@ -38,12 +38,12 @@ export class ToolsApplierColorsService implements Tools {
     const alphaAttributeString = 'primaryOpacity';
 
     this.colorApplierCommand = new ColorApplierCommand(
-        this.rendererService.renderer,
-        target,
-        this.toolsColorService.primaryColorString,
-        this.toolsColorService.primaryAlpha,
-        colorAttributeString, alphaAttributeString,
-      );
+      this.rendererService.renderer,
+      target,
+      this.toolsColorService.primaryColorString,
+      this.toolsColorService.primaryAlpha,
+      colorAttributeString, alphaAttributeString,
+    );
     if (this.colorApplierCommand) {
       this.colorApplierCommand.execute();
       const tempColorApplierCommand: ColorApplierCommand = this.colorApplierCommand;
@@ -58,7 +58,7 @@ export class ToolsApplierColorsService implements Tools {
   onPressed(event: MouseEvent): void {
     let target = event.target as SVGElement;
     if (target.getAttribute('name') === 'pen' || target.tagName === 'tspan' || target.getAttribute('name') === 'feather' ||
-    target.getAttribute('name') === 'spray') {
+      target.getAttribute('name') === 'spray') {
       target = target.parentNode as SVGElement;
     }
     let colorAttributeString: string;

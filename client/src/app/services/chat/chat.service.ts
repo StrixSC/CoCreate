@@ -1,60 +1,83 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { IChannel } from '../../model/IChannel.model';
-import { IReceiveMessagePayload } from '../../model/IReceiveMessagePayload.model';
-import { ISendMessagePayload } from '../../model/ISendMessagePayload.model';
-import { IUser } from '../../model/IUser.model';
-import { SocketService } from './socket.service';
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { IChannel } from "../../model/IChannel.model";
+import { IReceiveMessagePayload } from "../../model/IReceiveMessagePayload.model";
+import { ISendMessagePayload } from "../../model/ISendMessagePayload.model";
+import { IUser } from "../../model/IUser.model";
+import { SocketService } from "./socket.service";
 // import { BrowserWindow } from 'electron';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
-export class ChatService {
+export class ChatSocketService {
+  constructor(private socket: SocketService) {}
 
-  constructor(private socket: SocketService) { }
-
-  sendMessage(msg: string): void {
-    this.socket.emit('send-message', {
+  sendMessage(channel_id: string, msg: string): void {
+    this.socket.emit("channel:send", {
+      channelId: channel_id,
       message: msg,
     } as ISendMessagePayload);
   }
 
   receiveMessage(): Observable<IReceiveMessagePayload> {
-    return this.socket.on('receive-message');
+    return this.socket.on("channel:sent");
   }
 
   userConnection(): Observable<IReceiveMessagePayload> {
-    return this.socket.on('user-connection');
+    return this.socket.on("user-connection");
   }
 
-  userDisconnect(): Observable<IReceiveMessagePayload> {
-    return this.socket.on('user-disconnect');
+  leaveChannel(channel_id: string): void {
+    return this.socket.emit("channel:leave", {
+      channelId: channel_id,
+    });
   }
 
-  joinChannel(): void {
-    this.socket.emit('join-channel', null);
+  deleteChannel(channel_id: string) {
+    return this.socket.emit("channel:delete", {
+      channelId: channel_id,
+    });
+  }
+
+  joinChannel(channelId: string): void {
+    this.socket.emit("channel:join", {
+      channelId: channelId,
+    });
   }
 
   getUsers(): Observable<IUser[]> {
-    return this.socket.on('get-users');
+    return this.socket.on("get-users");
   }
 
   getChannels(): Observable<IChannel[]> {
-    return this.socket.on('get-channels');
+    return this.socket.on("get-channels");
   }
-  openChatWindow() {
-    const winRef: Window | null = window.open('chat', '_blank', 'toolbar=no,scrollbars=yes,resizable=0,menubar=1, max-width=400,max-height=400');
 
-    if (winRef !== null && winRef.location.href === 'about:blank') {
-
-      winRef.addEventListener('beforeunload', function(e) {
-        e.preventDefault();
-        e.returnValue = '';
+  createChannel(channelName: string): void {
+    this.socket.emit("channel:create", {
+      channelName: channelName,
     });
-      winRef.location.href = 'chat';
-      console.log('hey');
+  }
+
+  listenCreatedChannels(): Observable<any> {
+    return this.socket.on("channel:created");
+  }
+
+  openChatWindow() {
+    const winRef: Window | null = window.open(
+      "chat",
+      "_blank",
+      "toolbar=no,scrollbars=yes,resizable=0,menubar=1, max-width=400,max-height=400"
+    );
+
+    if (winRef !== null && winRef.location.href === "about:blank") {
+      winRef.addEventListener("beforeunload", function (e) {
+        e.preventDefault();
+        e.returnValue = "";
+      });
+      winRef.location.href = "chat";
+      console.log("hey");
     }
   }
-
 }

@@ -7,6 +7,8 @@ import { Pencil } from '../pencil-tool/pencil.model';
 export class PenCommand implements ICommand {
 
     private pen: SVGGElement | null = null;
+    public actionId: string = "";
+    public userId: string = "";
     private dot: SVGCircleElement | null = null;
     constructor(
         readonly renderer: Renderer2,
