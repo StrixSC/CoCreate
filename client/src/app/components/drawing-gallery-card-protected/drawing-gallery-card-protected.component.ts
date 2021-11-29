@@ -4,18 +4,19 @@ import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { ICollaborationLoadResponse } from './../../model/ICollaboration.model';
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DrawingPreviewDialogComponent } from '../drawing-preview-dialog/drawing-preview-dialog.component';
 import { IGalleryEntry } from '../../model/IGalleryEntry.model';
 import { CollaborationPasswordFormDialogComponent } from '../collaboration-password-form-dialog/collaboration-password-form-dialog.component';
 
 @Component({
-  selector: 'app-drawing-gallery-card',
-  templateUrl: './drawing-gallery-card.component.html',
-  styleUrls: ['./drawing-gallery-card.component.scss']
+  selector: 'app-drawing-gallery-card-protected',
+  templateUrl: './drawing-gallery-card-protected.component.html',
+  styleUrls: ['./drawing-gallery-card-protected.component.scss']
 })
-export class DrawingGalleryCardComponent {
+export class DrawingGalleryCardProtectedComponent implements OnInit {
+
 
   private loadSubscription: Subscription;
   dialogRef: MatDialogRef<DrawingPreviewDialogComponent | CollaborationPasswordFormDialogComponent>
@@ -37,11 +38,18 @@ export class DrawingGalleryCardComponent {
   }
 
   openDialog(): void {
-    
+    if (this.drawing.type !== "Protected") {
       this.dialogRef = this.dialog.open(DrawingPreviewDialogComponent,
         {
           data: this.drawing
         });
+    }
+    else if (this.drawing.type === "Protected") {
+      this.dialogRef = this.dialog.open(CollaborationPasswordFormDialogComponent,
+        {
+          data: this.drawing
+        });
+    }
 
   }
 

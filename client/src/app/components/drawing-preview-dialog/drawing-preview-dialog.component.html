@@ -18,11 +18,11 @@
 </mat-card-header>
   <img mat-card-image class="image-preview" src="../../../assets/default-image.png">
   <div class='"separator'></div>
-  <mat-card-content>
+  <mat-card-subtitle>
     Auteur: {{drawing.author_username}}<br>
     Type de dessin: {{drawing.type}}<br>
     Nombre de collaborateurs actifs: {{drawing.collaborator_count}}
-  </mat-card-content>
+  </mat-card-subtitle>
   <mat-dialog-actions class="actions">
     <div>
       <button [disabled]="isLoading" (click)="onSubmit()" mat-raised-button cdkFocusInitial color="primary">

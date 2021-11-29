@@ -62,6 +62,7 @@ import { RightSidebarComponent } from "./components/right-sidebar/right-sidebar.
 import { ChatBoxComponent } from "./components/right-sidebar/chat-box/chat-box.component";
 import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out/chat-poped-out.component";
 import { AllChannelsComponent } from "./components/right-sidebar/all-channels/all-channels.component";
+import { DrawingGalleryCardProtectedComponent } from './components/drawing-gallery-card-protected/drawing-gallery-card-protected.component';
 
 @NgModule({
   declarations: [
@@ -108,7 +109,8 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     ChatBoxComponent,
     ChatPopedOutComponent,
     AllChannelsComponent,
-    AuthWrapperComponent
+    AuthWrapperComponent,
+    DrawingGalleryCardProtectedComponent
   ],
   imports: [
     BrowserModule,
