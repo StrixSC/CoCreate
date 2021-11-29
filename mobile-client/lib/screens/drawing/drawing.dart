@@ -95,6 +95,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
                       socketShapeEmission(
                           details, DrawingType.ellipse, DrawingState.down);
                       break;
+                    //  todo: prevent translation and resize to move in the
+                  //   toolbar
                     case "select":
                       allowMove = false;
                       selectRef = Offset(
@@ -272,7 +274,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(150.0, 80.0, 0, 0),
               child: Visibility(
-                visible: selectedItems.isNotEmpty,
+                visible: selectedItems.containsValue(_user.uid),
                 child: FloatingActionButton(
                     onPressed: () {
                       setState(() {
@@ -342,6 +344,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void undoActionChooser() {
     ShapeAction undoAction = undoList.removeLast();
     redoList.add(undoAction);
+    selectedItems.removeWhere((actionId, userId) => userId == _user.uid);
     if (undoAction.angle != 0) {
       socketRotationEmission(
           -undoAction.angle, DrawingState.move, undoAction.actionId, true);
@@ -695,7 +698,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
         'actionId': data['actionId'],
         'username': _user.displayName,
         'userId': _user.uid,
-        'collaborationId': "DEMO_COLLABORATION",
+        'collaborationId': "fa0cab93-b571-4db4-8467-1bef5cbffbb4",
         'actionType': "Select",
         'isSelected': true,
         'isUndoRedo': false,
@@ -715,7 +718,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'actionId': selectItem,
       'username': _user.displayName,
       'userId': _user.uid,
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': "fa0cab93-b571-4db4-8467-1bef5cbffbb4",
       'actionType': "Select",
       'isSelected': isSelected,
     });
@@ -732,7 +735,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'username': _user.displayName,
       'userId': _user.uid,
       'state': drawingState,
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': "fa0cab93-b571-4db4-8467-1bef5cbffbb4",
       'actionType': "Translate",
       'xTranslation': xTranslation,
       'yTranslation': yTranslation
@@ -745,7 +748,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'selectedActionId': actionId,
       'username': _user.displayName,
       'userId': _user.uid,
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': "fa0cab93-b571-4db4-8467-1bef5cbffbb4",
       'actionType': 'Delete',
     });
   }
@@ -763,7 +766,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
               Offset(details.localPosition.dx, details.localPosition.dy)),
       'username': _user.displayName,
       'userId': _user.uid,
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': "fa0cab93-b571-4db4-8467-1bef5cbffbb4",
     });
   }
 
@@ -783,7 +786,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'selectedActionId': actionId,
       'username': _user.displayName,
       'userId': _user.uid,
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': "fa0cab93-b571-4db4-8467-1bef5cbffbb4",
       'xScale':
           (drawingState == DrawingState.move) ? bounds.xScale : 1.toDouble(),
       'yScale':
@@ -805,7 +808,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
           : shapeID,
       'username': _user.displayName,
       'userId': _user.uid,
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': "fa0cab93-b571-4db4-8467-1bef5cbffbb4",
       'actionType': 'Shape',
       'state': drawingState, // move/down/up
       'isSelected': (drawingState == DrawingState.up) ? false : true,
@@ -849,7 +852,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'y': (isRedo || drawingState == DrawingState.up)
           ? details.dy
           : details.localPosition.dy.toInt(),
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': "fa0cab93-b571-4db4-8467-1bef5cbffbb4",
       'username': _user.displayName,
       'userId': _user.uid,
       'actionType': "Freedraw",
