@@ -1,13 +1,13 @@
+import { SocketEventError } from './../socket';
+import { getOnlineMembersInRoom } from './../utils/socket';
 import { v4 } from 'uuid';
 import { ExceptionType } from './../models/Exceptions.enum';
-import create, { Unauthorized } from 'http-errors';
+import create from 'http-errors';
 import { handleSocketError } from './../utils/errors';
 import { db } from './../db';
 import { Server, Socket } from 'socket.io';
 import { Action, Collaboration, CollaborationMember, CollaborationType, Drawing, MemberType, Profile, User } from '.prisma/client';
 import validator from "validator";
-import { io } from '../bin/www';
-import { getOnlineMembersInRoom } from '../utils/socket';
 
 type CollaborationMemberConnectionResponse = CollaborationMember & {
     user: User & {
@@ -45,6 +45,9 @@ export = (io: Server, socket: Socket) => {
             const collaboration = await db.collaboration.findFirst({
                 where: {
                     collaboration_id: collaborationId
+                },
+                include: {
+                    collaboration_members: true
                 }
             });
 
@@ -93,6 +96,10 @@ export = (io: Server, socket: Socket) => {
             if (!member) {
                 let correctPassword = false;
                 const collaborationType = collaboration.type;
+                if (collaboration.max_collaborator_count <= collaboration.collaboration_members.length) {
+                    throw new SocketEventError("Erreur: La collaboration est déjà complète.", "E4050");
+                }
+
                 if (collaborationType === CollaborationType.Private) {
                     throw new create.Unauthorized("This drawing is private and cannot be joined by a user that is not the owner.");
                 }
@@ -174,6 +181,7 @@ export = (io: Server, socket: Socket) => {
                     username: member.user.profile!.username,
                     avatarUrl: member.user.profile!.avatar_url,
                     type: member.type,
+                    drawingId: member.collaboration.drawing!.drawing_id,
                 });
                 triggerJoin(member);
             }
@@ -221,12 +229,12 @@ export = (io: Server, socket: Socket) => {
                 const response = {
                     collaborationId: data.collaboration.collaboration_id,
                     title: data.title,
+                    drawingId: data.drawingId,
                     thumbnailUrl: data.thumbnail_url,
                     type: data.collaboration.type,
                     currentCollaboratorCount: data.currentMemberCount,
                     maxCollaboratorCount: data.maxMemberCount,
                     updatedAt: data.collaboration.updated_at,
-                    drawingId: data.collaboration.drawing!.drawing_id,
                     createdAt: data.collaboration.created_at,
                     authorUsername: data.author_username,
                     authorAvatarUrl: data.author_avatar_url,
@@ -249,12 +257,12 @@ export = (io: Server, socket: Socket) => {
                 io.emit("collaboration:created", {
                     collaborationId: data.collaboration.collaboration_id,
                     title: data.title,
+                    drawingId: data.drawingId,
                     thumbnailUrl: data.thumbnail_url,
                     type: data.collaboration.type,
                     currentCollaboratorCount: data.currentMemberCount,
                     maxCollaboratorCount: data.maxMemberCount,
                     updatedAt: data.collaboration.updated_at,
-                    drawingId: data.collaboration.drawing!.drawing_id,
                     createdAt: data.collaboration.created_at,
                     authorUsername: data.author_username,
                     authorAvatarUrl: data.author_avatar_url,
@@ -482,7 +490,8 @@ export = (io: Server, socket: Socket) => {
                 userId: member.user.user_id,
                 username: member.user.profile!.username,
                 avatarUrl: member.user.profile!.avatar_url,
-                type: member.type
+                type: member.type,
+                drawingId: member.collaboration.drawing!.drawing_id,
             });
 
             triggerJoin(member);
@@ -490,6 +499,46 @@ export = (io: Server, socket: Socket) => {
             handleSocketError(socket, e, ExceptionType.Collaboration);
         }
 
+    }
+
+    const onDisconnectCollaboration = async (payload: {
+        collaborationId: string;
+    }) => {
+        try {
+            const member = await db.collaborationMember.findFirst({
+                where: {
+                    user_id: socket.data.user,
+                },
+                include: {
+                    user: {
+                        include: {
+                            profile: true,
+                        },
+                    },
+                    collaboration: {
+                        include: {
+                            drawing: true,
+                        }
+                    }
+                }
+            });
+
+            if (!member) {
+                throw new SocketEventError("Oups! La connexion ne peut être faite, car l'utilisateur ne fait pas partie de la collaboration.", 'E8801');
+            }
+
+            socket.leave(payload.collaborationId);
+            socket.emit("collaboration:disconnected");
+            io.to(payload.collaborationId).emit("collaboration:disconnnected", {
+                collaborationId: member.collaboration_id,
+                drawingId: member.collaboration.drawing!.drawing_id,
+                userId: member.user_id,
+                username: member.user.profile!.username,
+                avatarUrl: member.user.profile!.avatar_url,
+            });
+        } catch (e) {
+
+        }
     }
 
     const onLeaveCollaboration = async (payload: {
@@ -514,6 +563,13 @@ export = (io: Server, socket: Socket) => {
                     collaboration: {
                         type: {
                             not: CollaborationType.Private
+                        }
+                    }
+                },
+                include: {
+                    collaboration: {
+                        include: {
+                            drawing: true,
                         }
                     }
                 }
@@ -546,6 +602,7 @@ export = (io: Server, socket: Socket) => {
                 username: updated.user.profile!.username,
                 collaborationId: updated.collaboration_id,
                 leftAt: new Date().toISOString(),
+                drawingId: collaboration.collaboration.drawing!.drawing_id,
             });
         } catch (e) {
             handleSocketError(socket, e, ExceptionType.Collaboration);
@@ -558,6 +615,7 @@ export = (io: Server, socket: Socket) => {
     socket.on("collaboration:delete", onDeleteCollaboration);
     socket.on("collaboration:connect", onConnectCollaboration);
     socket.on("collaboration:leave", onLeaveCollaboration);
+    socket.on("collaboration:disconnect", onDisconnectCollaboration);
 }
 
 const generateConnectedPayload = (member: CollaborationMemberConnectionResponse) => {
@@ -578,11 +636,12 @@ const generateConnectedPayload = (member: CollaborationMemberConnectionResponse)
             .map((m) => ({
                 avatarUrl: m.user.profile!.avatar_url,
                 username: m.user.profile!.username,
-                isOnline: onlineMembers.find((om) => om.userId === member.user_id) ? true : false
+                isOnline: onlineMembers.find((om: any) => om.userId === member.user_id) ? true : false
             })),
         backgroundColor: member.collaboration.drawing!.background_color,
         width: member.collaboration.drawing!.width,
         height: member.collaboration.drawing!.height,
+        drawingId: member.collaboration.drawing!.drawing_id,
     }
 };
 
@@ -649,7 +708,8 @@ const createCollaboration = async (user_id: string, creatorId: string, isTeam: b
         maxMemberCount: author.collaborations[0].max_collaborator_count,
         currentMemberCount: author.collaborations[0].collaboration_members.length,
         title: author.collaborations[0].drawing!.title,
-        thumbnail_url: author.collaborations[0].drawing!.thumbnail_url
+        thumbnail_url: author.collaborations[0].drawing!.thumbnail_url,
+        drawingId: author.collaborations[0].drawing!.drawing_id
     }
 
     return returnData;

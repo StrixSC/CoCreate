@@ -1,3 +1,4 @@
+import { getOnlineMembersInRoom } from './../utils/socket';
 import { MemberType, Collaboration, CollaborationType, Drawing, Account, CollaborationMember, Profile, User } from '.prisma/client';
 import { validationResult, matchedData } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
@@ -83,6 +84,8 @@ export const getMyGalleryController = async (req: Request, res: Response, next: 
                 return
             }
 
+            const activeMembers = getOnlineMembersInRoom(c.collaboration_id);
+
             return {
                 collaboration_id: c.collaboration_id,
                 title: c.drawing!.title,
@@ -94,7 +97,7 @@ export const getMyGalleryController = async (req: Request, res: Response, next: 
                 type: c.type,
                 collaborator_count: c.collaboration_members.length,
                 max_collaborator_count: c.max_collaborator_count,
-
+                active_member_count: activeMembers.length
             }
         })
         return res.status(StatusCodes.OK).json({ drawings: returnArray, total_drawing_count: result.total, offset: result.offset, limit: result.limit });
