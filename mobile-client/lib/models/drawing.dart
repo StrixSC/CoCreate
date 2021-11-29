@@ -1,4 +1,6 @@
 import 'package:Colorimage/models/collaboration.dart';
+import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 
 class Drawing {
   String drawingId, thumbnailUrl, title, type, authorUsername, authorAvatar;
@@ -17,9 +19,6 @@ class Drawing {
     required this.type,
   });
 }
-import 'dart:ui';
-
-import 'package:flutter/cupertino.dart';
 
 class DrawingType {
   static const String rectangle = "Rectangle";

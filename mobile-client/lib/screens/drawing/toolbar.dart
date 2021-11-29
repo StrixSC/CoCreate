@@ -79,7 +79,7 @@ class _ToolbarState extends State<Toolbar> {
                             itemBuilder: (context, index) => index < 5
                                 ? Container(
                                     color: currentTool == tools[index].type
-                                        ? kContentColorLightTheme
+                                        ? kPrimaryColor
                                             .withOpacity(0.2)
                                         : Colors.white24,
                                     child: Padding(

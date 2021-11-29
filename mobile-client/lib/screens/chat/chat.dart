@@ -42,7 +42,7 @@ class ChatMessage extends StatelessWidget {
                         children: [
                           ChatBubble(
                             clipper:
-                                ChatBubbleClipper3(type: BubbleType.sendBubble),
+                            ChatBubbleClipper3(type: BubbleType.sendBubble),
                             shadowColor: Colors.white,
                             elevation: 0,
                             alignment: Alignment.topRight,
@@ -52,7 +52,7 @@ class ChatMessage extends StatelessWidget {
                               color: Color(0xFF5D72CC),
                               constraints: BoxConstraints(
                                 maxWidth:
-                                    MediaQuery.of(context).size.width * 0.9,
+                                MediaQuery.of(context).size.width * 0.9,
                               ),
                               child: Text(
                                 text,
@@ -100,7 +100,7 @@ class ChatMessage extends StatelessWidget {
                               padding: EdgeInsets.fromLTRB(15, 0, 0, 0),
                               child: Text(this.message_username,
                                   style:
-                                      Theme.of(context).textTheme.headline6)),
+                                  Theme.of(context).textTheme.headline6)),
                           ChatBubble(
                             clipper: ChatBubbleClipper3(
                                 type: BubbleType.receiverBubble, radius: 15),
@@ -112,7 +112,7 @@ class ChatMessage extends StatelessWidget {
                             child: Container(
                               constraints: BoxConstraints(
                                 maxWidth:
-                                    MediaQuery.of(context).size.width * 0.9,
+                                MediaQuery.of(context).size.width * 0.9,
                               ),
                               child: Text(
                                 text,
@@ -137,7 +137,7 @@ class ChatMessage extends StatelessWidget {
 class ChatScreen extends StatefulWidget {
   int channelIndex;
 
-  ChatScreen(this.channelIndex, {Key? key}) : super(key: key);
+  ChatScreen(this.channelIndex);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -148,6 +148,12 @@ class _ChatScreenState extends State<ChatScreen> {
   final _textController = TextEditingController();
   bool _validate = false;
   final FocusNode _focusNode = FocusNode();
+
+  @override
+  void didUpdateWidget(dynamic oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _focusNode.requestFocus();
+  }
 
   void _handleSubmitted(String text) {
     print('submitted');
@@ -162,51 +168,13 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _handleChange(String text) {
-    if (_validate) {
-      setState(() {
-        _validate = _textController.text.isEmpty;
-      });
-    }
-  }
-
-  Widget _buildTextComposer() {
-    return IconTheme(
-      data: const IconThemeData(color: kPrimaryColor),
-      child: Container(
-        height: 75,
-        margin: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Row(
-          children: [
-            Flexible(
-              child: TextField(
-                style: TextStyle(fontSize: 25),
-                controller: _textController,
-                onSubmitted: _handleSubmitted,
-                onChanged: _handleChange,
-                decoration: InputDecoration(
-                  hintText: 'Envoyer un message',
-                  errorText:
-                      _validate ? 'Le message ne peut pas être vide' : null,
-                ),
-                focusNode: _focusNode,
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: IconButton(
-                  iconSize: 34,
-                  icon: const Icon(Icons.send),
-                  color: Colors.indigo.shade400,
-                  onPressed: () {
-                    _handleSubmitted(_textController.text);
-                  }),
-            )
-          ],
-        ),
-      ),
-    );
-  }
+  // void _handleChange(String text) {
+  //   if (_validate) {
+  //     setState(() {
+  //       _validate = _textController.text.isEmpty;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -218,6 +186,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 message: 'Se déconnecter',
                 child: Icon(Icons.arrow_back, color: Colors.white, size: 30)),
             onPressed: () {
+              messenger
+                  .userChannels[widget.channelIndex].messages.isEmpty? '':
               messenger.userChannels[widget.channelIndex].lastReadMessage =
                   messenger
                       .userChannels[widget.channelIndex].messages.last.text;
@@ -235,60 +205,60 @@ class _ChatScreenState extends State<ChatScreen> {
                 showDialog<String>(
                     context: context,
                     builder: (BuildContext context) => AlertDialog(
-                          title: Text(
-                              'Historique du canal ${messenger.userChannels[widget.channelIndex].name}'),
-                          content: const Text(
-                              "Voulez-vous obtenir l'historique du canal?"),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context, 'Non');
-                              },
-                              child: const Text('Non'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context, 'Oui');
-                                messenger
-                                    .fetchChannelHistory(widget.channelIndex);
-                              },
-                              child: const Text('Oui'),
-                            ),
-                          ],
-                        ));
+                      title: Text(
+                          'Historique du canal ${messenger.userChannels[widget.channelIndex].name}'),
+                      content: const Text(
+                          "Voulez-vous obtenir l'historique du canal?"),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, 'Non');
+                          },
+                          child: const Text('Non'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, 'Oui');
+                            messenger
+                                .fetchChannelHistory(widget.channelIndex);
+                          },
+                          child: const Text('Oui'),
+                        ),
+                      ],
+                    ));
               }),
           messenger.userChannels[widget.channelIndex].name != "Canal Publique"
               ? IconButton(
-                  icon: const Icon(Icons.exit_to_app_rounded,
-                      color: Colors.white, size: 30),
-                  onPressed: () {
-                    showDialog<String>(
-                        context: context,
-                        builder: (BuildContext context) => AlertDialog(
-                              title: Text(
-                                  'Quitter le canal ${messenger.userChannels[widget.channelIndex].name}'),
-                              content: const Text('Êtes-vous certain?'),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context, 'Non');
-                                  },
-                                  child: const Text('Non'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context, 'Oui');
-                                    messenger.channelSocket.leaveChannel(
-                                        messenger
-                                            .userChannels[widget.channelIndex]
-                                            .id);
-                                    messenger.toggleSelection();
-                                  },
-                                  child: const Text('Oui'),
-                                ),
-                              ],
-                            ));
-                  })
+              icon: const Icon(Icons.exit_to_app_rounded,
+                  color: Colors.white, size: 30),
+              onPressed: () {
+                showDialog<String>(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: Text(
+                          'Quitter le canal ${messenger.userChannels[widget.channelIndex].name}'),
+                      content: const Text('Êtes-vous certain?'),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, 'Non');
+                          },
+                          child: const Text('Non'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, 'Oui');
+                            messenger.channelSocket.leaveChannel(
+                                messenger
+                                    .userChannels[widget.channelIndex]
+                                    .id);
+                            messenger.toggleSelection();
+                          },
+                          child: const Text('Oui'),
+                        ),
+                      ],
+                    ));
+              })
               : const SizedBox.shrink()
         ],
       ),
@@ -312,7 +282,40 @@ class _ChatScreenState extends State<ChatScreen> {
           const Divider(height: 1.0),
           Container(
             decoration: BoxDecoration(color: Theme.of(context).cardColor),
-            child: _buildTextComposer(),
+            child:IconTheme(
+              data: const IconThemeData(color: kPrimaryColor),
+              child: Container(
+                height: 75,
+                margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        style: TextStyle(fontSize: 25),
+                        controller: _textController,
+                        // onChanged: _handleChange,
+                        decoration: InputDecoration(
+                          hintText: 'Envoyer un message',
+                          errorText:
+                          _validate ? 'Le message ne peut pas être vide' : null,
+                        ),
+                        focusNode: _focusNode,
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: IconButton(
+                          iconSize: 34,
+                          icon: const Icon(Icons.send),
+                          color: Colors.indigo.shade400,
+                          onPressed: () {
+                            _handleSubmitted(_textController.text);
+                          }),
+                    )
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
