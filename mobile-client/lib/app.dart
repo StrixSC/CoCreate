@@ -109,7 +109,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
           break;
         case homeRoute:
           screen = Home();
-          break;;
+          break;
         default:
           return null;
       }

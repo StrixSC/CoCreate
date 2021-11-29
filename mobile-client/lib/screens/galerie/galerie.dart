@@ -143,7 +143,7 @@ class GalerieState extends State<Galerie>
               maxMemberCount: drawing["max_collaborator_count"],
               members: [],
           );
-          // TODO: add updated_at && thumbnail url
+          // TODO: add updated_at
           drawings.add(Drawing(
               drawingId: drawing['drawing_id'],
               authorUsername: drawing["author_username"],
@@ -152,7 +152,9 @@ class GalerieState extends State<Galerie>
               createdAt: DateFormat('yyyy-MM-dd kk:mm')
                   .format(DateTime.parse(drawing['created_at'])),
               collaboration: collaboration,
-              type: drawing['type']));
+              type: drawing['type'],
+              // thumbnailUrl: drawing['thumbnail_url']
+          ));
         }
       }
       final isLastPage = drawings.length < _pageSize;
@@ -892,13 +894,20 @@ class _Drawing extends StatelessWidget {
         child: FittedBox(
             fit: BoxFit.fill,
             child: drawing.type == 'Protected'
-                ? ClipRRect(
-                    child: ImageFiltered(
-                      imageFilter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
-                      child: Image.asset('assets/images/default_thumbnail.png'),
-                    ),
-                  )
-                : Image.asset('assets/images/default_thumbnail.png')));
+                ? Stack(
+              children: <Widget>[
+                ClipRRect(
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Image.asset('assets/images/default_thumbnail.png'),
+                  ),
+                ),
+                const Positioned(
+                  bottom: 170, right: 250, //give the values according to your requirement
+                  child: Icon(Icons.lock, color: Colors.black, size: 100.0),
+                ),
+              ],
+            ) : Image.asset('assets/images/default_thumbnail.png')));
   }
 
   richTextWhitePurple(String text1, String text2) {
