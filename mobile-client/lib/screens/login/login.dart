@@ -43,7 +43,7 @@ class _LoginState extends State<Login> {
       userCredential = await FirebaseAuth.instance
           // .signInWithEmailAndPassword(email: email, password: password);
           .signInWithEmailAndPassword(
-              email: "demo@demo.com", password: "demo123");
+              email: "demo@demo.com", password: "demodemo");
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = e.message!;

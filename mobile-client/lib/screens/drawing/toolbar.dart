@@ -57,9 +57,9 @@ class _ToolbarState extends State<Toolbar> {
     changeColor(color, "Background");
   }
 
-  void selectTool(String type) {
+  void selectTool(String type, String fillType) {
     currentTool = type;
-    changeTool(currentTool);
+    changeTool(currentTool, fillType);
   }
 
   void selectWidth(double width) {
@@ -118,8 +118,47 @@ class _ToolbarState extends State<Toolbar> {
                           );
                         },
                       );
+                    } else if (tools[index].type == DrawingType.ellipse ||
+                        tools[index].type == DrawingType.rectangle) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title:
+                                const Text("Choisir un type de remplissage "),
+                            content: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                ElevatedButton(
+                                  style: ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all(
+                                        Colors.transparent),
+                                  ),
+                                  onPressed: () {
+                                    selectTool(tools[index].type, "border");
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Icon(CupertinoIcons.app),
+                                ),
+                                ElevatedButton(
+                                  style: ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all(
+                                        Colors.transparent),
+                                  ),
+                                  onPressed: () {
+                                    selectTool(tools[index].type, "fill");
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Icon(CupertinoIcons.app_fill),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    } else {
+                      selectTool(tools[index].type, "");
                     }
-                    selectTool(tools[index].type);
                   },
                   child: Icon(
                     tools[index].icon,
