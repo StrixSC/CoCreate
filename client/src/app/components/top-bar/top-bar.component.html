@@ -1,36 +1,92 @@
-  <!-- <mat-toolbar class="mat-elevation-z8 md-medium-tall" color="primary">
-    <mat-toolbar-row class="mat-elevation-z8">
-      <span routerLink="" matRipple class="clickable title-button">Colorimage</span>
-      <span class="example-spacer"></span>
-      <div *ngIf="!isLoading && auth.activeUser">
-        <button mat-button [matMenuTriggerFor]="menu">{{ auth.activeUser.displayName | uppercase }} </button>
-        <mat-menu #menu="matMenu">
-          <button mat-menu-item routerLink="profile">Profile</button>
-          <button mat-menu-item routerLink="account">Informations de compte</button>
-          <hr>
-          <button mat-menu-item (click)="logout()">Déconnexion</button>
-        </mat-menu>
+<div  *ngIf="!isLoading" class="main-container">
+  <div class="main-sidebar">
+    <div style="height: 100%"></div>
+    <div class="bottom-section">
+      <div class="action-area">
+        <div class="clickable">
+          <mat-icon routerLink="/profile"  #tooltip="matTooltip" matTooltip="Profil" [matTooltipPosition]="'right'"
+          matTooltipHideDelay="150" matRipple>account_circle</mat-icon>
+        </div>
+        <div class="clickable">
+          <mat-icon routerLink="/gallery"  #tooltip="matTooltip" matTooltip="Galerie" [matTooltipPosition]="'right'"
+          matTooltipHideDelay="150" matRipple>image</mat-icon>
+        </div>
+        <div class="clickable">
+          <mat-icon routerLink="/teams"  #tooltip="matTooltip" matTooltip="Équipes" [matTooltipPosition]="'right'"
+          matTooltipHideDelay="150" matRipple>people_alt</mat-icon>
+        </div>
       </div>
-      <div *ngIf="isLoading || !auth.activeUser" class="spinner">
-        <mat-spinner></mat-spinner>
+      <div class="logo-box clickable">
+        <div routerLink="" class="logo-img-container" #tooltip="matTooltip" matTooltip="Accueil" [matTooltipPosition]="'right'"
+          matTooltipHideDelay="150">
+          <img class="logo-img" src="/favicon.ico">
+        </div>
       </div>
-    </mat-toolbar-row>
-  </mat-toolbar> -->
-  <router-outlet *ngIf="!isLoading"></router-outlet>
+    </div>
+
+  </div>
+  <div class="router-outlet">
+    <router-outlet></router-outlet>
+  </div>
+</div>
 
 <div class="center-wrapper" *ngIf="isLoading">
   <div class="spinner">
-    <mat-spinner  [diameter]="35" color="accent" class="spinner"></mat-spinner>
+    <mat-spinner [diameter]="35" color="accent" class="spinner"></mat-spinner>
   </div>
 </div>
 
 
 <style>
+
+  .router-outlet {
+    width: 100%;
+    overflow: auto;
+  }
+
+  .main-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+  }
+
+  .main-sidebar {
+    height: 100%;
+    background-color: var(--bg-color);
+    display: flex;
+    justify-content: space-between;
+    min-width: 35px;
+    max-width: 35px;
+    overflow: hidden;
+    flex-direction: column;
+  }
+
+  .logo-box {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .logo-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .logo-img-container {
+    max-width: 100%;
+    max-height: 100%;
+    padding: 7.5%;
+  }
+
   .center-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
   }
+
   .example-spacer {
     flex: 1 1 auto;
   }
@@ -41,5 +97,24 @@
     justify-content: flex-start;
     align-items: center;
     padding: 0rem 1rem;
+  }
+
+  .action-area {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    height: 100%;
+    color: white;
+    flex-direction: column;
+  }
+
+  .bottom-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    height: 100%;
   }
 </style>

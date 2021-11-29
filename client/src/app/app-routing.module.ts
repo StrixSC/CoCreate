@@ -1,3 +1,5 @@
+import { TeamViewerComponent } from './components/team-viewer/team-viewer.component';
+import { TeamPageComponent } from './components/team-page/team-page.component';
 import { TopBarComponent } from './components/top-bar/top-bar.component';
 import { RegisterComponent } from './components/register/register.component';
 import { AuthWrapperComponent } from './components/auth-wrapper/auth-wrapper.component';
@@ -27,6 +29,12 @@ const routes: Routes = [
     }, children: [
       {
         path: "", component: MenuPageComponent
+      },
+      {
+        path: "teams", component: TeamPageComponent,
+      },
+      {
+        path: "team/:id", component: TeamViewerComponent,
       },
       { path: "workspace", component: SidenavComponent },
       { path: "profile", component: UserProfileComponent },

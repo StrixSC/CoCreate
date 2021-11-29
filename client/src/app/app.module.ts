@@ -1,3 +1,9 @@
+import { TeamInfoComponent } from './components/team-info/team-info.component';
+import { TeamPasswordDialogComponent } from './components/team-password-dialog/team-password-dialog.component';
+import { AngularFireStorageModule } from '@angular/fire/storage';
+import { CreateTeamDialogComponent } from './components/create-team-dialog/create-team-dialog.component';
+import { TeamViewerComponent } from './components/team-viewer/team-viewer.component';
+import { TeamPageComponent } from './components/team-page/team-page.component';
 import { AvatarDialogComponent } from './components/avatar-dialog/avatar-dialog.component';
 import { RegisterComponent } from './components/register/register.component';
 import { AuthWrapperComponent } from './components/auth-wrapper/auth-wrapper.component';
@@ -48,7 +54,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
 import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
-import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
 import { DrawingGalleryComponent } from './components/drawing-gallery/drawing-gallery.component';
@@ -84,14 +89,16 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     ControlMenuComponent,
     ParameterDirective,
     SaveDrawingComponent,
+    TeamViewerComponent,
     OpenDrawingComponent,
     ErrorMessageComponent,
     AlertMessageComponent,
+    CreateTeamDialogComponent,
     ExportDrawingComponent,
     DrawingPageComponent,
     WelcomePageComponent,
-    SignUpPageComponent,
     UserProfileComponent,
+    TeamPageComponent,
     ChangePasswordComponent,
     DrawingGalleryComponent,
     DrawingGalleryCardComponent,
@@ -112,6 +119,8 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     AllChannelsComponent,
     AuthWrapperComponent,
     AllChannelsComponent,
+    TeamInfoComponent,
+    TeamPasswordDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -122,6 +131,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     MaterialModules,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireAuthModule,
+    AngularFireStorageModule,
     AngularFireAuthGuardModule,
     WelcomeDialogModule,
     ColorPickerModule,
@@ -139,6 +149,8 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
   entryComponents: [
     NewDrawingAlertComponent,
     NewDrawingComponent,
+    TeamPasswordDialogComponent,
+    TeamInfoComponent,
     ToolsColorPickerComponent,
     WorkspaceComponent,
     ControlMenuComponent,
@@ -151,6 +163,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     AlertMessageComponent,
     DrawingPreviewDialogComponent,
     MatSnackBarContainer,
+    CreateTeamDialogComponent,
     CollaborationPasswordFormDialogComponent,
   ],
   providers: [

@@ -70,9 +70,11 @@ export interface ICollaborationConnectPayload {
 
 export interface ICollaborationCreatePayload {
     userId: string,
+    creatorId: string,
+    isTeam: boolean,
     title: string,
-    type: string, 		// "Protected" or "Public" or "Private"
-    password?: string 	// Mandatory if the type is "Protected"
+    type: string,
+    password?: string
 }
 
 export interface ICollaborationDeletePayload {
