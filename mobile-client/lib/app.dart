@@ -109,11 +109,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
           break;
         case homeRoute:
           screen = Home();
-          break;
-        case drawingRoute:
-          final arguments = settings.arguments as Map<String, dynamic>;
-          screen = DrawingScreen(arguments['socket'] , arguments['user']);
-          break;
+          break;;
         default:
           return null;
       }

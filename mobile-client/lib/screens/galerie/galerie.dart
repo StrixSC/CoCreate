@@ -4,12 +4,14 @@ import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/collaboration.dart';
 import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/providers/collaborator.dart';
+import 'package:Colorimage/screens/drawing/drawing.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:http/src/response.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/src/provider.dart';
 import 'package:intl/intl.dart';
 
@@ -98,7 +100,15 @@ class GalerieState extends State<Galerie>
   }
 
   navigateToDrawing() {
-    print('should navigate to drawing');
+    var user = context.read<Collaborator>().auth!.user!;
+    var socket = context.read<Collaborator>().collaborationSocket.socket;
+    var collaborationId =  context.read<Collaborator>().getCollaborationId();
+    pushNewScreen(
+      context,
+      screen: DrawingScreen(socket, user, collaborationId),
+      withNavBar: false,
+      pageTransitionAnimation: PageTransitionAnimation.cupertino,
+    );
   }
 
   Future<void> _fetchDrawings(int pageKey, String section, String? type) async {
@@ -122,7 +132,6 @@ class GalerieState extends State<Galerie>
     }
 
     if (response.statusCode == 200) {
-      print(response.body);
       var jsonResponse = json.decode(response.body); //Map<String, dynamic>;
       List<Drawing> drawings = [];
       var resp = jsonResponse['drawings'];
@@ -411,8 +420,6 @@ class GalerieState extends State<Galerie>
                           onPressed: () {
                             _formKey.currentState!.save();
                             if (_formKey.currentState!.validate()) {
-                              print(dropDownValueTypeCreate);
-                              print(dropDownValueAuthor);
                               var type = context
                                   .read<Collaborator>()
                                   .convertToEnglish(dropDownValueTypeCreate);

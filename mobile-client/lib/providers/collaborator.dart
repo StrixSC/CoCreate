@@ -74,6 +74,23 @@ class Collaborator extends ChangeNotifier {
     return englishType;
   }
 
+  String getCollaborationId() {
+    return (drawings[currentType][currentDrawingId] as Drawing).collaboration.collaborationId;
+  }
+  
+  String getDrawingId(String collaborationId) {
+    String drawingId = '';
+    for (var type in TYPES) {
+      (drawings[type] as Map<String, Drawing>).forEach((key, value) {
+        if ((drawings[type][key] as Drawing).collaboration.collaborationId ==
+            collaborationId) {
+          drawingId = key;
+        }
+      });
+    }
+    return drawingId;
+  }
+
   void setCurrentType(type) {
     currentType = type;
     notifyListeners();
@@ -113,15 +130,13 @@ class Collaborator extends ChangeNotifier {
 
   void memberJoined(Member member) {
     if(member.userId == auth!.user!.uid) {
-
-    } else {
-
-    }
-    if (drawings[currentType].containsKey(member.drawingId)) {
       drawings[currentType][currentDrawingId].collaboration.members.add(member);
       drawings[currentType][currentDrawingId].collaboration.memberCount++;
-      notifyListeners();
+    } else {
+      drawings[currentType][currentDrawingId].collaboration.members.add(member);
+      drawings[currentType][currentDrawingId].collaboration.memberCount++;
     }
+    
     for (var type in TYPES) {
       pagingControllers[type].refresh();
     }
@@ -164,18 +179,10 @@ class Collaborator extends ChangeNotifier {
   void deletedDrawing(Map delete) {
     String collaborationId = delete["collaborationId"];
     String deletedAt = delete["deletedAt"];
-    var toRemove = [];
-    for (var type in TYPES) {
-      (drawings[type] as Map<String, Drawing>).forEach((key, value) {
-        if ((drawings[type][key] as Drawing).collaboration.collaborationId ==
-            collaborationId) {
-          toRemove.add(key);
-        }
-      });
-    }
+    var toRemove = getDrawingId(collaborationId);
     for (var type in TYPES) {
       (drawings[type] as Map<String, Drawing>)
-          .removeWhere((key, value) => toRemove.contains(key));
+          .removeWhere((key, value) => toRemove == key);
     }
     pagingControllers[currentType].refresh();
     notifyListeners();
@@ -189,15 +196,7 @@ class Collaborator extends ChangeNotifier {
     String avatarUrl = left["avatarUrl"];
     String leftAt = left["leftAt"];
 
-    var drawingId = '';
-    for (var type in TYPES) {
-      (drawings[type] as Map<String, Drawing>).forEach((key, value) {
-        if ((drawings[type][key] as Drawing).collaboration.collaborationId ==
-            collaborationId) {
-          drawingId = key;
-        }
-      });
-    }
+    var drawingId = getDrawingId(collaborationId);
     for (var type in TYPES) {
       if(type == 'Available') {
         (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {

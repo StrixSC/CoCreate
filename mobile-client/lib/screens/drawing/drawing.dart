@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/screens/drawing/toolbar.dart';
+import 'package:Colorimage/widgets/sidebar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,16 +15,18 @@ import 'package:uuid/uuid.dart';
 class DrawingScreen extends StatefulWidget {
   final io.Socket _socket;
   final User _user;
+  final String _collaborationId;
 
-  const DrawingScreen(this._socket, this._user);
+  const DrawingScreen(this._socket, this._user, this._collaborationId);
 
   @override
-  State<DrawingScreen> createState() => _DrawingScreenState(_socket, _user);
+  State<DrawingScreen> createState() => _DrawingScreenState(_socket, _user, _collaborationId);
 }
 
 class _DrawingScreenState extends State<DrawingScreen> {
   final io.Socket _socket;
   final User _user;
+  final String _collaborationId;
   Offset endPoint = const Offset(-1, -1);
   String drawType = DrawingType.freedraw;
   String? shapeID;
@@ -44,7 +47,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   List<ShapeAction> undoList = [];
   List<ShapeAction> redoList = [];
 
-  _DrawingScreenState(this._socket, this._user);
+  _DrawingScreenState(this._socket, this._user, this._collaborationId);
 
   @override
   void initState() {
@@ -62,6 +65,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      endDrawer: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.45,
+          child: Sidebar()),
       body: Row(
         children: [
           SizedBox(width: 100, child: Toolbar(changeTool, changeColor, changeWidth)),
@@ -693,7 +699,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
         'actionId': data['actionId'],
         'username': _user.displayName,
         'userId': _user.uid,
-        'collaborationId': "DEMO_COLLABORATION",
+        'collaborationId': _collaborationId,
         'actionType': "Select",
         'isSelected': true,
         'isUndoRedo': false,
@@ -713,7 +719,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'actionId': selectItem,
       'username': _user.displayName,
       'userId': _user.uid,
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': _collaborationId,
       'actionType': "Select",
       'isSelected': isSelected,
     });
@@ -730,7 +736,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'username': _user.displayName,
       'userId': _user.uid,
       'state': drawingState,
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': _collaborationId,
       'actionType': "Translate",
       'xTranslation': xTranslation,
       'yTranslation': yTranslation
@@ -743,7 +749,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'selectedActionId': actionId,
       'username': _user.displayName,
       'userId': _user.uid,
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': _collaborationId,
       'actionType': 'Delete',
     });
   }
@@ -761,7 +767,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
           Offset(details.localPosition.dx, details.localPosition.dy)),
       'username': _user.displayName,
       'userId': _user.uid,
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': _collaborationId,
     });
   }
 
@@ -781,7 +787,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'selectedActionId': actionId,
       'username': _user.displayName,
       'userId': _user.uid,
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': _collaborationId,
       'xScale':
       (drawingState == DrawingState.move) ? bounds.xScale : 1.toDouble(),
       'yScale':
@@ -803,7 +809,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
           : shapeID,
       'username': _user.displayName,
       'userId': _user.uid,
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': _collaborationId,
       'actionType': 'Shape',
       'state': drawingState, // move/down/up
       'isSelected': (drawingState == DrawingState.up) ? false : true,
@@ -847,7 +853,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'y': (isRedo || drawingState == DrawingState.up)
           ? details.dy
           : details.localPosition.dy.toInt(),
-      'collaborationId': "DEMO_COLLABORATION",
+      'collaborationId': _collaborationId,
       'username': _user.displayName,
       'userId': _user.uid,
       'actionType': "Freedraw",
