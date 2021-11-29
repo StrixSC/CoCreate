@@ -7,6 +7,7 @@ import { Server, Socket } from 'socket.io';
 import { Action, Collaboration, CollaborationMember, CollaborationType, Drawing, MemberType, Profile, User } from '.prisma/client';
 import validator from "validator";
 import { io } from '../bin/www';
+import { getOnlineMembersInRoom } from '../utils/socket';
 
 type CollaborationMemberConnectionResponse = CollaborationMember & {
     user: User & {
@@ -166,10 +167,7 @@ export = (io: Server, socket: Socket) => {
                     });
                 }
 
-                socket.join(member.collaboration_id);
-
-                const data = generateConnectedPayload(member);
-                socket.emit("collaboration:load", data);
+                triggerJoin(member);
             } else {
                 socket.broadcast.to(member.collaboration_id).emit("collaboration:connected", {
                     userId: member.user.user_id,
@@ -177,14 +175,19 @@ export = (io: Server, socket: Socket) => {
                     avatarUrl: member.user.profile!.avatar_url,
                     type: member.type,
                 });
-                socket.join(member.collaboration_id);
-                const data = generateConnectedPayload(member);
-                socket.emit("collaboration:load", data);
+                triggerJoin(member);
             }
 
         } catch (e) {
             return handleSocketError(socket, e, ExceptionType.Collaboration);
         }
+    }
+
+    const triggerJoin = (member: any) => {
+        socket.join(member.collaboration_id);
+        const data = generateConnectedPayload(member);
+        socket.emit("collaboration:load", data);
+        socket.data.status = 'Occupé'
     }
 
     const onCreateCollaboration = async (payload: {
@@ -209,7 +212,7 @@ export = (io: Server, socket: Socket) => {
             }
 
             if (type === CollaborationType.Private) {
-                const data = await createCollaboration2(userId, creatorId, isTeam, type, title, password);
+                const data = await createCollaboration(userId, creatorId, isTeam, type, title, password);
 
                 if (!data.collaboration) {
                     throw new create.InternalServerError('Error while establishing author and collaboration');
@@ -237,7 +240,7 @@ export = (io: Server, socket: Socket) => {
                 ) {
                     throw new create.BadRequest("Collaboration type protected was given but no password (or an empty password) was given with the request.");
                 }
-                const data = await createCollaboration2(userId, creatorId, isTeam, type, title, password);
+                const data = await createCollaboration(userId, creatorId, isTeam, type, title, password);
 
                 if (!data || !data.collaboration) {
                     throw new create.InternalServerError("Could not create drawing/collaboration. Internal server error.");
@@ -482,9 +485,7 @@ export = (io: Server, socket: Socket) => {
                 type: member.type
             });
 
-            socket.join(member.collaboration_id);
-            const data = generateConnectedPayload(member);
-            socket.emit("collaboration:load", data);
+            triggerJoin(member);
         } catch (e) {
             handleSocketError(socket, e, ExceptionType.Collaboration);
         }
@@ -560,16 +561,7 @@ export = (io: Server, socket: Socket) => {
 }
 
 const generateConnectedPayload = (member: CollaborationMemberConnectionResponse) => {
-    const allActiveSockets = io.sockets.adapter.rooms.get(member.collaboration_id);
-    const onlineMembers = [] as string[];
-    const allSockets = io.sockets.sockets;
-    allActiveSockets!.forEach((s) => {
-        for (let [socketId, socket] of allSockets) {
-            if (socketId === s) {
-                onlineMembers.push(socket.data.user);
-            }
-        }
-    })
+    const onlineMembers = getOnlineMembersInRoom(member.collaboration_id);
 
     return {
         collaborationId: member.collaboration.collaboration_id,
@@ -586,7 +578,7 @@ const generateConnectedPayload = (member: CollaborationMemberConnectionResponse)
             .map((m) => ({
                 avatarUrl: m.user.profile!.avatar_url,
                 username: m.user.profile!.username,
-                isOnline: onlineMembers.includes(m.user_id) ? true : false
+                isOnline: onlineMembers.find((om) => om.userId === member.user_id) ? true : false
             })),
         backgroundColor: member.collaboration.drawing!.background_color,
         width: member.collaboration.drawing!.width,
@@ -594,82 +586,14 @@ const generateConnectedPayload = (member: CollaborationMemberConnectionResponse)
     }
 };
 
-const createCollaboration = async (userId: string, type: CollaborationType, title: string, password?: string) => {
-    const collab_id = v4();
-    const author_id = v4();
-
-    return db.user.update({
-        where: {
-            user_id: userId,
-        },
-        data: {
-            authored_collaborations: {
-                create: {
-                    author_id: author_id,
-                    is_team: false,
-                    collaborations: {
-                        create: {
-                            collaboration_id: collab_id,
-                            type: type,
-                            password: type === CollaborationType.Protected ? password : undefined,
-                            drawing: {
-                                create: {
-                                    title: title,
-                                }
-                            },
-                            collaboration_members: {
-                                create: [
-                                    {
-                                        type: MemberType.Owner,
-                                        user_id: userId,
-                                    }
-                                ]
-                            },
-                        }
-                    }
-                }
-            }
-        },
-        include: {
-            profile: true,
-            account: true,
-            authored_collaborations: {
-                where: {
-                    author_id: author_id,
-                },
-                include: {
-                    collaborations: {
-                        where: {
-                            collaboration_id: collab_id,
-                        },
-                        include: {
-                            drawing: true,
-                            collaboration_members: {
-                                include: {
-                                    user: {
-                                        include: {
-                                            profile: true,
-                                            account: true
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    })
-}
-
-const createCollaboration2 = async (user_id: string, creatorId: string, isTeam: boolean, type: CollaborationType, title: string, password?: string) => {
+const createCollaboration = async (user_id: string, creatorId: string, isTeam: boolean, type: CollaborationType, title: string, password?: string) => {
     const collab_id = v4();
 
     const author = await db.author.create({
         data: {
             is_team: isTeam,
-            user_id: isTeam ? null : creatorId,
-            team_id: isTeam ? creatorId : null,
+            user_id: isTeam ? undefined : creatorId,
+            team_id: isTeam ? creatorId : undefined,
             collaborations: {
                 create: [{
                     collaboration_id: collab_id,

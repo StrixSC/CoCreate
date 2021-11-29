@@ -19,6 +19,7 @@ export const handleCreate = async (io: Server, socket: Socket, data: {
         const team = await createTeam(socket.data.user, teamName, bio, maxMemberCount, type, password, mascot);
         socket.emit('teams:create:finished', team);
         io.emit('teams:created', team);
+        socket.join(team.teamId);
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.Teams_Create);
     }
@@ -89,6 +90,7 @@ const createTeam = async (userId: string, teamName: string, bio: string, maxMemb
         throw new SocketEventError("Une erreur est survenue lors de la création de l'équipe. Veuillez essayez à nouveau.");
     } else {
         return {
+            teamId: createdTeam.team_id,
             author_username: createdTeam.team_members[0].user.profile!.username,
             author_avatar_url: createdTeam.team_members[0].user.profile!.avatar_url,
             currentMemberCount: createdTeam.team_members.length,
