@@ -1,19 +1,27 @@
+<div align="end">
 <button mat-icon-button mat-dialog-close (click)="dialogRef.close()">
   <mat-icon>close</mat-icon>
 </button>
-<div style="text-align: center;">
-  <h1 mat-dialog-title>
-    {{drawing.title}}
-  </h1>
+</div>
+<div layout="row" layout-align="center center" style="margin: 0 auto; text-align: center;">
+  <div style="padding-left: 10;"></div>
+  <mat-card-header align="center">
+  <img style="background-size: cover;" mat-card-avatar src="{{drawing.author_avatar}}">
+  <br>
+  <mat-card-title>{{drawing.title}}</mat-card-title>
+  <br>
   <mat-card-subtitle>
     Mise à jour le {{ drawing.updated_at | date:'short' }}
+    <br>
+    Créé le {{ drawing.created_at | date:'short' }}
   </mat-card-subtitle>
+</mat-card-header>
   <img mat-card-image class="image-preview" src="../../../assets/default-image.png">
   <div class='"separator'></div>
   <mat-card-content>
-    Auteur: {{drawing.author_username}}
-  </mat-card-content>
-  <mat-card-content>
+    Auteur: {{drawing.author_username}}<br>
+    Type de dessin: {{drawing.type}}<br>
+    Nombre de collaborateurs actifs: {{drawing.collaborator_count}}
   </mat-card-content>
   <mat-dialog-actions class="actions">
     <div>

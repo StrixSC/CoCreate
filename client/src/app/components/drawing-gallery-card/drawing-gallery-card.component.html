@@ -1,6 +1,6 @@
 <mat-card style="border: 1px solid #fff;" class="drawing-card" *ngIf="drawing">
   <mat-card-header>
-    <div mat-card-avatar class="example-header-image"></div>
+    <img mat-card-avatar src="{{drawing.author_avatar}}" class="example-header-image">
     <mat-card-title>{{drawing.title}}</mat-card-title>
     <mat-card-subtitle>Mise à jour le {{ drawing.updated_at | date:'short' }}
     </mat-card-subtitle>
