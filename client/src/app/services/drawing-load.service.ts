@@ -1,3 +1,4 @@
+import { Point } from './../model/point.model';
 import { DeleteSyncCommand } from './sync/delete-sync-command';
 import { ResizeSyncCommand } from './sync/resize-sync-command';
 import { RotateSyncCommand } from './sync/rotate-sync-command';
@@ -85,7 +86,11 @@ class LoadTranslationCommand {
 export class DrawingLoadService {
   private callbacks: Record<ActionType, (payload: IAction) => any> = {
     Freedraw: (payload: IFreedrawUpAction & IFreedrawUpLoadAction) => {
-      payload.offsets = JSON.parse(payload.offsets);
+      try {
+        payload.offsets = JSON.parse(payload.offsets);
+      } catch (e) {
+        return;
+      }
       const command = new FreedrawSyncCommand(payload, this.drawingService.renderer, this.drawingService, this.syncService);
       command.isFlatAction = true;
       command.execute();

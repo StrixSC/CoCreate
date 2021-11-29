@@ -43,7 +43,11 @@ export class FreedrawSyncCommand extends SyncCommand {
                     this.command = new PencilCommand(this.renderer, this.pencil, this.drawingService);
                     this.command.userId = this.payload.userId;
                     this.command.actionId = this.payload.actionId;
-                    this.command.execute();
+                    try {
+                        this.command.execute();
+                    } catch (e) {
+                        return;
+                    }
                     return this;
                 }
         }
