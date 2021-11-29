@@ -171,6 +171,7 @@ class ShapeAction {
     copy.angle = angle;
     copy.translate = translate;
     copy.bodyColor = bodyColor;
+    copy.shapesOffsets = shapesOffsets;
     return copy;
   }
 }
