@@ -49,8 +49,8 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
                 type: c.type,
                 collaborator_count: c.collaboration_members.length,
                 max_collaborator_count: c.max_collaborator_count,
-                is_member: isMember,
-                is_owner: isOwner,
+                is_member: isMember ? true : false,
+                is_owner: isOwner ? true : false
             }
         })
         return res.status(StatusCodes.OK).json({ drawings: returnArray, total_drawing_count: result.total, offset: result.offset, limit: result.limit });
