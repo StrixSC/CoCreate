@@ -268,6 +268,22 @@ class _DrawingScreenState extends State<DrawingScreen> {
       floatingActionButton: Stack(
         children: <Widget>[
           Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(150.0, 80.0, 0, 0),
+              child: Visibility(
+                visible: selectedItems.isNotEmpty,
+                child: FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        drawType = "rotate";
+                      });
+                    },
+                    child: const Icon(Icons.rotate_left)),
+              ),
+            ),
+          ),
+          Align(
             alignment: Alignment.topRight,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(0, 80.0, 80.0, 0),
