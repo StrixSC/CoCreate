@@ -35,7 +35,7 @@
         Résultat de la recherche «{{drawingFilterSelf}}» :
       </div>
 
-      <mat-paginator #paginator4 (page)="handlePageEvent($event, true)"
+      <mat-paginator (page)="handlePageEvent($event, true)"
       [length]="lengthSelf"
       [pageSize]="pageSizeSelf"
       [showFirstLastButtons]="showFirstLastButtons"
@@ -102,7 +102,7 @@
         Résultat de la recherche «{{drawingFilterAll}}» :
       </div>
 
-      <mat-paginator #paginatorAll (page)="handleAllPageEvent($event)"
+      <mat-paginator (page)="handleAllPageEvent($event)"
       [length]="lengthAll"
       [pageSize]="pageSizeAll"
       [showFirstLastButtons]="showFirstLastButtons"

@@ -51,11 +51,9 @@ export class DrawingPreviewDialogComponent {
       password: '',
     } as ICollaborationJoinPayload
 
-    if (this.drawing.type === DrawingType.Private) {
+    
       this.syncService.sendConnectCollaboration(payload);
-    } else {
-      this.syncService.sendJoinCollaboration(payload);
-    }
+    
   }
 
 }

@@ -57,7 +57,7 @@ export class SyncCollaborationService {
       return;
     }
 
-    this.socketService.emit('collaboration:join', { ...data, userId: this.authService.activeUser.uid });
+    this.socketService.emit('collaboration:connect', { ...data, userId: this.authService.activeUser.uid });
   }
 
   sendCreateCollaboration(data: ICollaborationCreatePayload): void {
