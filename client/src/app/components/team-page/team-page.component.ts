@@ -7,34 +7,8 @@ import { TeamViewerComponent } from './../team-viewer/team-viewer.component';
 import { FormBuilder, FormGroup, Validators, FormControl, AbstractControl } from '@angular/forms';
 import { v4 } from 'uuid';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatSlideToggle, MatSlideToggleChange, MatDialog, MatSnackBar, MatDialogConfig } from '@angular/material';
-
-export enum TeamType {
-  Protected = "Protected",
-  Public = "Public",
-  None = ""
-}
-
-export enum MemberType {
-  Owner = "Owner",
-  Regular = "Regular",
-}
-
-export interface TeamResponse {
-  teamId: string,
-  createdAt: string,
-  teamName: string,
-  bio: string,
-  maxMemberCount: number,
-  type: string,
-  avatarUrl: string,
-  mascot: string,
-  authorUsername: string,
-  authorAvatarUrl: string,
-  team_members: { member_id: string, member_type: MemberType }[],
-  isMember: boolean,
-  isOwner: boolean
-}
+import { MatSlideToggle, MatSlideToggleChange, MatDialog, MatSnackBar, MatDialogConfig, PageEvent, MatPaginator } from '@angular/material';
+import { TeamType, TeamResponse } from 'src/app/model/team-response.model';
 
 @Component({
   selector: 'app-team-page',
@@ -44,7 +18,6 @@ export interface TeamResponse {
 export class TeamPageComponent implements OnInit {
 
   showCreatedByMeSwitch: boolean = false;
-  totalTeamLength = 0;
   buttonsLoading: boolean = false;
 
   activeTeamName: string = "";
@@ -53,6 +26,9 @@ export class TeamPageComponent implements OnInit {
     width: '800px',
     height: '800px'
   } as MatDialogConfig;
+
+  @ViewChild('paginator', { static: false })
+  paginator: MatPaginator;
 
   @ViewChild('fullTeamSwitch', { static: false })
   fullTeamSwitch: MatSlideToggle;
@@ -70,6 +46,9 @@ export class TeamPageComponent implements OnInit {
   joinFinishedSubscription: Subscription;
   joinedSubscription: Subscription;
   joinErrorSubscription: Subscription;
+  activeOffset = 0;
+  activeLimit = 12;
+  activeTotal = 0;
 
   searchParams: Map<string, string> = new Map();
   types = [
@@ -139,7 +118,7 @@ export class TeamPageComponent implements OnInit {
     if (team.type === TeamType.Protected) {
       this.buttonsLoading = true;
 
-      this.dialog.open(TeamPasswordDialogComponent, this.dialogOptions).afterClosed().subscribe(() => {
+      this.dialog.open(TeamPasswordDialogComponent, { width: '500px', data: team }).afterClosed().subscribe(() => {
         this.buttonsLoading = false;
       });
 
@@ -162,6 +141,7 @@ export class TeamPageComponent implements OnInit {
     } else {
       this.searchParams.set('type', this.type.value);
     }
+    this.resetPaginationValues();
     this.submitSearch();
   }
 
@@ -171,6 +151,8 @@ export class TeamPageComponent implements OnInit {
     } else {
       this.searchParams.set('filter', this.query.value)
     }
+
+    this.resetPaginationValues();
     this.submitSearch();
   }
 
@@ -182,6 +164,7 @@ export class TeamPageComponent implements OnInit {
       this.searchParams.delete('removeFull');
     }
 
+    this.resetPaginationValues();
     this.submitSearch();
   }
 
@@ -191,6 +174,7 @@ export class TeamPageComponent implements OnInit {
     } else {
       this.searchParams.delete('amMember');
     }
+    this.resetPaginationValues();
 
     this.submitSearch();
   }
@@ -202,19 +186,22 @@ export class TeamPageComponent implements OnInit {
       this.searchParams.delete('amOwner');
     }
 
+    this.resetPaginationValues();
     this.submitSearch();
   }
 
   submitSearch(): void {
     let query = "?";
+    query += `offset=${this.activeOffset}&limit=${this.activeLimit}&`;
     for (let [key, value] of this.searchParams) {
       query += `${key}=${value}&`
     }
     query = query.substr(0, query.length - 1); // remove the last & or the ? if no params.
-
+    this.isLoading = true;
     this.teamService.fetchTeams(query).subscribe((d: any) => {
-      console.log(d);
-      this.totalTeamLength = d.total_teams_count;
+      this.activeTotal = d.total;
+      this.activeOffset = d.offset;
+      this.activeLimit = d.limit;
       this.teams = d.teams;
       this.isLoading = false;
     }, (error) => {
@@ -222,6 +209,12 @@ export class TeamPageComponent implements OnInit {
       this.snackBar.dismiss();
       this.snackBar.open("Une erreur s'est produite lors de la requête, veuillez essayez à nouveau...", 'OK', { duration: 5000 });
     })
+  }
+
+  onPageChange(event: PageEvent) {
+    const pageIndex = event.pageIndex;
+    this.activeOffset = (pageIndex * this.activeLimit);
+    this.submitSearch();
   }
 
   ngOnDestroy(): void {
@@ -240,6 +233,12 @@ export class TeamPageComponent implements OnInit {
     if (this.joinFinishedSubscription) {
       this.joinErrorSubscription.unsubscribe();
     }
+  }
+
+  resetPaginationValues(): void {
+    this.paginator.firstPage();
+    this.activeLimit = 12;
+    this.activeOffset = 0;
   }
 
 }

@@ -1,5 +1,6 @@
 <mat-toolbar color="secondary">
     <mat-toolbar-row>
+        <mat-icon>exit_to_app</mat-icon>
         <h1>Équipes</h1>
         <span class="example-spacer"></span>
         <button class="accent" mat-raised-button (click)="openCreateTeamDialog()">Créer une équipe</button>
@@ -49,7 +50,7 @@
         </div>
     </form>
 
-    <mat-paginator [length]="totalTeamLength" [pageSizeOptions]="[10, 25, 50, 100]" aria-label="Choisir la page">
+    <mat-paginator #paginator (page)="onPageChange($event)" [pageSize]="12" [length]="activeTotal" aria-label="Choisir la page">
     </mat-paginator>
 
 
@@ -83,7 +84,8 @@
                 Nombre de membres: {{ team.currentMemberCount }}/{{team.maxMemberCount}}
             </div>
             <mat-card-actions class="actions-container" *ngIf="!team.isMember && !team.isOwner">
-                <button [disabled]="buttonsLoading" (click)="onJoin(team)" *ngIf="team.currentMemberCount < team.maxMemberCount" mat-stroked-button>
+                <button [disabled]="buttonsLoading" (click)="onJoin(team)"
+                    *ngIf="team.currentMemberCount < team.maxMemberCount" mat-stroked-button>
                     <div class="spinner" *ngIf="buttonsLoading">
                         <mat-spinner [diameter]="25" color="accent" class="spinner"></mat-spinner>
                     </div>
