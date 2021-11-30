@@ -10,4 +10,5 @@ export interface IChannel {
   style?: Object;
   divStyle?: Object;
   btnStyle?: Object;
+  unseen_messages?: number;
 }

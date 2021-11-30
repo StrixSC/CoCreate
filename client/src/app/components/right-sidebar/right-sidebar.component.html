@@ -29,7 +29,7 @@
           [ngStyle]="channel.value.divStyle"
         >
           <p
-            matBadge="8"
+            [matBadge]="channel.value.unseen_messages"
             matBadgePosition="before"
             matBadgeSize="small"
             matBadgeColor="warn"
