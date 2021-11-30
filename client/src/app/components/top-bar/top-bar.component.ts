@@ -1,9 +1,10 @@
+import { MatSnackBar } from '@angular/material';
 import { Router } from '@angular/router';
 import { AuthService } from './../../services/auth.service';
 import { Component, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { EMPTY, merge, of, Subscription } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
+import { switchMap, take, mergeMap, concatMap, map } from 'rxjs/operators';
 import { SocketService } from 'src/app/services/chat/socket.service';
 import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import * as firebase from 'firebase';
@@ -19,16 +20,27 @@ export class TopBarComponent implements OnInit, OnDestroy {
   public isLoading: boolean = false;
   private authSubscription: Subscription;
   private logoutSubscription: Subscription;
-  constructor(public auth: AuthService, private router: Router, private syncCollaboration: SyncCollaborationService, private socketService: SocketService,
+  constructor(private snackBar: MatSnackBar, public auth: AuthService, private router: Router, private socketService: SocketService,
     private af: AngularFireAuth) { }
 
   ngOnInit() {
     this.isLoading = true;
-    this.authSubscription = this.auth.authState.subscribe((state) => {
+    this.authSubscription = this.auth.authState.pipe(mergeMap(async (state) => {
       if (state) {
         this.auth.activeUser = state;
+        await this.socketService.setupSocketConnection();
+        return true;
+      } else return false
+    }), switchMap((status) => {
+      if (status) {
+        this.socketService.emit('user:init', null);
+        return this.socketService.on('user:initialized').pipe(map(() => true))
+      } else return of(status);
+    })).subscribe((data) => {
+      if (data) {
         this.isLoading = false;
-        this.authSubscription.unsubscribe();
+      } else {
+        this.snackBar.open(`Oh non! On dirait qu'il y a eu une erreur lors de la connexion à notre serveur, veuillez redémarrer l'application...`)
       }
     }, (error) => {
       console.error(error);

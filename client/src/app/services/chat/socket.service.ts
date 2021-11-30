@@ -13,7 +13,6 @@ export class SocketService {
   error: string;
   username: string;
   url: string;
-  socketReadyEmitter: EventEmitter<boolean> = new EventEmitter<boolean>();
   constructor(private af: AngularFireAuth) {
     this.error = '';
     this.username = '';
@@ -33,8 +32,6 @@ export class SocketService {
         Authorization: 'Bearer ' + userToken,
       },
     }) as Socket;
-
-    this.socketReadyEmitter.emit(true);
   }
 
   disconnect(): void {

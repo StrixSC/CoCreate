@@ -1,4 +1,3 @@
-import { TeamViewerComponent } from './components/team-viewer/team-viewer.component';
 import { TeamPageComponent } from './components/team-page/team-page.component';
 import { TopBarComponent } from './components/top-bar/top-bar.component';
 import { RegisterComponent } from './components/register/register.component';
@@ -14,7 +13,6 @@ import { AngularFireAuthGuard, redirectLoggedInTo, redirectUnauthorizedTo } from
 import { RouterModule, Routes } from '@angular/router';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
-import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out/chat-poped-out.component";
@@ -32,9 +30,6 @@ const routes: Routes = [
       },
       {
         path: "teams", component: TeamPageComponent,
-      },
-      {
-        path: "team/:id", component: TeamViewerComponent,
       },
       { path: "workspace", component: SidenavComponent },
       { path: "profile", component: UserProfileComponent },

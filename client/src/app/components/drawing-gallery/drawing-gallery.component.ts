@@ -113,42 +113,22 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   ngOnInit(): void {
-    this.errorListener = this.socketService.socketReadyEmitter
-      .pipe(
-        take(1),
-        switchMap((ready: boolean) => {
-          if (ready) {
-            return merge(
-              this.socketService.onException(),
-              this.socketService.onError()
-            );
-          } else {
-            return of(EMPTY);
-          }
-        })
-      )
-      .subscribe((data) => {
-        console.log(data);
-      });
+    this.errorListener = merge(
+      this.socketService.onException(),
+      this.socketService.onError()
+    ).subscribe((data) => {
+      console.log(data);
+    });
 
-    this.messageListener = this.socketService.socketReadyEmitter
-      .pipe(
-        take(1),
-        switchMap((ready: boolean) => {
-          if (ready) {
-            return merge(
-              this.syncCollaboration.onJoinCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Join }))),
-              this.syncCollaboration.onConnectCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Connect }))),
-              this.syncCollaboration.onCreateCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Create }))),
-              this.syncCollaboration.onDeleteCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Delete }))),
-              this.syncCollaboration.onUpdateCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Update }))),
-              this.syncCollaboration.onLoadCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Load })))
-            )
-          } else {
-            return of(EMPTY);
-          }
-        })
-      ).subscribe((data: object & { eventType: GalleryEvents }) => {
+    this.messageListener = merge(
+      this.syncCollaboration.onJoinCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Join }))),
+      this.syncCollaboration.onConnectCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Connect }))),
+      this.syncCollaboration.onCreateCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Create }))),
+      this.syncCollaboration.onDeleteCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Delete }))),
+      this.syncCollaboration.onUpdateCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Update }))),
+      this.syncCollaboration.onLoadCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Load })))
+    )
+      .subscribe((data: object & { eventType: GalleryEvents }) => {
         if (data && data.eventType) {
           this.handlerCallbacks[data.eventType](data);
         }

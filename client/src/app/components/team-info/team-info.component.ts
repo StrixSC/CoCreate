@@ -31,7 +31,9 @@ export class TeamInfoComponent implements OnInit {
       if (d) {
         console.log(d);
       }
-    })
+    });
+
+    this.teamInfo
     this.isLoading = false;
   }
 

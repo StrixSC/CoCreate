@@ -4,7 +4,6 @@ import { TeamPasswordDialogComponent } from './../team-password-dialog/team-pass
 import { Subscription, merge } from 'rxjs';
 import { CreateTeamDialogComponent } from './../create-team-dialog/create-team-dialog.component';
 import { TeamService } from './../../services/team.service';
-import { TeamViewerComponent } from './../team-viewer/team-viewer.component';
 import { FormBuilder, FormGroup, Validators, FormControl, AbstractControl } from '@angular/forms';
 import { v4 } from 'uuid';
 import { Component, OnInit, ViewChild } from '@angular/core';
@@ -119,14 +118,6 @@ export class TeamPageComponent implements OnInit {
 
   get type(): AbstractControl {
     return this.searchForm.get('type')!
-  }
-
-  openDialog(team: TeamResponse): void {
-    this.dialog.open(TeamViewerComponent, {
-      width: '800px',
-      height: '800px',
-      data: team.teamId
-    });
   }
 
   onJoin(team: TeamResponse): void {
