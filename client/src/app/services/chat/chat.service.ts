@@ -28,10 +28,18 @@ export class ChatSocketService {
     return this.socket.on("user-connection");
   }
 
+  joinedChannel() {
+    return this.socket.on("channel:joined");
+  }
+
   leaveChannel(channel_id: string): void {
     return this.socket.emit("channel:leave", {
       channelId: channel_id,
     });
+  }
+
+  leftChannel() {
+    return this.socket.on("channel:left");
   }
 
   deleteChannel(channel_id: string) {
@@ -48,10 +56,6 @@ export class ChatSocketService {
 
   getUsers(): Observable<IUser[]> {
     return this.socket.on("get-users");
-  }
-
-  getChannels(): Observable<IChannel[]> {
-    return this.socket.on("get-channels");
   }
 
   createChannel(channelName: string): void {

@@ -1,4 +1,4 @@
-import { environment } from 'src/environments/environment';
+import { environment } from "src/environments/environment";
 import {
   Component,
   Input,
@@ -75,11 +75,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
 
   loadChannelMessages(channelID: string) {
     this.http
-      .get(
-        environment.serverURL + "/api/channels/" +
-        channelID +
-        "/messages"
-      )
+      .get(environment.serverURL + "/api/channels/" + channelID + "/messages")
       .subscribe((data: any) => {
         data.forEach((m: any) => {
           this.messages.push({
@@ -127,7 +123,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
     try {
       this.messageBox.nativeElement.scrollTop =
         this.messageBox.nativeElement.scrollHeight;
-    } catch (err) { }
+    } catch (err) {}
   }
 
   sendMessage() {
@@ -140,7 +136,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
 
   popOutChat() {
     window.open(
-      "http://localhost:4200/popped-chat/" + this.channel_id,
+      "http://localhost:4200/#/popped-chat/" + this.channel_id,
       "_blank",
       "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=800,height=1000,addressbar=no"
     );

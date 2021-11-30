@@ -40,13 +40,11 @@ export class RightSidebarComponent implements OnInit {
         this.channelManager
           .GetUserChannels(user["uid"])
           .subscribe((channel_list: any[]) => {
-            console.log(channel_list);
             this.connectChannels(channel_list);
           });
       }
     });
     this.chatSocketService.receiveMessage().subscribe((data) => {
-      console.log(data);
       const channel = this.textChannels.get(data.channelId);
       if (channel) {
         if (channel.channel_id !== this.selectedChannel) {
@@ -54,9 +52,12 @@ export class RightSidebarComponent implements OnInit {
             ? channel.unseen_messages + 1
             : 1;
           this.textChannels.set(data.channelId, channel);
-          console.log(this.textChannels);
         }
       }
+    });
+
+    this.chatSocketService.joinedChannel().subscribe((data) => {
+      console.log("joinedChannel", data);
     });
   }
 
@@ -79,7 +80,6 @@ export class RightSidebarComponent implements OnInit {
   }
 
   AddChannel(channel_id: IChannel) {
-    console.log("AddChannel", channel_id);
     this.textChannels.set(channel_id.channel_id, channel_id);
   }
 

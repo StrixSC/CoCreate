@@ -11,6 +11,7 @@ import { IChannel } from "src/app/model/IChannel.model";
 import { ChannelManagerService } from "src/app/services/chat/ChannelManager.service";
 
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { ChatSocketService } from "src/app/services/chat/chat.service";
 export interface DialogData {
   animal: "panda" | "unicorn" | "lion";
 }
@@ -37,7 +38,8 @@ export class AllChannelsComponent implements OnInit, OnChanges {
 
   constructor(
     private channelManagerService: ChannelManagerService,
-    private _snackBar: MatSnackBar
+    private _snackBar: MatSnackBar,
+    private chatSocketService: ChatSocketService
   ) {
     this.all_channels = new Map();
     this.channel_names = new Set();
@@ -55,6 +57,7 @@ export class AllChannelsComponent implements OnInit, OnChanges {
   ngOnInit() {
     this.getChannels();
     this.syncChannels();
+    this.chatSocketService.leftChannel().subscribe((data) => console.log(data));
   }
 
   syncChannels() {
@@ -89,7 +92,12 @@ export class AllChannelsComponent implements OnInit, OnChanges {
       channel.btnStyle = { "background-color": "#3aa55d", color: "white" };
       this.all_channels.set(key, channel);
       this.joinChannelEvent.emit(channel);
+      this.chatSocketService.joinChannel(key);
     }
+  }
+
+  leaveChannel(channel_id: string) {
+    this.chatSocketService.leaveChannel(channel_id);
   }
 
   closeChannelBar() {
