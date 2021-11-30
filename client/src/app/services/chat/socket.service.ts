@@ -75,4 +75,12 @@ export class SocketService {
       });
     });
   }
+
+  sendInit(): void {
+    this.emit('user:init', null);
+  }
+
+  onInit(): Observable<void> {
+    return this.on('user:initialized');
+  }
 }

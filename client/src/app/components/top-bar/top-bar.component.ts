@@ -33,14 +33,14 @@ export class TopBarComponent implements OnInit, OnDestroy {
       } else return false
     }), switchMap((status) => {
       if (status) {
-        this.socketService.emit('user:init', null);
-        return this.socketService.on('user:initialized').pipe(map(() => true))
+        this.socketService.sendInit();
+        return this.socketService.onInit().pipe(map(() => true))
       } else return of(status);
     })).subscribe((data) => {
       if (data) {
         this.isLoading = false;
       } else {
-        this.snackBar.open(`Oh non! On dirait qu'il y a eu une erreur lors de la connexion à notre serveur, veuillez redémarrer l'application...`)
+        this.snackBar.open(`Oh non! On dirait qu'il y a eu une erreur lors de la connexion à notre serveur, veuillez rafraichir l'application...`)
       }
     }, (error) => {
       console.error(error);

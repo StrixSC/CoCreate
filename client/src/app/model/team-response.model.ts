@@ -24,3 +24,4 @@ export interface TeamResponse {
     isMember: boolean,
     isOwner: boolean
 }
+

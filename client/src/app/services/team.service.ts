@@ -9,6 +9,24 @@ import { Injectable } from '@angular/core';
 })
 export class TeamService {
 
+  types = [
+    { key: 'Protected', value: 'Protégé' },
+    { key: 'Public', value: 'Public' }
+  ];
+
+  mascots = [
+    { key: '', value: 'Choisir pour moi!' },
+    { key: 'tiger', value: 'Tigre' },
+    { key: 'lion', value: 'Lion' },
+    { key: 'elephant', value: 'Éléphant' },
+    { key: 'walrus', value: 'Morse' },
+    { key: 'gorilla', value: 'Gorille' },
+    { key: 'cobra', value: 'Cobra' },
+    { key: 'zebra', value: 'Zebre' },
+    { key: 'horse', value: 'Cheval' },
+    { key: 'eagle', value: 'Aigle' }
+  ];
+
   constructor(private http: HttpClient, private socketService: SocketService) { }
 
   fetchTeams(query: string) {
@@ -29,6 +47,22 @@ export class TeamService {
 
   sendCreateTeam(data: any): void {
     this.socketService.emit('teams:create', data);
+  }
+
+  sendUpdate(data: any): void {
+    this.socketService.emit('teams:update', data);
+  }
+
+  onUpdateException(): Observable<any> {
+    return this.socketService.on('teams:update:exception');
+  }
+
+  onUpdateFinished(): Observable<any> {
+    return this.socketService.on('teams:update:finished');
+  }
+
+  onUpdated(): Observable<any> {
+    return this.socketService.on('teams:updated');
   }
 
   onCreated(): Observable<any> {

@@ -18,8 +18,7 @@ import { TeamType, TeamResponse } from 'src/app/model/team-response.model';
 export class TeamPageComponent implements OnInit {
 
   showCreatedByMeSwitch: boolean = false;
-  buttonsLoading: boolean = false;
-
+  currentLoadingIndex: number | null = null;
   activeTeamName: string = "";
 
   dialogOptions = {
@@ -100,7 +99,7 @@ export class TeamPageComponent implements OnInit {
     this.teamCreatedSubscription = this.teamService.onCreated().subscribe(() => this.submitSearch());
     this.joinedSubscription = this.teamService.onJoin().subscribe((d) => this.submitSearch());
     this.joinFinishedSubscription = this.teamService.onJoinFinished().subscribe((d) => {
-      this.buttonsLoading = false;
+      this.currentLoadingIndex = null;
       this.snackBar.open(`Super! Vous avez rejoint l'équipe "${this.activeTeamName}"!`, 'OK', { duration: 5000 });
       this.activeTeamName = "";
     });
@@ -120,21 +119,21 @@ export class TeamPageComponent implements OnInit {
     return this.searchForm.get('type')!
   }
 
-  onJoin(team: TeamResponse): void {
-    if (this.buttonsLoading) {
+  onJoin(team: TeamResponse, index: number): void {
+    if (this.currentLoadingIndex === index) {
       return;
     }
 
     if (team.type === TeamType.Protected) {
-      this.buttonsLoading = true;
+      this.currentLoadingIndex = index;
 
       this.dialog.open(TeamPasswordDialogComponent, { width: '500px', data: team }).afterClosed().subscribe(() => {
-        this.buttonsLoading = false;
+        this.currentLoadingIndex = null;
       });
 
     } else {
       this.activeTeamName = team.teamName;
-      this.buttonsLoading = true;
+      this.currentLoadingIndex = index;
       this.teamService.sendJoin({ userId: this.auth.activeUser!.uid, teamId: team.teamId });
     }
   }

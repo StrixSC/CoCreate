@@ -110,12 +110,12 @@
                 Nombre de membres: {{ team.currentMemberCount }}/{{team.maxMemberCount}}
             </div>
             <mat-card-actions class="actions-container" *ngIf="!team.isMember && !team.isOwner">
-                <button [disabled]="buttonsLoading" (click)="onJoin(team)"
+                <button [disabled]="i === currentLoadingIndex" (click)="onJoin(team, i)"
                     *ngIf="team.currentMemberCount < team.maxMemberCount" mat-stroked-button>
-                    <div class="spinner" *ngIf="buttonsLoading">
+                    <div class="spinner" *ngIf="i === currentLoadingIndex">
                         <mat-spinner [diameter]="25" color="accent" class="spinner"></mat-spinner>
                     </div>
-                    <div *ngIf="!buttonsLoading">
+                    <div *ngIf="i !== currentLoadingIndex">
                         Rejoindre
                     </div>
                 </button>

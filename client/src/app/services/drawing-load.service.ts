@@ -20,66 +20,6 @@ import { IAction, IFreedrawUpLoadAction, IShapeAction, ITranslateAction, IFreedr
 import { ToolFactoryService } from './tool-factory.service';
 import { Injectable, Renderer2 } from '@angular/core';
 
-class LoadEllipseCommand {
-  command: EllipseCommand;
-
-  constructor(
-    public payload: IShapeAction,
-    private drawingService: DrawingService,
-    private renderer: Renderer2,
-  ) {
-    let shape = {} as FilledShape;
-    shape.x = this.payload.x;
-    shape.y = this.payload.y;
-    shape.width = this.payload.x2 - this.payload.x;
-    shape.height = this.payload.y2 - this.payload.y;
-    shape.fill = toRGBString([this.payload.rFill, this.payload.gFill, this.payload.bFill]);
-    shape.fillOpacity = fromAlpha(this.payload.aFill);
-    shape.stroke = toRGBString([this.payload.r, this.payload.g, this.payload.b]);
-    shape.strokeOpacity = fromAlpha(this.payload.a);
-    shape.strokeWidth = this.payload.width;
-    this.command = new EllipseCommand(this.renderer, shape, this.drawingService);
-    this.command.userId = this.payload.userId;
-    this.command.actionId = this.payload.actionId;
-    this.command.isSyncAction = true;
-  }
-
-  load(): void {
-    this.command.execute();
-  }
-}
-
-class LoadFreedrawCommand {
-  command: PencilCommand;
-
-  constructor(public payload: IFreedrawUpLoadAction, private drawingService: DrawingService, private renderer: Renderer2) {
-    let pencil: Pencil = {} as Pencil;
-    pencil.pointsList = JSON.parse(this.payload.offsets);
-    pencil.fill = "none";
-    pencil.fillOpacity = "none";
-    pencil.stroke = toRGBString([this.payload.r, this.payload.g, this.payload.b]);
-    pencil.strokeWidth = this.payload.width;
-    pencil.strokeOpacity = fromAlpha(this.payload.a);
-
-    this.command = new PencilCommand(this.renderer, pencil, this.drawingService);
-  }
-
-  load(): void {
-    this.command.execute();
-  }
-}
-
-class LoadTranslationCommand {
-  command: TranslateCommand;
-  constructor(public payload: ITranslateAction, private drawingService: DrawingService, private renderer: Renderer2) {
-
-  }
-
-  load(): void {
-    return;
-  }
-}
-
 @Injectable({
   providedIn: 'root'
 })
