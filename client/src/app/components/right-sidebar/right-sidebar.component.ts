@@ -29,10 +29,6 @@ export class RightSidebarComponent implements OnInit {
     this.my_channels_load = new Set();
     this.newChannelStyle = { display: "none" };
     this.chatDivView = { display: "none", transition: "0.2s" };
-    // this.audio = new Audio();
-    // this.audio.src = "../../../../assets/Audio/Track 1.mp3";
-    // this.audio.load();
-    // this.audio.play();
     this.ipcService.send("#general", "hello from angular!");
   }
 

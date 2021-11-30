@@ -1,18 +1,17 @@
-const electron = require('electron')
-const app = electron.app
-const BrowserWindow = electron.BrowserWindow
-
+const { app, BrowserWindow, ipcMain, Notification } = require("electron");
 let mainWindow
 
 function createWindow() {
 	mainWindow = new BrowserWindow({
-		width: 1200, height: 1200, electronBuilder: {
-			nodeIntegration: true
+		width: 1800, height: 900, electronBuilder: {
+			nodeIntegration: true,
+			enableRemoteModule: true,
+      		contextIsolation: false,
 		}
 	})
 
 	mainWindow.loadURL(`file://${__dirname}/dist/index.html#`)
-
+	mainWindow.webContents.openDevTools();
 	mainWindow.webContents.on("did-fail-load", function () {
 		console.log("did-fail-load");
 
@@ -24,9 +23,28 @@ function createWindow() {
 	})
 }
 
-app.on('ready', createWindow);
+// app.on('ready', createWindow);
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
 		app.quit();
 	}
 });
+
+const NOTIFICATION_TITLE = 'Basic Notification'
+const NOTIFICATION_BODY = 'Notification from the Main process'
+
+function showNotification () {
+  new Notification({ title: NOTIFICATION_TITLE, body: NOTIFICATION_BODY }).show()
+}
+
+app.whenReady().then(createWindow).then(showNotification)
+
+ipcMain.on('notification', (_, message, text_channel) => {
+	console.log("text_channel", text_channel);
+	console.log("message", message);
+	new Notification({
+	  title: text_channel, 
+	  body: message,
+	  sound: 'low'
+	}).show();
+  })
