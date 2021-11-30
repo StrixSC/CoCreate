@@ -1,5 +1,6 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/screens/galerie/galerie.dart';
+import 'package:Colorimage/screens/profile/profile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
@@ -40,7 +41,7 @@ List<Widget> _buildScreens(context) {
     Container(),
     Galerie(),
     Container(),
-    Container(),
+    Profile(),
     // add screens here
   ];
 }
