@@ -21,7 +21,7 @@
       style="margin-bottom: 50px; width: 270px"
       #messagesWatcher
     >
-      <mat-grid-list cols="4">
+      <mat-grid-list cols="4" style="margin-left: 10px">
         <div
           style="
             font-family: Whitney, 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -43,10 +43,12 @@
           </mat-grid-tile>
 
           <mat-grid-tile colspan="2" rowspan="1" style="color: white">
-            <p style="font-size: 16px; font-weight: 500; color: white">
+            <a style="font-size: 16px; font-weight: 500; color: white">
               {{ message_.username }}
+            </a>
+            <p style="color: #72767d; font-size: 13px; margin-left: 5px">
+              {{ message_.time }}
             </p>
-            <p style="color: #72767d">{{ message_.time }}</p>
           </mat-grid-tile>
         </div>
       </mat-grid-list>
@@ -59,7 +61,7 @@
           font-size: 16px;
           line-height: 22px;
           margin-top: -20px;
-          white-space: break-spaces; ;
+          padding-left: 15px;
         "
       >
         {{ message_.message }}

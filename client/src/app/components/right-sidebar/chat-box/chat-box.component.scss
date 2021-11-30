@@ -56,6 +56,29 @@
   border-radius: 10px;
 }
 
+img {
+  cursor: pointer;
+  transition: 0.2s;
+  border: solid;
+  border-width: 2px;
+  border-color: white;
+}
+
+img:hover {
+  -ms-transform: scale(1.1); /* IE 9 */
+  transform: scale(1.1);
+  transition: 0.2s;
+}
+
+a {
+  text-decoration: "";
+  cursor: pointer;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
 .input_text {
   padding: 10px;
   width: 380px;
