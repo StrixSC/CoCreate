@@ -98,10 +98,8 @@ export class TeamPageComponent implements OnInit {
       this.socketService.onConnection(),
     ).subscribe((d) => {
       if (d) {
-        console.log(d);
         const index = this.teams.findIndex((t) => t.teamId === d.roomId);
         if (index > -1) {
-          console.log(this.teams[index]);
           this.teams[index].onlineMemberCount = d.onlineMemberCount;
         }
       }

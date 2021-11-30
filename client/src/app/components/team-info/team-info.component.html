@@ -3,13 +3,56 @@
         <h1 class="team-name" mat-dialog-title><u>{{ team.teamName }}</u></h1>
 
         <mat-dialog-content>
-
             <mat-tab-group mat-align-tabs="center" class="tabs">
-                <mat-tab label="Info">
-
+                <mat-tab class="tab" label="Membres">
+                    <table mat-table *ngIf="teamInfo" [dataSource]="teamInfo.members"
+                        class="mat-elevation-z8 members-table">
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef> Utilisateur </th>
+                            <td class="user-column clickable" mat-cell *matCellDef="let element">
+                                <div class="user-avatar">
+                                    <img class="user-avatar-img" [src]="element.avatarUrl">
+                                </div>
+                                <div class="user-username">{{element.username}}</div>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef> Statut </th>
+                            <td mat-cell *matCellDef="let element"> {{element.status}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="joinedOn">
+                            <th mat-header-cell *matHeaderCellDef> Date rejoint </th>
+                            <td mat-cell *matCellDef="let element"> {{element.joinedOn | date:'short'}} </td>
+                        </ng-container>
+                        <ng-container matColumnDef="type">
+                            <th mat-header-cell *matHeaderCellDef> Rôle </th>
+                            <td mat-cell *matCellDef="let element">
+                                <span class="member-column" *ngIf="element.type === 'Owner'">Propriétaire
+                                    <mat-icon>star</mat-icon>
+                                </span>
+                                <span class="member-column" *ngIf="element.type !== 'Owner'">Membre
+                                </span>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                    </table>
                 </mat-tab>
-                <mat-tab *ngIf="team.isOwner" label="Options">
-
+                <mat-tab label="Dessins" >
+                    <table mat-table *ngIf="teamInfo && teamInfo.drawings.length > 0" [dataSource]="teamInfo.drawings"
+                        class="mat-elevation-z8 members-table">
+                        <ng-container matColumnDef="title">
+                            <th mat-header-cell *matHeaderCellDef> Utilisateur </th>
+                            <td class="clickable" mat-cell *matCellDef="let element">
+                                {{ element.title }}
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                    </table>
+                    <div *ngIf="teamInfo && teamInfo.drawings.length <= 0">
+                        Vous n'avez aucun dessin... :( 
+                    </div>
                 </mat-tab>
                 <mat-tab *ngIf="team.isOwner" label="Mise à jour">
                     <div class="main-container-wrapper">
@@ -172,6 +215,12 @@
         align-items: center;
     }
 
+    .member-column {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
     .header {
         font-weight: bolder;
         font-size: 2rem;
@@ -189,9 +238,40 @@
 
     }
 
+    .tab {
+        width: 100%;
+        height: 100%;
+        min-height: 500px;
+    }
+
     .image-container {
         max-width: 150px;
         max-height: 150px;
+    }
+
+    .user-avatar {
+        max-width: 50px;
+        max-height: 50px;
+        border-radius: 100%;
+    }
+
+    .user-username:hover {
+        text-decoration: underline;
+    }
+
+    .user-avatar-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 100%;
+    }
+
+    .user-column {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0rem;
     }
 
     .team-image {
@@ -201,5 +281,9 @@
 
     .form-bio-field {
         width: 100%
+    }
+
+    .members-table {
+        width: 100%;
     }
 </style>

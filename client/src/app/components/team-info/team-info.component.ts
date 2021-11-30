@@ -37,6 +37,8 @@ export class TeamInfoComponent implements OnInit {
   updateExceptionSubscription: Subscription;
   updateFinishedSubscription: Subscription;
 
+  displayedColumns = ['username', 'status', 'joinedOn', 'type'];
+  drawingsColumns = ['title', 'memberCount', 'collaborationId', 'delete']
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
@@ -57,8 +59,9 @@ export class TeamInfoComponent implements OnInit {
       mascot: [this.team.mascot, []]
     });
 
-    this.teamSub = this.teamService.fetchTeamById(this.team.teamId).subscribe((d) => {
+    this.teamSub = this.teamService.fetchTeamById(this.team.teamId).subscribe((d: any) => {
       if (d) {
+        this.teamInfo = d
         console.log(d);
       }
     });
