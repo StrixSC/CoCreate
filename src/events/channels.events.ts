@@ -176,13 +176,13 @@ export = (io: Server, socket: Socket) => {
                 );
             }
 
+            socket.leave(channelId);
+            socket.emit('channel:left');
+
             io.to(channelId).emit('channel:left', {
                 channelId: channelId
             });
 
-            socket.emit('channel:left');
-
-            socket.leave(channelId);
         } catch (e) {
             handleSocketError(socket, e);
         }
