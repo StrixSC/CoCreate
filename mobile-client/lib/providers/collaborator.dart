@@ -147,6 +147,7 @@ class Collaborator extends ChangeNotifier {
       notifyListeners();
   }
 
+  // TODO: If it is sent to everyone even when not in drawing, need to change this
   void memberConnected(Member member) {
     int index = drawings[currentType][currentDrawingId]
         .collaboration
