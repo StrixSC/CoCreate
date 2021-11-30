@@ -18,10 +18,12 @@ class DrawingScreen extends StatefulWidget {
   final String _collaborationId;
   final Map _actions;
 
-  const DrawingScreen(this._socket, this._user, this._collaborationId, this._actions);
+  const DrawingScreen(
+      this._socket, this._user, this._collaborationId, this._actions);
 
   @override
-  State<DrawingScreen> createState() => _DrawingScreenState(_socket, _user, _collaborationId, _actions);
+  State<DrawingScreen> createState() =>
+      _DrawingScreenState(_socket, _user, _collaborationId, _actions);
 }
 
 class _DrawingScreenState extends State<DrawingScreen> {
@@ -49,7 +51,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
   List<ShapeAction> undoList = [];
   List<ShapeAction> redoList = [];
 
-  _DrawingScreenState(this._socket, this._user, this._collaborationId, this.actionsMap);
+  _DrawingScreenState(
+      this._socket, this._user, this._collaborationId, this.actionsMap);
 
   @override
   void initState() {
@@ -68,8 +71,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       endDrawer: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.45,
-          child: Sidebar()),
+          width: MediaQuery.of(context).size.width * 0.45, child: Sidebar()),
       body: Row(
         children: [
           SizedBox(
@@ -103,7 +105,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                           details, DrawingType.ellipse, DrawingState.down);
                       break;
                     //  todo: prevent translation and resize to move in the
-                  //   toolbar
+                    //   toolbar
                     case "select":
                       allowMove = false;
                       selectRef = Offset(
@@ -284,9 +286,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
                 visible: selectedItems.containsValue(_user.uid),
                 child: FloatingActionButton(
                     onPressed: () {
-                      setState(() {
-                        drawType = "rotate";
-                      });
+                      if (mounted) {
+                        setState(() {
+                          drawType = "rotate";
+                        });
+                      }
                     },
                     child: const Icon(Icons.rotate_left)),
               ),
@@ -300,10 +304,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
                 visible: undoList.isNotEmpty,
                 child: FloatingActionButton(
                     onPressed: () {
-                      setState(() {
-                        undoActionChooser();
-                        print("undo");
-                      });
+                      if (mounted) {
+                        setState(() {
+                          undoActionChooser();
+                          print("undo");
+                        });
+                      }
                     },
                     child: const Icon(Icons.undo)),
               ),
@@ -329,13 +335,18 @@ class _DrawingScreenState extends State<DrawingScreen> {
             child: Visibility(
               visible: selectedItems.isNotEmpty,
               child: FloatingActionButton(
-                onPressed: () => setState(() {
-                  // TODO: add this in undo
-                  var selectedItem = selectedItems.entries.firstWhere(
-                      (selectedItem) => selectedItem.value == _user.uid);
-                  var actionId = selectedItem.key;
-                  socketDeleteEmission(actionId);
-                }),
+                onPressed: () => {
+                  if (mounted)
+                    {
+                      setState(() {
+                        // TODO: add this in undo
+                        var selectedItem = selectedItems.entries.firstWhere(
+                            (selectedItem) => selectedItem.value == _user.uid);
+                        var actionId = selectedItem.key;
+                        socketDeleteEmission(actionId);
+                      })
+                    }
+                },
                 tooltip: 'Supression',
                 child: const Icon(CupertinoIcons.archivebox_fill),
                 backgroundColor: kErrorColor,
@@ -425,89 +436,106 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void changeColor(Color color, String type) {
     switch (type) {
       case "Body":
-        setState(() => currentBodyColor = color);
+        if (mounted) {
+          setState(() => currentBodyColor = color);
+        }
         break;
       case "Border":
-        setState(() => currentBorderColor = color);
+        if (mounted) {
+          setState(() => currentBorderColor = color);
+        }
         break;
       case "Background":
-        setState(() => currentBackgroundColor = color);
+        if (mounted) {
+          setState(() => currentBackgroundColor = color);
+        }
         break;
     }
   }
 
   void changeWidth(double width) {
-    setState(() => currentWidth = width);
+    if (mounted) {
+      setState(() => currentWidth = width);
+    }
   }
 
   void changeTool(String type, String fillType) {
     if (drawType == DrawingType.rectangle || drawType == DrawingType.ellipse) {
       currentFillType = fillType;
     }
-    setState(() {
-      drawType = type;
-    });
+    if (mounted) {
+      setState(() {
+        drawType = type;
+      });
+    }
   }
 
   void socketSelectionReception() {
     _socket.on('selection:received', (data) {
-      setState(() {
-        if (data['isSelected']) {
-          selectedItems.putIfAbsent(
-              data['actionId'], () => data['selectedBy'] as String);
-          allowMove = true;
-        } else {
-          selectedItems.remove(data['actionId']);
-        }
-      });
+      if (mounted) {
+        setState(() {
+          if (data['isSelected']) {
+            selectedItems.putIfAbsent(
+                data['actionId'], () => data['selectedBy'] as String);
+            allowMove = true;
+          } else {
+            selectedItems.remove(data['actionId']);
+          }
+        });
+      }
     });
   }
 
   void socketTranslationReception() {
     _socket.on('translation:received', (data) {
-      setState(() {
-        if (data["state"] != DrawingState.up) {
-          actionsMap.forEach((actionId, shapeAction) {
-            if (actionId == data['actionId'] ||
-                actionId == data['selectedActionId']) {
-              Matrix4 matrix4 = Matrix4.translationValues(
-                  data['xTranslation'].toDouble(),
-                  data['yTranslation'].toDouble(),
-                  0);
-              shapeAction.path = shapeAction.path.transform(matrix4.storage);
+      if (mounted) {
+        setState(() {
+          if (data["state"] != DrawingState.up) {
+            actionsMap.forEach((actionId, shapeAction) {
+              if (actionId == data['actionId'] ||
+                  actionId == data['selectedActionId']) {
+                Matrix4 matrix4 = Matrix4.translationValues(
+                    data['xTranslation'].toDouble(),
+                    data['yTranslation'].toDouble(),
+                    0);
+                shapeAction.path = shapeAction.path.transform(matrix4.storage);
 
-              actionsMap.update(
-                  actionId, (value) => shapeAction as ShapeAction);
-            }
-          });
-        }
-      });
+                actionsMap.update(
+                    actionId, (value) => shapeAction as ShapeAction);
+              }
+            });
+          }
+        });
+      }
     });
   }
 
   void socketRotationReception() {
     _socket.on('rotation:received', (data) {
-      setState(() {
-        if (data['state'] == DrawingState.move) {
-          Path actionPath = actionsMap[data['selectedActionId']].path;
-          Offset center = actionPath.getBounds().center;
+      if (mounted) {
+        setState(() {
+          if (data['state'] == DrawingState.move) {
+            Path actionPath = actionsMap[data['selectedActionId']].path;
+            Offset center = actionPath.getBounds().center;
 
-          //transform path with matrix of rotation
-          Matrix4 matriceRotation = Matrix4.rotationZ(data['angle'].toDouble());
-          actionPath = actionPath.transform(matriceRotation.storage);
+            //transform path with matrix of rotation
+            Matrix4 matriceRotation =
+                Matrix4.rotationZ(data['angle'].toDouble());
+            actionPath = actionPath.transform(matriceRotation.storage);
 
-          //transform path with matrix of translation
-          Offset newCenter = actionPath.getBounds().center;
-          Matrix4 matriceTranslation = Matrix4.translationValues(
-              (center - newCenter).dx, (center - newCenter).dy, 0);
-          actionPath = actionPath.transform(matriceTranslation.storage);
+            //transform path with matrix of translation
+            Offset newCenter = actionPath.getBounds().center;
+            Matrix4 matriceTranslation = Matrix4.translationValues(
+                (center - newCenter).dx, (center - newCenter).dy, 0);
+            actionPath = actionPath.transform(matriceTranslation.storage);
 
-          //update map
-          ShapeAction shapeAction = actionsMap[data['selectedActionId']];
-          shapeAction.path = actionPath;
-          actionsMap.update(data['selectedActionId'], (value) => shapeAction);
-        }
-      });
+            //update map
+            ShapeAction shapeAction = actionsMap[data['selectedActionId']];
+            shapeAction.path = actionPath;
+            actionsMap.update(data['selectedActionId'], (value) => shapeAction);
+          }
+        });
+      }
     });
   }
 
@@ -527,175 +555,184 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
   void socketResizeReception() {
     _socket.on('resize:received', (data) {
-      setState(() {
-        selectedItems.forEach((actionId, selectedBy) {
-          if (data['selectedActionId'] == actionId) {
-            if (data['state'] == DrawingState.down) {
-              actionsMap[actionId].oldShape = actionsMap[actionId].path;
-            } else if (data['state'] == DrawingState.move) {
-              Path actionPath = actionsMap[actionId].oldShape;
+      if (mounted) {
+        setState(() {
+          selectedItems.forEach((actionId, selectedBy) {
+            if (data['selectedActionId'] == actionId) {
+              if (data['state'] == DrawingState.down) {
+                actionsMap[actionId].oldShape = actionsMap[actionId].path;
+              } else if (data['state'] == DrawingState.move) {
+                Path actionPath = actionsMap[actionId].oldShape;
 
-              Matrix4 matrixTranslation;
-              matrixTranslation = Matrix4.translationValues(
-                  -data['xTranslation'].toDouble(),
-                  -data['yTranslation'].toDouble(),
-                  0);
-              Path scaledPath = actionPath.transform(matrixTranslation.storage);
+                Matrix4 matrixTranslation;
+                matrixTranslation = Matrix4.translationValues(
+                    -data['xTranslation'].toDouble(),
+                    -data['yTranslation'].toDouble(),
+                    0);
+                Path scaledPath =
+                    actionPath.transform(matrixTranslation.storage);
 
-              Matrix4 matrixScale = Matrix4.identity();
-              matrixScale.scale(
-                  data['xScale'].toDouble(), data['yScale'].toDouble());
-              scaledPath = scaledPath.transform(matrixScale.storage);
+                Matrix4 matrixScale = Matrix4.identity();
+                matrixScale.scale(
+                    data['xScale'].toDouble(), data['yScale'].toDouble());
+                scaledPath = scaledPath.transform(matrixScale.storage);
 
-              // // Translate to match fix corner position
-              Matrix4 matrixTranslation2;
-              matrixTranslation2 = Matrix4.translationValues(
-                  data['xTranslation'].toDouble(),
-                  data['yTranslation'].toDouble(),
-                  0);
-              scaledPath = scaledPath.transform(matrixTranslation2.storage);
+                // // Translate to match fix corner position
+                Matrix4 matrixTranslation2;
+                matrixTranslation2 = Matrix4.translationValues(
+                    data['xTranslation'].toDouble(),
+                    data['yTranslation'].toDouble(),
+                    0);
+                scaledPath = scaledPath.transform(matrixTranslation2.storage);
 
-              // Save the scaled path
-              ShapeAction shapeAction = actionsMap[actionId];
-              shapeAction.path = scaledPath;
-              actionsMap.update(actionId, (value) => shapeAction);
-            } else if (data['state'] == DrawingState.up) {
-              actionsMap[actionId].delta = Offset.zero;
+                // Save the scaled path
+                ShapeAction shapeAction = actionsMap[actionId];
+                shapeAction.path = scaledPath;
+                actionsMap.update(actionId, (value) => shapeAction);
+              } else if (data['state'] == DrawingState.up) {
+                actionsMap[actionId].delta = Offset.zero;
+              }
             }
-          }
+          });
         });
-      });
+      }
     });
   }
 
   void socketShapeReception() {
     _socket.on('shape:received', (data) {
-      setState(() {
-        if (data['state'] == DrawingState.down) {
-          //Create new list of points to keep a track
-          List<Offset> offsets = <Offset>[];
-          offsets.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+      if (mounted) {
+        setState(() {
+          if (data['state'] == DrawingState.down) {
+            //Create new list of points to keep a track
+            List<Offset> offsets = <Offset>[];
+            offsets.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
 
-          //Create the paint for the border
-          final paintBorder = Paint()
-            ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
-                data['g'] as int, data['b'] as int)
-            ..isAntiAlias = true
-            ..strokeWidth = data['width'].toDouble()
-            ..style = PaintingStyle.stroke;
-
-          ShapeAction shapeAction = ShapeAction(
-              Path(), data['shapeType'], paintBorder, data['actionId']);
-
-          // Create paint of the fill if there is one
-          if (data['shapeStyle'] == "fill") {
-            final paintFill = Paint()
-              ..color = Color.fromARGB(
-                  data['aFill'] as int,
-                  data['rFill'] as int,
-                  data['gFill'] as int,
-                  data['bFill'] as int)
+            //Create the paint for the border
+            final paintBorder = Paint()
+              ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
+                  data['g'] as int, data['b'] as int)
               ..isAntiAlias = true
               ..strokeWidth = data['width'].toDouble()
-              ..style = PaintingStyle.fill;
-            shapeAction.bodyColor = paintFill;
-          }
+              ..style = PaintingStyle.stroke;
 
-          //Save the action and the offsets
-          shapeAction.shapesOffsets = offsets;
-          actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
-        } else if (data['state'] == DrawingState.move) {
-          actionsMap.forEach((actionId, shapeAction) {
-            //Find the action
-            if (actionId == data['actionId']) {
-              //Update list of points
-              shapeAction.shapesOffsets
-                  .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+            ShapeAction shapeAction = ShapeAction(
+                Path(), data['shapeType'], paintBorder, data['actionId']);
 
-              //Contruct the shape
-              Rect rect = Rect.fromPoints(shapeAction.shapesOffsets.first,
-                  shapeAction.shapesOffsets.last);
-
-              //Set the shape in the path
-              Path path = Path();
-              if (data['shapeType'] == DrawingType.ellipse) {
-                path.addOval(rect);
-              } else {
-                path.addRect(rect);
-              }
-              shapeAction.path = path;
-
-              actionsMap.update(
-                  data['actionId'], (value) => shapeAction as ShapeAction);
+            // Create paint of the fill if there is one
+            if (data['shapeStyle'] == "fill") {
+              final paintFill = Paint()
+                ..color = Color.fromARGB(
+                    data['aFill'] as int,
+                    data['rFill'] as int,
+                    data['gFill'] as int,
+                    data['bFill'] as int)
+                ..isAntiAlias = true
+                ..strokeWidth = data['width'].toDouble()
+                ..style = PaintingStyle.fill;
+              shapeAction.bodyColor = paintFill;
             }
-          });
-        } else {
-          //Clear the list of points
-          ShapeAction shapeAction = actionsMap[data['actionId']];
-          shapeAction.shapesOffsets!.clear();
-          actionsMap.update(data['actionId'], (value) => shapeAction);
-        }
-      });
+
+            //Save the action and the offsets
+            shapeAction.shapesOffsets = offsets;
+            actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
+          } else if (data['state'] == DrawingState.move) {
+            actionsMap.forEach((actionId, shapeAction) {
+              //Find the action
+              if (actionId == data['actionId']) {
+                //Update list of points
+                shapeAction.shapesOffsets
+                    .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+
+                //Contruct the shape
+                Rect rect = Rect.fromPoints(shapeAction.shapesOffsets.first,
+                    shapeAction.shapesOffsets.last);
+
+                //Set the shape in the path
+                Path path = Path();
+                if (data['shapeType'] == DrawingType.ellipse) {
+                  path.addOval(rect);
+                } else {
+                  path.addRect(rect);
+                }
+                shapeAction.path = path;
+
+                actionsMap.update(
+                    data['actionId'], (value) => shapeAction as ShapeAction);
+              }
+            });
+          } else {
+            //Clear the list of points
+            ShapeAction shapeAction = actionsMap[data['actionId']];
+            shapeAction.shapesOffsets!.clear();
+            actionsMap.update(data['actionId'], (value) => shapeAction);
+          }
+        });
+      }
     });
   }
 
   void socketFreedrawReception() {
     _socket.on('freedraw:received', (data) {
-      setState(() {
-        if (data['state'] == DrawingState.down) {
-          unselectLastShape();
-          //Create new freedraw path
-          Path path = Path();
-          path.moveTo(data['x'].toDouble(), data['y'].toDouble());
-          path.lineTo(data['x'].toDouble() + 1, data['y'].toDouble());
+      if (mounted) {
+        setState(() {
+          if (data['state'] == DrawingState.down) {
+            unselectLastShape();
+            //Create new freedraw path
+            Path path = Path();
+            path.moveTo(data['x'].toDouble(), data['y'].toDouble());
+            path.lineTo(data['x'].toDouble() + 1, data['y'].toDouble());
 
-          //Create border color and style
-          final paint = Paint()
-            ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
-                data['g'] as int, data['b'] as int)
-            ..isAntiAlias = true
-            ..strokeWidth = data['width'].toDouble()
-            ..style = PaintingStyle.stroke;
-          //Merge attributes and save shape
-          ShapeAction shapeAction =
-              ShapeAction(path, data['actionType'], paint, data['actionId']);
-          shapeAction.shapesOffsets = [
-            Offset(data['x'].toDouble(), data['y'].toDouble())
-          ];
-          actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
-        } else if (data['state'] == DrawingState.move) {
-          unselectLastShape();
-          actionsMap.forEach((actionId, shapeAction) {
-            //Get the action
-            if (actionId == data['actionId']) {
-              shapeAction.path
-                  .lineTo(data['x'].toDouble(), data['y'].toDouble());
+            //Create border color and style
+            final paint = Paint()
+              ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
+                  data['g'] as int, data['b'] as int)
+              ..isAntiAlias = true
+              ..strokeWidth = data['width'].toDouble()
+              ..style = PaintingStyle.stroke;
+            //Merge attributes and save shape
+            ShapeAction shapeAction =
+                ShapeAction(path, data['actionType'], paint, data['actionId']);
+            shapeAction.shapesOffsets = [
+              Offset(data['x'].toDouble(), data['y'].toDouble())
+            ];
+            actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
+          } else if (data['state'] == DrawingState.move) {
+            unselectLastShape();
+            actionsMap.forEach((actionId, shapeAction) {
+              //Get the action
+              if (actionId == data['actionId']) {
+                shapeAction.path
+                    .lineTo(data['x'].toDouble(), data['y'].toDouble());
 
-              shapeAction.shapesOffsets += [
-                Offset(data['x'].toDouble(), data['y'].toDouble())
-              ];
+                shapeAction.shapesOffsets += [
+                  Offset(data['x'].toDouble(), data['y'].toDouble())
+                ];
 
-              //Update the action
-              actionsMap.update(
-                  data['actionId'], (value) => shapeAction as ShapeAction);
-            }
-          });
-        } else if (data['state'] == DrawingState.up &&
-            _user.uid == data['userId']) {
-          unselectLastShape();
-          ShapeAction shapeAction = actionsMap[data['actionId']];
-          undoList.add(shapeAction.copy());
-        }
-      });
+                //Update the action
+                actionsMap.update(
+                    data['actionId'], (value) => shapeAction as ShapeAction);
+              }
+            });
+          } else if (data['state'] == DrawingState.up &&
+              _user.uid == data['userId']) {
+            unselectLastShape();
+            ShapeAction shapeAction = actionsMap[data['actionId']];
+            undoList.add(shapeAction.copy());
+          }
+        });
+      }
     });
   }
 
   void socketDeleteReception() {
     _socket.on('delete:received', (data) {
-      setState(() {
-        actionsMap.remove(data["selectedActionId"]);
-        selectedItems.remove(data["selectedActionId"]);
-      });
+      if (mounted) {
+        setState(() {
+          actionsMap.remove(data["selectedActionId"]);
+          selectedItems.remove(data["selectedActionId"]);
+        });
+      }
     });
   }
 

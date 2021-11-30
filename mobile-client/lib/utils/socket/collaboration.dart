@@ -104,8 +104,8 @@ class CollaborationSocket extends SocketService {
   }
 
   disconnectCollaboration(String collaborationId) {
-    print('Leave Collab');
-    socket.emit('collaboration:leave', {
+    print('Disconnect Collab');
+    socket.emit('collaboration:disconnect', {
       'userId': user.uid,
       'collaborationId': collaborationId,
     });
@@ -263,6 +263,20 @@ class CollaborationSocket extends SocketService {
     });
   }
 
+  // TODO : collaborationId is null -> nawras
+  disconnected(callbackChannel) {
+    socket.on('collaboration:disconnected', (data) {
+      print('Collaboration disconnected');
+      // Map disconnected = {
+      //   "collaborationId": data["collaborationId"],
+      //   "userId": data["userId"],
+      //   "username": data["username"],
+      //   "avatarUrl": data["avatarUrl"],
+      // };
+      // callbackChannel('disconnect', disconnected);
+    });
+  }
+
   initializeChannelSocketEvents(callbackChannel) {
     load(callbackChannel);
 
@@ -277,6 +291,8 @@ class CollaborationSocket extends SocketService {
     deleted(callbackChannel);
 
     left(callbackChannel);
+
+    disconnected(callbackChannel);
 
     print("initialized Collaboration socket events");
   }

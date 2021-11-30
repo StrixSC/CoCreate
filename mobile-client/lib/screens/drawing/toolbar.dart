@@ -1,9 +1,11 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/models/tool.dart';
+import 'package:Colorimage/providers/collaborator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:provider/src/provider.dart';
 
 class Toolbar extends StatefulWidget {
   Function changeTool;
@@ -279,6 +281,8 @@ class _ToolbarState extends State<Toolbar> {
       padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
       child: IconButton(
           onPressed: () {
+            String collaborationId = context.read<Collaborator>().getCollaborationId();
+            context.read<Collaborator>().collaborationSocket.disconnectCollaboration(collaborationId);
             Navigator.pop(context);
             Navigator.pop(context);
           },

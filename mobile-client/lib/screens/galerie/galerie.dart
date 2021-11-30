@@ -135,7 +135,7 @@ class GalerieState extends State<Galerie>
         ));
       },
     );
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 2), () {
       navigateToDrawing();
       // Navigator.pop(context);
     });

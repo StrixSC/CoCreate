@@ -224,22 +224,30 @@ class Collaborator extends ChangeNotifier {
         }
       }
     }
-    print('Lefttttttttta');
     pagingControllers[currentType].refresh();
     notifyListeners();
+  }
 
-    int index = drawings[currentType][currentDrawingId]
-        .collaboration
-        .members
-        .indexWhere((element) => element.userId == userId);
-    if (index != -1) {
-      drawings[currentType][currentDrawingId]
-          .collaboration
-          .members
-          .removeWhere((member) => member.userId == userId);
-      drawings[currentType][currentDrawingId].collaboration.memberCount--;
-      notifyListeners();
+  void disconnectedDrawing(Map left) {
+    String collaborationId = left["collaborationId"];
+    String userId = left["userId"];
+    String username = left["username"];
+    String avatarUrl = left["avatarUrl"];
+    String leftAt = left["leftAt"];
+
+    var drawingId = getDrawingId(collaborationId);
+    for (var type in TYPES) {
+      if(type == 'Available') {
+        (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
+          var index = value.collaboration.members.indexWhere((item) =>
+          item.userId == userId);
+          value.collaboration.members[index].isActive = false;
+          return value;
+        });
+      }
     }
+    pagingControllers[currentType].refresh();
+    notifyListeners();
   }
 
   void callbackChannel(eventType, data) {
@@ -271,6 +279,10 @@ class Collaborator extends ChangeNotifier {
       case 'left':
         Map left = data as Map;
         leftDrawing(left);
+        break;
+      case 'disconnected':
+        Map disc = data as Map;
+        disconnectedDrawing(disc);
         break;
       default:
         print("Invalid Collaboration socket event");
