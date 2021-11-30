@@ -1,6 +1,7 @@
+import { getTeamDrawings } from './../services/teams.service';
 import create, { Unauthorized } from 'http-errors';
 import { findTeamById } from './../events/handlers/teams/join.handler';
-import { MemberType } from '@prisma/client';
+import { Collaboration, CollaborationMember, Drawing, MemberType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import { validationResult, matchedData } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
@@ -53,7 +54,7 @@ export const getTeamsController = async (req: Request, res: Response, next: Next
 
                 const isMember = d.team_members.find((tm) => tm.user_id === req.userId);
                 const isOwner = d.team_members.find((tm) => tm.user_id === req.userId && tm.type === MemberType.Owner);
-
+                const onlineMembers = getOnlineMembersInRoom(d.team_id);
                 return {
                     authorUsername: author.user.profile!.username,
                     authorAvatarUrl: author.user.profile!.avatar_url,
@@ -69,6 +70,7 @@ export const getTeamsController = async (req: Request, res: Response, next: Next
                     teamMembers: d.team_members.map((t) => ({ username: t.user.profile?.username, avatarUrl: t.user.profile!.avatar_url, type: t.type })),
                     isMember: isMember ? true : false,
                     isOwner: isOwner ? true : false,
+                    onlineMemberCount: onlineMembers.length
                 } as TeamResponse
             }),
             offset: result.offset,
@@ -125,8 +127,29 @@ export const getTeamInfoById = async (req: Request, res: Response, next: NextFun
             }
         });
 
+        const drawings = await getTeamDrawings(teamId);
+        let allDrawings = [] as any | (Collaboration & {
+            drawing: Drawing | null;
+            collaboration_members: CollaborationMember[];
+        })[];
+
+        if (drawings) {
+            allDrawings = drawings.collaborations.map((d) => {
+                const onlineMembers = getOnlineMembersInRoom(d.collaboration_id);
+                return {
+                    currentCollaboratorCount: d.collaboration_members.length,
+                    title: d.drawing!.title,
+                    thumbnailUrl: d.drawing!.thumbnail_url,
+                    activeCollaboratorCount: onlineMembers.length,
+                    collaborationId: d.collaboration_id,
+                    drawingId: d.drawing!.drawing_id
+                }
+            });
+        }
+
         res.status(StatusCodes.OK).json({
             members: teamMembers,
+            drawings: allDrawings
         });
     } catch (e) {
         handleRequestError(e, next);

@@ -201,3 +201,21 @@ export const getNewMascotUrl = async (avatarUrl: string): Promise<string> => {
         return redirectedAvatarUrl;
     }
 }
+
+export const getTeamDrawings = async (id: string) => {
+    const drawings = await db.author.findFirst({
+        where: {
+            team_id: id
+        },
+        include: {
+            collaborations: {
+                include: {
+                    drawing: true,
+                    collaboration_members: true
+                }
+            },
+        }
+    });
+
+    return drawings;
+}

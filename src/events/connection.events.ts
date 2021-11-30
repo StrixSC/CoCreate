@@ -1,15 +1,24 @@
+import { getOnlineMembersInRoom } from './../utils/socket';
 import { ExceptionType } from './../models/Exceptions.enum';
 import { handleSocketError } from './../utils/errors';
 import { SocketEventError } from './../socket';
 import { db } from './../db';
 import { Socket, Server } from 'socket.io';
 export = (io: Server, socket: Socket) => {
-    socket.on('disconnect', () => {
+
+    socket.on('disconnecting', () => {
+        console.log(socket.rooms);
         socket.rooms.forEach((room) => {
+            const onlineMembers = getOnlineMembersInRoom(room);
             io.to(room).emit("user:disconnection", {
-                userId: socket.data.user
+                userId: socket.data.user,
+                roomId: room,
+                onlineMemberCount: onlineMembers.length - 1,
             })
         })
+    })
+
+    socket.on('disconnect', () => {
     });
 
     socket.on('user:init', () => initUser(io, socket))
@@ -45,7 +54,16 @@ const initUser = async (io: Server, socket: Socket) => {
 
         socket.data.status = "En ligne"
 
-        socket.emit('user:initialized')
+        socket.emit('user:initialized');
+
+        socket.rooms.forEach((room) => {
+            const onlineMembers = getOnlineMembersInRoom(room);
+            io.to(room).emit('user:connected', {
+                onlineMemberCount: onlineMembers.length,
+                userId: socket.data.userId,
+                roomId: room
+            });
+        });
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.User_Init)
     }
