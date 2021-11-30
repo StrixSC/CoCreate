@@ -50,8 +50,16 @@
                         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
                     </table>
-                    <div *ngIf="teamInfo && teamInfo.drawings.length <= 0">
-                        Vous n'avez aucun dessin... :( 
+                    <div class="no-drawing-container" *ngIf="teamInfo && teamInfo.drawings.length <= 0">
+                       <div class="no-drawing-img-container">
+                           <img src="/assets/img/no-pictures.png" class="no-drawing-img"> 
+                        </div>
+                        <h2 class="no-drawing-header">
+                            <div class="no-drawing-header-text">Cette équipe n'est auteur d'aucun dessins...</div>
+                            <button mat-raised-button color="primary" class="create-drawing-button" (click)="createDrawing()">
+                                Créer un dessin!
+                            </button>
+                        </h2>
                     </div>
                 </mat-tab>
                 <mat-tab *ngIf="team.isOwner" label="Mise à jour">
@@ -164,6 +172,42 @@
 </div>
 
 <style>
+
+    .no-drawing-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .no-drawing-header {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .no-drawing-header-text {
+        opacity: 0.5
+    }
+
+    .create-drawing-button {
+
+    }
+
+    .no-drawing-img-container {
+        max-width: 30%;
+        max-height: 30%;
+        opacity: 0.5;
+    }
+
+    .no-drawing-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
     .team-name {
         display: flex;
         justify-content: center;

@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { TeamType } from './../../model/team-response.model';
 import { Subscription } from 'rxjs';
 import { Component, Inject, OnInit } from '@angular/core';
@@ -45,6 +46,7 @@ export class TeamInfoComponent implements OnInit {
     private teamService: TeamService,
     public dialogRef: MatDialogRef<CollaborationPasswordFormDialogComponent>,
     private snackbar: MatSnackBar,
+    private router: Router,
     @Inject(MAT_DIALOG_DATA) public team: TeamResponse,
   ) { }
 
@@ -111,6 +113,11 @@ export class TeamInfoComponent implements OnInit {
 
   get mascot(): AbstractControl {
     return this.updateForm.get('mascot')!;
+  }
+
+  createDrawing(): void {
+    this.router.navigateByUrl('gallery?createDrawing=true');
+    this.dialogRef.close();
   }
 
   onUpdateSubmit(): void {

@@ -77,6 +77,7 @@ export class TeamPageComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+
     this.searchForm = this.fb.group({
       query: [''],
       type: [''],
@@ -126,6 +127,14 @@ export class TeamPageComponent implements OnInit {
     });
 
     this.isLoading = false;
+  }
+
+  ngAfterViewInit(): void {
+    this.paginator._intl.itemsPerPageLabel = "Équipes par page: ";
+    this.paginator._intl.nextPageLabel = "Page suivante";
+    this.paginator._intl.lastPageLabel = "Dernière page";
+    this.paginator._intl.previousPageLabel = "Page précédente";
+    this.paginator._intl.firstPageLabel = "Première page";
   }
 
   get query(): AbstractControl {

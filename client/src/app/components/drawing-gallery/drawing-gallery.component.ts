@@ -5,7 +5,7 @@ import { NewDrawingFormDialogComponent } from './../new-drawing-form-dialog/new-
 import { ICollaborationConnectResponse, ICollaborationDeleteResponse, ICollaborationJoinResponse, ICollaborationLeaveResponse, ICollaborationUpdateResponse, ICollaborationCreateResponse, ICollaborationLoadResponse } from './../../model/ICollaboration.model';
 import { AuthService } from './../../services/auth.service';
 import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog, MatPaginator, MatTableDataSource, PageEvent } from '@angular/material';
 import { BehaviorSubject, EMPTY, merge, of, Subscription } from 'rxjs';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
@@ -119,10 +119,16 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     private syncCollaboration: SyncCollaborationService,
     private socketService: SocketService,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
+    const createDrawing = this.route.snapshot.queryParams.createDrawing;
+    if (createDrawing) {
+      this.openDialog();
+    }
+
     this.errorListener = merge(
       this.socketService.onException(),
       this.socketService.onError()
