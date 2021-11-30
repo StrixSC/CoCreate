@@ -280,6 +280,7 @@ class _ToolbarState extends State<Toolbar> {
       child: IconButton(
           onPressed: () {
             Navigator.pop(context);
+            Navigator.pop(context);
           },
           icon: const Icon(
             Icons.door_back_door_outlined,

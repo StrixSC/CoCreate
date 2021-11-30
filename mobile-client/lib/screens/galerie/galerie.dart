@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 import 'package:Colorimage/constants/general.dart';
@@ -60,7 +61,7 @@ class GalerieState extends State<Galerie>
   void initState() {
     super.initState();
     context.read<Collaborator>().pagingControllers = pagingControllers;
-    context.read<Collaborator>().navigate = navigateToDrawing;
+    context.read<Collaborator>().navigate = _onLoading;
     _tabController = TabController(length: 2, vsync: this);
     pagingControllers.forEach((key, value) {
       value.addPageRequestListener((pageKey) {
@@ -107,6 +108,7 @@ class GalerieState extends State<Galerie>
     var user = context.read<Collaborator>().auth!.user!;
     var socket = context.read<Collaborator>().collaborationSocket.socket;
     var collaborationId = context.read<Collaborator>().getCollaborationId();
+    // TODO : wait for load, then navigate to screen
     var actions = context.read<Collaborator>().getCurrentActionMap();
     pushNewScreen(
       context,
@@ -114,6 +116,29 @@ class GalerieState extends State<Galerie>
       withNavBar: false,
       pageTransitionAnimation: PageTransitionAnimation.cupertino,
     );
+  }
+
+  void _onLoading() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return SizedBox(height: 150, child:Dialog(
+          child: Padding(padding: const EdgeInsets.all(25.0), child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+               CircularProgressIndicator(),
+               SizedBox(width: 20,),
+               Text("Chargement..."),
+            ],
+          )),
+        ));
+      },
+    );
+    Future.delayed(const Duration(seconds: 3), () {
+      navigateToDrawing();
+      // Navigator.pop(context);
+    });
   }
 
   Future<void> _fetchDrawings(int pageKey, String section, String? type) async {
