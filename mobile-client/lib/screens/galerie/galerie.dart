@@ -8,6 +8,7 @@ import 'package:Colorimage/screens/drawing/drawing.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:http/src/response.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -41,6 +42,7 @@ class GalerieState extends State<Galerie>
   static String dropDownValueTypeCreate = 'Public';
   static String dropDownValueAuthor = 'Moi';
   static String dropDownValueType = 'Aucun';
+  Color color = Colors.white;
 
   GalerieState() {
     for (var type in TYPES) {
@@ -102,7 +104,7 @@ class GalerieState extends State<Galerie>
   navigateToDrawing() {
     var user = context.read<Collaborator>().auth!.user!;
     var socket = context.read<Collaborator>().collaborationSocket.socket;
-    var collaborationId =  context.read<Collaborator>().getCollaborationId();
+    var collaborationId = context.read<Collaborator>().getCollaborationId();
     pushNewScreen(
       context,
       screen: DrawingScreen(socket, user, collaborationId),
@@ -138,22 +140,22 @@ class GalerieState extends State<Galerie>
       for (var drawing in resp) {
         if (drawing != null) {
           Collaboration collaboration = Collaboration(
-              collaborationId: drawing["collaboration_id"],
-              memberCount: drawing["collaborator_count"],
-              maxMemberCount: drawing["max_collaborator_count"],
-              members: [],
+            collaborationId: drawing["collaboration_id"],
+            memberCount: drawing["collaborator_count"],
+            maxMemberCount: drawing["max_collaborator_count"],
+            members: [],
           );
           // TODO: add updated_at
           drawings.add(Drawing(
-              drawingId: drawing['drawing_id'],
-              authorUsername: drawing["author_username"],
-              authorAvatar: drawing["author_avatar"],
-              title: drawing['title'],
-              createdAt: DateFormat('yyyy-MM-dd kk:mm')
-                  .format(DateTime.parse(drawing['created_at'])),
-              collaboration: collaboration,
-              type: drawing['type'],
-              // thumbnailUrl: drawing['thumbnail_url']
+            drawingId: drawing['drawing_id'],
+            authorUsername: drawing["author_username"],
+            authorAvatar: drawing["author_avatar"],
+            title: drawing['title'],
+            createdAt: DateFormat('yyyy-MM-dd kk:mm')
+                .format(DateTime.parse(drawing['created_at'])),
+            collaboration: collaboration,
+            type: drawing['type'],
+            // thumbnailUrl: drawing['thumbnail_url']
           ));
         }
       }
@@ -226,6 +228,7 @@ class GalerieState extends State<Galerie>
                     titreController.clear();
                     passController.clear();
                     memberController.clear();
+                    color = Colors.white;
                     createDessinDialog();
                   })
             ],
@@ -372,6 +375,7 @@ class GalerieState extends State<Galerie>
                 Expanded(
                     child: SizedBox(
                         width: 1000,
+                        height: 500,
                         child: ListView(
                             shrinkWrap: true,
                             padding: const EdgeInsets.only(
@@ -381,35 +385,71 @@ class GalerieState extends State<Galerie>
                                   key: _formKey,
                                   child: Column(children: <Widget>[
                                     const SizedBox(height: 28.0),
-                                    dropDown(
-                                        ['Moi', 'Équipe'],
-                                        dropDownValueAuthor,
-                                        'Choisir un auteur',
-                                        'Auteur'),
-                                    // TODO: Add teams when ready
+                                    SizedBox(
+                                        width: 900,
+                                        child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              SizedBox(
+                                                width: 280,
+                                                child: dropDown([
+                                                  'Public',
+                                                  'Protégé',
+                                                  'Privée'
+                                                ],
+                                                    dropDownValueTypeCreate,
+                                                    'Choisir un type de dessins',
+                                                    'Type'),
+                                              ),
+                                              // const SizedBox(width: 24.0),
+                                              SizedBox(
+                                                  width: 280,
+                                                  child: dropDown(
+                                                      ['Moi', 'Équipe'],
+                                                      dropDownValueAuthor,
+                                                      'Choisir un auteur',
+                                                      'Auteur')),
+                                              SizedBox(
+                                                  width: 180,
+                                                  child: colorPicker())
+                                            ])),
                                     const SizedBox(height: 48.0),
-                                    formField(
+                                    dropDownValueTypeCreate == 'Protégé'
+                                        ? SizedBox(
+                                        width: 900.0,
+                                        child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              SizedBox(
+                                                width: 375,
+                                                child: formField(
+                                                    'Titre',
+                                                    'Veuillez entrez le titre du dessin',
+                                                    titreController),
+                                              ),
+                                              // const SizedBox(width: 24.0),
+                                              SizedBox(
+                                                  width: 375,
+                                                  child: formField(
+                                                      'Nombre de membres maximum',
+                                                      'Veuillez entrez choisir un auteur',
+                                                      memberController))
+                                            ])) : formField(
                                         'Titre',
                                         'Veuillez entrez le titre du dessin',
                                         titreController),
-                                    const SizedBox(height: 48.0),
-                                    formField(
-                                        'Nombre de membres maximum',
-                                        'Veuillez entrez choisir un auteur',
-                                        memberController),
-                                    const SizedBox(height: 48.0),
-                                    dropDown(
-                                        ['Public', 'Protégé', 'Privée'],
-                                        dropDownValueTypeCreate,
-                                        'Choisir un type de dessins',
-                                        'Type'),
                                     const SizedBox(height: 48.0),
                                     dropDownValueTypeCreate == 'Protégé'
                                         ? formField(
                                             'Mot de passe',
                                             'Veuillez entrez choisir un mot de passe',
                                             passController)
-                                        : const SizedBox.shrink(),
+                                        : formField(
+                                        'Nombre de membres maximum',
+                                        'Veuillez entrez choisir un auteur',
+                                        memberController),
                                   ]))
                             ])))
               ]),
@@ -475,6 +515,63 @@ class GalerieState extends State<Galerie>
                         ))),
               ],
             ));
+  }
+
+
+  colorPicker() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
+      child: ElevatedButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  content: SingleChildScrollView(
+                    child: Column(children: [
+                      const Text('Choisir une couleur de fond',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 20.0),
+                      ColorPicker(
+                        pickerColor: color,
+                        onColorChanged: (pickerColor) {
+                          color = pickerColor;
+                        },
+                        showLabel: true,
+                        pickerAreaHeightPercent: 0.4,
+                        colorPickerWidth: 500,
+                        pickerAreaBorderRadius:
+                        const BorderRadius.all(Radius.circular(15.0)),
+                      ),
+                    ]),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context, 'Choisir');
+                      },
+                      child: const Text('Choisir'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+          child: const Text(
+            'Couleur de fond',
+            style: TextStyle(fontSize: 15),
+            textAlign: TextAlign.center,
+          ),
+          style: ButtonStyle(
+            fixedSize: MaterialStateProperty.all(Size(80, 57)),
+            backgroundColor: MaterialStateProperty.all(color),
+            foregroundColor: MaterialStateProperty.all(
+                useWhiteForeground(color)
+                    ? const Color(0xffffffff)
+                    : const Color(0xff000000)),
+          ),
+        ),
+    );
   }
 
   dropDown(List<String> items, value, inputHint, String location) {
@@ -674,7 +771,11 @@ class _Drawing extends StatelessWidget {
                                                 Colors.red)),
                                     onPressed: () {
                                       Navigator.pop(context, 'Delete');
-                                      alert(context, 'supprimer', 'Vous pourrez plus le ré-obtenir! 😧', 'Créez-en un autre! 😄');
+                                      alert(
+                                          context,
+                                          'supprimer',
+                                          'Vous pourrez plus le ré-obtenir! 😧',
+                                          'Créez-en un autre! 😄');
                                     },
                                     child: const Text('Supprimer'),
                                   )))
@@ -706,10 +807,10 @@ class _Drawing extends StatelessWidget {
                                             .read<Collaborator>()
                                             .collaborationSocket
                                             .joinCollaboration(
-                                            drawing.collaboration
-                                                .collaborationId,
-                                            drawing.type,
-                                            null);
+                                                drawing.collaboration
+                                                    .collaborationId,
+                                                drawing.type,
+                                                null);
                                       }
                                       Navigator.pop(context, 'Joindre');
                                     },
@@ -722,7 +823,11 @@ class _Drawing extends StatelessWidget {
                                   child: ElevatedButton(
                                     onPressed: () {
                                       Navigator.pop(context, 'Quitter');
-                                      alert(context, 'quitter', 'Il sera possible de le rejoindre plus tard si il est pas supprimer 😄', 'Aller joindre des dessins!');
+                                      alert(
+                                          context,
+                                          'quitter',
+                                          'Il sera possible de le rejoindre plus tard si il est pas supprimer 😄',
+                                          'Aller joindre des dessins!');
                                     },
                                     child: const Text('Quitter'),
                                   ))),
@@ -741,9 +846,8 @@ class _Drawing extends StatelessWidget {
                                       context
                                           .read<Collaborator>()
                                           .collaborationSocket
-                                          .connectCollaboration(
-                                          drawing.collaboration
-                                              .collaborationId);
+                                          .connectCollaboration(drawing
+                                              .collaboration.collaborationId);
                                     },
                                     child: const Text('Se connecter'),
                                   ))),
@@ -895,19 +999,24 @@ class _Drawing extends StatelessWidget {
             fit: BoxFit.fill,
             child: drawing.type == 'Protected'
                 ? Stack(
-              children: <Widget>[
-                ClipRRect(
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Image.asset('assets/images/default_thumbnail.png'),
-                  ),
-                ),
-                const Positioned(
-                  bottom: 170, right: 250, //give the values according to your requirement
-                  child: Icon(Icons.lock, color: Colors.black, size: 100.0),
-                ),
-              ],
-            ) : Image.asset('assets/images/default_thumbnail.png')));
+                    children: <Widget>[
+                      ClipRRect(
+                        child: ImageFiltered(
+                          imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Image.asset(
+                              'assets/images/default_thumbnail.png'),
+                        ),
+                      ),
+                      const Positioned(
+                        bottom: 170,
+                        right:
+                            250, //give the values according to your requirement
+                        child:
+                            Icon(Icons.lock, color: Colors.black, size: 100.0),
+                      ),
+                    ],
+                  )
+                : Image.asset('assets/images/default_thumbnail.png')));
   }
 
   richTextWhitePurple(String text1, String text2) {

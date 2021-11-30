@@ -50,22 +50,20 @@ class CollaborationSocket extends SocketService {
   }
 
   createCollaboration(
-      String authorId, String title, String type, String? password) {
+    String creatorId,
+    String title,
+    String type,
+    String? password,
+  ) {
     print('Create Collab');
-    if (type == "Protected") {
-      socket.emit('collaboration:create', {
-        'userId': authorId,
-        'title': title,
-        'type': type,
-        'password': password
-      });
-    } else {
-      socket.emit('collaboration:create', {
-        'userId': authorId,
-        'title': title,
-        'type': type,
-      });
-    }
+    socket.emit('collaboration:create', {
+      'userId': user.uid,
+      'creatorId': creatorId,
+      'isTeam': user.uid != creatorId,
+      'title': title,
+      'type': type,
+      'password': password
+    });
   }
 
   updateCollaboration(
