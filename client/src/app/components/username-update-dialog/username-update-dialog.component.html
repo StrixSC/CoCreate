@@ -1,0 +1,13 @@
+ <p class="form-title"><b>Veuiller entrer votre mot de passe afin d'enregistrer les changements</b></p>
+ <form class="form" [formGroup]="updateUsernameForm" (submit)="register()">
+    <mat-form-field class="pb-1 form-field clickable" appearance="outline">
+    <mat-label>mot de passe</mat-label>
+            <input
+            type="text"
+            formControlName="username"
+            matInput
+            placeholder="Identificateur"
+            />
+    </mat-form-field>
+</form>
+<button mat-raised-button class="profile-settings-btn" (click)="submitUpdate()">Soummettre</button>

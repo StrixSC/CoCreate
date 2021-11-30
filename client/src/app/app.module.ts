@@ -69,6 +69,7 @@ import { RightSidebarComponent } from "./components/right-sidebar/right-sidebar.
 import { ChatBoxComponent } from "./components/right-sidebar/chat-box/chat-box.component";
 import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out/chat-poped-out.component";
 import { AllChannelsComponent } from "./components/right-sidebar/all-channels/all-channels.component";
+import { UsernameUpdateDialogComponent } from './components/username-update-dialog/username-update-dialog.component';
 
 @NgModule({
   declarations: [
@@ -121,6 +122,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
    
     AuthWrapperComponent,
     AllChannelsComponent,
+    UsernameUpdateDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -162,6 +164,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     MatSnackBarContainer,
     AvatarDialogComponent,
     CollaborationPasswordFormDialogComponent,
+    UsernameUpdateDialogComponent
   ],
   providers: [
     FileReader,
