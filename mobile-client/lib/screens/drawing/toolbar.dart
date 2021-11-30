@@ -167,7 +167,7 @@ class _ToolbarState extends State<Toolbar> {
                   ),
                 ),
               )
-            : drawingColorPicker(),
+            : Column(children: [drawingColorPicker(), openChatDrawer(), navigateToGallery()]),
       ),
     );
   }
@@ -243,11 +243,11 @@ class _ToolbarState extends State<Toolbar> {
           },
           child: const Text(
             'Couleurs',
-            style: TextStyle(fontSize: 17, wordSpacing: 20),
+            style: TextStyle(fontSize: 15, wordSpacing: 20),
             textAlign: TextAlign.center,
           ),
           style: ButtonStyle(
-            fixedSize: MaterialStateProperty.all(Size(80, 57)),
+            fixedSize: MaterialStateProperty.all(Size(100, 57)),
             backgroundColor: MaterialStateProperty.all(Colors.transparent),
             foregroundColor: MaterialStateProperty.all(
                 useWhiteForeground(currentBodyColor)
@@ -256,6 +256,36 @@ class _ToolbarState extends State<Toolbar> {
           ),
         ),
       ),
+    );
+  }
+
+  openChatDrawer() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
+      child: IconButton(
+        onPressed: () {
+
+        },
+        icon: const Icon(
+          Icons.message,
+          size: 35,
+        ),
+      ),
+    );
+  }
+
+  navigateToGallery() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
+      child: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(
+            Icons.door_back_door_outlined,
+            size: 35,
+          ),
+        ),
     );
   }
 }

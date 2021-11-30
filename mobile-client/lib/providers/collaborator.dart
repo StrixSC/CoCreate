@@ -77,6 +77,10 @@ class Collaborator extends ChangeNotifier {
   String getCollaborationId() {
     return (drawings[currentType][currentDrawingId] as Drawing).collaboration.collaborationId;
   }
+
+  Map getCurrentActionMap() {
+    return (drawings[currentType][currentDrawingId] as Drawing).collaboration.actionsMap;
+  }
   
   String getDrawingId(String collaborationId) {
     String drawingId = '';

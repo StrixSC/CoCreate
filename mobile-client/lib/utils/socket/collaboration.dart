@@ -103,15 +103,41 @@ class CollaborationSocket extends SocketService {
     });
   }
 
+  disconnectCollaboration(String collaborationId) {
+    print('Leave Collab');
+    socket.emit('collaboration:leave', {
+      'userId': user.uid,
+      'collaborationId': collaborationId,
+    });
+  }
+
+  // Path path;
+  // Paint? bodyColor;
+  // Paint borderColor;
+  // String actionType;
+  // int? layer;
+  // List<Offset>? shapesOffsets;
+  // int? boundIndex;
+  // Path? oldShape;
+  // Offset delta = Offset.zero;
+  // TextPainter? text;
+  // String actionId;
+  // double angle = 0;
+  // Offset translate = Offset.zero;
+
   // Receives
   load(callbackMessage) {
     socket.on('collaboration:load', (data) {
       print('Collaboration Load');
+
+      print(data["actions"]); // Actions List
+
       List<Member> members = [];
       for (var element in (data["members"] as List<dynamic>)) {
         members.add(Member(
             username: element["username"], avatarUrl: element["avatarUrl"]));
       }
+      // TODO: Create new Action Map from actions list received to match our Action class
       Collaboration collaboration = Collaboration(
           collaborationId: 'id',
           actions: data["actions"],
@@ -120,7 +146,8 @@ class CollaborationSocket extends SocketService {
           maxMemberCount: data["maxMemberCount"],
           width: data["width"],
           height: data["height"],
-          members: members);
+          members: members,
+          actionsMap: {}); // TODO: add correct Actions Map here
       callbackMessage('load', collaboration);
     });
   }
@@ -172,7 +199,7 @@ class CollaborationSocket extends SocketService {
               type: data['type'],
               isActive: false,
             )
-          ]); //data["maxMemberCount"],);
+          ], actionsMap: {}); //data["maxMemberCount"],);
       Drawing drawing = Drawing(
           drawingId: data['drawingId'],
           thumbnailUrl: data['thumbnailUrl'],
@@ -197,7 +224,7 @@ class CollaborationSocket extends SocketService {
           maxMemberCount: data["maxMemberCount"],
           width: data["width"],
           height: data["height"],
-          members: data["members"]);
+          members: data["members"], actionsMap: {});
       Drawing drawing = Drawing(
           drawingId: data['drawingId'],
           thumbnailUrl: data['thumbnailUrl'],

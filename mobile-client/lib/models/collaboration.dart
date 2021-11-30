@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import '../models/drawing.dart';
 
 class Collaboration {
   String collaborationId;
-  List actions; // change this to List<Action> when Action is ready
+  List actions = [];
+  Map actionsMap = <String, ShapeAction>{};
   Color backgroundColor;
   int memberCount, maxMemberCount, width, height;
   List<Member> members = [];
 
   Collaboration({
     this.collaborationId = 'NO ID AVAILABLE',
-    this.actions = const [],
+    required this.actionsMap,
+    required this.actions,
     this.backgroundColor = Colors.white,
     this.memberCount = 0,
     this.maxMemberCount = 0,

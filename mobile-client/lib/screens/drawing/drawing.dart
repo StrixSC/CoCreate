@@ -16,11 +16,12 @@ class DrawingScreen extends StatefulWidget {
   final io.Socket _socket;
   final User _user;
   final String _collaborationId;
+  final Map _actions;
 
-  const DrawingScreen(this._socket, this._user, this._collaborationId);
+  const DrawingScreen(this._socket, this._user, this._collaborationId, this._actions);
 
   @override
-  State<DrawingScreen> createState() => _DrawingScreenState(_socket, _user, _collaborationId);
+  State<DrawingScreen> createState() => _DrawingScreenState(_socket, _user, _collaborationId, _actions);
 }
 
 class _DrawingScreenState extends State<DrawingScreen> {
@@ -31,7 +32,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   String drawType = DrawingType.freedraw;
   String? shapeID;
   String? lastShapeID;
-  Map actionsMap = <String, ShapeAction>{};
+  Map actionsMap;
   Map selectedItems = <String, String>{};
   bool allowMove = false;
   Offset? selectRef; // offset reference of selected item
@@ -48,7 +49,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   List<ShapeAction> undoList = [];
   List<ShapeAction> redoList = [];
 
-  _DrawingScreenState(this._socket, this._user, this._collaborationId);
+  _DrawingScreenState(this._socket, this._user, this._collaborationId, this.actionsMap);
 
   @override
   void initState() {

@@ -16,6 +16,8 @@ import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/src/provider.dart';
 import 'package:intl/intl.dart';
 
+import '../../app.dart';
+
 const _fontSize = 20.0;
 const padding = 30.0;
 const TYPES = ["Available", "Joined"];
@@ -105,9 +107,10 @@ class GalerieState extends State<Galerie>
     var user = context.read<Collaborator>().auth!.user!;
     var socket = context.read<Collaborator>().collaborationSocket.socket;
     var collaborationId = context.read<Collaborator>().getCollaborationId();
+    var actions = context.read<Collaborator>().getCurrentActionMap();
     pushNewScreen(
       context,
-      screen: DrawingScreen(socket, user, collaborationId),
+      screen: DrawingScreen(socket, user, collaborationId, actions),
       withNavBar: false,
       pageTransitionAnimation: PageTransitionAnimation.cupertino,
     );
@@ -143,7 +146,7 @@ class GalerieState extends State<Galerie>
             collaborationId: drawing["collaboration_id"],
             memberCount: drawing["collaborator_count"],
             maxMemberCount: drawing["max_collaborator_count"],
-            members: [],
+            members: [], actionsMap: {}, actions: [],
           );
           // TODO: add updated_at
           drawings.add(Drawing(
@@ -417,29 +420,31 @@ class GalerieState extends State<Galerie>
                                     const SizedBox(height: 48.0),
                                     dropDownValueTypeCreate == 'Protégé'
                                         ? SizedBox(
-                                        width: 900.0,
-                                        child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              SizedBox(
-                                                width: 375,
-                                                child: formField(
-                                                    'Titre',
-                                                    'Veuillez entrez le titre du dessin',
-                                                    titreController),
-                                              ),
-                                              // const SizedBox(width: 24.0),
-                                              SizedBox(
-                                                  width: 375,
-                                                  child: formField(
-                                                      'Nombre de membres maximum',
-                                                      'Veuillez entrez choisir un auteur',
-                                                      memberController))
-                                            ])) : formField(
-                                        'Titre',
-                                        'Veuillez entrez le titre du dessin',
-                                        titreController),
+                                            width: 900.0,
+                                            child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  SizedBox(
+                                                    width: 375,
+                                                    child: formField(
+                                                        'Titre',
+                                                        'Veuillez entrez le titre du dessin',
+                                                        titreController),
+                                                  ),
+                                                  // const SizedBox(width: 24.0),
+                                                  SizedBox(
+                                                      width: 375,
+                                                      child: formField(
+                                                          'Nombre de membres maximum',
+                                                          'Veuillez entrez choisir un auteur',
+                                                          memberController))
+                                                ]))
+                                        : formField(
+                                            'Titre',
+                                            'Veuillez entrez le titre du dessin',
+                                            titreController),
                                     const SizedBox(height: 48.0),
                                     dropDownValueTypeCreate == 'Protégé'
                                         ? formField(
@@ -447,9 +452,9 @@ class GalerieState extends State<Galerie>
                                             'Veuillez entrez choisir un mot de passe',
                                             passController)
                                         : formField(
-                                        'Nombre de membres maximum',
-                                        'Veuillez entrez choisir un auteur',
-                                        memberController),
+                                            'Nombre de membres maximum',
+                                            'Veuillez entrez choisir un auteur',
+                                            memberController),
                                   ]))
                             ])))
               ]),
@@ -517,60 +522,58 @@ class GalerieState extends State<Galerie>
             ));
   }
 
-
   colorPicker() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
       child: ElevatedButton(
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  content: SingleChildScrollView(
-                    child: Column(children: [
-                      const Text('Choisir une couleur de fond',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 20.0),
-                      ColorPicker(
-                        pickerColor: color,
-                        onColorChanged: (pickerColor) {
-                          color = pickerColor;
-                        },
-                        showLabel: true,
-                        pickerAreaHeightPercent: 0.4,
-                        colorPickerWidth: 500,
-                        pickerAreaBorderRadius:
-                        const BorderRadius.all(Radius.circular(15.0)),
-                      ),
-                    ]),
-                  ),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context, 'Choisir');
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: SingleChildScrollView(
+                  child: Column(children: [
+                    const Text('Choisir une couleur de fond',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 20.0),
+                    ColorPicker(
+                      pickerColor: color,
+                      onColorChanged: (pickerColor) {
+                        color = pickerColor;
                       },
-                      child: const Text('Choisir'),
+                      showLabel: true,
+                      pickerAreaHeightPercent: 0.4,
+                      colorPickerWidth: 500,
+                      pickerAreaBorderRadius:
+                          const BorderRadius.all(Radius.circular(15.0)),
                     ),
-                  ],
-                );
-              },
-            );
-          },
-          child: const Text(
-            'Couleur de fond',
-            style: TextStyle(fontSize: 15),
-            textAlign: TextAlign.center,
-          ),
-          style: ButtonStyle(
-            fixedSize: MaterialStateProperty.all(Size(80, 57)),
-            backgroundColor: MaterialStateProperty.all(color),
-            foregroundColor: MaterialStateProperty.all(
-                useWhiteForeground(color)
-                    ? const Color(0xffffffff)
-                    : const Color(0xff000000)),
-          ),
+                  ]),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context, 'Choisir');
+                    },
+                    child: const Text('Choisir'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: const Text(
+          'Couleur de fond',
+          style: TextStyle(fontSize: 15),
+          textAlign: TextAlign.center,
         ),
+        style: ButtonStyle(
+          fixedSize: MaterialStateProperty.all(Size(80, 57)),
+          backgroundColor: MaterialStateProperty.all(color),
+          foregroundColor: MaterialStateProperty.all(useWhiteForeground(color)
+              ? const Color(0xffffffff)
+              : const Color(0xff000000)),
+        ),
+      ),
     );
   }
 
@@ -940,7 +943,8 @@ class _Drawing extends StatelessWidget {
                                       radius: 24,
                                       backgroundColor: kPrimaryColor,
                                       backgroundImage:
-                                          NetworkImage(drawing.authorAvatar),
+                                      drawing.authorUsername != 'admin' ? NetworkImage(drawing.authorAvatar): Image.asset(
+                                          'assets/images/Boruto_Uzumaki_1.png').image
                                     ))
                               ]),
                               Column(
