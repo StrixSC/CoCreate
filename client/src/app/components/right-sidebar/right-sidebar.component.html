@@ -17,7 +17,18 @@
   </div>
 
   <div class="right_pannel">
-    <button mat-flat-button (click)="newChannel()">Add new channel</button>
+    <button
+      mat-stroked-button
+      style="
+        color: white;
+        margin-top: 10px;
+        border-color: #282b2f;
+        background-color: #282b2f;
+      "
+      (click)="newChannel()"
+    >
+      <mat-icon>keyboard_arrow_left</mat-icon> Canaux
+    </button>
 
     <div class="chatbox">
       <mat-action-list>
