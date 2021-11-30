@@ -64,7 +64,7 @@ export class SyncCollaborationService {
     if (!this.authService.activeUser) {
       return;
     }
-
+    //console.log(data)
     this.socketService.emit('collaboration:create', data);
   }
 

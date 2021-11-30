@@ -13,36 +13,64 @@ export class DrawingGalleryService {
   constructor(private http: HttpClient) { }
 
   /// Permet de recuperer les dessins sur le serveur
-  getPrivateDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?type=Private',).pipe(
-      catchError(() => of([])),
-    );
-  }
-  getPublicDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?type=Public',).pipe(
-      catchError(() => of([])),
-    );
-  }
-  getProtectedDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?type=Protected',).pipe(
-      catchError(() => of([])),
-    );
-  }
-  getDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery').pipe(
+  getAllDrawings(): Observable<IGalleryEntry[]> {
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery?offset=0').pipe(
       catchError(() => of([])),
     );
   }
 
   getMyDrawings(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery/mine').pipe(
+    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery/mine?offset=0').pipe(
       catchError(() => of([]))
     );
   }
 
-  filter(): Observable<IGalleryEntry[]> {
-    return this.http.get<IGalleryEntry[]>(environment.serverURL + '/api/gallery').pipe(
-      catchError(() => of([])),
-    );
+  getTypeMyDrawings(offset: number, type?: string, filter?: string): Observable<IGalleryEntry[]> {
+    if (isNaN(offset)) offset = 0;
+    if (type !== "All" && !filter) {
+      return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery/mine?offset=${offset}&type=${type}`).pipe(
+        catchError(() => of([])),
+      );
+    }
+    else if (type !== "All" && filter) {
+      return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery/mine?offset=${offset}&type=${type}&filter=${filter}`).pipe(
+        catchError(() => of([])),
+      );
+    }
+    else if (type === "All" && filter) {
+      return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery/mine?offset=${offset}&filter=${filter}`).pipe(
+        catchError(() => of([])),
+      );
+    }
+    else {
+      return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery/mine?offset=${offset}`).pipe(
+        catchError(() => of([])),
+      );
+    }
   }
+
+  getTypeDrawings(offset: number, type?: string, filter?: string): Observable<IGalleryEntry[]> {
+    if (isNaN(offset)) offset = 0;
+    if (type !== "All" && !filter) {
+      return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery?offset=${offset}&type=${type}`).pipe(
+        catchError(() => of([])),
+      );
+    }
+    else if (type !== "All" && filter) {
+      return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery?offset=${offset}&type=${type}&filter=${filter}`).pipe(
+        catchError(() => of([])),
+      );
+    }
+    else if (type === "All" && filter) {
+      return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery?offset=${offset}&filter=${filter}`).pipe(
+        catchError(() => of([])),
+      );
+    }
+    else {
+      return this.http.get<IGalleryEntry[]>(environment.serverURL + `/api/gallery?offset=${offset}`).pipe(
+        catchError(() => of([])),
+      );
+    }
+  }
+
 }
