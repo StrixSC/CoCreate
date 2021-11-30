@@ -12,7 +12,7 @@ export const handleJoin = async (io: Server, socket: Socket, data: {
 }) => {
     try {
         const userId = socket.data.user;
-        const team = await findTeamById(userId, data.teamId);
+        const team = await findTeamById(data.teamId);
         if (!team) {
             throw new SocketEventError("Cette équipe n'existe pas dans nos records...", "E4101");
         }
@@ -57,10 +57,10 @@ export const handleJoin = async (io: Server, socket: Socket, data: {
     }
 }
 
-export const findTeamById = async (userId: string, teamId: string) => {
+export const findTeamById = async (teamId: string) => {
     const team = db.team.findUnique({
         where: {
-            team_id: teamId
+            team_id: teamId,
         },
         include: {
             team_members: {

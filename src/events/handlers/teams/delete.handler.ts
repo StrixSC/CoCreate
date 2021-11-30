@@ -1,0 +1,47 @@
+import { MemberType } from '@prisma/client';
+import { getOnlineMembersInRoom } from './../../../utils/socket';
+import { SocketEventError } from './../../../socket';
+import { db } from './../../../db';
+import { handleSocketError } from './../../../utils/errors';
+import { Server, Socket } from 'socket.io';
+import { ExceptionType } from '../../../models/Exceptions.enum';
+import { findTeamById } from './join.handler';
+
+export const handleDelete = async (io: Server, socket: Socket, data: { teamId: string }) => {
+    try {
+        const team = await findTeamById(data.teamId);
+
+        if (!team) {
+            throw new SocketEventError('Oups... Il y eu une erreur lors du traitement de la requête, veuillez essayez à nouveau SVP!', 'E1031');
+        }
+
+        const member = team.team_members.find((tm) => tm.user_id === socket.data.user);
+        if (!member) {
+            throw new SocketEventError('Oups! On dirait que l\'utilisateur ne fait pas partie de cette équipe. Si cela est une erreur, veuillez contacter un administrateur', 'E1030');
+        }
+
+        if (member.type !== MemberType.Owner) {
+            throw new SocketEventError("Hmm... On dirait que vous n'êtes pas le propriétaire de cette équipe...");
+        }
+
+        const updated = await db.team.delete({
+            where: {
+                team_id: team.team_id,
+            }
+        });
+
+        if (!updated) {
+            throw new SocketEventError(`Oups... Quelque chose s'est produit lors du traitement de la requête, veuillez réessayez à nouveau SVP.`);
+        } else {
+            socket.emit('teams:delete:finished');
+
+            io.to(team.team_id).emit('teams:deleted', {
+                teamId: team.team_id
+            });
+
+            io.socketsLeave(team.team_id);
+        }
+    } catch (e) {
+        handleSocketError(socket, e, ExceptionType.Teams_Delete)
+    }
+}

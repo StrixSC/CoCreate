@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { MemberType, TeamType } from "@prisma/client";
 import { db } from "../db";
 import { GetTeamsPayload, TeamQueryInterface } from "../models/Teams.model";
@@ -171,4 +172,32 @@ export const filterTeamsByParams = (result: TeamQueryInterface, userId: string, 
     }
 
     return filtered;
+}
+
+export const generateMascotProfile = async (mascot: string): Promise<{ avatarUrl: string, redirectedAvatarUrl: string }> => {
+    const avatarUrl = "https://source.unsplash.com/random/300x300/?" + mascot;
+    let redirectedAvatarUrl = "";
+    try {
+        const response = await axios.get(avatarUrl);
+
+        if (response) {
+            redirectedAvatarUrl = response.request.res.responseUrl;
+        }
+        return { avatarUrl, redirectedAvatarUrl }
+    } catch (e) {
+        return { avatarUrl, redirectedAvatarUrl }
+    }
+}
+
+export const getNewMascotUrl = async (avatarUrl: string): Promise<string> => {
+    let redirectedAvatarUrl = "";
+    try {
+        const response = await axios.get(avatarUrl);
+        if (response) {
+            redirectedAvatarUrl = response.request.res.responseUrl;
+        }
+        return redirectedAvatarUrl;
+    } catch (e) {
+        return redirectedAvatarUrl;
+    }
 }

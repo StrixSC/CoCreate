@@ -95,7 +95,7 @@ export const getTeamInfoById = async (req: Request, res: Response, next: NextFun
         const teamId = data.id;
         const userId = req.userId;
 
-        const team = await findTeamById(userId, teamId);
+        const team = await findTeamById(teamId);
 
         if (!team) {
             throw new create.Unauthorized("L'utilisateur ne fait pas partie de cette équipe. Accès non-autorisée");

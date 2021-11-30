@@ -1,31 +1,31 @@
+import { generateMascotProfile } from './../../../services/teams.service';
 import { TeamType, MemberType } from "@prisma/client";
 import { db } from "../../../db";
 import { Socket, Server } from 'socket.io';
 import { ExceptionType } from "../../../models/Exceptions.enum";
 import { SocketEventError } from "../../../socket";
 import { handleSocketError } from "../../../utils/errors";
-import axios from "axios";
 
 export const handleCreate = async (io: Server, socket: Socket, data: {
     teamName: string,
     bio: string,
     maxMemberCount: number,
     type: TeamType,
+    mascot: string,
     password?: string,
-    mascot?: string,
 }) => {
     try {
         const { teamName, bio, maxMemberCount, type, password, mascot } = data;
-        const team = await createTeam(socket.data.user, teamName, bio, maxMemberCount, type, password, mascot);
+        const team = await createTeam(socket.data.user, teamName, bio, maxMemberCount, type, mascot, password);
+        socket.join(team.teamId);
         socket.emit('teams:create:finished', team);
         io.emit('teams:created', team);
-        socket.join(team.teamId);
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.Teams_Create);
     }
 }
 
-const createTeam = async (userId: string, teamName: string, bio: string, maxMemberCount: number, type: TeamType, password?: string, mascot?: string) => {
+const createTeam = async (userId: string, teamName: string, bio: string, maxMemberCount: number, type: TeamType, mascot: string, password?: string,) => {
     const existingTeam = await db.team.findFirst({
         where: {
             team_name: teamName
@@ -44,26 +44,16 @@ const createTeam = async (userId: string, teamName: string, bio: string, maxMemb
         throw new SocketEventError("L'équipe a été mise à protégée, mais aucun mot de passe a été fournit.", 'E4002');
     }
 
-    const avatarUrl = "https://source.unsplash.com/random/300x300/?" + mascot;
-    let redirectedAvatarUrl = "";
-    try {
-        const response = await axios.get(avatarUrl);
-
-        if (response) {
-            redirectedAvatarUrl = response.request.res.responseUrl;
-            console.log(redirectedAvatarUrl);
-        }
-    } catch (e) {
-    }
+    const mascotProfile = await generateMascotProfile(mascot);
 
     const createdTeam = await db.team.create({
         data: {
             team_name: teamName,
             type: type,
             max_member_count: maxMemberCount,
-            avatar_url: redirectedAvatarUrl,
+            avatar_url: mascotProfile.redirectedAvatarUrl,
             mascot: mascot,
-            mascot_url: avatarUrl,
+            mascot_url: mascotProfile.avatarUrl,
             bio: bio,
             password: password,
             team_members: {
@@ -95,7 +85,9 @@ const createTeam = async (userId: string, teamName: string, bio: string, maxMemb
             author_avatar_url: createdTeam.team_members[0].user.profile!.avatar_url,
             currentMemberCount: createdTeam.team_members.length,
             maxMemberCount: createdTeam.max_member_count,
+            onlineMemberCount: 1,
             teamName: createdTeam.team_name,
+            teamAvatarUrl: createdTeam.avatar_url,
             bio: createdTeam.bio,
             type: createdTeam.type,
         }
