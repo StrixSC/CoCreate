@@ -106,8 +106,11 @@
                 </div>
             </mat-card-content>
 
-            <div *ngIf="team.currentMemberCount < team.maxMemberCount" class="member-count-container">
-                Nombre de membres: {{ team.currentMemberCount }}/{{team.maxMemberCount}}
+            <div *ngIf="team.isMember" class="member-count-container">
+                Nombre de membre en ligne: {{ team.onlineMemberCount }}/{{ team.maxMemberCount }}
+            </div>
+            <div *ngIf="team.currentMemberCount <= team.maxMemberCount" class="member-count-container">
+                Nombre de membre total: {{ team.currentMemberCount }}/{{team.maxMemberCount}}
             </div>
             <mat-card-actions class="actions-container" *ngIf="!team.isMember && !team.isOwner">
                 <button [disabled]="i === currentLoadingIndex" (click)="onJoin(team, i)"
@@ -126,7 +129,7 @@
             </mat-card-actions>
             <mat-card-actions class="actions-container" *ngIf="team.isMember && !team.isOwner">
                 <button disabled class="team-joined-container" mat-button>
-                    Vous êtes déjà membre de cette équipe!
+                    Vous êtes membre de cette équipe!
                 </button>
             </mat-card-actions>
             <mat-card-actions class="actions-container" *ngIf="team.isOwner">

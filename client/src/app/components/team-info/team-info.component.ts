@@ -63,23 +63,16 @@ export class TeamInfoComponent implements OnInit {
       }
     });
 
-    this.updatedSubscription = this.teamService.onUpdate().subscribe((d) => {
-      console.log(d);
-    });
-
-    this.updateFinishedSubscription = this.teamService.onUpdateFinished().subscribe((d: ITeamUpdateResponse) => {
+    this.updateFinishedSubscription = this.teamService.onUpdateFinished().subscribe(() => {
       this.isLoading = false;
-      this.team.teamName = d.teamName;
-      this.team.bio = d.bio;
-      this.team.avatarUrl = d.teamAvatarUrl;
-      this.team.mascot = d.mascot;
-      this.team.maxMemberCount = d.maxMemberCount;
-      this.isLoading = false;
-      console.log(d);
+      this.dialogRef.disableClose = false;
+      this.snackbar.open("Succès! Votre équipe à été mise à jour!", "OK", { duration: 2000 })
     })
 
-    this.updateExceptionSubscription = this.teamService.onException().subscribe((d) => {
-      this.snackbar.open("Oups... Il y a eu une erreur lors du traitement de la requête, essayez à nouveau...", "OK", { duration: 5000 })
+    this.updateExceptionSubscription = this.teamService.onUpdateException().subscribe((d) => {
+      this.dialogRef.disableClose = false;
+      this.isLoading = false;
+      this.snackbar.open(d.message, "OK", { duration: 5000 })
     })
 
     this.teamInfo
@@ -129,6 +122,7 @@ export class TeamInfoComponent implements OnInit {
         mascot: this.mascot.value,
         password: this.password.value
       });
+      this.dialogRef.disableClose = true;
     }
   }
 

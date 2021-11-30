@@ -1,112 +1,117 @@
 <div class="main-info-container">
     <div class="top-section">
-        <h1 class="team-name"><u>{{ team.teamName }}</u></h1>
+        <h1 class="team-name" mat-dialog-title><u>{{ team.teamName }}</u></h1>
 
-        <mat-tab-group mat-align-tabs="center" class="tabs">
-            <mat-tab label="Info">
+        <mat-dialog-content>
 
-            </mat-tab>
-            <mat-tab *ngIf="team.isOwner" label="Options">
+            <mat-tab-group mat-align-tabs="center" class="tabs">
+                <mat-tab label="Info">
 
-            </mat-tab>
-            <mat-tab *ngIf="team.isOwner" label="Mise à jour">
-                <div class="main-container-wrapper">
-                    <h1>
-                        Mise à jour de l'équipe
-                    </h1>
-                    <form class="form" [formGroup]="updateForm" (submit)="onUpdateSubmit()">
-                        <div class="main-form-container">
+                </mat-tab>
+                <mat-tab *ngIf="team.isOwner" label="Options">
 
-                            <div class="form-section">
-                                <div>
+                </mat-tab>
+                <mat-tab *ngIf="team.isOwner" label="Mise à jour">
+                    <div class="main-container-wrapper">
+                        <h1>
+                            Mise à jour de l'équipe
+                        </h1>
+                        <form class="form" [formGroup]="updateForm" (submit)="onUpdateSubmit()">
+                            <div class="main-form-container">
 
-                                    <mat-form-field required class="form-field clickable" appearance="outline">
-                                        <mat-label>Nom d'équipe</mat-label>
-                                        <input required matInput type="text" formControlName="teamName"
-                                            placeholder="Les Piccassos des ténèbres" />
-                                    </mat-form-field>
+                                <div class="form-section">
+                                    <div>
+
+                                        <mat-form-field required class="form-field clickable" appearance="outline">
+                                            <mat-label>Nom d'équipe</mat-label>
+                                            <input required matInput type="text" formControlName="teamName"
+                                                placeholder="Les Piccassos des ténèbres" />
+                                        </mat-form-field>
+                                    </div>
+                                    <div>
+                                        <mat-form-field class="pb-1 form-field clickable" appearance="outline">
+                                            <mat-label>Visibilité</mat-label>
+                                            <mat-select (selectionChange)="changeType($event)" formControlName='type'
+                                                required>
+                                                <mat-option *ngFor="let type of types" [value]="type.key">
+                                                    {{ type.value }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                    <div>
+                                        <mat-form-field class="pb-1 form-field clickable"
+                                            *ngIf="type.value === 'Protected'" appearance="outline">
+                                            <mat-label>Mot de passe</mat-label>
+                                            <input formControlName="password"
+                                                [type]="showPassword ? 'text' : 'password'" matInput
+                                                placeholder="********" />
+                                            <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">
+                                                {{
+                                                showPassword
+                                                ?
+                                                'visibility_off' : 'visibility' }} </mat-icon>
+                                            <mat-hint>Caractères alphanumériques seulement et doit être entre 8 et 256
+                                                caractères
+                                            </mat-hint>
+                                            <mat-error *ngIf="password.hasError('required')">
+                                                Ce champ est obligatoire.
+                                            </mat-error>
+                                            <mat-error *ngIf="password.hasError('minlength')">
+                                                Le mot de passe doit être entre 8 et 256 caractères.
+                                            </mat-error>
+                                            <mat-error *ngIf="password.hasError('maxlength')">
+                                                Le mot de passe doit être entre 8 et 256 caractères.
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
                                 </div>
-                                <div>
-                                    <mat-form-field class="pb-1 form-field clickable" appearance="outline">
-                                        <mat-label>Visibilité</mat-label>
-                                        <mat-select (selectionChange)="changeType($event)" formControlName='type'
-                                            required>
-                                            <mat-option *ngFor="let type of types" [value]="type.key">
-                                                {{ type.value }}
-                                            </mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
+                                <div class="form-section">
+                                    <div>
+                                        <mat-form-field required class="form-field clickable" appearance="outline">
+                                            <mat-label>Nombre de membre maximale</mat-label>
+                                            <input min="1" max="30" required matInput type="number"
+                                                formControlName="maxMemberCount"
+                                                placeholder="Les Piccassos des ténèbres" />
+                                        </mat-form-field>
+                                    </div>
+                                    <div>
+                                        <mat-form-field class="pb-1 form-field clickable" appearance="outline">
+                                            <mat-label>Choisissez votre mascotte</mat-label>
+                                            <mat-select formControlName='mascot'>
+                                                <mat-option *ngFor="let mascot of mascots" [value]="mascot.key">
+                                                    {{ mascot.value }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
                                 </div>
-                                <div>
-                                    <mat-form-field class="pb-1 form-field clickable" *ngIf="type.value === 'Protected'"
-                                        appearance="outline">
-                                        <mat-label>Mot de passe</mat-label>
-                                        <input formControlName="password" [type]="showPassword ? 'text' : 'password'"
-                                            matInput placeholder="********" />
-                                        <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">{{
-                                            showPassword
-                                            ?
-                                            'visibility_off' : 'visibility' }} </mat-icon>
-                                        <mat-hint>Caractères alphanumériques seulement et doit être entre 8 et 256
-                                            caractères
-                                        </mat-hint>
-                                        <mat-error *ngIf="password.hasError('required')">
-                                            Ce champ est obligatoire.
-                                        </mat-error>
-                                        <mat-error *ngIf="password.hasError('minlength')">
-                                            Le mot de passe doit être entre 8 et 256 caractères.
-                                        </mat-error>
-                                        <mat-error *ngIf="password.hasError('maxlength')">
-                                            Le mot de passe doit être entre 8 et 256 caractères.
-                                        </mat-error>
-                                    </mat-form-field>
-                                </div>
+
                             </div>
-                            <div class="form-section">
-                                <div>
-                                    <mat-form-field required class="form-field clickable" appearance="outline">
-                                        <mat-label>Nombre de membre maximale</mat-label>
-                                        <input min="1" max="30" required matInput type="number"
-                                            formControlName="maxMemberCount" placeholder="Les Piccassos des ténèbres" />
-                                    </mat-form-field>
-                                </div>
-                                <div>
-                                    <mat-form-field class="pb-1 form-field clickable" appearance="outline">
-                                        <mat-label>Choisissez votre mascotte</mat-label>
-                                        <mat-select formControlName='mascot'>
-                                            <mat-option *ngFor="let mascot of mascots" [value]="mascot.key">
-                                                {{ mascot.value }}
-                                            </mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
-                                </div>
+                            <div class="form-bio">
+                                <mat-form-field class="pb-1 form-bio-field clickable" appearance="outline">
+                                    <mat-label>Bio (Description)</mat-label>
+                                    <textarea placeholder="La meilleur équipe!" matInput
+                                        formControlName='bio'></textarea>
+                                </mat-form-field>
                             </div>
-
-                        </div>
-                        <div class="form-bio">
-                            <mat-form-field class="pb-1 form-bio-field clickable" appearance="outline">
-                                <mat-label>Bio (Description)</mat-label>
-                                <textarea placeholder="La meilleur équipe!" matInput formControlName='bio'></textarea>
-                            </mat-form-field>
-                        </div>
-                        <div>
-                            <button [disabled]="isLoading || !valid()" type="submit" mat-raised-button color="primary"
-                                class="form-field">
-                                <div class="spinner" *ngIf="isLoading">
-                                    <mat-spinner [diameter]="35" color="accent" class="spinner"></mat-spinner>
-                                </div>
-                                <ng-container *ngIf="!isLoading">Soumettre</ng-container>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-
-            </mat-tab>
-        </mat-tab-group>
+                            <div>
+                                <button [disabled]="isLoading || !valid()" type="submit" mat-raised-button
+                                    color="primary" class="form-field">
+                                    <div class="spinner" *ngIf="isLoading">
+                                        <mat-spinner [diameter]="35" color="accent" class="spinner"></mat-spinner>
+                                    </div>
+                                    <ng-container *ngIf="!isLoading">Soumettre</ng-container>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+        </mat-dialog-content>
     </div>
     <mat-dialog-actions align="end">
-        <button [disabled]="isLoading" (click)="dialogRef.close()" type="submit" mat-raised-button color="secondary">
+        <button [disabled]="isLoading" (click)="dialogRef.close()" mat-raised-button color="secondary">
             <div class="spinner" *ngIf="isLoading">
                 <mat-spinner [diameter]="25" color="accent" class="spinner"></mat-spinner>
             </div>

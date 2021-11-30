@@ -1,3 +1,4 @@
+import { SocketService } from 'src/app/services/chat/socket.service';
 import { environment } from 'src/environments/environment';
 import { Component } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
@@ -11,10 +12,14 @@ import { Subscription } from 'rxjs';
 export class AppComponent {
   title = 'Colorimage';
   authSubscription: Subscription;
-  constructor(private af: AngularFireAuth) {
+  constructor(private af: AngularFireAuth, private socketService: SocketService) {
     if (environment.useEmulator) {
       this.af.auth.useEmulator(environment.authEmulator)
     }
+  }
+
+  ngOnDestroy() {
+    this.socketService.disconnect();
   }
 
 }

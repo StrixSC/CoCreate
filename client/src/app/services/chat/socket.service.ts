@@ -76,6 +76,14 @@ export class SocketService {
     });
   }
 
+  onDisconnect(): Observable<any> {
+    return this.on('user:disconnection');
+  }
+
+  onConnection(): Observable<any> {
+    return this.on('user:connected');
+  }
+
   sendInit(): void {
     this.emit('user:init', null);
   }

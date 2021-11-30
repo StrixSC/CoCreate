@@ -1,11 +1,12 @@
+import { map } from 'rxjs/operators';
+import { SocketService } from 'src/app/services/chat/socket.service';
 import { TeamInfoComponent } from './../team-info/team-info.component';
 import { AuthService } from './../../services/auth.service';
 import { TeamPasswordDialogComponent } from './../team-password-dialog/team-password-dialog.component';
 import { Subscription, merge } from 'rxjs';
 import { CreateTeamDialogComponent } from './../create-team-dialog/create-team-dialog.component';
 import { TeamService } from './../../services/team.service';
-import { FormBuilder, FormGroup, Validators, FormControl, AbstractControl } from '@angular/forms';
-import { v4 } from 'uuid';
+import { FormBuilder, FormGroup, AbstractControl } from '@angular/forms';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatSlideToggle, MatSlideToggleChange, MatDialog, MatSnackBar, MatDialogConfig, PageEvent, MatPaginator } from '@angular/material';
 import { TeamType, TeamResponse } from 'src/app/model/team-response.model';
@@ -42,13 +43,12 @@ export class TeamPageComponent implements OnInit {
   queryLoading: boolean = false;
   leaveLoading: boolean = false;
   searchForm: FormGroup;
-  teamCreatedSubscription: Subscription;
   joinFinishedSubscription: Subscription;
-  joinedSubscription: Subscription;
   joinErrorSubscription: Subscription;
   leaveException: Subscription;
+  connectionSubscription: Subscription;
   leaveFinishedSubscription: Subscription;
-  leftSubscription: Subscription;
+  refreshSubscription: Subscription;
   activeOffset = 0;
   activeLimit = 12;
   activeTotal = 0;
@@ -66,13 +66,14 @@ export class TeamPageComponent implements OnInit {
     }
   ]
 
-  teams = [];
+  teams: TeamResponse[] = [];
   constructor(
     private snackBar: MatSnackBar,
     private teamService: TeamService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private auth: AuthService,
+    private socketService: SocketService
   ) { }
 
   ngOnInit() {
@@ -82,12 +83,32 @@ export class TeamPageComponent implements OnInit {
     });
     this.submitSearch();
 
-    this.leaveException = this.teamService.onLeaveException().subscribe((data: { message: string }) => {
-      this.snackBar.open(data.message, 'OK', { duration: 5000 });
+    this.refreshSubscription = merge(
+      this.teamService.onLeave(),
+      this.teamService.onUpdate(),
+      this.teamService.onCreated(),
+      this.teamService.onJoin(),
+    ).subscribe((d) => {
+      console.log(d);
+      this.submitSearch()
     });
 
-    this.leftSubscription = this.teamService.onLeave().subscribe(() => {
-      this.submitSearch();
+    this.connectionSubscription = merge(
+      this.socketService.onDisconnect(),
+      this.socketService.onConnection(),
+    ).subscribe((d) => {
+      if (d) {
+        console.log(d);
+        const index = this.teams.findIndex((t) => t.teamId === d.roomId);
+        if (index > -1) {
+          console.log(this.teams[index]);
+          this.teams[index].onlineMemberCount = d.onlineMemberCount;
+        }
+      }
+    })
+
+    this.leaveException = this.teamService.onLeaveException().subscribe((data: { message: string }) => {
+      this.snackBar.open(data.message, 'OK', { duration: 5000 });
     });
 
     this.leaveFinishedSubscription = this.teamService.onLeaveFinished().subscribe((data) => {
@@ -96,8 +117,6 @@ export class TeamPageComponent implements OnInit {
       this.submitSearch();
     });
 
-    this.teamCreatedSubscription = this.teamService.onCreated().subscribe(() => this.submitSearch());
-    this.joinedSubscription = this.teamService.onJoin().subscribe((d) => this.submitSearch());
     this.joinFinishedSubscription = this.teamService.onJoinFinished().subscribe((d) => {
       this.currentLoadingIndex = null;
       this.snackBar.open(`Super! Vous avez rejoint l'équipe "${this.activeTeamName}"!`, 'OK', { duration: 5000 });
@@ -226,12 +245,9 @@ export class TeamPageComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
-    if (this.teamCreatedSubscription) {
-      this.teamCreatedSubscription.unsubscribe();
-    }
 
-    if (this.joinedSubscription) {
-      this.joinedSubscription.unsubscribe();
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
     }
 
     if (this.joinErrorSubscription) {
@@ -250,8 +266,8 @@ export class TeamPageComponent implements OnInit {
       this.leaveFinishedSubscription.unsubscribe();
     }
 
-    if (this.leftSubscription) {
-      this.leftSubscription.unsubscribe();
+    if (this.connectionSubscription) {
+      this.connectionSubscription.unsubscribe();
     }
 
   }

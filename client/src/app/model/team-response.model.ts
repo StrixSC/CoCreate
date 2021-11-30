@@ -23,5 +23,5 @@ export interface TeamResponse {
     team_members: { member_id: string, member_type: MemberType }[],
     isMember: boolean,
     isOwner: boolean
+    onlineMemberCount: number,
 }
-
