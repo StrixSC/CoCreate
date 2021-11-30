@@ -53,6 +53,10 @@ export class TeamService {
     this.socketService.emit('teams:update', data);
   }
 
+  getAllUserTeams() {
+    return this.http.get(environment.serverURL + '/api/users/teams')
+  }
+
   onUpdateException(): Observable<any> {
     return this.socketService.on('teams:update:exception');
   }

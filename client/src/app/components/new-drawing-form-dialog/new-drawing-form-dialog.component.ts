@@ -1,3 +1,6 @@
+import { TeamService } from 'src/app/services/team.service';
+import { environment } from './../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
 import { IGalleryEntry } from './../../model/IGalleryEntry.model';
 import { OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -46,7 +49,9 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
     private auth: AuthService,
     public dialogRef: MatDialogRef<NewDrawingFormDialogComponent>,
     private fb: FormBuilder,
+    private teamService: TeamService,
     private snackbar: MatSnackBar,
+    private http: HttpClient,
     @Inject(MAT_DIALOG_DATA) public drawing: IGalleryEntry | null,
   ) {
   }
@@ -69,13 +74,12 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
       backgroundColor: this.colorService.colorForm
     });
 
-    this.authors = [
-      {
-        key: this.auth.activeUser!.uid,
-        value: `${this.auth.activeUser!.displayName} (Moi)`
-      }
-      // TODO: Add fetch for teams.
-    ];
+    this.authors = []
+
+    this.teamService.getAllUserTeams().subscribe((d: { teams: { teamName: string, teamId: string }[] }) => {
+      const me = [{ key: this.auth.activeUser!.uid, value: `${this.auth.activeUser!.displayName} (Moi)` }];
+      this.authors = me.concat((d.teams.map((t) => ({ key: t.teamId, value: t.teamName + ' (Équipe)' }))));
+    });
 
     this.exceptionSubscription = this.syncCollaborationService.onCollaborationException().subscribe((message: any) => {
       this.snackbar.open(message.message, '', { duration: 5000 });
@@ -84,16 +88,6 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
     });
   }
 
-  sendCreateCollaboration(form: any) {
-    console.log(form.author)
-    let data : ICollaborationCreatePayload = {
-      userId: form.author,
-      title: form.title,
-      type: form.type
-
-    }
-    this.syncCollaborationService.sendCreateCollaboration(data)
-  }
   onNoClick(): void {
     this.dialogRef.close();
   }
