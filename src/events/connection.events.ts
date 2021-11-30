@@ -18,7 +18,6 @@ export = (io: Server, socket: Socket) => {
 const initUser = async (io: Server, socket: Socket) => {
     try {
         if (!socket.data.user) {
-            // throw error
             return;
         }
 
@@ -43,6 +42,8 @@ const initUser = async (io: Server, socket: Socket) => {
         user.channels.forEach((c) => {
             socket.join(c.channel_id);
         });
+
+        socket.data.status = "En ligne"
 
         socket.emit('user:initialized')
     } catch (e) {

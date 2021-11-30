@@ -31,8 +31,8 @@ export const handleUpdate = async (io: Server, socket: Socket, data: { teamId: s
         }
 
         let newMascotUrl = team.mascot_url;
-        let newAvatarUrl = undefined;
-        if (data.mascot) {
+        let newAvatarUrl = team.avatar_url;
+        if (data.mascot && data.mascot !== team.mascot) {
             if (data.mascot !== team.mascot) {
                 const mascotProfile = await generateMascotProfile(data.mascot);
                 newMascotUrl = mascotProfile.avatarUrl;
@@ -77,8 +77,8 @@ export const handleUpdate = async (io: Server, socket: Socket, data: { teamId: s
         const onlineMembers = getOnlineMembersInRoom(updated.team_id);
         io.to(team.team_id).emit('teams:updated', {
             teamId: updated.team_id,
-            author_username: member.user.profile!.username,
-            author_avatar_url: member.user.profile!.avatar_url,
+            authorUsername: member.user.profile!.username,
+            authorAvatarUrl: member.user.profile!.avatar_url,
             currentMemberCount: updated.team_members.length,
             maxMemberCount: updated.max_member_count,
             onlineMemberCount: onlineMembers.length,
@@ -86,6 +86,8 @@ export const handleUpdate = async (io: Server, socket: Socket, data: { teamId: s
             teamAvatarUrl: updated.avatar_url,
             bio: updated.bio,
             type: updated.type,
+            mascot: updated.mascot,
+
         });
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.Teams_Delete)
