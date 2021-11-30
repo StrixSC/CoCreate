@@ -106,7 +106,7 @@ export = (io: Server, socket: Socket) => {
                 data: {
                     name: channelName,
                     members: {
-                        create: [ { user_id: socket.data.user, type: 'Owner' } ]
+                        create: [{ user_id: socket.data.user, type: 'Owner' }]
                     }
                 },
                 include: {
@@ -179,6 +179,9 @@ export = (io: Server, socket: Socket) => {
             io.to(channelId).emit('channel:left', {
                 channelId: channelId
             });
+
+            socket.emit('channel:left');
+
             socket.leave(channelId);
         } catch (e) {
             handleSocketError(socket, e);
