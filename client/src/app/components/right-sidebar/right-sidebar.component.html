@@ -23,16 +23,19 @@
       <mat-action-list>
         <p class="channelHeaders">Recently Joined</p>
         <div
-          matBadge="8"
-          matBadgePosition="before"
-          matBadgeSize="small"
-          matBadgeColor="accent"
           class="channel_box"
           *ngFor="let channel of textChannels | keyvalue"
           (click)="changeChannel(channel.key)"
           [ngStyle]="channel.value.divStyle"
         >
-          <p class="channels" [ngStyle]="channel.value.style">
+          <p
+            matBadge="8"
+            matBadgePosition="before"
+            matBadgeSize="small"
+            matBadgeColor="accent"
+            class="channels"
+            [ngStyle]="channel.value.style"
+          >
             {{ channel.value.name }}
           </p>
         </div>

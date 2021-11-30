@@ -151,11 +151,10 @@ class _RegisterState extends State<Register> {
                   padding: EdgeInsets.only(left: 100.0, right: 100.0),
                   children: <Widget>[
                     SizedBox(height: 48.0),
-                    Text("S'inscrire",
+                    const Text("S'inscrire",
                         style: TextStyle(
                             fontWeight: FontWeight.w800,
-                            fontSize: 40.0,
-                            color: primaryColor)),
+                            fontSize: 40.0)),
                     SizedBox(height: 24.0),
                     textForm('Courriel', emailController),
                     const SizedBox(height: 24.0),
@@ -187,6 +186,7 @@ class _RegisterState extends State<Register> {
                       child: Text('Créer compte',
                           style: new TextStyle(fontSize: 30.0)),
                     ),
+                    const SizedBox(height: 24.0),
                   ],
                 )),
               ),

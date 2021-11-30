@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Observable } from 'rxjs/internal/Observable';
 import { WorkspaceService } from 'src/app/services/workspace/workspace.service';
-
+import { SocketService } from '../chat/socket.service';
+import { IGalleryEntry } from '../../model/IGalleryEntry.model'
+import { SyncCollaborationService } from '../syncCollaboration.service';
 /// Service pour créer des nouveau canvas de dessin
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class NewDrawingService {
 
   form: FormGroup;
@@ -12,27 +15,25 @@ export class NewDrawingService {
   constructor(
     private formBuilder: FormBuilder,
     private workspaceService: WorkspaceService,
+    private socket: SocketService,
+    private syncCollaborationService: SyncCollaborationService
   ) {
     this.form = this.formBuilder.group({
       size: this.formBuilder.group({
-        width: this.formBuilder.control(0, [Validators.required, Validators.min(0), Validators.pattern('[0-9]*')]),
-        height: this.formBuilder.control(0, [Validators.required, Validators.min(0), Validators.pattern('[0-9]*')]),
+        title: this.formBuilder.control('', Validators.required),
+        type: this.formBuilder.control('', Validators.required),
+        author_username: this.formBuilder.control('', Validators.required),
+        password: this.formBuilder.control('')
       }),
     });
-    this.sizeGroup.valueChanges.subscribe((size) => {
-      this.isSizeModified = !(size.width === this.workspaceService.width && size.height === this.workspaceService.height);
-      this.form.updateValueAndValidity();
-    });
+    //this.form.updateValueAndValidity;
   }
 
-  get sizeGroup(): FormGroup {
+  get drawingFormGroup(): FormGroup {
     return this.form.get('size') as FormGroup;
   }
 
-  /// Réajuste le grandeur du workspace
-  onResize(): void {
-    if (!this.isSizeModified) {
-      this.sizeGroup.setValue({ width: this.workspaceService.width, height: this.workspaceService.height });
-    }
+  receiveMessage(): Observable<IGalleryEntry> {
+    return this.socket.on('collaboration:created');
   }
 }

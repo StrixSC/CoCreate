@@ -153,9 +153,7 @@ class _ChatScreenState extends State<ChatScreen> {
     print('submitted');
     setState(() {
       _validate =
-          _textController.text.isEmpty || _textController.text
-              .trim()
-              .isEmpty;
+          _textController.text.isEmpty || _textController.text.trim().isEmpty;
     });
     if (!_validate) {
       _textController.clear();
@@ -214,14 +212,17 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     Messenger messenger = context.read<Messenger>();
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
             icon: const Tooltip(
                 message: 'Se déconnecter',
-                child: Icon(Icons.arrow_back, color: Colors.black, size: 30)),
-            onPressed: () => context.read<Messenger>().toggleSelection()),
-        backgroundColor: Colors.white,
+                child: Icon(Icons.arrow_back, color: Colors.white, size: 30)),
+            onPressed: () {
+              messenger.userChannels[widget.channelIndex].lastReadMessage =
+                  messenger
+                      .userChannels[widget.channelIndex].messages.last.text;
+              context.read<Messenger>().toggleSelection();
+            }),
         title: const Text(
           '',
           style: TextStyle(fontSize: 25, color: Colors.blue),
@@ -229,7 +230,7 @@ class _ChatScreenState extends State<ChatScreen> {
         actions: [
           IconButton(
               icon: const Icon(Icons.history_rounded,
-                  color: Colors.black, size: 30),
+                  color: Colors.white, size: 30),
               onPressed: () {
                 showDialog<String>(
                     context: context,
@@ -259,7 +260,7 @@ class _ChatScreenState extends State<ChatScreen> {
           messenger.userChannels[widget.channelIndex].name != "Canal Publique"
               ? IconButton(
                   icon: const Icon(Icons.exit_to_app_rounded,
-                      color: Colors.black, size: 30),
+                      color: Colors.white, size: 30),
                   onPressed: () {
                     showDialog<String>(
                         context: context,
@@ -310,9 +311,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           const Divider(height: 1.0),
           Container(
-            decoration: BoxDecoration(color: Theme
-                .of(context)
-                .cardColor),
+            decoration: BoxDecoration(color: Theme.of(context).cardColor),
             child: _buildTextComposer(),
           ),
         ],

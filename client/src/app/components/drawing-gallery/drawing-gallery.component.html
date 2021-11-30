@@ -1,0 +1,95 @@
+<mat-toolbar color="secondary">
+  <mat-toolbar-row>
+    <h1>Galerie</h1>
+    <span class="example-spacer"></span>
+    <button class="accent" mat-raised-button (click)="openDialog()">Nouveau dessin</button>
+    <button matTooltip="Retour au menu" routerLink="" mat-icon-button>
+      <mat-icon>exit_to_app</mat-icon>
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<mat-tab-group #tabGroup class="centerTab" (selectedIndexChange)="setPagination($event)">
+  <mat-tab class="drawing-list" label="Mes Dessins">
+    <div>
+      <mat-form-field [style.width.%]="50">
+        <mat-label>Recherche</mat-label>
+        <input matInput placeholder="Entrez un mot-clé">
+        <button mat-button matPrefix mat-icon-button>
+          <mat-icon>search</mat-icon>
+        </button>
+        <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
+      </mat-form-field>
+
+      <mat-paginator #paginator4 [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
+
+      <div class="margin-center">
+        <app-drawing-gallery-card *ngFor="let drawing of dataObsSelf | async" [drawing]="drawing">
+        </app-drawing-gallery-card>
+      </div>
+    </div>
+  </mat-tab>
+  
+  <mat-tab class="drawing-list" label="Dessins privés">
+    <br>
+    <div>
+      <mat-form-field [style.width.%]="50">
+        <mat-label>Recherche</mat-label>
+        <input matInput placeholder="Entrez un mot-clé">
+        <button mat-button matPrefix mat-icon-button>
+          <mat-icon>search</mat-icon>
+        </button>
+        <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
+      </mat-form-field>
+
+      <mat-paginator #paginator [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
+
+      <div class="margin-center">
+        <app-drawing-gallery-card *ngFor="let drawing of dataObsPrivate | async" [drawing]="drawing">
+        </app-drawing-gallery-card>
+      </div>
+    </div>
+  </mat-tab>
+
+  <mat-tab class="drawing-list" label="Dessins publiques">
+    <br>
+    <div>
+      <mat-form-field [style.width.%]="50">
+        <mat-label>Recherche</mat-label>
+        <input matInput placeholder="Entrez un mot-clé">
+        <button mat-button matPrefix mat-icon-button>
+          <mat-icon>search</mat-icon>
+        </button>
+        <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
+      </mat-form-field>
+
+      <mat-paginator #paginator2 [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
+
+      <div class="margin-center">
+        <app-drawing-gallery-card *ngFor="let drawing of dataObsPublic | async" [drawing]="drawing">
+        </app-drawing-gallery-card>
+      </div>
+    </div>
+  </mat-tab>
+  <mat-tab class="drawing-list" label="Dessins protégés">
+    <br>
+    <div>
+      <mat-form-field [style.width.%]="50">
+        <mat-label>Recherche</mat-label>
+        <input matInput placeholder="Entrez un mot-clé">
+        <button mat-button matPrefix mat-icon-button>
+          <mat-icon>search</mat-icon>
+        </button>
+        <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
+      </mat-form-field>
+
+      <mat-paginator #paginator3 [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
+
+      <div class="margin-center">
+        <app-drawing-gallery-card *ngFor="let drawing of dataObsProtected | async" [drawing]="drawing">
+        </app-drawing-gallery-card>
+      </div>
+    </div>
+  </mat-tab>
+  
+</mat-tab-group>

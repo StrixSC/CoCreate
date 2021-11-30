@@ -1,3 +1,4 @@
+import { environment } from 'src/environments/environment';
 import { HttpClient } from "@angular/common/http";
 import {
   AfterViewInit,
@@ -53,7 +54,7 @@ export class ChatPopedOutComponent implements OnInit, OnChanges, AfterViewInit {
     this.messages = [];
     this.alreadySubbed = false;
   }
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void { }
 
   ngAfterViewInit(): void {
     this.messagesWatcher.changes.subscribe(() => {
@@ -65,16 +66,16 @@ export class ChatPopedOutComponent implements OnInit, OnChanges, AfterViewInit {
     try {
       this.messageBox.nativeElement.scrollTop =
         this.messageBox.nativeElement.scrollHeight;
-    } catch (err) {}
+    } catch (err) { }
   }
 
   getMessagesFromChannel(channelID: string) {
     this.messages = [];
     this.http
       .get(
-        "https://colorimage-109-3900.herokuapp.com/api/channels/" +
-          channelID +
-          "/messages"
+        environment.serverURL + "/api/channels/" +
+        channelID +
+        "/messages"
       )
       .subscribe((data: any) => {
         data.forEach((m: any) => {
@@ -88,7 +89,7 @@ export class ChatPopedOutComponent implements OnInit, OnChanges, AfterViewInit {
       });
   }
 
-  ngOnChanges() {}
+  ngOnChanges() { }
 
   sendMessage() {
     if (this.currentText.length > 0) {

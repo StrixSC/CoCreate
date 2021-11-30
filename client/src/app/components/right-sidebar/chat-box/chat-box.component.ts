@@ -1,3 +1,4 @@
+import { environment } from 'src/environments/environment';
 import {
   Component,
   Input,
@@ -75,9 +76,9 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
   loadChannelMessages(channelID: string) {
     this.http
       .get(
-        "https://colorimage-109-3900.herokuapp.com/api/channels/" +
-          channelID +
-          "/messages"
+        environment.serverURL + "/api/channels/" +
+        channelID +
+        "/messages"
       )
       .subscribe((data: any) => {
         data.forEach((m: any) => {
@@ -126,7 +127,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
     try {
       this.messageBox.nativeElement.scrollTop =
         this.messageBox.nativeElement.scrollHeight;
-    } catch (err) {}
+    } catch (err) { }
   }
 
   sendMessage() {

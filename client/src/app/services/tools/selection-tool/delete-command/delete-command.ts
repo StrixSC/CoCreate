@@ -4,10 +4,12 @@ import { DrawingService } from '../../../drawing/drawing.service';
 /// Commande permettant le retrait d'une liste d'element svg du dessin
 export class DeleteCommand implements ICommand {
     private markerDef: SVGElement[] = [];
+    public actionId: string = "";
+    public userId: string = "";
 
     constructor(
-        private drawingService: DrawingService,
-        private objectList: SVGElement[],
+        public drawingService: DrawingService,
+        public objectList: SVGElement[],
     ) { }
 
     /// Rajout des elements suprimé

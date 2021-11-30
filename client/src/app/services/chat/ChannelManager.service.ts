@@ -1,3 +1,4 @@
+import { environment } from 'src/environments/environment';
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
@@ -64,13 +65,13 @@ export class ChannelManagerService {
 
   GetAllChannels(): Observable<any> {
     return this.http.get(
-      "https://colorimage-109-3900.herokuapp.com/api/channels/"
+      environment.serverURL + "/api/channels/"
     );
   }
 
   GetChannelById(channel_id: string): Observable<any> {
     return this.http.get(
-      "https://colorimage-109-3900.herokuapp.com/api/channels/" + channel_id
+      environment.serverURL + "/api/channels/" + channel_id
     );
   }
 }

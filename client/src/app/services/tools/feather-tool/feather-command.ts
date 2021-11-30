@@ -9,18 +9,20 @@ import { Feather } from './feather-model';
 })
 export class FeatherCommand implements ICommand {
   private feather: SVGGElement | null = null;
-  private currentPath: SVGPathElement|null = null;
+  private currentPath: SVGPathElement | null = null;
+  public actionId: string = "";
+  public userId: string = "";
 
   constructor(
     readonly renderer: Renderer2,
     private drawingService: DrawingService,
     private featherAttributes: Feather,
   ) { }
-/// Creation de l'objet de la plume et ajout de l'objet au dessin
+  /// Creation de l'objet de la plume et ajout de l'objet au dessin
   execute(): void {
     if (this.feather) {
 
-        this.drawingService.addObject(this.feather);
+      this.drawingService.addObject(this.feather);
     } else {
       this.feather = this.renderer.createElement('g', 'svg') as SVGGElement;
       this.renderer.setAttribute(this.feather, 'name', 'feather');
@@ -60,7 +62,7 @@ export class FeatherCommand implements ICommand {
 
   undo(): void {
     if (this.feather) {
-        this.drawingService.removeObject(Number(this.feather.id));
+      this.drawingService.removeObject(Number(this.feather.id));
     }
   }
 

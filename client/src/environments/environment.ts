@@ -4,13 +4,15 @@
 
 export const environment = {
   serverURL: "https://colorimage-109-3900.herokuapp.com",
+  authEmulator: "http://localhost:9099",
+  useEmulator: false,
   firebaseConfig: {
-  apiKey: 'AIzaSyCfef5WBapS3mTkp_swLaXZVQ6haiwH6hA',
-    authDomain: 'colorimage-f380e.firebaseapp.com',
-    projectId: 'colorimage-f380e',
-    storageBucket: 'colorimage-f380e.appspot.com',
-    messagingSenderId: '529472970911',
-    appId: '1:529472970911:web:eb14f2b67c57debf1d42aa',
+    apiKey: "AIzaSyCfef5WBapS3mTkp_swLaXZVQ6haiwH6hA",
+    authDomain: "colorimage-f380e.firebaseapp.com",
+    projectId: "colorimage-f380e",
+    storageBucket: "colorimage-f380e.appspot.com",
+    messagingSenderId: "529472970911",
+    appId: "1:529472970911:web:eb14f2b67c57debf1d42aa",
   },
 };
 

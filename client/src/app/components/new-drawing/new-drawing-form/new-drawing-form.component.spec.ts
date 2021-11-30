@@ -21,7 +21,7 @@ describe('NewDrawingFormComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(NewDrawingFormComponent);
     component = fixture.componentInstance;
-    component.sizeForm = formBuilder.group({
+    component.newDrawingForm = formBuilder.group({
       width: null,
       height: null,
     });

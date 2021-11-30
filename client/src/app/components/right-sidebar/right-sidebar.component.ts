@@ -80,15 +80,32 @@ export class RightSidebarComponent implements OnInit {
   }
 
   changeChannel(channelID: string) {
+    this.RemoveSelectionCSS();
     this.selectedChannel = channelID;
     this.newChannelStyle = { display: "none" };
-
     if (this.textChannels.has(channelID)) {
       this.channel = this.textChannels.get(channelID) as IChannel;
       this.chatDivView = { display: "block", transition: "0.2s" };
       this.rightsidebarCss = { width: "550px" };
+      this.AddSelectionCSS();
     } else {
       this.chatDivView = { display: "none", transition: "0.2s" };
+    }
+  }
+
+  RemoveSelectionCSS() {
+    const channel = this.textChannels.get(this.selectedChannel);
+    if (channel) {
+      channel.style = {};
+      this.textChannels.set(this.selectedChannel, channel);
+    }
+  }
+
+  AddSelectionCSS() {
+    const channel = this.textChannels.get(this.selectedChannel);
+    if (channel) {
+      channel.style = { color: "white" };
+      this.textChannels.set(this.selectedChannel, channel);
     }
   }
 

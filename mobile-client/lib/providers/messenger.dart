@@ -8,6 +8,7 @@ import 'package:Colorimage/utils/rest/users_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 
 import '../models/chat.dart';
 
@@ -25,7 +26,7 @@ class Messenger extends ChangeNotifier {
   void setSocket(socket) {
     channelSocket = socket;
     channelSocket.socket.on('connect', (_) {
-      print("connected to socket");
+      print("Channel socket events initialized");
       channelSocket.initializeChannelSocketEvents(callbackChannel);
       joinAllUserChannels();
     });
