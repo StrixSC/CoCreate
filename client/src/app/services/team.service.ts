@@ -23,6 +23,10 @@ export class TeamService {
     this.socketService.emit('teams:join', data);
   }
 
+  sendLeave(data: any): void {
+    this.socketService.emit('teams:leave', data);
+  }
+
   sendCreateTeam(data: any): void {
     this.socketService.emit('teams:create', data);
   }
@@ -49,5 +53,37 @@ export class TeamService {
 
   onCreationException(): Observable<any> {
     return this.socketService.on('teams:create:exception');
+  }
+
+  onLeaveException(): Observable<any> {
+    return this.socketService.on('teams:leave:exception');
+  }
+
+  onLeaveFinished(): Observable<any> {
+    return this.socketService.on('teams:leave:finished');
+  }
+
+  onLeave(): Observable<any> {
+    return this.socketService.on('teams:left');
+  }
+
+  onDeleteException() {
+    return this.socketService.on('teams:delete:exception');
+  }
+
+  onDeleteFinished() {
+    return this.socketService.on('teams:delete:finished');
+  }
+
+  onDelete() {
+    return this.socketService.on('teams:deleted');
+  }
+
+  onUpdate() {
+    return this.socketService.on('teams:updated');
+  }
+
+  onException() {
+    return this.socketService.on('teams:exception');
   }
 }

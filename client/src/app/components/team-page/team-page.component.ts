@@ -42,11 +42,15 @@ export class TeamPageComponent implements OnInit {
 
   isLoading: boolean = false;
   queryLoading: boolean = false;
+  leaveLoading: boolean = false;
   searchForm: FormGroup;
   teamCreatedSubscription: Subscription;
   joinFinishedSubscription: Subscription;
   joinedSubscription: Subscription;
   joinErrorSubscription: Subscription;
+  leaveException: Subscription;
+  leaveFinishedSubscription: Subscription;
+  leftSubscription: Subscription;
   activeOffset = 0;
   activeLimit = 12;
   activeTotal = 0;
@@ -79,6 +83,20 @@ export class TeamPageComponent implements OnInit {
       type: [''],
     });
     this.submitSearch();
+
+    this.leaveException = this.teamService.onLeaveException().subscribe((data: { message: string }) => {
+      this.snackBar.open(data.message, 'OK', { duration: 5000 });
+    });
+
+    this.leftSubscription = this.teamService.onLeave().subscribe(() => {
+      this.submitSearch();
+    });
+
+    this.leaveFinishedSubscription = this.teamService.onLeaveFinished().subscribe((data) => {
+      this.leaveLoading = false;
+      this.snackBar.open(`Succès! Vous avez quitté l'équipe "${data.teamName}!"`, 'OK', { duration: 5000 });
+      this.submitSearch();
+    });
 
     this.teamCreatedSubscription = this.teamService.onCreated().subscribe(() => this.submitSearch());
     this.joinedSubscription = this.teamService.onJoin().subscribe((d) => this.submitSearch());
@@ -198,16 +216,13 @@ export class TeamPageComponent implements OnInit {
       query += `${key}=${value}&`
     }
     query = query.substr(0, query.length - 1); // remove the last & or the ? if no params.
-    this.isLoading = true;
     const teamSub = this.teamService.fetchTeams(query).subscribe((d: any) => {
       this.activeTotal = d.total;
       this.activeOffset = d.offset;
       this.activeLimit = d.limit;
       this.teams = d.teams;
-      this.isLoading = false;
       teamSub.unsubscribe();
     }, (error) => {
-      this.isLoading = false;
       this.snackBar.dismiss();
       teamSub.unsubscribe();
       this.snackBar.open("Une erreur s'est produite lors de la requête, veuillez essayez à nouveau...", 'OK', { duration: 5000 });
@@ -236,10 +251,23 @@ export class TeamPageComponent implements OnInit {
     if (this.joinFinishedSubscription) {
       this.joinErrorSubscription.unsubscribe();
     }
+
+    if (this.leaveException) {
+      this.leaveException.unsubscribe();
+    }
+
+    if (this.leaveFinishedSubscription) {
+      this.leaveFinishedSubscription.unsubscribe();
+    }
+
+    if (this.leftSubscription) {
+      this.leftSubscription.unsubscribe();
+    }
+
   }
 
   leaveTeam(team: TeamResponse): void {
-
+    this.teamService.sendLeave({ teamId: team.teamId });
   }
 
   openInfo(team: TeamResponse): void {

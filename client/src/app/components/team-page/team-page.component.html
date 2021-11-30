@@ -74,7 +74,7 @@
                                 <mat-icon>info</mat-icon>
                                 <span>Info</span>
                             </button>
-                            <button *ngIf="!team.isOwner" mat-menu-item>
+                            <button (click)="leaveTeam(team)" *ngIf="!team.isOwner" mat-menu-item>
                                 <mat-icon>logout</mat-icon>
                                 <span>Quitter</span>
                             </button>
