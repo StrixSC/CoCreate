@@ -59,6 +59,10 @@ export class RightSidebarComponent implements OnInit {
     this.chatSocketService.joinedChannel().subscribe((data) => {
       console.log("joinedChannel", data);
     });
+
+    setTimeout(() => {
+      this.changeChannel("PUBLIC");
+    }, 1000);
   }
 
   connectChannels(channel_list: any[]) {
@@ -87,12 +91,16 @@ export class RightSidebarComponent implements OnInit {
     this.textChannels.delete(channel_id.channel_id);
   }
 
+  openChat() {
+    this.chatDivView = { display: "block", transition: "0.2s" };
+  }
+
   changeChannel(channelID: string) {
     this.RemoveSelectionCSS();
     this.selectedChannel = channelID;
     this.newChannelStyle = { display: "none" };
     if (this.textChannels.has(channelID)) {
-      this.chatDivView = { display: "block", transition: "0.2s" };
+      this.openChat();
       this.rightsidebarCss = { width: "550px" };
       this.AddSelectionCSS();
       this.ClearNotification();

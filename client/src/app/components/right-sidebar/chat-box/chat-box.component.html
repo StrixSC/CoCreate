@@ -21,21 +21,47 @@
       style="margin-bottom: 50px; width: 270px"
       #messagesWatcher
     >
-      <mat-grid-list cols="4" rowHeight="20px">
-        <mat-grid-tile colspan="1" rowspan="1" style="color: white">
-          {{ message_.avatar }}
-        </mat-grid-tile>
+      <mat-grid-list cols="4">
+        <div
+          style="
+            font-family: Whitney, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            display: block;
+            position: relative;
+            line-height: 1.375rem;
+            min-height: 1.375rem;
+            color: var(--text-muted);
+            white-space: break-spaces;
+          "
+        >
+          <mat-grid-tile colspan="1" rowspan="1" style="color: white">
+            <!-- {{ message_.avatar }} -->
+            <img
+              src="https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/spider-man-movies-in-order-index-1631199371.jpeg?crop=0.565xw:1.00xh;0.435xw,0&resize=640:*"
+              alt="Italian Trulli"
+              style="height: 50px; border-radius: 50%"
+            />
+          </mat-grid-tile>
 
-        <mat-grid-tile colspan="2" rowspan="1" style="color: white">
-          {{ message_.username }}
-        </mat-grid-tile>
-
-        <mat-grid-tile colspan="1" rowspan="1" style="color: white">
-          {{ message_.time }}
-        </mat-grid-tile>
+          <mat-grid-tile colspan="2" rowspan="1" style="color: white">
+            <p style="font-size: 16px; font-weight: 500; color: white">
+              {{ message_.username }}
+            </p>
+            <p style="color: #72767d">{{ message_.time }}</p>
+          </mat-grid-tile>
+        </div>
       </mat-grid-list>
 
-      <div style="padding: 10px; color: white; word-wrap: break-word">
+      <div
+        style="
+          color: rgb(220, 221, 222);
+          word-wrap: break-word;
+          font-weight: 400;
+          font-size: 16px;
+          line-height: 22px;
+          margin-top: -20px;
+          white-space: break-spaces; ;
+        "
+      >
         {{ message_.message }}
       </div>
     </div>
