@@ -110,6 +110,10 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
               maxLines: 1,
               autofocus: false,
               decoration: InputDecoration(
+                labelText: 'Pseudonyme',
+                labelStyle: TextStyle(
+                  fontSize: 25.0,
+                ),
                 errorStyle: const TextStyle(fontSize: _fontSize),
                 hintText: "Pseudonyme",
                 hintStyle: const TextStyle(
@@ -132,7 +136,7 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
               obscureText: !_passwordVisible,
               decoration: InputDecoration(
                   errorStyle: const TextStyle(fontSize: _fontSize),
-                  hintText: "Mot de Passe",
+                  hintText: "Nouveau mot de passe",
                   hintStyle: const TextStyle(
                     fontSize: _fontSize,
                   ),

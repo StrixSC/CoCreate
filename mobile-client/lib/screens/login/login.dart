@@ -169,7 +169,7 @@ class _LoginState extends State<Login> {
                         obscureText: !_passwordVisible,
                         decoration: InputDecoration(
                             errorStyle: const TextStyle(fontSize: _fontSize),
-                            hintText: "Mot de Passe",
+                            hintText: "Mot de passe",
                             hintStyle: const TextStyle(
                               fontSize: _fontSize,
                             ),

@@ -211,6 +211,7 @@ class GalerieState extends State<Galerie>
           //   pagingControllers[TYPES[value]].refresh();
           // });
           scrollControllers[TYPES[value]] = ScrollController();
+          pagingControllers[TYPES[value]].refresh();
           context.read<Collaborator>().setCurrentType(TYPES[value]);
         },
         tabs: [
@@ -332,6 +333,7 @@ class GalerieState extends State<Galerie>
                     },
                   ),
               child: PagedGridView<int, Drawing>(
+                physics: AlwaysScrollableScrollPhysics(),
                 showNewPageProgressIndicatorAsGridChild: false,
                 showNewPageErrorIndicatorAsGridChild: false,
                 showNoMoreItemsIndicatorAsGridChild: false,
