@@ -48,7 +48,7 @@
         </app-drawing-gallery-card>
       </div>
     </div>
-    <div *ngIf="!lengthSelf && drawingFilterSelf !==''" style="font-style: Roboto">
+    <div *ngIf="!lengthSelf && drawingFilterSelf !=='' && !isLoading" style="font-style: Roboto">
       <br>
       <h2>Aucun de vos dessins ne correspond à la recherche<br>«{{drawingFilterSelf}}»</h2>
       Effectuez une autre recherche<br>
@@ -56,7 +56,7 @@
         <mat-icon [inline]="true">search_off</mat-icon>
       </div>      
     </div>
-    <div *ngIf="!lengthSelf && drawingFilterSelf ==='' && selectedOption === 'All'" style="font-style: Roboto">
+    <div *ngIf="!lengthSelf && drawingFilterSelf ==='' && selectedOption === 'All' && !isLoading" style="font-style: Roboto">
       <br><br>
       <h2>Bienvenue à Colorimage!</h2>
       Aucun dessin ne fait encore parti de votre répertoire.<br>
@@ -66,7 +66,7 @@
         <mat-icon [inline]="true">palette</mat-icon>
       </div>
     </div>
-    <div *ngIf="!lengthSelf && selectedOption !== 'All' && drawingFilterSelf ===''" style="font-style: Roboto">
+    <div *ngIf="!lengthSelf && selectedOption !== 'All' && drawingFilterSelf ==='' && !isLoading" style="font-style: Roboto">
       <br><br>
       <h2>Aucun de vos dessins ne correspond à ce type</h2>
       Créer un dessin ou accéder à un dessin <br>
@@ -116,7 +116,7 @@
         </app-drawing-gallery-card>
       </div>
     </div>
-    <div *ngIf="!lengthAll && drawingFilterAll !==''" style="font-style: Roboto">
+    <div *ngIf="!lengthAll && drawingFilterAll !=='' && !isLoading" style="font-style: Roboto">
       <br>
       <h2>Aucun dessin disponible ne correspond à la recherche<br>«{{drawingFilterAll}}»</h2>
       Effectuez une autre recherche<br>
@@ -124,7 +124,7 @@
         <mat-icon [inline]="true">search_off</mat-icon>
       </div>      
     </div>
-    <div *ngIf="!lengthAll && drawingFilterAll ==='' && selectedOptionAll === 'All'" style="font-style: Roboto">
+    <div *ngIf="!lengthAll && drawingFilterAll ==='' && selectedOptionAll === 'All' && !isLoading" style="font-style: Roboto">
       <br><br>
       <h2>Aucun dessin n'est disponible en ce moment</h2>
       Veuillez réessayer plus tard
@@ -132,7 +132,7 @@
         <mat-icon [inline]="true">palette</mat-icon>
       </div>
     </div>
-    <div *ngIf="!lengthAll && selectedOptionAll !== 'All' && drawingFilterAll ===''" style="font-style: Roboto">
+    <div *ngIf="!lengthAll && selectedOptionAll !== 'All' && drawingFilterAll ==='' && !isLoading" style="font-style: Roboto">
       <br><br>
       <h2>Aucun dessin disponible ne correspond à ce type</h2>
       Créer un dessin ou<br>

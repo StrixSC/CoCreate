@@ -54,6 +54,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   lengthAll: number;
   pageSizeAll = 12;
   pageIndexAll = 0;
+  isLoading: boolean = false;
   
   selectedOption: string = 'All';
   selectedOptionAll: string = 'All';
@@ -125,6 +126,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   ) {}
 
   ngOnInit(): void {
+    this.isLoading = true;
     this.errorListener = this.socketService.socketReadyEmitter
       .pipe(
         take(1),
@@ -176,6 +178,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     this.dataObsSelf = this.datasourceSelf.connect();
     this.dataObsAll = this.datasourceAll.connect();
     this.cdr.detectChanges();
+    this.isLoading = false;
   }
 
   searchMyDrawings(value: any) {
@@ -254,6 +257,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   handlePageEvent(event: PageEvent, paginate: boolean) {
+    this.isLoading = true;
     if(!paginate)
     {
       this.pageSizeSelf = 12;
@@ -269,10 +273,11 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
       this.datasourceSelf.data = d.drawings;
       this.lengthSelf = d.count;
     });
+    this.isLoading = false;
   }
 
   handleAllPageEvent(event: PageEvent, paginate: boolean) {
-
+    this.isLoading = true;
     if(!paginate)
     {
       this.pageSizeAll = 12;
@@ -290,9 +295,12 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
           this.datasourceAll.data = d.drawings;
           this.lengthAll = d.count;
     });
+    this.isLoading = false;
   }
   
   fetchAllDrawings(): void {
+    
+    this.isLoading = true;
     this.drawingsSubscription = merge(
       this.drawingGalleryService.getAllDrawings().pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count}))),
       this.drawingGalleryService.getMyDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: 'Self', count: d.total_drawing_count})))
@@ -309,6 +317,8 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
         }
       }
     });
+    
+    this.isLoading = false;
   }
   clearFilterAll() {
     this.drawingFilterAll = '';
