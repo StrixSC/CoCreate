@@ -92,7 +92,8 @@ export class TeamInfoComponent implements OnInit {
       this.isLoading = false;
       this.dialogRef.disableClose = false;
       this.fetchTeamInfo();
-    })
+    });
+
   }
 
   get types(): any {
@@ -139,14 +140,6 @@ export class TeamInfoComponent implements OnInit {
       collaborationId: collaborationId,
       userId: this.auth.activeUser!.uid,
     });
-  }
-
-  deleteTeam(team: TeamResponse): void {
-    this.isLoading = true;
-    this.dialogRef.disableClose = true;
-    this.teamService.sendDelete({
-      teamId: team.teamId
-    })
   }
 
   createDrawing(): void {
