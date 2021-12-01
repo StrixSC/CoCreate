@@ -17,6 +17,8 @@ const drawingRoute = '/drawing';
 const registerRoute = '/register';
 const fontsize = TextStyle(fontSize: 25);
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);
 
@@ -92,6 +94,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
                         fontSizeFactor: 2.0,
                         fontSizeDelta: 2.0,
                       ))),
+          navigatorKey: navigatorKey,
         ), //_theme(),
       ),
     );

@@ -5,9 +5,12 @@ import 'package:Colorimage/models/collaboration.dart';
 import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/screens/chat/chat.dart';
 import 'package:Colorimage/utils/socket/socket_service.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:vector_math/vector_math.dart';
+
+import '../../app.dart';
 
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
@@ -264,13 +267,26 @@ class CollaborationSocket extends SocketService {
   disconnected(callbackChannel) {
     socket.on('collaboration:disconnected', (data) {
       print('Collaboration disconnected');
+      print(data);
       // Map disconnected = {
+      //   "drawingId": data["drawingId"],
       //   "collaborationId": data["collaborationId"],
       //   "userId": data["userId"],
       //   "username": data["username"],
       //   "avatarUrl": data["avatarUrl"],
       // };
       // callbackChannel('disconnect', disconnected);
+
+      // TODO: don't delete this example for now
+      AwesomeDialog(
+        context: navigatorKey.currentContext as BuildContext,
+        width: 800,
+        dialogType: DialogType.SUCCES,
+        animType: AnimType.BOTTOMSLIDE,
+        title: 'Succes!',
+        desc: 'Vous avez ete déconnecter du dessin',
+        btnOkOnPress: () {},
+      ).show();
     });
   }
 

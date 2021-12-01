@@ -75,13 +75,17 @@ class Collaborator extends ChangeNotifier {
   }
 
   String getCollaborationId() {
-    return (drawings[currentType][currentDrawingId] as Drawing).collaboration.collaborationId;
+    return (drawings[currentType][currentDrawingId] as Drawing)
+        .collaboration
+        .collaborationId;
   }
 
   Map getCurrentActionMap() {
-    return (drawings[currentType][currentDrawingId] as Drawing).collaboration.actionsMap;
+    return (drawings[currentType][currentDrawingId] as Drawing)
+        .collaboration
+        .actionsMap;
   }
-  
+
   String getDrawingId(String collaborationId) {
     String drawingId = '';
     for (var type in TYPES) {
@@ -133,18 +137,26 @@ class Collaborator extends ChangeNotifier {
   }
 
   void memberJoined(Member member) {
-    if(member.userId == auth!.user!.uid) {
+    if (member.userId == auth!.user!.uid) {
       drawings[currentType][currentDrawingId].collaboration.members.add(member);
       drawings[currentType][currentDrawingId].collaboration.memberCount++;
     } else {
-      drawings['Available'][member.drawingId].collaboration.members.add(member);
-      drawings['Available'][member.drawingId].collaboration.memberCount++;
+      (drawings['Available'] as Map<String, Drawing>).update(member.drawingId!,
+          (value) {
+        value.collaboration.members.add(member);
+        return value;
+      });
+      (drawings['Available'] as Map<String, Drawing>).update(member.drawingId!,
+          (value) {
+        value.collaboration.memberCount++;
+        return value;
+      });
     }
-    
+
     for (var type in TYPES) {
       pagingControllers[type].refresh();
     }
-      notifyListeners();
+    notifyListeners();
   }
 
   // TODO: If it is sent to everyone even when not in drawing, need to change this
@@ -165,7 +177,7 @@ class Collaborator extends ChangeNotifier {
   }
 
   void drawingCreated(Drawing drawing) {
-    if(drawing.authorUsername == auth!.user!.displayName) {
+    if (drawing.authorUsername == auth!.user!.displayName) {
       (drawings['Joined'] as Map<String, Drawing>)
           .putIfAbsent(drawing.drawingId, () => drawing);
     } else {
@@ -203,22 +215,21 @@ class Collaborator extends ChangeNotifier {
 
     var drawingId = getDrawingId(collaborationId);
     for (var type in TYPES) {
-      if(type == 'Available') {
+      if (type == 'Available') {
         (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
-          value.collaboration.members.removeWhere((item) =>
-          item.userId == userId);
+          value.collaboration.members
+              .removeWhere((item) => item.userId == userId);
           value.collaboration.memberCount--;
           return value;
         });
-
       } else {
-        if(userId == auth!.user!.uid) {
+        if (userId == auth!.user!.uid) {
           (drawings[type] as Map<String, Drawing>)
               .removeWhere((key, value) => drawingId == key);
         } else {
           (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
-            value.collaboration.members.removeWhere((item) =>
-            item.userId == userId);
+            value.collaboration.members
+                .removeWhere((item) => item.userId == userId);
             value.collaboration.memberCount--;
             return value;
           });
@@ -238,10 +249,10 @@ class Collaborator extends ChangeNotifier {
 
     var drawingId = getDrawingId(collaborationId);
     for (var type in TYPES) {
-      if(type == 'Available') {
+      if (type == 'Available') {
         (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
-          var index = value.collaboration.members.indexWhere((item) =>
-          item.userId == userId);
+          var index = value.collaboration.members
+              .indexWhere((item) => item.userId == userId);
           value.collaboration.members[index].isActive = false;
           return value;
         });

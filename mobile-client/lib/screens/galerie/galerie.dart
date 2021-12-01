@@ -211,7 +211,8 @@ class GalerieState extends State<Galerie>
           //   pagingControllers[TYPES[value]].refresh();
           // });
           scrollControllers[TYPES[value]] = ScrollController();
-          pagingControllers[TYPES[value]].refresh();
+          // TODO: uncomment this line if you want to reload on tab change
+          // pagingControllers[TYPES[value]].refresh();
           context.read<Collaborator>().setCurrentType(TYPES[value]);
         },
         tabs: [
