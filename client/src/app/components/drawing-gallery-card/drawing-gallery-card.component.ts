@@ -70,4 +70,12 @@ export class DrawingGalleryCardComponent {
       
     });
   }
+  openUpdate(): void {
+    this.dialog.open(FormMenuDialogDrawingComponent, 
+      {
+      
+        data: {drawing:this.drawing, action: 'Update'}
+      
+    });
+  }
 }

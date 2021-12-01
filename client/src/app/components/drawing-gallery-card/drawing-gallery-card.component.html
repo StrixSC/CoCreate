@@ -4,7 +4,7 @@
     aria-label="Example icon button with a vertical three dot icon">
         <mat-icon>more_vert</mat-icon>
         <mat-menu #menu="matMenu">
-            <button *ngIf="drawing.is_owner" mat-menu-item>
+            <button *ngIf="drawing.is_owner" (click)="openUpdate()" mat-menu-item>
               <mat-icon>settings_icon</mat-icon>
               <span>Mise à jour des infos</span>
             </button>
@@ -39,6 +39,9 @@
     <mat-card-subtitle>Collaborateurs actifs: {{drawing.collaborator_count}}</mat-card-subtitle>
   </mat-card-header>
   <mat-card-actions>
+    <button mat-raised-button class="lock" color="primary" (click)="openDialog()" *ngIf="drawing.type === 'Protected' && !drawing.is_member">
+      <mat-icon>lock</mat-icon>
+    </button>
     <button class="btn" mat-raised-button color="primary"
       (click)="openDialog()">Aperçu du dessin</button>
   </mat-card-actions>

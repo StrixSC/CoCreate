@@ -36,4 +36,58 @@
         <button (click)="sendLeaveCollaboration()" mat-raised-button color="primary">Quitter</button>
         <button (click)="onNoClick()" mat-raised-button>Annuler</button>
     </div>
+</div>
+<div *ngIf="drawing['action']==='Update'">
+
+    <div class="main-container-wrapper">
+        <span class="header">Mise à jour des informations</span>
     </div>
+    <div class="main-container-wrapper">
+        <form class="form" [formGroup]="updateForm" (submit)="onSubmit()">
+            <div>
+
+                              <mat-form-field required appearance="outline">
+                                     <mat-label>Nom d'équipe</mat-label>
+                                     <input required matInput type="text" formControlName="teamName"
+                                            placeholder="Les Piccassos des ténèbres" />
+                                     <mat-error *ngIf="teamName.hasError('required')">
+                                            Ce champ est obligatoire.
+                                     </mat-error>
+                              </mat-form-field>
+                
+         </div>
+    
+            
+        </form>
+
+    </div>
+
+</div>
+    <style>
+        h1 {
+            font-size: 2rem;
+        }
+    
+        .form-field {
+            width: 300px;
+        }
+    
+        .main-container-wrapper {
+            gap: 0rem;
+            align-items: center;
+            padding-top: 3rem;
+            justify-content: space-around;
+            display: flex;
+            flex-direction: row;
+        }
+    
+        .form {
+            display: flex;
+            flex-direction: column;
+        }
+    
+        .header {
+            font-weight: bolder;
+            font-size: 2rem;
+        }
+    </style>
