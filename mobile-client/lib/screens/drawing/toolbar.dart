@@ -81,7 +81,7 @@ class _ToolbarState extends State<Toolbar> {
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(
                         currentTool == tools[index].type
-                            ? kContentColor.withOpacity(0.5)
+                            ? kPrimaryColor.withOpacity(0.5)
                             : Colors.transparent),
                     fixedSize: MaterialStateProperty.all(const Size(80, 57)),
                   ),
