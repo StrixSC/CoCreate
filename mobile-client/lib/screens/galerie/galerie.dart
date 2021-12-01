@@ -5,8 +5,10 @@ import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/collaboration.dart';
 import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/providers/collaborator.dart';
+import 'package:Colorimage/providers/messenger.dart';
 import 'package:Colorimage/screens/drawing/drawing.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
+import 'package:Colorimage/widgets/sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -248,6 +250,12 @@ class GalerieState extends State<Galerie>
             backgroundColor: kPrimaryColor,
             centerTitle: true,
             automaticallyImplyLeading: false,
+            leading: Builder(builder: (context) => // Ensure Scaffold is in context
+            IconButton(
+                icon: Icon(Icons.message),
+                onPressed: () => Scaffold.of(context).openEndDrawer()
+            ),
+            ),
             title: const Text("Galerie de dessins"),
             actions: <Widget>[
               IconButton(

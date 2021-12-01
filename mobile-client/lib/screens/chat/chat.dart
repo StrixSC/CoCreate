@@ -186,16 +186,17 @@ class _ChatScreenState extends State<ChatScreen> {
                 message: 'Se déconnecter',
                 child: Icon(Icons.arrow_back, color: Colors.white, size: 30)),
             onPressed: () {
-              var lastMessage = messenger
-                  .userChannels[widget.channelIndex].messages.first.text;
               messenger.userChannels[widget.channelIndex].messages.isEmpty
                   ? ''
-                  : messenger.setLastMessage(lastMessage, widget.channelIndex);
+                  : messenger.setLastMessage(
+                      messenger.userChannels[widget.channelIndex].messages.first
+                          .text,
+                      widget.channelIndex);
               context.read<Messenger>().toggleSelection();
             }),
-        title: const Text(
-          '',
-          style: TextStyle(fontSize: 25, color: Colors.blue),
+        title: Text(
+          context.read<Messenger>().userChannels[widget.channelIndex].name,
+          style: TextStyle(fontSize: 25, color: kPrimaryColor),
         ),
         actions: [
           IconButton(

@@ -21,6 +21,8 @@ class Messenger extends ChangeNotifier {
   int currentSelectedChannelIndex = 0;
   late ChannelSocket channelSocket;
 
+  late Function openDrawer;
+
   Messenger(this.auth, this.userChannels, this.allChannels);
 
   void setSocket(socket) {

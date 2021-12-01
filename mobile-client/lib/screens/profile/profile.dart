@@ -75,10 +75,12 @@ class _ProfileScreenState extends State<Profile> {
                       padding: const EdgeInsets.all(8),
                       itemCount: entries.length,
                       itemBuilder: (BuildContext context, int index) {
-                        return index != 1 ? Container(
-                            height: height[index],
-                            color: colorCodes[index],
-                            child: Widgets(index)) : Widgets(index);
+                        return index != 1
+                            ? Container(
+                                height: height[index],
+                                color: colorCodes[index],
+                                child: Widgets(index))
+                            : Widgets(index);
                       }))
             ],
           ),
@@ -105,10 +107,11 @@ class _ProfileScreenState extends State<Profile> {
       const SizedBox(width: 50),
       isAuthor
           ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Text('Courriel: ' + _user.email.toString()),
-        Text('Nom: Patel'),
-        Text('Prenom: Pritam'),
-      ]) : const SizedBox.shrink(),
+              Text('Courriel: ' + _user.email.toString()),
+              Text('Nom: Patel'),
+              Text('Prenom: Pritam'),
+            ])
+          : const SizedBox.shrink(),
       Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         CircleAvatar(
           backgroundColor: Colors.white,
@@ -146,16 +149,22 @@ class _ProfileScreenState extends State<Profile> {
         height: MediaQuery.of(context).size.height * 0.15,
         child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: numbers.length, itemBuilder: (context, index) {
-          return Container(
-            width: MediaQuery.of(context).size.width * 0.25,
-            child: Card(
-              color: kContentColor,
-              child: Container(
-                child: Center(child: Text(numbers[index].toString(), style: TextStyle(color: Colors.white, fontSize: 36.0),)),
-              ),
-            ),
-          );}));
+            itemCount: numbers.length,
+            itemBuilder: (context, index) {
+              return Container(
+                width: MediaQuery.of(context).size.width * 0.25,
+                child: Card(
+                  color: kContentColor,
+                  child: Container(
+                    child: Center(
+                        child: Text(
+                      numbers[index].toString(),
+                      style: TextStyle(color: Colors.white, fontSize: 36.0),
+                    )),
+                  ),
+                ),
+              );
+            }));
   }
 
   openSettingsDialog() {
@@ -168,7 +177,8 @@ class _ProfileScreenState extends State<Profile> {
             pageTransitionAnimation: PageTransitionAnimation.cupertino,
           );
         },
-        child: const Text('Paramètres de compte', style: TextStyle(color: Colors.white)),
+        child: const Text('Paramètres de compte',
+            style: TextStyle(color: Colors.white)),
         style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all(kPrimaryColor)));
   }
@@ -198,7 +208,8 @@ class _ProfileScreenState extends State<Profile> {
             pageTransitionAnimation: PageTransitionAnimation.cupertino,
           );
         },
-        child: const Text('Statistiques', style: TextStyle(color: Colors.white)),
+        child:
+            const Text('Statistiques', style: TextStyle(color: Colors.white)),
         style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all(kPrimaryColor)));
   }
