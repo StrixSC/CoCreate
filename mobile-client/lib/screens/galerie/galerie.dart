@@ -281,12 +281,12 @@ class GalerieState extends State<Galerie>
       return Column(children: <Widget>[
         const SizedBox(height: 40.0),
         SizedBox(
-            width: 1050.0,
+            width: MediaQuery.of(context).size.width - MediaQuery.of(context).size.width / 4,
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SizedBox(
-                      width: 500,
+                      width: MediaQuery.of(context).size.width / 3,
                       child: TextField(
                         style: const TextStyle(fontSize: 25),
                         controller: searchController,
@@ -316,7 +316,7 @@ class GalerieState extends State<Galerie>
                       )),
                   // const SizedBox(width: 24.0),
                   SizedBox(
-                      width: 500,
+                      width: MediaQuery.of(context).size.width / 3,
                       child: dropDown(
                           ['Aucun', 'Public', 'Protégé', 'Privée'],
                           dropDownControllers[
@@ -733,9 +733,9 @@ class _Drawing extends StatelessWidget {
                       Row(children: <Widget>[
                         Expanded(
                             child: SizedBox(
-                                width: 680, child: gridTileJoin(thumbnail))),
+                                width: MediaQuery.of(context).size.width / 2, child: gridTileJoin(thumbnail))),
                         SizedBox(
-                            width: 300,
+                            width: MediaQuery.of(context).size.width / 4,
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -949,6 +949,7 @@ class _Drawing extends StatelessWidget {
           child: Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20.0),
               child: Container(
+                height: 820,
                   decoration: BoxDecoration(
                       border: Border.all(
                           width: 2.5, color: Colors.grey.withOpacity(0.1))),
@@ -956,8 +957,9 @@ class _Drawing extends StatelessWidget {
                       color: kContentColor,
                       child: Column(children: <Widget>[
                         Container(
-                            height: 80.0,
-                            child: Row(children: [
+                            height: orientation == Orientation.portrait ? 50.0 : MediaQuery.of(context).size.height / 9,
+                            child: Row(
+                                children: [
                               Column(children: [
                                 Padding(
                                     padding: EdgeInsets.all(15.0),
@@ -990,8 +992,8 @@ class _Drawing extends StatelessWidget {
                                   ]),
                             ])),
                         Container(
-                            width: 400,
-                            height: 175,
+                            width: MediaQuery.of(context).size.width / 2,
+                            height: MediaQuery.of(context).size.width / 7,
                             child: GridTile(
                               child: thumbnail,
                             )),
