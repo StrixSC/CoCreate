@@ -1,5 +1,5 @@
 import { AuthService } from './auth.service';
-import { ICollaborationJoinPayload, ICollaborationConnectPayload, ICollaborationCreatePayload, ICollaborationUpdatePayload, ICollaborationDeletePayload } from './../model/ICollaboration.model';
+import { ICollaborationJoinPayload, ICollaborationConnectPayload, ICollaborationCreatePayload, ICollaborationUpdatePayload, ICollaborationDeletePayload, ICollaborationLeavePayload } from './../model/ICollaboration.model';
 import {
   IGalleryEntry, IConnectCollaboration, ICreateCollaboration
 } from "../model/IGalleryEntry.model";
@@ -84,11 +84,11 @@ export class SyncCollaborationService {
     this.socketService.emit('collaboration:delete', { ...data, userId: this.authService.activeUser.uid });
   }
 
-  sendLeaveCollaboration(data: { userId: string, collaborationId: string }) {
+  sendLeaveCollaboration(data: ICollaborationLeavePayload) {
     if (!this.authService.activeUser) {
       return;
     }
-
+    console.log(data)
     this.socketService.emit('collaboration:leave', { ...data, userId: this.authService.activeUser.uid });
   }
 

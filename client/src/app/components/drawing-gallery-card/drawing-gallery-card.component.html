@@ -8,7 +8,7 @@
               <mat-icon>settings_icon</mat-icon>
               <span>Mise à jour des infos</span>
             </button>
-            <button *ngIf="!drawing.is_owner" mat-menu-item>
+            <button *ngIf="!drawing.is_owner" (click)="openLeave()" mat-menu-item>
                 <mat-icon>logout</mat-icon>
                 <span>Quitter</span>
             </button>
@@ -33,7 +33,6 @@
   <img class="image-preview" mat-card-image
     src="../../../assets/default-image.png">
 
-  <button mat-icon-button *ngIf="drawing.type === 'Protected'" class="lock" mat-card-image src=""></button>
   <mat-card-header align="center" fxLayoutAlign="center">
     <mat-card-title></mat-card-title>
     <mat-card-subtitle>Auteur: {{drawing.author_username}}</mat-card-subtitle>

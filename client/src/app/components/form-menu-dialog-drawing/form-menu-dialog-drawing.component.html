@@ -1,0 +1,39 @@
+<div *ngIf="drawing['action']==='Delete'">
+<div>
+    <h2>Suppression du dessin</h2>
+</div>
+<br>
+<div>
+    Êtes-vous sûr de vouloir supprimer le dessin 
+    <br>
+</div>
+<div style="font-size: large; text-align: center;">
+    «{{drawing['drawing'].title}}»?
+    
+<br>
+</div>
+<div mat-dialog-actions>
+    <button (click)="sendDeleteCollaboration()" mat-raised-button color="primary">Supprimer</button>
+    <button (click)="onNoClick()" mat-raised-button>Annuler</button>
+</div>
+</div>
+
+<div *ngIf="drawing['action']==='Leave'">
+    <div>
+        <h2>Quitter dessin</h2>
+    </div>
+    <br>
+    <div>
+        Êtes-vous sûr de vouloir quitter le dessin 
+        <br>
+    </div>
+    <div style="font-size: large; text-align: center;">
+        «{{drawing['drawing'].title}}»?
+        
+    <br>
+    </div>
+    <div mat-dialog-actions>
+        <button (click)="sendLeaveCollaboration()" mat-raised-button color="primary">Quitter</button>
+        <button (click)="onNoClick()" mat-raised-button>Annuler</button>
+    </div>
+    </div>

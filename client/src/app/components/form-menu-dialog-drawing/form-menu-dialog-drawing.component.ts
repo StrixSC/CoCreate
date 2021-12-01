@@ -1,18 +1,18 @@
-import { IGalleryEntry } from './../../model/IGalleryEntry.model';
+import { IGalleryEntry } from '../../model/IGalleryEntry.model';
 import {OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
-import { ICollaborationDeletePayload } from './../../model/ICollaboration.model';
+import { ICollaborationDeletePayload, ICollaborationLeavePayload } from '../../model/ICollaboration.model';
 import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-form-delete-drawing',
-  templateUrl: './form-delete-drawing.component.html',
-  styleUrls: ['./form-delete-drawing.component.scss']
+  selector: 'app-form-menu-dialog-drawing',
+  templateUrl: './form-menu-dialog-drawing.component.html',
+  styleUrls: ['./form-menu-dialog-drawing.component.scss']
 })
-export class FormDeleteDrawingComponent implements OnInit {
+export class FormMenuDialogDrawingComponent implements OnInit {
 
 
   selectedType: string;
@@ -22,9 +22,9 @@ export class FormDeleteDrawingComponent implements OnInit {
   
   public constructor(
     private syncCollaborationService: SyncCollaborationService,
-    public dialogRef: MatDialogRef<FormDeleteDrawingComponent>,
+    public dialogRef: MatDialogRef<FormMenuDialogDrawingComponent>,
     private snackbar: MatSnackBar,
-    @Inject(MAT_DIALOG_DATA) public drawing: IGalleryEntry | null,
+    @Inject(MAT_DIALOG_DATA) public drawing: any,
   ) {
   }
 
@@ -37,11 +37,23 @@ export class FormDeleteDrawingComponent implements OnInit {
   }
 
   sendDeleteCollaboration() {
-    if(this.drawing!==null){
+    if(this.drawing!==null && this.drawing['action']==="Delete"){
     let data =  {
-    collaborationId: this.drawing.collaboration_id
+    collaborationId: this.drawing['drawing'].collaboration_id
     } as ICollaborationDeletePayload
+    console.log(data)
     this.syncCollaborationService.sendDeleteCollaboration(data)
+    this.dialogRef.close();
+    }
+  }
+
+  sendLeaveCollaboration() {
+    if(this.drawing!==null && this.drawing['action']==="Leave"){
+    let data =  {
+    collaborationId: this.drawing['drawing'].collaboration_id
+    } as ICollaborationLeavePayload
+    console.log(data)
+    this.syncCollaborationService.sendLeaveCollaboration(data)
     this.dialogRef.close();
     }
   }

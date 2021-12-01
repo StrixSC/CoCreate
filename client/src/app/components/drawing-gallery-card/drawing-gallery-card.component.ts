@@ -9,7 +9,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DrawingPreviewDialogComponent } from '../drawing-preview-dialog/drawing-preview-dialog.component';
 import { IGalleryEntry } from '../../model/IGalleryEntry.model';
 import { CollaborationPasswordFormDialogComponent } from '../collaboration-password-form-dialog/collaboration-password-form-dialog.component';
-import { FormDeleteDrawingComponent } from '../form-delete-drawing/form-delete-drawing.component';
+import { FormMenuDialogDrawingComponent } from '../form-menu-dialog-drawing/form-menu-dialog-drawing.component';
 
 @Component({
   selector: 'app-drawing-gallery-card',
@@ -55,10 +55,18 @@ export class DrawingGalleryCardComponent {
   }
 
   openDelete(): void {
-    this.dialog.open(FormDeleteDrawingComponent, 
+    this.dialog.open(FormMenuDialogDrawingComponent, 
       {
       
-        data: this.drawing
+        data: {drawing:this.drawing, action: "Delete"}
+      
+    });
+  }
+  openLeave(): void {
+    this.dialog.open(FormMenuDialogDrawingComponent, 
+      {
+      
+        data: {drawing:this.drawing, action: "Leave"}
       
     });
   }

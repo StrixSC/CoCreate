@@ -149,7 +149,8 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
               this.syncCollaboration.onCreateCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Create }))),
               this.syncCollaboration.onDeleteCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Delete }))),
               this.syncCollaboration.onUpdateCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Update }))),
-              this.syncCollaboration.onLoadCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Load })))
+              this.syncCollaboration.onLoadCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Load }))),
+              this.syncCollaboration.onLeaveCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Leave })))
       ).subscribe((data: object & { eventType: GalleryEvents }) => {
         if (data && data.eventType) {
           this.handlerCallbacks[data.eventType](data);
@@ -247,9 +248,9 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   onLeave(data: ICollaborationLeaveResponse) {
-    this.dialogRef.close();
+    if(this.dialogRef) this.dialogRef.close();
     this.snackbar.open('Dessin quitté avec succès!', '', { duration: 5000 });
-    this.fetchAllDrawings();
+    this.handlePageEvent(new PageEvent, false);
   }
 
   handlePageEvent(event: PageEvent, paginate: boolean) {
