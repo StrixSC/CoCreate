@@ -14,7 +14,8 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: SizedBox(
+        backgroundColor: Colors.red,
+        endDrawer: SizedBox(
             width: MediaQuery.of(context).size.width * 0.70,
             child: Sidebar()),
         body: BottomNavBar(_controller));

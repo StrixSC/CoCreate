@@ -6,8 +6,8 @@ export abstract class SyncCommand {
     public selectedBy: string = "";
     public isSelected: boolean = false;
     public payload: IAction;
-    abstract undo(): void;
+    abstract undo(action?: SVGElement): void;
     abstract execute(): SyncCommand | void;
     abstract update(payload: IAction): SyncCommand | void;
-    abstract redo(): void;
+    abstract redo(action?: SVGElement): void;
 }

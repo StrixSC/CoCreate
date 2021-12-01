@@ -295,10 +295,12 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
       this.drawingGalleryService.getAllDrawings().pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count}))),
       this.drawingGalleryService.getMyDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: 'Self', count: d.total_drawing_count})))
     ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string, count: number }) => {
+      console.log(d)
       if (d.drawings && d.drawings.length > 0) {
         if (d.galleryType === 'Self') {
           this.datasourceSelf.data = d.drawings;
           this.lengthSelf = d.count;
+          
         } else {
           this.datasourceAll.data = d.drawings;
           this.lengthAll = d.count;

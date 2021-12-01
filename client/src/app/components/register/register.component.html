@@ -1,92 +1,128 @@
 <div class="main-container-wrapper">
     <h1>Inscription</h1>
     <form class="form" [formGroup]="registerForm" (submit)="register()">
-        <div *ngIf="errorMessage" class="error-flash">
-            {{ errorMessage }}
+        <div class="inner-section">
+
+            <div class="first-section">
+                <div *ngIf="errorMessage" class="error-flash">
+                    {{ errorMessage }}
+                </div>
+                <mat-form-field class="form-field clickable" appearance="outline">
+                    <mat-label>Courriel</mat-label>
+                    <input required matInput type="email" formControlName="email" placeholder="exemple@courriel.com" />
+                    <mat-error *ngIf="registerForm.get('email').hasError('required')">
+                        Ce champ est obligatoire.
+                    </mat-error>
+
+                </mat-form-field>
+
+                <mat-form-field class="pb-1 form-field clickable" appearance="outline">
+                    <mat-label>Mot de passe</mat-label>
+                    <input required formControlName="password" [type]="showPassword ? 'text' : 'password'" matInput
+                        placeholder="********" />
+                    <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">{{ showPassword ?
+                        'visibility_off' : 'visibility' }} </mat-icon>
+                    <mat-hint>Caractères alphanumériques seulement et doit être entre 8 et 256 caractères</mat-hint>
+                    <mat-error *ngIf="registerForm.get('password').hasError('required')">
+                        Ce champ est obligatoire.
+                    </mat-error>
+                    <mat-error *ngIf="registerForm.get('password').hasError('minlength')">
+                        Le mot de passe doit être entre 8 et 256 caractères.
+                    </mat-error>
+                    <mat-error *ngIf="registerForm.get('password').hasError('maxlength')">
+                        Le mot de passe doit être entre 8 et 256 caractères.
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field class="pb-1 form-field clickable" appearance="outline">
+                    <mat-label>Nom d'utilisateur</mat-label>
+                    <input required type="text" formControlName="username" matInput placeholder="Picasso123" />
+                    <mat-hint>Caractères alphanumériques seulement</mat-hint>
+                    <mat-error *ngIf="registerForm.get('username').hasError('required')">
+                        Ce champ est obligatoire.
+                    </mat-error>
+                    <mat-error *ngIf="registerForm.get('username').hasError('minlength')">
+                        Le nom d'utilisateur doit être entre 4 et 256 caractères.
+                    </mat-error>
+                    <mat-error *ngIf="registerForm.get('username').hasError('maxlength')">
+                        Le nom d'utilisateur doit être entre 4 et 256 caractères.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="second-section">
+                <mat-form-field class="form-field clickable" appearance="outline">
+                    <mat-label>Prénom</mat-label>
+                    <input required type="text" formControlName="firstName" matInput placeholder="John" />
+                    <mat-error *ngIf="registerForm.get('firstName').hasError('required')">
+                        Ce champ est obligatoire.
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field class="form-field clickable pb-1" appearance="outline">
+                    <mat-label>Surnom</mat-label>
+                    <input required type="text" formControlName="lastName" matInput placeholder="Doe" />
+                    <mat-error *ngIf="registerForm.get('lastName').hasError('required')">
+                        Ce champ est obligatoire.
+                    </mat-error>
+                </mat-form-field>
+
+                <div class="form-field avatar-section">
+                    <div>
+                        <div class="avatar-container">
+                            <label class="avatar-label clickable" for="avatar">Choisir un avatar</label>
+                            <input style="display: none" name="avatar" id="avatar" type="file"
+                                (change)="uploadFile($event)">
+                        </div>
+                        <p class="link clickable"><u (click)="triggerAvatarDialog()">Ou en choisir un d'une liste!</u>
+                        </p>
+                    </div>
+                    <div class="selected-avatar" *ngIf="selectedAvatarUrl">
+                        <img class="selected-avatar-img" [src]="selectedAvatarUrl">
+                    </div>
+                    <div class="selected-file-name" *ngIf="activeFile">
+                        <small>Fichier choisit:
+                            <br>{{ activeFile.name | slice:0:12 }}...</small>
+                    </div>
+                </div>
+            </div>
         </div>
-        <mat-form-field class="form-field clickable" appearance="outline">
-            <mat-label>Courriel</mat-label>
-            <input matInput type="email" formControlName="email" placeholder="exemple@courriel.com" />
-            <mat-error *ngIf="registerForm.get('email').hasError('required')">
-                Ce champ est obligatoire.
-            </mat-error>
 
-        </mat-form-field>
+        <div class="buttons-container">
 
-        <mat-form-field class="pb-1 form-field clickable" appearance="outline">
-            <mat-label>Mot de passe</mat-label>
-            <input formControlName="password" [type]="showPassword ? 'text' : 'password'" matInput placeholder="********" />
-            <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">{{ showPassword ?
-                'visibility_off' : 'visibility' }} </mat-icon>
-            <mat-hint>Caractères alphanumériques seulement et doit être entre 8 et 256 caractères</mat-hint>
-            <mat-error *ngIf="registerForm.get('password').hasError('required')">
-                Ce champ est obligatoire.
-            </mat-error>
-            <mat-error *ngIf="registerForm.get('password').hasError('minlength')">
-                Le mot de passe doit être entre 8 et 256 caractères.
-            </mat-error>
-            <mat-error *ngIf="registerForm.get('password').hasError('maxlength')">
-                Le mot de passe doit être entre 8 et 256 caractères.
-            </mat-error>
-        </mat-form-field>
+            <div>
+                <button [disabled]="!isValid()" color="primary" class="form-field" type="submit" mat-raised-button>
+                    <div class="spinner" *ngIf="isLoading">
+                        <mat-spinner [diameter]="35" color="accent" class="spinner">
+                        </mat-spinner>
+                    </div>
+                    <ng-container *ngIf="!isLoading">Inscription</ng-container>
+                </button>
+            </div>
+            <div class="pt-1">
+                <button color="cancel" class="form-field" mat-raised-button routerLink="/auth">Retour</button>
+            </div>
 
-        <mat-form-field class="pb-1 form-field clickable" appearance="outline">
-            <mat-label>Nom d'utilisateur</mat-label>
-            <input type="text" formControlName="username" matInput placeholder="Picasso123" />
-            <mat-hint>Caractères alphanumériques seulement</mat-hint>
-            <mat-error *ngIf="registerForm.get('username').hasError('required')">
-                Ce champ est obligatoire.
-            </mat-error>
-            <mat-error *ngIf="registerForm.get('username').hasError('minlength')">
-                Le nom d'utilisateur doit être entre 4 et 256 caractères.
-            </mat-error>
-            <mat-error *ngIf="registerForm.get('username').hasError('maxlength')">
-                Le nom d'utilisateur doit être entre 4 et 256 caractères.
-            </mat-error>
-        </mat-form-field>
-
-        <mat-form-field class="form-field clickable" appearance="outline">
-            <mat-label>Prénom</mat-label>
-            <input type="text" formControlName="firstName" matInput placeholder="John" />
-            <mat-error *ngIf="registerForm.get('firstName').hasError('required')">
-                Ce champ est obligatoire.
-            </mat-error>
-        </mat-form-field>
-
-        <mat-form-field class="form-field clickable pb-1" appearance="outline">
-            <mat-label>Surnom</mat-label>
-            <input type="text" formControlName="lastName" matInput placeholder="Doe" />
-            <mat-error *ngIf="registerForm.get('lastName').hasError('required')">
-                Ce champ est obligatoire.
-            </mat-error>
-        </mat-form-field>
-
-        <div>
-            <button color="primary" class="form-field" type="submit" mat-raised-button>
-                <mat-spinner *ngIf="isLoading" class="spinner"></mat-spinner>
-                <ng-container *ngIf="!isLoading">Inscription</ng-container>
-            </button>
-        </div>
-        <div class="pt-1">
-            <button color="cancel" class="form-field" mat-raised-button routerLink="/auth/menu">Retour</button>
-        </div>
-
-        <div class="pt-2">
-            <span>
-                Déjà un compte? <u class="link clickable" routerLink="/auth/login">Connectez-vous</u>
-            </span>
+            <div class="pt-2">
+                <span>
+                    Déjà un compte? <u class="link clickable" routerLink="/auth/login">Connectez-vous</u>
+                </span>
+            </div>
         </div>
     </form>
 
 </div>
 
 <style>
+    .hidden {
+        visibility: hidden;
+    }
+
     h1 {
         font-size: 2rem;
     }
 
     .form-field {
-        min-width: 300px;
+        min-width: 400px;
     }
 
     .main-container-wrapper {
@@ -95,8 +131,68 @@
         padding-top: 3rem;
     }
 
+    .selected-avatar {
+        max-width: 100px;
+        max-height: 100px;
+    }
+
+    .selected-file-name {}
+
+    .avatar-label {
+        border: 2px dashed gray;
+        padding: 0.5rem;
+        text-align: center;
+        text-decoration: underline;
+    }
+
+    .selected-avatar-img {
+        max-width: 100%;
+        object-fit: contain;
+        max-height: 100%;
+    }
+
+    .avatar-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .avatar-section {
+        display: flex;
+        gap: 1rem;
+    }
+
     .form {
         display: flex;
         flex-direction: column;
+    }
+
+    .buttons-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        padding-top: 3rem;
+    }
+
+    .first-section {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .second-section {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .inner-section {
+        display: flex;
+        justify-content: center;
+        flex-direction: row;
+        gap: 3rem;
     }
 </style>

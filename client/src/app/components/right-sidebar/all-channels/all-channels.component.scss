@@ -1,5 +1,4 @@
 .all_channels {
-  width: 1010px;
   color: white;
   position: fixed;
   height: 100%;
@@ -7,22 +6,30 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.all_channels button {
+  color: rgb(174, 174, 174);
+}
+
 .channel_box {
   margin-top: 20px;
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+.channel_box:hover {
+  cursor: pointer;
 }
 
 .column1 {
   float: left;
-  margin-left: 10px;
-  width: 140px;
+  margin-left: 20px;
+  width: 200px;
   padding: 10px;
   height: 120px;
   margin-top: 20px;
   background-color: #282b2f;
-  border-radius: 10px 0px 0px 10px;
+  border-radius: 10px 10px 10px 10px;
   transition: 0.2s;
-  // border-color: #3aa55d;
-  // border-style: solid;
 }
 
 .column2 {
@@ -34,8 +41,6 @@
   background-color: #282b2f;
   border-radius: 0px 10px 10px 0px;
   transition: 0.2s;
-  // border-color: #3aa55d;
-  // border-style: solid;
 }
 
 .channel_btn {
@@ -69,4 +74,45 @@
   background-color: #1b1d20;
   -ms-transform: scale(1.01); /* IE 9 */
   transform: scale(1.05);
+}
+
+.create_channel_input {
+  padding: 18px;
+  width: 80%;
+  margin-top: 5%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border-color: #36393f;
+  border: none;
+  outline: none;
+  font-size: 20px;
+  color: white;
+  background-color: #40444b;
+  transition: 0.2s;
+  left: 50;
+}
+
+.btn_class {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 85%;
+  height: 50px;
+  border-radius: 10px;
+  background-color: #282b2f;
+  transition: 0.5;
+  color: #36393e;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  outline: none;
+  border: none;
+}
+
+.btn_class:hover {
+  background-color: #0f1012;
+  color: #cc00ff;
+  transition: 0.5;
 }

@@ -34,6 +34,12 @@ export class ChatSocketService {
     });
   }
 
+  deleteChannel(channel_id: string) {
+    return this.socket.emit("channel:delete", {
+      channelId: channel_id,
+    });
+  }
+
   joinChannel(channelId: string): void {
     this.socket.emit("channel:join", {
       channelId: channelId,

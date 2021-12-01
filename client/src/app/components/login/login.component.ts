@@ -1,8 +1,10 @@
+import { MatSnackBar, MatSnackBarConfig } from '@angular/material';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FormControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from './../../services/auth.service';
 import { Component, OnInit } from '@angular/core';
+import { firebaseAuthErrorHandler } from 'src/app/utils/login';
 
 @Component({
   selector: 'app-login',
@@ -10,13 +12,13 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
-
+  options: MatSnackBarConfig = { duration: 5000, verticalPosition: 'top' };
   authSubscription: Subscription;
   isLoading: boolean = false;
   loginForm: FormGroup;
   errorMessage: string | null = null;
   showPassword: boolean = false;
-  constructor(private router: Router, private auth: AuthService, private fb: FormBuilder) { }
+  constructor(private snackbar: MatSnackBar, private router: Router, private auth: AuthService, private fb: FormBuilder) { }
 
   ngOnInit() {
     this.loginForm = this.fb.group({
@@ -54,11 +56,9 @@ export class LoginComponent implements OnInit {
           this.isLoading = false;
         }
       }, (error) => {
-        // TODO Handle errors to translate them in french.
-        console.error(error);
         this.isLoading = false;
         this.loginForm.enable();
-        this.errorMessage = error;
+        this.snackbar.open(this.handleError(error), '', this.options);
       })
     }
   }
@@ -67,6 +67,13 @@ export class LoginComponent implements OnInit {
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
     }
+  }
+
+  handleError(error: firebase.FirebaseError) {
+    const handledError = firebaseAuthErrorHandler[error.code];
+    if (handledError) {
+      return handledError;
+    } else return "Oups! Un erreur inconnu à survenu. Veuillez réessayez à nouveau!"
   }
 
 }

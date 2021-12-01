@@ -1,5 +1,4 @@
 import { AuthService } from './auth.service';
-import { CollaborationService } from './collaboration.service';
 import { FilledShape } from "./tools/tool-rectangle/filed-shape.model";
 import {
   IUndoRedoAction,
@@ -10,8 +9,7 @@ import {
 } from "./../model/IAction.model";
 import { fromRGB, fromOpacity } from "../utils/colors";
 import { Pencil } from "./tools/pencil-tool/pencil.model";
-import { ICommand } from "src/app/interfaces/command.interface";
-import { Observable, of, EMPTY } from "rxjs";
+import { Observable } from "rxjs";
 import {
   DrawingState,
   IFreedrawUpAction,
@@ -31,6 +29,13 @@ export class SyncDrawingService {
   private readonly R = 0;
   private readonly G = 1;
   private readonly B = 2;
+
+  private totalXTranslation = 0;
+  private totalYTranslation = 0;
+  private currentXScale = 0;
+  private currentYScale = 0;
+  private totalAngle = 0;
+
   public activeActionId: string = "";
   private hasStartedMovement: boolean = false;
 
@@ -53,7 +58,7 @@ export class SyncDrawingService {
     return this.socketService.on("freedraw:received");
   }
 
-  sendFreedraw(state: DrawingState, pencil: Pencil) {
+  sendFreedraw(state: DrawingState, pencil: Pencil, isUndoRedo?: boolean, actionId?: string) {
     if (!this.defaultPayload || !pencil) {
       return;
     }
@@ -73,6 +78,10 @@ export class SyncDrawingService {
       alpha = fromOpacity(pencil.strokeOpacity);
     }
 
+    if (actionId) {
+      this.activeActionId = actionId
+    }
+
     let payload = {
       ...this.defaultPayload,
       actionId: this.activeActionId,
@@ -85,20 +94,16 @@ export class SyncDrawingService {
       isSelected: true,
       actionType: ActionType.Freedraw,
       selectedBy: this.defaultPayload.userId,
+      isUndoRedo: !!isUndoRedo,
     } as IDefaultActionPayload & IFreedrawUpAction;
-
-    if (state === DrawingState.up) {
-      payload.isSelected = "false" as unknown as boolean;
-    }
 
     const lastPoint = pencil.pointsList[pencil.pointsList.length - 1];
 
-    if (state === DrawingState.down || DrawingState.move) {
-      payload.x = lastPoint.x;
-      payload.y = lastPoint.y;
-    }
+    payload.x = lastPoint.x;
+    payload.y = lastPoint.y;
 
     if (state === DrawingState.up) {
+      payload.isSelected = false;
       payload.offsets = pencil.pointsList;
     }
 
@@ -109,7 +114,9 @@ export class SyncDrawingService {
     state: DrawingState,
     shapeStyle: ShapeStyle,
     shapeType: ShapeType,
-    shape: FilledShape
+    shape: FilledShape,
+    isUndoRedo?: boolean,
+    actionId?: string
   ) {
     if (!this.defaultPayload || !shapeType || !shape) {
       return;
@@ -141,6 +148,10 @@ export class SyncDrawingService {
       fillAlpha = fromOpacity(shape.fillOpacity);
     }
 
+    if (actionId) {
+      this.activeActionId = actionId
+    }
+
     let payload: IShapeAction = {
       ...this.defaultPayload,
       actionId: this.activeActionId,
@@ -163,10 +174,11 @@ export class SyncDrawingService {
       selectedBy: this.defaultPayload.userId,
       shapeStyle: shapeStyle,
       actionType: ActionType.Shape,
+      isUndoRedo: !!isUndoRedo,
     };
 
     if (state === DrawingState.up) {
-      payload.isSelected = "false" as unknown as boolean;
+      payload.isSelected = false;
     }
 
     this.socketService.emit("shape:emit", payload);
@@ -190,17 +202,18 @@ export class SyncDrawingService {
     });
   }
 
-  sendSelect(actionId: string, selection: boolean): void {
+  sendSelect(actionId: string, selection: boolean, isUndoRedo?: boolean): void {
     if (!actionId) return;
     this.socketService.emit("selection:emit", {
       ...this.defaultPayload,
       actionId: actionId,
       actionType: ActionType.Select,
-      isSelected: selection
+      isSelected: selection,
+      isUndoRedo: !!isUndoRedo
     } as ISelectionAction);
   }
 
-  sendRotate(state: DrawingState, selectedActionId: string, angle: number) {
+  sendRotate(state: DrawingState, selectedActionId: string, angle: number, isUndoRedo?: boolean) {
     if (!selectedActionId) {
       return;
     }
@@ -208,33 +221,51 @@ export class SyncDrawingService {
     if (state === DrawingState.move && !this.hasStartedMovement) {
       this.activeActionId = v4();
       this.hasStartedMovement = true;
+      this.resetScalings();
     } else if (state === DrawingState.up && this.hasStartedMovement) {
       this.hasStartedMovement = false;
+    } else if (state === DrawingState.move && this.hasStartedMovement) {
+      this.totalAngle += angle;
     }
 
-    this.socketService.emit('rotation:emit', {
+    const payload = {
       ...this.defaultPayload,
       actionType: ActionType.Rotate,
       actionId: this.activeActionId,
       selectedActionId,
       state,
-      angle
-    })
+      angle,
+      isUndoRedo: !!isUndoRedo
+    }
+
+    if (state === DrawingState.up && !isUndoRedo) {
+      payload.angle = this.totalAngle;
+      this.resetScalings();
+    }
+
+    this.socketService.emit('rotation:emit', payload);
   }
 
-  sendTranslate(state: DrawingState, selectedActionId: string, xTranslate: number, yTranslate: number) {
+  sendTranslate(state: DrawingState, selectedActionId: string, xTranslate: number, yTranslate: number, isUndoRedo?: boolean) {
     if (!selectedActionId) {
       return;
     }
-
     if (state === DrawingState.move && !this.hasStartedMovement) {
       this.activeActionId = v4();
       this.hasStartedMovement = true;
     } else if (state === DrawingState.up && this.hasStartedMovement) {
       this.hasStartedMovement = false;
+    } else if (state === DrawingState.move && this.hasStartedMovement) {
+      this.totalXTranslation += xTranslate;
+      this.totalYTranslation += yTranslate;
     }
 
-    this.socketService.emit('translation:emit', {
+    if (isUndoRedo) {
+      this.hasStartedMovement = false;
+      this.activeActionId = v4();
+    }
+
+    const payload = {
       ...this.defaultPayload,
       actionType: ActionType.Translate,
       actionId: this.activeActionId,
@@ -242,30 +273,38 @@ export class SyncDrawingService {
       state,
       xTranslation: xTranslate,
       yTranslation: yTranslate,
-    });
+      isUndoRedo: !!isUndoRedo,
+    }
+
+    if (state === DrawingState.up && !isUndoRedo) {
+      payload.xTranslation = this.totalXTranslation;
+      payload.yTranslation = this.totalYTranslation;
+      this.resetScalings();
+    }
+
+    this.socketService.emit('translation:emit', payload);
   }
 
-  sendDelete(actionId: string): void {
+  sendDelete(actionId: string, isUndoRedo?: boolean): void {
     if (!actionId) return;
 
     const payload = {
       ...this.defaultPayload,
       actionId: v4(),
       selectedActionId: actionId,
-      actionType: ActionType.Delete
+      actionType: ActionType.Delete,
+      isUndoRedo: !!isUndoRedo,
     }
 
     this.socketService.emit('delete:emit', payload);
   }
 
-  sendResize(state: DrawingState, actionId: string, xScale: number, yScale: number, xTranslation: number, yTranslation: number) {
+  sendResize(state: DrawingState, actionId: string, xScale: number, yScale: number, xTranslation: number, yTranslation: number, isUndoRedo?: boolean) {
     if (!actionId) return;
 
-    if (state === DrawingState.move && !this.hasStartedMovement) {
+    if (state === DrawingState.down || isUndoRedo) {
+
       this.activeActionId = v4();
-      this.hasStartedMovement = true;
-    } else if (state === DrawingState.up && this.hasStartedMovement) {
-      this.hasStartedMovement = false;
     }
 
     const payload = {
@@ -277,10 +316,32 @@ export class SyncDrawingService {
       yScale,
       xTranslation,
       yTranslation,
-      state
+      state,
+      isUndoRedo: !!isUndoRedo
+    }
+
+    if (state === DrawingState.move) {
+      this.currentXScale = xScale;
+      this.currentYScale = yScale;
+      this.totalXTranslation = xTranslation;
+      this.totalYTranslation = yTranslation;
+    } else if (state === DrawingState.up && !isUndoRedo) {
+      payload.xScale = this.currentXScale;
+      payload.yScale = this.currentYScale;
+      payload.xTranslation = this.totalXTranslation;
+      payload.yTranslation = this.totalYTranslation;
+      this.resetScalings();
     }
 
     this.socketService.emit('resize:emit', payload);
+  }
+
+  resetScalings(): void {
+    this.currentXScale = 0;
+    this.totalXTranslation = 0;
+    this.totalYTranslation = 0;
+    this.currentYScale = 0;
+    this.totalAngle = 0;
   }
 
   sendPostSaveSelect(data: { collaborationId: string, actionId: string }) {

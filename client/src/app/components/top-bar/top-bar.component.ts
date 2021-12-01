@@ -28,10 +28,11 @@ export class TopBarComponent implements OnInit, OnDestroy {
       if (state) {
         this.auth.activeUser = state;
         this.isLoading = false;
+        this.authSubscription.unsubscribe();
       }
     }, (error) => {
       console.error(error);
-    })
+    });
   }
 
   ngOnDestroy() {

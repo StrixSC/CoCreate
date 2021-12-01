@@ -27,7 +27,7 @@ export class CanvasComponent implements AfterViewInit {
   svg: SVGElement;
   sub: Subscription;
 
-  constructor(private drawingService: DrawingService, public renderer: Renderer2) {
+  constructor(private drawingService: DrawingService, public renderer: Renderer2, private drawingLoadService: DrawingLoadService) {
     this.drawingService.renderer = this.renderer;
   }
 
@@ -39,6 +39,7 @@ export class CanvasComponent implements AfterViewInit {
       }
       this.svg = el;
       this.renderer.appendChild(this.canvasDiv.nativeElement, this.svg);
+      this.drawingLoadService.loadActions();
     });
   }
 

@@ -1,0 +1,36 @@
+<div class="main-info-container">
+    <div class="top-section">
+        <h1 class="team-name"><u>{{ team.teamName }}</u></h1>
+
+        <mat-tab-group mat-align-tabs="center" class="tabs">
+            <mat-tab label="Info">
+                
+            </mat-tab>
+            <mat-tab label="Options">
+
+            </mat-tab>
+        </mat-tab-group>
+    </div>
+    <div class="bottom-section">
+        <button [disabled]="isLoading" (click)="dialogRef.close()" type="submit" mat-raised-button color="secondary" class="form-field">
+            <div class="spinner" *ngIf="isLoading"  >
+                <mat-spinner  [diameter]="25" color="accent" class="spinner"></mat-spinner>
+            </div>
+            <ng-container *ngIf="!isLoading">Annuler</ng-container>
+        </button>
+    </div>
+</div>
+
+<style>
+    .team-name {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .main-info-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+</style>

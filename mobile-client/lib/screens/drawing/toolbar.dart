@@ -86,7 +86,7 @@ class _ToolbarState extends State<Toolbar> {
             shrinkWrap: true,
             itemCount: tools.length,
             itemBuilder: (context, index) => Container(
-                color: currentTool == tools[index].type ? kContentColorLightTheme.withOpacity(0.2) : kPrimaryColor,
+                color: currentTool == tools[index].type ? kContentColor3.withOpacity(0.2) : kPrimaryColor,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20.0, 0, 20.0, 0),
                   child: GestureDetector(

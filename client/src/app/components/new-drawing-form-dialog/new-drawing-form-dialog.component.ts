@@ -135,10 +135,12 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
       this.newDrawingForm.disable();
       this.isLoading = true;
       const payload = {
+        userId: this.auth.activeUser.uid,
+        creatorId: this.author.value,
+        isTeam: this.auth.activeUser.uid !== this.author.value,
         title: this.title.value,
         type: this.type.value,
         password: this.password.value,
-        userId: this.author.value
       } as ICollaborationCreatePayload
       this.syncCollaborationService.sendCreateCollaboration(payload);
     }

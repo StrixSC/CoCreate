@@ -1,6 +1,9 @@
+import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/screens/login/register.dart';
+import 'package:Colorimage/utils/general.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'screens/login/login.dart';
 import 'package:provider/provider.dart';
 import 'screens/home/home.dart';
@@ -22,7 +25,6 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> with TickerProviderStateMixin {
-
   late AnimationController controller;
   final Future<FirebaseApp> _initialization = Firebase.initializeApp();
 
@@ -32,8 +34,8 @@ class _AppState extends State<App> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(seconds: 3),
     )..addListener(() {
-      setState(() {});
-    });
+        setState(() {});
+      });
     controller.repeat();
     super.initState();
   }
@@ -46,7 +48,8 @@ class _AppState extends State<App> with TickerProviderStateMixin {
       builder: (context, snapshot) {
         // Check for errors
         if (snapshot.hasError) {
-          print("There was an error while initializing FlutterFire: " + snapshot.toString());
+          print("There was an error while initializing FlutterFire: " +
+              snapshot.toString());
         }
 
         // Once complete, show your application
@@ -55,31 +58,43 @@ class _AppState extends State<App> with TickerProviderStateMixin {
         }
 
         // Otherwise, show something whilst waiting for initialization to complete
-        return
-          CircularProgressIndicator(
-            value: controller.value,
-            semanticsLabel: 'Linear progress indicator',
-          );
+        return CircularProgressIndicator(
+          value: controller.value,
+          semanticsLabel: 'Linear progress indicator',
+        );
       },
     );
   }
 
   App() {
     return ScreenUtilInit(
-        designSize: const Size(1200, 1920),
-        builder: () => Provider<String>(
-          create: (context) => 'Flutter Dev',
-          child: MaterialApp(
-            onGenerateRoute: _routes(),
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
-              textTheme: Theme.of(context).textTheme.apply(
-                fontSizeFactor: 1.5,
-                fontSizeDelta: 2.0,
-              ),
-            ), //_theme(),
-          ),
-        ));
+      designSize: const Size(1200, 1920),
+      builder: () => Provider<String>(
+        create: (context) => 'Flutter Dev',
+        child: MaterialApp(
+          onGenerateRoute: _routes(),
+          theme: ThemeData(
+              primarySwatch: createMaterialColor(kPrimaryColor),
+              accentColor: kPrimaryColor2,
+              canvasColor: kContentColor2,
+              scaffoldBackgroundColor: kContentColor2,
+              primaryColor: kPrimaryColor,
+              primaryColorDark: kPrimaryColor,
+              brightness: Brightness.dark,
+              inputDecorationTheme: const InputDecorationTheme(
+                filled: true,
+                fillColor: kContentColor4,
+                  labelStyle: TextStyle(color: kPrimaryColor),),
+              textTheme: GoogleFonts.ralewayTextTheme(
+                  Theme.of(context).textTheme.apply(
+                    displayColor: Colors.white,
+                        bodyColor: Colors.white,
+                        fontSizeFactor: 2.0,
+                        fontSizeDelta: 2.0,
+                      ))),
+        ), //_theme(),
+      ),
+    );
   }
 
   RouteFactory _routes() {

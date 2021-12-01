@@ -1,9 +1,7 @@
+import { SyncDrawingService } from './../syncdrawing.service';
 import { IResizeAction } from './../../model/IAction.model';
 import { Renderer2 } from '@angular/core';
-import { TranslateCommand } from '../tools/selection-tool/translate-command/translate-command';
 import { DrawingState } from 'src/app/model/IAction.model';
-import { ITranslateAction } from '../../model/IAction.model';
-import { RotateTranslateCompositeCommand } from '../tools/selection-tool/rotate-translate-composite-command/rotate-translate-composite-command';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { SyncCommand } from './sync-command';
 import { ResizeCommand } from '../tools/selection-tool/resize-command/resize-command';
@@ -11,10 +9,16 @@ import { ResizeCommand } from '../tools/selection-tool/resize-command/resize-com
 export class ResizeSyncCommand extends SyncCommand {
     public command: ResizeCommand;
     private object: SVGElement | null;
+    public isFlatAction: boolean = false;
+    private totalXScale = 0;
+    private totalYScale = 0;
+    private totalXTranslation = 0;
+    private totalYTranslation = 0;
     constructor(
         public payload: IResizeAction,
         private renderer: Renderer2,
-        private drawingService: DrawingService
+        private drawingService: DrawingService,
+        private syncService: SyncDrawingService
     ) {
         super();
     }
@@ -24,21 +28,36 @@ export class ResizeSyncCommand extends SyncCommand {
             return this;
         }
 
+        this.totalXScale = this.payload.xScale;
+        this.totalYScale = this.payload.yScale;
+        this.totalXTranslation = this.payload.xTranslation;
+        this.totalYTranslation = this.payload.yTranslation;
+
+        if (this.payload.state === DrawingState.move && this.isFlatAction) {
+            this.object = this.drawingService.getObjectByActionId(this.payload.selectedActionId);
+            if (this.object) {
+                this.command = new ResizeCommand(this.renderer, [this.object]);
+                this.command.resize(this.totalXScale, this.totalYScale, this.totalXTranslation, this.totalYTranslation);
+                return this;
+            }
+            return;
+        }
+
         this.object = this.drawingService.getObjectByActionId(this.payload.selectedActionId);
 
         if (!this.command && this.object) {
             this.command = new ResizeCommand(this.renderer, [this.object]);
-        } else {
-            this.command.resize(this.payload.xScale, this.payload.yScale, this.payload.xTranslation, this.payload.yTranslation);
+        } else if (this.object) {
+            this.command.resize(this.totalXScale, this.totalYScale, this.totalXTranslation, this.totalYTranslation);
         }
     }
 
     undo(): void {
-        this.command.undo();
+        this.syncService.sendResize(DrawingState.move, this.payload.selectedActionId, 1 / this.totalXScale, 1 / this.totalYScale, -1 * this.totalXTranslation, -1 * this.totalYTranslation, true);
     }
 
     redo(): void {
-        this.command.execute();
+        this.syncService.sendResize(DrawingState.move, this.payload.selectedActionId, this.totalXScale, this.totalYScale, this.totalXTranslation, this.totalYTranslation)
     }
 
     update(payload: IResizeAction): SyncCommand | void {

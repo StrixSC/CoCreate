@@ -26,6 +26,10 @@ class SocketService {
       print('exception');
       print(err);
     });
+    socket.on('collaboration:exception', (err) {
+      print('gallerie:exception');
+      print(err);
+    });
   }
 
   // onConnect() {

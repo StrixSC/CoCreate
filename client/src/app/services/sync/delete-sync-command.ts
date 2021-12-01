@@ -9,12 +9,14 @@ export class DeleteSyncCommand extends SyncCommand {
     constructor(
         public payload: IDeleteAction,
         private drawingService: DrawingService,
+        private drawnAction: SyncCommand | null
     ) {
         super();
     }
 
     execute(): SyncCommand | void {
         const object = this.drawingService.getObjectByActionId(this.payload.selectedActionId);
+
         if (object) {
             this.command = new DeleteCommand(this.drawingService, [object]);
             this.command.execute();
@@ -23,11 +25,16 @@ export class DeleteSyncCommand extends SyncCommand {
     }
 
     undo(): void {
-        this.command.undo();
+        if (this.drawnAction) {
+            this.drawnAction!.redo();
+        }
     }
 
     redo(): void {
-        this.command.execute();
+        if (this.drawnAction) {
+            const object = this.command.objectList[0];
+            this.drawnAction!.undo(object);
+        }
     }
 
     update(payload: IDeleteAction): SyncCommand | void {
