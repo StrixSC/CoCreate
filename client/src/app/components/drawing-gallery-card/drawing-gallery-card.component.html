@@ -45,7 +45,9 @@
     <button mat-raised-button class="lock" color="primary" (click)="openDialog()" *ngIf="drawing.type === 'Protected' && !drawing.is_member">
       <mat-icon>lock</mat-icon>
     </button>
-    <button class="btn" *ngIf="drawing.is_member || (drawing.type !== 'Protected' && !drawing.is_member)" mat-raised-button color="primary"
+    <button class="btn" *ngIf="(drawing.type !== 'Protected' && !drawing.is_member)" mat-raised-button color="primary"
+      (click)="openDialog()">Aperçu du dessin</button>
+    <button class="btn-mine" *ngIf="drawing.is_member" mat-raised-button color="primary"
       (click)="openDialog()">Aperçu du dessin</button>
   </mat-card-actions>
 </mat-card>

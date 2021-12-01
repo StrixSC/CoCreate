@@ -2,8 +2,6 @@
   max-width: 250px;
   display:inline-block;
   margin: 10px;
-  //text-align: center;
-  //align-items: center;
 }
 
 .example-header-image {
@@ -17,9 +15,7 @@
   background-color: #000;
 }
 
-
 .lock {
-  
   position: absolute;
   top: 45%;
   left: 50%;
@@ -27,29 +23,40 @@
 }
 
 .btn {
-  
   transition: .5s ease;
   opacity: 0;
   position: absolute;
   top: 48%;
   left: 50%;
   transform: translate(-50%, -50%);
-  //-ms-transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+
+.btn-mine {
+  transition: .5s ease;
+  opacity: 0;
+  position: absolute;
+  top: 53%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   text-align: center;
 }
 
 .lock {
-  
   transition: .5s ease;
   opacity: 1;
   position: absolute;
   top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
-  //-ms-transform: translate(-50%, -50%);
   text-align: center;
 }
 
 .drawing-card:hover .btn {
+  opacity: 1;
+}
+
+.drawing-card:hover .btn-mine {
   opacity: 1;
 }
