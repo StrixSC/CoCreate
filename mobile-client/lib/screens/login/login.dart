@@ -33,6 +33,7 @@ class _LoginState extends State<Login> {
   String errorMessage = "";
   final translator = GoogleTranslator();
   late UserCredential userCredential;
+  bool _passwordVisible = false;
 
   final logo = Hero(
     tag: 'hero',
@@ -165,25 +166,33 @@ class _LoginState extends State<Login> {
                         controller: passController,
                         maxLines: 1,
                         autofocus: false,
+                        obscureText: !_passwordVisible,
                         decoration: InputDecoration(
-                          errorStyle: const TextStyle(fontSize: _fontSize),
-                          hintText: "Password",
-                          hintStyle: const TextStyle(
-                            fontSize: _fontSize,
-                          ),
-                          contentPadding: const EdgeInsets.all(padding),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(3.0)),
-                        ),
-                        obscureText: true,
+                            errorStyle: const TextStyle(fontSize: _fontSize),
+                            hintText: "Mot de Passe",
+                            hintStyle: const TextStyle(
+                              fontSize: _fontSize,
+                            ),
+                            contentPadding: const EdgeInsets.all(padding),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(3.0)),
+                            suffixIcon: IconButton(
+                                icon: Icon(
+                                  // Based on passwordVisible state choose the icon
+                                  _passwordVisible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: Theme.of(context).primaryColorDark,
+                                ),
+                                onPressed: () {
+                                  // Update the state i.e. toogle the state of passwordVisible variable
+                                  setState(() {
+                                    _passwordVisible = !_passwordVisible;
+                                  });
+                                })),
                         enableSuggestions: false,
                         autocorrect: false,
                         autovalidate: true,
-                        onFieldSubmitted: (value) {
-                          if (_formKey.currentState!.validate()) {
-                            login(userController.text, passController.text);
-                          }
-                        },
                       )),
                   const SizedBox(height: 24.0),
                   ElevatedButton(

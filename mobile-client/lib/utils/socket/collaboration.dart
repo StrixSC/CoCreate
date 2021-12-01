@@ -143,7 +143,6 @@ class CollaborationSocket extends SocketService {
           actions: data["actions"],
           backgroundColor: HexColor(data["backgroundColor"]),
           memberCount: data["memberCount"],
-          maxMemberCount: data["maxMemberCount"],
           width: data["width"],
           height: data["height"],
           members: members,
@@ -189,7 +188,6 @@ class CollaborationSocket extends SocketService {
           collaborationId: data["collaborationId"],
           actions: [],
           memberCount: data['currentCollaboratorCount'],
-          maxMemberCount: data['maxCollaboratorCount'],
           members: [
             Member(
               drawingId: data['drawingId'],
@@ -221,7 +219,6 @@ class CollaborationSocket extends SocketService {
           actions: data["actions"],
           backgroundColor: data["backgroundColor"],
           memberCount: data["memberCount"],
-          maxMemberCount: data["maxMemberCount"],
           width: data["width"],
           height: data["height"],
           members: data["members"], actionsMap: {});

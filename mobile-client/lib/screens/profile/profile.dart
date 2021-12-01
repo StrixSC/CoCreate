@@ -1,8 +1,10 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/collaborator.dart';
+import 'package:Colorimage/screens/profile/update_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/src/provider.dart';
 
 class Profile extends StatefulWidget {
@@ -38,20 +40,21 @@ class _ProfileScreenState extends State<Profile> {
       appBar: AppBar(
           backgroundColor: kPrimaryColor,
           centerTitle: true,
+          title: Text('Profile de ' + _user.displayName.toString()),
           automaticallyImplyLeading: false,
-          actions: <Widget>[
-            IconButton(
-                icon: const Icon(Icons.list_alt, color: Colors.white, size: 34),
-                onPressed: () {
-                  openHistoryDialog();
-                }),
-            const SizedBox(width: 20),
-            IconButton(
-                icon: const Icon(Icons.settings, color: Colors.white, size: 34),
-                onPressed: () {
-                  openSettingsDialog();
-                }),
-            const SizedBox(width: 20)
+          actions: const <Widget>[
+            // IconButton(
+            //     icon: const Icon(Icons.list_alt, color: Colors.white, size: 34),
+            //     onPressed: () {
+            //       openHistoryDialog();
+            //     }),
+            // const SizedBox(width: 20),
+            // IconButton(
+            //     icon: const Icon(Icons.settings, color: Colors.white, size: 34),
+            //     onPressed: () {
+            //       openSettingsDialog();
+            //     }),
+            // const SizedBox(width: 20)
           ]),
       body: DefaultTabController(
         length: 2,
@@ -72,10 +75,10 @@ class _ProfileScreenState extends State<Profile> {
                       padding: const EdgeInsets.all(8),
                       itemCount: entries.length,
                       itemBuilder: (BuildContext context, int index) {
-                        return Container(
+                        return index != 1 ? Container(
                             height: height[index],
                             color: colorCodes[index],
-                            child: Widgets(index));
+                            child: Widgets(index)) : Widgets(index);
                       }))
             ],
           ),
@@ -100,15 +103,23 @@ class _ProfileScreenState extends State<Profile> {
   profileRow() {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       const SizedBox(width: 300),
-      CircleAvatar(
-          radius: 82,
-          backgroundColor: kPrimaryColor,
-          backgroundImage: NetworkImage(
-              context.read<Collaborator>().auth!.user!.photoURL as String)),
+      Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        CircleAvatar(
+          backgroundColor: Colors.white,
+          radius: 85.0,
+          child: CircleAvatar(
+            backgroundImage: NetworkImage(_user.photoURL as String),
+            radius: 80.0,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(_user.displayName.toString())
+      ]),
       isAuthor
           ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               openHistoryDialog(),
               openSettingsDialog(),
+              openStatisticsDialog(),
             ])
           : const SizedBox.shrink(),
       const SizedBox(width: 50),
@@ -118,10 +129,8 @@ class _ProfileScreenState extends State<Profile> {
   divider() {
     return const Divider(
       color: Colors.black,
-      height: 5,
-      thickness: 2,
-      indent: 140,
-      endIndent: 140,
+      height: 3,
+      thickness: 1,
     );
   }
 
@@ -131,31 +140,46 @@ class _ProfileScreenState extends State<Profile> {
 
   openSettingsDialog() {
     return ElevatedButton(
-        onPressed: () { showDialog(context: context, builder: (BuildContext context) {
-          return const AlertDialog(
-            title: Text("My Super title"),
-            content: Text("Hello World"),
+        onPressed: () {
+          pushNewScreen(
+            context,
+            screen: UpdateProfile(_user),
+            withNavBar: false,
+            pageTransitionAnimation: PageTransitionAnimation.cupertino,
           );
-        });},
-        child: const Text('Paramètres du compte',
-            style: TextStyle(color: Colors.white)),
+        },
+        child: const Text('Paramètres de compte', style: TextStyle(color: Colors.white)),
         style: ButtonStyle(
-            backgroundColor:
-            MaterialStateProperty.all(kPrimaryColor)));
+            backgroundColor: MaterialStateProperty.all(kPrimaryColor)));
   }
 
   openHistoryDialog() {
     return ElevatedButton(
-        onPressed: () { showDialog(context: context, builder: (BuildContext context) {
-          return const AlertDialog(
-            title: Text("My Super title"),
-            content: Text("Hello World"),
+        onPressed: () {
+          pushNewScreen(
+            context,
+            screen: UpdateProfile(_user),
+            withNavBar: false,
+            pageTransitionAnimation: PageTransitionAnimation.cupertino,
           );
-        });},
-        child: const Text('Historique',
-            style: TextStyle(color: Colors.white)),
+        },
+        child: const Text('Historique', style: TextStyle(color: Colors.white)),
         style: ButtonStyle(
-            backgroundColor:
-            MaterialStateProperty.all(kPrimaryColor)));
+            backgroundColor: MaterialStateProperty.all(kPrimaryColor)));
+  }
+
+  openStatisticsDialog() {
+    return ElevatedButton(
+        onPressed: () {
+          pushNewScreen(
+            context,
+            screen: UpdateProfile(_user),
+            withNavBar: false,
+            pageTransitionAnimation: PageTransitionAnimation.cupertino,
+          );
+        },
+        child: const Text('Statistiques', style: TextStyle(color: Colors.white)),
+        style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(kPrimaryColor)));
   }
 }
