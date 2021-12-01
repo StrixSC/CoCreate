@@ -18,10 +18,10 @@
   <div class="messages_container" #messageBox>
     <div
       *ngFor="let message_ of messages"
-      style="margin-bottom: 50px; width: 270px"
+      style="margin-bottom: 50px; width: 400px"
       #messagesWatcher
     >
-      <mat-grid-list cols="4" style="margin-left: 10px">
+      <mat-grid-list cols="4">
         <div
           style="
             font-family: Whitney, 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -33,17 +33,22 @@
             white-space: break-spaces;
           "
         >
-          <mat-grid-tile colspan="1" rowspan="1" style="color: white">
+          <mat-grid-tile colspan="2" rowspan="1" style="color: white">
             <!-- {{ message_.avatar }} -->
             <img
               src="https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/spider-man-movies-in-order-index-1631199371.jpeg?crop=0.565xw:1.00xh;0.435xw,0&resize=640:*"
               alt="Italian Trulli"
               style="height: 50px; border-radius: 50%"
             />
-          </mat-grid-tile>
 
-          <mat-grid-tile colspan="2" rowspan="1" style="color: white">
-            <a style="font-size: 16px; font-weight: 500; color: white">
+            <a
+              style="
+                font-size: 16px;
+                font-weight: 500;
+                color: white;
+                margin-left: 10px;
+              "
+            >
               {{ message_.username }}
             </a>
             <p style="color: #72767d; font-size: 13px; margin-left: 5px">
@@ -60,8 +65,9 @@
           font-weight: 400;
           font-size: 16px;
           line-height: 22px;
-          margin-top: -20px;
-          padding-left: 15px;
+          margin-top: -50px;
+          margin-left: 80px;
+          margin-right: 10px;
         "
       >
         {{ message_.message }}
