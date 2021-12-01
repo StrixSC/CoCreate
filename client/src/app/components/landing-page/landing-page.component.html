@@ -1,0 +1,33 @@
+<div class="wrapper-container">
+  <div>
+    <button class="action-button" mat-raised-button routerLink="/auth/login">
+      Connexion
+    </button>
+  </div>
+  <div>
+    <button class="action-button" mat-raised-button routerLink="/auth/register">
+      Inscription
+    </button>
+  </div>
+  <div>
+    <button class="action-button" mat-raised-button routerLink="/offline">
+      Dessin hors-ligne
+    </button>
+  </div>
+</div>
+<style>
+  .action-button {
+    min-width: 300px;
+  }
+
+  .wrapper-container {
+    width: 100%;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-self: center;
+    justify-content: center;
+    gap: 2em;
+  }
+</style>

@@ -28,7 +28,7 @@ describe('DrawingSizeService', () => {
 
   it('should updatethe value and the validity of the new drawing service form on resize', () => {
     const service: NewDrawingService = TestBed.get(NewDrawingService);
-    service.sizeGroup.patchValue({ width: 10, height: 10 });
+    service.drawingFormGroup.patchValue({ width: 10, height: 10 });
 
     const spy = spyOn(service.form, 'updateValueAndValidity');
 

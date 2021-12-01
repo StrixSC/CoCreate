@@ -1,9 +1,11 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/models/tool.dart';
+import 'package:Colorimage/providers/collaborator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:provider/src/provider.dart';
 
 class Toolbar extends StatefulWidget {
   Function changeTool;
@@ -79,7 +81,7 @@ class _ToolbarState extends State<Toolbar> {
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(
                         currentTool == tools[index].type
-                            ? kContentColorLightTheme.withOpacity(0.5)
+                            ? kContentColor.withOpacity(0.5)
                             : Colors.transparent),
                     fixedSize: MaterialStateProperty.all(const Size(80, 57)),
                   ),
@@ -167,7 +169,7 @@ class _ToolbarState extends State<Toolbar> {
                   ),
                 ),
               )
-            : drawingColorPicker(),
+            : Column(children: [drawingColorPicker(), openChatDrawer(), navigateToGallery()]),
       ),
     );
   }
@@ -243,11 +245,11 @@ class _ToolbarState extends State<Toolbar> {
           },
           child: const Text(
             'Couleurs',
-            style: TextStyle(fontSize: 17, wordSpacing: 20),
+            style: TextStyle(fontSize: 15, wordSpacing: 20),
             textAlign: TextAlign.center,
           ),
           style: ButtonStyle(
-            fixedSize: MaterialStateProperty.all(Size(80, 57)),
+            fixedSize: MaterialStateProperty.all(Size(100, 57)),
             backgroundColor: MaterialStateProperty.all(Colors.transparent),
             foregroundColor: MaterialStateProperty.all(
                 useWhiteForeground(currentBodyColor)
@@ -256,6 +258,39 @@ class _ToolbarState extends State<Toolbar> {
           ),
         ),
       ),
+    );
+  }
+
+  openChatDrawer() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
+      child: IconButton(
+        onPressed: () {
+
+        },
+        icon: const Icon(
+          Icons.message,
+          size: 35,
+        ),
+      ),
+    );
+  }
+
+  navigateToGallery() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
+      child: IconButton(
+          onPressed: () {
+            String collaborationId = context.read<Collaborator>().getCollaborationId();
+            context.read<Collaborator>().collaborationSocket.disconnectCollaboration(collaborationId);
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
+          icon: const Icon(
+            Icons.door_back_door_outlined,
+            size: 35,
+          ),
+        ),
     );
   }
 }

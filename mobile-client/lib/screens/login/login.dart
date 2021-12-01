@@ -1,9 +1,13 @@
+import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/providers/collaborator.dart';
 import 'package:Colorimage/providers/messenger.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
+import 'package:Colorimage/utils/socket/collaboration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/src/provider.dart';
+import 'package:translator/translator.dart';
 import '../../app.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -14,7 +18,10 @@ Color primaryColor =
     Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
+  const Login({Key? key})
+      : super(
+          key: key,
+        );
 
   @override
   _LoginState createState() => _LoginState();
@@ -24,7 +31,9 @@ class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String errorMessage = "";
+  final translator = GoogleTranslator();
   late UserCredential userCredential;
+  bool _passwordVisible = false;
 
   final logo = Hero(
     tag: 'hero',
@@ -40,13 +49,15 @@ class _LoginState extends State<Login> {
 
   Future<void> login(email, password) async {
     try {
+      // TODO : Don't forget to uncomment controllers at the end
       userCredential = await FirebaseAuth.instance
           // .signInWithEmailAndPassword(email: email, password: password);
           .signInWithEmailAndPassword(
               email: "demo@demo.com", password: "demodemo");
     } on FirebaseAuthException catch (e) {
+      await translator.translate(e.message!, from: 'en', to: 'fr').then((value) => errorMessage = value.text);
       setState(() {
-        errorMessage = e.message!;
+        errorMessage;
       });
       return;
     }
@@ -57,23 +68,18 @@ class _LoginState extends State<Login> {
     var response = await rest.auth.login(token);
 
     if (response.statusCode == 202) {
-      print(response.body); // Initialize socket connection
-
       initializeSocketConnection(userCredential, token);
 
       // Fetch initial user info
       context.read<Messenger>().updateUser(userCredential);
+      context.read<Collaborator>().updateUser(userCredential);
       context.read<Messenger>().fetchChannels();
       context.read<Messenger>().fetchAllChannels();
 
       // Home Page
-      // Navigator.pushNamed(context, homeRoute);
-      Navigator.pushNamed(context, drawingRoute, arguments: {
-        'socket': context.read<Messenger>().channelSocket.socket,
-        'user': userCredential.user
-      });
+      Navigator.pushNamed(context, homeRoute);
+      // Navigator.pushNamed(context, drawingRoute, arguments: {'socket': context.read<Messenger>().channelSocket.socket});
 
-      print(userCredential.user);
     } else {
       print('Login request failed with status: ${response.statusCode}.');
     }
@@ -83,15 +89,18 @@ class _LoginState extends State<Login> {
     IO.Socket socket = IO.io(
         'https://' + (dotenv.env['SERVER_URL'] ?? "localhost:5000"),
         IO.OptionBuilder()
-            // .setAuth({token:token})
             .setExtraHeaders({'Authorization': 'Bearer ' + token})
             .disableAutoConnect()
             .setTransports(['websocket']) // for Flutter or Dart VM
             .build());
 
+    CollaborationSocket collaborationSocket = CollaborationSocket(auth.user, socket);
     ChannelSocket channelSocket = ChannelSocket(auth.user, socket);
     context.read<Messenger>().setSocket(channelSocket);
+    context.read<Collaborator>().setSocket(collaborationSocket);
   }
+
+  var _scrollController = new ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -106,11 +115,21 @@ class _LoginState extends State<Login> {
                 padding: EdgeInsets.only(left: 100.0, right: 100.0),
                 children: <Widget>[
                   SizedBox(height: 48.0),
-                  Text('Connexion',
+                  const Text('Connexion',
                       style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 40.0,
-                          color: primaryColor)),
+                          color: kPrimaryColor)),
+                  const Text('Connexion',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 40.0,
+                          color: Colors.white)),
+                  const Text('Connexion',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 40.0,
+                          color: Colors.white38)),
                   errorMessage.isNotEmpty
                       ? Padding(
                           padding: const EdgeInsets.fromLTRB(30, 20, 0, 0),
@@ -132,7 +151,7 @@ class _LoginState extends State<Login> {
                       ),
                       contentPadding: const EdgeInsets.all(padding),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.0)),
+                          borderRadius: BorderRadius.circular(3.0)),
                     ),
                     autovalidate: true,
                     // onFieldSubmitted: (value) {
@@ -148,33 +167,52 @@ class _LoginState extends State<Login> {
                         controller: passController,
                         maxLines: 1,
                         autofocus: false,
+                        obscureText: !_passwordVisible,
                         decoration: InputDecoration(
-                          errorStyle: const TextStyle(fontSize: _fontSize),
-                          hintText: "Password",
-                          hintStyle: const TextStyle(
-                            fontSize: _fontSize,
-                          ),
-                          contentPadding: const EdgeInsets.all(padding),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0)),
-                        ),
-                        obscureText: true,
+                            errorStyle: const TextStyle(fontSize: _fontSize),
+                            hintText: "Mot de passe",
+                            hintStyle: const TextStyle(
+                              fontSize: _fontSize,
+                            ),
+                            contentPadding: const EdgeInsets.all(padding),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(3.0)),
+                            suffixIcon: IconButton(
+                                icon: Icon(
+                                  // Based on passwordVisible state choose the icon
+                                  _passwordVisible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: Theme.of(context).primaryColorDark,
+                                ),
+                                onPressed: () {
+                                  // Update the state i.e. toogle the state of passwordVisible variable
+                                  setState(() {
+                                    _passwordVisible = !_passwordVisible;
+                                  });
+                                })),
                         enableSuggestions: false,
                         autocorrect: false,
                         autovalidate: true,
-                        onFieldSubmitted: (value) {
-                          if (_formKey.currentState!.validate()) {
-                            login(userController.text, passController.text);
-                          }
-                        },
                       )),
                   const SizedBox(height: 24.0),
                   ElevatedButton(
                     onPressed: () {
                       // Validate will return true if the form is valid, or false if
                       // the form is invalid.
+                      // TODO: Uncomment this
                       if (_formKey.currentState!.validate()) {
-                        login(userController.text, passController.text);
+                        // if(userController.text.isEmpty) {
+                        //   setState(() {
+                        //     errorMessage = "Veuillez saisir un courriel.";
+                        //   });
+                        // } else if(passController.text.isEmpty) {
+                        //   setState(() {
+                        //     errorMessage = "Veuillez saisir un mot de passe.";
+                        //   });
+                        // } else {
+                          login(userController.text, passController.text);
+                        // }
                       }
                     },
                     style:

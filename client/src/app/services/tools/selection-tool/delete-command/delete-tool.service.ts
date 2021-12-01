@@ -1,6 +1,5 @@
+import { SyncDrawingService } from './../../../syncdrawing.service';
 import { Injectable } from '@angular/core';
-import { CommandInvokerService } from '../../../command-invoker/command-invoker.service';
-import { DrawingService } from '../../../drawing/drawing.service';
 import { SelectionToolService } from '../selection-tool.service';
 import { DeleteCommand } from './delete-command';
 
@@ -14,19 +13,17 @@ export class DeletingToolService {
 
   constructor(
     private selectionTool: SelectionToolService,
-    private commandInvoker: CommandInvokerService,
-    private drawingService: DrawingService,
+    private syncDrawingService: SyncDrawingService
   ) { }
 
   /// Creation et execution d'une commande de supression
   deleteSelection(): void {
-    this.deleteCommand = new DeleteCommand(
-      this.drawingService,
-      this.selectionTool.getObjectList(),
-    );
+    const items = this.selectionTool.getObjectList();
+    if (items.length <= 0) {
+      return;
+    }
 
-    this.commandInvoker.executeCommand(this.deleteCommand);
-
+    this.syncDrawingService.sendDelete(items[0].getAttribute('actionId')!);
     this.selectionTool.removeSelection();
   }
 }

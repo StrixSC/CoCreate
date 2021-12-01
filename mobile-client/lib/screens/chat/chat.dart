@@ -137,7 +137,7 @@ class ChatMessage extends StatelessWidget {
 class ChatScreen extends StatefulWidget {
   int channelIndex;
 
-  ChatScreen(this.channelIndex, {Key? key}) : super(key: key);
+  ChatScreen(this.channelIndex);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -149,13 +149,17 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _validate = false;
   final FocusNode _focusNode = FocusNode();
 
+  @override
+  void didUpdateWidget(dynamic oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _focusNode.requestFocus();
+  }
+
   void _handleSubmitted(String text) {
     print('submitted');
     setState(() {
       _validate =
-          _textController.text.isEmpty || _textController.text
-              .trim()
-              .isEmpty;
+          _textController.text.isEmpty || _textController.text.trim().isEmpty;
     });
     if (!_validate) {
       _textController.clear();
@@ -164,64 +168,31 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _handleChange(String text) {
-    if (_validate) {
-      setState(() {
-        _validate = _textController.text.isEmpty;
-      });
-    }
-  }
-
-  Widget _buildTextComposer() {
-    return IconTheme(
-      data: const IconThemeData(color: kPrimaryColor),
-      child: Container(
-        height: 75,
-        margin: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Row(
-          children: [
-            Flexible(
-              child: TextField(
-                style: TextStyle(fontSize: 25),
-                controller: _textController,
-                onSubmitted: _handleSubmitted,
-                onChanged: _handleChange,
-                decoration: InputDecoration(
-                  hintText: 'Envoyer un message',
-                  errorText:
-                      _validate ? 'Le message ne peut pas être vide' : null,
-                ),
-                focusNode: _focusNode,
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: IconButton(
-                  iconSize: 34,
-                  icon: const Icon(Icons.send),
-                  color: Colors.indigo.shade400,
-                  onPressed: () {
-                    _handleSubmitted(_textController.text);
-                  }),
-            )
-          ],
-        ),
-      ),
-    );
-  }
+  // void _handleChange(String text) {
+  //   if (_validate) {
+  //     setState(() {
+  //       _validate = _textController.text.isEmpty;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     Messenger messenger = context.read<Messenger>();
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
             icon: const Tooltip(
                 message: 'Se déconnecter',
-                child: Icon(Icons.arrow_back, color: Colors.black, size: 30)),
-            onPressed: () => context.read<Messenger>().toggleSelection()),
-        backgroundColor: Colors.white,
+                child: Icon(Icons.arrow_back, color: Colors.white, size: 30)),
+            onPressed: () {
+              var lastMessage = messenger
+                  .userChannels[widget.channelIndex].messages.first.text;
+              messenger.userChannels[widget.channelIndex].messages.isEmpty
+                  ? ''
+                  : messenger.setLastMessage(lastMessage, widget.channelIndex);
+              context.read<Messenger>().toggleSelection();
+            }),
         title: const Text(
           '',
           style: TextStyle(fontSize: 25, color: Colors.blue),
@@ -229,7 +200,7 @@ class _ChatScreenState extends State<ChatScreen> {
         actions: [
           IconButton(
               icon: const Icon(Icons.history_rounded,
-                  color: Colors.black, size: 30),
+                  color: Colors.white, size: 30),
               onPressed: () {
                 showDialog<String>(
                     context: context,
@@ -259,7 +230,7 @@ class _ChatScreenState extends State<ChatScreen> {
           messenger.userChannels[widget.channelIndex].name != "Canal Publique"
               ? IconButton(
                   icon: const Icon(Icons.exit_to_app_rounded,
-                      color: Colors.black, size: 30),
+                      color: Colors.white, size: 30),
                   onPressed: () {
                     showDialog<String>(
                         context: context,
@@ -310,10 +281,42 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           const Divider(height: 1.0),
           Container(
-            decoration: BoxDecoration(color: Theme
-                .of(context)
-                .cardColor),
-            child: _buildTextComposer(),
+            decoration: BoxDecoration(color: Theme.of(context).cardColor),
+            child: IconTheme(
+              data: const IconThemeData(color: kPrimaryColor),
+              child: Container(
+                height: 75,
+                margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        style: TextStyle(fontSize: 25),
+                        controller: _textController,
+                        // onChanged: _handleChange,
+                        decoration: InputDecoration(
+                          hintText: 'Envoyer un message',
+                          errorText: _validate
+                              ? 'Le message ne peut pas être vide'
+                              : null,
+                        ),
+                        focusNode: _focusNode,
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: IconButton(
+                          iconSize: 34,
+                          icon: const Icon(Icons.send),
+                          color: Colors.indigo.shade400,
+                          onPressed: () {
+                            _handleSubmitted(_textController.text);
+                          }),
+                    )
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),

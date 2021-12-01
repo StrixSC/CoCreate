@@ -7,6 +7,8 @@ import { Text } from './text.model';
 export class TextCommand implements ICommand {
 
     private text: SVGTextElement;
+    public actionId: string = "";
+    public userId: string = "";
 
     constructor(
         private renderer: Renderer2,

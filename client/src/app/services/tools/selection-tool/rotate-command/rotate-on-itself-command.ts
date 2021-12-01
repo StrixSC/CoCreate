@@ -6,7 +6,9 @@ export class RotateOnItselfCommand implements ICommand {
 
     private objectsBoundingBox: Map<string, DOMRect | ClientRect> = new Map<string, DOMRect>();
 
-    private lastAngle = 0;
+    public lastAngle = 0;
+    public actionId: string = "";
+    public userId: string = "";
 
     constructor(
         private renderer: Renderer2,

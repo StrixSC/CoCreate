@@ -14,21 +14,26 @@ import 'package:uuid/uuid.dart';
 class DrawingScreen extends StatefulWidget {
   final io.Socket _socket;
   final User _user;
+  final String _collaborationId;
+  final Map _actions;
 
-  const DrawingScreen(this._socket, this._user);
+  const DrawingScreen(
+      this._socket, this._user, this._collaborationId, this._actions);
 
   @override
-  State<DrawingScreen> createState() => _DrawingScreenState(_socket, _user);
+  State<DrawingScreen> createState() =>
+      _DrawingScreenState(_socket, _user, _collaborationId, _actions);
 }
 
 class _DrawingScreenState extends State<DrawingScreen> {
   final io.Socket _socket;
   final User _user;
+  final String _collaborationId;
   Offset endPoint = const Offset(-1, -1);
   String drawType = DrawingType.freedraw;
   String? shapeID;
   String? lastShapeID;
-  Map actionsMap = <String, ShapeAction>{};
+  Map actionsMap;
   Map selectedItems = <String, String>{};
   bool allowMove = false;
   Offset? selectRef; // offset reference of selected item
@@ -45,7 +50,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
   List<ShapeAction> undoList = [];
   List<ShapeAction> redoList = [];
 
-  _DrawingScreenState(this._socket, this._user);
+  _DrawingScreenState(
+      this._socket, this._user, this._collaborationId, this.actionsMap);
 
   @override
   void initState() {
@@ -63,6 +69,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      endDrawer: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.45, child: Sidebar()),
       body: Row(
         children: [
           SizedBox(
@@ -556,140 +564,146 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
   void socketShapeReception() {
     _socket.on('shape:received', (data) {
-      setState(() {
-        if (data['state'] == DrawingState.down) {
+      if (mounted) {
+        setState(() {
+          if (data['state'] == DrawingState.down) {
           unselectLastShape();
-          //Create new list of points to keep a track
-          List<Offset> offsets = <Offset>[];
-          offsets.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+            //Create new list of points to keep a track
+            List<Offset> offsets = <Offset>[];
+            offsets.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
 
-          //Create the paint for the border
-          final paintBorder = Paint()
-            ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
-                data['g'] as int, data['b'] as int)
-            ..isAntiAlias = true
-            ..strokeWidth = data['width'].toDouble()
-            ..style = PaintingStyle.stroke;
-
-          ShapeAction shapeAction = ShapeAction(
-              Path(), data['shapeType'], paintBorder, data['actionId']);
-
-          // Create paint of the fill if there is one
-          if (data['shapeStyle'] == "fill") {
-            final paintFill = Paint()
-              ..color = Color.fromARGB(
-                  data['aFill'] as int,
-                  data['rFill'] as int,
-                  data['gFill'] as int,
-                  data['bFill'] as int)
+            //Create the paint for the border
+            final paintBorder = Paint()
+              ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
+                  data['g'] as int, data['b'] as int)
               ..isAntiAlias = true
               ..strokeWidth = data['width'].toDouble()
-              ..style = PaintingStyle.fill;
-            shapeAction.bodyColor = paintFill;
-          }
+              ..style = PaintingStyle.stroke;
 
-          //Save the action and the offsets
-          shapeAction.shapesOffsets = offsets;
-          actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
-        } else if (data['state'] == DrawingState.move) {
-          unselectLastShape();
-          actionsMap.forEach((actionId, shapeAction) {
-            //Find the action
-            if (actionId == data['actionId']) {
-              //Update list of points
-              shapeAction.shapesOffsets
-                  .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+            ShapeAction shapeAction = ShapeAction(
+                Path(), data['shapeType'], paintBorder, data['actionId']);
 
-              //Contruct the shape
-              Rect rect = Rect.fromPoints(shapeAction.shapesOffsets.first,
-                  shapeAction.shapesOffsets.last);
-
-              //Set the shape in the path
-              Path path = Path();
-              if (data['shapeType'] == DrawingType.ellipse) {
-                path.addOval(rect);
-              } else {
-                path.addRect(rect);
-              }
-              shapeAction.path = path;
-
-              actionsMap.update(
-                  data['actionId'], (value) => shapeAction as ShapeAction);
+            // Create paint of the fill if there is one
+            if (data['shapeStyle'] == "fill") {
+              final paintFill = Paint()
+                ..color = Color.fromARGB(
+                    data['aFill'] as int,
+                    data['rFill'] as int,
+                    data['gFill'] as int,
+                    data['bFill'] as int)
+                ..isAntiAlias = true
+                ..strokeWidth = data['width'].toDouble()
+                ..style = PaintingStyle.fill;
+              shapeAction.bodyColor = paintFill;
             }
-          });
-        } else {
-          //Clear the list of points
-          ShapeAction shapeAction = actionsMap[data['actionId']];
-          shapeAction.shapesOffsets!.clear();
+
+            //Save the action and the offsets
+            shapeAction.shapesOffsets = offsets;
+            actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
+          } else if (data['state'] == DrawingState.move) {
+          unselectLastShape();
+            actionsMap.forEach((actionId, shapeAction) {
+              //Find the action
+              if (actionId == data['actionId']) {
+                //Update list of points
+                shapeAction.shapesOffsets
+                    .add(Offset(data['x'].toDouble(), data['y'].toDouble()));
+
+                //Contruct the shape
+                Rect rect = Rect.fromPoints(shapeAction.shapesOffsets.first,
+                    shapeAction.shapesOffsets.last);
+
+                //Set the shape in the path
+                Path path = Path();
+                if (data['shapeType'] == DrawingType.ellipse) {
+                  path.addOval(rect);
+                } else {
+                  path.addRect(rect);
+                }
+                shapeAction.path = path;
+
+                actionsMap.update(
+                    data['actionId'], (value) => shapeAction as ShapeAction);
+              }
+            });
+          } else {
+            //Clear the list of points
+            ShapeAction shapeAction = actionsMap[data['actionId']];
+            shapeAction.shapesOffsets!.clear();
           unselectLastShape();
           if (_user.uid == data['userId']) {
             undoList.add(shapeAction.copy());
           }
-          actionsMap.update(data['actionId'], (value) => shapeAction);
-        }
-      });
+            actionsMap.update(data['actionId'], (value) => shapeAction);
+          }
+        });
+      }
     });
   }
 
   void socketFreedrawReception() {
     _socket.on('freedraw:received', (data) {
-      setState(() {
-        if (data['state'] == DrawingState.down) {
-          unselectLastShape();
-          //Create new freedraw path
-          Path path = Path();
-          path.moveTo(data['x'].toDouble(), data['y'].toDouble());
-          path.lineTo(data['x'].toDouble() + 1, data['y'].toDouble());
+      if (mounted) {
+        setState(() {
+          if (data['state'] == DrawingState.down) {
+            unselectLastShape();
+            //Create new freedraw path
+            Path path = Path();
+            path.moveTo(data['x'].toDouble(), data['y'].toDouble());
+            path.lineTo(data['x'].toDouble() + 1, data['y'].toDouble());
 
-          //Create border color and style
-          final paint = Paint()
-            ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
-                data['g'] as int, data['b'] as int)
-            ..isAntiAlias = true
-            ..strokeWidth = data['width'].toDouble()
-            ..style = PaintingStyle.stroke;
-          //Merge attributes and save shape
-          ShapeAction shapeAction =
-              ShapeAction(path, data['actionType'], paint, data['actionId']);
-          shapeAction.shapesOffsets = [
-            Offset(data['x'].toDouble(), data['y'].toDouble())
-          ];
-          actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
-        } else if (data['state'] == DrawingState.move) {
-          unselectLastShape();
-          actionsMap.forEach((actionId, shapeAction) {
-            //Get the action
-            if (actionId == data['actionId']) {
-              shapeAction.path
-                  .lineTo(data['x'].toDouble(), data['y'].toDouble());
+            //Create border color and style
+            final paint = Paint()
+              ..color = Color.fromARGB(data['a'] as int, data['r'] as int,
+                  data['g'] as int, data['b'] as int)
+              ..isAntiAlias = true
+              ..strokeWidth = data['width'].toDouble()
+              ..style = PaintingStyle.stroke;
+            //Merge attributes and save shape
+            ShapeAction shapeAction =
+                ShapeAction(path, data['actionType'], paint, data['actionId']);
+            shapeAction.shapesOffsets = [
+              Offset(data['x'].toDouble(), data['y'].toDouble())
+            ];
+            actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
+          } else if (data['state'] == DrawingState.move) {
+            unselectLastShape();
+            actionsMap.forEach((actionId, shapeAction) {
+              //Get the action
+              if (actionId == data['actionId']) {
+                shapeAction.path
+                    .lineTo(data['x'].toDouble(), data['y'].toDouble());
 
-              shapeAction.shapesOffsets += [
-                Offset(data['x'].toDouble(), data['y'].toDouble())
-              ];
+                shapeAction.shapesOffsets += [
+                  Offset(data['x'].toDouble(), data['y'].toDouble())
+                ];
 
-              //Update the action
-              actionsMap.update(
-                  data['actionId'], (value) => shapeAction as ShapeAction);
-            }
-          });
+                //Update the action
+                actionsMap.update(
+                    data['actionId'], (value) => shapeAction as ShapeAction);
+              }
+            });
         } else if (data['state'] == DrawingState.up) {
-          ShapeAction shapeAction = actionsMap[data['actionId']];
+            ShapeAction shapeAction = actionsMap[data['actionId']];
           unselectLastShape();
           if (_user.uid == data['userId']) {
             undoList.add(shapeAction.copy());
           }
           shapeAction.shapesOffsets!.clear();
         }
-      });
+        });
+      }
     });
   }
 
   void socketDeleteReception() {
     _socket.on('delete:received', (data) {
-      setState(() {
-        actionsMap.remove(data["selectedActionId"]);
-        selectedItems.remove(data["selectedActionId"]);
-      });
+      if (mounted) {
+        setState(() {
+          actionsMap.remove(data["selectedActionId"]);
+          selectedItems.remove(data["selectedActionId"]);
+        });
+      }
     });
   }
 
@@ -699,7 +713,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
         'actionId': data['actionId'],
         'username': _user.displayName,
         'userId': _user.uid,
-        'collaborationId': "7d51166d-4edb-45e4-8306-b7b6c8064a92",
+        'collaborationId': _collaborationId,
         'actionType': "Select",
         'isSelected': true,
         'isUndoRedo': false,
@@ -860,7 +874,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'y': (isRedo || drawingState == DrawingState.up)
           ? details.dy
           : details.localPosition.dy.toInt(),
-      'collaborationId': "7d51166d-4edb-45e4-8306-b7b6c8064a92",
+      'collaborationId': _collaborationId,
       'username': _user.displayName,
       'userId': _user.uid,
       'actionType': "Freedraw",

@@ -1,30 +1,32 @@
 import { environment } from './../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
-import { Observable, from } from "rxjs";
+import { Observable, from, BehaviorSubject } from "rxjs";
 import { AngularFireAuth } from '@angular/fire/auth';
+import * as firebase from 'firebase';
 
 @Injectable({
   providedIn: "root",
 })
 export class AuthService {
 
+  activeUser: firebase.User | null = null;
   constructor(private af: AngularFireAuth, private http: HttpClient) { }
 
-  signIn(user: { email: string, password: string }): Observable<any> {
-      return from(this.af.auth.signInWithEmailAndPassword(user.email, user.password));
-    }
-    
-  logUserConnection() {
-      return this.http.get(environment.serverURL + '/auth/login');
+  signIn(user: { email: string, password: string }): Observable<firebase.auth.UserCredential> {
+    return from(this.af.auth.signInWithEmailAndPassword(user.email, user.password));
   }
 
-  register(payload: any): Observable<any> {
-    return this.http.post(environment.serverURL + '/auth/register', JSON.stringify(payload), {
-      headers: {
-        'Content-Type': "application/json"
-      }
-    });
+  get authState(): Observable<any> {
+    return this.af.authState;
+  }
+
+  logUserConnection() {
+    return this.http.get(environment.serverURL + '/auth/login');
+  }
+
+  register(fd: FormData): Observable<any> {
+    return this.http.post(environment.serverURL + '/auth/register', fd);
   }
 
   signOut(): Observable<any> {
@@ -35,4 +37,7 @@ export class AuthService {
     return this.http.get(environment.serverURL + '/auth/logout');
   }
 
+  getPublicAvatars(): Observable<any> {
+    return this.http.get(environment.serverURL + '/api/public/avatars');
+  }
 }
