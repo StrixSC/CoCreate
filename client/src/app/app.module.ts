@@ -68,7 +68,6 @@ import { RightSidebarComponent } from "./components/right-sidebar/right-sidebar.
 import { ChatBoxComponent } from "./components/right-sidebar/chat-box/chat-box.component";
 import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out/chat-poped-out.component";
 import { AllChannelsComponent } from "./components/right-sidebar/all-channels/all-channels.component";
-import { DrawingGalleryCardProtectedComponent } from './components/drawing-gallery-card-protected/drawing-gallery-card-protected.component';
 import { FormMenuDialogDrawingComponent } from './components/form-menu-dialog-drawing/form-menu-dialog-drawing.component';
 
 @NgModule({
@@ -120,7 +119,6 @@ import { FormMenuDialogDrawingComponent } from './components/form-menu-dialog-dr
     ChatPopedOutComponent,
     AllChannelsComponent,
     AuthWrapperComponent,
-    DrawingGalleryCardProtectedComponent,
     AllChannelsComponent,
     TeamInfoComponent,
     TeamPasswordDialogComponent,

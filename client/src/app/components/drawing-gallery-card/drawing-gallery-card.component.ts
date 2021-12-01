@@ -39,10 +39,18 @@ export class DrawingGalleryCardComponent {
 
   openDialog(): void {
     
+    if (this.drawing.type !== "Protected" || (this.drawing.type === "Protected" && this.drawing.is_member)) {
       this.dialogRef = this.dialog.open(DrawingPreviewDialogComponent,
         {
           data: this.drawing
         });
+    }
+    else if (this.drawing.type === "Protected") {
+      this.dialogRef = this.dialog.open(CollaborationPasswordFormDialogComponent,
+        {
+          data: this.drawing
+        });
+    }
 
   }
 

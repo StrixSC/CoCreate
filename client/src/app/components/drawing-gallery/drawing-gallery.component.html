@@ -112,8 +112,8 @@
 
 
       <div class="margin-center">
-        <app-drawing-gallery-card-protected fxLayout="row" fxLayout.xs="column" *ngFor="let drawing of dataObsAll | async" [drawing]="drawing">
-        </app-drawing-gallery-card-protected>
+        <app-drawing-gallery-card fxLayout="row" fxLayout.xs="column" *ngFor="let drawing of dataObsAll | async" [drawing]="drawing">
+        </app-drawing-gallery-card>
       </div>
     </div>
     <div *ngIf="!lengthAll && drawingFilterAll !==''" style="font-style: Roboto">

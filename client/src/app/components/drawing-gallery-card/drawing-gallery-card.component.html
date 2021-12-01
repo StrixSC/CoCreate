@@ -30,8 +30,11 @@
     <mat-card-subtitle>Mise à jour le {{ drawing.updated_at | date:'short' }}
     </mat-card-subtitle>
   </mat-card-header>
-  <img class="image-preview" mat-card-image
+  <img class="image-preview" *ngIf="drawing.is_member || (drawing.type !== 'Protected' && !drawing.is_member)" mat-card-image
     src="../../../assets/default-image.png">
+  <img class="image-preview" *ngIf="drawing.type === 'Protected' && !drawing.is_member" mat-card-image
+    src="../../../assets/img/white-blank-protected.png">
+  
 
   <mat-card-header align="center" fxLayoutAlign="center">
     <mat-card-title></mat-card-title>
@@ -42,7 +45,7 @@
     <button mat-raised-button class="lock" color="primary" (click)="openDialog()" *ngIf="drawing.type === 'Protected' && !drawing.is_member">
       <mat-icon>lock</mat-icon>
     </button>
-    <button class="btn" mat-raised-button color="primary"
+    <button class="btn" *ngIf="drawing.is_member || (drawing.type !== 'Protected' && !drawing.is_member)" mat-raised-button color="primary"
       (click)="openDialog()">Aperçu du dessin</button>
   </mat-card-actions>
 </mat-card>
