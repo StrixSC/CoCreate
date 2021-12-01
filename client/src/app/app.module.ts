@@ -1,3 +1,8 @@
+import { CreateChannelDialogComponent } from './components/create-channel-dialog/create-channel-dialog.component';
+import { ChatWindowComponent } from './components/chat-window/chat-window.component';
+import { ChatComponent } from './components/chat/chat.component';
+import { ChatMenuComponent } from './components/chat-menu/chat-menu.component';
+import { ChatChannelListComponent } from './chat-channel-list/chat-channel-list.component';
 import { DeleteConfirmationDialogComponent } from './components/delete-confirmation-dialog/delete-confirmation-dialog.component';
 import { TeamInfoComponent } from './components/team-info/team-info.component';
 import { TeamPasswordDialogComponent } from './components/team-password-dialog/team-password-dialog.component';
@@ -84,6 +89,8 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     WorkspaceComponent,
     SidenavComponent,
     CanvasComponent,
+    ChatChannelListComponent,
+    ChatMenuComponent,
     ControlMenuComponent,
     ParameterDirective,
     SaveDrawingComponent,
@@ -92,6 +99,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     AlertMessageComponent,
     CreateTeamDialogComponent,
     ExportDrawingComponent,
+    ChatComponent,
     DrawingPageComponent,
     UserProfileComponent,
     TeamPageComponent,
@@ -115,6 +123,8 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     AllChannelsComponent,
     AuthWrapperComponent,
     AllChannelsComponent,
+    ChatWindowComponent,
+    CreateChannelDialogComponent,
     TeamInfoComponent,
     TeamPasswordDialogComponent,
   ],
@@ -145,12 +155,14 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
   entryComponents: [
     NewDrawingAlertComponent,
     NewDrawingComponent,
+    CreateChannelDialogComponent,
     TeamPasswordDialogComponent,
     DeleteConfirmationDialogComponent,
     TeamInfoComponent,
     ToolsColorPickerComponent,
     WorkspaceComponent,
     ControlMenuComponent,
+    ChatMenuComponent,
     AvatarDialogComponent,
     SaveDrawingComponent,
     NewDrawingFormDialogComponent,

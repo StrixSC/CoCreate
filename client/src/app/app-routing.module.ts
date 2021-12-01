@@ -1,3 +1,4 @@
+import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { TeamPageComponent } from './components/team-page/team-page.component';
 import { TopBarComponent } from './components/top-bar/top-bar.component';
 import { RegisterComponent } from './components/register/register.component';
@@ -21,6 +22,11 @@ const redirectLoggedInToMenu = () => redirectLoggedInTo(["menu"]);
 
 const routes: Routes = [
   {
+    path: "chatbox/:id", component: ChatWindowComponent, canActivate: [AngularFireAuthGuard], data: {
+      authGuardPipe: redirectUnauthorizedToLogin,
+    }
+  },
+  {
     path: "", component: TopBarComponent, canActivate: [AngularFireAuthGuard], data: {
       authGuardPipe: redirectUnauthorizedToLogin,
     }, children: [
@@ -40,7 +46,6 @@ const routes: Routes = [
         path: 'gallery', component: DrawingGalleryComponent
       },
       { path: 'forgot-password', component: ChangePasswordComponent },
-      { path: "popped-chat/:id", component: ChatPopedOutComponent },
     ]
   },
   {

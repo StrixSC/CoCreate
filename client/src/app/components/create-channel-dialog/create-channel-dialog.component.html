@@ -1,0 +1,57 @@
+<div class="main-container-wrapper">
+    <h1 mat-dialog-title>Création de canal de communication</h1>
+    <div mat-dialog-content class="content-container">
+        <form class="form" [formGroup]="nameForm" (submit)="onSubmit()">
+            <mat-form-field class="form-field clickable" appearance="outline">
+                <mat-label>Nom de la chaîne</mat-label>
+                <input formControlName="channelName" matInput placeholder="Les animaux magiques" />
+                <mat-error *ngIf="channelName.hasError('required')">
+                    Ce champ est obligatoire.
+                </mat-error>
+                <mat-error *ngIf="channelName.hasError('minlength') || channelName.hasError('maxlength')">
+                    Le nom de la chaîne doit être entre 4 et 256 caractères
+                </mat-error>
+            </mat-form-field>
+        </form>
+    </div>
+    <div class="actions" mat-dialog-actions>
+        <div>
+            <button [disabled]="isLoading || !nameForm.valid" type="submit" class="action-button" mat-raised-button color="primary" (click)="onSubmit()">Soumettre</button>
+        </div>
+        <div>
+            <button [disabled]="isLoading" class="action-button" mat-raised-button mat-dialog-close color="secondary">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .action-button {
+        min-width: 300px;
+    }
+
+    .content-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .form {
+        width: 100%;
+    }
+
+    .form-field {
+        width: 100%;
+    }
+</style>

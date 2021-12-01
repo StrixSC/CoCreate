@@ -1,13 +1,12 @@
+import { ChatSidebarService } from './../../services/chat-sidebar.service';
 import { MatSnackBar } from '@angular/material';
 import { Router } from '@angular/router';
 import { AuthService } from './../../services/auth.service';
-import { Component, OnChanges, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { EMPTY, merge, of, Subscription } from 'rxjs';
-import { switchMap, take, mergeMap, concatMap, map } from 'rxjs/operators';
+import { of, Subscription } from 'rxjs';
+import { switchMap, mergeMap, map } from 'rxjs/operators';
 import { SocketService } from 'src/app/services/chat/socket.service';
-import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
-import * as firebase from 'firebase';
 
 @Component({
   selector: 'app-top-bar',
@@ -15,12 +14,14 @@ import * as firebase from 'firebase';
   styleUrls: ['./top-bar.component.scss']
 })
 export class TopBarComponent implements OnInit, OnDestroy {
-
+  showFiller = false;
   messageListener: Subscription;
   public isLoading: boolean = false;
   private authSubscription: Subscription;
   private logoutSubscription: Subscription;
-  constructor(private snackBar: MatSnackBar, public auth: AuthService, private router: Router, private socketService: SocketService,
+  constructor(private snackBar: MatSnackBar,
+    private chatsideBar: ChatSidebarService,
+    public auth: AuthService, private router: Router, private socketService: SocketService,
     private af: AngularFireAuth) { }
 
   ngOnInit() {
@@ -45,6 +46,10 @@ export class TopBarComponent implements OnInit, OnDestroy {
     }, (error) => {
       this.snackBar.open(`Oh non! On dirait qu'il y a eu une erreur lors de la connexion à notre serveur, veuillez rafraichir l'application...`, "OK", { duration: 5000 });
     });
+  }
+
+  get isOpen(): boolean {
+    return this.chatsideBar.navOpen;
   }
 
   ngOnDestroy() {

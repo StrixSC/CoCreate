@@ -2,7 +2,7 @@
     <mat-toolbar-row>
         <h1>Équipes</h1>
         <span class="example-spacer"></span>
-        <button class="accent" mat-raised-button (click)="openCreateTeamDialog()">Créer une équipe</button>
+        <button color="primary" mat-raised-button (click)="openCreateTeamDialog()">Créer une équipe</button>
         <button matTooltip="Retour au menu" routerLink="" mat-icon-button>
             <mat-icon>exit_to_app</mat-icon>
         </button>
@@ -122,18 +122,18 @@
                         Rejoindre
                     </div>
                 </button>
-                <button disabled class="full-team-container" *ngIf="team.currentMemberCount >= team.maxMemberCount"
+                <button disabled color="warn" class="full-team-container" *ngIf="team.currentMemberCount >= team.maxMemberCount"
                     mat-button>
                     Équipe Complète
                 </button>
             </mat-card-actions>
             <mat-card-actions class="actions-container" *ngIf="team.isMember && !team.isOwner">
-                <button disabled class="team-joined-container" mat-button>
+                <button disabled color="secondary" class="team-joined-container" mat-button>
                     Vous êtes membre de cette équipe!
                 </button>
             </mat-card-actions>
             <mat-card-actions class="actions-container" *ngIf="team.isOwner">
-                <button disabled class="team-owner-container" mat-button>
+                <button disabled color="primary" class="team-owner-container" mat-button>
                     Vous êtes propriétaire de cette équipe!
                 </button>
             </mat-card-actions>

@@ -1,3 +1,4 @@
+import { ActivatedRoute, Router } from '@angular/router';
 import { SocketService } from 'src/app/services/chat/socket.service';
 import { environment } from 'src/environments/environment';
 import { Component } from '@angular/core';
@@ -12,9 +13,14 @@ import { Subscription } from 'rxjs';
 export class AppComponent {
   title = 'Colorimage';
   authSubscription: Subscription;
-  constructor(private af: AngularFireAuth, private socketService: SocketService) {
+  constructor(private af: AngularFireAuth, private socketService: SocketService, private activeRoute: ActivatedRoute, private router: Router) {
     if (environment.useEmulator) {
       this.af.auth.useEmulator(environment.authEmulator)
+    }
+
+    const redirectTo = this.activeRoute.snapshot.queryParams.redirectTo;
+    if (redirectTo) {
+      this.router.navigateByUrl(redirectTo);
     }
   }
 

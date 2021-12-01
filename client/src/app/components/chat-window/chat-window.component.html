@@ -1,0 +1,110 @@
+<div *ngIf="!isLoading && activeChannel" class="main-content-wrapper">
+    <div class="top-section">
+        <div class="chat-header">
+            <div>{{ activeChannel.name }}</div>
+        </div>
+
+        <div class="chat-actions">
+            <div class="history-button-container">
+                <button [matTooltip]="'Chercher l\'historique de la chaîne'" matTooltipPosition="below" mat-icon-button
+                    class="action-button history-button">
+                    <mat-icon>history</mat-icon>
+                </button>
+            </div>
+            <div class="mute-button-container">
+                <button [matTooltip]="'Enlever la sonorité de notification.'" matTooltipPosition="below" mat-icon-button
+                    class="action-button mute-button">
+                    <mat-icon>volume_off</mat-icon>
+                </button>
+            </div>
+            <div  class="mute-button-container">
+                <button [matTooltip]="'Ouvrir la messagerie sur une fenêtre séparée'" (click)="openInNewWindow()" matTooltipPosition="below" mat-icon-button
+                    class="action-button open-button">
+                    <mat-icon>open_in_new</mat-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-box">
+        <div class="messages-container" #messageBox [scrollTop]="messageBox.scrollHeight">
+            <div class="message-wrapper" *ngFor="let message of messages" [class.myMessage]="isActiveUser(message.username)">
+                <div class="avatar-container">
+                    <img class="avatar-img" [src]="message.avatarUrl">
+                </div>
+                <div class="message-content-wrapper">
+                    <small class="message-username">
+                        {{ message.username }}
+                    </small>
+                    <div class="message-content">
+                        {{ message.message }}
+                    </div>
+                    <small class="message-datetime">
+                        {{ message.createdAt }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="text-input">
+            <mat-form-field class="message-input" appearance="outline">
+                <mat-label>Message</mat-label>
+                <input matInput autocomplete="off" type="text" [(ngModel)]="message" placeholder="Aa" (keyup.enter)="onSubmit()">
+                <mat-hint align="end">{{message.length}} / 256</mat-hint>
+                <button *ngIf="message" matSuffix mat-icon-button type="submit" (click)="onSubmit()">
+                    <mat-icon>send</mat-icon>
+                </button>
+            </mat-form-field>
+        </div>
+    </div>
+</div>
+<div *ngIf="isLoading && !activeChannel" class="main-content-wrapper no-channel-container">
+    <div class="spinner">
+        <mat-spinner color="accent" [diameter]="35"></mat-spinner>
+    </div>
+</div>
+<style>
+    .messages-container {
+        text-overflow: ellipsis;
+        word-break: break-word;
+        padding: 1.5rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: 100%;
+        max-width: 85%;
+        min-width: 85%;
+        display: flex;
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .avatar-container {
+        max-width: 50px;
+        max-height: 50px;
+    }
+
+    .avatar-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 100%;
+    }
+
+    .message-wrapper {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        max-width: 300px;
+    }
+
+    .message-content-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .message-content {
+        padding: 1rem;
+        background-color: var(--bg-color);
+        border-radius: 10px;
+    }
+</style>
