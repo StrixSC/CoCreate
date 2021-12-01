@@ -137,8 +137,8 @@ class Collaborator extends ChangeNotifier {
       drawings[currentType][currentDrawingId].collaboration.members.add(member);
       drawings[currentType][currentDrawingId].collaboration.memberCount++;
     } else {
-      drawings[currentType][currentDrawingId].collaboration.members.add(member);
-      drawings[currentType][currentDrawingId].collaboration.memberCount++;
+      drawings['Available'][member.drawingId].collaboration.members.add(member);
+      drawings['Available'][member.drawingId].collaboration.memberCount++;
     }
     
     for (var type in TYPES) {
