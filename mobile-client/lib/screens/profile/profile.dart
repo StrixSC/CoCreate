@@ -19,11 +19,11 @@ class Profile extends StatefulWidget {
 class _ProfileScreenState extends State<Profile> {
   List<String> entries = <String>['A', 'B', 'C'];
   List colorCodes = [kContentColor2, Colors.black, kContentColor3];
-  List<double> height = <double>[250.0, 2.0, 400.0];
+  List<double> height = <double>[250.0, 2.0, 300.0];
   late List children;
   bool isAuthor = false;
   User _user;
-
+  final List<int> numbers = [1, 2, 3, 5, 8, 13, 21, 34, 55];
   _ProfileScreenState(this._user);
 
   @override
@@ -135,7 +135,21 @@ class _ProfileScreenState extends State<Profile> {
   }
 
   postedDrawings() {
-    return Row(children: [Container()]);
+    return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+        height: MediaQuery.of(context).size.height * 0.15,
+        child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: numbers.length, itemBuilder: (context, index) {
+          return Container(
+            width: MediaQuery.of(context).size.width * 0.25,
+            child: Card(
+              color: kContentColor,
+              child: Container(
+                child: Center(child: Text(numbers[index].toString(), style: TextStyle(color: Colors.white, fontSize: 36.0),)),
+              ),
+            ),
+          );}));
   }
 
   openSettingsDialog() {
