@@ -9,43 +9,34 @@
   </mat-toolbar-row>
 </mat-toolbar>
 
-<mat-tab-group #tabGroup class="centerTab" (selectedIndexChange)="setPagination($event)">
-  <mat-tab class="drawing-list" label="Mes Dessins">
-    <div>
-      <mat-form-field [style.width.%]="50">
-        <mat-label>Recherche</mat-label>
-        <input matInput placeholder="Entrez un mot-clé">
-        <button mat-button matPrefix mat-icon-button>
-          <mat-icon>search</mat-icon>
-        </button>
-        <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
-      </mat-form-field>
-
-      <mat-paginator #paginator4 [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
-
-      <div class="margin-center">
-        <app-drawing-gallery-card *ngFor="let drawing of dataObsSelf | async" [drawing]="drawing">
-        </app-drawing-gallery-card>
-      </div>
-    </div>
-  </mat-tab>
-  
-  <mat-tab class="drawing-list" label="Dessins privés">
+<mat-tab-group #tabGroup class="centerTab">
+  <mat-tab class="drawing-list" label="Mes Dessins & Dessins Rejoints">
     <br>
     <div>
       <mat-form-field [style.width.%]="50">
         <mat-label>Recherche</mat-label>
-        <input matInput placeholder="Entrez un mot-clé">
+        <input (keydown.enter)="setFilterMyDrawings($event.target.value); handlePageEvent($event, false)" matInput placeholder="Entrez un mot-clé">
         <button mat-button matPrefix mat-icon-button>
           <mat-icon>search</mat-icon>
         </button>
         <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
       </mat-form-field>
+      <mat-form-field>
+        <mat-label>Type de dessins</mat-label>
+        <mat-select [(ngModel)]="selectedOption" (selectionChange)="searchMyDrawings($event.value); handlePageEvent($event, false)">
+          <mat-option *ngFor="let type of visibilityFilter" [value]="type.key">{{type.value}}</mat-option>
+        </mat-select>
+      </mat-form-field>
 
-      <mat-paginator #paginator [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
+      <mat-paginator #paginator4 (page)="handlePageEvent($event, true)"
+      [length]="lengthSelf"
+      [pageSize]="pageSizeSelf"
+      [showFirstLastButtons]="showFirstLastButtons"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndexSelf"></mat-paginator>
 
       <div class="margin-center">
-        <app-drawing-gallery-card *ngFor="let drawing of dataObsPrivate | async" [drawing]="drawing">
+        <app-drawing-gallery-card *ngFor="let drawing of dataObsSelf | async" [drawing]="drawing">
         </app-drawing-gallery-card>
       </div>
     </div>
@@ -56,37 +47,29 @@
     <div>
       <mat-form-field [style.width.%]="50">
         <mat-label>Recherche</mat-label>
-        <input matInput placeholder="Entrez un mot-clé">
+        <input (keydown.enter)="setFilterAll($event.target.value); handleAllPageEvent($event, false)" matInput placeholder="Entrez un mot-clé">
         <button mat-button matPrefix mat-icon-button>
           <mat-icon>search</mat-icon>
         </button>
         <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
       </mat-form-field>
-
-      <mat-paginator #paginator2 [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
-
-      <div class="margin-center">
-        <app-drawing-gallery-card *ngFor="let drawing of dataObsPublic | async" [drawing]="drawing">
-        </app-drawing-gallery-card>
-      </div>
-    </div>
-  </mat-tab>
-  <mat-tab class="drawing-list" label="Dessins protégés">
-    <br>
-    <div>
-      <mat-form-field [style.width.%]="50">
-        <mat-label>Recherche</mat-label>
-        <input matInput placeholder="Entrez un mot-clé">
-        <button mat-button matPrefix mat-icon-button>
-          <mat-icon>search</mat-icon>
-        </button>
-        <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
+      <mat-form-field>
+        <mat-label>Type de dessins</mat-label>
+        <mat-select [(ngModel)]="selectedOptionAll" (selectionChange)="searchAllDrawings($event.value); handleAllPageEvent($event, false)">
+          <mat-option *ngFor="let type of visibilityAllFilter" [value]="type.key">{{type.value}}</mat-option>
+        </mat-select>
       </mat-form-field>
 
-      <mat-paginator #paginator3 [pageSize]="10" [showFirstLastButtons]="true" [pageIndex]="pageIndex"></mat-paginator>
+      <mat-paginator #paginatorAll (page)="handleAllPageEvent($event)"
+      [length]="lengthAll"
+      [pageSize]="pageSizeAll"
+      [showFirstLastButtons]="showFirstLastButtons"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndexAll"></mat-paginator>
+
 
       <div class="margin-center">
-        <app-drawing-gallery-card *ngFor="let drawing of dataObsProtected | async" [drawing]="drawing">
+        <app-drawing-gallery-card *ngFor="let drawing of dataObsAll | async" [drawing]="drawing">
         </app-drawing-gallery-card>
       </div>
     </div>

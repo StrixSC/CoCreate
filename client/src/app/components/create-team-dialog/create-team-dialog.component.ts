@@ -23,23 +23,13 @@ export class CreateTeamDialogComponent implements OnInit {
   activeUrlBlob: Blob | null = null;
   readonly defaultImage = "/assets/img/default.png"
 
-  types = [
-    { key: 'Protected', value: 'Protégé' },
-    { key: 'Public', value: 'Public' }
-  ];
+  get types(): any {
+    return this.teamService.types;
+  }
 
-  mascots = [
-    { key: '', value: 'Choisir pour moi!' },
-    { key: 'tiger', value: 'Tigre' },
-    { key: 'lion', value: 'Lion' },
-    { key: 'elephant', value: 'Éléphant' },
-    { key: 'walrus', value: 'Morse' },
-    { key: 'gorilla', value: 'Gorille' },
-    { key: 'cobra', value: 'Cobra' },
-    { key: 'zebra', value: 'Zebre' },
-    { key: 'horse', value: 'Cheval' },
-    { key: 'eagle', value: 'Aigle' }
-  ];
+  get mascots(): any {
+    return this.teamService.mascots;
+  }
 
   constructor(
     private auth: AuthService,

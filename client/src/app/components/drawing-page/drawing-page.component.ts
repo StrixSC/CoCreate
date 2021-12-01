@@ -89,7 +89,6 @@ export class DrawingPageComponent {
           if (data.eventType === EventTypes.Error) {
             this.onError();
           }
-          console.error(data);
         }
       });
     }

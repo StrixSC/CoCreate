@@ -64,7 +64,7 @@ export class SyncCollaborationService {
     if (!this.authService.activeUser) {
       return;
     }
-
+    //console.log(data)
     this.socketService.emit('collaboration:create', data);
   }
 
@@ -94,6 +94,14 @@ export class SyncCollaborationService {
 
   onCollaborationException(): Observable<any> {
     return this.socketService.on('collaboration:exception');
+  }
+
+  onDeleteException(): Observable<any> {
+    return this.socketService.on('collaboration:delete:exception');
+  }
+
+  onDeleteFinished(): Observable<any> {
+    return this.socketService.on('collaboration:delete:finished');
   }
 
 }

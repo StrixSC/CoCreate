@@ -1,12 +1,13 @@
+import { DeleteConfirmationDialogComponent } from './../delete-confirmation-dialog/delete-confirmation-dialog.component';
+import { map } from 'rxjs/operators';
+import { SocketService } from 'src/app/services/chat/socket.service';
 import { TeamInfoComponent } from './../team-info/team-info.component';
 import { AuthService } from './../../services/auth.service';
 import { TeamPasswordDialogComponent } from './../team-password-dialog/team-password-dialog.component';
 import { Subscription, merge } from 'rxjs';
 import { CreateTeamDialogComponent } from './../create-team-dialog/create-team-dialog.component';
 import { TeamService } from './../../services/team.service';
-import { TeamViewerComponent } from './../team-viewer/team-viewer.component';
-import { FormBuilder, FormGroup, Validators, FormControl, AbstractControl } from '@angular/forms';
-import { v4 } from 'uuid';
+import { FormBuilder, FormGroup, AbstractControl } from '@angular/forms';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatSlideToggle, MatSlideToggleChange, MatDialog, MatSnackBar, MatDialogConfig, PageEvent, MatPaginator } from '@angular/material';
 import { TeamType, TeamResponse } from 'src/app/model/team-response.model';
@@ -19,8 +20,7 @@ import { TeamType, TeamResponse } from 'src/app/model/team-response.model';
 export class TeamPageComponent implements OnInit {
 
   showCreatedByMeSwitch: boolean = false;
-  buttonsLoading: boolean = false;
-
+  currentLoadingIndex: number | null = null;
   activeTeamName: string = "";
 
   dialogOptions = {
@@ -42,11 +42,14 @@ export class TeamPageComponent implements OnInit {
 
   isLoading: boolean = false;
   queryLoading: boolean = false;
+  leaveLoading: boolean = false;
   searchForm: FormGroup;
-  teamCreatedSubscription: Subscription;
   joinFinishedSubscription: Subscription;
-  joinedSubscription: Subscription;
-  joinErrorSubscription: Subscription;
+  connectionSubscription: Subscription;
+  leaveFinishedSubscription: Subscription;
+  refreshSubscription: Subscription;
+  deleteFinishedSubscription: Subscription;
+  exceptionSubscription: Subscription;
   activeOffset = 0;
   activeLimit = 12;
   activeTotal = 0;
@@ -64,35 +67,80 @@ export class TeamPageComponent implements OnInit {
     }
   ]
 
-  teams = [];
+  teams: TeamResponse[] = [];
   constructor(
     private snackBar: MatSnackBar,
     private teamService: TeamService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private auth: AuthService,
+    private socketService: SocketService
   ) { }
 
   ngOnInit() {
+
     this.searchForm = this.fb.group({
       query: [''],
       type: [''],
     });
     this.submitSearch();
 
-    this.teamCreatedSubscription = this.teamService.onCreated().subscribe(() => this.submitSearch());
-    this.joinedSubscription = this.teamService.onJoin().subscribe((d) => this.submitSearch());
+    this.refreshSubscription = merge(
+      this.teamService.onLeave(),
+      this.teamService.onUpdate(),
+      this.teamService.onCreated(),
+      this.teamService.onJoin(),
+      this.teamService.onDelete(),
+    ).subscribe((d) => {
+      this.submitSearch()
+    });
+
+    this.connectionSubscription = merge(
+      this.socketService.onDisconnect(),
+      this.socketService.onConnection(),
+    ).subscribe((d) => {
+      if (d) {
+        const index = this.teams.findIndex((t) => t.teamId === d.roomId);
+        if (index > -1) {
+          this.teams[index].onlineMemberCount = d.onlineMemberCount;
+        }
+      }
+    });
+
+    this.deleteFinishedSubscription = this.teamService.onDeleteFinished().subscribe((d) => {
+      this.isLoading = false;
+      this.snackBar.open('Super! Équipe supprimée!', "OK", { duration: 5000 });
+    });
+
+    this.leaveFinishedSubscription = this.teamService.onLeaveFinished().subscribe((data) => {
+      this.leaveLoading = false;
+      this.snackBar.open(`Succès! Vous avez quitté l'équipe "${data.teamName}!"`, 'OK', { duration: 5000 });
+      this.submitSearch();
+    });
+
     this.joinFinishedSubscription = this.teamService.onJoinFinished().subscribe((d) => {
-      this.buttonsLoading = false;
+      this.currentLoadingIndex = null;
       this.snackBar.open(`Super! Vous avez rejoint l'équipe "${this.activeTeamName}"!`, 'OK', { duration: 5000 });
       this.activeTeamName = "";
     });
 
-    this.joinErrorSubscription = this.teamService.onJoinException().subscribe(() => {
-      // TODO: join exception handling
+    this.exceptionSubscription = merge(
+      this.teamService.onDeleteException(),
+      this.teamService.onJoinException(),
+      this.teamService.onLeaveException(),
+    ).subscribe((data) => {
+      this.snackBar.open(data.message, "OK", { duration: 5000 });
     });
 
     this.isLoading = false;
+  }
+
+  ngAfterViewInit(): void {
+    this.paginator._intl.itemsPerPageLabel = "Équipes par page: ";
+    this.paginator._intl.nextPageLabel = "Page suivante";
+    this.paginator._intl.lastPageLabel = "Dernière page";
+    this.paginator._intl.previousPageLabel = "Page précédente";
+    this.paginator._intl.firstPageLabel = "Première page";
   }
 
   get query(): AbstractControl {
@@ -103,29 +151,21 @@ export class TeamPageComponent implements OnInit {
     return this.searchForm.get('type')!
   }
 
-  openDialog(team: TeamResponse): void {
-    this.dialog.open(TeamViewerComponent, {
-      width: '800px',
-      height: '800px',
-      data: team.teamId
-    });
-  }
-
-  onJoin(team: TeamResponse): void {
-    if (this.buttonsLoading) {
+  onJoin(team: TeamResponse, index: number): void {
+    if (this.currentLoadingIndex === index) {
       return;
     }
 
     if (team.type === TeamType.Protected) {
-      this.buttonsLoading = true;
+      this.currentLoadingIndex = index;
 
       this.dialog.open(TeamPasswordDialogComponent, { width: '500px', data: team }).afterClosed().subscribe(() => {
-        this.buttonsLoading = false;
+        this.currentLoadingIndex = null;
       });
 
     } else {
       this.activeTeamName = team.teamName;
-      this.buttonsLoading = true;
+      this.currentLoadingIndex = index;
       this.teamService.sendJoin({ userId: this.auth.activeUser!.uid, teamId: team.teamId });
     }
   }
@@ -198,16 +238,13 @@ export class TeamPageComponent implements OnInit {
       query += `${key}=${value}&`
     }
     query = query.substr(0, query.length - 1); // remove the last & or the ? if no params.
-    this.isLoading = true;
     const teamSub = this.teamService.fetchTeams(query).subscribe((d: any) => {
       this.activeTotal = d.total;
       this.activeOffset = d.offset;
       this.activeLimit = d.limit;
       this.teams = d.teams;
-      this.isLoading = false;
       teamSub.unsubscribe();
     }, (error) => {
-      this.isLoading = false;
       this.snackBar.dismiss();
       teamSub.unsubscribe();
       this.snackBar.open("Une erreur s'est produite lors de la requête, veuillez essayez à nouveau...", 'OK', { duration: 5000 });
@@ -221,25 +258,44 @@ export class TeamPageComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
-    if (this.teamCreatedSubscription) {
-      this.teamCreatedSubscription.unsubscribe();
+
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
     }
 
-    if (this.joinedSubscription) {
-      this.joinedSubscription.unsubscribe();
+    if (this.exceptionSubscription) {
+      this.exceptionSubscription.unsubscribe();
     }
 
-    if (this.joinErrorSubscription) {
-      this.joinErrorSubscription.unsubscribe();
+    if (this.leaveFinishedSubscription) {
+      this.leaveFinishedSubscription.unsubscribe();
     }
 
-    if (this.joinFinishedSubscription) {
-      this.joinErrorSubscription.unsubscribe();
+    if (this.connectionSubscription) {
+      this.connectionSubscription.unsubscribe();
+    }
+
+    if (this.deleteFinishedSubscription) {
+      this.deleteFinishedSubscription.unsubscribe();
     }
   }
 
   leaveTeam(team: TeamResponse): void {
+    this.teamService.sendLeave({ teamId: team.teamId });
+  }
 
+  deleteTeam(team: TeamResponse): void {
+    this.dialog.open(DeleteConfirmationDialogComponent, {
+      width: '500px',
+      data: {
+        message: `Êtes vous sûr de vouloir supprimer l'équipe "${team.teamName}" ?`,
+        submessage: `Cette action est irréversible et supprimera tous les dessins créés par l'équipe.`
+      }
+    }).afterClosed().subscribe((d) => {
+      if (d) {
+        this.teamService.sendDelete({ teamId: team.teamId });
+      }
+    });
   }
 
   openInfo(team: TeamResponse): void {

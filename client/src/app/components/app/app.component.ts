@@ -1,11 +1,8 @@
+import { SocketService } from 'src/app/services/chat/socket.service';
 import { environment } from 'src/environments/environment';
-import { SyncDrawingService } from '../../services/syncdrawing.service';
 import { Component } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { SocketService } from './../../services/chat/socket.service';
-import { ActionType } from 'src/app/model/IAction.model';
 
 @Component({
   selector: 'app-root',
@@ -15,25 +12,14 @@ import { ActionType } from 'src/app/model/IAction.model';
 export class AppComponent {
   title = 'Colorimage';
   authSubscription: Subscription;
-  constructor(private router: Router, private socketService: SocketService, private af: AngularFireAuth, private syncDrawing: SyncDrawingService) {
+  constructor(private af: AngularFireAuth, private socketService: SocketService) {
     if (environment.useEmulator) {
       this.af.auth.useEmulator(environment.authEmulator)
     }
-    this.authSubscription = this.af.authState.subscribe((state) => {
-      if (!state) {
-        this.router.navigateByUrl('');
-        this.socketService.disconnect();
-      } else {
-        this.syncDrawing.defaultPayload = {
-          collaborationId: 'DEMO_COLLABORATION',
-          userId: state.uid,
-          username: state.displayName || 'demo',
-          actionId: '',
-          actionType: ActionType.Freedraw
-        }
-        this.socketService.setupSocketConnection();
-      }
-    });
+  }
+
+  ngOnDestroy() {
+    this.socketService.disconnect();
   }
 
 }

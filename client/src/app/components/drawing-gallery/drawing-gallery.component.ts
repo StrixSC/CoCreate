@@ -4,25 +4,16 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { NewDrawingFormDialogComponent } from './../new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { ICollaborationConnectResponse, ICollaborationDeleteResponse, ICollaborationJoinResponse, ICollaborationLeaveResponse, ICollaborationUpdateResponse, ICollaborationCreateResponse, ICollaborationLoadResponse } from './../../model/ICollaboration.model';
 import { AuthService } from './../../services/auth.service';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { Router } from '@angular/router';
-import {
-  MatAutocomplete,
-  MatDialog, MatPaginator, MatTableDataSource
-} from '@angular/material';
-import { BehaviorSubject, EMPTY, merge, Observable, of, Subscription } from 'rxjs';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { MatDialog, MatPaginator, MatTableDataSource, PageEvent } from '@angular/material';
+import { BehaviorSubject, EMPTY, merge, of, Subscription } from 'rxjs';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
-import { OpenDrawingService } from 'src/app/services/open-drawing/open-drawing.service';
-import { Drawing } from '../../../../../common/communication/drawing';
 import { DrawingGalleryService } from 'src/app/services/drawing-gallery/drawing-gallery.service';
-import { NewDrawingComponent } from '../new-drawing/new-drawing.component';
 import { IGalleryEntry } from '../../model/IGalleryEntry.model';
 import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { SocketService } from 'src/app/services/chat/socket.service';
 import { switchMap, take, map } from 'rxjs/operators';
-import { now } from 'moment';
 
 export enum DrawingTypes {
   Protected = 'Protected',
@@ -40,8 +31,6 @@ export enum GalleryEvents {
   Create = 'Create',
 }
 
-const ONE_WEEK_NUMERIC_VALUE = 24 * 60 * 60 * 1000 * 7;
-
 @Component({
   selector: 'app-drawing-gallery',
   templateUrl: './drawing-gallery.component.html',
@@ -50,41 +39,66 @@ const ONE_WEEK_NUMERIC_VALUE = 24 * 60 * 60 * 1000 * 7;
 
 export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  visible = true;
-  selectable = true;
-  removable = true;
-  addOnBlur = false;
-  separatorKeysCodes: number[] = [ENTER, COMMA];
-  pageIndex = 0;
-  selectedTab = new FormControl(0);
   errorListener: Subscription;
   messageListener: Subscription;
   dialogRef: MatDialogRef<NewDrawingFormDialogComponent>;
+  datasourceSelf = new MatTableDataSource<IGalleryEntry>([]);
+  datasourceAll = new MatTableDataSource<IGalleryEntry>([]);
+  dataObsSelf: BehaviorSubject<IGalleryEntry[]>;
+  dataObsAll: BehaviorSubject<IGalleryEntry[]>;
+  showFirstLastButtons = true;
+  lengthSelf: number;
+  pageSizeSelf = 12;
+  pageIndexSelf = 0;
+  lengthAll: number;
+  pageSizeAll = 12;
+  pageIndexAll = 0;
+
+  selectedOption: string = 'All';
+  selectedOptionAll: string = 'All';
+  drawingFilterSelf: string = '';
+  drawingFilterAll: string = '';
 
   private drawingsSubscription: Subscription;
+  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
 
-  datasourcePublic = new MatTableDataSource<IGalleryEntry>([]);
-  datasourcePrivate = new MatTableDataSource<IGalleryEntry>([]);
-  datasourceProtected = new MatTableDataSource<IGalleryEntry>([]);
-  datasourceSelf = new MatTableDataSource<IGalleryEntry>([]);
-
-  @ViewChild('tagInput', { static: false }) tagInput: ElementRef<HTMLInputElement>;
-  @ViewChild('auto', { static: false }) matAutocomplete: MatAutocomplete;
-  @ViewChild('fileUpload', { static: false }) fileUploadEl: ElementRef;
-  @ViewChild('paginator', { static: true }) paginatorPrivate: MatPaginator;
-  @ViewChild('paginator2', { static: true }) paginatorPublic: MatPaginator;
-  @ViewChild('paginator3', { static: true }) paginatorProtected: MatPaginator;
-  @ViewChild('paginator4', { static: true }) paginatorSelf: MatPaginator;
-
-  drawings: IGalleryEntry[] = [];
   drawingsEntry: IGalleryEntry[] = []
 
-  teamName: String[];
-  isLoaded = false;
-  dataObsPublic: BehaviorSubject<IGalleryEntry[]>;
-  dataObsPrivate: BehaviorSubject<IGalleryEntry[]>;
-  dataObsProtected: BehaviorSubject<IGalleryEntry[]>;
-  dataObsSelf: BehaviorSubject<IGalleryEntry[]>;
+  public visibilityFilter: { key: string, value: string }[] =
+    [
+      {
+        key: 'All',
+        value: "Tous les types",
+      },
+      {
+        key: DrawingType.Public,
+        value: "Public",
+      },
+      {
+        key: DrawingType.Private,
+        value: "Privé",
+      },
+      {
+        key: DrawingType.Protected,
+        value: "Protégé"
+      }
+    ];
+
+  public visibilityAllFilter: { key: string, value: string }[] =
+    [
+      {
+        key: 'All',
+        value: "Tous les types",
+      },
+      {
+        key: DrawingType.Public,
+        value: "Public",
+      },
+      {
+        key: DrawingType.Protected,
+        value: "Protégé"
+      }
+    ];
 
   handlerCallbacks: Record<GalleryEvents, (data: any) => any> = {
     Connect: (data: ICollaborationConnectResponse) => this.onConnect(data),
@@ -98,74 +112,51 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
   constructor(
     private snackbar: MatSnackBar,
-    private openDrawingService: OpenDrawingService,
     public drawingService: DrawingService,
-    private renderer: Renderer2,
     public dialog: MatDialog,
     private cdr: ChangeDetectorRef,
     private drawingGalleryService: DrawingGalleryService,
     private syncCollaboration: SyncCollaborationService,
     private socketService: SocketService,
     private auth: AuthService,
-    private router: Router
-  ) {
-
-  }
+    private router: Router,
+    private route: ActivatedRoute
+  ) { }
 
   ngOnInit(): void {
-    this.errorListener = this.socketService.socketReadyEmitter
-      .pipe(
-        take(1),
-        switchMap((ready: boolean) => {
-          if (ready) {
-            return merge(
-              this.socketService.onException(),
-              this.socketService.onError()
-            );
-          } else {
-            return of(EMPTY);
-          }
-        })
-      )
-      .subscribe((data) => {
-        console.log(data);
-      });
+    const createDrawing = this.route.snapshot.queryParams.createDrawing;
+    if (createDrawing) {
+      this.openDialog();
+    }
 
-    this.messageListener = this.socketService.socketReadyEmitter
-      .pipe(
-        take(1),
-        switchMap((ready: boolean) => {
-          if (ready) {
-            return merge(
-              this.syncCollaboration.onJoinCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Join }))),
-              this.syncCollaboration.onConnectCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Connect }))),
-              this.syncCollaboration.onCreateCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Create }))),
-              this.syncCollaboration.onDeleteCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Delete }))),
-              this.syncCollaboration.onUpdateCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Update }))),
-              this.syncCollaboration.onLoadCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Load })))
-            )
-          } else {
-            return of(EMPTY);
-          }
-        })
-      ).subscribe((data: object & { eventType: GalleryEvents }) => {
-        if (data && data.eventType) {
-          this.handlerCallbacks[data.eventType](data);
-        }
-      })
+    this.errorListener = merge(
+      this.socketService.onException(),
+      this.socketService.onError()
+    ).subscribe((data) => {
+      console.log(data);
+    });
 
-    this.paginatorPrivate._intl.itemsPerPageLabel = "Dessins par page: ";
-    this.paginatorPublic._intl.itemsPerPageLabel = "Dessins par page: ";
-    this.paginatorProtected._intl.itemsPerPageLabel = "Dessins par page: ";
-    this.paginatorSelf._intl.itemsPerPageLabel = "Dessins par page: ";
+    this.messageListener = merge(
+      this.syncCollaboration.onJoinCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Join }))),
+      this.syncCollaboration.onConnectCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Connect }))),
+      this.syncCollaboration.onCreateCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Create }))),
+      this.syncCollaboration.onDeleteCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Delete }))),
+      this.syncCollaboration.onUpdateCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Update }))),
+      this.syncCollaboration.onLoadCollaboration().pipe(map((d) => ({ ...d, eventType: GalleryEvents.Load })))
+    ).subscribe((data: object & { eventType: GalleryEvents }) => {
+      if (data && data.eventType) {
+        this.handlerCallbacks[data.eventType](data);
+      }
+    })
+
+    this.initializePagination();
+
   }
 
   ngOnDestroy(): void {
     if (this.errorListener) { this.errorListener.unsubscribe(); }
-    if (this.datasourcePublic) { this.datasourcePublic.disconnect(); }
-    if (this.datasourcePrivate) { this.datasourcePrivate.disconnect(); }
-    if (this.datasourceProtected) { this.datasourceProtected.disconnect(); }
-    if (this.datasourceProtected) { this.datasourceSelf.disconnect(); }
+    if (this.datasourceSelf) { this.datasourceSelf.disconnect(); }
+    if (this.datasourceAll) { this.datasourceAll.disconnect(); }
     if (this.messageListener) { this.messageListener.unsubscribe(); }
     if (this.drawingsSubscription) {
       this.drawingsSubscription.unsubscribe();
@@ -174,72 +165,33 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
   ngAfterViewInit(): void {
     this.fetchAllDrawings();
-    this.datasourcePublic.paginator = this.paginatorPublic;
-    this.datasourcePrivate.paginator = this.paginatorPrivate;
-    this.datasourceProtected.paginator = this.paginatorProtected;
-    this.dataObsPublic = this.datasourcePublic.connect();
-    this.dataObsPrivate = this.datasourcePrivate.connect();
-    this.dataObsProtected = this.datasourceProtected.connect();
     this.dataObsSelf = this.datasourceSelf.connect();
+    this.dataObsAll = this.datasourceAll.connect();
     this.cdr.detectChanges();
   }
 
-  public search() {
-
+  searchMyDrawings(value: any) {
+    this.selectedOption = value;
   }
 
-  get tagCtrl(): FormControl {
-    return this.openDrawingService.tagCtrl;
+  searchAllDrawings(value: any) {
+    this.selectedOptionAll = value;
   }
 
-  get errorOpenFile() {
-    return this.openDrawingService.errorDialog;
-  }
-  get filteredTags(): Observable<string[]> {
-    return this.openDrawingService.filteredTags;
-  }
-  get selectedTags(): string[] {
-    return this.openDrawingService.selectedTags;
-  }
-  get allTags(): string[] {
-    return this.openDrawingService.allTags;
-
-  }
-  get selectedDrawing(): Drawing | null {
-    return this.openDrawingService.selectedDrawing;
+  setFilterMyDrawings(value: any): void {
+    this.drawingFilterSelf = value;
   }
 
-  isOneWeekOld(date: number) {
-    return Math.round(new Date().getTime() - new Date(date).getTime()) > ONE_WEEK_NUMERIC_VALUE;
+  setFilterAll(value: any): void {
+    this.drawingFilterAll = value;
   }
 
-  getLocalThumbnail() {
-    const container: HTMLElement | null = document.getElementById('localFileThumbnail');
-    if (container) {
-      const svgThumbnail: Element | null = container.children.item(0);
-      if (svgThumbnail) {
-        this.renderer.setAttribute(svgThumbnail, 'viewBox', `0 0 800 800`);
-        svgThumbnail.innerHTML = `${this.openDrawingService.localDrawingThumbnail}`;
-      }
-    }
-  }
-
-  setPagination(index: number): void {
-    setTimeout(() => {
-      switch (index) {
-        case 0:
-          !this.datasourcePublic.paginator ? this.datasourceSelf.paginator = this.paginatorSelf : null;
-          break;
-        case 1:
-          !this.datasourcePublic.paginator ? this.datasourcePublic.paginator = this.paginatorPublic : null;
-          break;
-        case 2:
-          !this.datasourcePrivate.paginator ? this.datasourcePrivate.paginator = this.paginatorPrivate : null;
-          break;
-        case 3:
-          !this.datasourceProtected.paginator ? this.datasourceProtected.paginator = this.paginatorProtected : null;
-      }
-    });
+  initializePagination(): void {
+    this.paginator._intl.itemsPerPageLabel = "Dessins par page: ";
+    this.paginator._intl.nextPageLabel = "Page suivante";
+    this.paginator._intl.lastPageLabel = "Dernière page";
+    this.paginator._intl.previousPageLabel = "Page précédente"
+    this.paginator._intl.firstPageLabel = "Première page"
   }
 
   openDialog(): void {
@@ -264,6 +216,8 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   onLoad(data: ICollaborationLoadResponse) {
+    if (this.dialogRef) this.dialogRef.close();
+    this.router.navigateByUrl('drawing');
   }
 
   onCreate() {
@@ -290,24 +244,58 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     this.fetchAllDrawings();
   }
 
+  handlePageEvent(event: PageEvent, paginate: boolean) {
+    if (!paginate) {
+      this.pageSizeSelf = 12;
+      this.pageIndexSelf = 0;
+    }
+    else {
+      this.pageSizeSelf = event.pageSize;
+      this.pageIndexSelf = event.pageIndex;
+    }
+    this.drawingsSubscription = merge(
+      this.drawingGalleryService.getTypeMyDrawings(event.pageSize * event.pageIndex, this.selectedOption, this.drawingFilterSelf).pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count })))
+    ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string, count: number }) => {
+      this.datasourceSelf.data = d.drawings;
+      this.lengthSelf = d.count;
+    });
+  }
+
+  handleAllPageEvent(event: PageEvent, paginate: boolean) {
+
+    if (!paginate) {
+      this.pageSizeAll = 12;
+      this.pageIndexAll = 0;
+    }
+    else {
+      this.lengthAll = event.length
+      this.pageSizeAll = event.pageSize;
+      this.pageIndexAll = event.pageIndex;
+    }
+
+    this.drawingsSubscription = merge(
+      this.drawingGalleryService.getTypeDrawings(event.pageSize * event.pageIndex, this.selectedOptionAll, this.drawingFilterAll).pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count })))
+    ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string, count: number }) => {
+      this.datasourceAll.data = d.drawings;
+      this.lengthAll = d.count;
+    });
+  }
+
   fetchAllDrawings(): void {
     this.drawingsSubscription = merge(
-      this.drawingGalleryService.getPublicDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: DrawingType.Public }))),
-      this.drawingGalleryService.getPrivateDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: DrawingType.Private }))),
-      this.drawingGalleryService.getProtectedDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: DrawingType.Protected }))),
-      this.drawingGalleryService.getMyDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: 'Self' })))
-    ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string }) => {
+      this.drawingGalleryService.getAllDrawings().pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count }))),
+      this.drawingGalleryService.getMyDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: 'Self', count: d.total_drawing_count })))
+    ).subscribe((d: { drawings: IGalleryEntry[], galleryType: string, count: number }) => {
       if (d.drawings && d.drawings.length > 0) {
-        if (d.galleryType === DrawingType.Protected) {
-          this.datasourceProtected.data = d.drawings;
-        } else if (d.galleryType === DrawingType.Private) {
-          this.datasourcePrivate.data = d.drawings;
-        } else if (d.galleryType === DrawingType.Public) {
-          this.datasourcePublic.data = d.drawings;
+        if (d.galleryType === 'Self') {
+          this.datasourceSelf.data = d.drawings;
+          this.lengthSelf = d.count;
         } else {
-          this.datasourceSelf.data = d.drawings
+          this.datasourceAll.data = d.drawings;
+          this.lengthAll = d.count;
         }
       }
     });
   }
+
 }

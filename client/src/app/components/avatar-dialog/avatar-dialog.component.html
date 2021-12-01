@@ -6,14 +6,16 @@
         </div>
     </div>
 
+    <div class="spinner" *ngIf="isLoading">
+        <mat-spinner [diameter]="35" color="accent"></mat-spinner>
+    </div>
+
     <div class="buttons-container">
         <button (click)="close()" color="secondary" mat-raised-button>Retour</button>
         <button (click)="close(selectedIndex)" color="primary" mat-raised-button>Choisir</button>
     </div>
 </div>
-<div class="spinner" *ngIf="isLoading">
-    <mat-spinner [diameter]="35" color="accent"></mat-spinner>
-</div>
+
 
 <style>
     .avatars-container {
@@ -41,7 +43,7 @@
     .selected {
         border: 3px dashed black;
     }
-    
+
     .buttons-container {
         display: flex;
         gap: 1.5rem;

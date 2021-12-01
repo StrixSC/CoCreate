@@ -9,6 +9,24 @@ import { Injectable } from '@angular/core';
 })
 export class TeamService {
 
+  types = [
+    { key: 'Protected', value: 'Protégé' },
+    { key: 'Public', value: 'Public' }
+  ];
+
+  mascots = [
+    { key: '', value: 'Choisir pour moi!' },
+    { key: 'tiger', value: 'Tigre' },
+    { key: 'lion', value: 'Lion' },
+    { key: 'elephant', value: 'Éléphant' },
+    { key: 'walrus', value: 'Morse' },
+    { key: 'gorilla', value: 'Gorille' },
+    { key: 'cobra', value: 'Cobra' },
+    { key: 'zebra', value: 'Zebre' },
+    { key: 'horse', value: 'Cheval' },
+    { key: 'eagle', value: 'Aigle' }
+  ];
+
   constructor(private http: HttpClient, private socketService: SocketService) { }
 
   fetchTeams(query: string) {
@@ -23,8 +41,36 @@ export class TeamService {
     this.socketService.emit('teams:join', data);
   }
 
+  sendLeave(data: any): void {
+    this.socketService.emit('teams:leave', data);
+  }
+
   sendCreateTeam(data: any): void {
     this.socketService.emit('teams:create', data);
+  }
+
+  sendDelete(data: any): void {
+    this.socketService.emit('teams:delete', data);
+  }
+
+  sendUpdate(data: any): void {
+    this.socketService.emit('teams:update', data);
+  }
+
+  getAllUserTeams() {
+    return this.http.get(environment.serverURL + '/api/users/teams')
+  }
+
+  onUpdateException(): Observable<any> {
+    return this.socketService.on('teams:update:exception');
+  }
+
+  onUpdateFinished(): Observable<any> {
+    return this.socketService.on('teams:update:finished');
+  }
+
+  onUpdated(): Observable<any> {
+    return this.socketService.on('teams:updated');
   }
 
   onCreated(): Observable<any> {
@@ -49,5 +95,37 @@ export class TeamService {
 
   onCreationException(): Observable<any> {
     return this.socketService.on('teams:create:exception');
+  }
+
+  onLeaveException(): Observable<any> {
+    return this.socketService.on('teams:leave:exception');
+  }
+
+  onLeaveFinished(): Observable<any> {
+    return this.socketService.on('teams:leave:finished');
+  }
+
+  onLeave(): Observable<any> {
+    return this.socketService.on('teams:left');
+  }
+
+  onDeleteException() {
+    return this.socketService.on('teams:delete:exception');
+  }
+
+  onDeleteFinished() {
+    return this.socketService.on('teams:delete:finished');
+  }
+
+  onDelete() {
+    return this.socketService.on('teams:deleted');
+  }
+
+  onUpdate() {
+    return this.socketService.on('teams:updated');
+  }
+
+  onException() {
+    return this.socketService.on('teams:exception');
   }
 }
