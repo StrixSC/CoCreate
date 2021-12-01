@@ -1,4 +1,6 @@
 export interface IGalleryEntry {
+    is_member: string;
+    is_owner: string;
     drawing_id: string;
     collaboration_id?: string;
     userId?: string
