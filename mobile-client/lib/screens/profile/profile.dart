@@ -102,7 +102,13 @@ class _ProfileScreenState extends State<Profile> {
 
   profileRow() {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      const SizedBox(width: 300),
+      const SizedBox(width: 50),
+      isAuthor
+          ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Text('Courriel: ' + _user.email.toString()),
+        Text('Nom: Patel'),
+        Text('Prenom: Pritam'),
+      ]) : const SizedBox.shrink(),
       Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         CircleAvatar(
           backgroundColor: Colors.white,
