@@ -20,7 +20,7 @@ class ChatCard extends StatelessWidget {
 
   getfontWeight() {
     return chat.messages.isEmpty ? const TextStyle(fontSize: 20, fontWeight: FontWeight.w500) :
-    chat.lastReadMessage == chat.messages.last.text ?
+    chat.lastReadMessage == chat.messages.first.text ?
       const TextStyle(fontSize: 20, fontWeight: FontWeight.w500) :
       const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: kPrimaryColor);
   }

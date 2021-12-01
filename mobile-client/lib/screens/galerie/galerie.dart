@@ -170,7 +170,6 @@ class GalerieState extends State<Galerie>
           Collaboration collaboration = Collaboration(
             collaborationId: drawing["collaboration_id"],
             memberCount: drawing["collaborator_count"],
-            maxMemberCount: drawing["max_collaborator_count"],
             members: [], actionsMap: {}, actions: [],
           );
           // TODO: add updated_at
@@ -752,11 +751,6 @@ class _Drawing extends StatelessWidget {
                                           .toString()),
                                   const SizedBox(height: 48.0),
                                   richTextWhitePurple(
-                                      'Nombre de membres max: ',
-                                      drawing.collaboration.maxMemberCount
-                                          .toString()),
-                                  const SizedBox(height: 48.0),
-                                  richTextWhitePurple(
                                       'Créé le: ', drawing.createdAt),
                                   const SizedBox(height: 28.0),
                                   drawing.type == 'Protected' &&
@@ -1004,9 +998,7 @@ class _Drawing extends StatelessWidget {
                         const SizedBox(height: 10),
                         Text(
                             "Collaborateurs actifs: " +
-                                drawing.collaboration.memberCount.toString() +
-                                "/" +
-                                drawing.collaboration.maxMemberCount.toString(),
+                                drawing.collaboration.memberCount.toString(),
                             style: TextStyle(fontSize: 20.0)),
                       ])))));
     });

@@ -39,6 +39,11 @@ class Messenger extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setLastMessage(lastMessage, index) {
+    userChannels[index].lastReadMessage = lastMessage;
+    notifyListeners();
+  }
+
   void updateUserChannels(List<Chat> updatedUserChannels) {
     userChannels = updatedUserChannels;
     notifyListeners();
