@@ -29,21 +29,21 @@ export class TopBarComponent implements OnInit, OnDestroy {
       if (state) {
         this.auth.activeUser = state;
         await this.socketService.setupSocketConnection();
-        return true;
-      } else return false
+        return { result: true, message: "" };
+      } else return { result: false, message: "Erreur: Vous n'êtes pas authentifié." }
     }), switchMap((status) => {
-      if (status) {
+      if (status.result) {
         this.socketService.sendInit();
-        return this.socketService.onInit().pipe(map(() => true))
+        return this.socketService.onInit().pipe(map(() => ({ result: true, message: "" })))
       } else return of(status);
-    })).subscribe((data) => {
-      if (data) {
+    })).subscribe((status) => {
+      if (status.result) {
         this.isLoading = false;
       } else {
-        this.snackBar.open(`Oh non! On dirait qu'il y a eu une erreur lors de la connexion à notre serveur, veuillez rafraichir l'application...`)
+        this.snackBar.open(status.message, "OK", { duration: 5000 });
       }
     }, (error) => {
-      console.error(error);
+      this.snackBar.open(`Oh non! On dirait qu'il y a eu une erreur lors de la connexion à notre serveur, veuillez rafraichir l'application...`, "OK", { duration: 5000 });
     });
   }
 

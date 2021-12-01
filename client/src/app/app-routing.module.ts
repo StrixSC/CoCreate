@@ -3,7 +3,6 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
 import { RegisterComponent } from './components/register/register.component';
 import { AuthWrapperComponent } from './components/auth-wrapper/auth-wrapper.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
-import { OfflineComponent } from './components/offline/offline.component';
 import { LandingPageComponent } from './components/landing-page/landing-page.component';
 import { LoginComponent } from './components/login/login.component';
 import { MenuPageComponent } from './components/menu-page/menu-page.component';
@@ -54,7 +53,8 @@ const routes: Routes = [
     children: [
       {
         path: "",
-        component: LandingPageComponent,
+        redirectTo: "/auth/login",
+        pathMatch: "full"
       },
       {
         path: "login",
@@ -70,7 +70,6 @@ const routes: Routes = [
       }
     ]
   },
-  { path: "offline", component: OfflineComponent },
   { path: "**", redirectTo: "" }
 ]
 

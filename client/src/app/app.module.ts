@@ -9,7 +9,6 @@ import { RegisterComponent } from './components/register/register.component';
 import { AuthWrapperComponent } from './components/auth-wrapper/auth-wrapper.component';
 import { LandingPageComponent } from './components/landing-page/landing-page.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
-import { OfflineComponent } from './components/offline/offline.component';
 import { LoginComponent } from './components/login/login.component';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
@@ -53,7 +52,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
-import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
 import { DrawingGalleryComponent } from './components/drawing-gallery/drawing-gallery.component';
@@ -95,7 +93,6 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     CreateTeamDialogComponent,
     ExportDrawingComponent,
     DrawingPageComponent,
-    WelcomePageComponent,
     UserProfileComponent,
     TeamPageComponent,
     ChangePasswordComponent,
@@ -104,7 +101,6 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     DrawingGalleryCardComponent,
     LoginComponent,
     ForgotPasswordComponent,
-    OfflineComponent,
     LandingPageComponent,
     DrawingPreviewDialogComponent,
     CreateDrawingComponent,
