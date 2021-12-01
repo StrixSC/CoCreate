@@ -228,9 +228,10 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   onCreate() {
+    if(this.dialogRef)
     this.dialogRef.close();
     this.snackbar.open('Nouveau dessin créé avec succès!', '', { duration: 5000 });
-    this.fetchAllDrawings();
+    this.handlePageEvent(new PageEvent, false);
   }
 
   onUpdate() {
@@ -242,7 +243,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   onDelete(data: ICollaborationDeleteResponse) {
     if (this.dialogRef) this.dialogRef.close();
     this.snackbar.open('Dessin supprimé avec succès!', '', { duration: 5000 });
-    this.fetchAllDrawings();
+    this.handlePageEvent(new PageEvent, false);
   }
 
   onLeave(data: ICollaborationLeaveResponse) {

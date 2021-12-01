@@ -69,6 +69,7 @@ import { ChatBoxComponent } from "./components/right-sidebar/chat-box/chat-box.c
 import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out/chat-poped-out.component";
 import { AllChannelsComponent } from "./components/right-sidebar/all-channels/all-channels.component";
 import { DrawingGalleryCardProtectedComponent } from './components/drawing-gallery-card-protected/drawing-gallery-card-protected.component';
+import { FormDeleteDrawingComponent } from './components/form-delete-drawing/form-delete-drawing.component';
 
 @NgModule({
   declarations: [
@@ -123,6 +124,7 @@ import { DrawingGalleryCardProtectedComponent } from './components/drawing-galle
     AllChannelsComponent,
     TeamInfoComponent,
     TeamPasswordDialogComponent,
+    FormDeleteDrawingComponent
   ],
   imports: [
     BrowserModule,
@@ -167,6 +169,7 @@ import { DrawingGalleryCardProtectedComponent } from './components/drawing-galle
     MatSnackBarContainer,
     CreateTeamDialogComponent,
     CollaborationPasswordFormDialogComponent,
+    FormDeleteDrawingComponent
   ],
   providers: [
     FileReader,

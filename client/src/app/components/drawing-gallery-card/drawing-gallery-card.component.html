@@ -1,7 +1,32 @@
 <mat-card style="border: 1px solid #fff;" class="drawing-card" *ngIf="drawing">
+  <div align="end" *ngIf="drawing.is_member" class="clickable">
+    <button mat-icon-button [matMenuTriggerFor]="menu"
+    aria-label="Example icon button with a vertical three dot icon">
+        <mat-icon>more_vert</mat-icon>
+        <mat-menu #menu="matMenu">
+            <button *ngIf="drawing.is_owner" mat-menu-item>
+              <mat-icon>settings_icon</mat-icon>
+              <span>Mise à jour des infos</span>
+            </button>
+            <button *ngIf="!drawing.is_owner" mat-menu-item>
+                <mat-icon>logout</mat-icon>
+                <span>Quitter</span>
+            </button>
+            <hr *ngIf="drawing.is_owner">
+            <button *ngIf="drawing.is_owner" (click)="openDelete()" mat-menu-item>
+                <mat-icon>delete</mat-icon>
+                <span>Supprimer</span>
+            </button>
+        </mat-menu>
+    </button>
+</div>
   <mat-card-header>
     <img mat-card-avatar src="{{drawing.author_avatar}}" class="example-header-image">
-    <mat-card-title>{{drawing.title}}</mat-card-title>
+
+      <mat-card-title *ngIf="drawing.title.length >=15">{{ drawing.title | slice:0:15 }}...</mat-card-title>
+
+      <mat-card-title *ngIf="drawing.title.length < 15">{{drawing.title}}</mat-card-title>
+
     <mat-card-subtitle>Mise à jour le {{ drawing.updated_at | date:'short' }}
     </mat-card-subtitle>
   </mat-card-header>
@@ -9,7 +34,7 @@
     src="../../../assets/default-image.png">
 
   <button mat-icon-button *ngIf="drawing.type === 'Protected'" class="lock" mat-card-image src=""></button>
-  <mat-card-header fxLayoutAlign="center">
+  <mat-card-header align="center" fxLayoutAlign="center">
     <mat-card-title></mat-card-title>
     <mat-card-subtitle>Auteur: {{drawing.author_username}}</mat-card-subtitle>
     <mat-card-subtitle>Collaborateurs actifs: {{drawing.collaborator_count}}</mat-card-subtitle>

@@ -1,0 +1,47 @@
+<div>
+    <h2>Suppression du dessin</h2>
+</div>
+<br>
+<div>
+    Êtes-vous sûr de vouloir supprimer le dessin 
+    <br>
+</div>
+<div style="font-size: large; text-align: center;">
+    «{{drawing.title}}»?
+    
+<br>
+</div>
+<div mat-dialog-actions>
+    <button (click)="sendDeleteCollaboration()" mat-raised-button color="primary">Supprimer</button>
+    <button (click)="onNoClick()" mat-raised-button>Annuler</button>
+</div>
+
+<style>
+    h1 {
+        font-size: 2rem;
+    }
+
+    .form-field {
+        width: 300px;
+    }
+
+    .main-container-wrapper {
+        gap: 0rem;
+        align-items: center;
+        padding-top: 3rem;
+        justify-content: space-around;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .header {
+        font-weight: bolder;
+        font-size: 2rem;
+        font-style: "Roboto";
+    }
+</style>
