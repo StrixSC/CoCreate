@@ -79,7 +79,7 @@
                                 <span>Quitter</span>
                             </button>
                             <hr *ngIf="team.isOwner">
-                            <button *ngIf="team.isOwner" mat-menu-item>
+                            <button *ngIf="team.isOwner" (click)="deleteTeam(team)" mat-menu-item>
                                 <mat-icon>delete</mat-icon>
                                 <span>Supprimer</span>
                             </button>

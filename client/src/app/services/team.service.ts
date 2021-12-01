@@ -49,6 +49,10 @@ export class TeamService {
     this.socketService.emit('teams:create', data);
   }
 
+  sendDelete(data: any): void {
+    this.socketService.emit('teams:delete', data);
+  }
+
   sendUpdate(data: any): void {
     this.socketService.emit('teams:update', data);
   }

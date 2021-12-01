@@ -1,3 +1,4 @@
+import { DeleteConfirmationDialogComponent } from './../delete-confirmation-dialog/delete-confirmation-dialog.component';
 import { map } from 'rxjs/operators';
 import { SocketService } from 'src/app/services/chat/socket.service';
 import { TeamInfoComponent } from './../team-info/team-info.component';
@@ -44,11 +45,11 @@ export class TeamPageComponent implements OnInit {
   leaveLoading: boolean = false;
   searchForm: FormGroup;
   joinFinishedSubscription: Subscription;
-  joinErrorSubscription: Subscription;
-  leaveException: Subscription;
   connectionSubscription: Subscription;
   leaveFinishedSubscription: Subscription;
   refreshSubscription: Subscription;
+  deleteFinishedSubscription: Subscription;
+  exceptionSubscription: Subscription;
   activeOffset = 0;
   activeLimit = 12;
   activeTotal = 0;
@@ -89,8 +90,8 @@ export class TeamPageComponent implements OnInit {
       this.teamService.onUpdate(),
       this.teamService.onCreated(),
       this.teamService.onJoin(),
+      this.teamService.onDelete(),
     ).subscribe((d) => {
-      console.log(d);
       this.submitSearch()
     });
 
@@ -104,10 +105,11 @@ export class TeamPageComponent implements OnInit {
           this.teams[index].onlineMemberCount = d.onlineMemberCount;
         }
       }
-    })
+    });
 
-    this.leaveException = this.teamService.onLeaveException().subscribe((data: { message: string }) => {
-      this.snackBar.open(data.message, 'OK', { duration: 5000 });
+    this.deleteFinishedSubscription = this.teamService.onDeleteFinished().subscribe((d) => {
+      this.isLoading = false;
+      this.snackBar.open('Super! Équipe supprimée!', "OK", { duration: 5000 });
     });
 
     this.leaveFinishedSubscription = this.teamService.onLeaveFinished().subscribe((data) => {
@@ -122,8 +124,12 @@ export class TeamPageComponent implements OnInit {
       this.activeTeamName = "";
     });
 
-    this.joinErrorSubscription = this.teamService.onJoinException().subscribe(() => {
-      // TODO: join exception handling
+    this.exceptionSubscription = merge(
+      this.teamService.onDeleteException(),
+      this.teamService.onJoinException(),
+      this.teamService.onLeaveException(),
+    ).subscribe((data) => {
+      this.snackBar.open(data.message, "OK", { duration: 5000 });
     });
 
     this.isLoading = false;
@@ -257,16 +263,8 @@ export class TeamPageComponent implements OnInit {
       this.refreshSubscription.unsubscribe();
     }
 
-    if (this.joinErrorSubscription) {
-      this.joinErrorSubscription.unsubscribe();
-    }
-
-    if (this.joinFinishedSubscription) {
-      this.joinErrorSubscription.unsubscribe();
-    }
-
-    if (this.leaveException) {
-      this.leaveException.unsubscribe();
+    if (this.exceptionSubscription) {
+      this.exceptionSubscription.unsubscribe();
     }
 
     if (this.leaveFinishedSubscription) {
@@ -277,10 +275,27 @@ export class TeamPageComponent implements OnInit {
       this.connectionSubscription.unsubscribe();
     }
 
+    if (this.deleteFinishedSubscription) {
+      this.deleteFinishedSubscription.unsubscribe();
+    }
   }
 
   leaveTeam(team: TeamResponse): void {
     this.teamService.sendLeave({ teamId: team.teamId });
+  }
+
+  deleteTeam(team: TeamResponse): void {
+    this.dialog.open(DeleteConfirmationDialogComponent, {
+      width: '500px',
+      data: {
+        message: `Êtes vous sûr de vouloir supprimer l'équipe "${team.teamName}" ?`,
+        submessage: `Cette action est irréversible et supprimera tous les dessins créés par l'équipe.`
+      }
+    }).afterClosed().subscribe((d) => {
+      if (d) {
+        this.teamService.sendDelete({ teamId: team.teamId });
+      }
+    });
   }
 
   openInfo(team: TeamResponse): void {

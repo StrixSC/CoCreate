@@ -96,4 +96,12 @@ export class SyncCollaborationService {
     return this.socketService.on('collaboration:exception');
   }
 
+  onDeleteException(): Observable<any> {
+    return this.socketService.on('collaboration:delete:exception');
+  }
+
+  onDeleteFinished(): Observable<any> {
+    return this.socketService.on('collaboration:delete:finished');
+  }
+
 }

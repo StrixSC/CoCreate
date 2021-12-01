@@ -1,3 +1,4 @@
+import { DeleteConfirmationDialogComponent } from './components/delete-confirmation-dialog/delete-confirmation-dialog.component';
 import { TeamInfoComponent } from './components/team-info/team-info.component';
 import { TeamPasswordDialogComponent } from './components/team-password-dialog/team-password-dialog.component';
 import { AngularFireStorageModule } from '@angular/fire/storage';
@@ -99,6 +100,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     TeamPageComponent,
     ChangePasswordComponent,
     DrawingGalleryComponent,
+    DeleteConfirmationDialogComponent,
     DrawingGalleryCardComponent,
     LoginComponent,
     ForgotPasswordComponent,
@@ -148,6 +150,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     NewDrawingAlertComponent,
     NewDrawingComponent,
     TeamPasswordDialogComponent,
+    DeleteConfirmationDialogComponent,
     TeamInfoComponent,
     ToolsColorPickerComponent,
     WorkspaceComponent,

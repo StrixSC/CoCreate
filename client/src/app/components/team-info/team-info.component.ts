@@ -1,3 +1,4 @@
+import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { Router } from '@angular/router';
 import { TeamType } from './../../model/team-response.model';
 import { Subscription } from 'rxjs';
@@ -30,20 +31,25 @@ interface ITeamUpdateResponse {
 })
 export class TeamInfoComponent implements OnInit {
 
-  isLoading: boolean;
+  returnVar = false;
+  isLoading: boolean = false;
+  deleteLoading: boolean = false;
   teamInfo: any;
-  teamSub: Subscription;
   updateForm: FormGroup;
   updatedSubscription: Subscription;
+  teamSub: Subscription;
   updateExceptionSubscription: Subscription;
   updateFinishedSubscription: Subscription;
+  deleteExceptionSubscription: Subscription;
+  deleteFinishedSubscription: Subscription;
 
   displayedColumns = ['username', 'status', 'joinedOn', 'type'];
-  drawingsColumns = ['title', 'memberCount', 'collaborationId', 'delete']
+  drawingsColumns = ['title', 'memberCount', 'createdAt', 'updatedAt', 'actions']
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
     private teamService: TeamService,
+    private syncCollabService: SyncCollaborationService,
     public dialogRef: MatDialogRef<CollaborationPasswordFormDialogComponent>,
     private snackbar: MatSnackBar,
     private router: Router,
@@ -51,7 +57,6 @@ export class TeamInfoComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.isLoading = false;
     this.updateForm = this.fb.group({
       teamName: [this.team.teamName, [Validators.minLength(4), Validators.maxLength(256), Validators.required]],
       bio: [this.team.bio, [Validators.maxLength(1024)]],
@@ -61,16 +66,12 @@ export class TeamInfoComponent implements OnInit {
       mascot: [this.team.mascot, []]
     });
 
-    this.teamSub = this.teamService.fetchTeamById(this.team.teamId).subscribe((d: any) => {
-      if (d) {
-        this.teamInfo = d
-        console.log(d);
-      }
-    });
+    this.fetchTeamInfo();
 
     this.updateFinishedSubscription = this.teamService.onUpdateFinished().subscribe(() => {
       this.isLoading = false;
       this.dialogRef.disableClose = false;
+      this.returnVar = true;
       this.snackbar.open("Succès! Votre équipe à été mise à jour!", "OK", { duration: 2000 })
     })
 
@@ -78,9 +79,20 @@ export class TeamInfoComponent implements OnInit {
       this.dialogRef.disableClose = false;
       this.isLoading = false;
       this.snackbar.open(d.message, "OK", { duration: 5000 })
-    })
+    });
 
-    this.teamInfo
+    this.deleteExceptionSubscription = this.syncCollabService.onDeleteException().subscribe((d) => {
+      this.snackbar.open(d.message, 'OK', { duration: 5000 });
+      this.deleteLoading = false;
+      this.dialogRef.disableClose = false;
+    });
+
+    this.deleteFinishedSubscription = this.syncCollabService.onDeleteCollaboration().subscribe((d) => {
+      this.snackbar.open('Dessin supprimé!', 'OK', { duration: 5000 });
+      this.isLoading = false;
+      this.dialogRef.disableClose = false;
+      this.fetchTeamInfo();
+    })
   }
 
   get types(): any {
@@ -115,9 +127,31 @@ export class TeamInfoComponent implements OnInit {
     return this.updateForm.get('mascot')!;
   }
 
+  joinDrawing(collaborationId: string): void {
+    this.router.navigateByUrl('drawing/' + collaborationId);
+    this.dialogRef.close(this.returnVar);
+  }
+
+  deleteDrawing(collaborationId: string): void {
+    this.isLoading = true;
+    this.dialogRef.disableClose = true;
+    this.syncCollabService.sendDeleteCollaboration({
+      collaborationId: collaborationId,
+      userId: this.auth.activeUser!.uid,
+    });
+  }
+
+  deleteTeam(team: TeamResponse): void {
+    this.isLoading = true;
+    this.dialogRef.disableClose = true;
+    this.teamService.sendDelete({
+      teamId: team.teamId
+    })
+  }
+
   createDrawing(): void {
     this.router.navigateByUrl('gallery?createDrawing=true');
-    this.dialogRef.close();
+    this.dialogRef.close(this.returnVar);
   }
 
   onUpdateSubmit(): void {
@@ -152,6 +186,15 @@ export class TeamInfoComponent implements OnInit {
     return this.infoChanged() && this.team.isOwner && this.updateForm.valid;
   }
 
+  fetchTeamInfo() {
+    this.teamSub = this.teamService.fetchTeamById(this.team.teamId).subscribe((d: any) => {
+      if (d) {
+        this.teamInfo = d
+        this.teamSub.unsubscribe();
+      }
+    });
+  }
+
   infoChanged(): boolean {
     let infoChanged = false;
 
@@ -178,4 +221,30 @@ export class TeamInfoComponent implements OnInit {
     return infoChanged;
   }
 
+  ngOnDelete(): void {
+    if (this.updatedSubscription) {
+      this.updatedSubscription.unsubscribe();
+    }
+
+    if (this.teamSub) {
+      this.teamSub.unsubscribe();
+    }
+
+    if (this.updateExceptionSubscription) {
+      this.updateExceptionSubscription.unsubscribe();
+    }
+
+    if (this.updateFinishedSubscription) {
+      this.updateFinishedSubscription.unsubscribe();
+    }
+
+    if (this.deleteExceptionSubscription) {
+      this.deleteExceptionSubscription.unsubscribe();
+    }
+
+    if (this.deleteFinishedSubscription) {
+      this.deleteFinishedSubscription.unsubscribe();
+    }
+
+  }
 }

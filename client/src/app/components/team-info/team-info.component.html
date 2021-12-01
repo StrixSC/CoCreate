@@ -4,63 +4,110 @@
 
         <mat-dialog-content>
             <mat-tab-group mat-align-tabs="center" class="tabs">
-                <mat-tab class="tab" label="Membres">
-                    <table mat-table *ngIf="teamInfo" [dataSource]="teamInfo.members"
-                        class="mat-elevation-z8 members-table">
-                        <ng-container matColumnDef="username">
-                            <th mat-header-cell *matHeaderCellDef> Utilisateur </th>
-                            <td class="user-column clickable" mat-cell *matCellDef="let element">
-                                <div class="user-avatar">
-                                    <img class="user-avatar-img" [src]="element.avatarUrl">
-                                </div>
-                                <div class="user-username">{{element.username}}</div>
-                            </td>
-                        </ng-container>
-                        <ng-container matColumnDef="status">
-                            <th mat-header-cell *matHeaderCellDef> Statut </th>
-                            <td mat-cell *matCellDef="let element"> {{element.status}} </td>
-                        </ng-container>
-                        <ng-container matColumnDef="joinedOn">
-                            <th mat-header-cell *matHeaderCellDef> Date rejoint </th>
-                            <td mat-cell *matCellDef="let element"> {{element.joinedOn | date:'short'}} </td>
-                        </ng-container>
-                        <ng-container matColumnDef="type">
-                            <th mat-header-cell *matHeaderCellDef> Rôle </th>
-                            <td mat-cell *matCellDef="let element">
-                                <span class="member-column" *ngIf="element.type === 'Owner'">Propriétaire
-                                    <mat-icon>star</mat-icon>
-                                </span>
-                                <span class="member-column" *ngIf="element.type !== 'Owner'">Membre
-                                </span>
-                            </td>
-                        </ng-container>
-                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                    </table>
-                </mat-tab>
-                <mat-tab label="Dessins" >
-                    <table mat-table *ngIf="teamInfo && teamInfo.drawings.length > 0" [dataSource]="teamInfo.drawings"
-                        class="mat-elevation-z8 members-table">
-                        <ng-container matColumnDef="title">
-                            <th mat-header-cell *matHeaderCellDef> Utilisateur </th>
-                            <td class="clickable" mat-cell *matCellDef="let element">
-                                {{ element.title }}
-                            </td>
-                        </ng-container>
-                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                    </table>
-                    <div class="no-drawing-container" *ngIf="teamInfo && teamInfo.drawings.length <= 0">
-                       <div class="no-drawing-img-container">
-                           <img src="/assets/img/no-pictures.png" class="no-drawing-img"> 
-                        </div>
-                        <h2 class="no-drawing-header">
-                            <div class="no-drawing-header-text">Cette équipe n'est auteur d'aucun dessins...</div>
-                            <button mat-raised-button color="primary" class="create-drawing-button" (click)="createDrawing()">
-                                Créer un dessin!
-                            </button>
-                        </h2>
+                <mat-tab class="tab" label="Membres" dynamicHeight>
+                    <div class=" custom-tab">
+
+                        <table mat-table *ngIf="teamInfo" [dataSource]="teamInfo.members" class="members-table">
+                            <ng-container matColumnDef="username">
+                                <th mat-header-cell *matHeaderCellDef> Utilisateur </th>
+                                <td class="user-column clickable" mat-cell *matCellDef="let element">
+                                    <div class="user-avatar">
+                                        <img class="user-avatar-img" [src]="element.avatarUrl">
+                                    </div>
+                                    <div class="user-username">{{element.username}}</div>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef> Statut </th>
+                                <td mat-cell *matCellDef="let element"> {{element.status}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="joinedOn">
+                                <th mat-header-cell *matHeaderCellDef> Date rejoint </th>
+                                <td mat-cell *matCellDef="let element"> {{element.joinedOn | date:'short'}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="type">
+                                <th mat-header-cell *matHeaderCellDef> Rôle </th>
+                                <td mat-cell *matCellDef="let element">
+                                    <span class="member-column" *ngIf="element.type === 'Owner'">Propriétaire
+                                        <mat-icon>star</mat-icon>
+                                    </span>
+                                    <span class="member-column" *ngIf="element.type !== 'Owner'">Membre
+                                    </span>
+                                </td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                        </table>
                     </div>
+                </mat-tab>
+                <mat-tab label="Dessins" dynamicHeight>
+                    <div class="drawings-tab custom-tab">
+
+                        <table mat-table *ngIf="teamInfo && teamInfo.drawings.length > 0"
+                            [dataSource]="teamInfo.drawings" class="drawings-table">
+                            <ng-container matColumnDef="title">
+                                <th mat-header-cell *matHeaderCellDef> Titre du dessin </th>
+                                <td class="" mat-cell *matCellDef="let element">
+                                    {{ element.title }}
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="memberCount">
+                                <th mat-header-cell *matHeaderCellDef> Membres Actifs </th>
+                                <td class="" mat-cell *matCellDef="let element">
+                                    {{ element.activeCollaboratorCount }} / {{ element.currentCollaboratorCount }}
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="createdAt">
+                                <th mat-header-cell *matHeaderCellDef> Créé le </th>
+                                <td class="" mat-cell *matCellDef="let element">
+                                    {{ element.createdAt | date:'short' }}
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="updatedAt">
+                                <th mat-header-cell *matHeaderCellDef> Dernière mise à jour </th>
+                                <td class="" mat-cell *matCellDef="let element">
+                                    {{ element.updatedAt | date:'short' }}
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="actions">
+                                <th mat-header-cell *matHeaderCellDef> </th>
+                                <td class="" mat-cell *matCellDef="let element">
+                                    <div class="clickable">
+                                        <button mat-icon-button [matMenuTriggerFor]="menu">
+                                            <mat-icon>more_vert</mat-icon>
+                                            <mat-menu #menu="matMenu">
+                                                <button (click)="joinDrawing(element.collaborationId)" mat-menu-item>
+                                                    <mat-icon>draw</mat-icon>
+                                                    <span>Rejoindre le dessin</span>
+                                                </button>
+                                                <button (click)="deleteDrawing(element.collaborationId)" mat-menu-item>
+                                                    <mat-icon>delete</mat-icon>
+                                                    <span>Supprimer</span>
+                                                </button>
+                                            </mat-menu>
+                                        </button>
+                                    </div>
+                                </td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="drawingsColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: drawingsColumns;"></tr>
+                        </table>
+
+                        <div class="no-drawing-container" *ngIf="teamInfo && teamInfo.drawings.length <= 0">
+                            <div class="no-drawing-img-container">
+                                <img src="/assets/img/no-pictures.png" class="no-drawing-img">
+                            </div>
+                            <h2 class="no-drawing-header">
+                                <div class="no-drawing-header-text">Cette équipe n'est auteur d'aucun dessins...</div>
+                            </h2>
+                        </div>
+
+                        <button mat-raised-button color="primary" class="create-drawing-button"
+                            (click)="createDrawing()">
+                            Créer un dessin!
+                        </button>
+                    </div>
+
                 </mat-tab>
                 <mat-tab *ngIf="team.isOwner" label="Mise à jour">
                     <div class="main-container-wrapper">
@@ -162,17 +209,16 @@
         </mat-dialog-content>
     </div>
     <mat-dialog-actions align="end">
-        <button [disabled]="isLoading" (click)="dialogRef.close()" mat-raised-button color="secondary">
+        <button [disabled]="isLoading" (click)="dialogRef.close(returnVar)" mat-raised-button color="secondary">
             <div class="spinner" *ngIf="isLoading">
                 <mat-spinner [diameter]="25" color="accent" class="spinner"></mat-spinner>
             </div>
-            <ng-container *ngIf="!isLoading">Annuler</ng-container>
+            <ng-container *ngIf="!isLoading">Retour</ng-container>
         </button>
     </mat-dialog-actions>
 </div>
 
 <style>
-
     .no-drawing-container {
         display: flex;
         justify-content: center;
@@ -192,9 +238,7 @@
         opacity: 0.5
     }
 
-    .create-drawing-button {
-
-    }
+    .create-drawing-button {}
 
     .no-drawing-img-container {
         max-width: 30%;
@@ -327,7 +371,21 @@
         width: 100%
     }
 
+    .drawings-table,
     .members-table {
         width: 100%;
+    }
+
+    .custom-tab {
+        min-height: 90%;
+        width: 100%;
+    }
+
+    .drawings-tab {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 3rem;
     }
 </style>
