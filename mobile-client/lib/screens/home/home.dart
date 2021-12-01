@@ -27,9 +27,7 @@ class _HomeScreenState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    final _scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
-      key: _scaffoldKey,
         backgroundColor: Colors.red,
         endDrawer: SizedBox(
             width: MediaQuery.of(context).size.width * 0.45,

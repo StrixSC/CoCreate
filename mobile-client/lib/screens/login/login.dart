@@ -6,6 +6,7 @@ import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:Colorimage/utils/socket/collaboration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/src/provider.dart';
 import 'package:translator/translator.dart';
 import '../../app.dart';
@@ -105,7 +106,13 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: null,
-        body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        body: Center(child: Container( width: 800, child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text('Colorimage',
+              style: TextStyle(
+                fontFamily: GoogleFonts.yellowtail().fontFamily,
+                fontWeight: FontWeight.w200,
+                fontSize: 100.0,
+                color: Colors.white,)),
           Form(
             key: _formKey,
             child: Flexible(
@@ -114,21 +121,6 @@ class _LoginState extends State<Login> {
                 padding: EdgeInsets.only(left: 100.0, right: 100.0),
                 children: <Widget>[
                   SizedBox(height: 48.0),
-                  const Text('Connexion',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 40.0,
-                          color: kPrimaryColor)),
-                  const Text('Connexion',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 40.0,
-                          color: Colors.white)),
-                  const Text('Connexion',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 40.0,
-                          color: Colors.white38)),
                   errorMessage.isNotEmpty
                       ? Padding(
                           padding: const EdgeInsets.fromLTRB(30, 20, 0, 0),
@@ -137,7 +129,7 @@ class _LoginState extends State<Login> {
                                   color: Colors.red, fontSize: 25.0)))
                       : const SizedBox.shrink(),
                   SizedBox(height: 24.0),
-                  TextFormField(
+                 TextFormField(
                     style: const TextStyle(fontSize: _fontSize),
                     controller: userController,
                     maxLines: 1,
@@ -235,6 +227,6 @@ class _LoginState extends State<Login> {
               ),
             ),
           )
-        ]));
+        ]))));
   }
 }
