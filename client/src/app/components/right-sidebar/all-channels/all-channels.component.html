@@ -21,56 +21,76 @@
     (click)="createNewChannel()"
   >
     <mat-icon>add</mat-icon>
-    Create new channel
+    Créer une nouvelle chaîne
   </button>
 
   <div [ngStyle]="browseChannelView">
-    <h3 style="margin-left: 5%">Browse channels</h3>
+    <h3 style="margin-left: 5%">Toutes les chaînes</h3>
 
-    <div
-      class="channel_box"
-      *ngFor="let channel of all_channels | keyvalue"
-      (click)="joinChannel(channel.value.channel_id)"
-    >
+    <div class="channel_box" *ngFor="let channel of all_channels | keyvalue">
       <div
+        *ngIf="channel.value.channel_id !== 'PUBLIC'"
         class="column1"
         [ngStyle]="channel.value.btnStyle"
-        matTooltip="Join channel"
       >
-        <div style="font-size: 18px" [ngStyle]="channel.value.btnStyle">
+        <div style="font-size: 18px">
           <mat-icon>public</mat-icon>{{ channel.value.name }}
         </div>
-        <div style="color: #b9bbbe" [ngStyle]="channel.value.btnStyle">
+        <div style="color: #b9bbbe">
           <mat-icon>person_outline</mat-icon>
           {{ channel.value.owner_username }}
         </div>
         <br />
 
         <div style="width: 50%; float: left; height: '50px'">
-          <div
-            style="color: #b9bbbe; font-size: 12px"
-            [ngStyle]="channel.value.btnStyle"
-          >
+          <div style="color: #b9bbbe; font-size: 12px">
             {{ channel.value.member_count }} Members
           </div>
-          <div
-            style="color: #b9bbbe; font-size: 12px"
-            [ngStyle]="channel.value.btnStyle"
-          >
+          <div style="color: #b9bbbe; font-size: 12px">
             {{ channel.value.online_member_count }} Online
           </div>
         </div>
-        <div
-          *ngIf="channel.value.channel_id !== 'PUBLIC'"
-          style="width: 30%; float: right"
-        >
-          <button
+        <div *ngIf="channel.value.channel_id !== 'PUBLIC'" style="float: right">
+          <!-- <button
             mat-mini-fab
             color="warn"
             style="background-color: rgb(57, 0, 0)"
             (click)="deleteChannel(channel.value.channel_id)"
           >
             <mat-icon>delete_outline</mat-icon>
+          </button> -->
+          <button
+            mat-icon-button
+            [matMenuTriggerFor]="menu"
+            style="background-color: #282b2f; color: white"
+            aria-label="Example icon button with a vertical three dot icon"
+          >
+            <mat-icon>more_vert</mat-icon>
+            <mat-menu #menu="matMenu">
+              <button
+                mat-menu-item
+                (click)="joinChannel(channel.value.channel_id)"
+              >
+                <mat-icon>add</mat-icon>
+                <span>Joindre</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="leaveChannel(channel.value.channel_id)"
+              >
+                <mat-icon>logout</mat-icon>
+                <span>Quitter</span>
+              </button>
+              <hr />
+              <button
+                mat-menu-item
+                style="color: red"
+                (click)="deleteChannel(channel.value.channel_id)"
+              >
+                <mat-icon style="color: red">delete</mat-icon>
+                <span>Supprimer</span>
+              </button>
+            </mat-menu>
           </button>
         </div>
       </div>
@@ -97,7 +117,7 @@
   </button>
 
   <div [ngStyle]="newChannelView">
-    <h3 style="margin-left: 5%">Create new channel</h3>
+    <h3 style="margin-left: 5%">Créer une nouvelle chaîne</h3>
     <br /><br />
     <input
       class="create_channel_input"
@@ -112,7 +132,7 @@
       (click)="verifyText()"
       [disabled]="!input_text"
     >
-      Create channel
+      Créer
     </button>
   </div>
 </div>

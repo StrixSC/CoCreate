@@ -1,4 +1,4 @@
-import { environment } from 'src/environments/environment';
+import { environment } from "src/environments/environment";
 import {
   Component,
   Input,
@@ -16,6 +16,7 @@ import { HttpClient } from "@angular/common/http";
 import { IReceiveMessagePayload } from "src/app/model/IReceiveMessagePayload.model";
 import { ChannelManagerService } from "src/app/services/chat/ChannelManager.service";
 import { IChannelPayload } from "src/app/model/IChannelPayload.model";
+import { IpcService } from "src/app/services/notification-manager/IPCManager.service";
 
 export interface MessageHeader {
   color: string;
@@ -40,6 +41,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
   chatBoxName: string;
   myChannelID: string;
   messagesSet: Set<string>;
+  userImages: Map<string, string>;
   @Output() closeChatEvent = new EventEmitter<boolean>();
 
   @Input() channel_id: string;
@@ -56,9 +58,11 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
   constructor(
     private chatSocketService: ChatSocketService,
     private http: HttpClient,
-    private channelManagerService: ChannelManagerService
+    private channelManagerService: ChannelManagerService,
+    private ipcService: IpcService
   ) {
     this.messagesSet = new Set();
+    this.userImages = new Map();
     this.messages = [];
   }
   ngAfterViewInit(): void {
@@ -73,11 +77,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
 
   loadChannelMessages(channelID: string) {
     this.http
-      .get(
-        environment.serverURL + "/api/channels/" +
-        channelID +
-        "/messages"
-      )
+      .get(environment.serverURL + "/api/channels/" + channelID + "/messages")
       .subscribe((data: any) => {
         data.forEach((m: any) => {
           this.messages.push({
@@ -86,6 +86,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
             username: m.username,
             time: m.timestamp,
           });
+          this.userImages.set(m.username, m.avatar_url);
         });
       });
   }
@@ -115,6 +116,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
             username: data.username,
             time: data.createdAt,
           });
+          this.userImages.set(data.username, data.avatarUrl);
           this.messagesSet.add(data.messageId);
           if (this.messagesSet.size > 20) this.messagesSet.clear();
         }
@@ -125,11 +127,12 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
     try {
       this.messageBox.nativeElement.scrollTop =
         this.messageBox.nativeElement.scrollHeight;
-    } catch (err) { }
+    } catch (err) {}
   }
 
   sendMessage() {
     if (this.currentText.length > 0) {
+      this.ipcService.send(`#${this.chatBoxName}`, this.currentText);
       this.chatSocketService.sendMessage(this.channel_id, this.currentText);
       this.currentText = "";
     }
@@ -137,7 +140,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
 
   popOutChat() {
     window.open(
-      "http://localhost:4200/popped-chat/" + this.channel_id,
+      "http://localhost:4200/#/popped-chat/" + this.channel_id,
       "_blank",
       "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=800,height=1000,addressbar=no"
     );

@@ -17,22 +17,36 @@
   </div>
 
   <div class="right_pannel">
-    <button mat-flat-button (click)="newChannel()">Add new channel</button>
+    <button
+      mat-stroked-button
+      style="
+        color: white;
+        margin-top: 10px;
+        border-color: #282b2f;
+        background-color: #282b2f;
+      "
+      (click)="newChannel()"
+    >
+      <mat-icon>keyboard_arrow_left</mat-icon> Canaux
+    </button>
 
     <div class="chatbox">
       <mat-action-list>
-        <p class="channelHeaders">Recently Joined</p>
+        <p class="channelHeaders">Mes canaux</p>
         <div
-          matBadge="8"
-          matBadgePosition="before"
-          matBadgeSize="small"
-          matBadgeColor="accent"
           class="channel_box"
           *ngFor="let channel of textChannels | keyvalue"
           (click)="changeChannel(channel.key)"
           [ngStyle]="channel.value.divStyle"
         >
-          <p class="channels" [ngStyle]="channel.value.style">
+          <p
+            [matBadge]="channel.value.unseen_messages"
+            matBadgePosition="before"
+            matBadgeSize="small"
+            matBadgeColor="warn"
+            class="channels"
+            [ngStyle]="channel.value.style"
+          >
             {{ channel.value.name }}
           </p>
         </div>

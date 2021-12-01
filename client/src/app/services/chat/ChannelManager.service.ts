@@ -1,7 +1,8 @@
 import { environment } from 'src/environments/environment';
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { AngularFireAuth } from "@angular/fire/auth";
+import { Observable, Subscription } from "rxjs";
 import { IReceiveMessagePayload } from "src/app/model/IReceiveMessagePayload.model";
 import { ChatSocketService } from "./chat.service";
 
@@ -10,15 +11,43 @@ import { ChatSocketService } from "./chat.service";
 })
 export class ChannelManagerService {
   private myChannels: Set<string>;
+  private user: firebase.User;
+  private afSubscription: Subscription;
   constructor(
     private http: HttpClient,
-    private chatSocketService: ChatSocketService
+    private chatSocketService: ChatSocketService,
+    private af: AngularFireAuth
   ) {
     this.myChannels = new Set();
   }
 
   CreateChannel(channel_name: string) {
     this.chatSocketService.createChannel(channel_name);
+  }
+
+  GetUser() {
+    return this.af.authState;
+
+    // .subscribe((user) => {
+    //   if (user) {
+    //     this.user = user;
+    //     return this.http.get(
+    //       "https://colorimage-109-3900.herokuapp.com/api/users/" +
+    //         user["uid"] +
+    //         "/channels"
+    //     );
+    //   } else {
+    //     return [];
+    //   }
+    // })
+  }
+
+  GetUserChannels(user: string) {
+    return this.http.get(
+      "https://colorimage-109-3900.herokuapp.com/api/users/" +
+        user +
+        "/channels"
+    );
   }
 
   JoinChannel(channelId: string) {
