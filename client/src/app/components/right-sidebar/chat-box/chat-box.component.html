@@ -35,13 +35,14 @@
         >
           <mat-grid-tile colspan="2" rowspan="1" style="color: white">
             <!-- {{ message_.avatar }} -->
+            <!-- src="https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/spider-man-movies-in-order-index-1631199371.jpeg?crop=0.565xw:1.00xh;0.435xw,0&resize=640:*" -->
             <img
-              src="https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/spider-man-movies-in-order-index-1631199371.jpeg?crop=0.565xw:1.00xh;0.435xw,0&resize=640:*"
+              [src]="message_.avatar"
               alt="Italian Trulli"
               style="height: 50px; border-radius: 50%"
             />
 
-            <a
+            <p
               style="
                 font-size: 16px;
                 font-weight: 500;
@@ -50,7 +51,7 @@
               "
             >
               {{ message_.username }}
-            </a>
+            </p>
             <p style="color: #72767d; font-size: 13px; margin-left: 5px">
               {{ message_.time }}
             </p>

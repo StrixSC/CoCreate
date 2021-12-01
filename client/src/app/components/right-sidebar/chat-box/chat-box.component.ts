@@ -84,6 +84,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
             username: m.username,
             time: m.timestamp,
           });
+          console.log(m.avatar_url);
         });
       });
   }
