@@ -56,7 +56,7 @@ class _LoginState extends State<Login> {
     RestApi rest = RestApi();
     var response = await rest.auth.login(token);
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 202) {
       print(response.body); // Initialize socket connection
 
       initializeSocketConnection(userCredential, token);

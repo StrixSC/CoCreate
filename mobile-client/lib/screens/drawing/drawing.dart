@@ -86,17 +86,15 @@ class _DrawingScreenState extends State<DrawingScreen> {
                           details, DrawingState.down, false, "");
                       break;
                     case DrawingType.rectangle:
-                      unselectLastShape();
                       socketShapeEmission(
                           details, DrawingType.rectangle, DrawingState.down);
                       break;
                     case DrawingType.ellipse:
-                      unselectLastShape();
                       socketShapeEmission(
                           details, DrawingType.ellipse, DrawingState.down);
                       break;
-                    //  todo: prevent translation and resize to move in the
-                  //   toolbar
+                    //  todo: prevent translation to move in the
+                    //   toolbar
                     case "select":
                       allowMove = false;
                       selectRef = Offset(
@@ -157,20 +155,19 @@ class _DrawingScreenState extends State<DrawingScreen> {
                       break;
                     case DrawingType.rectangle:
                       if (details.localPosition.dx > 0) {
-                        unselectLastShape();
                         socketShapeEmission(
                             details, DrawingType.rectangle, DrawingState.move);
                       }
                       break;
                     case DrawingType.ellipse:
                       if (details.localPosition.dx > 0) {
-                        unselectLastShape();
                         socketShapeEmission(
                             details, DrawingType.ellipse, DrawingState.move);
                       }
                       break;
                     case "select":
                       if (allowResize &&
+                          details.localPosition.dx > 0 &&
                           selectedItems.containsValue(_user.uid)) {
                         selectedItems.forEach((actionId, selectedBy) {
                           if (selectedBy == _user.uid) {
@@ -221,15 +218,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
                     case DrawingType.rectangle:
                       socketShapeEmission(
                           details, DrawingType.rectangle, DrawingState.up);
-                      ShapeAction shapeAction = actionsMap[shapeID];
-                      undoList.add(shapeAction.copy());
                       lastShapeID = shapeID;
                       break;
                     case DrawingType.ellipse:
                       socketShapeEmission(
                           details, DrawingType.ellipse, DrawingState.up);
-                      ShapeAction shapeAction = actionsMap[shapeID];
-                      undoList.add(shapeAction.copy());
                       lastShapeID = shapeID;
                       break;
                     case "select":
@@ -565,6 +558,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
     _socket.on('shape:received', (data) {
       setState(() {
         if (data['state'] == DrawingState.down) {
+          unselectLastShape();
           //Create new list of points to keep a track
           List<Offset> offsets = <Offset>[];
           offsets.add(Offset(data['x'].toDouble(), data['y'].toDouble()));
@@ -598,6 +592,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
           shapeAction.shapesOffsets = offsets;
           actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
         } else if (data['state'] == DrawingState.move) {
+          unselectLastShape();
           actionsMap.forEach((actionId, shapeAction) {
             //Find the action
             if (actionId == data['actionId']) {
@@ -626,6 +621,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
           //Clear the list of points
           ShapeAction shapeAction = actionsMap[data['actionId']];
           shapeAction.shapesOffsets!.clear();
+          unselectLastShape();
+          if (_user.uid == data['userId']) {
+            undoList.add(shapeAction.copy());
+          }
           actionsMap.update(data['actionId'], (value) => shapeAction);
         }
       });
@@ -673,11 +672,13 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   data['actionId'], (value) => shapeAction as ShapeAction);
             }
           });
-        } else if (data['state'] == DrawingState.up &&
-            _user.uid == data['userId']) {
-          unselectLastShape();
+        } else if (data['state'] == DrawingState.up) {
           ShapeAction shapeAction = actionsMap[data['actionId']];
-          undoList.add(shapeAction.copy());
+          unselectLastShape();
+          if (_user.uid == data['userId']) {
+            undoList.add(shapeAction.copy());
+          }
+          shapeAction.shapesOffsets!.clear();
         }
       });
     });
@@ -698,7 +699,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
         'actionId': data['actionId'],
         'username': _user.displayName,
         'userId': _user.uid,
-        'collaborationId': "fa0cab93-b571-4db4-8467-1bef5cbffbb4",
+        'collaborationId': "7d51166d-4edb-45e4-8306-b7b6c8064a92",
         'actionType': "Select",
         'isSelected': true,
         'isUndoRedo': false,
@@ -842,9 +843,16 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
   void socketFreedrawEmission(
       var details, String drawingState, bool isRedo, String actionId) {
+    List<Map<String, double>> testList = [];
     if (actionId != "") {
       shapeID = actionId;
     }
+    if (drawingState == DrawingState.up) {
+      for (var offset in (actionsMap[shapeID] as ShapeAction).shapesOffsets!) {
+        testList.add({"x": offset.dx.toDouble(), "y": offset.dy.toDouble()});
+      }
+    }
+
     _socket.emit("freedraw:emit", {
       'x': (isRedo || drawingState == DrawingState.up)
           ? details.dx
@@ -852,7 +860,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'y': (isRedo || drawingState == DrawingState.up)
           ? details.dy
           : details.localPosition.dy.toInt(),
-      'collaborationId': "fa0cab93-b571-4db4-8467-1bef5cbffbb4",
+      'collaborationId': "7d51166d-4edb-45e4-8306-b7b6c8064a92",
       'username': _user.displayName,
       'userId': _user.uid,
       'actionType': "Freedraw",
@@ -862,9 +870,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'g': currentBorderColor.green,
       'b': currentBorderColor.blue,
       'width': currentWidth,
-      // TODO: ADD OFFSET FOR DATABASE SAVE
-      // 'offset': (drawingState == DrawingState.up) ? actionsMap[]
+      'offsets': testList,
       'isSelected': (drawingState == DrawingState.up) ? false : true,
+      'isUndoRedo': isRedo,
       'actionId': (drawingState == DrawingState.down && !isRedo)
           ? shapeID = const Uuid().v1()
           : shapeID
