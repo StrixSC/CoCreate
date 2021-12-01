@@ -178,7 +178,9 @@ export const generateMascotProfile = async (mascot: string): Promise<{ avatarUrl
     const avatarUrl = "https://source.unsplash.com/random/300x300/?" + mascot;
     let redirectedAvatarUrl = "";
     try {
-        const response = await axios.get(avatarUrl);
+        const response = await axios.get(avatarUrl, {
+            timeout: 7500
+        });
 
         if (response) {
             redirectedAvatarUrl = response.request.res.responseUrl;
@@ -203,7 +205,7 @@ export const getNewMascotUrl = async (avatarUrl: string): Promise<string> => {
 }
 
 export const getTeamDrawings = async (id: string) => {
-    const drawings = await db.author.findFirst({
+    const drawings = await db.author.findMany({
         where: {
             team_id: id
         },
@@ -211,8 +213,8 @@ export const getTeamDrawings = async (id: string) => {
             collaborations: {
                 include: {
                     drawing: true,
-                    collaboration_members: true
-                }
+                    collaboration_members: true,
+                },
             },
         }
     });

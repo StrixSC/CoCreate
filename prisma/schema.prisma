@@ -189,18 +189,17 @@ model CollaborationMember {
 }
 
 model Collaboration {
-  index                  Int                   @unique @default(autoincrement())
-  collaboration_id       String                @id @unique @default(uuid())
-  created_at             DateTime              @default(now())
-  updated_at             DateTime              @updatedAt
-  collaboration_members  CollaborationMember[]
-  drawing                Drawing?
-  actions                Action[]
-  type                   CollaborationType
-  max_collaborator_count Int                   @default(4)
-  password               String?
-  author                 Author                @relation(fields: [author_id], references: [author_id], onDelete: Cascade)
-  author_id              String
+  index                 Int                   @unique @default(autoincrement())
+  collaboration_id      String                @id @unique @default(uuid())
+  created_at            DateTime              @default(now())
+  updated_at            DateTime              @updatedAt
+  collaboration_members CollaborationMember[]
+  drawing               Drawing?
+  actions               Action[]
+  type                  CollaborationType
+  password              String?
+  author                Author                @relation(fields: [author_id], references: [author_id], onDelete: Cascade)
+  author_id             String
 }
 
 model Team {

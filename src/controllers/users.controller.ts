@@ -2,7 +2,7 @@ import { db } from './../db';
 import admin from 'firebase-admin';
 import { validationResult, matchedData } from 'express-validator';
 import { handleRequestError } from './../utils/errors';
-import { getUserChannelsById, getUserLogs, updateUserProfile, getUserAvatars } from './../services/users.service';
+import { getUserChannelsById, getUserLogs, updateUserProfile, getUserAvatars, getUserTeams } from './../services/users.service';
 import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { StatusCodes } from 'http-status-codes';
 import create from 'http-errors';
@@ -12,7 +12,6 @@ import {
     getSinglePublicProfileByUsername,
     getCompleteUser
 } from '../services/users.service';
-
 
 export const getPublicUsersController = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -97,6 +96,24 @@ export const getUserChannelsController = async (
         next(create(e.status, e.message));
     }
 };
+
+export const getUserTeamsController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.userId;
+
+        const teams = await getUserTeams(userId);
+
+        const code = teams.length <= 0 ? StatusCodes.NO_CONTENT : StatusCodes.OK;
+        return res.status(code).json({
+            teams: teams.map((t) => ({
+                teamName: t.team.team_name,
+                teamId: t.team_id
+            }))
+        })
+    } catch (e) {
+        handleRequestError(e, next);
+    }
+}
 
 export const getUserLogsController = async (req: Request, res: Response, next: NextFunction) => {
     try {

@@ -10,6 +10,7 @@ import {
     getUserAvatarsController,
     getUserChannelsController,
     getUserLogsController,
+    getUserTeamsController,
     updateUserProfileController,
     uploadAndChangeUserAvatarController
 } from './../controllers/users.controller';
@@ -41,6 +42,8 @@ router.put('/profile', checkIfAuthenticated,
 
 // Get a user's public information by their username
 router.get('/profile/:username', (req, res, next) => getPublicUserController(req, res, next));
+
+router.get('/teams', checkIfAuthenticated, (req, res, next) => getUserTeamsController(req, res, next));
 
 router.get('/logs', checkIfAuthenticated,
     query('offset')

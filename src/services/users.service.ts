@@ -1,10 +1,30 @@
+import { Team } from '@prisma/client';
 import create from 'http-errors';
 import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { IPublicUserProfile } from './../models/IUserPublicProfile';
 import { db } from '../db';
-import { MemberType, Log, Avatar } from '.prisma/client';
+import { MemberType, Log, Avatar, TeamMember } from '.prisma/client';
 import { admin, auth } from '../firebase';
 import { uploadToBucket } from '../utils/users';
+
+export const getUserTeams = async (userId: string) => {
+    let teams = db.teamMember.findMany({
+        where: {
+            user_id: userId
+        },
+        include: {
+            team: {
+                select: {
+                    team_name: true
+                }
+            },
+        }
+    });
+
+    if (!teams) {
+        return [];
+    } else return teams;
+}
 
 export const getAllPublicProfiles = async (
     offset: number,

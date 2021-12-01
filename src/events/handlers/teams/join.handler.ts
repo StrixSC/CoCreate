@@ -35,23 +35,35 @@ export const handleJoin = async (io: Server, socket: Socket, data: {
         if (!member) {
             throw new SocketEventError("Une erreur s'est produit lors de l'ajout de l'utilisateur à l'équipe, réessayez à nouveau plus tard!");
         }
-        else {
-            socket.emit('teams:join:finished');
 
-            io.emit('teams:joined', {
-                teamId: team.team_id,
-                member: member.user_id
-            });
+        let collaborations: string[] = [];
+        member.team.authored_drawings.forEach((authored_drawings) => {
+            authored_drawings.collaborations.forEach((c) => {
+                collaborations.push(c.collaboration_id);
+            })
+        });
 
-            io.to(team.team_id).emit('teams:new-member', {
-                username: member.user.profile!.username,
-                userId: member.user_id,
-                avatarUrl: member.user.profile!.avatar_url,
-                status: 1,
-            });
+        const done = await addUserToCollaboration(userId, collaborations);
 
-            socket.join(team.team_id);
+        if (!done) {
+            throw new SocketEventError("Une erreur s'est produite lors de l'ajout de l'utilisateur en tant que membre aux dessins de l'équipe.")
         }
+
+        socket.emit('teams:join:finished');
+
+        io.emit('teams:joined', {
+            teamId: team.team_id,
+            member: member.user_id
+        });
+
+        io.to(team.team_id).emit('teams:new-member', {
+            username: member.user.profile!.username,
+            userId: member.user_id,
+            avatarUrl: member.user.profile!.avatar_url,
+            status: 1,
+        });
+
+        socket.join(team.team_id);
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.Teams_Join);
     }
@@ -95,6 +107,15 @@ export const addUserToTeam = async (userId: string, teamId: string) => {
             user_id: userId
         },
         include: {
+            team: {
+                include: {
+                    authored_drawings: {
+                        include: {
+                            collaborations: true,
+                        }
+                    }
+                }
+            },
             user: {
                 include: {
                     profile: true
@@ -104,4 +125,22 @@ export const addUserToTeam = async (userId: string, teamId: string) => {
     });
 
     return user;
+}
+
+export const addUserToCollaboration = async (userId: string, collaborationIds: string[]) => {
+    const batch = collaborationIds.map((c) => ({
+        type: MemberType.Regular,
+        collaboration_id: c,
+        user_id: userId
+    }));
+
+    try {
+        await db.collaborationMember.createMany({
+            data: batch
+        });
+    } catch (e) {
+        return false;
+    }
+
+    return true;
 }

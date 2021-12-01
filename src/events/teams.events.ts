@@ -1,6 +1,6 @@
 import { handleUpdate } from './handlers/teams/update.handler';
 import { Server, Socket } from 'socket.io';
-import { handleDelete } from './handlers/drawings/delete.handler';
+import { handleDelete } from './handlers/teams/delete.handler';
 import { handleCreate } from './handlers/teams/create.handler';
 import { handleJoin } from './handlers/teams/join.handler';
 import { handleLeave } from './handlers/teams/leave.handler';

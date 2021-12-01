@@ -128,23 +128,25 @@ export const getTeamInfoById = async (req: Request, res: Response, next: NextFun
         });
 
         const drawings = await getTeamDrawings(teamId);
-        let allDrawings = [] as any | (Collaboration & {
-            drawing: Drawing | null;
-            collaboration_members: CollaborationMember[];
-        })[];
-
+        let allDrawings = [] as any[];
         if (drawings) {
-            allDrawings = drawings.collaborations.map((d) => {
-                const onlineMembers = getOnlineMembersInRoom(d.collaboration_id);
-                return {
-                    currentCollaboratorCount: d.collaboration_members.length,
-                    title: d.drawing!.title,
-                    thumbnailUrl: d.drawing!.thumbnail_url,
-                    activeCollaboratorCount: onlineMembers.length,
-                    collaborationId: d.collaboration_id,
-                    drawingId: d.drawing!.drawing_id
-                }
-            });
+            for (let author of drawings) {
+                const collaborations = author.collaborations.map((d) => {
+                    const onlineMembers = getOnlineMembersInRoom(d.collaboration_id);
+                    return {
+                        currentCollaboratorCount: d.collaboration_members.length,
+                        title: d.drawing!.title,
+                        thumbnailUrl: d.drawing!.thumbnail_url,
+                        activeCollaboratorCount: onlineMembers.length,
+                        collaborationId: d.collaboration_id,
+                        drawingId: d.drawing!.drawing_id,
+                        updatedAt: d.updated_at,
+                        createdAt: d.created_at
+                    }
+                });
+
+                allDrawings = allDrawings.concat(collaborations);
+            }
         }
 
         res.status(StatusCodes.OK).json({

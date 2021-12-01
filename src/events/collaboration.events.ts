@@ -1,7 +1,8 @@
+import { findTeamById } from './handlers/teams/join.handler';
 import { SocketEventError } from './../socket';
 import { getOnlineMembersInRoom } from './../utils/socket';
 import { v4 } from 'uuid';
-import { ExceptionType } from './../models/Exceptions.enum';
+import { ExceptionType, EventFinishedType } from './../models/Exceptions.enum';
 import create from 'http-errors';
 import { handleSocketError } from './../utils/errors';
 import { db } from './../db';
@@ -96,9 +97,6 @@ export = (io: Server, socket: Socket) => {
             if (!member) {
                 let correctPassword = false;
                 const collaborationType = collaboration.type;
-                if (collaboration.max_collaborator_count <= collaboration.collaboration_members.length) {
-                    throw new SocketEventError("Erreur: La collaboration est déjà complète.", "E4050");
-                }
 
                 if (collaborationType === CollaborationType.Private) {
                     throw new create.Unauthorized("This drawing is private and cannot be joined by a user that is not the owner.");
@@ -219,6 +217,18 @@ export = (io: Server, socket: Socket) => {
                 throw new create.BadRequest("Title must be a non-empty alphanumeric value with a length between 8 and 256. The type must be either Public, Protected or Private");
             }
 
+            if (isTeam) {
+                const team = await findTeamById(creatorId);
+                if (!team) {
+                    throw new create.BadRequest("There are no teams with this id...")
+                }
+
+                const member = team.team_members.find((tm) => tm.user_id === userId);
+                if (!member) {
+                    throw new create.Unauthorized("This user cannot be found in the team...");
+                }
+            }
+
             if (type === CollaborationType.Private) {
                 const data = await createCollaboration(userId, creatorId, isTeam, type, title, password);
 
@@ -233,7 +243,6 @@ export = (io: Server, socket: Socket) => {
                     thumbnailUrl: data.thumbnail_url,
                     type: data.collaboration.type,
                     currentCollaboratorCount: data.currentMemberCount,
-                    maxCollaboratorCount: data.maxMemberCount,
                     updatedAt: data.collaboration.updated_at,
                     createdAt: data.collaboration.created_at,
                     authorUsername: data.author_username,
@@ -261,7 +270,6 @@ export = (io: Server, socket: Socket) => {
                     thumbnailUrl: data.thumbnail_url,
                     type: data.collaboration.type,
                     currentCollaboratorCount: data.currentMemberCount,
-                    maxCollaboratorCount: data.maxMemberCount,
                     updatedAt: data.collaboration.updated_at,
                     createdAt: data.collaboration.created_at,
                     authorUsername: data.author_username,
@@ -281,11 +289,11 @@ export = (io: Server, socket: Socket) => {
             const { userId, collaborationId } = payload;
 
             if (!userId || userId !== socket.data.user) {
-                throw new create.Unauthorized("UserId does not match session userId");
+                throw new SocketEventError('Oops, on dirait que cet utilisateur n`est pas autorisé à faire cet action...', "E5001", ExceptionType.Collaboration_Delete)
             }
 
             if (!collaborationId) {
-                throw new create.BadRequest('Invalid or missing userId or collaborationId from payload.');
+                throw new SocketEventError("Hmm... On dirait que vous n'avez pas mentionné quel dessin vous voudriez supprimer.", "E5002", ExceptionType.Collaboration_Delete)
             }
 
             const member = await db.collaborationMember.findFirst({
@@ -297,7 +305,6 @@ export = (io: Server, socket: Socket) => {
             });
 
             if (!member) {
-                throw new create.Unauthorized('Failed to delete: either this user is not a member of this drawing, or is not the owner.')
             }
 
             const collaboration = await db.collaboration.delete({
@@ -307,7 +314,7 @@ export = (io: Server, socket: Socket) => {
             });
 
             if (!collaboration) {
-                throw new create.InternalServerError('Failed to delete: Internal server error.');
+                throw new SocketEventError("Oups! On dirait qu'il y a eu une erreur lors de la suppression du dessin...", "E5003", ExceptionType.Collaboration_Delete)
             }
 
             const response = {
@@ -412,7 +419,6 @@ export = (io: Server, socket: Socket) => {
                 thumbnailUrl: updated.drawing!.thumbnail_url,
                 type: updated.type,
                 currentCollaboratorCount: updated.collaboration_members.length,
-                maxCollaboratorCount: updated.max_collaborator_count,
                 updatedAt: updated.updated_at,
                 drawingId: updated.drawing!.drawing_id,
                 createdAt: updated.created_at,
@@ -625,7 +631,6 @@ const generateConnectedPayload = (member: CollaborationMemberConnectionResponse)
         collaborationId: member.collaboration.collaboration_id,
         actions: member.collaboration.actions,
         memberCount: member.collaboration.collaboration_members.length,
-        maxMemberCount: member.collaboration.max_collaborator_count,
         title: member.collaboration.drawing!.title,
         authorUsername: member.collaboration.collaboration_members
             .find((c) => c.type === MemberType.Owner)!.user.profile!.username || "Admin",
@@ -705,7 +710,6 @@ const createCollaboration = async (user_id: string, creatorId: string, isTeam: b
         collaboration: author.collaborations[0],
         author_username: author.is_team ? author_team_data!.team_name : author_user_data!.profile!.username,
         author_avatar_url: author.is_team ? author_team_data!.avatar_url : author_user_data!.profile!.avatar_url,
-        maxMemberCount: author.collaborations[0].max_collaborator_count,
         currentMemberCount: author.collaborations[0].collaboration_members.length,
         title: author.collaborations[0].drawing!.title,
         thumbnail_url: author.collaborations[0].drawing!.thumbnail_url,
