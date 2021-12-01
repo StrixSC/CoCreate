@@ -4,6 +4,30 @@
   margin: 10px;
 }
 
+.member-count-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.actions-container {
+  display: flex;
+  justify-content: center;
+}
+
+.team-joined-container {
+  color: var(--secondary-color) !important;
+  cursor: default;
+}
+
+.team-owner-container {
+  color: var(--primary-color) !important;
+  cursor: default;
+}
+
 .example-header-image {
   background-size: cover;
 }
@@ -26,7 +50,7 @@
   transition: .5s ease;
   opacity: 0;
   position: absolute;
-  top: 48%;
+  top: 49%;
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
@@ -37,7 +61,7 @@
   transition: .5s ease;
   opacity: 0;
   position: absolute;
-  top: 53%;
+  top: 54%;
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;

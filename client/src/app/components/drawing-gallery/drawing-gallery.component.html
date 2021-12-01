@@ -10,6 +10,70 @@
 </mat-toolbar>
 
 <mat-tab-group #tabGroup class="centerTab">
+  <mat-tab class="drawing-list" label="Dessins disponibles">
+    <br>
+    <div>
+      <mat-form-field [style.width.%]="50">
+        <mat-label>Recherche</mat-label>
+        <input type="text" [(ngModel)]="drawingFilterAll" (keyup)="setFilterAll($event.target.value); handleAllPageEvent($event, false)" matInput placeholder="Entrez un mot-clé">
+        <button mat-button matPrefix mat-icon-button>
+          <mat-icon>search</mat-icon>
+        </button>
+        <button *ngIf="drawingFilterAll!==''" mat-icon-button matTooltip="Effacer la recherche" matSuffix (click)="clearFilterAll()">
+          <mat-icon>clear</mat-icon>
+        </button>
+        <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Type de dessins</mat-label>
+        <mat-select [(ngModel)]="selectedOptionAll" (selectionChange)="searchAllDrawings($event.value); handleAllPageEvent($event, false)">
+          <mat-option *ngFor="let type of visibilityAllFilter" [value]="type.key">{{type.value}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div style="position: relative; left: -24%; color: #616161" *ngIf="drawingFilterAll!==''">
+        <br>
+        Résultat de la recherche «{{drawingFilterAll}}» :
+      </div>
+
+      <mat-paginator (page)="handleAllPageEvent($event)"
+      [length]="lengthAll"
+      [pageSize]="pageSizeAll"
+      [showFirstLastButtons]="showFirstLastButtons"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndexAll"></mat-paginator>
+
+      <div class="margin-center">
+        <app-drawing-gallery-card fxLayout="row" fxLayout.xs="column" *ngFor="let drawing of dataObsAll | async" [drawing]="drawing">
+        </app-drawing-gallery-card>
+      </div>
+    </div>
+    <div *ngIf="!lengthAll && drawingFilterAll !=='' && !isLoading" style="font-style: Roboto">
+      <br>
+      <h2>Aucun dessin disponible ne correspond à la recherche<br>«{{drawingFilterAll}}»</h2>
+      Effectuez une autre recherche<br>
+      <div style="font-size: 100px;">
+        <mat-icon [inline]="true">search_off</mat-icon>
+      </div>      
+    </div>
+    <div *ngIf="!lengthAll && drawingFilterAll ==='' && selectedOptionAll === 'All' && !isLoading" style="font-style: Roboto">
+      <br><br>
+      <h2>Aucun dessin n'est disponible en ce moment</h2>
+      Veuillez réessayer plus tard
+      <div style="font-size: 100px;">
+        <mat-icon [inline]="true">palette</mat-icon>
+      </div>
+    </div>
+    <div *ngIf="!lengthAll && selectedOptionAll !== 'All' && drawingFilterAll ==='' && !isLoading" style="font-style: Roboto">
+      <br><br>
+      <h2>Aucun dessin disponible ne correspond à ce type</h2>
+      Créer un dessin ou<br>
+      réessayer plus tard pour accéder à un dessin<br><br>
+      <div style="font-size: 100px;">
+        <mat-icon [inline]="true">palette</mat-icon>
+      </div>
+    </div>
+  </mat-tab>
   <mat-tab class="drawing-list" label="Mes Dessins & Dessins Rejoints">
     <br>
     <div>
@@ -71,72 +135,6 @@
       <h2>Aucun de vos dessins ne correspond à ce type</h2>
       Créer un dessin ou accéder à un dessin <br>
       pour remplir votre répertoire<br><br>
-      <div style="font-size: 100px;">
-        <mat-icon [inline]="true">palette</mat-icon>
-      </div>
-    </div>
-  </mat-tab>
-
-  <mat-tab class="drawing-list" label="Dessins publiques">
-    <br>
-    <div>
-      <mat-form-field [style.width.%]="50">
-        <mat-label>Recherche</mat-label>
-        <input type="text" [(ngModel)]="drawingFilterAll" (keyup)="setFilterAll($event.target.value); handleAllPageEvent($event, false)" matInput placeholder="Entrez un mot-clé">
-        <button mat-button matPrefix mat-icon-button>
-          <mat-icon>search</mat-icon>
-        </button>
-        <button *ngIf="drawingFilterAll!==''" mat-icon-button matTooltip="Effacer la recherche" matSuffix (click)="clearFilterAll()">
-          <mat-icon>clear</mat-icon>
-        </button>
-        <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>Type de dessins</mat-label>
-        <mat-select [(ngModel)]="selectedOptionAll" (selectionChange)="searchAllDrawings($event.value); handleAllPageEvent($event, false)">
-          <mat-option *ngFor="let type of visibilityAllFilter" [value]="type.key">{{type.value}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <div style="position: relative; left: -24%; color: #616161" *ngIf="drawingFilterAll!==''">
-        <br>
-        Résultat de la recherche «{{drawingFilterAll}}» :
-      </div>
-
-      <mat-paginator (page)="handleAllPageEvent($event)"
-      [length]="lengthAll"
-      [pageSize]="pageSizeAll"
-      [showFirstLastButtons]="showFirstLastButtons"
-      [pageSizeOptions]="pageSizeOptions"
-      [pageIndex]="pageIndexAll"></mat-paginator>
-
-
-      <div class="margin-center">
-        <app-drawing-gallery-card fxLayout="row" fxLayout.xs="column" *ngFor="let drawing of dataObsAll | async" [drawing]="drawing">
-        </app-drawing-gallery-card>
-      </div>
-    </div>
-    <div *ngIf="!lengthAll && drawingFilterAll !=='' && !isLoading" style="font-style: Roboto">
-      <br>
-      <h2>Aucun dessin disponible ne correspond à la recherche<br>«{{drawingFilterAll}}»</h2>
-      Effectuez une autre recherche<br>
-      <div style="font-size: 100px;">
-        <mat-icon [inline]="true">search_off</mat-icon>
-      </div>      
-    </div>
-    <div *ngIf="!lengthAll && drawingFilterAll ==='' && selectedOptionAll === 'All' && !isLoading" style="font-style: Roboto">
-      <br><br>
-      <h2>Aucun dessin n'est disponible en ce moment</h2>
-      Veuillez réessayer plus tard
-      <div style="font-size: 100px;">
-        <mat-icon [inline]="true">palette</mat-icon>
-      </div>
-    </div>
-    <div *ngIf="!lengthAll && selectedOptionAll !== 'All' && drawingFilterAll ==='' && !isLoading" style="font-style: Roboto">
-      <br><br>
-      <h2>Aucun dessin disponible ne correspond à ce type</h2>
-      Créer un dessin ou<br>
-      réessayer plus tard pour accéder à un dessin<br><br>
       <div style="font-size: 100px;">
         <mat-icon [inline]="true">palette</mat-icon>
       </div>
