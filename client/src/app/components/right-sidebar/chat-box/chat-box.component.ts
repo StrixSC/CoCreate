@@ -41,6 +41,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
   chatBoxName: string;
   myChannelID: string;
   messagesSet: Set<string>;
+  userImages: Map<string, string>;
   @Output() closeChatEvent = new EventEmitter<boolean>();
 
   @Input() channel_id: string;
@@ -61,6 +62,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
     private ipcService: IpcService
   ) {
     this.messagesSet = new Set();
+    this.userImages = new Map();
     this.messages = [];
   }
   ngAfterViewInit(): void {
@@ -84,7 +86,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
             username: m.username,
             time: m.timestamp,
           });
-          console.log(m.avatar_url);
+          this.userImages.set(m.username, m.avatar_url);
         });
       });
   }
@@ -114,6 +116,7 @@ export class ChatBoxComponent implements OnChanges, AfterViewInit {
             username: data.username,
             time: data.createdAt,
           });
+          this.userImages.set(data.username, data.avatarUrl);
           this.messagesSet.add(data.messageId);
           if (this.messagesSet.size > 20) this.messagesSet.clear();
         }

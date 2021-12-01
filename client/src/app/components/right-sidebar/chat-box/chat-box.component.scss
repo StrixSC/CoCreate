@@ -56,18 +56,97 @@
   border-radius: 10px;
 }
 
-img {
-  cursor: pointer;
-  transition: 0.2s;
+.fade-in-from-left {
+  opacity: 1;
+  // transform: translateX(26px);
+  animation-name: fadeInleft;
+  animation-iteration-count: 1;
+  animation-timing-function: linear;
+  animation-duration: 0.5s;
+}
+
+.fade-in-from-right {
+  opacity: 1;
+  animation-name: fadeInRight;
+  animation-iteration-count: 1;
+  animation-timing-function: linear;
+  animation-duration: 0.3s;
+}
+
+@keyframes fadeInRight {
+  0% {
+    opacity: 0;
+    transform: translate(50px, 50px);
+  }
+
+  50% {
+    opacity: 0.2;
+    transform: translate(50px, 0px);
+  }
+
+  100% {
+    opacity: 0.5;
+    // transform: translateY(0px);
+    transform: translate(0px, 0px);
+  }
+}
+
+@keyframes fadeInleft {
+  0% {
+    opacity: 0;
+    transform: translateX(-150px);
+  }
+  90% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
+
+@keyframes fadeInOpacity {
+  0% {
+    opacity: 0;
+    border: none;
+  }
+  85% {
+    opacity: 0;
+    border: solid;
+    border-width: 1px;
+  }
+  100% {
+    opacity: 1;
+    border: solid;
+    border-width: 2px;
+    border-color: white;
+  }
+}
+
+.white_image {
+  opacity: 1;
   border: solid;
   border-width: 2px;
   border-color: white;
+  animation-name: fadeInOpacity;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in;
+  animation-duration: 0.5s;
+}
+
+img {
+  cursor: pointer;
+  transition: 0.2s;
+  // border: solid;
+  // border-width: 2px;
+  // border-color: white;
 }
 
 img:hover {
   -ms-transform: scale(1.1); /* IE 9 */
   transform: scale(1.1);
   transition: 0.2s;
+  border-color: #3aa55d;
 }
 
 a {

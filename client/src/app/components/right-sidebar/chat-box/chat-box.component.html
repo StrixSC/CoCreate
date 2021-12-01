@@ -1,4 +1,4 @@
-<div [ngStyle]="chatCss">
+<div [ngStyle]="chatCss" style="transition: 1s; overflow: hidden">
   <div class="header_box">
     <mat-grid-list cols="4" rowHeight="50px">
       <mat-grid-tile colspan="3" rowspan="1">
@@ -26,23 +26,30 @@
           style="
             font-family: Whitney, 'Helvetica Neue', Helvetica, Arial, sans-serif;
             display: block;
-            position: relative;
+            /* position: rela; */
             line-height: 1.375rem;
             min-height: 1.375rem;
-            color: var(--text-muted);
-            white-space: break-spaces;
           "
         >
           <mat-grid-tile colspan="2" rowspan="1" style="color: white">
-            <!-- {{ message_.avatar }} -->
-            <!-- src="https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/spider-man-movies-in-order-index-1631199371.jpeg?crop=0.565xw:1.00xh;0.435xw,0&resize=640:*" -->
+            <!-- <div
+              style="
+                background-color: white;
+                height: 50px;
+                width: 50px;
+                border-radius: 50%;
+              "
+            ></div> -->
             <img
+              class="white_image"
               [src]="message_.avatar"
               alt="Italian Trulli"
               style="height: 50px; border-radius: 50%"
+              loading="lazy"
             />
 
             <p
+              class="fade-in-from-left"
               style="
                 font-size: 16px;
                 font-weight: 500;
@@ -52,7 +59,10 @@
             >
               {{ message_.username }}
             </p>
-            <p style="color: #72767d; font-size: 13px; margin-left: 5px">
+            <p
+              class="fade-in-from-left"
+              style="color: #72767d; font-size: 13px; margin-left: 5px"
+            >
               {{ message_.time }}
             </p>
           </mat-grid-tile>
@@ -60,6 +70,7 @@
       </mat-grid-list>
 
       <div
+        class="fade-in-from-left"
         style="
           color: rgb(220, 221, 222);
           word-wrap: break-word;
