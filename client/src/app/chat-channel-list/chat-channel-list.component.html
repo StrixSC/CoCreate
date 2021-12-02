@@ -2,7 +2,7 @@
     <div class="action-section">
         <div class="clickable section-button">
             <button (click)="openChatDialog()" [matTooltip]="'Ouvrir le menu de clavardage'" matTooltipPosition="left"
-                mat-icon-button>
+            mat-mini-fab color="accent">
                 <mat-icon>chat</mat-icon>
             </button>
         </div>
@@ -17,9 +17,15 @@
             </button>
         </div>
         <div class="clickable section-button">
-            <button (click)="searchAndJoin()" [matTooltip]="'Chercher pour une chaîne'" matTooltipPosition="left"
-                mat-icon-button>
+            <button [matTooltip]="'Chercher pour une chaîne dans votre liste de chaîne'" matTooltipPosition="left"
+                [matMenuTriggerFor]="menu" mat-icon-button>
                 <mat-icon>search</mat-icon>
+                <mat-menu #menu="matMenu">
+                    <div mat-menu-item>
+                        <input autocomplete="off" (click)="stopPropagation($event)" (input)="filterChannels()" matInput
+                            placeholder="Recherche" [(ngModel)]="searchTerm">
+                    </div>
+                </mat-menu>
             </button>
         </div>
         <div class='section-button'>
@@ -38,11 +44,14 @@
                 <mat-divider></mat-divider>
 
             </div>
-            <div class="chat-channels-list">
-                <div [matBadge]="3" matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent"
-                    [matTooltip]="'TESTING'" matTooltipPosition="left" class="clickable chat-channel-bubble">
-                    {{ 'D' }}
-                </div>
+            <div  *ngIf="filteredCollaborationChannels.length > 0" class="chat-channels-list">
+                <div [matBadgeHidden]="!channel.notificationCount" [matBadge]="channel.notificationCount"
+                matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(i)"
+                [matTooltip]="channel.name" matTooltipPosition="left"
+                *ngFor="let channel of filteredCollaborationChannels; index as i" class="clickable chat-channel-bubble"
+                [ngStyle]="{'background-color': '#' + channel.bgColor}">
+                {{ channel.name[0] }}
+            </div>
             </div>
             <mat-divider></mat-divider>
         </div>
@@ -53,14 +62,13 @@
                 <mat-divider></mat-divider>
 
             </div>
-            <div class="chat-channels-list">
-                <div [matBadge]="3" matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent"
-                    [matTooltip]="'TESTING'" matTooltipPosition="left" class="clickable chat-channel-bubble">
-                    {{ 'D' }}
-                </div>
-                <div [matBadge]="3" matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent"
-                    [matTooltip]="'TESTING'" matTooltipPosition="left" class="clickable chat-channel-bubble">
-                    {{ 'D' }}
+            <div *ngIf="filteredTeamChannels.length > 0" class="chat-channels-list">
+                <div [matBadgeHidden]="!channel.notificationCount" [matBadge]="channel.notificationCount"
+                    matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(i)"
+                    [matTooltip]="channel.name" matTooltipPosition="left"
+                    *ngFor="let channel of filteredTeamChannels; index as i" class="clickable chat-channel-bubble"
+                    [ngStyle]="{'background-color': '#' + channel.bgColor}">
+                    {{ channel.name[0] }}
                 </div>
             </div>
             <mat-divider></mat-divider>
@@ -73,12 +81,20 @@
             <div class="chat-channels-list">
                 <div [matBadgeHidden]="!channel.notificationCount" [matBadge]="channel.notificationCount"
                     matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(i)"
-                    [matTooltip]="channel.name" matTooltipPosition="left" *ngFor="let channel of channels; index as i"
-                    class="clickable chat-channel-bubble">
+                    [matTooltip]="channel.name" matTooltipPosition="left"
+                    *ngFor="let channel of filteredPublicChannels; index as i" class="clickable chat-channel-bubble"
+                    [ngStyle]="{'background-color': '#' + channel.bgColor}">
                     {{ channel.name[0] }}
                 </div>
             </div>
         </div>
+        <mat-divider></mat-divider>
+    </div>
+    <div class="clear-filter-section">
+        <button *ngIf="searchTerm" mat-icon-button (click)="resetFilter()" [matTooltip]="'Enlever le filtre'"
+            matTooltipPosition="left" mat-icon-button>
+            <mat-icon>clear</mat-icon>
+        </button>
     </div>
 </div>
 
@@ -100,6 +116,7 @@
 
     .bottom-section,
     .middle-section,
+    .clear-filter-section,
     .top-section {
         display: flex;
         flex-direction: column;
@@ -111,6 +128,7 @@
         height: 100%;
         background-color: var(--bg-color);
         display: flex;
+        padding-top: 0.5rem;
         min-width: 75px;
         max-width: 75px;
         overflow-x: hidden;

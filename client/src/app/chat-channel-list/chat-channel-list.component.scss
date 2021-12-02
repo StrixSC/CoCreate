@@ -2,10 +2,10 @@
     .chat-channel-bubble {
         border: 1px solid transparent;
         border-radius: 100%;
-        background-color: rgb(random(255), random(255), random(255));
         display: flex;
         padding: 0.5rem;
         justify-content: center;
+        color: white;
         align-items: center;
         width: 25px;
         height: 25px;

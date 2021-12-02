@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Notification } = require("electron");
+const { app, BrowserWindow, ipcMain, Notification, shell } = require("electron");
 let mainWindow
 
 function createWindow() {
@@ -6,15 +6,22 @@ function createWindow() {
 		width: 1800, height: 900, electronBuilder: {
 			nodeIntegration: true,
 			enableRemoteModule: true,
-      		contextIsolation: false,
+			contextIsolation: false,
 		}
 	})
 
 	mainWindow.loadURL(`file://${__dirname}/dist/index.html#`)
 	mainWindow.webContents.openDevTools();
+	mainWindow.webContents.on("new-window", function (event, url) {
+		event.preventDefault();
+		const win = new BrowserWindow({width: 500, height: 800});
+		const newUrl = `file://${__dirname}/dist/index.html#${url.replace("file:///#", "")}`;
+		console.log(newUrl);
+		win.loadURL(newUrl);
+	});
+
 	mainWindow.webContents.on("did-fail-load", function () {
 		console.log("did-fail-load");
-
 		mainWindow.loadUrl('file://' + __dirname + '/dist/index.html#');
 	});
 
@@ -33,8 +40,8 @@ app.on('window-all-closed', () => {
 const NOTIFICATION_TITLE = 'Basic Notification'
 const NOTIFICATION_BODY = 'Notification from the Main process'
 
-function showNotification () {
-  new Notification({ title: NOTIFICATION_TITLE, body: NOTIFICATION_BODY }).show()
+function showNotification() {
+	new Notification({ title: NOTIFICATION_TITLE, body: NOTIFICATION_BODY }).show()
 }
 
 app.whenReady().then(createWindow).then(showNotification)
@@ -43,8 +50,8 @@ ipcMain.on('notification', (_, message, text_channel) => {
 	console.log("text_channel", text_channel);
 	console.log("message", message);
 	new Notification({
-	  title: text_channel, 
-	  body: message,
-	  sound: 'low'
+		title: text_channel,
+		body: message,
+		sound: 'low'
 	}).show();
-  })
+})

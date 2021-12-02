@@ -10,6 +10,9 @@ import { IChannelResponse, ISidebarChannel } from '../model/IChannel.model';
 export class ChatSidebarService {
 
   isLoading = true;
+  _filteredPublicChannels: ISidebarChannel[] = [];
+  _filteredTeamChannels: ISidebarChannel[] = [];
+  _filteredCollaborationChannels: ISidebarChannel[] = [];
   _allChannels: ISidebarChannel[] = [];
   _activeChannelIndex: number = 0;
   navOpen: boolean = false;
@@ -24,6 +27,32 @@ export class ChatSidebarService {
     this._allChannels = channels;
     this.isLoading = false;
   }
+
+  get filteredPublicChannels(): ISidebarChannel[] {
+    return this._filteredPublicChannels;
+  }
+
+  set filteredPublicChannels(channels: ISidebarChannel[]) {
+    this._filteredPublicChannels = channels;
+  }
+
+  get filteredTeamChannels(): ISidebarChannel[] {
+    return this._filteredTeamChannels;
+  }
+
+  set filteredTeamChannels(channels: ISidebarChannel[]) {
+    this._filteredTeamChannels = channels;
+  }
+
+  get filteredCollaborationChannels(): ISidebarChannel[] {
+    return this._filteredCollaborationChannels;
+  }
+
+  set filteredCollaborationChannels(channels: ISidebarChannel[]) {
+    this._filteredCollaborationChannels = channels;
+  }
+
+
 
   get activeChannel(): IChannelResponse {
     return this._allChannels[this._activeChannelIndex];

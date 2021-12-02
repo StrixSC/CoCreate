@@ -46,7 +46,8 @@ export class ChatMenuComponent implements OnInit {
       this.isLoading = false;
       this.dialogRef.disableClose = false;
       this.fetchAllChannels();
-      this.snackbar.open(c.message, 'OK', { duration: 2000 })
+      this.snackbar.open(c.message, 'OK', { duration: 2000 });
+      console.log(c);
     });
 
     this.exceptionSubscription = merge(

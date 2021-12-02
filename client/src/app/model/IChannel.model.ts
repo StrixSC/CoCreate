@@ -13,8 +13,15 @@ export interface IChannel {
   unseen_messages?: number;
 }
 
+export enum ChannelType {
+  Team = "Team",
+  Collaboration = "Collaboration",
+  Public = "Public"
+}
+
 export interface IChannelResponse {
   name: string,
+  channel_type: string,
   index: number,
   channel_id: string,
   is_owner: boolean,
@@ -23,6 +30,8 @@ export interface IChannelResponse {
 
 export type ISidebarChannel = IChannelResponse & {
   notificationCount: number,
+  bgColor: string,
+  textColor: string
 }
 
 export interface IMessageResponse {

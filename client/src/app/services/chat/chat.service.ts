@@ -86,6 +86,10 @@ export class ChatSocketService {
     return this.socket.on('channel:create:exception');
   }
 
+  onTeamChatJoined(): any {
+    return this.socket.on('teams:channel:joined');
+  }
+
   joinChannel(channelId: string): void {
     this.socket.emit("channel:join", {
       channelId: channelId,
@@ -104,6 +108,22 @@ export class ChatSocketService {
 
   listenCreatedChannels(): Observable<any> {
     return this.socket.on("channel:created");
+  }
+
+  onTeamChannelJoin(): Observable<any> {
+    return this.socket.on('teams:channel:join');
+  }
+
+  onTeamChannelLeave(): Observable<any> {
+    return this.socket.on('teams:channel:leave');
+  }
+
+  onCollaborationChannelJoin(): Observable<any> {
+    return this.socket.on('collaboration:channel:join');
+  }
+
+  onCollaborationChannelLeave(): Observable<any> {
+    return this.socket.on('collaboration:channel:leave');
   }
 
   openChatWindow() {
