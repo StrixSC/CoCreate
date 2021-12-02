@@ -62,12 +62,28 @@ export class ChatSocketService {
     return this.socket.on('channel:delete:exception');
   }
 
+  onChannelLeaveException(): any {
+    return this.socket.on('channel:leave:exception');
+  }
+
+  onChannelJoinException(): any {
+    return this.socket.on('channel:join:exception');
+  }
+
+  onChannelUpdateException(): any {
+    return this.socket.on('channel:update:exception');
+  }
+
   onChannelDeleteFinish(): any {
     return this.socket.on('channel:delete:finished');
   }
 
   onChannelUpdateFinish(): any {
     return this.socket.on('channel:update:finished')
+  }
+
+  onChannelCreateException(): any {
+    return this.socket.on('channel:create:exception');
   }
 
   joinChannel(channelId: string): void {

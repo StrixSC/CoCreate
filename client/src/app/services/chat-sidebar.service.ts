@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs';
 import { environment } from './../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -47,6 +48,10 @@ export class ChatSidebarService {
       // TODO: Add notification sound
       this.allChannels[index].notificationCount++;
     }
+  }
+
+  fetchAllChannels(): Observable<any> {
+    return this.http.get(environment.serverURL + "/api/channels/");
   }
 
   fetchUserChannels(uid: string) {

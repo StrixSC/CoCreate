@@ -16,8 +16,15 @@
                 <mat-icon>chevron_right</mat-icon>
             </button>
         </div>
+        <div class="clickable section-button">
+            <button (click)="searchAndJoin()" [matTooltip]="'Chercher pour une chaîne'" matTooltipPosition="left"
+                mat-icon-button>
+                <mat-icon>search</mat-icon>
+            </button>
+        </div>
         <div class='section-button'>
-            <button (click)="openCreateChannelDialog()" matTooltipPosition="left" mat-icon-button>
+            <button (click)="openCreateChannelDialog()" matTooltipPosition="left"
+                [matTooltip]="'Créer une nouvelle chaîne'" mat-icon-button>
                 <mat-icon>add</mat-icon>
             </button>
         </div>

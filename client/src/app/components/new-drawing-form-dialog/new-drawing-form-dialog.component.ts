@@ -78,7 +78,11 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
 
     this.teamService.getAllUserTeams().subscribe((d: { teams: { teamName: string, teamId: string }[] }) => {
       const me = [{ key: this.auth.activeUser!.uid, value: `${this.auth.activeUser!.displayName} (Moi)` }];
-      this.authors = me.concat((d.teams.map((t) => ({ key: t.teamId, value: t.teamName + ' (Équipe)' }))));
+      if (d && d.teams && d.teams.length >= 1) {
+        this.authors = me.concat((d.teams.map((t) => ({ key: t.teamId, value: t.teamName + ' (Équipe)' }))));
+      } else {
+        this.authors = me;
+      }
     });
 
     this.exceptionSubscription = this.syncCollaborationService.onCollaborationException().subscribe((message: any) => {

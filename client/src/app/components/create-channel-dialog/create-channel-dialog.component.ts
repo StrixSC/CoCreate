@@ -13,6 +13,7 @@ import { Component, OnInit } from '@angular/core';
 export class CreateChannelDialogComponent implements OnInit {
 
   channelCreatedSubscription: Subscription;
+  createExceptionSubscription: Subscription;
   nameForm: FormGroup;
   isLoading: boolean = false;
   constructor(public dialogRef: MatDialogRef<CreateChannelDialogComponent>, private snackbar: MatSnackBar, private fb: FormBuilder, private chatService: ChatSocketService) { }
@@ -23,6 +24,12 @@ export class CreateChannelDialogComponent implements OnInit {
       this.dialogRef.disableClose = false;
       this.dialogRef.close()
       this.snackbar.open(`Succès! La chaîne de clavardage "${c.channelName}" a été créée!`, "OK", { duration: 2000 });
+    });
+
+    this.createExceptionSubscription = this.chatService.onChannelCreateException().subscribe((s: any) => {
+      this.dialogRef.disableClose = false;
+      this.isLoading = false;
+      this.snackbar.open(s.message, 'OK', { duration: 3000 });
     });
 
     this.nameForm = this.fb.group({

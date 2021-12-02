@@ -57,8 +57,14 @@ export class ChatChannelListComponent implements OnInit {
 
   openChatDialog(): void {
     this.dialog.open(ChatMenuComponent, { width: '800px', height: '800px' }).afterClosed().subscribe((c) => {
-      console.log(c);
+      if (c === 'CREATE') {
+        this.openCreateChannelDialog();
+      }
     })
+  }
+
+  searchAndJoin(): void {
+    console.log('chat search and join');
   }
 
   openCreateChannelDialog(): void {
