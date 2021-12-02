@@ -5,7 +5,7 @@ import { IChannelResponse, ISidebarChannel, ChannelType, IMessageResponse } from
 import { Subscription, merge } from 'rxjs';
 import { AuthService } from './../services/auth.service';
 import { ChatSidebarService } from './../services/chat-sidebar.service';
-import { ChatSocketService } from 'src/app/services/chat/chat.service';
+import { ChatService } from 'src/app/services/chat/chat.service';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
@@ -23,7 +23,7 @@ export class ChatChannelListComponent implements OnInit {
     private dialog: MatDialog,
     private chatSidebarService: ChatSidebarService,
     private auth: AuthService,
-    private chatSocketService: ChatSocketService
+    private chatSocketService: ChatService
   ) { }
 
   ngOnInit() {
@@ -102,6 +102,7 @@ export class ChatChannelListComponent implements OnInit {
             bgColor: prevData.bgColor,
             textColor: prevData.textColor,
             messages: prevData.messages,
+            muteNotification: prevData.muteNotification
           } as ISidebarChannel;
 
           newSnapshot.set(newData.channel_id, newData);
@@ -113,6 +114,7 @@ export class ChatChannelListComponent implements OnInit {
               notificationCount: 0,
               bgColor: bubbleColors.bgColor,
               textColor: bubbleColors.textColor,
+              muteNotification: false,
               messages: [],
             });
         }

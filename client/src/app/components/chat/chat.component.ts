@@ -2,7 +2,7 @@ import { Router } from '@angular/router';
 import { AuthService } from './../../services/auth.service';
 import { IMessageResponse, IChannelResponse, ISidebarChannel } from './../../model/IChannel.model';
 import { Subscription } from 'rxjs';
-import { ChatSocketService } from 'src/app/services/chat/chat.service';
+import { ChatService } from 'src/app/services/chat/chat.service';
 import { ChatSidebarService } from './../../services/chat-sidebar.service';
 import { Component, OnInit, ElementRef, ViewChild, isDevMode } from '@angular/core';
 
@@ -16,7 +16,7 @@ export class ChatComponent {
   @ViewChild("messageBox", { static: false })
   messageBox: ElementRef<HTMLDivElement>;
 
-  constructor(private sidebarService: ChatSidebarService, private router: Router, private auth: AuthService, private chatService: ChatSocketService) { }
+  constructor(private sidebarService: ChatSidebarService, private router: Router, private auth: AuthService, private chatService: ChatService) { }
 
   message: string = "";
 
@@ -50,6 +50,20 @@ export class ChatComponent {
 
   get activeChannel(): ISidebarChannel {
     return this.sidebarService.activeChannel;
+  }
+
+  fetchHistory(): void {
+    const subscription = this.chatService.getChannelHistory(this.activeChannel.channel_id).subscribe((m) => {
+      this.activeChannel.messages = m.map((message) => ({
+        message: message.message_data,
+        avatarUrl: message.avatar_url,
+        channelId: this.activeChannel.channel_id,
+        createdAt: message.timestamp,
+        messageId: message.message_id,
+        username: message.username
+      } as IMessageResponse));
+      subscription.unsubscribe();
+    });
   }
 
   onSubmit(): any {

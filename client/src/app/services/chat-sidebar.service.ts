@@ -1,3 +1,4 @@
+import { AuthService } from 'src/app/services/auth.service';
 import { IMessageResponse } from './../model/IChannel.model';
 import { Observable } from 'rxjs';
 import { environment } from './../../environments/environment';
@@ -18,7 +19,7 @@ export class ChatSidebarService {
   messagesMap: Map<string, IMessageResponse[]> = new Map();
   navOpen: boolean = false;
 
-  constructor(private http: HttpClient) { }
+  constructor(private auth: AuthService, private http: HttpClient) { }
 
   get allChannels(): ISidebarChannel[] {
     return this._allChannels;
@@ -47,14 +48,11 @@ export class ChatSidebarService {
   }
 
   handleIncomingMessage(data: IMessageResponse) {
-    console.log(data);
     const channel = this.allChannels.find((c) => c.channel_id === data.channelId);
     if (channel) {
       // TODO: Add notification sound
-      console.log(channel, channel.messages);
-
       channel.messages.push(data);
-      if (this.activeChannel.channel_id !== channel.channel_id || !this.navOpen) {
+      if (data.username !== this.auth.activeUser!.displayName, this.activeChannel.channel_id !== channel.channel_id || !this.navOpen) {
         channel.notificationCount++;
       }
     }

@@ -1,7 +1,7 @@
 import { IChannelCreatedResponse } from './../../model/IChannel.model';
 import { MatSnackBar, MatDialogRef } from '@angular/material';
 import { Subscription } from 'rxjs';
-import { ChatSocketService } from 'src/app/services/chat/chat.service';
+import { ChatService } from 'src/app/services/chat/chat.service';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
 
@@ -16,7 +16,7 @@ export class CreateChannelDialogComponent implements OnInit {
   createExceptionSubscription: Subscription;
   nameForm: FormGroup;
   isLoading: boolean = false;
-  constructor(public dialogRef: MatDialogRef<CreateChannelDialogComponent>, private snackbar: MatSnackBar, private fb: FormBuilder, private chatService: ChatSocketService) { }
+  constructor(public dialogRef: MatDialogRef<CreateChannelDialogComponent>, private snackbar: MatSnackBar, private fb: FormBuilder, private chatService: ChatService) { }
 
   ngOnInit() {
     this.channelCreatedSubscription = this.chatService.listenCreatedChannels().subscribe((c: IChannelCreatedResponse) => {

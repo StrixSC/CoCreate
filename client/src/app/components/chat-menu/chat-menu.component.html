@@ -26,7 +26,8 @@
             <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef> Nom de la chaîne </th>
                 <td class="" mat-cell *matCellDef="let element">
-                    {{ element.name }}
+                    <span *ngIf="element.name.length >= 30"> {{ element.name | slice:0:30 }}...</span>
+                    <span *ngIf="element.name.length < 30"> {{ element.name }}</span>
                 </td>
             </ng-container>
             <ng-container matColumnDef="lastActivity">
@@ -115,6 +116,7 @@
         justify-content: center;
         align-items: center;
     }
+
     .right-side {
         display: flex;
         justify-content: center;

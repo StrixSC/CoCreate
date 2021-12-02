@@ -3,7 +3,7 @@ import { SocketService } from 'src/app/services/chat/socket.service';
 import { AuthService } from './../../services/auth.service';
 import { IMessageResponse } from './../../model/IChannel.model';
 import { Subscription } from 'rxjs';
-import { ChatSocketService } from 'src/app/services/chat/chat.service';
+import { ChatService } from 'src/app/services/chat/chat.service';
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 
@@ -19,7 +19,7 @@ interface IChannelJoinResponse {
 })
 export class ChatWindowComponent implements OnInit {
 
-  constructor(private snackbar: MatSnackBar, private activeRoute: ActivatedRoute, private socketService: SocketService, private auth: AuthService, private chatService: ChatSocketService) { }
+  constructor(private snackbar: MatSnackBar, private activeRoute: ActivatedRoute, private socketService: SocketService, private auth: AuthService, private chatService: ChatService) { }
   messageSubscription: Subscription;
   joinedSubscription: Subscription;
   message: string = "";

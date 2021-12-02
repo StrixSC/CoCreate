@@ -2,7 +2,7 @@ import { FormGroup, FormBuilder, AbstractControl } from '@angular/forms';
 import { MatSnackBar, MatDialogRef } from '@angular/material';
 import { map } from 'rxjs/operators';
 import { merge, Subscription } from 'rxjs';
-import { ChatSocketService } from 'src/app/services/chat/chat.service';
+import { ChatService } from 'src/app/services/chat/chat.service';
 import { ChatSidebarService } from './../../services/chat-sidebar.service';
 import { Component, OnInit } from '@angular/core';
 
@@ -31,7 +31,7 @@ export class ChatMenuComponent implements OnInit {
   filteredChannels: IAllChannelResponse[] = [];
   displayedColumns = ['name', 'lastActivity', 'owner', 'memberCount', 'actions'];
   filterForm: FormGroup;
-  constructor(private fb: FormBuilder, public dialogRef: MatDialogRef<ChatMenuComponent>, private snackbar: MatSnackBar, private chatSidebarService: ChatSidebarService, private chatSocketService: ChatSocketService) { }
+  constructor(private fb: FormBuilder, public dialogRef: MatDialogRef<ChatMenuComponent>, private snackbar: MatSnackBar, private chatSidebarService: ChatSidebarService, private chatSocketService: ChatService) { }
   ngOnInit() {
     this.filterForm = this.fb.group({
       filter: ['']

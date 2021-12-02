@@ -67,10 +67,6 @@ import { MenuPageComponent } from './components/menu-page/menu-page.component';
 import { NewDrawingFormDialogComponent } from './components/new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { CollaborationPasswordFormDialogComponent } from './components/collaboration-password-form-dialog/collaboration-password-form-dialog.component';
 import { TopBarComponent } from './components/top-bar/top-bar.component';
-import { RightSidebarComponent } from "./components/right-sidebar/right-sidebar.component";
-import { ChatBoxComponent } from "./components/right-sidebar/chat-box/chat-box.component";
-import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out/chat-poped-out.component";
-import { AllChannelsComponent } from "./components/right-sidebar/all-channels/all-channels.component";
 
 @NgModule({
   declarations: [
@@ -117,12 +113,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     NewDrawingFormDialogComponent,
     CollaborationPasswordFormDialogComponent,
     TopBarComponent,
-    RightSidebarComponent,
-    ChatBoxComponent,
-    ChatPopedOutComponent,
-    AllChannelsComponent,
     AuthWrapperComponent,
-    AllChannelsComponent,
     ChatWindowComponent,
     CreateChannelDialogComponent,
     TeamInfoComponent,

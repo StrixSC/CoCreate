@@ -32,6 +32,7 @@ export type ISidebarChannel = IChannelResponse & {
   notificationCount: number,
   bgColor: string,
   textColor: string,
+  muteNotification: boolean,
   messages: IMessageResponse[];
 }
 
@@ -41,6 +42,15 @@ export interface IMessageResponse {
   createdAt: string,
   message: string,
   messageId: string,
+  username: string,
+}
+
+export interface IMessageHttpResponse {
+  avatar_url: string,
+  message_data: string,
+  message_id: string,
+  sender_profile_id: string,
+  timestamp: string,
   username: string,
 }
 

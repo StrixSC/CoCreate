@@ -1,6 +1,8 @@
+import { IMessageHttpResponse, IMessageResponse } from './../../model/IChannel.model';
+import { environment } from 'src/environments/environment';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { IReceiveMessagePayload } from "../../model/IReceiveMessagePayload.model";
 import { ISendMessagePayload } from "../../model/ISendMessagePayload.model";
 import { IUser } from "../../model/IUser.model";
 import { SocketService } from "./socket.service";
@@ -8,8 +10,8 @@ import { SocketService } from "./socket.service";
 @Injectable({
   providedIn: "root",
 })
-export class ChatSocketService {
-  constructor(private socket: SocketService) { }
+export class ChatService {
+  constructor(private socket: SocketService, private http: HttpClient) { }
 
   sendMessage(channel_id: string, msg: string): void {
     this.socket.emit("channel:send", {
@@ -18,12 +20,12 @@ export class ChatSocketService {
     } as ISendMessagePayload);
   }
 
-  receiveMessage(): Observable<IReceiveMessagePayload> {
-    return this.socket.on("channel:sent");
+  getChannelHistory(channelId: string): Observable<IMessageHttpResponse[]> {
+    return this.http.get<IMessageHttpResponse[]>(`${environment.serverURL}/api/channels/${channelId}/messages`);
   }
 
-  userConnection(): Observable<IReceiveMessagePayload> {
-    return this.socket.on("user-connection");
+  receiveMessage(): Observable<IMessageResponse> {
+    return this.socket.on("channel:sent");
   }
 
   joinedChannel() {

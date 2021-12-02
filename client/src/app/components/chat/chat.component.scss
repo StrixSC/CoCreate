@@ -2,6 +2,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    max-width: 300px;
+    .chat-header-content {
+        color: white;
+        word-break: break-all;
+    }
 }
 
 .top-section {

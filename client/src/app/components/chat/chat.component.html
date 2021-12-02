@@ -1,12 +1,13 @@
 <div *ngIf="!isLoading && activeChannel" class="main-content-wrapper">
     <div class="top-section">
         <div class="chat-header">
-            <div>{{ activeChannel.name }}</div>
+            <h2 class="chat-header-content" *ngIf="activeChannel.name.length >= 30">{{ activeChannel.name | slice:0:30}}...</h2>
+            <h2 class="chat-header-content" *ngIf="activeChannel.name.length < 30">{{ activeChannel.name }}</h2>
         </div>
 
         <div class="chat-actions">
             <div class="history-button-container">
-                <button [matTooltip]="'Chercher l\'historique de la chaîne'" matTooltipPosition="below" mat-icon-button
+                <button (click)="fetchHistory()" [matTooltip]="'Chercher l\'historique de la chaîne'" matTooltipPosition="below" mat-icon-button
                     class="action-button history-button">
                     <mat-icon>history</mat-icon>
                 </button>
