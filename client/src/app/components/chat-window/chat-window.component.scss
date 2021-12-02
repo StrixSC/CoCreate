@@ -2,6 +2,22 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    max-width: 90%;
+    min-width: 90%;
+    gap: 1rem;
+    .header-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        color: white;
+        max-width: 100px;
+        align-items: center;
+    }
+}
+
+.channel-header {
+    color: white;
+    word-break: break-all;
 }
 
 .top-section {
@@ -15,13 +31,6 @@
     color: white;
 }
 
-.chat-header {
-    width: 100%;
-    justify-content: center;
-    display: flex;
-    
-}
-
 .chat-actions {
     display: flex;
     width: 100%;
@@ -30,14 +39,17 @@
 }
 
 .chat-box {
-    height: auto;
+    margin-bottom: 1rem;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     align-items: center;
     align-items: flex-end;
-    width: 100%;
-    height: 100%;
+    height: 800px;
+    min-height: 100px;
+    max-height: 800px;
+    align-items: center;
+    width: 95%;
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 10px;
     
@@ -54,13 +66,16 @@
 
 }
 .main-content-wrapper {
+    gap: 0.25rem;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    padding: 1rem;
     background: var(--bg-accent-color);
     align-items: center;
-    justify-content: space-between;
     height: 100%;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
 }
 
 .action-button {
@@ -99,13 +114,12 @@
 .messages-container {
     text-overflow: ellipsis;
     word-break: break-word;
-    padding: 1.5rem;
     overflow-y: auto;
     overflow-x: hidden;
-    height: 100%;
     display: flex;
-    gap: 1rem;
+    width: 100%;
     flex-direction: column;
+    height: 100%;
 }
 
 .avatar-container {
@@ -123,14 +137,16 @@
 .message-wrapper {
     display: flex;
     gap: 1rem;
+    padding: 0.5rem 1rem;
     align-items: center;
-    max-width: 300px;
 }
 
 .message-content-wrapper {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    color: white;
+    
 }
 
 .message-content {
