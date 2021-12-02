@@ -1,3 +1,4 @@
+import { getOnlineMembersInRoom } from './../utils/socket';
 import { Team } from '@prisma/client';
 import create from 'http-errors';
 import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
@@ -150,16 +151,38 @@ export const getUserChannelsById = async (id: string): Promise<any> => {
         return [];
     }
 
-    return channels.map((c) => ({
-        name: c.channel.name,
-        index: c.channel.index,
-        channel_type: c.channel.type,
-        channel_id: c.channel.channel_id,
-        owner_username:
-            c.channel.members.find((m) => m.type === MemberType.Owner)?.member.profile?.username ||
-            'Admin',
-        is_owner: c.type === MemberType.Owner ? true : false
-    }));
+    return channels.map((c) => {
+        let onlineMembers = getOnlineMembersInRoom(c.channel.channel_id);
+        let owner_username = "admin";
+        const owner = c.channel.members.find((m) => m.type === MemberType.Owner);
+        const is_owner = owner && owner.user_id === id;
+        const newOnlineMembers = [];
+        for (let i = 0; i < onlineMembers.length; i++) {
+            const member = c.channel.members.find((cm) => cm.user_id === onlineMembers[i].userId);
+            if (member) {
+                newOnlineMembers.push(
+                    {
+                        ...member,
+                        username: member.member.profile!.username,
+                        avatarUrl: member.member.profile!.avatar_url,
+                    }
+                );
+            }
+        }
+        if (owner) {
+            owner_username = owner.member.profile!.username;
+        }
+
+        return {
+            name: c.channel.name,
+            index: c.channel.index,
+            channel_type: c.channel.type,
+            channel_id: c.channel.channel_id,
+            online_members: newOnlineMembers,
+            owner_username,
+            is_owner: is_owner ? true : false,
+        }
+    });
 };
 
 export const getUserLogs = async (userId: string, offset: number, limit: number): Promise<Log[]> => {

@@ -24,7 +24,16 @@ export const handleDelete = async (io: Server, socket: Socket, data: { teamId: s
             throw new SocketEventError("Hmm... On dirait que vous n'êtes pas le propriétaire de cette équipe...");
         }
 
-        const [deletedTeam, deletedChannel] = await db.$transaction([
+        let collaborationIds: string[] = [];
+        let channelIds: string[] = [];
+        team.authored_drawings.forEach((authored_drawings) => {
+            authored_drawings.collaborations.forEach((c) => {
+                channelIds.push(c.channel_id);
+                collaborationIds.push(c.collaboration_id);
+            })
+        });
+
+        const [deletedTeam, deletedChannel, deletedCollaborationChannels] = await db.$transaction([
             db.team.delete({
                 where: {
                     team_id: team.team_id,
@@ -33,6 +42,13 @@ export const handleDelete = async (io: Server, socket: Socket, data: { teamId: s
             db.channel.delete({
                 where: {
                     channel_id: team.channel_id
+                }
+            }),
+            db.channel.deleteMany({
+                where: {
+                    channel_id: {
+                        in: channelIds
+                    }
                 }
             })
         ]);
@@ -49,6 +65,15 @@ export const handleDelete = async (io: Server, socket: Socket, data: { teamId: s
             io.to(deletedChannel.channel_id).emit('teams:channel:leave');
             io.socketsLeave(deletedChannel.channel_id);
             io.socketsLeave(deletedTeam.team_id);
+            for (let channel of channelIds) {
+                io.to(channel).emit('channel:deleted');
+                io.socketsLeave(channel);
+            }
+
+            for (let collaboration of collaborationIds) {
+                io.to(collaboration).emit('collaboration:deleted');
+                io.socketsLeave(collaborationIds);
+            }
         }
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.Teams_Delete)
