@@ -12,7 +12,6 @@ import { AngularFireAuthGuard, redirectLoggedInTo, redirectUnauthorizedTo } from
 import { RouterModule, Routes } from '@angular/router';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
-import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { UserProfileSettingsComponent } from './components/user-profile-settings/user-profile-settings.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
