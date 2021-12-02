@@ -1,3 +1,4 @@
+import { IMessageResponse } from './../model/IChannel.model';
 import { Observable } from 'rxjs';
 import { environment } from './../../environments/environment';
 import { HttpClient } from '@angular/common/http';
@@ -10,11 +11,11 @@ import { IChannelResponse, ISidebarChannel } from '../model/IChannel.model';
 export class ChatSidebarService {
 
   isLoading = true;
-  _filteredPublicChannels: ISidebarChannel[] = [];
-  _filteredTeamChannels: ISidebarChannel[] = [];
-  _filteredCollaborationChannels: ISidebarChannel[] = [];
+  _filteredChannels: ISidebarChannel[] = [];
   _allChannels: ISidebarChannel[] = [];
   _activeChannelIndex: number = 0;
+  _activeChannel: ISidebarChannel;
+  messagesMap: Map<string, IMessageResponse[]> = new Map();
   navOpen: boolean = false;
 
   constructor(private http: HttpClient) { }
@@ -28,43 +29,21 @@ export class ChatSidebarService {
     this.isLoading = false;
   }
 
-  get filteredPublicChannels(): ISidebarChannel[] {
-    return this._filteredPublicChannels;
+  get filteredChannels(): ISidebarChannel[] {
+    return this._filteredChannels;
   }
 
-  set filteredPublicChannels(channels: ISidebarChannel[]) {
-    this._filteredPublicChannels = channels;
+  set filteredChannels(channels: ISidebarChannel[]) {
+    this._filteredChannels = channels;
   }
 
-  get filteredTeamChannels(): ISidebarChannel[] {
-    return this._filteredTeamChannels;
+  get activeChannel(): ISidebarChannel {
+    return this._activeChannel;
   }
 
-  set filteredTeamChannels(channels: ISidebarChannel[]) {
-    this._filteredTeamChannels = channels;
-  }
-
-  get filteredCollaborationChannels(): ISidebarChannel[] {
-    return this._filteredCollaborationChannels;
-  }
-
-  set filteredCollaborationChannels(channels: ISidebarChannel[]) {
-    this._filteredCollaborationChannels = channels;
-  }
-
-
-
-  get activeChannel(): IChannelResponse {
-    return this._allChannels[this._activeChannelIndex];
-  }
-
-  get activeChannelIndex(): number {
-    return this._activeChannelIndex;
-  }
-
-  set activeChannelIndex(channelIndex: number) {
+  set activeChannel(channel: ISidebarChannel) {
     this.navOpen = true;
-    this._activeChannelIndex = channelIndex;
+    this._activeChannel = channel;
   }
 
   addNotification(channelId: string) {
@@ -85,5 +64,8 @@ export class ChatSidebarService {
 
   fetchUserChannels(uid: string) {
     return this.http.get(`${environment.serverURL}/api/users/${uid}/channels`);
+  }
+
+  addOrUpdateChannelList(channels: ISidebarChannel[]) {
   }
 }

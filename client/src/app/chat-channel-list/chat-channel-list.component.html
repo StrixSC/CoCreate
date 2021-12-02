@@ -46,7 +46,7 @@
             </div>
             <div  *ngIf="filteredCollaborationChannels.length > 0" class="chat-channels-list">
                 <div [matBadgeHidden]="!channel.notificationCount" [matBadge]="channel.notificationCount"
-                matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(i)"
+                matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(channel)"
                 [matTooltip]="channel.name" matTooltipPosition="left"
                 *ngFor="let channel of filteredCollaborationChannels; index as i" class="clickable chat-channel-bubble"
                 [ngStyle]="{'background-color': '#' + channel.bgColor}">
@@ -64,7 +64,7 @@
             </div>
             <div *ngIf="filteredTeamChannels.length > 0" class="chat-channels-list">
                 <div [matBadgeHidden]="!channel.notificationCount" [matBadge]="channel.notificationCount"
-                    matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(i)"
+                    matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(channel)"
                     [matTooltip]="channel.name" matTooltipPosition="left"
                     *ngFor="let channel of filteredTeamChannels; index as i" class="clickable chat-channel-bubble"
                     [ngStyle]="{'background-color': '#' + channel.bgColor}">
@@ -80,7 +80,7 @@
             </div>
             <div class="chat-channels-list">
                 <div [matBadgeHidden]="!channel.notificationCount" [matBadge]="channel.notificationCount"
-                    matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(i)"
+                    matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(channel)"
                     [matTooltip]="channel.name" matTooltipPosition="left"
                     *ngFor="let channel of filteredPublicChannels; index as i" class="clickable chat-channel-bubble"
                     [ngStyle]="{'background-color': '#' + channel.bgColor}">

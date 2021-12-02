@@ -37,14 +37,14 @@ export class ChatChannelListComponent implements OnInit {
       this.chatSocketService.onCollaborationChannelJoin(),
       this.chatSocketService.onCollaborationChannelLeave(),
     ).subscribe((c) => {
-      this.fetchChannels();
+      this.addOrUpdateChannels();
     })
 
     this.messageReceived = this.chatSocketService.receiveMessage().subscribe((d) => {
       this.chatSidebarService.addNotification(d.channelId);
     })
 
-    this.fetchChannels();
+    this.addOrUpdateChannels();
   }
 
   stopPropagation(event: any) {
@@ -56,12 +56,13 @@ export class ChatChannelListComponent implements OnInit {
     this.chatSidebarService.navOpen = !this.chatSidebarService.navOpen;
   }
 
-  onClick(index: number) {
-    if (this.chatSidebarService.navOpen && this.chatSidebarService.activeChannelIndex === index) {
+  onClick(channel: ISidebarChannel) {
+    if (this.chatSidebarService.navOpen && this.chatSidebarService.activeChannel.channel_id === channel.channel_id) {
       this.toggleChatMenu();
     } else {
-      this.chatSidebarService.activeChannelIndex = index;
+      this.chatSidebarService.activeChannel = channel;
     }
+    channel.notificationCount = 0;
   }
 
   openChatDialog(): void {
@@ -85,21 +86,44 @@ export class ChatChannelListComponent implements OnInit {
     })
   }
 
-  fetchChannels(): void {
+  addOrUpdateChannels(): void {
+    const snapshot = new Map<string, ISidebarChannel>();
+    this.chatSidebarService.allChannels.forEach((c) => snapshot.set(c.channel_id, c));
+
     const fetchSubscription = this.chatSidebarService.fetchUserChannels(this.auth.activeUser!.uid).subscribe((c: IChannelResponse[]) => {
-      this.chatSidebarService.allChannels = c.map((c) => {
-        const colors = this.genBubbleColors();
-        return { ...c, notificationCount: 0, bgColor: colors.bgColor, textColor: colors.textColor }
-      });
+      const newSnapshot = new Map<string, ISidebarChannel>();
+      for (let channel of c) {
+        const prevData = snapshot.get(channel.channel_id);
+        if (prevData) {
+          const newData = {
+            ...channel,
+            notificationCount: prevData.notificationCount,
+            bgColor: prevData.bgColor,
+            textColor: prevData.textColor
+          } as ISidebarChannel;
+
+          newSnapshot.set(newData.channel_id, newData);
+        } else {
+          const bubbleColors = this.genBubbleColors();
+          newSnapshot.set(channel.channel_id,
+            {
+              ...channel,
+              notificationCount: 0,
+              bgColor: bubbleColors.bgColor,
+              textColor: bubbleColors.textColor
+            });
+        }
+      }
+
+      const updatedChannels = Array.from(newSnapshot).map((d) => d[1]);
+      this.chatSidebarService.allChannels = updatedChannels;
       this.filterChannels();
       fetchSubscription.unsubscribe();
     })
   }
 
   filterChannels(): void {
-    this.chatSidebarService.filteredPublicChannels = this.chatSidebarService.allChannels.filter((c) => c.name.includes(this.searchTerm) && c.channel_type === ChannelType.Public);
-    this.chatSidebarService.filteredTeamChannels = this.chatSidebarService.allChannels.filter((c) => c.name.includes(this.searchTerm) && c.channel_type === ChannelType.Team);
-    this.chatSidebarService.filteredCollaborationChannels = this.chatSidebarService.allChannels.filter((c) => c.name.includes(this.searchTerm) && c.channel_type === ChannelType.Collaboration);
+    this.chatSidebarService.filteredChannels = this.chatSidebarService.allChannels.filter((c) => c.name.includes(this.searchTerm));
   }
 
   get isOpen(): boolean {
@@ -107,23 +131,27 @@ export class ChatChannelListComponent implements OnInit {
   }
 
   selectPublicChat(): void {
-    this.onClick(0);
+    const publicChannel = this.allChannels.find((c) => c.channel_id === 'PUBLIC');
+    if (publicChannel) {
+      this.onClick(publicChannel);
+    }
   }
 
-  get channels(): any[] {
+  get allChannels() {
     return this.chatSidebarService.allChannels;
   }
 
   get filteredPublicChannels(): any[] {
-    return this.chatSidebarService.filteredPublicChannels;
+    return this.chatSidebarService.filteredChannels.filter((t) => t.channel_type === ChannelType.Public);
   }
 
   get filteredTeamChannels(): any[] {
-    return this.chatSidebarService.filteredTeamChannels;
+    return this.chatSidebarService.filteredChannels.filter((t) => t.channel_type === ChannelType.Team);
+
   }
 
   get filteredCollaborationChannels(): any[] {
-    return this.chatSidebarService._filteredCollaborationChannels;
+    return this.chatSidebarService.filteredChannels.filter((t) => t.channel_type === ChannelType.Collaboration);
   }
 
   genBubbleColors(): { bgColor: string, textColor: string } {
