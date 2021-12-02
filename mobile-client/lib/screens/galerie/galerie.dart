@@ -1025,6 +1025,7 @@ class _Drawing extends StatelessWidget {
         ));
   }
 
+  // TODO: Add real thumbnail when ready (drawing.thumbnail)
   getThumbnail() {
     return Material(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),

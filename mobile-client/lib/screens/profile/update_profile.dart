@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/collaborator.dart';
+import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/src/provider.dart';
+import 'dart:io';
+import 'dart:async';
 
 class UpdateProfile extends StatefulWidget {
   final User _user;
@@ -16,7 +21,7 @@ class UpdateProfile extends StatefulWidget {
 }
 
 class _UpdateProfileScreenState extends State<UpdateProfile> {
-  late List children;
+  List avatars = [];
   bool isAuthor = false;
   User _user;
   TextEditingController userController = TextEditingController();
@@ -26,6 +31,11 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
   static const _fontSize = 20.0;
   static const padding = 30.0;
   bool _passwordVisible = false;
+  String currentAvatar = '';
+  bool isFromAvatarList = true;
+  File? _image;
+  bool isPicture = false;
+  int? currentlySelectedIndex;
 
   _UpdateProfileScreenState(this._user);
 
@@ -33,6 +43,7 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
   void initState() {
     super.initState();
     _passwordVisible = false;
+    currentAvatar = _user.photoURL as String;
     isAuthor = context.read<Collaborator>().auth!.user!.uid == _user.uid;
     userController.text = _user.displayName.toString();
   }
@@ -73,11 +84,11 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
                       shrinkWrap: true,
                       padding: const EdgeInsets.only(left: 0.0, right: 0.0),
                       children: <Widget>[
-                        Container(
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height - 80,
-                            color: kContentColor,
-                            child: profileRow())
+                    Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height - 80,
+                        color: kContentColor,
+                        child: profileRow())
                   ])))
         ],
       ),
@@ -91,16 +102,12 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
           backgroundColor: Colors.white,
           radius: 85.0,
           child: CircleAvatar(
-            backgroundImage: NetworkImage(_user.photoURL as String),
+            backgroundImage: isPicture ? Image.file(_image!).image : NetworkImage(currentAvatar),
             radius: 80.0,
           ),
         ),
         SizedBox(height: 20),
-        TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text("Changer d'avatar")),
+        openAvatarDialog(),
         SizedBox(height: 20),
         Container(
             width: 500,
@@ -176,20 +183,131 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
   }
 
   openAvatarDialog() {
-    return ElevatedButton(
+    return TextButton(
         onPressed: () {
+          fetchAvatars();
           showDialog(
               context: context,
               builder: (BuildContext context) {
-                return const AlertDialog(
-                  title: Text("My Super title"),
-                  content: Text("Hello World"),
-                );
+                return AlertDialog(
+                    title: Text("Changer d'avatar"),
+                    content: Row(children: [
+                      chooseFromListDialog(),
+                      const SizedBox(width: 20),
+                      takePicture(),
+                    ]));
               });
         },
-        child: const Text('Paramètres de compte',
-            style: TextStyle(color: Colors.white)),
-        style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(kPrimaryColor)));
+        child: const Text("Changer d'avatar"));
+  }
+
+  chooseFromListDialog() {
+    return ElevatedButton(
+        onPressed: () {
+          isFromAvatarList = true;
+          showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (BuildContext context) {
+                return listAlert();
+              });
+        },
+        child: Text("Choisir d'une liste"));
+  }
+
+  listAlert() {
+    return AlertDialog(
+        titlePadding: EdgeInsets.zero,
+        title: Container(
+            color: kContentColor,
+            child: Center(child: Text("Choisir un avatar"))),
+        content: Container(
+            width: 700,
+            height: 700,
+            child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  childAspectRatio: 1,
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 20,
+                  crossAxisSpacing: 25,
+                ),
+                itemCount: avatars.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return GestureDetector(
+                    child: Container(
+                        decoration: currentlySelectedIndex != null && currentlySelectedIndex == index? BoxDecoration(
+                            border: Border.all(width: 5, color: kPrimaryColor)) : BoxDecoration(
+                            border: Border.all(width: 0, color: Colors.black)) ,
+                        child: Card(
+                          elevation: 10,
+                          shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30.0))),
+                          color: kContentColor2,
+                          child: FittedBox(
+                              fit: BoxFit.fill,
+                              child: Image.network(avatars[index])),
+                        )),
+                    onTap: () {
+                      currentlySelectedIndex = index;
+                    },
+                  );
+                })),
+        actions: [
+          ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                currentlySelectedIndex = null;
+              },
+              child: Text('Annuler')),
+          const SizedBox(width: 10),
+          ElevatedButton(
+              onPressed: () {
+                // TODO : set url here
+                if(currentlySelectedIndex != null){
+                  setState(() {
+                    currentAvatar = avatars[currentlySelectedIndex as int];
+                  });
+                }
+                currentlySelectedIndex = null;
+                isPicture = false;
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: Text('Choisir'))
+        ]);
+  }
+
+  takePicture() {
+    return ElevatedButton(
+        onPressed: () async {
+          isFromAvatarList = false;
+          isPicture = true;
+          final ImagePicker _picker = ImagePicker();
+          final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+          File file = File( photo!.path );
+          setState(() {
+            _image = file;
+          });
+          Navigator.pop(context);
+        },
+        child: Text("Prendre une phto"));
+  }
+
+  fetchAvatars() async {
+    RestApi rest = RestApi();
+    var response = await rest.user.fetchAvailableAvatars(_user);
+    if (response.statusCode == 200) {
+      var jsonResponse = json.decode(response.body) as Map<String, dynamic>;
+      print('Fetch Avatars');
+      setState(() {
+        avatars = jsonResponse['avatars'];
+      });
+    } else {
+      setState(() {
+        avatars = [];
+      });
+      print('Request failed with status: ${response.body}.');
+    }
   }
 }
