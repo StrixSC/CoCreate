@@ -19,7 +19,7 @@ import '../models/chat.dart';
 class Collaborator extends ChangeNotifier {
   UserCredential? auth;
   Map drawings =
-      <String, Map<String, Drawing>>{}; // <section, <drawing_id, drawing>>
+  <String, Map<String, Drawing>>{}; // <section, <drawing_id, drawing>>
   bool isDrawing = false;
   String currentType = "Available"; // sections : Available, Joined
   late String currentDrawingId = '';
@@ -142,15 +142,15 @@ class Collaborator extends ChangeNotifier {
       drawings[currentType][currentDrawingId].collaboration.memberCount++;
     } else {
       (drawings['Available'] as Map<String, Drawing>).update(member.drawingId!,
-          (value) {
-        value.collaboration.members.add(member);
-        return value;
-      });
+              (value) {
+            value.collaboration.members.add(member);
+            return value;
+          });
       (drawings['Available'] as Map<String, Drawing>).update(member.drawingId!,
-          (value) {
-        value.collaboration.memberCount++;
-        return value;
-      });
+              (value) {
+            value.collaboration.memberCount++;
+            return value;
+          });
     }
     print('okok');
     for (var type in TYPES) {

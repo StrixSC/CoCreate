@@ -2,6 +2,7 @@ import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/collaborator.dart';
 import 'package:Colorimage/screens/galerie/galerie.dart';
 import 'package:Colorimage/screens/profile/profile.dart';
+import 'package:Colorimage/screens/teams/team.dart';
 import 'package:provider/src/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,7 @@ class _BottomNavBarScreenState extends State<BottomNavBar> {
       Container(),
       Container(),
       Galerie(),
-      Container(),
+      Team(),
       Profile(context.read<Collaborator>().auth!.user!),
       // add screens here
     ];

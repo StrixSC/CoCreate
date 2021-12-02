@@ -71,18 +71,18 @@ class GalerieState extends State<Galerie>
       });
       value.addStatusListener((status) {
         if (status == PagingStatus.completed) {
-          ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text(
-                "Il n'y a plus de dessins disponibles",
-              ),
-              action: SnackBarAction(
-                label: 'Ok',
-                onPressed: () {},
-              ),
-            ),
-          );
+          // ScaffoldMessenger.of(context).clearSnackBars();
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //     content: const Text(
+          //       "Il n'y a plus de dessins disponibles",
+          //     ),
+          //     action: SnackBarAction(
+          //       label: 'Ok',
+          //       onPressed: () {},
+          //     ),
+          //   ),
+          // );
         }
       });
     });
@@ -125,16 +125,22 @@ class GalerieState extends State<Galerie>
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return SizedBox(height: 150, child:Dialog(
-          child: Padding(padding: const EdgeInsets.all(25.0), child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-               CircularProgressIndicator(),
-               SizedBox(width: 20,),
-               Text("Chargement..."),
-            ],
-          )),
-        ));
+        return SizedBox(
+            height: 150,
+            child: Dialog(
+              child: Padding(
+                  padding: const EdgeInsets.all(25.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      CircularProgressIndicator(),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text("Chargement..."),
+                    ],
+                  )),
+            ));
       },
     );
     Future.delayed(const Duration(seconds: 2), () {
@@ -172,7 +178,9 @@ class GalerieState extends State<Galerie>
           Collaboration collaboration = Collaboration(
             collaborationId: drawing["collaboration_id"],
             memberCount: drawing["collaborator_count"],
-            members: [], actionsMap: {}, actions: [],
+            members: [],
+            actionsMap: {},
+            actions: [],
           );
           // TODO: add updated_at
           drawings.add(Drawing(
@@ -250,11 +258,11 @@ class GalerieState extends State<Galerie>
             backgroundColor: kPrimaryColor,
             centerTitle: true,
             automaticallyImplyLeading: false,
-            leading: Builder(builder: (context) => // Ensure Scaffold is in context
-            IconButton(
-                icon: Icon(Icons.message),
-                onPressed: () => Scaffold.of(context).openEndDrawer()
-            ),
+            leading: Builder(
+              builder: (context) => // Ensure Scaffold is in context
+                  IconButton(
+                      icon: Icon(Icons.message),
+                      onPressed: () => Scaffold.of(context).openEndDrawer()),
             ),
             title: const Text("Galerie de dessins"),
             actions: <Widget>[
@@ -289,7 +297,8 @@ class GalerieState extends State<Galerie>
       return Column(children: <Widget>[
         const SizedBox(height: 40.0),
         SizedBox(
-            width: MediaQuery.of(context).size.width - MediaQuery.of(context).size.width / 4,
+            width: MediaQuery.of(context).size.width -
+                MediaQuery.of(context).size.width / 4,
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -405,10 +414,11 @@ class GalerieState extends State<Galerie>
     showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-              title: const Center(
-                  child: Padding(
-                      padding: EdgeInsets.only(top: 20.0),
-                      child: Text('Créer un dessin'))),
+              titlePadding: EdgeInsets.zero,
+              title: Container(
+                  padding: EdgeInsets.all(10.0),
+                  color: kContentColor,
+                  child: Center(child: Text('Créer un dessin'))),
               content: Column(children: [
                 Expanded(
                     child: SizedBox(
@@ -720,7 +730,7 @@ class _GridTitleText extends StatelessWidget {
     );
   }
 }
-
+enum WhyFarther { harder, smarter, selfStarter, tradingCharter }
 class _Drawing extends StatelessWidget {
   const _Drawing({
     required this.drawing,
@@ -728,12 +738,32 @@ class _Drawing extends StatelessWidget {
 
   final Drawing drawing;
 
+  popup() {
+    return PopupMenuButton(
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            child: Text("First"),
+            value: 1,
+          ),
+          PopupMenuItem(
+            child: Text("Second"),
+            value: 2,
+          )
+        ]
+    );
+  }
+
+
   joinDessinDialog(context) async {
     final Widget thumbnail = getThumbnail();
     showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-                title: Center(child: Text(drawing.title)),
+                titlePadding: EdgeInsets.zero,
+                title: Container(
+                    padding: EdgeInsets.all(10.0),
+                    color: kContentColor,
+                    child: Center(child: Text(drawing.title))),
                 content: SingleChildScrollView(
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -741,7 +771,8 @@ class _Drawing extends StatelessWidget {
                       Row(children: <Widget>[
                         Expanded(
                             child: SizedBox(
-                                width: MediaQuery.of(context).size.width / 2, child: gridTileJoin(thumbnail))),
+                                width: MediaQuery.of(context).size.width / 2,
+                                child: gridTileJoin(thumbnail))),
                         SizedBox(
                             width: MediaQuery.of(context).size.width / 4,
                             child: Column(
@@ -957,7 +988,7 @@ class _Drawing extends StatelessWidget {
           child: Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20.0),
               child: Container(
-                height: 820,
+                  height: 820,
                   decoration: BoxDecoration(
                       border: Border.all(
                           width: 2.5, color: Colors.grey.withOpacity(0.1))),
@@ -965,19 +996,23 @@ class _Drawing extends StatelessWidget {
                       color: kContentColor,
                       child: Column(children: <Widget>[
                         Container(
-                            height: orientation == Orientation.portrait ? 50.0 : MediaQuery.of(context).size.height / 9,
-                            child: Row(
-                                children: [
+                            height: orientation == Orientation.portrait
+                                ? 50.0
+                                : MediaQuery.of(context).size.height / 9,
+                            child: Row(children: [
                               Column(children: [
                                 Padding(
                                     padding: EdgeInsets.all(15.0),
                                     child: CircleAvatar(
-                                      radius: 24,
-                                      backgroundColor: kPrimaryColor,
-                                      backgroundImage:
-                                      drawing.authorUsername != 'admin' ? NetworkImage(drawing.authorAvatar): Image.asset(
-                                          'assets/images/Boruto_Uzumaki_1.png').image
-                                    ))
+                                        radius: 24,
+                                        backgroundColor: kPrimaryColor,
+                                        backgroundImage: drawing
+                                                    .authorUsername !=
+                                                'admin'
+                                            ? NetworkImage(drawing.authorAvatar)
+                                            : Image.asset(
+                                                    'assets/images/Boruto_Uzumaki_1.png')
+                                                .image))
                               ]),
                               Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -985,7 +1020,7 @@ class _Drawing extends StatelessWidget {
                                   children: [
                                     Row(children: [
                                       SizedBox(
-                                          width: 300,
+                                          width: 260,
                                           child: Text(drawing.title,
                                               style: TextStyle(
                                                   fontSize: 20.0,
@@ -993,11 +1028,16 @@ class _Drawing extends StatelessWidget {
                                     ]),
                                     Row(children: [
                                       SizedBox(
-                                          width: 300,
+                                          width: 260,
                                           child: Text(drawing.createdAt,
                                               style: TextStyle(fontSize: 20.0)))
-                                    ])
+                                    ]),
                                   ]),
+                              // Column(children: [
+                              //   SizedBox(
+                              //       width: 30,
+                              //       child: popup())
+                              // ])
                             ])),
                         Container(
                             width: MediaQuery.of(context).size.width / 2,
