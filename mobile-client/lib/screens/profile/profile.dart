@@ -106,7 +106,7 @@ class _ProfileScreenState extends State<Profile> {
 
   profileRow() {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      const SizedBox(width: 50),
+      const SizedBox(width: 120),
       isAuthor
           ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text('Courriel: ' + _user.email.toString()),

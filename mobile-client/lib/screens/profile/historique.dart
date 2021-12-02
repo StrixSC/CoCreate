@@ -88,7 +88,9 @@ class _HistoriqueProfileScreenState extends State<HistoriqueProfile> {
   }
 
   historiqueConnexion(type, date) {
-    return Row(children: [
+    return Container(
+        decoration: BoxDecoration(border: Border.all(width: 0.25,color: Colors.white)),
+    child: Row(children: [
       Column(children: [
         Container(
           padding: EdgeInsets.only(left: 20.0),
@@ -96,11 +98,13 @@ class _HistoriqueProfileScreenState extends State<HistoriqueProfile> {
           child: Center(child: richTextWhitePurple('${type} le: ', date)),
         )
       ]),
-    ]);
+    ]));
   }
 
   historiqueEdition(name, date) {
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+    return Container(
+        decoration: BoxDecoration(border: Border.all(width: 0.25,color: Colors.white)),
+    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Column(children: [
         Container(
           padding: EdgeInsets.only(left: 20.0),
@@ -115,7 +119,7 @@ class _HistoriqueProfileScreenState extends State<HistoriqueProfile> {
         height: 85,
         child: Center(child: openDrawingDialog(name)),
       )
-    ]);
+    ]));
   }
 
   divider() {

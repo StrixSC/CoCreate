@@ -73,10 +73,9 @@ class _StatistiqueProfileScreenState extends State<StatistiqueProfile> {
                                   padding: EdgeInsets.only(bottom: 10.0),
                                   width: MediaQuery.of(context).size.width,
                                   child: Card(
-                                    color: kContentColor2,
-                                    child: statistique(
-                                        'Connexion', '2021-12-01')
-                                  ),
+                                      color: kContentColor2,
+                                      child: statistique(
+                                          'Connexion', '2021-12-01')),
                                 );
                               }))))
             ],
@@ -85,15 +84,17 @@ class _StatistiqueProfileScreenState extends State<StatistiqueProfile> {
   }
 
   statistique(type, data) {
-    return Row(children: [
-      Column(children: [
-        Container(
-          padding: EdgeInsets.only(left: 20.0),
-          height: 85,
-          child: Center(child: richTextWhitePurple('${type}: ', data)),
-        )
-      ]),
-    ]);
+    return Container(
+        decoration: BoxDecoration(border: Border.all(width: 0.25,color: Colors.white)),
+        child: Row(children: [
+          Column(children: [
+            Container(
+              padding: EdgeInsets.only(left: 20.0),
+              height: 85,
+              child: Center(child: richTextWhitePurple('${type}: ', data)),
+            )
+          ]),
+        ]));
   }
 
   divider() {
@@ -116,9 +117,7 @@ class _StatistiqueProfileScreenState extends State<StatistiqueProfile> {
             style: const TextStyle(fontSize: 32.0),
             children: <TextSpan>[
               TextSpan(text: text1),
-              TextSpan(
-                  text: text2,
-                  style: TextStyle( color: kPrimaryColor)),
+              TextSpan(text: text2, style: TextStyle(color: kPrimaryColor)),
             ],
           ),
         ));
