@@ -11,6 +11,9 @@
 
 <mat-tab-group #tabGroup class="centerTab">
   <mat-tab class="drawing-list" label="Dessins disponibles">
+    <ng-template mat-tab-label>
+      <mat-icon>public</mat-icon> Dessins disponibles
+   </ng-template>
     <br>
     <div>
       <mat-form-field [style.width.%]="50">
@@ -75,6 +78,9 @@
     </div>
   </mat-tab>
   <mat-tab class="drawing-list" label="Mes Dessins & Dessins Rejoints">
+    <ng-template mat-tab-label>
+      <mat-icon>image</mat-icon> Mes Dessins & Dessins Rejoints
+   </ng-template>
     <br>
     <div>
       <mat-form-field [style.width.%]="50">
