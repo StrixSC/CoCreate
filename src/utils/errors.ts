@@ -34,7 +34,7 @@ export const handleRequestError = (e: any, next: NextFunction) => {
     next(create(e.status, e.message));
 };
 
-export const handleSocketError = (socket: Socket, e: any, exceptionType?: ExceptionType): boolean => {
+export const handleSocketError = (socket: Socket, e: any, exceptionType?: ExceptionType, exceptionTypes?: ExceptionType[]): boolean => {
     log('DEBUG', e);
     let error = `(${e.code}) - ${e.message}`;
     if (e instanceof HttpError) {
@@ -51,7 +51,10 @@ export const handleSocketError = (socket: Socket, e: any, exceptionType?: Except
 
     if (exceptionType) {
         return socket.emit(exceptionType, create(error));
-    } else {
+    } else if (exceptionTypes) {
+        exceptionTypes.forEach((e) => socket.emit(e, create(error)));
+    } {
         return socket.emit('exception', create(error));
     };
+
 }

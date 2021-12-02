@@ -1,3 +1,4 @@
+import { ChannelType } from '.prisma/client';
 import { generateMascotProfile } from './../../../services/teams.service';
 import { TeamType, MemberType } from "@prisma/client";
 import { db } from "../../../db";
@@ -18,6 +19,8 @@ export const handleCreate = async (io: Server, socket: Socket, data: {
         const { teamName, bio, maxMemberCount, type, password, mascot } = data;
         const team = await createTeam(socket.data.user, teamName, bio, maxMemberCount, type, mascot, password);
         socket.join(team.teamId);
+        socket.join(team.channel_id);
+        socket.emit('teams:channel:join');
         socket.emit('teams:create:finished', team);
         io.emit('teams:created', team);
     } catch (e) {
@@ -60,6 +63,17 @@ const createTeam = async (userId: string, teamName: string, bio: string, maxMemb
                 create: [
                     { user_id: userId, type: MemberType.Owner }
                 ]
+            },
+            channel: {
+                create: {
+                    name: `Canal de l'équipe ${teamName}`,
+                    type: ChannelType.Team,
+                    members: {
+                        create: [
+                            { user_id: userId, type: MemberType.Owner }
+                        ]
+                    }
+                }
             }
         },
         include: {
@@ -90,6 +104,7 @@ const createTeam = async (userId: string, teamName: string, bio: string, maxMemb
             teamAvatarUrl: createdTeam.avatar_url,
             bio: createdTeam.bio,
             type: createdTeam.type,
+            channel_id: createdTeam.channel_id,
         }
     }
 }

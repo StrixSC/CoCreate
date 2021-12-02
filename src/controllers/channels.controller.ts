@@ -14,7 +14,7 @@ import moment from 'moment';
 
 export const getAllChannelsController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const channels = await getAllChannels();
+        const channels = await getAllChannels(req.userId);
         if (channels.length === 0) return res.status(StatusCodes.NO_CONTENT).json([]);
 
         return res.status(StatusCodes.OK).json(channels);

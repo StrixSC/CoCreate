@@ -24,22 +24,31 @@ export const handleDelete = async (io: Server, socket: Socket, data: { teamId: s
             throw new SocketEventError("Hmm... On dirait que vous n'êtes pas le propriétaire de cette équipe...");
         }
 
-        const updated = await db.team.delete({
-            where: {
-                team_id: team.team_id,
-            }
-        });
+        const [deletedTeam, deletedChannel] = await db.$transaction([
+            db.team.delete({
+                where: {
+                    team_id: team.team_id,
+                }
+            }),
+            db.channel.delete({
+                where: {
+                    channel_id: team.channel_id
+                }
+            })
+        ]);
 
-        if (!updated) {
+        if (!deletedChannel || !deletedTeam) {
             throw new SocketEventError(`Oups... Quelque chose s'est produit lors du traitement de la requête, veuillez réessayez à nouveau SVP.`);
         } else {
             socket.emit('teams:delete:finished');
 
-            io.to(team.team_id).emit('teams:deleted', {
-                teamId: team.team_id
+            io.to(deletedTeam.team_id).emit('teams:deleted', {
+                teamId: deletedTeam.team_id
             });
 
-            io.socketsLeave(team.team_id);
+            io.to(deletedChannel.channel_id).emit('teams:channel:leave');
+            io.socketsLeave(deletedChannel.channel_id);
+            io.socketsLeave(deletedTeam.team_id);
         }
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.Teams_Delete)

@@ -7,13 +7,23 @@ export enum ExceptionType {
     Collaboration_Disconnect = "collaboration:disconnect:exception",
     Collaboration_Delete = "collaboration:delete:exception",
     Collaboration_Connect = "collaboration:connect:exception",
+
     Drawing = "drawing:exception",
+
     Teams = "teams:exception",
     Teams_Create = "teams:create:exception",
     Teams_Join = "teams:join:exception",
     Teams_Leave = "teams:leave:exception",
     Teams_Delete = "teams:delete:exception",
     User_Init = "user:init:exception",
+
+    Channel_Create = "channel:create:exception",
+    Channel_Delete = "channel:delete:exception",
+    Channel_Leave = "channel:leave:exception",
+    Channel_Join = "channel:join:exception",
+    Channel_Update = "channel:update:exception",
+    Channels = "channel:exception",
+    Channel_Send = "channel:send:exception",
 }
 
 export enum EventFinishedType {
@@ -29,4 +39,11 @@ export enum EventFinishedType {
     Teams_Join = "teams:join:finished",
     Teams_Leave = "teams:leave:finished",
     Teams_Delete = "teams:delete:finished",
+
+    Channel_Create = "channel:create:finished",
+    Channel_Delete = "channel:delete:finished",
+    Channel_Leave = "channel:leave:finished",
+    Channel_Join = "channel:join:finished",
+    Channel_Update = "channel:update:finished",
+    Channel_Send = "channel:send:finished",
 }

@@ -7,7 +7,7 @@ import create from 'http-errors';
 import { handleSocketError } from './../utils/errors';
 import { db } from './../db';
 import { Server, Socket } from 'socket.io';
-import { Action, Collaboration, CollaborationMember, CollaborationType, Drawing, MemberType, Profile, User } from '.prisma/client';
+import { Action, Collaboration, CollaborationMember, CollaborationType, Drawing, MemberType, Profile, User, ChannelType } from '.prisma/client';
 import validator from "validator";
 
 type CollaborationMemberConnectionResponse = CollaborationMember & {
@@ -120,42 +120,51 @@ export = (io: Server, socket: Socket) => {
                     }
                 }
 
-                const member = await db.collaborationMember.create({
-                    data: {
-                        type: MemberType.Regular,
-                        collaboration_id: collaboration.collaboration_id,
-                        user_id: userId,
-                    },
-                    include: {
-                        user: {
-                            include: {
-                                profile: true
-                            }
+                const [member, channelMember] = await db.$transaction([
+                    db.collaborationMember.create({
+                        data: {
+                            type: MemberType.Regular,
+                            collaboration_id: collaboration.collaboration_id,
+                            user_id: userId,
                         },
-                        collaboration: {
-                            include: {
-                                drawing: true,
-                                actions: {
-                                    where: {
-                                        collaborationId: collaborationId
+                        include: {
+                            user: {
+                                include: {
+                                    profile: true
+                                }
+                            },
+                            collaboration: {
+                                include: {
+                                    drawing: true,
+                                    actions: {
+                                        where: {
+                                            collaborationId: collaborationId
+                                        },
+                                        orderBy: {
+                                            createdAt: "asc"
+                                        }
                                     },
-                                    orderBy: {
-                                        createdAt: "asc"
-                                    }
-                                },
-                                collaboration_members: {
-                                    include: {
-                                        user: {
-                                            include: {
-                                                profile: true
+                                    collaboration_members: {
+                                        include: {
+                                            user: {
+                                                include: {
+                                                    profile: true
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                });
+                    }),
+                    db.channelMember.create({
+                        data: {
+                            channel_id: collaboration.channel_id,
+                            type: MemberType.Regular,
+                            user_id: userId
+                        }
+                    })
+                ]);
 
                 if (!member) {
                     throw new create.InternalServerError("Could not create member relationship between user and collaboration/drawing.");
@@ -163,7 +172,7 @@ export = (io: Server, socket: Socket) => {
 
                 // TODO: Might need to switch "socket" to "io"
                 if (collaboration.type !== CollaborationType.Private) {
-                    io.emit("collaboration:joined", {
+                    io.to(member.collaboration_id).emit("collaboration:joined", {
                         userId: userId,
                         collaborationId: member.collaboration_id,
                         username: member.user.profile!.username,
@@ -190,9 +199,11 @@ export = (io: Server, socket: Socket) => {
     }
 
     const triggerJoin = (member: any) => {
+        socket.join(member.collaboration.channel_id);
         socket.join(member.collaboration_id);
         const data = generateConnectedPayload(member);
         socket.emit("collaboration:load", data);
+        socket.emit('collaboration:channel:join');
         socket.data.status = 'Occupé'
     }
 
@@ -301,32 +312,47 @@ export = (io: Server, socket: Socket) => {
                     user_id: userId,
                     collaboration_id: collaborationId,
                     type: MemberType.Owner
+                },
+                include: {
+                    collaboration: true,
                 }
             });
 
             if (!member) {
+                throw new SocketEventError(`Hmm... On dirait que vous n'êtes pas le propriétaire du dessin...`, "E4023")
             }
 
-            const collaboration = await db.collaboration.delete({
-                where: {
-                    collaboration_id: collaborationId
-                }
-            });
+            const [deletedCollaboration, deletedChannel] = await db.$transaction([
+                db.collaboration.delete({
+                    where: {
+                        collaboration_id: member.collaboration.collaboration_id
+                    }
+                }),
+                db.channel.delete({
+                    where: {
+                        channel_id: member.collaboration.channel_id
+                    }
+                })
+            ])
 
-            if (!collaboration) {
+            if (!deletedCollaboration || !deletedChannel) {
                 throw new SocketEventError("Oups! On dirait qu'il y a eu une erreur lors de la suppression du dessin...", "E5003", ExceptionType.Collaboration_Delete)
             }
 
             const response = {
-                collaborationId: collaboration.collaboration_id,
+                collaborationId: deletedCollaboration.collaboration_id,
                 deletedAt: new Date().toISOString(),
             };
 
-            if (collaboration.type === CollaborationType.Private) {
-                socket.emit('collaboration:deleted', response)
+            if (deletedCollaboration.type === CollaborationType.Private) {
+                io.to(deletedCollaboration.collaboration_id).emit('collaboration:deleted', response);
             } else {
                 io.emit('collaboration:deleted', response)
             }
+
+            io.to(deletedChannel.channel_id).emit('collaboration:channel:leave');
+            io.socketsLeave(deletedCollaboration.collaboration_id);
+            io.socketsLeave(deletedChannel.channel_id);
         } catch (e) {
             handleSocketError(socket, e, ExceptionType.Collaboration);
         }
@@ -492,6 +518,18 @@ export = (io: Server, socket: Socket) => {
                 throw new create.Unauthorized("The user is not a member of the collaboration, or the collaboration does not exist. Try joining the collaboration first before connecting.");
             }
 
+            const channelMember = await db.channelMember.create({
+                data: {
+                    user_id: userId,
+                    channel_id: member.collaboration.channel_id,
+                    type: member.type
+                }
+            })
+
+            if (!channelMember) {
+                throw new SocketEventError("Oups... On dirait qu'il y a eu une erreur lors du traitement de la requête...", "E4452");
+            }
+
             socket.broadcast.to(member.collaboration_id).emit("collaboration:connected", {
                 userId: member.user.user_id,
                 username: member.user.profile!.username,
@@ -533,14 +571,34 @@ export = (io: Server, socket: Socket) => {
                 throw new SocketEventError("Oups! La connexion ne peut être faite, car l'utilisateur ne fait pas partie de la collaboration.", 'E8801');
             }
 
+            const deletedChannelMember = await db.channelMember.deleteMany({
+                where: {
+                    channel_id: member.collaboration.channel_id,
+                    user_id: member.user_id
+                }
+            });
+
+            if (!deletedChannelMember) {
+                throw new SocketEventError("Oups! Quelque chose s'est produit lors du traitement de la requête...", "E4423")
+            }
+
             socket.leave(payload.collaborationId);
+            socket.leave(member.collaboration.channel_id)
+            socket.emit('collaboration:channel:leave');
             socket.emit("collaboration:disconnected");
+
             io.to(payload.collaborationId).emit("collaboration:disconnnected", {
                 collaborationId: member.collaboration_id,
                 drawingId: member.collaboration.drawing!.drawing_id,
                 userId: member.user_id,
                 username: member.user.profile!.username,
                 avatarUrl: member.user.profile!.avatar_url,
+            });
+
+            io.to(member.collaboration.channel_id).emit('collaboration:channel:disconnected', {
+                username: member.user.profile!.username,
+                userId: member.user_id,
+                time: new Date().toISOString(),
             });
         } catch (e) {
 
@@ -555,11 +613,11 @@ export = (io: Server, socket: Socket) => {
             const { userId, collaborationId } = payload;
 
             if (!userId || userId !== socket.data.user) {
-                throw new create.Unauthorized("Invalid or missing userId/provided userId does not match the session user.");
+                throw new SocketEventError("Hmm... On dirait que vous n'avez pas le droit de faire cela...", "E1050");
             }
 
             if (!collaborationId) {
-                throw new create.BadRequest("Invalid or missing collaborationId in the provided payload");
+                throw new SocketEventError("Oups! On dirait qu'il n'y a pas eu d'identificateur de dessin envoyé...", "E1051");
             }
 
             const collaboration = await db.collaborationMember.findFirst({
@@ -610,6 +668,11 @@ export = (io: Server, socket: Socket) => {
                 leftAt: new Date().toISOString(),
                 drawingId: collaboration.collaboration.drawing!.drawing_id,
             });
+
+            socket.emit('collaboration:channel:leave');
+            socket.leave(collaboration.collaboration_id);
+            socket.leave(collaboration.collaboration.channel_id);
+
         } catch (e) {
             handleSocketError(socket, e, ExceptionType.Collaboration);
         }
@@ -675,6 +738,17 @@ const createCollaboration = async (user_id: string, creatorId: string, isTeam: b
                                 user_id: user_id
                             }
                         ]
+                    },
+                    channel: {
+                        create: {
+                            name: `Canal du dessin ${title}`,
+                            type: ChannelType.Collaboration,
+                            members: {
+                                create: [
+                                    { user_id: user_id, type: MemberType.Owner }
+                                ]
+                            }
+                        }
                     }
                 }]
             }
@@ -713,7 +787,8 @@ const createCollaboration = async (user_id: string, creatorId: string, isTeam: b
         currentMemberCount: author.collaborations[0].collaboration_members.length,
         title: author.collaborations[0].drawing!.title,
         thumbnail_url: author.collaborations[0].drawing!.thumbnail_url,
-        drawingId: author.collaborations[0].drawing!.drawing_id
+        drawingId: author.collaborations[0].drawing!.drawing_id,
+        channelId: author.collaborations[0].channel_id
     }
 
     return returnData;

@@ -24,18 +24,28 @@ export const handleLeave = async (io: Server, socket: Socket, data: { teamId: st
             throw new SocketEventError("Hmm... On dirait que vous êtes le propriétaire de cette équipe, il faudrait plutôt supprimer l'équipe si vous comptez la quitter...");
         }
 
-        const updated = await db.teamMember.deleteMany({
-            where: {
-                team_id: team.team_id,
-                user_id: socket.data.user
-            },
-        });
+        const [deletedMember, deletedChannelMember] = await db.$transaction([
+            db.teamMember.deleteMany({
+                where: {
+                    team_id: team.team_id,
+                    user_id: socket.data.user
+                },
+            }),
+            db.channelMember.deleteMany({
+                where: {
+                    channel_id: team.channel_id,
+                    user_id: socket.data.user
+                }
+            })
+        ]);
 
-        if (!updated) {
+        if (!deletedMember || !deletedChannelMember) {
             throw new SocketEventError(`Oups... Quelque chose s'est produit lors du traitement de la requête, veuillez réessayez à nouveau SVP.`);
         } else {
             socket.leave(team.team_id);
+            socket.leave(team.channel_id);
             socket.emit('teams:leave:finished', { teamName: team.team_name });
+            socket.emit('teams:channel:leave');
 
             const onlineMembers = getOnlineMembersInRoom(team.team_id);
 

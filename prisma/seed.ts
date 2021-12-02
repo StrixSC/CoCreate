@@ -56,6 +56,13 @@ async function main() {
                                             thumbnail_url: '',
                                         }
                                     },
+                                    channel: {
+                                        create: {
+                                            channel_id: 'DEMO_COLLABORATION_CHATROOM',
+                                            name: 'Chatroom for Demo Collaboration',
+                                            type: ChannelType.Collaboration,
+                                        }
+                                    },
                                     collaboration_members: {
                                         create: [
                                             {

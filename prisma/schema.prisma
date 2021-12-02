@@ -76,7 +76,10 @@ model Channel {
   channel_id       String          @id @unique @default(uuid())
   created_at       DateTime        @default(now())
   updated_at       DateTime        @updatedAt
-  collaboration_id String?
+  team             Team?
+  team_id          String?         @default("")
+  collaboration_id String?         @default("")
+  collaboration    Collaboration?
   members          ChannelMember[]
   type             ChannelType     @default(Public)
 }
@@ -194,6 +197,8 @@ model Collaboration {
   created_at            DateTime              @default(now())
   updated_at            DateTime              @updatedAt
   collaboration_members CollaborationMember[]
+  channel               Channel               @relation(fields: [channel_id], references: [channel_id])
+  channel_id            String                @unique
   drawing               Drawing?
   actions               Action[]
   type                  CollaborationType
@@ -213,6 +218,8 @@ model Team {
   max_member_count  Int          @default(4)
   type              TeamType
   authored_drawings Author[]
+  channel           Channel      @relation(fields: [channel_id], references: [channel_id])
+  channel_id        String       @unique
   password          String?      @default("")
   mascot            String       @default("")
   mascot_url        String       @default("")
@@ -261,7 +268,8 @@ enum ActionState {
 }
 
 enum ChannelType {
-  Private
+  Collaboration
+  Team
   Public
 }
 

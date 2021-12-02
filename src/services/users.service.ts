@@ -153,6 +153,7 @@ export const getUserChannelsById = async (id: string): Promise<any> => {
     return channels.map((c) => ({
         name: c.channel.name,
         index: c.channel.index,
+        channel_type: c.channel.type,
         channel_id: c.channel.channel_id,
         owner_username:
             c.channel.members.find((m) => m.type === MemberType.Owner)?.member.profile?.username ||

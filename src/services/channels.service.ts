@@ -1,4 +1,5 @@
-import { MemberType } from '.prisma/client';
+import { getOnlineMembersInRoom } from './../utils/socket';
+import { MemberType, ChannelType } from '.prisma/client';
 import { ICompleteChannelData } from '../models/ICompleteChannelData.model';
 import { IReceiveMessagePayload } from './../models/IReceiveMessagePayload.model';
 import { ISendMessagePayload } from './../models/ISendMessagePayload.model';
@@ -9,8 +10,11 @@ import { db } from '../db';
 import moment from 'moment';
 import { IChannel } from '../models/IChannel.model';
 
-export const getAllChannels = async (): Promise<IChannel[]> => {
+export const getAllChannels = async (userId: string): Promise<IChannel[]> => {
     const channels = await db.channel.findMany({
+        where: {
+            type: ChannelType.Public
+        },
         include: {
             members: {
                 include: {
@@ -25,6 +29,23 @@ export const getAllChannels = async (): Promise<IChannel[]> => {
     });
 
     const returnVal = channels.map((c) => {
+        const onlineMembers = getOnlineMembersInRoom(c.channel_id);
+        let ownerUsername = "admin";
+        let isMember = false;
+        let isOwner = false;
+        const owner = c.members.find((m) => m.type === MemberType.Owner);
+        if (owner) {
+            ownerUsername = owner.member.profile!.username;
+            if (c.members.find((m) => m.user_id === userId)) {
+                isMember = true;
+            }
+
+            if (owner.user_id === userId) {
+                isOwner = true;
+                isMember = true;
+            }
+        }
+
         return {
             name: c.name,
             channel_id: c.channel_id,
@@ -32,10 +53,10 @@ export const getAllChannels = async (): Promise<IChannel[]> => {
             collaboration_id: c.collaboration_id,
             updated_at: c.updated_at,
             member_count: c.members.length,
-            online_member_count: io.sockets.adapter.rooms.get(c.channel_id) ? io.sockets.adapter.rooms.get(c.channel_id)!.size : 0,
-            owner_username:
-                c.members.find((m) => m.type === MemberType.Owner)?.member.profile?.username ||
-                'Admin'
+            online_member_count: onlineMembers.length,
+            owner_username: ownerUsername,
+            isOwner: isOwner,
+            isMember: isMember
         };
     });
 

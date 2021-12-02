@@ -37,7 +37,7 @@ router.put('/profile', checkIfAuthenticated,
         .optional()
         .isString()
         .isURL()
-        .withMessage('Avatar Url missing or invalid'),
+        .withMessage('Avatar url missing or invalid'),
     (req, res, next) => updateUserProfileController(req, res, next));
 
 // Get a user's public information by their username

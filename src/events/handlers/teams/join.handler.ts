@@ -4,7 +4,6 @@ import { Socket, Server } from 'socket.io';
 import { ExceptionType } from "../../../models/Exceptions.enum";
 import { SocketEventError } from "../../../socket";
 import { handleSocketError } from "../../../utils/errors";
-import axios from "axios";
 
 export const handleJoin = async (io: Server, socket: Socket, data: {
     teamId: string,
@@ -31,7 +30,7 @@ export const handleJoin = async (io: Server, socket: Socket, data: {
             throw new SocketEventError("Il ne reste plus aucune place dans cette équipe, malheureusement!", "E4103");
         }
 
-        const member = await addUserToTeam(userId, team.team_id);
+        const member = await addUserToTeam(userId, team.team_id, team.channel_id);
         if (!member) {
             throw new SocketEventError("Une erreur s'est produit lors de l'ajout de l'utilisateur à l'équipe, réessayez à nouveau plus tard!");
         }
@@ -50,6 +49,7 @@ export const handleJoin = async (io: Server, socket: Socket, data: {
         }
 
         socket.emit('teams:join:finished');
+        socket.emit('teams:channel:join');
 
         io.emit('teams:joined', {
             teamId: team.team_id,
@@ -64,13 +64,14 @@ export const handleJoin = async (io: Server, socket: Socket, data: {
         });
 
         socket.join(team.team_id);
+        socket.join(team.channel_id);
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.Teams_Join);
     }
 }
 
 export const findTeamById = async (teamId: string) => {
-    const team = db.team.findUnique({
+    const team = await db.team.findUnique({
         where: {
             team_id: teamId,
         },
@@ -99,32 +100,42 @@ export const findTeamById = async (teamId: string) => {
     return team;
 };
 
-export const addUserToTeam = async (userId: string, teamId: string) => {
-    const user = await db.teamMember.create({
-        data: {
-            team_id: teamId,
-            type: MemberType.Regular,
-            user_id: userId
-        },
-        include: {
-            team: {
-                include: {
-                    authored_drawings: {
-                        include: {
-                            collaborations: true,
-                        }
+export const addUserToTeam = async (userId: string, teamId: string, channelId: string) => {
+    const [teamMember, channelMember] = await db.$transaction([
+        db.teamMember.create({
+            data: {
+                team_id: teamId,
+                type: MemberType.Regular,
+                user_id: userId,
+            },
+            include: {
+                team: {
+                    include: {
+                        channel: true,
+                        authored_drawings: {
+                            include: {
+                                collaborations: true,
+                            }
+                        },
+                    }
+                },
+                user: {
+                    include: {
+                        profile: true
                     }
                 }
-            },
-            user: {
-                include: {
-                    profile: true
-                }
             }
-        }
-    });
+        }),
+        db.channelMember.create({
+            data: {
+                channel_id: channelId,
+                type: MemberType.Regular,
+                user_id: userId,
+            }
+        })
+    ]);
 
-    return user;
+    return teamMember;
 }
 
 export const addUserToCollaboration = async (userId: string, collaborationIds: string[]) => {
