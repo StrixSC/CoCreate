@@ -1,5 +1,6 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/collaborator.dart';
+import 'package:Colorimage/screens/profile/historique.dart';
 import 'package:Colorimage/screens/profile/update_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -188,7 +189,7 @@ class _ProfileScreenState extends State<Profile> {
         onPressed: () {
           pushNewScreen(
             context,
-            screen: UpdateProfile(_user),
+            screen: HistoriqueProfile(_user),
             withNavBar: false,
             pageTransitionAnimation: PageTransitionAnimation.cupertino,
           );

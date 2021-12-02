@@ -413,7 +413,7 @@ class GalerieState extends State<Galerie>
                 Expanded(
                     child: SizedBox(
                         width: 1000,
-                        height: 500,
+                        height: 700,
                         child: ListView(
                             shrinkWrap: true,
                             padding: const EdgeInsets.only(
@@ -521,14 +521,14 @@ class GalerieState extends State<Galerie>
                                     .read<Collaborator>()
                                     .collaborationSocket
                                     .createCollaboration(
-                                        authorId, title, type, password);
+                                        authorId, title, type, password, color);
                               }
                               {
                                 context
                                     .read<Collaborator>()
                                     .collaborationSocket
                                     .createCollaboration(
-                                        authorId, title, type, null);
+                                        authorId, title, type, null, color);
                               }
                               Navigator.of(context).pop();
                               showDialog<String>(

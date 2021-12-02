@@ -57,15 +57,18 @@ class CollaborationSocket extends SocketService {
     String title,
     String type,
     String? password,
+      Color color,
   ) {
     print('Create Collab');
+    String hexColor = '#${color.value.toRadixString(16)}';
     socket.emit('collaboration:create', {
       'userId': user.uid,
       'creatorId': creatorId,
       'isTeam': user.uid != creatorId,
       'title': title,
       'type': type,
-      'password': password
+      'password': password,
+      'bgColor' : hexColor
     });
   }
 
