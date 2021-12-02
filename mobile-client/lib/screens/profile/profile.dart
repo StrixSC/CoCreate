@@ -1,6 +1,7 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/collaborator.dart';
 import 'package:Colorimage/screens/profile/historique.dart';
+import 'package:Colorimage/screens/profile/statistique.dart';
 import 'package:Colorimage/screens/profile/update_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -127,9 +128,9 @@ class _ProfileScreenState extends State<Profile> {
       ]),
       isAuthor
           ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              openHistoryDialog(),
-              openSettingsDialog(),
-              openStatisticsDialog(),
+              history(),
+              settings(),
+        statistics(),
             ])
           : const SizedBox.shrink(),
       const SizedBox(width: 50),
@@ -168,7 +169,7 @@ class _ProfileScreenState extends State<Profile> {
             }));
   }
 
-  openSettingsDialog() {
+  settings() {
     return ElevatedButton(
         onPressed: () {
           pushNewScreen(
@@ -184,7 +185,7 @@ class _ProfileScreenState extends State<Profile> {
             backgroundColor: MaterialStateProperty.all(kPrimaryColor)));
   }
 
-  openHistoryDialog() {
+  history() {
     return ElevatedButton(
         onPressed: () {
           pushNewScreen(
@@ -199,12 +200,12 @@ class _ProfileScreenState extends State<Profile> {
             backgroundColor: MaterialStateProperty.all(kPrimaryColor)));
   }
 
-  openStatisticsDialog() {
+  statistics() {
     return ElevatedButton(
         onPressed: () {
           pushNewScreen(
             context,
-            screen: UpdateProfile(_user),
+            screen: StatistiqueProfile(_user),
             withNavBar: false,
             pageTransitionAnimation: PageTransitionAnimation.cupertino,
           );

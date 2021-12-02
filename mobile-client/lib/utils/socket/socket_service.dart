@@ -30,6 +30,10 @@ class SocketService {
       print('gallerie:exception');
       print(err);
     });
+    socket.on('channel:exception', (err) {
+      print('channel:exception');
+      print(err);
+    });
   }
 
   // onConnect() {
