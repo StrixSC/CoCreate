@@ -47,11 +47,13 @@ export class ChatSidebarService {
   }
 
   handleIncomingMessage(data: IMessageResponse) {
+    console.log(data);
     const channel = this.allChannels.find((c) => c.channel_id === data.channelId);
     if (channel) {
       // TODO: Add notification sound
-      channel.messages.push(data);
+      console.log(channel, channel.messages);
 
+      channel.messages.push(data);
       if (this.activeChannel.channel_id !== channel.channel_id || !this.navOpen) {
         channel.notificationCount++;
       }

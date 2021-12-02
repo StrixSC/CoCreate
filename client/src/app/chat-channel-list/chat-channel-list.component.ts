@@ -100,7 +100,8 @@ export class ChatChannelListComponent implements OnInit {
             ...channel,
             notificationCount: prevData.notificationCount,
             bgColor: prevData.bgColor,
-            textColor: prevData.textColor
+            textColor: prevData.textColor,
+            messages: prevData.messages,
           } as ISidebarChannel;
 
           newSnapshot.set(newData.channel_id, newData);
