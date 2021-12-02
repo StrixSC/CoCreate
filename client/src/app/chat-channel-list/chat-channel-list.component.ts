@@ -1,7 +1,7 @@
 import { CreateChannelDialogComponent } from './../components/create-channel-dialog/create-channel-dialog.component';
 import { ChatMenuComponent } from './../components/chat-menu/chat-menu.component';
 import { MatDialog } from '@angular/material';
-import { IChannelResponse, ISidebarChannel, ChannelType } from './../model/IChannel.model';
+import { IChannelResponse, ISidebarChannel, ChannelType, IMessageResponse } from './../model/IChannel.model';
 import { Subscription, merge } from 'rxjs';
 import { AuthService } from './../services/auth.service';
 import { ChatSidebarService } from './../services/chat-sidebar.service';
@@ -15,6 +15,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ChatChannelListComponent implements OnInit {
 
+  initSet: boolean = false;
   channelsSubscription: Subscription;
   messageReceived: Subscription;
   searchTerm: string = "";
@@ -40,8 +41,8 @@ export class ChatChannelListComponent implements OnInit {
       this.addOrUpdateChannels();
     })
 
-    this.messageReceived = this.chatSocketService.receiveMessage().subscribe((d) => {
-      this.chatSidebarService.addNotification(d.channelId);
+    this.messageReceived = this.chatSocketService.receiveMessage().subscribe((d: IMessageResponse) => {
+      this.chatSidebarService.handleIncomingMessage(d);
     })
 
     this.addOrUpdateChannels();
@@ -110,13 +111,20 @@ export class ChatChannelListComponent implements OnInit {
               ...channel,
               notificationCount: 0,
               bgColor: bubbleColors.bgColor,
-              textColor: bubbleColors.textColor
+              textColor: bubbleColors.textColor,
+              messages: [],
             });
         }
       }
 
       const updatedChannels = Array.from(newSnapshot).map((d) => d[1]);
       this.chatSidebarService.allChannels = updatedChannels;
+      if (!this.initSet) {
+        this.selectPublicChat();
+        this.initSet = true;
+        this.toggleChatMenu();
+      }
+
       this.filterChannels();
       fetchSubscription.unsubscribe();
     })

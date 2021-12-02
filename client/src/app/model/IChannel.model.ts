@@ -31,7 +31,8 @@ export interface IChannelResponse {
 export type ISidebarChannel = IChannelResponse & {
   notificationCount: number,
   bgColor: string,
-  textColor: string
+  textColor: string,
+  messages: IMessageResponse[];
 }
 
 export interface IMessageResponse {

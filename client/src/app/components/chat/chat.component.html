@@ -28,7 +28,7 @@
 
     <div class="chat-box">
         <div class="messages-container" #messageBox [scrollTop]="messageBox.scrollHeight">
-            <div class="message-wrapper" *ngFor="let message of messages" [class.myMessage]="isActiveUser(message.username)">
+            <div class="message-wrapper" *ngFor="let message of activeChannel.messages" [class.myMessage]="isActiveUser(message.username)">
                 <div class="avatar-container">
                     <img class="avatar-img" [src]="message.avatarUrl">
                 </div>

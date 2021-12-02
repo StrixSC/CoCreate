@@ -1,6 +1,6 @@
 import { Router } from '@angular/router';
 import { AuthService } from './../../services/auth.service';
-import { IMessageResponse, IChannelResponse } from './../../model/IChannel.model';
+import { IMessageResponse, IChannelResponse, ISidebarChannel } from './../../model/IChannel.model';
 import { Subscription } from 'rxjs';
 import { ChatSocketService } from 'src/app/services/chat/chat.service';
 import { ChatSidebarService } from './../../services/chat-sidebar.service';
@@ -11,22 +11,14 @@ import { Component, OnInit, ElementRef, ViewChild, isDevMode } from '@angular/co
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss']
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent {
 
   @ViewChild("messageBox", { static: false })
   messageBox: ElementRef<HTMLDivElement>;
 
   constructor(private sidebarService: ChatSidebarService, private router: Router, private auth: AuthService, private chatService: ChatSocketService) { }
 
-  messageListener: Subscription;
-  messages: IMessageResponse[] = [];
   message: string = "";
-  ngOnInit() {
-    this.messageListener = this.chatService.receiveMessage().subscribe((m: IMessageResponse) => {
-      this.messages.push(m);
-      console.log(this.messages);
-    })
-  }
 
   openInNewWindow() {
     const winRef: Window | null = window.open(
@@ -56,7 +48,7 @@ export class ChatComponent implements OnInit {
     return this.sidebarService.isLoading;
   }
 
-  get activeChannel(): IChannelResponse {
+  get activeChannel(): ISidebarChannel {
     return this.sidebarService.activeChannel;
   }
 

@@ -46,15 +46,15 @@ export class ChatSidebarService {
     this._activeChannel = channel;
   }
 
-  addNotification(channelId: string) {
-    if (this.activeChannel.channel_id === channelId && this.navOpen) {
-      return;
-    }
-
-    const index = this.allChannels.findIndex((c) => c.channel_id === channelId);
-    if (index >= 0) {
+  handleIncomingMessage(data: IMessageResponse) {
+    const channel = this.allChannels.find((c) => c.channel_id === data.channelId);
+    if (channel) {
       // TODO: Add notification sound
-      this.allChannels[index].notificationCount++;
+      channel.messages.push(data);
+
+      if (this.activeChannel.channel_id !== channel.channel_id || !this.navOpen) {
+        channel.notificationCount++;
+      }
     }
   }
 
