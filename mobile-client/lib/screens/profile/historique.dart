@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/collaborator.dart';
+import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/src/provider.dart';
 
@@ -17,7 +21,7 @@ class HistoriqueProfile extends StatefulWidget {
 }
 
 class _HistoriqueProfileScreenState extends State<HistoriqueProfile> {
-  late List children;
+  List logs = [];
   bool isAuthor = false;
   User _user;
   TextEditingController userController = TextEditingController();
@@ -28,6 +32,7 @@ class _HistoriqueProfileScreenState extends State<HistoriqueProfile> {
   @override
   void initState() {
     super.initState();
+    fetchLogs();
     isAuthor = context.read<Collaborator>().auth!.user!.uid == _user.uid;
     userController.text = _user.displayName.toString();
   }
@@ -65,20 +70,28 @@ class _HistoriqueProfileScreenState extends State<HistoriqueProfile> {
                       height: MediaQuery.of(context).size.height,
                       child: SingleChildScrollView(
                           child: ListView.builder(
+                              physics: NeverScrollableScrollPhysics(),
                               scrollDirection: Axis.vertical,
                               shrinkWrap: true,
-                              itemCount: numbers.length,
+                              itemCount: logs.length,
                               itemBuilder: (context, index) {
                                 return Container(
                                   padding: EdgeInsets.only(bottom: 10.0),
                                   width: MediaQuery.of(context).size.width,
                                   child: Card(
                                     color: kContentColor2,
-                                    child: numbers[index] == 0
+                                    child: logs[index]["type"] == 'Connection'
                                         ? historiqueConnexion(
-                                            'Connexion', '2021-12-01')
+                                            logs[index]["type"],
+                                            DateFormat('yyyy-MM-dd kk:mm')
+                                                .format(DateTime.parse(
+                                                    logs[index]["created_at"])))
                                         : historiqueEdition(
-                                            'PontChamplainLive', '2021-12-01'),
+                                            logs[index]["type"],
+                                            DateFormat('yyyy-MM-dd kk:mm')
+                                                .format(DateTime.parse(
+                                                    logs[index]
+                                                        ["created_at"]))),
                                   ),
                                 );
                               }))))
@@ -87,39 +100,61 @@ class _HistoriqueProfileScreenState extends State<HistoriqueProfile> {
     );
   }
 
+  fetchLogs() async {
+    RestApi rest = RestApi();
+    var response = await rest.user.fetchUserLogs(_user);
+    if (response.statusCode == 200) {
+      var jsonResponse =
+          json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
+      print('Fetch Logs');
+      print(jsonResponse);
+      setState(() {
+        logs = jsonResponse;
+      });
+    } else {
+      setState(() {
+        logs = [];
+      });
+      print('Request failed with status: ${response.body}.');
+    }
+  }
+
   historiqueConnexion(type, date) {
     return Container(
-        decoration: BoxDecoration(border: Border.all(width: 0.25,color: Colors.white)),
-    child: Row(children: [
-      Column(children: [
-        Container(
-          padding: EdgeInsets.only(left: 20.0),
-          height: 85,
-          child: Center(child: richTextWhitePurple('${type} le: ', date)),
-        )
-      ]),
-    ]));
+        decoration:
+            BoxDecoration(border: Border.all(width: 0.25, color: Colors.white)),
+        child: Row(children: [
+          Column(children: [
+            Container(
+              padding: EdgeInsets.only(left: 20.0),
+              height: 85,
+              child: Center(child: richTextWhitePurple('${type} le: ', date)),
+            )
+          ]),
+        ]));
   }
 
   historiqueEdition(name, date) {
     return Container(
-        decoration: BoxDecoration(border: Border.all(width: 0.25,color: Colors.white)),
-    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Column(children: [
-        Container(
-          padding: EdgeInsets.only(left: 20.0),
-          height: 85,
-          child: Center(
-              child: richTextWhitePurple(
-                  'Édition de dessin: ', name + ' le ' + date)),
-        ),
-      ]),
-      Container(
-        padding: EdgeInsets.only(right: 20.0),
-        height: 85,
-        child: Center(child: openDrawingDialog(name)),
-      )
-    ]));
+        decoration:
+            BoxDecoration(border: Border.all(width: 0.25, color: Colors.white)),
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Column(children: [
+            Container(
+              padding: EdgeInsets.only(left: 20.0),
+              height: 85,
+              child: Center(
+                  child: richTextWhitePurple(
+                      'Édition de dessin: ', name + ' le ' + date)),
+            ),
+          ]),
+          Container(
+            padding: EdgeInsets.only(right: 20.0),
+            height: 85,
+            child: Center(child: openDrawingDialog(name)),
+          )
+        ]));
   }
 
   divider() {
@@ -139,17 +174,20 @@ class _HistoriqueProfileScreenState extends State<HistoriqueProfile> {
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: Text("Naviguer vers " + name + "?"),
-                  content: Text("Êtes vous sure?"),
-                  actions: [
-                    ElevatedButton(onPressed: (){
-                      Navigator.pop(context);
-                    }, child: Text("Annuler")),
-                    ElevatedButton(onPressed: (){
-                      Navigator.pop(context);
-                    }, child: Text("Oui m'apporter"))
-                  ]
-                );
+                    title: Text("Naviguer vers " + name + "?"),
+                    content: Text("Êtes vous sure?"),
+                    actions: [
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text("Annuler")),
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text("Oui m'apporter"))
+                    ]);
               });
         },
         child: const Text('Aller', style: TextStyle(color: Colors.white)),
@@ -167,9 +205,7 @@ class _HistoriqueProfileScreenState extends State<HistoriqueProfile> {
             style: const TextStyle(fontSize: 32.0),
             children: <TextSpan>[
               TextSpan(text: text1),
-              TextSpan(
-                  text: text2,
-                  style: TextStyle( color: kPrimaryColor)),
+              TextSpan(text: text2, style: TextStyle(color: kPrimaryColor)),
             ],
           ),
         ));
