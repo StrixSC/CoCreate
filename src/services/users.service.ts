@@ -162,7 +162,7 @@ export const getUserChannelsById = async (id: string): Promise<any> => {
             if (member) {
                 newOnlineMembers.push(
                     {
-                        ...member,
+                        status: onlineMembers[i].status,
                         username: member.member.profile!.username,
                         avatarUrl: member.member.profile!.avatar_url,
                     }
