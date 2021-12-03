@@ -1,0 +1,63 @@
+import { UserStatusTypes } from './../../../models/IUser.model';
+import { SocketEventError } from './../../../socket';
+import { Server, Socket } from 'socket.io';
+import { db } from '../../../db';
+import { ExceptionType } from '../../../models/Exceptions.enum';
+import { handleSocketError } from '../../../utils/errors';
+
+
+export const handleDisconnect = async (io: Server, socket: Socket, payload: {
+    collaborationId: string;
+}) => {
+    try {
+        const member = await db.collaborationMember.findFirst({
+            where: {
+                user_id: socket.data.user,
+            },
+            include: {
+                user: {
+                    include: {
+                        profile: true,
+                    },
+                },
+                collaboration: {
+                    include: {
+                        drawing: true,
+                    }
+                }
+            }
+        });
+
+        if (!member) {
+            throw new SocketEventError("Oups! La déconnexion ne peut être faite, car l'utilisateur ne fait pas partie de la collaboration.", 'E8801');
+        }
+
+        const deletedChannelMember = await db.channelMember.deleteMany({
+            where: {
+                channel_id: member.collaboration.channel_id,
+                user_id: member.user_id
+            }
+        });
+
+        if (!deletedChannelMember) {
+            throw new SocketEventError("Oups! Quelque chose s'est produit lors du traitement de la requête...", "E4423")
+        }
+
+        socket.data.status = UserStatusTypes.Online;
+        const disconnectionData = {
+            userId: member.user_id,
+            avatarUrl: member.user.profile!.avatar_url,
+            username: member.user.profile!.username,
+            roomId: member.collaboration.channel_id,
+            status: socket.data.status,
+        }
+
+        io.to(payload.collaborationId).emit("collaboration:disconnnected", disconnectionData);
+        io.to(member.collaboration.channel_id).emit('collaboration:channel:disconnected', disconnectionData);
+
+        socket.leave(payload.collaborationId);
+        socket.leave(member.collaboration.channel_id);
+    } catch (e) {
+        handleSocketError(socket, e, undefined, [ExceptionType.Collaboration, ExceptionType.Collaboration_Disconnect])
+    }
+}

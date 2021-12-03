@@ -165,6 +165,7 @@ export const getUserChannelsById = async (id: string): Promise<any> => {
                         status: onlineMembers[i].status,
                         username: member.member.profile!.username,
                         avatarUrl: member.member.profile!.avatar_url,
+                        userId: member.user_id
                     }
                 );
             }

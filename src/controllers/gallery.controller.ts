@@ -88,7 +88,7 @@ export const getMyGalleryController = async (req: Request, res: Response, next: 
                 return
             }
 
-            const activeMembers = getOnlineMembersInRoom(c.collaboration_id);
+            const onlineMembers = getOnlineMembersInRoom(c.collaboration_id);
             const isOwner = c.collaboration_members.find((m: any) => m.type === MemberType.Owner && m.user_id === req.userId);
             const isMember = c.collaboration_members.find((m: any) => m.user_id === req.userId);
 
@@ -103,7 +103,7 @@ export const getMyGalleryController = async (req: Request, res: Response, next: 
                 type: c.type,
                 collaborator_count: c.collaboration_members.length,
                 max_collaborator_count: c.max_collaborator_count,
-                active_member_count: activeMembers.length,
+                active_member_count: onlineMembers.length,
                 is_member: isMember ? true : false,
                 is_owner: isOwner ? true : false
             }

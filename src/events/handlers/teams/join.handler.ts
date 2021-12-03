@@ -1,3 +1,4 @@
+import { IConnectionEventData } from './../../../models/IUser.model';
 import { TeamType, MemberType } from "@prisma/client";
 import { db } from "../../../db";
 import { Socket, Server } from 'socket.io';
@@ -49,19 +50,21 @@ export const handleJoin = async (io: Server, socket: Socket, data: {
         }
 
         socket.emit('teams:join:finished');
-        socket.emit('teams:channel:join');
 
-        io.emit('teams:joined', {
-            teamId: team.team_id,
-            member: member.user_id
-        });
-
-        io.to(team.team_id).emit('teams:new-member', {
+        const connectionData = {
             username: member.user.profile!.username,
             userId: member.user_id,
             avatarUrl: member.user.profile!.avatar_url,
-            status: 1,
-        });
+            status: socket.data.status,
+            roomId: team.team_id
+        } as IConnectionEventData;
+
+        io.emit('teams:joined', connectionData);
+        io.emit('channels:joined', connectionData)
+
+        for (let collaboration of collaborations) {
+            io.to(collaboration).emit("collaboration:joined", { ...connectionData, roomId: collaboration });
+        }
 
         socket.join(team.team_id);
         socket.join(team.channel_id);

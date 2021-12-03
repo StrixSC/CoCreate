@@ -9,7 +9,7 @@ import { Socket, Server } from 'socket.io';
 export const handleResize = async (io: Server, socket: Socket, data: Action) => {
     try {
         const state = data.state;
-        if (state === DrawingState.Move || state === DrawingState.Down) {
+        if ((state === DrawingState.Move || state === DrawingState.Down) && !data.isUndoRedo) {
             return io.emit('resize:received', { ...data });
         } else {
             const savedAction = await db.action.create({

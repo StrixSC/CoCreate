@@ -1,3 +1,4 @@
+import { UserStatusTypes } from './../models/IUser.model';
 import { Socket } from 'socket.io';
 import { io } from '../bin/www';
 export const getSocketIp = (socket: Socket) => {
@@ -11,7 +12,9 @@ export const getSocketIp = (socket: Socket) => {
 export interface SocketOnlineMemberData {
     socketId: string,
     userId: string,
-    status: string,
+    status: UserStatusTypes,
+    username: string,
+    avatarUrl: string
 }
 
 export const getOnlineMembersInRoom = (id: string): SocketOnlineMemberData[] => {
@@ -23,7 +26,14 @@ export const getOnlineMembersInRoom = (id: string): SocketOnlineMemberData[] => 
         allActiveSockets.forEach((s) => {
             for (let [socketId, socket] of allSockets) {
                 if (socketId === s) {
-                    onlineMembers.push({ socketId: socket.id, userId: socket.data.user, status: socket.data.status });
+                    onlineMembers
+                        .push({
+                            socketId: socket.id,
+                            userId: socket.data.user,
+                            status: socket.data.status,
+                            username: socket.data.username,
+                            avatarUrl: socket.data.avatarUrl
+                        });
                 }
             }
         })

@@ -10,7 +10,7 @@ import { validateDrawingEvents } from "../../../utils/drawings";
 export const handleTranslation = async (io: Server, socket: Socket, data: Action) => {
     try {
         const state = data.state;
-        if (state === DrawingState.Move || state === DrawingState.Down) {
+        if ((state === DrawingState.Move || state === DrawingState.Down) && !data.isUndoRedo) {
             io.emit('translation:received', { ...data });
         } else {
             const savedAction = await db.action.create({

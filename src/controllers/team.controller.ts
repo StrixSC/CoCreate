@@ -1,3 +1,4 @@
+import { UserStatusTypes } from './../models/IUser.model';
 import { getTeamDrawings } from './../services/teams.service';
 import create, { Unauthorized } from 'http-errors';
 import { findTeamById } from './../events/handlers/teams/join.handler';
@@ -111,7 +112,7 @@ export const getTeamInfoById = async (req: Request, res: Response, next: NextFun
 
         const onlineMembers = getOnlineMembersInRoom(teamId);
         const teamMembers = team.team_members.map((tm) => {
-            let status = 'Hors-ligne';
+            let status = UserStatusTypes.Offline;
             const member = onlineMembers.find((m) => m.userId === tm.user_id);
 
             if (member) {

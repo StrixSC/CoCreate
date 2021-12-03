@@ -24,12 +24,10 @@ export const handleDelete = async (io: Server, socket: Socket, data: { teamId: s
             throw new SocketEventError("Hmm... On dirait que vous n'êtes pas le propriétaire de cette équipe...");
         }
 
-        let collaborationIds: string[] = [];
-        let channelIds: string[] = [];
+        let deletedCollabInfo: { channelId: string, collaborationId: string }[] = [];
         team.authored_drawings.forEach((authored_drawings) => {
             authored_drawings.collaborations.forEach((c) => {
-                channelIds.push(c.channel_id);
-                collaborationIds.push(c.collaboration_id);
+                deletedCollabInfo.push({ channelId: c.channel_id, collaborationId: c.collaboration_id });
             })
         });
 
@@ -47,7 +45,7 @@ export const handleDelete = async (io: Server, socket: Socket, data: { teamId: s
             db.channel.deleteMany({
                 where: {
                     channel_id: {
-                        in: channelIds
+                        in: deletedCollabInfo.map((c) => c.channelId)
                     }
                 }
             })
@@ -62,18 +60,19 @@ export const handleDelete = async (io: Server, socket: Socket, data: { teamId: s
                 teamId: deletedTeam.team_id
             });
 
-            io.to(deletedChannel.channel_id).emit('teams:channel:leave');
-            io.socketsLeave(deletedChannel.channel_id);
-            io.socketsLeave(deletedTeam.team_id);
-            for (let channel of channelIds) {
-                io.to(channel).emit('channel:deleted');
-                io.socketsLeave(channel);
+            io.to(deletedChannel.channel_id).emit('channel:deleted', {
+                channelId: deletedChannel.channel_id
+            })
+
+            for (let c of deletedCollabInfo) {
+                io.to(c.collaborationId).emit('collaboration:deleted');
+                io.to(c.channelId).emit('channel:deleted');
+                io.socketsLeave(c.channelId);
+                io.socketsLeave(c.collaborationId);
             }
 
-            for (let collaboration of collaborationIds) {
-                io.to(collaboration).emit('collaboration:deleted');
-                io.socketsLeave(collaborationIds);
-            }
+            io.socketsLeave(deletedChannel.channel_id);
+            io.socketsLeave(deletedTeam.team_id);
         }
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.Teams_Delete)
