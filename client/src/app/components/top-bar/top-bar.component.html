@@ -4,23 +4,29 @@
     <div class="bottom-section">
       <div class="action-area">
         <div class="clickable">
-          <mat-icon routerLink="/profile" #tooltip="matTooltip" matTooltip="Profil" [matTooltipPosition]="'right'"
-            matTooltipHideDelay="150" matRipple>account_circle</mat-icon>
+          <button mat-icon-button routerLink="/profile" #tooltip="matTooltip" matTooltip="Profil"
+            [matTooltipPosition]="'right'" matTooltipHideDelay="150">
+            <mat-icon>account_circle</mat-icon>
+          </button>
         </div>
         <div class="clickable">
-          <mat-icon routerLink="/gallery" #tooltip="matTooltip" matTooltip="Galerie" [matTooltipPosition]="'right'"
-            matTooltipHideDelay="150" matRipple>image</mat-icon>
+          <button mat-icon-button routerLink="/gallery" #tooltip="matTooltip" matTooltip="Galerie"
+            [matTooltipPosition]="'right'" matTooltipHideDelay="150">
+            <mat-icon>image</mat-icon>
+          </button>
         </div>
         <div class="clickable">
-          <mat-icon routerLink="/teams" #tooltip="matTooltip" matTooltip="Équipes" [matTooltipPosition]="'right'"
-            matTooltipHideDelay="150" matRipple>people_alt</mat-icon>
+          <button mat-icon-button routerLink="/teams" #tooltip="matTooltip" matTooltip="Équipes"
+            [matTooltipPosition]="'right'" matTooltipHideDelay="150">
+            <mat-icon>people_alt</mat-icon>
+          </button>
         </div>
       </div>
       <div class="logo-box clickable">
-        <div routerLink="" class="logo-img-container" #tooltip="matTooltip" matTooltip="Accueil"
+        <button mat-icon-button routerLink="" class="logo-img-container" #tooltip="matTooltip" matTooltip="Accueil"
           [matTooltipPosition]="'right'" matTooltipHideDelay="150">
           <img class="logo-img" src="/favicon.ico">
-        </div>
+        </button>
       </div>
     </div>
 

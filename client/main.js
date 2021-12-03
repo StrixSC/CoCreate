@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Notification, shell } = require("electron");
+const { app, BrowserWindow, ipcMain, Notification } = require("electron");
 let mainWindow
 
 function createWindow() {

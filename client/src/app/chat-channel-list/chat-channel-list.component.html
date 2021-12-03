@@ -6,14 +6,10 @@
                 <mat-icon>chat</mat-icon>
             </button>
         </div>
-        <div class="clickable section-button">
-            <button *ngIf="!isOpen" (click)="toggleChatMenu()" [matTooltip]="'Basculer le clavardage'"
-                matTooltipPosition="left" mat-icon-button>
-                <mat-icon>chevron_left</mat-icon>
-            </button>
-            <button *ngIf="isOpen" (click)="toggleChatMenu()" [matTooltip]="'Basculer le clavardage'"
-                matTooltipPosition="left" mat-icon-button>
-                <mat-icon>chevron_right</mat-icon>
+        <div class='section-button'>
+            <button (click)="openCreateChannelDialog()" matTooltipPosition="left"
+                [matTooltip]="'Créer une nouvelle chaîne'" color="secondary" mat-mini-fab>
+                <mat-icon>add</mat-icon>
             </button>
         </div>
         <div class="clickable section-button">
@@ -28,23 +24,27 @@
                 </mat-menu>
             </button>
         </div>
-        <div class='section-button'>
-            <button (click)="openCreateChannelDialog()" matTooltipPosition="left"
-                [matTooltip]="'Créer une nouvelle chaîne'" mat-icon-button>
-                <mat-icon>add</mat-icon>
+        <div class="clickable section-button">
+            <button *ngIf="!isOpen" (click)="toggleChatMenu()" [matTooltip]="'Basculer le clavardage'"
+                matTooltipPosition="left" mat-icon-button>
+                <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button *ngIf="isOpen" (click)="toggleChatMenu()" [matTooltip]="'Basculer le clavardage'"
+                matTooltipPosition="left" mat-icon-button>
+                <mat-icon>chevron_right</mat-icon>
             </button>
         </div>
         <mat-divider></mat-divider>
     </div>
 
-    <div class="channels">
+    <div *ngIf="filteredCollaborationChannels.length > 0"  class="channels">
         <div class="top-section">
-            <div class="section-button" mat-icon-button>
+            <div class="section-button" mat-icon-button matTooltipPosition="left"
+            [matTooltip]="'Canaux des séances de collaborations actifs'" >
                 <mat-icon>palette</mat-icon>
                 <mat-divider></mat-divider>
-
             </div>
-            <div  *ngIf="filteredCollaborationChannels.length > 0" class="chat-channels-list">
+            <div class="chat-channels-list">
                 <div [matBadgeHidden]="!channel.notificationCount" [matBadge]="channel.notificationCount"
                 matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(channel)"
                 [matTooltip]="channel.name" matTooltipPosition="left"
@@ -56,13 +56,14 @@
             <mat-divider></mat-divider>
         </div>
 
-        <div class="middle-section">
+        <div *ngIf="filteredTeamChannels.length > 0" class="middle-section" matTooltipPosition="left"
+            [matTooltip]="'Canaux de vos équipes'" >
             <div class="section-button" mat-icon-button>
                 <mat-icon>groups</mat-icon>
                 <mat-divider></mat-divider>
 
             </div>
-            <div *ngIf="filteredTeamChannels.length > 0" class="chat-channels-list">
+            <div class="chat-channels-list">
                 <div [matBadgeHidden]="!channel.notificationCount" [matBadge]="channel.notificationCount"
                     matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(channel)"
                     [matTooltip]="channel.name" matTooltipPosition="left"
@@ -73,8 +74,9 @@
             </div>
             <mat-divider></mat-divider>
         </div>
-        <div class="bottom-section">
-            <div class="section-button" mat-icon-button>
+        <div *ngIf="filteredPublicChannels.length > 0" class="bottom-section">
+            <div class="section-button" mat-icon-button matTooltipPosition="left"
+            [matTooltip]="'Canaux Publiques'">
                 <mat-icon>public</mat-icon>
                 <mat-divider></mat-divider>
             </div>

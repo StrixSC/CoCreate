@@ -57,7 +57,7 @@
                             <mat-icon>more_vert</mat-icon>
                             <mat-menu #menu="matMenu">
                                 <button *ngIf="!element.isMember" (click)="joinChannel(element)" mat-menu-item>
-                                    <mat-icon>draw</mat-icon>
+                                    <mat-icon>textsms</mat-icon>
                                     <span>Rejoindre la chaîne</span>
                                 </button>
                                 <button *ngIf="element.isMember && !element.isOwner" mat-menu-item

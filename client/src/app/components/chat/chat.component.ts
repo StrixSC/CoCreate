@@ -34,6 +34,8 @@ export class ChatComponent {
       });
       winRef.location.href = "/#/chatbox/" + this.activeChannel.channel_id;
     }
+
+    this.sidebarService.navOpen = false;
   }
 
   isActiveUser(username: string): boolean {

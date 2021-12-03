@@ -13,19 +13,13 @@ import { Subscription } from 'rxjs';
 export class AppComponent {
   title = 'Colorimage';
   authSubscription: Subscription;
-  constructor(private af: AngularFireAuth, private socketService: SocketService, private activeRoute: ActivatedRoute, private router: Router) {
+  constructor(private af: AngularFireAuth) {
     if (environment.useEmulator) {
       this.af.auth.useEmulator(environment.authEmulator)
-    }
-
-    const redirectTo = this.activeRoute.snapshot.queryParams.redirectTo;
-    if (redirectTo) {
-      this.router.navigateByUrl(redirectTo);
     }
   }
 
   ngOnDestroy() {
-    this.socketService.disconnect();
   }
 
 }
