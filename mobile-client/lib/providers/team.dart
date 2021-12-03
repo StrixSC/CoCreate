@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:Colorimage/models/collaboration.dart';
 import 'package:Colorimage/models/drawing.dart';
+import 'package:Colorimage/models/team.dart';
 import 'package:Colorimage/models/user.dart';
 import 'package:Colorimage/screens/chat/chat.dart';
 import 'package:Colorimage/screens/galerie/galerie.dart';
@@ -10,34 +11,27 @@ import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/utils/rest/users_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:Colorimage/utils/socket/collaboration.dart';
+import 'package:Colorimage/utils/socket/team.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import '../models/chat.dart';
 
-class Collaborator extends ChangeNotifier {
+class Teammate extends ChangeNotifier {
   UserCredential? auth;
-  Map drawings =
-  <String, Map<String, Drawing>>{}; // <section, <drawing_id, drawing>>
-  bool isDrawing = false;
-  String currentType = "Available"; // sections : Available, Joined
-  late String currentDrawingId = '';
-  late CollaborationSocket collaborationSocket;
-  late Map pagingControllers;
+  List teams = [];
+  late TeamSocket teamSocket;
+  late PagingController pagingController;
 
-  late Function navigate;
-
-  Collaborator(this.auth) {
-    drawings.putIfAbsent("Available", () => <String, Drawing>{});
-    drawings.putIfAbsent("Joined", () => <String, Drawing>{});
-  }
+  Teammate(this.auth);
 
   void setSocket(socket) {
-    collaborationSocket = socket;
-    collaborationSocket.socket.on('connect', (_) {
-      print("Collab socket events initialized");
-      collaborationSocket.initializeChannelSocketEvents(callbackChannel);
+    teamSocket = socket;
+    teamSocket.socket.on('connect', (_) {
+      print("Team socket events initialized");
+      teamSocket.initializeChannelSocketEvents(callbackChannel);
     });
     notifyListeners();
   }
@@ -50,9 +44,6 @@ class Collaborator extends ChangeNotifier {
         break;
       case 'Protected':
         frenchType = 'Protégé';
-        break;
-      case 'Private':
-        frenchType = 'Privée';
         break;
     }
     return frenchType;
@@ -67,45 +58,8 @@ class Collaborator extends ChangeNotifier {
       case 'Protégé':
         englishType = 'Protected';
         break;
-      case 'Privée':
-        englishType = 'Private';
-        break;
     }
     return englishType;
-  }
-
-  String getCollaborationId() {
-    return (drawings[currentType][currentDrawingId] as Drawing)
-        .collaboration
-        .collaborationId;
-  }
-
-  Map getCurrentActionMap() {
-    return (drawings[currentType][currentDrawingId] as Drawing)
-        .collaboration
-        .actionsMap;
-  }
-
-  String getDrawingId(String collaborationId) {
-    String drawingId = '';
-    for (var type in TYPES) {
-      (drawings[type] as Map<String, Drawing>).forEach((key, value) {
-        if ((drawings[type][key] as Drawing).collaboration.collaborationId ==
-            collaborationId) {
-          drawingId = key;
-        }
-      });
-    }
-    return drawingId;
-  }
-
-  void setCurrentType(type) {
-    currentType = type;
-    notifyListeners();
-  }
-
-  bool isEmpty() {
-    return drawings[currentType].isEmpty;
   }
 
   void updateUser(UserCredential updatedUser) {
@@ -113,191 +67,54 @@ class Collaborator extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateDrawings(Map<String, Drawing> updatedDrawings) {
-    drawings.update(currentType, (value) => updatedDrawings);
+  void updateTeam(List updatedTeams) {
     notifyListeners();
   }
 
-  void addDrawings(List<Drawing> updatedDrawings) {
-    for (var drawing in updatedDrawings) {
-      (drawings[currentType] as Map<String, Drawing>)
-          .putIfAbsent(drawing.drawingId, () => drawing);
-    }
-
+  void addTeam(List updatedTeams) {
     notifyListeners();
   }
 
-  void loadDrawing(Collaboration collaboration) {
-    // Since collab id is not sent (just for local object manipulation)
-    collaboration.collaborationId =
-        drawings[currentType][currentDrawingId].collaboration.collaborationId;
-    drawings[currentType][currentDrawingId].collaboration = collaboration;
-    navigate();
+  void memberJoined(Team team) {
     notifyListeners();
   }
 
-  void memberJoined(Member member) {
-    if (member.userId == auth!.user!.uid) {
-      drawings[currentType][currentDrawingId].collaboration.members.add(member);
-      drawings[currentType][currentDrawingId].collaboration.memberCount++;
-    } else {
-      (drawings['Available'] as Map<String, Drawing>).update(member.drawingId!,
-              (value) {
-            value.collaboration.members.add(member);
-            return value;
-          });
-      (drawings['Available'] as Map<String, Drawing>).update(member.drawingId!,
-              (value) {
-            value.collaboration.memberCount++;
-            return value;
-          });
-    }
-    print('okok');
-    for (var type in TYPES) {
-      pagingControllers[type].refresh();
-    }
+  void teamCreated(Team team) {
     notifyListeners();
   }
 
-  // TODO: If it is sent to everyone even when not in drawing, need to change this
-  void memberConnected(Member member) {
-    int index = drawings[currentType][currentDrawingId]
-        .collaboration
-        .members
-        .indexWhere((element) => element.userId == member.userId);
-    if (index != -1) {
-      drawings[currentType][currentDrawingId]
-          .collaboration
-          .members[index]
-          .isActive = true;
-      notifyListeners();
-    } else {
-      throw ("Connected member user index not found.");
-    }
-  }
-
-  void drawingCreated(Drawing drawing) {
-    if (drawing.authorUsername == auth!.user!.displayName) {
-      (drawings['Joined'] as Map<String, Drawing>)
-          .putIfAbsent(drawing.drawingId, () => drawing);
-    } else {
-      (drawings['Available'] as Map<String, Drawing>)
-          .putIfAbsent(drawing.drawingId, () => drawing);
-    }
-    pagingControllers[currentType].refresh();
+  void updatedDrawing(Team team) {
     notifyListeners();
   }
 
-  void updatedDrawing(Drawing drawing) {
-    drawings[currentType][currentDrawingId] = drawing;
+  void deletedDrawing(Team team) {
     notifyListeners();
   }
 
-  void deletedDrawing(Map delete) {
-    String collaborationId = delete["collaborationId"];
-    String deletedAt = delete["deletedAt"];
-    var toRemove = getDrawingId(collaborationId);
-    for (var type in TYPES) {
-      (drawings[type] as Map<String, Drawing>)
-          .removeWhere((key, value) => toRemove == key);
-    }
-    pagingControllers[currentType].refresh();
-    notifyListeners();
-  }
-
-  // TODO: left vs disconnect && joined vs connected
-  void leftDrawing(Map left) {
-    String collaborationId = left["collaborationId"];
-    String userId = left["userId"];
-    String username = left["username"];
-    String avatarUrl = left["avatarUrl"];
-    String leftAt = left["leftAt"];
-
-    var drawingId = getDrawingId(collaborationId);
-    for (var type in TYPES) {
-      if (type == 'Available') {
-        (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
-          value.collaboration.members
-              .removeWhere((item) => item.userId == userId);
-          value.collaboration.memberCount--;
-          return value;
-        });
-      } else {
-        if (userId == auth!.user!.uid) {
-          (drawings[type] as Map<String, Drawing>)
-              .removeWhere((key, value) => drawingId == key);
-        } else {
-          (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
-            value.collaboration.members
-                .removeWhere((item) => item.userId == userId);
-            value.collaboration.memberCount--;
-            return value;
-          });
-        }
-      }
-    }
-    pagingControllers[currentType].refresh();
-    notifyListeners();
-  }
-
-  void disconnectedDrawing(Map left) {
-    String collaborationId = left["collaborationId"];
-    String userId = left["userId"];
-    String username = left["username"];
-    String avatarUrl = left["avatarUrl"];
-    String leftAt = left["leftAt"];
-
-    var drawingId = getDrawingId(collaborationId);
-    for (var type in TYPES) {
-      if (type == 'Available') {
-        (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
-          var index = value.collaboration.members
-              .indexWhere((item) => item.userId == userId);
-          value.collaboration.members[index].isActive = false;
-          return value;
-        });
-      }
-    }
-    pagingControllers[currentType].refresh();
+  void leftDrawing(Team team) {
     notifyListeners();
   }
 
   void callbackChannel(eventType, data) {
+    Team team = data as Team;
     switch (eventType) {
-      case 'load':
-        Collaboration collaboration = data as Collaboration;
-        loadDrawing(collaboration);
-        break;
       case 'joined':
-        Member member = data as Member;
-        memberJoined(member);
-        break;
-      case 'connected':
-        Member member = data as Member;
-        memberConnected(member);
+        memberJoined(team);
         break;
       case 'created':
-        Drawing drawing = data as Drawing;
-        drawingCreated(drawing);
+        teamCreated(team);
         break;
       case 'updated':
-        Drawing drawing = data as Drawing;
-        updatedDrawing(drawing);
+        updatedDrawing(team);
         break;
       case 'deleted':
-        Map delete = data as Map;
-        deletedDrawing(delete);
+        deletedDrawing(team);
         break;
       case 'left':
-        Map left = data as Map;
-        leftDrawing(left);
-        break;
-      case 'disconnected':
-        Map disc = data as Map;
-        disconnectedDrawing(disc);
+        leftDrawing(team);
         break;
       default:
-        print("Invalid Collaboration socket event");
+        print("Invalid Team socket event");
     }
   }
 }

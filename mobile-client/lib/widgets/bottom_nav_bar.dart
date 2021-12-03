@@ -50,7 +50,7 @@ class _BottomNavBarScreenState extends State<BottomNavBar> {
       Container(),
       Container(),
       Galerie(),
-      Team(),
+      TeamsScreen(),
       Profile(context.read<Collaborator>().auth!.user!),
       // add screens here
     ];

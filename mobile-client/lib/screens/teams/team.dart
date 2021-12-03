@@ -1,18 +1,70 @@
 import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/models/team.dart';
+import 'package:Colorimage/providers/team.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:provider/src/provider.dart';
 
-class Team extends StatefulWidget {
-  Team();
+const _fontSize = 20.0;
+const padding = 30.0;
+
+class TeamsScreen extends StatefulWidget {
+  const TeamsScreen({Key? key}) : super(key: key);
 
   @override
-  _TeamScreenState createState() => _TeamScreenState();
+  _TeamsScreenState createState() => _TeamsScreenState();
 }
 
-class _TeamScreenState extends State<Team> {
-  final List _teams = ['Colorimage Test', 'Colorimage Test'];
+class _TeamsScreenState extends State<TeamsScreen> {
 
-  _TeamScreenState() {}
+  PagingController pagingController = PagingController(firstPageKey: 0);
+  TextEditingController searchController = TextEditingController();
+  Map scrollControllers = ScrollController();
+  String dropDownController = 'Aucun';
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<Teammate>().pagingController = pagingController;
+    pagingController.addPageRequestListener((pageKey) {
+        _fetchDrawings(pageKey);
+      });
+    pagingController.addStatusListener((status) {
+        if (status == PagingStatus.completed) {
+          // ScaffoldMessenger.of(context).clearSnackBars();
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //     content: const Text(
+          //       "Il n'y a plus de dessins disponibles",
+          //     ),
+          //     action: SnackBarAction(
+          //       label: 'Ok',
+          //       onPressed: () {},
+          //     ),
+          //   ),
+          // );
+        }
+      });
+
+    // Setup the listener.
+    scrollControllers.forEach((key, value) {
+      value.addListener(() {
+        if (value.position.atEdge) {
+          if (value.position.pixels == 0) {
+            // You're at the top.
+          } else {
+            // You're at the bottom.
+            String section = context.read<Collaborator>().currentType;
+            var pageKey = (pagingControllers[section] as PagingController)
+                .itemList!
+                .length;
+            _fetchDrawings(pageKey, section,
+                dropDownControllers[context.read<Collaborator>().currentType]);
+          }
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,37 +90,44 @@ class _TeamScreenState extends State<Team> {
             ]),
         body: Padding(
             padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
-            child: getTeamPageBody(context)));
+            child: getTeamPageBody(pagingController, searchController)));
   }
 
-  gallerieView(pagingController, searchController) {
+  getTeamPageBody(pagingController, searchController) {
     return StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return Column(children: <Widget>[
             const SizedBox(height: 40.0),
             SizedBox(
-                width: MediaQuery.of(context).size.width -
-                    MediaQuery.of(context).size.width / 4,
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width -
+                    MediaQuery
+                        .of(context)
+                        .size
+                        .width / 4,
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SizedBox(
-                          width: MediaQuery.of(context).size.width / 3,
+                          width: MediaQuery
+                              .of(context)
+                              .size
+                              .width / 3,
                           child: TextField(
                             style: const TextStyle(fontSize: 25),
                             controller: searchController,
                             onChanged: (text) {
-                              String type =
-                                  context.read<Collaborator>().currentType;
-                              pagingControllers[type].refresh();
+                              pagingController.refresh();
                               setState(() {
-                                pagingControllers;
+                                pagingController;
                               });
                             },
                             maxLines: 1,
                             decoration: InputDecoration(
                               errorStyle: const TextStyle(fontSize: 26),
-                              hintText: "Filtrer les dessins selon un attribut",
+                              hintText: "Filtrer les équipes selon un attribut",
                               hintStyle: const TextStyle(
                                 fontSize: 26,
                               ),
@@ -83,72 +142,109 @@ class _TeamScreenState extends State<Team> {
                           )),
                       // const SizedBox(width: 24.0),
                       SizedBox(
-                          width: MediaQuery.of(context).size.width / 3,
+                          width: MediaQuery
+                              .of(context)
+                              .size
+                              .width / 3,
                           child: dropDown(
-                              ['Aucun', 'Public', 'Protégé', 'Privée'],
-                              dropDownControllers[
-                              context.watch<Collaborator>().currentType],
-                              'Filtrer selon un type de dessins',
-                              'gallery'))
+                              ['Aucun', 'Public', 'Protégé'],
+                              dropDownController,
+                              'Filtrer selon un type'))
                     ])),
             const SizedBox(height: 40.0),
             Expanded(child: OrientationBuilder(builder: (context, orientation) {
               return RefreshIndicator(
-                  onRefresh: () => Future.sync(
-                        () {
-                      String type = context.read<Collaborator>().currentType;
-                      pagingControllers[type].refresh();
-                    },
-                  ),
-                  child: PagedGridView<int, Drawing>(
+                onRefresh: () =>
+                    Future.sync(
+                          () {
+                        pagingController.refresh();
+                      },
+                    ),
+                child: PagedGridView<int, Team>(
                     physics: AlwaysScrollableScrollPhysics(),
                     showNewPageProgressIndicatorAsGridChild: false,
                     showNewPageErrorIndicatorAsGridChild: false,
                     showNoMoreItemsIndicatorAsGridChild: false,
-                    scrollController:
-                    scrollControllers[context.read<Collaborator>().currentType],
                     pagingController: pagingController,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       childAspectRatio: (270.0 / 220.0),
-                      crossAxisCount: orientation == Orientation.portrait ? 2 : 3,
+                      crossAxisCount: orientation == Orientation.portrait
+                          ? 2
+                          : 3,
                       mainAxisSpacing: 18,
                       crossAxisSpacing: 5,
                     ),
-                    builderDelegate: PagedChildBuilderDelegate<Drawing>(
-                      noItemsFoundIndicatorBuilder: (context) =>
-                      context.watch<Collaborator>().currentType == 'Available'
-                          ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Center(
-                                child: Text('🧐',
-                                    style: TextStyle(fontSize: 50))),
-                            SizedBox(height: 24.0),
-                            Center(
-                                child: Text(
-                                    'Aucun dessin disponible. Veuillez en créer un.'))
-                          ])
-                          : Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Center(
-                                child: Text('😭',
-                                    style: TextStyle(fontSize: 50))),
-                            SizedBox(height: 24.0),
-                            Center(
-                                child: Text(
-                                    'Vous faites partie de aucun dessin.'))
-                          ]),
-                      itemBuilder: (context, item, index) => _getItemUI
-                    ),
-                  ));
+                    builderDelegate: PagedChildBuilderDelegate<Team>(
+                        noItemsFoundIndicatorBuilder: (context) =>
+                            Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Center(
+                                      child: Text('🧐',
+                                          style: TextStyle(fontSize: 50))),
+                                  SizedBox(height: 24.0),
+                                  Center(
+                                      child: Text(
+                                          'Veuillez joindre ou créer une équipe!'))
+                                ]),
+                    itemBuilder: (context, item, index) => _Team(
+                      team: item
+                    )
+                ),
+              ));
             }))
           ]);
         });
   }
+    dropDown(List<String> items, value, inputHint) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+        DropdownButtonFormField<String>(
+          value: value,
+          decoration: InputDecoration(
+            labelText: inputHint,
+            labelStyle: const TextStyle(fontSize: _fontSize),
+            border: const OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.zero)),
+          ),
+          icon: const Align(
+              alignment: Alignment.topRight,
+              child: Icon(Icons.arrow_downward, size: 35.0)),
+          onChanged: (String? newValue) {
+              setState(() {
+                dropDownController = newValue!;
+                pagingController.refresh();
+              });
+          },
+          items: items.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          style:
+          const TextStyle(fontSize: _fontSize, fontWeight: FontWeight.w300),
+        )
+      ]);
+    }
+  }
 
-  // First Attempt
-  Widget _getItemUI(BuildContext context, int index) {
+class _Team extends StatelessWidget {
+  const _Team({
+    required this.team,
+  });
+
+  final Team team;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+        onTap: () {
+          // TODO
+        },
+        child: gridTile(context));
+  }
+
+  Widget gridTile(BuildContext context) {
     return Card(
         elevation: 5,
         child: Container(
@@ -157,18 +253,7 @@ class _TeamScreenState extends State<Team> {
                     width: 2.5, color: Colors.grey.withOpacity(0.15))),
             height: MediaQuery.of(context).size.height / 6,
             child: Row(children: <Widget>[
-              Container(
-                height: MediaQuery.of(context).size.height / 6,
-                width: 170.0,
-                decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(5),
-                        topLeft: Radius.circular(5)),
-                    image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: NetworkImage(
-                            "https://is2-ssl.mzstatic.com/image/thumb/Video2/v4/e1/69/8b/e1698bc0-c23d-2424-40b7-527864c94a8e/pr_source.lsr/268x0w.png"))),
-              ),
+              getThumbnail(context),
               Container(
                 height: MediaQuery.of(context).size.height / 8,
                 width: 600,
@@ -177,9 +262,7 @@ class _TeamScreenState extends State<Team> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(
-                        _teams[index],
-                      ),
+                      const Text("Colorimage Test"),
                       Padding(
                         padding: EdgeInsets.fromLTRB(0, 5, 0, 2),
                         child: Container(
@@ -197,5 +280,20 @@ class _TeamScreenState extends State<Team> {
                 ),
               )
             ])));
+  }
+
+  getThumbnail(BuildContext context) {
+    return         Container(
+      height: MediaQuery.of(context).size.height / 6,
+      width: 170.0,
+      decoration: const BoxDecoration(
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(5),
+              topLeft: Radius.circular(5)),
+          image: DecorationImage(
+              fit: BoxFit.cover,
+              image: NetworkImage(
+                  "https://is2-ssl.mzstatic.com/image/thumb/Video2/v4/e1/69/8b/e1698bc0-c23d-2424-40b7-527864c94a8e/pr_source.lsr/268x0w.png"))),
+    );
   }
 }

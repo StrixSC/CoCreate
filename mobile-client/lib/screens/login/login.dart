@@ -1,9 +1,11 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/collaborator.dart';
 import 'package:Colorimage/providers/messenger.dart';
+import 'package:Colorimage/providers/team.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:Colorimage/utils/socket/collaboration.dart';
+import 'package:Colorimage/utils/socket/team.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -73,6 +75,7 @@ class _LoginState extends State<Login> {
       // Fetch initial user info
       context.read<Messenger>().updateUser(userCredential);
       context.read<Collaborator>().updateUser(userCredential);
+      context.read<Teammate>().updateUser(userCredential);
       context.read<Messenger>().fetchChannels();
       context.read<Messenger>().fetchAllChannels();
 
@@ -96,11 +99,11 @@ class _LoginState extends State<Login> {
 
     CollaborationSocket collaborationSocket = CollaborationSocket(auth.user, socket);
     ChannelSocket channelSocket = ChannelSocket(auth.user, socket);
+    TeamSocket teamSocket = TeamSocket(auth.user, socket);
     context.read<Messenger>().setSocket(channelSocket);
+    context.read<Teammate>().setSocket(teamSocket);
     context.read<Collaborator>().setSocket(collaborationSocket);
   }
-
-  var _scrollController = new ScrollController();
 
   @override
   Widget build(BuildContext context) {

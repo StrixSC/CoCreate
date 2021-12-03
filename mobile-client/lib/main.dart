@@ -1,6 +1,7 @@
 // main.dart
 
 import 'package:Colorimage/providers/collaborator.dart';
+import 'package:Colorimage/providers/team.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'app.dart';
@@ -16,7 +17,8 @@ Future main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => Messenger(null, [], [])),
-      ChangeNotifierProvider(create: (_) => Collaborator(null))
+      ChangeNotifierProvider(create: (_) => Collaborator(null)),
+      ChangeNotifierProvider(create: (_) => Teammate(null))
     ],
     builder: (context, child) {
       return App();

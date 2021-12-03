@@ -34,6 +34,10 @@ class SocketService {
       print('channel:exception');
       print(err);
     });
+    socket.on('channel:exception', (err) {
+      print('teams:exception');
+      print(err);
+    });
   }
 
   // onConnect() {
