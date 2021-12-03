@@ -2,7 +2,7 @@
     <div class="action-section">
         <div class="clickable section-button">
             <button (click)="openChatDialog()" [matTooltip]="'Ouvrir le menu de clavardage'" matTooltipPosition="left"
-            mat-mini-fab color="accent">
+                mat-mini-fab color="accent">
                 <mat-icon>chat</mat-icon>
             </button>
         </div>
@@ -37,28 +37,28 @@
         <mat-divider></mat-divider>
     </div>
 
-    <div *ngIf="filteredCollaborationChannels.length > 0"  class="channels">
-        <div class="top-section">
+    <div class="channels">
+        <div *ngIf="filteredCollaborationChannels.length > 0" class="top-section">
             <div class="section-button" mat-icon-button matTooltipPosition="left"
-            [matTooltip]="'Canaux des séances de collaborations actifs'" >
+                [matTooltip]="'Canaux des séances de collaborations actifs'">
                 <mat-icon>palette</mat-icon>
                 <mat-divider></mat-divider>
             </div>
             <div class="chat-channels-list">
                 <div [matBadgeHidden]="!channel.notificationCount" [matBadge]="channel.notificationCount"
-                matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(channel)"
-                [matTooltip]="channel.name" matTooltipPosition="left"
-                *ngFor="let channel of filteredCollaborationChannels; index as i" class="clickable chat-channel-bubble"
-                [ngStyle]="{'background-color': '#' + channel.bgColor}">
-                {{ channel.name[0] }}
-            </div>
+                    matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(channel)"
+                    [matTooltip]="channel.name" matTooltipPosition="left"
+                    *ngFor="let channel of filteredCollaborationChannels; index as i"
+                    class="clickable chat-channel-bubble" [ngStyle]="{'background-color': '#' + channel.bgColor}">
+                    {{ channel.name[0] }}
+                </div>
             </div>
             <mat-divider></mat-divider>
         </div>
 
-        <div *ngIf="filteredTeamChannels.length > 0" class="middle-section" matTooltipPosition="left"
-            [matTooltip]="'Canaux de vos équipes'" >
-            <div class="section-button" mat-icon-button>
+        <div *ngIf="filteredTeamChannels.length > 0" class="middle-section">
+            <div matTooltipPosition="left" [matTooltip]="'Canaux de vos équipes'" class="section-button"
+                mat-icon-button>
                 <mat-icon>groups</mat-icon>
                 <mat-divider></mat-divider>
 
@@ -75,8 +75,7 @@
             <mat-divider></mat-divider>
         </div>
         <div *ngIf="filteredPublicChannels.length > 0" class="bottom-section">
-            <div class="section-button" mat-icon-button matTooltipPosition="left"
-            [matTooltip]="'Canaux Publiques'">
+            <div class="section-button" mat-icon-button matTooltipPosition="left" [matTooltip]="'Canaux Publiques'">
                 <mat-icon>public</mat-icon>
                 <mat-divider></mat-divider>
             </div>

@@ -26,6 +26,7 @@ export interface IChannelResponse {
   channel_id: string,
   is_owner: boolean,
   owner_username: string,
+  online_members: { username: string, avatarUrl: string, status: string }[]
 }
 
 export type ISidebarChannel = IChannelResponse & {
@@ -34,6 +35,13 @@ export type ISidebarChannel = IChannelResponse & {
   textColor: string,
   muteNotification: boolean,
   messages: IMessageResponse[];
+  onlineMembers: IOnlineChannelMember[]
+}
+
+export interface IOnlineChannelMember {
+  status: string,
+  username: string,
+  avatarUrl: string,
 }
 
 export interface IMessageResponse {

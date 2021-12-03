@@ -18,8 +18,12 @@ export class ChatSidebarService {
   _activeChannel: ISidebarChannel;
   messagesMap: Map<string, IMessageResponse[]> = new Map();
   navOpen: boolean = false;
-
-  constructor(private auth: AuthService, private http: HttpClient) { }
+  notificationAudio: HTMLAudioElement;
+  constructor(private auth: AuthService, private http: HttpClient) {
+    this.notificationAudio = new Audio();
+    this.notificationAudio.src = "/assets/notification.wav";
+    this.notificationAudio.load();
+  }
 
   get allChannels(): ISidebarChannel[] {
     return this._allChannels;
@@ -50,10 +54,13 @@ export class ChatSidebarService {
   handleIncomingMessage(data: IMessageResponse) {
     const channel = this.allChannels.find((c) => c.channel_id === data.channelId);
     if (channel) {
-      // TODO: Add notification sound
+
       channel.messages.push(data);
-      if (data.username !== this.auth.activeUser!.displayName, this.activeChannel.channel_id !== channel.channel_id || !this.navOpen) {
+      if (data.username !== this.auth.activeUser!.displayName && this.activeChannel.channel_id !== channel.channel_id || !this.navOpen) {
         channel.notificationCount++;
+        if (!channel.muteNotification) {
+          this.notificationAudio.play();
+        }
       }
     }
   }

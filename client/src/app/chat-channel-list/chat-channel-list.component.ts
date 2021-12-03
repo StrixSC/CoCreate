@@ -102,7 +102,8 @@ export class ChatChannelListComponent implements OnInit {
             bgColor: prevData.bgColor,
             textColor: prevData.textColor,
             messages: prevData.messages,
-            muteNotification: prevData.muteNotification
+            muteNotification: prevData.muteNotification,
+            onlineMembers: channel.online_members,
           } as ISidebarChannel;
 
           newSnapshot.set(newData.channel_id, newData);
@@ -115,6 +116,7 @@ export class ChatChannelListComponent implements OnInit {
               bgColor: bubbleColors.bgColor,
               textColor: bubbleColors.textColor,
               muteNotification: false,
+              onlineMembers: channel.online_members,
               messages: [],
             });
         }
@@ -158,7 +160,6 @@ export class ChatChannelListComponent implements OnInit {
 
   get filteredTeamChannels(): any[] {
     return this.chatSidebarService.filteredChannels.filter((t) => t.channel_type === ChannelType.Team);
-
   }
 
   get filteredCollaborationChannels(): any[] {

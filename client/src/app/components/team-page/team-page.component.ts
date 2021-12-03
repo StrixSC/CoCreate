@@ -244,7 +244,7 @@ export class TeamPageComponent implements OnInit {
       this.activeLimit = d.limit;
       this.teams = d.teams;
       teamSub.unsubscribe();
-    }, (error) => {
+    }, () => {
       this.snackBar.dismiss();
       teamSub.unsubscribe();
       this.snackBar.open("Une erreur s'est produite lors de la requête, veuillez essayez à nouveau...", 'OK', { duration: 5000 });
