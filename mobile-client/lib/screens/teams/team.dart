@@ -347,7 +347,7 @@ class _Team extends StatelessWidget {
             decoration: BoxDecoration(
                 color: kContentColor,
                 border: Border.all(
-                    width: 2.5, color: Colors.grey.withOpacity(0.15))),
+                    width: 2.5, color: Colors.white.withOpacity(0.15))),
             child: Row(children: <Widget>[
               getThumbnail(context),
               Container(

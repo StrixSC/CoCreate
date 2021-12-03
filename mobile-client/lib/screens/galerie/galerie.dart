@@ -206,7 +206,7 @@ class GalerieState extends State<Galerie>
       context.read<Collaborator>().addDrawings(drawings);
     } else if (response.statusCode == 204) {
       pagingControllers[section].itemsList = [];
-      throw("Theres was a problem in the fetching of drawings...");
+      throw ("Theres was a problem in the fetching of drawings...");
     } else {
       pagingControllers[section].itemsList = [];
     }
@@ -224,7 +224,7 @@ class GalerieState extends State<Galerie>
           // });
           scrollControllers[TYPES[value]] = ScrollController();
           // TODO: uncomment this line if you want to reload on tab change
-          // pagingControllers[TYPES[value]].refresh();
+          pagingControllers[TYPES[value]].refresh();
           context.read<Collaborator>().setCurrentType(TYPES[value]);
         },
         tabs: [
@@ -735,7 +735,9 @@ class _GridTitleText extends StatelessWidget {
     );
   }
 }
+
 enum WhyFarther { harder, smarter, selfStarter, tradingCharter }
+
 class _Drawing extends StatelessWidget {
   const _Drawing({
     required this.drawing,
@@ -746,18 +748,16 @@ class _Drawing extends StatelessWidget {
   popup() {
     return PopupMenuButton(
         itemBuilder: (context) => [
-          PopupMenuItem(
-            child: Text("First"),
-            value: 1,
-          ),
-          PopupMenuItem(
-            child: Text("Second"),
-            value: 2,
-          )
-        ]
-    );
+              PopupMenuItem(
+                child: Text("First"),
+                value: 1,
+              ),
+              PopupMenuItem(
+                child: Text("Second"),
+                value: 2,
+              )
+            ]);
   }
-
 
   joinDessinDialog(context) async {
     final Widget thumbnail = getThumbnail();
@@ -848,7 +848,25 @@ class _Drawing extends StatelessWidget {
                                     },
                                     child: const Text('Supprimer'),
                                   )))
-                          : const SizedBox.shrink(),
+                          : Padding(
+                              padding: EdgeInsets.fromLTRB(25.0, 0, 0, 20.0),
+                              child: Container(
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                                Colors.red)),
+                                    onPressed: () {
+                                      Navigator.pop(context, 'Quitter');
+                                      alert(
+                                          context,
+                                          'quitter',
+                                          'Il sera possible de le rejoindre plus tard si il est pas supprimer 😄',
+                                          'Aller joindre des dessins!');
+                                    },
+                                    child: const Text('Quitter'),
+                                  ))),
                       context.read<Collaborator>().currentType == 'Available'
                           ? Padding(
                               padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
@@ -881,25 +899,14 @@ class _Drawing extends StatelessWidget {
                                                 drawing.type,
                                                 null);
                                       }
+                                      context
+                                          .read<Collaborator>()
+                                          .refreshPages();
                                       Navigator.pop(context, 'Joindre');
                                     },
                                     child: const Text('Joindre'),
                                   )))
-                          : Padding(
-                              padding: EdgeInsets.fromLTRB(0, 0, 25.0, 0.0),
-                              child: Container(
-                                  height: 50,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pop(context, 'Quitter');
-                                      alert(
-                                          context,
-                                          'quitter',
-                                          'Il sera possible de le rejoindre plus tard si il est pas supprimer 😄',
-                                          'Aller joindre des dessins!');
-                                    },
-                                    child: const Text('Quitter'),
-                                  ))),
+                          : SizedBox.shrink(),
                       context.read<Collaborator>().currentType == 'Available'
                           ? SizedBox.shrink()
                           : Padding(
@@ -909,6 +916,9 @@ class _Drawing extends StatelessWidget {
                                   child: ElevatedButton(
                                     onPressed: () {
                                       Navigator.pop(context, 'Se connecter');
+                                      context
+                                          .read<Collaborator>()
+                                          .refreshPages();
                                       context
                                           .read<Collaborator>()
                                           .currentDrawingId = drawing.drawingId;
@@ -993,73 +1003,78 @@ class _Drawing extends StatelessWidget {
           child: Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20.0),
               child: Material(
-                  elevation: 10, child: Container(
-                  height: 820,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          width: 2.5, color: Colors.grey.withOpacity(0.1))),
+                  elevation: 10,
                   child: Container(
-                      color: kContentColor,
-                      child: Column(children: <Widget>[
-                        Container(
-                            height: orientation == Orientation.portrait
-                                ? 50.0
-                                : MediaQuery.of(context).size.height / 9,
-                            child: Row(children: [
-                              Column(children: [
-                                Padding(
-                                    padding: EdgeInsets.all(15.0),
-                                    child: CircleAvatar(
-                                        radius: 24,
-                                        backgroundColor: kPrimaryColor,
-                                        backgroundImage: drawing
-                                                    .authorUsername !=
-                                                'admin'
-                                            ? NetworkImage(drawing.authorAvatar)
-                                            : Image.asset(
-                                                    'assets/images/Boruto_Uzumaki_1.png')
-                                                .image))
-                              ]),
-                              Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Row(children: [
-                                      SizedBox(
-                                          width: 260,
-                                          child: Text(drawing.title,
-                                              style: TextStyle(
-                                                  fontSize: 20.0,
-                                                  fontWeight: FontWeight.bold)))
-                                    ]),
-                                    Row(children: [
-                                      SizedBox(
-                                          width: 260,
-                                          child: Text(drawing.createdAt,
-                                              style: TextStyle(fontSize: 20.0)))
-                                    ]),
+                      height: 820,
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                              width: 2.5, color: Colors.grey.withOpacity(0.1))),
+                      child: Container(
+                          color: kContentColor,
+                          child: Column(children: <Widget>[
+                            Container(
+                                height: orientation == Orientation.portrait
+                                    ? 50.0
+                                    : MediaQuery.of(context).size.height / 9,
+                                child: Row(children: [
+                                  Column(children: [
+                                    Padding(
+                                        padding: EdgeInsets.all(15.0),
+                                        child: CircleAvatar(
+                                            radius: 24,
+                                            backgroundColor: kPrimaryColor,
+                                            backgroundImage: drawing
+                                                        .authorUsername !=
+                                                    'admin'
+                                                ? NetworkImage(
+                                                    drawing.authorAvatar)
+                                                : Image.asset(
+                                                        'assets/images/Boruto_Uzumaki_1.png')
+                                                    .image))
                                   ]),
-                              // Column(children: [
-                              //   SizedBox(
-                              //       width: 30,
-                              //       child: popup())
-                              // ])
-                            ])),
-                        Container(
-                            width: MediaQuery.of(context).size.width / 2,
-                            height: MediaQuery.of(context).size.width / 7,
-                            child: GridTile(
-                              child: thumbnail,
-                            )),
-                        const SizedBox(height: 10),
-                        Text('Auteur: ' + drawing.authorUsername,
-                            style: TextStyle(fontSize: 20.0)),
-                        const SizedBox(height: 10),
-                        Text(
-                            "Collaborateurs actifs: " +
-                                drawing.collaboration.memberCount.toString(),
-                            style: TextStyle(fontSize: 20.0)),
-                      ]))))));
+                                  Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Row(children: [
+                                          SizedBox(
+                                              width: 260,
+                                              child: _GridTitleText(
+                                                drawing.title,
+                                              ))
+                                        ]),
+                                        Row(children: [
+                                          SizedBox(
+                                              width: 260,
+                                              child: Text(drawing.createdAt,
+                                                  style: TextStyle(
+                                                      fontSize: 20.0)))
+                                        ]),
+                                      ]),
+                                  // Column(children: [
+                                  //   SizedBox(
+                                  //       width: 30,
+                                  //       child: popup())
+                                  // ])
+                                ])),
+                            Container(
+                                width: MediaQuery.of(context).size.width / 2,
+                                height: MediaQuery.of(context).size.width / 7,
+                                child: GridTile(
+                                  child: thumbnail,
+                                )),
+                            const SizedBox(height: 10),
+                            Text('Auteur: ' + drawing.authorUsername,
+                                style: TextStyle(fontSize: 20.0)),
+                            const SizedBox(height: 10),
+                            Text(
+                                "Collaborateurs actifs: " +
+                                    drawing.collaboration.memberCount
+                                        .toString(),
+                                style: TextStyle(fontSize: 20.0)),
+                          ]))))));
     });
   }
 

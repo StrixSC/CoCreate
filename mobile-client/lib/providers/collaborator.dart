@@ -108,6 +108,12 @@ class Collaborator extends ChangeNotifier {
     return drawings[currentType].isEmpty;
   }
 
+  void refreshPages() {
+    for (var type in TYPES) {
+      pagingControllers[type].refresh();
+    }
+  }
+
   void updateUser(UserCredential updatedUser) {
     auth = updatedUser;
     notifyListeners();
@@ -152,10 +158,7 @@ class Collaborator extends ChangeNotifier {
         return value;
       });
     }
-    print('okok');
-    for (var type in TYPES) {
-      pagingControllers[type].refresh();
-    }
+    refreshPages();
     notifyListeners();
   }
 
