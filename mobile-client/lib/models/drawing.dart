@@ -47,10 +47,11 @@ class Bounds {
   double? xTranslation;
   double? yTranslation;
 
-  void setResizeData(
-      Map actionsMap, String actionId, int boundIndex, Offset varDelta) {
-    actionsMap[actionId].delta += Offset(varDelta.dx, varDelta.dy);
-
+  void setResizeData(Map actionsMap, String actionId, int boundIndex,
+      Offset varDelta, bool isForSave) {
+    if (!isForSave) {
+      actionsMap[actionId].delta += Offset(varDelta.dx, varDelta.dy);
+    }
     switch (boundIndex) {
       case 0:
         double xDelta = actionsMap[actionId].oldShape.getBounds().width -
