@@ -992,7 +992,8 @@ class _Drawing extends StatelessWidget {
       return Center(
           child: Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20.0),
-              child: Container(
+              child: Material(
+                  elevation: 10, child: Container(
                   height: 820,
                   decoration: BoxDecoration(
                       border: Border.all(
@@ -1058,7 +1059,7 @@ class _Drawing extends StatelessWidget {
                             "Collaborateurs actifs: " +
                                 drawing.collaboration.memberCount.toString(),
                             style: TextStyle(fontSize: 20.0)),
-                      ])))));
+                      ]))))));
     });
   }
 

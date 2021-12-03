@@ -122,6 +122,9 @@ class _TeamsScreenState extends State<TeamsScreen> {
             members: members,
           );
           teams.add(team);
+          teams.add(team);
+          teams.add(team);
+          teams.add(team);
         }
       }
       final isLastPage = teams.length < _pageSize;
@@ -230,7 +233,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                 children: [
                   toggleSwitch('full', 'Afficher uniquement les équipes créées par moi'),
                 ]))])),
-        const SizedBox(height: 40.0),
+        const SizedBox(height: 20.0),
         Expanded(child: OrientationBuilder(builder: (context, orientation) {
           return RefreshIndicator(
               onRefresh: () => Future.sync(
@@ -240,15 +243,12 @@ class _TeamsScreenState extends State<TeamsScreen> {
                   ),
               child: PagedGridView<int, Team>(
                 physics: AlwaysScrollableScrollPhysics(),
-                showNewPageProgressIndicatorAsGridChild: false,
-                showNewPageErrorIndicatorAsGridChild: false,
-                showNoMoreItemsIndicatorAsGridChild: false,
                 pagingController: pagingController,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  childAspectRatio: 1,
-                  crossAxisCount: orientation == Orientation.portrait ? 2 : 3,
-                  mainAxisSpacing: 1,
-                  crossAxisSpacing: 1,
+                  childAspectRatio: 10/3,
+                  crossAxisCount: orientation == Orientation.portrait ? 1 : 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
                 ),
                 builderDelegate: PagedChildBuilderDelegate<Team>(
                     animateTransitions: true,
@@ -265,8 +265,14 @@ class _TeamsScreenState extends State<TeamsScreen> {
                                   child: Text(
                                       'Veuillez joindre ou créer une équipe!'))
                             ]),
-                    itemBuilder: (context, item, index) => _Team(team: item)),
-              ));
+                    itemBuilder: (context, item, index) {
+                      var left  = 0.0;
+                      var right = 0.0;
+                      var padding = 15.0;
+                      index % 2 == 0 ? left = padding : right = padding;
+                      return Padding(padding: EdgeInsets.fromLTRB(left, 0, right, 0), child:_Team(team: item));
+                },
+              )));
         }))
       ]);
     });
@@ -314,7 +320,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
           },
           activeTrackColor: kPrimaryColor.withOpacity(0.5),
           activeColor: kPrimaryColor,
-        ), Text(text)]);
+        ), Text(text, style: TextStyle(fontSize: 25.0))]);
   }
 }
 
@@ -336,18 +342,16 @@ class _Team extends StatelessWidget {
 
   Widget gridTile(BuildContext context) {
     return Card(
-        elevation: 5,
+        elevation: 10,
         child: Container(
             decoration: BoxDecoration(
                 color: kContentColor,
                 border: Border.all(
                     width: 2.5, color: Colors.grey.withOpacity(0.15))),
-            height: 100,
             child: Row(children: <Widget>[
               getThumbnail(context),
               Container(
                 height: 100,
-                width: 600,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(10, 2, 0, 0),
                   child: Column(
@@ -373,15 +377,15 @@ class _Team extends StatelessWidget {
 
   getThumbnail(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height / 6,
-      width: 170.0,
-      decoration: const BoxDecoration(
+      height: MediaQuery.of(context).size.height,
+      width: 200.0,
+      decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(5), topLeft: Radius.circular(5)),
           image: DecorationImage(
               fit: BoxFit.cover,
               image: NetworkImage(
-                  "https://is2-ssl.mzstatic.com/image/thumb/Video2/v4/e1/69/8b/e1698bc0-c23d-2424-40b7-527864c94a8e/pr_source.lsr/268x0w.png"))),
+                  team.thumbnailUrl))),
     );
   }
 }
