@@ -169,6 +169,7 @@ export const getUserChannelsById = async (id: string): Promise<any> => {
                 );
             }
         }
+
         if (owner) {
             owner_username = owner.member.profile!.username;
         }

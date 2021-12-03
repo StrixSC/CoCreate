@@ -44,13 +44,23 @@ const initUser = async (io: Server, socket: Socket) => {
             throw new SocketEventError("Oups! Il y a eu une erreur lors d'un traitement au Serveur, veuillez contacter un administrateur", "E0100");
         }
 
-        user.teams.forEach((t) => {
-            socket.join(t.team_id);
-        });
+        for (let team of user.teams) {
+            const members = getOnlineMembersInRoom(team.team_id);
+            if (!members.find((m) => m.userId === socket.data.user)) {
+                socket.join(team.team_id)
+            } else {
+                throw new SocketEventError(`Erreur: l'utilisateur est déjà connecté sur un autre client.`, 'E4518');
+            }
+        }
 
-        user.channels.forEach((c) => {
-            socket.join(c.channel_id);
-        });
+        for (let channel of user.channels) {
+            const members = getOnlineMembersInRoom(channel.channel_id);
+            if (!members.find((m) => m.userId === socket.data.user)) {
+                socket.join(channel.channel_id)
+            } else {
+                throw new SocketEventError(`Erreur: l'utilisateur est déjà connecté sur un client.`, 'E4518');
+            }
+        }
 
         socket.data.status = "En ligne"
 

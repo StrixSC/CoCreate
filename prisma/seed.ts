@@ -59,7 +59,7 @@ async function main() {
                                     channel: {
                                         create: {
                                             channel_id: 'DEMO_COLLABORATION_CHATROOM',
-                                            name: 'Chatroom for Demo Collaboration',
+                                            name: 'Canal du dessin "Demo Collaboration"',
                                             type: ChannelType.Collaboration,
                                         }
                                     },
