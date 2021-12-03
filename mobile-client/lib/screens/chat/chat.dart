@@ -291,7 +291,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: TextFormField(
+                      child: TextField(
                         style: TextStyle(fontSize: 25),
                         controller: _textController,
                         // onChanged: _handleChange,
@@ -302,6 +302,13 @@ class _ChatScreenState extends State<ChatScreen> {
                               : null,
                         ),
                         focusNode: _focusNode,
+                        onSubmitted: (val) {
+                          setState(() {
+                            _handleSubmitted(_textController.text);
+                          });
+                          _textController.clear();
+                          _focusNode.requestFocus();
+                        },
                       ),
                     ),
                     Container(

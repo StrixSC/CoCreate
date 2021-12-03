@@ -212,16 +212,24 @@ class _TeamsScreenState extends State<TeamsScreen> {
                       child: dropDown(['Aucun', 'Public', 'Protégé'],
                           dropDownController, 'Filtrer selon un type'))
                 ])),
-        SizedBox(
-            width: MediaQuery.of(context).size.width -
-                MediaQuery.of(context).size.width / 4,
+        Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width/4, top: 15.0),child:Column(children: [SizedBox(
+            width: MediaQuery.of(context).size.width,
             child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   toggleSwitch('owner', 'Filtrer les équipes complètes'),
-                  toggleSwitch('member', 'Afficher les équipes dont je suis membre'),
-                  toggleSwitch('full', 'Afficher uniquement les équipes créées par moi'),
                 ])),
+        SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: Row(
+                children: [
+                  toggleSwitch('member', 'Afficher les équipes dont je suis membre'),
+                ])),
+        SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: Row(
+                children: [
+                  toggleSwitch('full', 'Afficher uniquement les équipes créées par moi'),
+                ]))])),
         const SizedBox(height: 40.0),
         Expanded(child: OrientationBuilder(builder: (context, orientation) {
           return RefreshIndicator(
@@ -237,10 +245,10 @@ class _TeamsScreenState extends State<TeamsScreen> {
                 showNoMoreItemsIndicatorAsGridChild: false,
                 pagingController: pagingController,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  childAspectRatio: (270.0 / 220.0),
+                  childAspectRatio: 1,
                   crossAxisCount: orientation == Orientation.portrait ? 2 : 3,
-                  mainAxisSpacing: 18,
-                  crossAxisSpacing: 5,
+                  mainAxisSpacing: 1,
+                  crossAxisSpacing: 1,
                 ),
                 builderDelegate: PagedChildBuilderDelegate<Team>(
                     animateTransitions: true,
@@ -296,9 +304,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
   }
 
   toggleSwitch(type, text) {
-    return SizedBox(
-        width: MediaQuery.of(context).size.width / 2,
-        child: Column(children: [Switch(
+    return Row(children: [Switch(
           value: type == 'owner' ? amOwner : type == 'member'? amMember : removeFull,
           onChanged: (value) {
             setState(() {
@@ -308,7 +314,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
           },
           activeTrackColor: kPrimaryColor.withOpacity(0.5),
           activeColor: kPrimaryColor,
-        ), Text(text)]));
+        ), Text(text)]);
   }
 }
 
@@ -336,11 +342,11 @@ class _Team extends StatelessWidget {
                 color: kContentColor,
                 border: Border.all(
                     width: 2.5, color: Colors.grey.withOpacity(0.15))),
-            height: MediaQuery.of(context).size.height / 6,
+            height: 100,
             child: Row(children: <Widget>[
               getThumbnail(context),
               Container(
-                height: MediaQuery.of(context).size.height / 8,
+                height: 100,
                 width: 600,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(10, 2, 0, 0),
