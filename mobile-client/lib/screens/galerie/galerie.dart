@@ -255,17 +255,15 @@ class GalerieState extends State<Galerie>
   Widget build(BuildContext context) {
     return Scaffold(
         key: const Key('Gallery'),
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
             backgroundColor: kPrimaryColor,
             centerTitle: true,
             automaticallyImplyLeading: false,
-            leading: Builder(
-              builder: (context) => // Ensure Scaffold is in context
-                  IconButton(
-                      icon: Icon(Icons.message),
-                      onPressed: () => Scaffold.of(context).openEndDrawer()),
-            ),
+            leading: // Ensure Scaffold is in context
+                IconButton(
+                    icon: Icon(Icons.message),
+                    onPressed: () => context.read<Messenger>().openDrawer()),
             title: const Text("Galerie de dessins"),
             actions: <Widget>[
               IconButton(

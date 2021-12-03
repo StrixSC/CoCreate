@@ -1,8 +1,10 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/collaborator.dart';
+import 'package:Colorimage/providers/messenger.dart';
 import 'package:Colorimage/screens/galerie/galerie.dart';
 import 'package:Colorimage/screens/profile/profile.dart';
 import 'package:Colorimage/screens/teams/team.dart';
+import 'package:Colorimage/widgets/sidebar.dart';
 import 'package:provider/src/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -18,45 +20,61 @@ class BottomNavBar extends StatefulWidget {
 }
 
 class _BottomNavBarScreenState extends State<BottomNavBar> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final PersistentTabController _controller;
   _BottomNavBarScreenState(this._controller);
 
   @override
+  void initState() {
+    super.initState();
+    context.read<Messenger>().openDrawer = openDrawer;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return PersistentTabView(
-      context,
-      navBarHeight: 75,
-      controller: this._controller,
-      screens: _buildScreens(),
-      items: _navBarsItems(),
-      confineInSafeArea: true,
-      backgroundColor: kContentColor,
-      decoration: NavBarDecoration(
-      border: Border(top:BorderSide(
-    width: 3.0, color: Colors.black))),
-      // decoration: NavBarDecoration(
-      //   borderRadius: BorderRadius.circular(70.0),
-      //   colorBehindNavBar: kContentColor3,
-      // ),
-      // margin: EdgeInsets.all(20.0),
-      hideNavigationBarWhenKeyboardShows: true,
-      popAllScreensOnTapOfSelectedTab: true,
-      resizeToAvoidBottomInset: true,
-      popActionScreens: PopActionScreensType.all,
-      itemAnimationProperties: const ItemAnimationProperties(
-        // Navigation Bar's items animation properties.
-        duration: Duration(milliseconds: 200),
-        curve: Curves.ease,
-      ),
-      screenTransitionAnimation: const ScreenTransitionAnimation(
-        // Screen transition animation on change of selected tab.
-        animateTabTransition: false,
-        curve: Curves.ease,
-        duration: Duration(milliseconds: 300),
-      ),
-      navBarStyle:
-          NavBarStyle.style6, // Choose the nav bar style with this property.
-    );
+    return Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: Colors.red,
+        endDrawer: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.45, child: Sidebar()),
+        body: PersistentTabView(
+          context,
+          navBarHeight: 75,
+          stateManagement: false,
+          controller: this._controller,
+          screens: _buildScreens(),
+          items: _navBarsItems(),
+          confineInSafeArea: true,
+          backgroundColor: kContentColor,
+          decoration: NavBarDecoration(
+              border: Border(top: BorderSide(width: 3.0, color: Colors.black))),
+          // decoration: NavBarDecoration(
+          //   borderRadius: BorderRadius.circular(70.0),
+          //   colorBehindNavBar: kContentColor3,
+          // ),
+          // margin: EdgeInsets.all(20.0),
+          hideNavigationBarWhenKeyboardShows: true,
+          popAllScreensOnTapOfSelectedTab: true,
+          resizeToAvoidBottomInset: true,
+          popActionScreens: PopActionScreensType.all,
+          itemAnimationProperties: const ItemAnimationProperties(
+            // Navigation Bar's items animation properties.
+            duration: Duration(milliseconds: 200),
+            curve: Curves.ease,
+          ),
+          screenTransitionAnimation: const ScreenTransitionAnimation(
+            // Screen transition animation on change of selected tab.
+            animateTabTransition: false,
+            curve: Curves.ease,
+            duration: Duration(milliseconds: 300),
+          ),
+          navBarStyle: NavBarStyle
+              .style6, // Choose the nav bar style with this property.
+        ));
+  }
+
+  openDrawer() {
+    _scaffoldKey.currentState!.openEndDrawer();
   }
 
   List<Widget> _buildScreens() {

@@ -20,22 +20,8 @@ class Home extends StatefulWidget {
 class _HomeScreenState extends State<Home> {
 
   @override
-  void initState() {
-    super.initState();
-    context.read<Messenger>().openDrawer = openDrawer;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.red,
-        endDrawer: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.45,
-            child: Sidebar()),
-        body: BottomNavBar(_controller));
+    return BottomNavBar(_controller);
   }
 
-  openDrawer() {
-    Scaffold.of(context).openEndDrawer();
-  }
 }
