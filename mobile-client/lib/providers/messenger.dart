@@ -104,10 +104,13 @@ class Messenger extends ChangeNotifier {
       List<Chat> userChannels = [];
       for (var channel in jsonResponse) {
         userChannels.add(Chat(
-            name: channel['name'],
-            id: channel['channel_id'],
-            ownerUsername: channel['owner_username'],
-            messages: []));
+          name: channel['name'],
+          id: channel['channel_id'],
+          type: channel['channel_type'],
+          ownerUsername: channel['owner_username'],
+          messages: [],
+          onlineMembers: channel['online_members'],
+        ));
       }
       updateUserChannels(userChannels);
     } else {
@@ -127,12 +130,14 @@ class Messenger extends ChangeNotifier {
       List<Chat> allChannels = [];
       for (var channel in jsonResponse) {
         allChannels.add(Chat(
-            name: channel['name'],
-            id: channel['channel_id'],
-            type: channel['type'],
-            ownerUsername: channel['owner_username'],
-            updatedAt: channel['updated_at'],
-            messages: []));
+          name: channel['name'],
+          id: channel['channel_id'],
+          type: channel['channel_type'] ?? 'None',
+          ownerUsername: channel['owner_username'],
+          updatedAt: channel['updated_at'],
+          messages: [],
+          onlineMembers: channel['online_members'] ?? [],
+        ));
       }
       updateAllChannels(allChannels);
     } else {
@@ -195,12 +200,12 @@ class Messenger extends ChangeNotifier {
       case 'joined':
         Chat channel = data as Chat;
         print("joined: " + channel.name);
-        addUserChannel(channel);
+        fetchChannels();
         break;
       case 'created':
         Chat channel = data as Chat;
         channel.ownerUsername == auth!.user!.displayName
-            ? addUserChannel(channel)
+            ? fetchChannels()
             : getAvailableChannels();
         break;
       case 'left':

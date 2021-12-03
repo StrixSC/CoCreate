@@ -154,7 +154,7 @@ class _LoginState extends State<Login> {
                     // },
                   ),
                   Padding(
-                      padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                      padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
                       child: TextFormField(
                         style: const TextStyle(fontSize: _fontSize),
                         controller: passController,

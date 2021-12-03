@@ -4,6 +4,7 @@ class Chat {
   String name, id, type, ownerUsername, lastReadMessage;
   String? collaborationId, updatedAt;
   List<ChatMessage> messages;
+  List onlineMembers = [];
 
   Chat({
     required this.id,
@@ -14,6 +15,7 @@ class Chat {
     this.collaborationId = '',
     this.updatedAt = '',
     this.type = "",
+    required this.onlineMembers,
   });
 
   @override

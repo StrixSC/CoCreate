@@ -24,49 +24,7 @@ class _ChannelState extends State<Channel> {
             child: const Text('Canaux de Discussions', style: TextStyle()),
           )),
       const Divider(thickness: 2, color: Colors.black),
-      MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
-          child: ConstrainedBox(
-              constraints: context.read<Messenger>().userChannels.isEmpty
-                  ? const BoxConstraints(minHeight: 5.0, maxHeight: 75.0)
-                  : const BoxConstraints(minHeight: 45.0, maxHeight: 475.0),
-              child: context.read<Messenger>().userChannels.isEmpty
-                  ? const Center(
-                      child: Text(
-                      "Joignez un canal pour discuter avec vos amis! 😄",
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w500),
-                    ))
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: context.read<Messenger>().userChannels.length,
-                      itemBuilder: (context, index) => ChatCard(
-                          chat: context.watch<Messenger>().userChannels[index],
-                          user: context.watch<Messenger>().auth!.user!,
-                          press: () {
-                            context.read<Messenger>().toggleSelection();
-                            context
-                                .read<Messenger>()
-                                .currentSelectedChannelIndex = index;
-                            if (context
-                                .read<Messenger>()
-                                .userChannels[index]
-                                .messages
-                                .isNotEmpty) {
-                              context
-                                      .read<Messenger>()
-                                      .userChannels[index]
-                                      .lastReadMessage =
-                                  context
-                                      .read<Messenger>()
-                                      .userChannels[index]
-                                      .messages
-                                      .first
-                                      .text;
-                            }
-                          }),
-                    ))),
+      getChannelListWithType('Public'),
       const Divider(thickness: 2, color: Colors.black),
       Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -92,6 +50,58 @@ class _ChannelState extends State<Channel> {
                 ))
           ]),
     ]));
+  }
+
+  getChannelListWithType(type) {
+    return MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: ConstrainedBox(
+            constraints: context.read<Messenger>().userChannels.isEmpty
+                ? const BoxConstraints(minHeight: 5.0, maxHeight: 75.0)
+                : const BoxConstraints(minHeight: 45.0, maxHeight: 475.0),
+            child: context.read<Messenger>().userChannels.isEmpty
+                ? const Center(
+                    child: Text(
+                    "Joignez un canal pour discuter avec vos amis! 😄",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ))
+                : ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: context.read<Messenger>().userChannels.length,
+                    itemBuilder: (context, index) {
+                      if (context.read<Messenger>().userChannels[index].type ==
+                          type) {
+                        return ChatCard(
+                            chat:
+                                context.watch<Messenger>().userChannels[index],
+                            user: context.watch<Messenger>().auth!.user!,
+                            press: () {
+                              context.read<Messenger>().toggleSelection();
+                              context
+                                  .read<Messenger>()
+                                  .currentSelectedChannelIndex = index;
+                              if (context
+                                  .read<Messenger>()
+                                  .userChannels[index]
+                                  .messages
+                                  .isNotEmpty) {
+                                context
+                                        .read<Messenger>()
+                                        .userChannels[index]
+                                        .lastReadMessage =
+                                    context
+                                        .read<Messenger>()
+                                        .userChannels[index]
+                                        .messages
+                                        .first
+                                        .text;
+                              }
+                            });
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    })));
   }
 
   createChannelDialog() async {

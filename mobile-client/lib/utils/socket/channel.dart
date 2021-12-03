@@ -59,10 +59,12 @@ class ChannelSocket extends SocketService {
     socket.on('channel:joined', (data) {
       print('Socket On : Joined channel');
       Chat channel = Chat(
-          id: data['channelId'],
-          name: data['channelName'],
-          type: 'Public',
-          messages: []);
+        id: data['channelId'],
+        name: data['channelName'],
+        type:'',
+        messages: [],
+        onlineMembers: [],
+      );
       callbackChannel('joined', channel);
     });
   }
@@ -76,8 +78,9 @@ class ChannelSocket extends SocketService {
           ownerUsername: data['ownerUsername'],
           collaborationId: data['collaborationId'],
           updatedAt: data['updatedAt'],
-          type: 'Public',
-          messages: []);
+          type: data['channel_type'],
+          messages: [],
+          onlineMembers: data['online_members']);
       callbackChannel('created', channel);
     });
   }
@@ -94,11 +97,13 @@ class ChannelSocket extends SocketService {
     socket.on('channel:updated', (data) {
       print('Socket Message : Updated channel');
       Chat channel = Chat(
-          id: data['channelId'],
-          name: data['channelName'],
-          updatedAt: data['updatedAt'],
-          type: 'Public',
-          messages: []);
+        id: data['channelId'],
+        name: data['channelName'],
+        updatedAt: data['updatedAt'],
+        type: data['channel_type'],
+        messages: [],
+        onlineMembers: data['online_members'],
+      );
       callbackChannel('updated', channel);
     });
   }
