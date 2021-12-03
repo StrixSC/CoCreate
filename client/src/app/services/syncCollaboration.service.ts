@@ -1,5 +1,5 @@
 import { AuthService } from './auth.service';
-import { ICollaborationJoinPayload, ICollaborationConnectPayload, ICollaborationCreatePayload, ICollaborationUpdatePayload, ICollaborationDeletePayload } from './../model/ICollaboration.model';
+import { ICollaborationJoinPayload, ICollaborationConnectPayload, ICollaborationCreatePayload, ICollaborationUpdatePayload, ICollaborationDeletePayload, ICollaborationDisconnectPayload } from './../model/ICollaboration.model';
 import {
   IGalleryEntry, IConnectCollaboration, ICreateCollaboration
 } from "../model/IGalleryEntry.model";
@@ -16,40 +16,16 @@ export class SyncCollaborationService {
     private socketService: SocketService
   ) { }
 
-  onCreateCollaboration(): Observable<ICreateCollaboration> {
-    return this.socketService.on("collaboration:created");
-  }
-
-  onJoinCollaboration(): Observable<any> {
-    return this.socketService.on("collaboration:joined");
-  }
-
-  onLeaveCollaboration(): Observable<any> {
-    return this.socketService.on("collaboration:left");
-  }
-
-  onDeleteCollaboration(): Observable<any> {
-    return this.socketService.on("collaboration:deleted");
-  }
-
-  onConnectCollaboration(): Observable<any> {
-    return this.socketService.on("collaboration:connected");
-  }
-
-  onLoadCollaboration(): Observable<any> {
-    return this.socketService.on("collaboration:load");
-  }
-
-  onUpdateCollaboration(): Observable<any> {
-    return this.socketService.on("collaboration:updated");
-  }
-
   sendJoinCollaboration(data: ICollaborationJoinPayload) {
     if (!this.authService.activeUser) {
       return;
     }
 
     this.socketService.emit('collaboration:join', { ...data, userId: this.authService.activeUser.uid });
+  }
+
+  sendDisconnect(data: ICollaborationDisconnectPayload) {
+    this.socketService.emit('collaboration:disconnect', { ...data });
   }
 
   sendConnectCollaboration(data: ICollaborationConnectPayload) {
@@ -102,6 +78,38 @@ export class SyncCollaborationService {
 
   onDeleteFinished(): Observable<any> {
     return this.socketService.on('collaboration:delete:finished');
+  }
+
+  onCreateCollaboration(): Observable<ICreateCollaboration> {
+    return this.socketService.on("collaboration:created");
+  }
+
+  onJoinCollaboration(): Observable<any> {
+    return this.socketService.on("collaboration:joined");
+  }
+
+  onLeaveCollaboration(): Observable<any> {
+    return this.socketService.on("collaboration:left");
+  }
+
+  onDeleteCollaboration(): Observable<any> {
+    return this.socketService.on("collaboration:deleted");
+  }
+
+  onConnectCollaboration(): Observable<any> {
+    return this.socketService.on("collaboration:connected");
+  }
+
+  onDisconnectCollaboration(): Observable<any> {
+    return this.socketService.on("collaboration:disconnected");
+  }
+
+  onLoadCollaboration(): Observable<any> {
+    return this.socketService.on("collaboration:load");
+  }
+
+  onUpdateCollaboration(): Observable<any> {
+    return this.socketService.on("collaboration:updated");
   }
 
 }

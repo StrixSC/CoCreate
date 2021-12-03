@@ -1,7 +1,11 @@
+import { TeamService } from 'src/app/services/team.service';
+import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
+import { map } from 'rxjs/operators';
+import { SocketService } from 'src/app/services/chat/socket.service';
 import { CreateChannelDialogComponent } from './../components/create-channel-dialog/create-channel-dialog.component';
 import { ChatMenuComponent } from './../components/chat-menu/chat-menu.component';
 import { MatDialog } from '@angular/material';
-import { IChannelResponse, ISidebarChannel, ChannelType, IMessageResponse } from './../model/IChannel.model';
+import { IChannelResponse, ISidebarChannel, ChannelType, IMessageResponse, IConnectionEventData, ConnectionEventType, IDisconnectionEventData } from './../model/IChannel.model';
 import { Subscription, merge } from 'rxjs';
 import { AuthService } from './../services/auth.service';
 import { ChatSidebarService } from './../services/chat-sidebar.service';
@@ -19,11 +23,13 @@ export class ChatChannelListComponent implements OnInit {
   channelsSubscription: Subscription;
   messageReceived: Subscription;
   searchTerm: string = "";
+  connectionSubscription: Subscription;
   constructor(
     private dialog: MatDialog,
     private chatSidebarService: ChatSidebarService,
     private auth: AuthService,
-    private chatSocketService: ChatService
+    private chatSocketService: ChatService,
+    private socketService: SocketService,
   ) { }
 
   ngOnInit() {
@@ -33,12 +39,17 @@ export class ChatChannelListComponent implements OnInit {
       this.chatSocketService.onChannelUpdated(),
       this.chatSocketService.onChannelDelete(),
       this.chatSocketService.joinedChannel(),
-      this.chatSocketService.onTeamChannelJoin(),
-      this.chatSocketService.onTeamChannelLeave(),
-      this.chatSocketService.onCollaborationChannelJoin(),
-      this.chatSocketService.onCollaborationChannelLeave(),
-    ).subscribe((c) => {
+    ).subscribe(() => {
       this.addOrUpdateChannels();
+    });
+
+    this.connectionSubscription = merge(
+      this.socketService.onConnected().pipe((map(d => ({ ...d, type: ConnectionEventType.Connection })))),
+      this.socketService.onDisconnected().pipe((map(d => ({ ...d, type: ConnectionEventType.Disconnection }))))
+    ).subscribe((connection: (IConnectionEventData & IDisconnectionEventData) & { type: ConnectionEventType }) => {
+      if (connection && connection.userId !== this.auth.activeUser!.uid && connection.username !== this.auth.activeUser!.displayName) {
+        this.chatSidebarService.handleConnectionEvent(connection.type, connection);
+      }
     })
 
     this.messageReceived = this.chatSocketService.receiveMessage().subscribe((d: IMessageResponse) => {
@@ -82,9 +93,7 @@ export class ChatChannelListComponent implements OnInit {
   }
 
   openCreateChannelDialog(): void {
-    this.dialog.open(CreateChannelDialogComponent, { width: '400px', height: '400px' }).afterClosed().subscribe((c) => {
-      console.log(c);
-    })
+    this.dialog.open(CreateChannelDialogComponent, { width: '400px', height: '400px' });
   }
 
   addOrUpdateChannels(): void {
@@ -131,6 +140,7 @@ export class ChatChannelListComponent implements OnInit {
       }
 
       this.filterChannels();
+      this.chatSidebarService.preventUnavailableActiveChat();
       fetchSubscription.unsubscribe();
     })
   }

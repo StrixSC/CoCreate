@@ -1,5 +1,5 @@
 import { AuthService } from 'src/app/services/auth.service';
-import { IMessageResponse } from './../model/IChannel.model';
+import { IMessageResponse, IConnectionEventData, ConnectionEventType, IDisconnectionEventData } from './../model/IChannel.model';
 import { Observable } from 'rxjs';
 import { environment } from './../../environments/environment';
 import { HttpClient } from '@angular/common/http';
@@ -23,6 +23,16 @@ export class ChatSidebarService {
     this.notificationAudio = new Audio();
     this.notificationAudio.src = "/assets/notification.wav";
     this.notificationAudio.load();
+  }
+
+  preventUnavailableActiveChat(): void {
+    const channel = this.allChannels.find((c) => this.activeChannel.channel_id === c.channel_id);
+    if (!channel) {
+      const publicChannel = this.allChannels.find((c) => c.channel_id === 'PUBLIC');
+      if (publicChannel) {
+        this.activeChannel = publicChannel;
+      }
+    }
   }
 
   get allChannels(): ISidebarChannel[] {
@@ -56,10 +66,30 @@ export class ChatSidebarService {
     if (channel) {
 
       channel.messages.push(data);
+      console.log(data);
       if (data.username !== this.auth.activeUser!.displayName && this.activeChannel.channel_id !== channel.channel_id || !this.navOpen) {
         channel.notificationCount++;
         if (!channel.muteNotification) {
           this.notificationAudio.play();
+        }
+      }
+    }
+  }
+
+  handleConnectionEvent(type: ConnectionEventType, connection: IConnectionEventData & IDisconnectionEventData) {
+    const channel = this.allChannels.find((channel) => channel.channel_id === connection.roomId);
+    if (channel) {
+      if (type === ConnectionEventType.Connection) {
+        channel.onlineMembers.push({
+          userId: connection.userId,
+          username: connection.username,
+          status: connection.status,
+          avatarUrl: connection.avatarUrl,
+        });
+      } else if (type === ConnectionEventType.Disconnection) {
+        const index = channel.onlineMembers.findIndex((om) => om.userId === connection.userId);
+        if (index > -1) {
+          channel.onlineMembers.splice(index, 1);
         }
       }
     }

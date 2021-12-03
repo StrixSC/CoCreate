@@ -1,3 +1,4 @@
+import { ServerErrorComponent } from './components/server-error/server-error.component';
 import { CreateChannelDialogComponent } from './components/create-channel-dialog/create-channel-dialog.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { ChatComponent } from './components/chat/chat.component';
@@ -109,6 +110,7 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     DrawingPreviewDialogComponent,
     CreateDrawingComponent,
     MenuPageComponent,
+    ServerErrorComponent,
     RegisterComponent,
     NewDrawingFormDialogComponent,
     CollaborationPasswordFormDialogComponent,

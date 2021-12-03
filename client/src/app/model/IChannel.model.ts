@@ -26,7 +26,29 @@ export interface IChannelResponse {
   channel_id: string,
   is_owner: boolean,
   owner_username: string,
-  online_members: { username: string, avatarUrl: string, status: string }[]
+  online_members: { username: string, avatarUrl: string, status: string, userId: string }[]
+}
+
+export enum ConnectionEventType {
+  Connection = 'Connection',
+  Disconnection = 'Disconnection',
+  CollaborationConnect = 'CollaborationConnect',
+  CollaborationDisconnect = 'CollaborationDisconnect'
+}
+
+export interface IConnectionEventData {
+  userId: string,
+  roomId: string,
+  onlineMemberCount: number
+  username: string,
+  avatarUrl: string,
+  status: string
+}
+
+export interface IDisconnectionEventData {
+  userId: string,
+  roomId: string,
+  onlineMemberCount: number
 }
 
 export type ISidebarChannel = IChannelResponse & {
@@ -42,6 +64,7 @@ export interface IOnlineChannelMember {
   status: string,
   username: string,
   avatarUrl: string,
+  userId: string
 }
 
 export interface IMessageResponse {

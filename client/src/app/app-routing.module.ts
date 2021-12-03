@@ -1,3 +1,4 @@
+import { ServerErrorComponent } from './components/server-error/server-error.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { TeamPageComponent } from './components/team-page/team-page.component';
 import { TopBarComponent } from './components/top-bar/top-bar.component';
@@ -15,12 +16,14 @@ import { DrawingPageComponent } from './components/drawing-page/drawing-page.com
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
-import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out/chat-poped-out.component";
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(["auth"]);
 const redirectLoggedInToMenu = () => redirectLoggedInTo(["menu"]);
 
 const routes: Routes = [
+  {
+    path: "server-error", component: ServerErrorComponent
+  },
   {
     path: "chatbox/:id", component: ChatWindowComponent, canActivate: [AngularFireAuthGuard], data: {
       authGuardPipe: redirectUnauthorizedToLogin,
