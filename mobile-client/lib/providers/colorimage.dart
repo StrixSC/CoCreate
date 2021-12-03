@@ -29,9 +29,9 @@ class Colorimage extends ChangeNotifier {
             .disableAutoConnect()
             .setTransports(['websocket']) // for Flutter or Dart VM
             .build());
-    messenger.channelSocket = ChannelSocket(auth!.user as User, _socket);
-    messenger.channelSocket = ChannelSocket(auth!.user as User, _socket);
-    messenger.channelSocket = ChannelSocket(auth!.user as User, _socket);
+    messenger.channelSocket = ChannelSocket(user: auth!.user as User, socket: _socket);
+    messenger.channelSocket = ChannelSocket(user: auth!.user as User, socket: _socket);
+    messenger.channelSocket = ChannelSocket(user: auth!.user as User, socket: _socket);
 
     _socket.on('connect', (_) {
       print("Socket events initialized");

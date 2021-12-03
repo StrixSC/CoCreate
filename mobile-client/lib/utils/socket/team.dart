@@ -3,8 +3,11 @@ import 'package:Colorimage/utils/socket/socket_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-class TeamSocket extends SocketService {
-  TeamSocket(User user, IO.Socket socket) : super(user, socket);
+class TeamSocket {
+  User user;
+  IO.Socket socket;
+
+  TeamSocket({required this.user, required this.socket});
 
   data(Team team) {
     return {

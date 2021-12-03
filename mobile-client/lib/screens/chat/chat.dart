@@ -47,9 +47,9 @@ class ChatMessage extends StatelessWidget {
                             elevation: 0,
                             alignment: Alignment.topRight,
                             margin: EdgeInsets.only(top: 10),
-                            backGroundColor: Colors.indigo.shade400,
+                            backGroundColor: kPrimaryColor,
                             child: Container(
-                              color: Color(0xFF5D72CC),
+                              color: kPrimaryColor,
                               constraints: BoxConstraints(
                                 maxWidth:
                                     MediaQuery.of(context).size.width * 0.9,
@@ -181,6 +181,7 @@ class _ChatScreenState extends State<ChatScreen> {
     Messenger messenger = context.read<Messenger>();
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: kContentColor,
         leading: IconButton(
             icon: const Tooltip(
                 message: 'Se déconnecter',
@@ -196,7 +197,7 @@ class _ChatScreenState extends State<ChatScreen> {
             }),
         title: Text(
           context.read<Messenger>().userChannels[widget.channelIndex].name,
-          style: TextStyle(fontSize: 25, color: kPrimaryColor),
+          style: TextStyle(fontSize: 30, color: kPrimaryColor),
         ),
         actions: [
           IconButton(
@@ -286,8 +287,9 @@ class _ChatScreenState extends State<ChatScreen> {
             child: IconTheme(
               data: const IconThemeData(color: kPrimaryColor),
               child: Container(
+                color: kContentColor,
                 height: 75,
-                margin: const EdgeInsets.symmetric(horizontal: 8.0),
+
                 child: Row(
                   children: [
                     Expanded(
@@ -316,7 +318,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: IconButton(
                           iconSize: 34,
                           icon: const Icon(Icons.send),
-                          color: Colors.indigo.shade400,
+                          color:kPrimaryColor,
                           onPressed: () {
                             _handleSubmitted(_textController.text);
                           }),

@@ -24,8 +24,11 @@ class HexColor extends Color {
   HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
 }
 
-class CollaborationSocket extends SocketService {
-  CollaborationSocket(User user, IO.Socket socket) : super(user, socket);
+class CollaborationSocket {
+  User user;
+  IO.Socket socket;
+
+  CollaborationSocket({required this.user, required this.socket});
 
   // Emits
   joinCollaboration(String collaborationId, String type, String? password) {
@@ -279,17 +282,6 @@ class CollaborationSocket extends SocketService {
       //   "avatarUrl": data["avatarUrl"],
       // };
       // callbackChannel('disconnect', disconnected);
-
-      // TODO: don't delete this example for now
-      AwesomeDialog(
-        context: navigatorKey.currentContext as BuildContext,
-        width: 800,
-        dialogType: DialogType.SUCCES,
-        animType: AnimType.BOTTOMSLIDE,
-        title: 'Succes!',
-        desc: 'Vous avez ete déconnecter du dessin',
-        btnOkOnPress: () {},
-      ).show();
     });
   }
 

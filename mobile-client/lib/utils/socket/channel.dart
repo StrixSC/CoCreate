@@ -4,8 +4,11 @@ import 'package:Colorimage/utils/socket/socket_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-class ChannelSocket extends SocketService {
-  ChannelSocket(User user, IO.Socket socket) : super(user, socket);
+class ChannelSocket {
+  User user;
+  IO.Socket socket;
+
+  ChannelSocket({required this.user, required this.socket});
 
   // Emits
   sendMessage(message, channelId) {

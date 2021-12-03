@@ -26,7 +26,7 @@ class _ChannelState extends State<Channel> {
   Widget channelListWidget() {
     return (Column(children: [
       Padding(
-          padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+          padding: const EdgeInsets.fromLTRB(0, 40, 0, 0),
           child: Title(
             color: Colors.black,
             child: const Text('Canaux de Discussions', style: TextStyle()),
@@ -37,21 +37,25 @@ class _ChannelState extends State<Channel> {
             "Joignez un canal pour discuter avec vos amis! 😄"),
         createJoinButtons(),
       ]),
-      isDrawing() ? Column(children: [
-        section(channelType['Collaboration']),
-        getChannelListWithType(channelType['Collaboration'],
-            "Joignez un dessin pour discuter avec vos amis! 😄"),
-      ]) : const SizedBox.shrink(),
-      context.read<Teammate>().teams.isNotEmpty ? Column(children: [
-        section(channelType['Teams']),
-        getChannelListWithType(channelType['Teams'],
-            "Joignez une équipe pour discuter avec vos amis! 😄"),
-      ]): const SizedBox.shrink(),
+      isDrawing()
+          ? Column(children: [
+              section(channelType['Collaboration']),
+              getChannelListWithType(channelType['Collaboration'],
+                  "Joignez un dessin pour discuter avec vos amis! 😄"),
+            ])
+          : const SizedBox.shrink(),
+      context.read<Teammate>().teams.isNotEmpty
+          ? Column(children: [
+              section(channelType['Teams']),
+              getChannelListWithType(channelType['Teams'],
+                  "Joignez une équipe pour discuter avec vos amis! 😄"),
+            ])
+          : const SizedBox.shrink(),
     ]));
   }
 
   bool isDrawing() {
-    return context.read<Collaborator>().currentDrawingId == '';
+    return context.watch<Collaborator>().currentDrawingId != '';
   }
 
   getChannelListWithType(type, String message) {
@@ -67,7 +71,7 @@ class _ChannelState extends State<Channel> {
             child: ConstrainedBox(
                 constraints: context.read<Messenger>().userChannels.isEmpty
                     ? const BoxConstraints(minHeight: 5.0, maxHeight: 75.0)
-                    : const BoxConstraints(minHeight: 45.0, maxHeight: 475.0),
+                    : const BoxConstraints(minHeight: 45.0, maxHeight: 175.0),
                 child: context.read<Messenger>().userChannels.isEmpty
                     ? Center(
                         child: Text(
@@ -75,47 +79,45 @@ class _ChannelState extends State<Channel> {
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w500),
                       ))
-                    : ListView.builder(
-                        shrinkWrap: true,
-                        itemCount:
-                            context.read<Messenger>().userChannels.length,
-                        itemBuilder: (context, index) {
-                          if (context
-                                  .read<Messenger>()
-                                  .userChannels[index]
-                                  .type ==
-                              type) {
-                            return Column(children:[ChatCard(
-                                chat: context
-                                    .watch<Messenger>()
-                                    .userChannels[index],
-                                user: context.watch<Messenger>().auth!.user!,
-                                press: () {
-                                  context.read<Messenger>().toggleSelection();
-                                  context
-                                      .read<Messenger>()
-                                      .currentSelectedChannelIndex = index;
-                                  if (context
-                                      .read<Messenger>()
-                                      .userChannels[index]
-                                      .messages
-                                      .isNotEmpty) {
-                                    context
-                                            .read<Messenger>()
-                                            .userChannels[index]
-                                            .lastReadMessage =
-                                        context
-                                            .read<Messenger>()
-                                            .userChannels[index]
-                                            .messages
-                                            .first
-                                            .text;
-                                  }
-                                })]); //, Divider(indent: 250.0, endIndent: 250.0, thickness: 1, color: Colors.white.withOpacity(0.3))]);
-                          } else {
-                            return const SizedBox.shrink();
-                          }
-                        }))));
+                    : listBuilder(type))));
+  }
+
+  listBuilder(type) {
+    return ListView.builder(
+        shrinkWrap: true,
+        itemCount: context.read<Messenger>().userChannels.length,
+        itemBuilder: (context, index) {
+          if (context.read<Messenger>().userChannels[index].type == type) {
+            return Column(children: [
+              ChatCard(
+                  chat: context.watch<Messenger>().userChannels[index],
+                  user: context.watch<Messenger>().auth!.user!,
+                  press: () {
+                    context.read<Messenger>().toggleSelection();
+                    context.read<Messenger>().currentSelectedChannelIndex =
+                        index;
+                    if (context
+                        .read<Messenger>()
+                        .userChannels[index]
+                        .messages
+                        .isNotEmpty) {
+                      context
+                              .read<Messenger>()
+                              .userChannels[index]
+                              .lastReadMessage =
+                          context
+                              .read<Messenger>()
+                              .userChannels[index]
+                              .messages
+                              .first
+                              .text;
+                    }
+                  })
+            ]); //, Divider(indent: 250.0, endIndent: 250.0, thickness: 1, color: Colors.white.withOpacity(0.3))]);
+          } else {
+            return const SizedBox.shrink();
+          }
+        });
   }
 
   section(type) {

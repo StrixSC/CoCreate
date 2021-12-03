@@ -74,6 +74,8 @@ class _BottomNavBarScreenState extends State<BottomNavBar> {
   }
 
   openDrawer() {
+    print('chatcaht');
+    print(_scaffoldKey.currentState!.hasEndDrawer);
     _scaffoldKey.currentState!.openEndDrawer();
   }
 

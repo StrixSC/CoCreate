@@ -200,7 +200,7 @@ class Messenger extends ChangeNotifier {
       case 'joined':
         Chat channel = data as Chat;
         print("joined: " + channel.name);
-        fetchChannels();
+        addUserChannel(channel);
         break;
       case 'created':
         Chat channel = data as Chat;
