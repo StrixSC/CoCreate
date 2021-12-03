@@ -1,4 +1,7 @@
+import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/providers/collaborator.dart';
 import 'package:Colorimage/providers/messenger.dart';
+import 'package:Colorimage/providers/team.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/src/provider.dart';
 import '../../models/chat.dart';
@@ -15,93 +18,155 @@ class Channel extends StatefulWidget {
 }
 
 class _ChannelState extends State<Channel> {
+  Map<String, String> channelType = {
+    'Public': 'Public',
+    'Teams': 'Teams',
+    'Collaboration': 'Collaboration'
+  };
   Widget channelListWidget() {
     return (Column(children: [
       Padding(
-          padding: const EdgeInsets.fromLTRB(0, 60, 0, 0),
+          padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
           child: Title(
             color: Colors.black,
             child: const Text('Canaux de Discussions', style: TextStyle()),
           )),
-      const Divider(thickness: 2, color: Colors.black),
-      getChannelListWithType('Public'),
-      const Divider(thickness: 2, color: Colors.black),
-      Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            ElevatedButton(
-                onPressed: () {
-                  context.read<Messenger>().getAvailableChannels();
-                  joinChannelDialog(context.read<Messenger>().auth!.user);
-                },
-                child: const Text(
-                  'Joindre un canal',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-                )),
-            const Padding(padding: EdgeInsets.fromLTRB(0, 0, 20, 0)),
-            ElevatedButton(
-                onPressed: () {
-                  createChannelDialog();
-                },
-                child: const Text(
-                  'Créer un canal',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-                ))
-          ]),
+      Column(children: [
+        section(channelType['Public']),
+        getChannelListWithType(channelType['Public'],
+            "Joignez un canal pour discuter avec vos amis! 😄"),
+        createJoinButtons(),
+      ]),
+      isDrawing() ? Column(children: [
+        section(channelType['Collaboration']),
+        getChannelListWithType(channelType['Collaboration'],
+            "Joignez un dessin pour discuter avec vos amis! 😄"),
+      ]) : const SizedBox.shrink(),
+      context.read<Teammate>().teams.isNotEmpty ? Column(children: [
+        section(channelType['Teams']),
+        getChannelListWithType(channelType['Teams'],
+            "Joignez une équipe pour discuter avec vos amis! 😄"),
+      ]): const SizedBox.shrink(),
     ]));
   }
 
-  getChannelListWithType(type) {
-    return MediaQuery.removePadding(
-        context: context,
-        removeTop: true,
-        child: ConstrainedBox(
-            constraints: context.read<Messenger>().userChannels.isEmpty
-                ? const BoxConstraints(minHeight: 5.0, maxHeight: 75.0)
-                : const BoxConstraints(minHeight: 45.0, maxHeight: 475.0),
-            child: context.read<Messenger>().userChannels.isEmpty
-                ? const Center(
-                    child: Text(
-                    "Joignez un canal pour discuter avec vos amis! 😄",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ))
-                : ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: context.read<Messenger>().userChannels.length,
-                    itemBuilder: (context, index) {
-                      if (context.read<Messenger>().userChannels[index].type ==
-                          type) {
-                        return ChatCard(
-                            chat:
-                                context.watch<Messenger>().userChannels[index],
-                            user: context.watch<Messenger>().auth!.user!,
-                            press: () {
-                              context.read<Messenger>().toggleSelection();
-                              context
-                                  .read<Messenger>()
-                                  .currentSelectedChannelIndex = index;
-                              if (context
+  bool isDrawing() {
+    return context.read<Collaborator>().currentDrawingId == '';
+  }
+
+  getChannelListWithType(type, String message) {
+    return RefreshIndicator(
+        onRefresh: () => Future.sync(
+              () {
+                context.read<Messenger>().fetchChannels();
+              },
+            ),
+        child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: ConstrainedBox(
+                constraints: context.read<Messenger>().userChannels.isEmpty
+                    ? const BoxConstraints(minHeight: 5.0, maxHeight: 75.0)
+                    : const BoxConstraints(minHeight: 45.0, maxHeight: 475.0),
+                child: context.read<Messenger>().userChannels.isEmpty
+                    ? Center(
+                        child: Text(
+                        message,
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w500),
+                      ))
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount:
+                            context.read<Messenger>().userChannels.length,
+                        itemBuilder: (context, index) {
+                          if (context
                                   .read<Messenger>()
                                   .userChannels[index]
-                                  .messages
-                                  .isNotEmpty) {
-                                context
-                                        .read<Messenger>()
-                                        .userChannels[index]
-                                        .lastReadMessage =
+                                  .type ==
+                              type) {
+                            return Column(children:[ChatCard(
+                                chat: context
+                                    .watch<Messenger>()
+                                    .userChannels[index],
+                                user: context.watch<Messenger>().auth!.user!,
+                                press: () {
+                                  context.read<Messenger>().toggleSelection();
+                                  context
+                                      .read<Messenger>()
+                                      .currentSelectedChannelIndex = index;
+                                  if (context
+                                      .read<Messenger>()
+                                      .userChannels[index]
+                                      .messages
+                                      .isNotEmpty) {
                                     context
-                                        .read<Messenger>()
-                                        .userChannels[index]
-                                        .messages
-                                        .first
-                                        .text;
-                              }
-                            });
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    })));
+                                            .read<Messenger>()
+                                            .userChannels[index]
+                                            .lastReadMessage =
+                                        context
+                                            .read<Messenger>()
+                                            .userChannels[index]
+                                            .messages
+                                            .first
+                                            .text;
+                                  }
+                                })]); //, Divider(indent: 250.0, endIndent: 250.0, thickness: 1, color: Colors.white.withOpacity(0.3))]);
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        }))));
+  }
+
+  section(type) {
+    return Padding(
+        padding: const EdgeInsets.only(top: 20.0),
+        child: Row(children: <Widget>[
+          Expanded(child: Divider(thickness: 2, color: Colors.white)),
+          CircleAvatar(
+            child: Stack(children: [
+              Align(
+                alignment: Alignment.bottomRight,
+                child: CircleAvatar(
+                  radius: 55,
+                  backgroundColor: Colors.white70,
+                  child: type == channelType['Public']
+                      ? Icon(Icons.message)
+                      : type == channelType['Collaboration']
+                          ? Icon(Icons.brush_sharp)
+                          : Icon(Icons.group),
+                ),
+              ),
+            ]),
+          ),
+          Expanded(child: Divider(thickness: 2, color: Colors.white)),
+        ]));
+  }
+
+  createJoinButtons() {
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ElevatedButton(
+              onPressed: () {
+                context.read<Messenger>().getAvailableChannels();
+                joinChannelDialog(context.read<Messenger>().auth!.user);
+              },
+              child: const Text(
+                'Joindre un canal',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+              )),
+          const Padding(padding: EdgeInsets.fromLTRB(0, 0, 20, 0)),
+          ElevatedButton(
+              onPressed: () {
+                createChannelDialog();
+              },
+              child: const Text(
+                'Créer un canal',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+              ))
+        ]);
   }
 
   createChannelDialog() async {
@@ -168,10 +233,9 @@ class _ChannelState extends State<Channel> {
     return Column(
       key: const PageStorageKey("channels"),
       children: [
-        Expanded(
-            child: messenger.isChannelSelected
-                ? channelChatWidget()
-                : channelListWidget()),
+        messenger.isChannelSelected
+            ? Expanded(child: channelChatWidget())
+            : Expanded(child: SingleChildScrollView(child: channelListWidget()))
       ],
     );
   }

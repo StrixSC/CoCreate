@@ -239,6 +239,7 @@ class Collaborator extends ChangeNotifier {
         }
       }
     }
+    currentDrawingId = '';
     pagingControllers[currentType].refresh();
     notifyListeners();
   }

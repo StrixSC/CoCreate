@@ -78,9 +78,8 @@ class ChannelSocket extends SocketService {
           ownerUsername: data['ownerUsername'],
           collaborationId: data['collaborationId'],
           updatedAt: data['updatedAt'],
-          type: data['channel_type'],
           messages: [],
-          onlineMembers: data['online_members']);
+          onlineMembers: []);
       callbackChannel('created', channel);
     });
   }

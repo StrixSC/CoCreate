@@ -246,7 +246,7 @@ class CollaborationSocket extends SocketService {
       print('Collaboration deleted');
       Map deleted = {
         "collaborationId": data["collaborationId"],
-        "deletedAt": data["deletedAt"],
+        "deletedAt": data["deletedAt"] ?? '',
       };
       callbackChannel('deleted', deleted);
     });
