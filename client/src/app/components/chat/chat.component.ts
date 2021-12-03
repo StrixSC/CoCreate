@@ -54,6 +54,10 @@ export class ChatComponent {
     return this.sidebarService.activeChannel;
   }
 
+  toggleNotifications(): void {
+    this.activeChannel.muteNotification = !this.activeChannel.muteNotification;
+  }
+
   fetchHistory(): void {
     const subscription = this.chatService.getChannelHistory(this.activeChannel.channel_id).subscribe((m) => {
       this.activeChannel.messages = m.map((message) => ({

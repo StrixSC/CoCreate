@@ -1,7 +1,8 @@
+import { SocketService } from 'src/app/services/chat/socket.service';
 import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { Router } from '@angular/router';
 import { TeamType } from './../../model/team-response.model';
-import { Subscription } from 'rxjs';
+import { Subscription, merge } from 'rxjs';
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { MatDialogRef, MatSnackBar, MAT_DIALOG_DATA } from '@angular/material';
@@ -42,10 +43,12 @@ export class TeamInfoComponent implements OnInit {
   updateFinishedSubscription: Subscription;
   deleteExceptionSubscription: Subscription;
   deleteFinishedSubscription: Subscription;
+  connectionSubscription: Subscription;
 
   displayedColumns = ['username', 'status', 'joinedOn', 'type'];
   drawingsColumns = ['title', 'memberCount', 'createdAt', 'updatedAt', 'actions']
   constructor(
+    private socketService: SocketService,
     private fb: FormBuilder,
     private auth: AuthService,
     private teamService: TeamService,
@@ -65,6 +68,18 @@ export class TeamInfoComponent implements OnInit {
       maxMemberCount: [this.team.maxMemberCount, [Validators.min(1), Validators.max(30)]],
       mascot: [this.team.mascot, []]
     });
+
+    this.connectionSubscription = merge(
+      this.socketService.onConnected(),
+      this.socketService.onDisconnected(),
+      this.syncCollabService.onCreateCollaboration(),
+      this.syncCollabService.onUpdateCollaboration(),
+      this.syncCollabService.onJoinCollaboration(),
+      this.syncCollabService.onConnectCollaboration(),
+      this.syncCollabService.onDisconnectCollaboration(),
+    ).subscribe(() => {
+      this.fetchTeamInfo();
+    })
 
     this.fetchTeamInfo();
 
@@ -217,6 +232,10 @@ export class TeamInfoComponent implements OnInit {
   ngOnDelete(): void {
     if (this.updatedSubscription) {
       this.updatedSubscription.unsubscribe();
+    }
+
+    if (this.connectionSubscription) {
+      this.connectionSubscription.unsubscribe();
     }
 
     if (this.teamSub) {

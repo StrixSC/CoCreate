@@ -21,7 +21,7 @@ import { MatSnackBar } from '@angular/material';
 export class DrawingPageComponent {
   loadListener: Subscription;
   listener: Subscription;
-
+  activeCollaborationId: string;
   constructor(
     public dialog: MatDialog,
     private hotkeyService: HotkeysService,
@@ -32,7 +32,8 @@ export class DrawingPageComponent {
     private activeRoute: ActivatedRoute,
     private snackbar: MatSnackBar,
     private router: Router,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private syncCollabService: SyncCollaborationService,
   ) {
     this.hotkeyService.hotkeysListener();
   }
@@ -41,7 +42,7 @@ export class DrawingPageComponent {
     if (!this.drawingLoader.activeDrawingData) {
       const collaborationId = this.activeRoute.snapshot.params.id;
       if (collaborationId) {
-
+        this.activeCollaborationId = collaborationId;
         this.syncService.sendConnectCollaboration({
           userId: '',
           collaborationId
@@ -64,6 +65,9 @@ export class DrawingPageComponent {
     if (!this.drawingLoader.isLoaded) {
       if (data) {
         this.drawingLoader.activeDrawingData = data;
+      }
+      if (this.drawingLoader.activeDrawingData) {
+        this.activeCollaborationId = this.drawingLoader.activeDrawingData.collaborationId;
       }
       this.drawingLoader.loadDrawing();
       this.syncDrawingService.updatedDefaultPayload(this.drawingLoader.activeDrawingData!.collaborationId);
@@ -98,6 +102,12 @@ export class DrawingPageComponent {
     if (this.loadListener) {
       this.loadListener.unsubscribe();
     }
+
+    if (this.listener) {
+      this.listener.unsubscribe();
+    }
+
+    this.syncCollabService.sendDisconnect({ collaborationId: this.activeCollaborationId });
 
     this.drawingLoader.activeDrawingData = null;
     this.drawingLoader.isLoaded = false;

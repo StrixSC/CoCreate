@@ -1,0 +1,55 @@
+<div class="wrapper-container">
+    <div class="image-container">
+        <img class="img" src="/assets/img/server.png">
+    </div>
+    <div class="header-container">
+        <h1>Oups!</h1>
+    </div>
+    <div class="message-container">
+        <h1 *ngIf="message">{{ message }}</h1>
+        <h1 *ngIf="!message">Oups! Une erreur imprévue s'est produite...</h1>
+        <div class="button-container">
+            <button mat-raised-button color="accent" (click)="signOutAndRedirect()">Se connecter sous un autre
+                compte</button>
+        </div>
+    </div>
+</div>
+<style>
+    .button-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .image-container {
+        max-width: 400px;
+        max-height: 400px;
+        opacity: 0.3;
+        position: absolute;
+        top: 0;
+    }
+
+    .img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .action-button {
+        min-width: 300px;
+    }
+
+    .header-container {}
+
+    .wrapper-container {
+        width: 100%;
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+        align-items: center;
+        justify-self: center;
+        justify-content: center;
+        background-color: var(--bg-color);
+        color: white;
+    }
+</style>

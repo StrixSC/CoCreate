@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from './../../services/auth.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { of, Subscription } from 'rxjs';
+import { combineLatest, of, Subscription, merge } from 'rxjs';
 import { switchMap, mergeMap, map } from 'rxjs/operators';
 import { SocketService } from 'src/app/services/chat/socket.service';
 
@@ -18,6 +18,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
   messageListener: Subscription;
   public isLoading: boolean = false;
   private authSubscription: Subscription;
+  private initExceptionSubscription: Subscription;
   private logoutSubscription: Subscription;
   constructor(private snackBar: MatSnackBar,
     private chatsideBar: ChatSidebarService,
@@ -30,17 +31,22 @@ export class TopBarComponent implements OnInit, OnDestroy {
       if (state) {
         this.auth.activeUser = state;
         await this.socketService.setupSocketConnection();
-        return { result: true, message: "" };
-      } else return { result: false, message: "Erreur: Vous n'êtes pas authentifié." }
+        return { result: true, message: "", redirect: false, };
+      } else return { result: false, message: "Erreur: Vous n'êtes pas authentifié.", redirect: false }
     }), switchMap((status) => {
       if (status.result) {
         this.socketService.sendInit();
-        return this.socketService.onInit().pipe(map(() => ({ result: true, message: "" })))
+        return merge(
+          this.socketService.onInit().pipe(map(() => ({ result: true, message: "", redirect: false, }))),
+          this.socketService.onInitException().pipe(map((d) => ({ result: false, message: d.message, redirect: true })))
+        )
       } else return of(status);
     })).subscribe((status) => {
       if (status.result) {
         this.isLoading = false;
-      } else {
+      } else if (!status.result && status.redirect) {
+        this.router.navigateByUrl(`server-error?message=${status.message}`)
+      } else if (!status.result) {
         this.snackBar.open(status.message, "OK", { duration: 5000 });
       }
     }, (error) => {
@@ -54,6 +60,9 @@ export class TopBarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     if (this.messageListener) { this.messageListener.unsubscribe(); }
+    if (this.initExceptionSubscription) {
+      this.initExceptionSubscription.unsubscribe();
+    }
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
     }

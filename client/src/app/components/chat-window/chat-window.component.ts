@@ -47,6 +47,7 @@ export class ChatWindowComponent implements OnInit {
       this.chatService.joinChannel(channelId);
       this.joinedSubscription = this.chatService.joinedChannel().subscribe((c: IChannelJoinResponse) => {
         this.activeChannel = c;
+        console.log(c);
         this.isLoading = false;
       });
 
