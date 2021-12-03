@@ -32,7 +32,6 @@ class TeamSocket extends SocketService {
   updateTeams(Team team) {
     print('Emit Update Collab');
     socket.emit('teams:update', data(team));
-
   }
 
   deleteTeams(Team team) {
@@ -50,14 +49,15 @@ class TeamSocket extends SocketService {
     socket.on('teams:joined', (data) {
       print('Teams joined');
       Team updatedTeam = Team(
-          id: data['teamId'],
-          authorUsername: data['authorUsername'],
-          authorAvatarUrl: data['authorAvatarUrl'],
-          name: data['teamName'],
-          bio: data['teamBio'],
-          maxMemberCount: data['maxMemberCount'],
-          type: data['type'],
-          mascot: data['mascot'],
+        id: data['teamId'],
+        authorUsername: data['authorUsername'],
+        authorAvatarUrl: data['authorAvatarUrl'],
+        name: data['teamName'],
+        bio: data['teamBio'],
+        maxMemberCount: data['maxMemberCount'],
+        type: data['type'],
+        mascot: data['mascot'],
+        members: [],
       );
       callbackChannel('updated', updatedTeam);
     });
@@ -89,6 +89,7 @@ class TeamSocket extends SocketService {
         maxMemberCount: data['maxMemberCount'],
         type: data['type'],
         mascot: data['mascot'],
+        members: [],
       );
       callbackChannel('updated', updatedTeam);
     });
@@ -121,6 +122,7 @@ class TeamSocket extends SocketService {
         maxMemberCount: data['maxMemberCount'],
         type: data['type'],
         mascot: data['mascot'],
+        members: [],
       );
       callbackChannel('created', updatedTeam);
     });
@@ -153,6 +155,7 @@ class TeamSocket extends SocketService {
         maxMemberCount: data['maxMemberCount'],
         type: data['type'],
         mascot: data['mascot'],
+        members: [],
       );
       callbackChannel('deleted', updatedTeam);
     });
@@ -185,6 +188,7 @@ class TeamSocket extends SocketService {
         maxMemberCount: data['maxMemberCount'],
         type: data['type'],
         mascot: data['mascot'],
+        members: [],
       );
       callbackChannel('updated', updatedTeam);
     });
@@ -203,8 +207,6 @@ class TeamSocket extends SocketService {
       print('Teams updated finished');
     });
   }
-
-
 
   initializeChannelSocketEvents(callbackChannel) {
     joined(callbackChannel);

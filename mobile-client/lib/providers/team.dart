@@ -71,7 +71,8 @@ class Teammate extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addTeam(List updatedTeams) {
+  void addTeams(List team) {
+    teams.add(team);
     notifyListeners();
   }
 

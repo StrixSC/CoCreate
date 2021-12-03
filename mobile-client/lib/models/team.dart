@@ -1,5 +1,5 @@
 class Team {
-  String id, name, bio, type, mascot;
+  String id, name, bio, type, mascot, thumbnailUrl;
   String authorUsername, authorAvatarUrl;
   int memberCount, maxMemberCount, onlineMemberCount;
   String? password;
@@ -18,11 +18,12 @@ class Team {
     this.memberCount = 1,
     this.onlineMemberCount = 0,
     this.type = "Public",
+    this.thumbnailUrl = "",
     this.mascot = "",
     this.password,
     this.authorUsername = "Admin",
     this.authorAvatarUrl = "",
-
+    required this.members,
   });
 }
 

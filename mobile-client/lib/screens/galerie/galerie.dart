@@ -205,8 +205,10 @@ class GalerieState extends State<Galerie>
       }
       context.read<Collaborator>().addDrawings(drawings);
     } else if (response.statusCode == 204) {
-      print('bruh');
-      print(response.body);
+      pagingControllers[section].itemsList = [];
+      throw("Theres was a problem in the fetching of drawings...");
+    } else {
+      pagingControllers[section].itemsList = [];
     }
   }
 
@@ -318,7 +320,7 @@ class GalerieState extends State<Galerie>
                         maxLines: 1,
                         decoration: InputDecoration(
                           errorStyle: const TextStyle(fontSize: 26),
-                          hintText: "Filtrer les dessins selon un attribut",
+                          hintText: "Filtrer selon un attribut",
                           hintStyle: const TextStyle(
                             fontSize: 26,
                           ),
@@ -365,6 +367,9 @@ class GalerieState extends State<Galerie>
                   crossAxisSpacing: 5,
                 ),
                 builderDelegate: PagedChildBuilderDelegate<Drawing>(
+                  animateTransitions: true,
+                  // [transitionDuration] has a default value of 250 milliseconds.
+                  transitionDuration: const Duration(milliseconds: 500),
                   noItemsFoundIndicatorBuilder: (context) =>
                       context.watch<Collaborator>().currentType == 'Available'
                           ? Column(

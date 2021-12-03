@@ -81,7 +81,6 @@ class _LoginState extends State<Login> {
 
       // Home Page
       Navigator.pushNamed(context, homeRoute);
-      // Navigator.pushNamed(context, drawingRoute, arguments: {'socket': context.read<Messenger>().channelSocket.socket});
 
     } else {
       print('Login request failed with status: ${response.statusCode}.');

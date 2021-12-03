@@ -14,12 +14,16 @@ class TeamsAPI {
     final queryParameters = {
       'offset': offset.toString(),
       'limit': limit.toString(),
-      'filter': filter.toString(),
       'removeFull': removeFull.toString(),
       'amMemner': filter.toString(),
       'amOwner': amOwner.toString(),
-      'type': type.toString(),
     };
+    if (type != null) {
+      queryParameters['type'] = type;
+    }
+    if (filter != null) {
+      queryParameters['filter'] = filter;
+    }
     var url = Uri.http(_url!, '/api/teams', queryParameters);
     var response = await http.get(url);
     return response;
