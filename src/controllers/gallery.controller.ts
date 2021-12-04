@@ -48,7 +48,7 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
                 author_avatar: author.user.profile!.avatar_url,
                 type: c.type,
                 collaborator_count: c.collaboration_members.length,
-                max_collaborator_count: c.max_collaborator_count,
+                max_collaborator_count: 30,
                 is_member: isMember ? true : false,
                 is_owner: isOwner ? true : false
             }
@@ -102,7 +102,7 @@ export const getMyGalleryController = async (req: Request, res: Response, next: 
                 author_avatar: author.user.profile!.avatar_url,
                 type: c.type,
                 collaborator_count: c.collaboration_members.length,
-                max_collaborator_count: c.max_collaborator_count,
+                max_collaborator_count: 30,
                 active_member_count: onlineMembers.length,
                 is_member: isMember ? true : false,
                 is_owner: isOwner ? true : false

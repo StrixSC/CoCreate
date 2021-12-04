@@ -132,7 +132,7 @@ const createCollaboration = async (user_id: string, creatorId: string, isTeam: b
                     },
                     collaboration_members: {
                         create: isTeam
-                            ? teamMembers.map((tm) => ({ type: MemberType.Regular, user_id: tm.user_id })) :
+                            ? teamMembers.map((tm) => ({ type: tm.user_id === user_id ? MemberType.Owner : MemberType.Regular, user_id: tm.user_id })) :
                             [{ type: MemberType.Owner, user_id: user_id }]
                     },
                     channel: {

@@ -1,8 +1,18 @@
 import { DEFAULT_DRAWING_OFFSET, DEFAULT_DRAWING_LIMIT } from './../utils/drawings';
 import create from 'http-errors';
-import { MemberType, CollaborationType, Drawing } from '.prisma/client';
+import { MemberType, CollaborationType, Drawing, Account, Collaboration, CollaborationMember, Profile, User } from '.prisma/client';
 import { db } from '../db';
 import moment from 'moment';
+
+export type ICollaboration = (Collaboration & {
+    drawing: Drawing | null;
+    collaboration_members: (CollaborationMember & {
+        user: User & {
+            profile: Profile | null;
+            account: Account | null;
+        };
+    })[];
+});
 
 export const getCollaborations = async (filter: string, offset: number, limit: number, type?: CollaborationType, userId?: string, excludeUser?: boolean) => {
 
@@ -16,6 +26,17 @@ export const getCollaborations = async (filter: string, offset: number, limit: n
     let result = await db.collaboration.findMany({
         include: {
             drawing: true,
+            author: {
+                include: {
+                    team: true,
+                    user: {
+                        include: {
+                            profile: true,
+                            account: true,
+                        }
+                    }
+                }
+            },
             collaboration_members: {
                 include: {
                     user: {
@@ -56,6 +77,17 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
     let allCollaborations = await db.collaboration.findMany({
         include: {
             drawing: true,
+            author: {
+                include: {
+                    team: true,
+                    user: {
+                        include: {
+                            profile: true,
+                            account: true,
+                        }
+                    }
+                }
+            },
             collaboration_members: {
                 include: {
                     user: {
@@ -154,7 +186,7 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
         }
     };
 
-    const returnDrawings: any[] = [];
+    const returnDrawings = [] as ICollaboration[];
 
     for (let [key, entry] of filterMap) {
         for (let input of entry.data) {
