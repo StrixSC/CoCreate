@@ -68,6 +68,7 @@ import { MenuPageComponent } from './components/menu-page/menu-page.component';
 import { NewDrawingFormDialogComponent } from './components/new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { CollaborationPasswordFormDialogComponent } from './components/collaboration-password-form-dialog/collaboration-password-form-dialog.component';
 import { TopBarComponent } from './components/top-bar/top-bar.component';
+import { FormMenuDialogDrawingComponent } from './components/form-menu-dialog-drawing/form-menu-dialog-drawing.component';
 
 @NgModule({
   declarations: [
@@ -120,6 +121,7 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     CreateChannelDialogComponent,
     TeamInfoComponent,
     TeamPasswordDialogComponent,
+    FormMenuDialogDrawingComponent
   ],
   imports: [
     BrowserModule,
@@ -167,6 +169,7 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     MatSnackBarContainer,
     CreateTeamDialogComponent,
     CollaborationPasswordFormDialogComponent,
+    FormMenuDialogDrawingComponent
   ],
   providers: [
     FileReader,

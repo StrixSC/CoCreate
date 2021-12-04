@@ -4,7 +4,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { NewDrawingFormDialogComponent } from './../new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { ICollaborationConnectResponse, ICollaborationDeleteResponse, ICollaborationJoinResponse, ICollaborationLeaveResponse, ICollaborationUpdateResponse, ICollaborationCreateResponse, ICollaborationLoadResponse } from './../../model/ICollaboration.model';
 import { AuthService } from './../../services/auth.service';
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, Input, OnInit, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog, MatPaginator, MatTableDataSource, PageEvent } from '@angular/material';
 import { BehaviorSubject, EMPTY, merge, of, Subscription } from 'rxjs';
@@ -38,7 +38,8 @@ export enum GalleryEvents {
 })
 
 export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit {
-
+  @Input() self = 'self';
+  @Input() all = 'all';
   errorListener: Subscription;
   messageListener: Subscription;
   dialogRef: MatDialogRef<NewDrawingFormDialogComponent>;
@@ -53,6 +54,8 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   lengthAll: number;
   pageSizeAll = 12;
   pageIndexAll = 0;
+
+  isLoading: boolean = false;
 
   selectedOption: string = 'All';
   selectedOptionAll: string = 'All';
@@ -168,6 +171,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     this.dataObsSelf = this.datasourceSelf.connect();
     this.dataObsAll = this.datasourceAll.connect();
     this.cdr.detectChanges();
+    this.isLoading = false;
   }
 
   searchMyDrawings(value: any) {
@@ -221,9 +225,10 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   onCreate() {
-    this.dialogRef.close();
+    if (this.dialogRef)
+      this.dialogRef.close();
     this.snackbar.open('Nouveau dessin créé avec succès!', '', { duration: 5000 });
-    this.fetchAllDrawings();
+    this.handlePageEvent(new PageEvent, false);
   }
 
   onUpdate() {
@@ -235,16 +240,17 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   onDelete(data: ICollaborationDeleteResponse) {
     if (this.dialogRef) this.dialogRef.close();
     this.snackbar.open('Dessin supprimé avec succès!', '', { duration: 5000 });
-    this.fetchAllDrawings();
+    this.handlePageEvent(new PageEvent, false);
   }
 
   onLeave(data: ICollaborationLeaveResponse) {
-    this.dialogRef.close();
+    if (this.dialogRef) this.dialogRef.close();
     this.snackbar.open('Dessin quitté avec succès!', '', { duration: 5000 });
-    this.fetchAllDrawings();
+    this.handlePageEvent(new PageEvent, false);
   }
 
   handlePageEvent(event: PageEvent, paginate: boolean) {
+    this.isLoading = true;
     if (!paginate) {
       this.pageSizeSelf = 12;
       this.pageIndexSelf = 0;
@@ -259,10 +265,11 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
       this.datasourceSelf.data = d.drawings;
       this.lengthSelf = d.count;
     });
+    this.isLoading = false;
   }
 
   handleAllPageEvent(event: PageEvent, paginate: boolean) {
-
+    this.isLoading = true;
     if (!paginate) {
       this.pageSizeAll = 12;
       this.pageIndexAll = 0;
@@ -279,9 +286,12 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
       this.datasourceAll.data = d.drawings;
       this.lengthAll = d.count;
     });
+    this.isLoading = false;
   }
 
   fetchAllDrawings(): void {
+
+    this.isLoading = true;
     this.drawingsSubscription = merge(
       this.drawingGalleryService.getAllDrawings().pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count }))),
       this.drawingGalleryService.getMyDrawings().pipe(map((d: any) => ({ drawings: d.drawings, galleryType: 'Self', count: d.total_drawing_count })))
@@ -290,12 +300,22 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
         if (d.galleryType === 'Self') {
           this.datasourceSelf.data = d.drawings;
           this.lengthSelf = d.count;
+
         } else {
           this.datasourceAll.data = d.drawings;
           this.lengthAll = d.count;
         }
       }
     });
-  }
 
+    this.isLoading = false;
+  }
+  clearFilterAll() {
+    this.drawingFilterAll = '';
+    this.handleAllPageEvent(new PageEvent, false);
+  }
+  clearFilterSelf() {
+    this.drawingFilterSelf = '';
+    this.handlePageEvent(new PageEvent, false);
+  }
 }

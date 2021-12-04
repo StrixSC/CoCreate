@@ -1,13 +1,34 @@
 .drawing-card {
-  max-width: 200px;
+  max-width: 250px;
   display:inline-block;
   margin: 10px;
-  text-align: center;
+}
+
+.member-count-container {
+  display: flex;
+  justify-content: center;
   align-items: center;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.actions-container {
+  display: flex;
+  justify-content: center;
+}
+
+.team-joined-container {
+  color: var(--secondary-color) !important;
+  cursor: default;
+}
+
+.team-owner-container {
+  color: var(--primary-color) !important;
+  cursor: default;
 }
 
 .example-header-image {
-  background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
   background-size: cover;
 }
 
@@ -18,11 +39,7 @@
   background-color: #000;
 }
 
-.image-preview {
-}
-
 .lock {
-  
   position: absolute;
   top: 45%;
   left: 50%;
@@ -30,29 +47,40 @@
 }
 
 .btn {
-  
+  transition: .5s ease;
+  opacity: 0;
+  position: absolute;
+  top: 49%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+
+.btn-mine {
   transition: .5s ease;
   opacity: 0;
   position: absolute;
   top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
-  //-ms-transform: translate(-50%, -50%);
   text-align: center;
 }
 
 .lock {
-  
   transition: .5s ease;
   opacity: 1;
   position: absolute;
   top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
-  //-ms-transform: translate(-50%, -50%);
   text-align: center;
 }
 
 .drawing-card:hover .btn {
+  opacity: 1;
+}
+
+.drawing-card:hover .btn-mine {
   opacity: 1;
 }

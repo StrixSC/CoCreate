@@ -5,7 +5,6 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
 import { RegisterComponent } from './components/register/register.component';
 import { AuthWrapperComponent } from './components/auth-wrapper/auth-wrapper.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
-import { LandingPageComponent } from './components/landing-page/landing-page.component';
 import { LoginComponent } from './components/login/login.component';
 import { MenuPageComponent } from './components/menu-page/menu-page.component';
 import { DrawingGalleryComponent } from './components/drawing-gallery/drawing-gallery.component';

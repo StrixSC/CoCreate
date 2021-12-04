@@ -10,46 +10,20 @@
 </mat-toolbar>
 
 <mat-tab-group #tabGroup class="centerTab">
-  <mat-tab class="drawing-list" label="Mes Dessins & Dessins Rejoints">
+  <mat-tab class="drawing-list" label="Dessins disponibles">
+    <ng-template mat-tab-label>
+      <mat-icon>public</mat-icon> Dessins disponibles
+   </ng-template>
     <br>
     <div>
       <mat-form-field [style.width.%]="50">
         <mat-label>Recherche</mat-label>
-        <input (keydown.enter)="setFilterMyDrawings($event.target.value); handlePageEvent($event, false)" matInput placeholder="Entrez un mot-clé">
+        <input type="text" [(ngModel)]="drawingFilterAll" (keyup)="setFilterAll($event.target.value); handleAllPageEvent($event, false)" matInput placeholder="Entrez un mot-clé">
         <button mat-button matPrefix mat-icon-button>
           <mat-icon>search</mat-icon>
         </button>
-        <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>Type de dessins</mat-label>
-        <mat-select [(ngModel)]="selectedOption" (selectionChange)="searchMyDrawings($event.value); handlePageEvent($event, false)">
-          <mat-option *ngFor="let type of visibilityFilter" [value]="type.key">{{type.value}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-paginator #paginator4 (page)="handlePageEvent($event, true)"
-      [length]="lengthSelf"
-      [pageSize]="pageSizeSelf"
-      [showFirstLastButtons]="showFirstLastButtons"
-      [pageSizeOptions]="pageSizeOptions"
-      [pageIndex]="pageIndexSelf"></mat-paginator>
-
-      <div class="margin-center">
-        <app-drawing-gallery-card *ngFor="let drawing of dataObsSelf | async" [drawing]="drawing">
-        </app-drawing-gallery-card>
-      </div>
-    </div>
-  </mat-tab>
-
-  <mat-tab class="drawing-list" label="Dessins publiques">
-    <br>
-    <div>
-      <mat-form-field [style.width.%]="50">
-        <mat-label>Recherche</mat-label>
-        <input (keydown.enter)="setFilterAll($event.target.value); handleAllPageEvent($event, false)" matInput placeholder="Entrez un mot-clé">
-        <button mat-button matPrefix mat-icon-button>
-          <mat-icon>search</mat-icon>
+        <button *ngIf="drawingFilterAll!==''" mat-icon-button matTooltip="Effacer la recherche" matSuffix (click)="clearFilterAll()">
+          <mat-icon>clear</mat-icon>
         </button>
         <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
       </mat-form-field>
@@ -60,17 +34,115 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-paginator #paginatorAll (page)="handleAllPageEvent($event)"
+      <div style="position: relative; left: -24%; color: #616161" *ngIf="drawingFilterAll!==''">
+        <br>
+        Résultat de la recherche «{{drawingFilterAll}}» :
+      </div>
+
+      <mat-paginator (page)="handleAllPageEvent($event)"
       [length]="lengthAll"
       [pageSize]="pageSizeAll"
       [showFirstLastButtons]="showFirstLastButtons"
       [pageSizeOptions]="pageSizeOptions"
       [pageIndex]="pageIndexAll"></mat-paginator>
 
+      <div class="margin-center">
+        <app-drawing-gallery-card fxLayout="row" fxLayout.xs="column" *ngFor="let drawing of dataObsAll | async" [drawing]="drawing">
+        </app-drawing-gallery-card>
+      </div>
+    </div>
+    <div *ngIf="!lengthAll && drawingFilterAll !=='' && !isLoading" style="font-style: Roboto">
+      <br>
+      <h2>Aucun dessin disponible ne correspond à la recherche<br>«{{drawingFilterAll}}»</h2>
+      Effectuez une autre recherche<br>
+      <div style="font-size: 100px;">
+        <mat-icon [inline]="true">search_off</mat-icon>
+      </div>      
+    </div>
+    <div *ngIf="!lengthAll && drawingFilterAll ==='' && selectedOptionAll === 'All' && !isLoading" style="font-style: Roboto">
+      <br><br>
+      <h2>Aucun dessin n'est disponible en ce moment</h2>
+      Veuillez réessayer plus tard
+      <div style="font-size: 100px;">
+        <mat-icon [inline]="true">palette</mat-icon>
+      </div>
+    </div>
+    <div *ngIf="!lengthAll && selectedOptionAll !== 'All' && drawingFilterAll ==='' && !isLoading" style="font-style: Roboto">
+      <br><br>
+      <h2>Aucun dessin disponible ne correspond à ce type</h2>
+      Créer un dessin ou<br>
+      réessayer plus tard pour accéder à un dessin<br><br>
+      <div style="font-size: 100px;">
+        <mat-icon [inline]="true">palette</mat-icon>
+      </div>
+    </div>
+  </mat-tab>
+  <mat-tab class="drawing-list" label="Mes Dessins & Dessins Rejoints">
+    <ng-template mat-tab-label>
+      <mat-icon>image</mat-icon> Mes Dessins & Dessins Rejoints
+   </ng-template>
+    <br>
+    <div>
+      <mat-form-field [style.width.%]="50">
+        <mat-label>Recherche</mat-label>
+        <input type="text" [(ngModel)]="drawingFilterSelf" (keyup)="setFilterMyDrawings($event.target.value); handlePageEvent($event, false)" matInput placeholder="Entrez un mot-clé">
+        <button mat-button matPrefix mat-icon-button>
+          <mat-icon>search</mat-icon>
+        </button>
+        <button *ngIf="drawingFilterSelf!==''"  mat-icon-button matTooltip="Effacer la recherche" matSuffix (click)="clearFilterSelf()">
+          <mat-icon>clear</mat-icon>
+        </button>
+        <mat-hint>Le mot-clé doit être un attribut du dessin</mat-hint>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Type de dessins</mat-label>
+        <mat-select [(ngModel)]="selectedOption" (selectionChange)="searchMyDrawings($event.value); handlePageEvent($event, false)">
+          <mat-option *ngFor="let type of visibilityFilter" [value]="type.key">{{type.value}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div style="position: relative; left: -24%; color: #616161" *ngIf="drawingFilterSelf!==''">
+        <br>
+        Résultat de la recherche «{{drawingFilterSelf}}» :
+      </div>
+
+      <mat-paginator (page)="handlePageEvent($event, true)"
+      [length]="lengthSelf"
+      [pageSize]="pageSizeSelf"
+      [showFirstLastButtons]="showFirstLastButtons"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndexSelf"></mat-paginator>
 
       <div class="margin-center">
-        <app-drawing-gallery-card *ngFor="let drawing of dataObsAll | async" [drawing]="drawing">
+        <app-drawing-gallery-card fxLayout="row wrap" fxLayoutAlign="space-evenly none" fxfill fxLayoutGap *ngFor="let drawing of dataObsSelf | async" [drawing]="drawing">
         </app-drawing-gallery-card>
+      </div>
+    </div>
+    <div *ngIf="!lengthSelf && drawingFilterSelf !=='' && !isLoading" style="font-style: Roboto">
+      <br>
+      <h2>Aucun de vos dessins ne correspond à la recherche<br>«{{drawingFilterSelf}}»</h2>
+      Effectuez une autre recherche<br>
+      <div style="font-size: 100px;">
+        <mat-icon [inline]="true">search_off</mat-icon>
+      </div>      
+    </div>
+    <div *ngIf="!lengthSelf && drawingFilterSelf ==='' && selectedOption === 'All' && !isLoading" style="font-style: Roboto">
+      <br><br>
+      <h2>Bienvenue à Colorimage!</h2>
+      Aucun dessin ne fait encore parti de votre répertoire.<br>
+      Créer un dessin ou accéder à un dessin <br>
+      pour laisser place à votre créativité!<br><br>
+      <div style="font-size: 100px;">
+        <mat-icon [inline]="true">palette</mat-icon>
+      </div>
+    </div>
+    <div *ngIf="!lengthSelf && selectedOption !== 'All' && drawingFilterSelf ==='' && !isLoading" style="font-style: Roboto">
+      <br><br>
+      <h2>Aucun de vos dessins ne correspond à ce type</h2>
+      Créer un dessin ou accéder à un dessin <br>
+      pour remplir votre répertoire<br><br>
+      <div style="font-size: 100px;">
+        <mat-icon [inline]="true">palette</mat-icon>
       </div>
     </div>
   </mat-tab>

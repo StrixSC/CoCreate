@@ -1,20 +1,28 @@
+<div align="end">
 <button mat-icon-button mat-dialog-close (click)="dialogRef.close()">
   <mat-icon>close</mat-icon>
 </button>
-<div style="text-align: center;">
-  <h1 mat-dialog-title>
-    {{drawing.title}}
-  </h1>
+</div>
+<div layout="row" layout-align="center center" style="margin: 0 auto; text-align: center;">
+  <div style="padding-left: 10;"></div>
+  <mat-card-header align="center" class="actions-container">
+  <img style="background-size: cover;" mat-card-avatar src="{{drawing.author_avatar}}">
+  <br>
+  <mat-card-title>{{drawing.title}}</mat-card-title>
+  <br>
   <mat-card-subtitle>
+    Mise à jour le {{ drawing.updated_at | date:'short' }}
+    <br>
     Créé le {{ drawing.created_at | date:'short' }}
   </mat-card-subtitle>
-  <img mat-card-image class="image-preview" src="../../../assets/img/mock-img/10.jpg">
+</mat-card-header>
+  <img mat-card-image class="image-preview" src="../../../assets/default-image.png">
   <div class='"separator'></div>
-  <mat-card-content>
-    Auteur: {{drawing.author_username}}
-  </mat-card-content>
-  <mat-card-content>
-  </mat-card-content>
+  <mat-card-subtitle>Auteur: {{drawing.author_username}}</mat-card-subtitle>
+  <mat-card-subtitle *ngIf="drawing.type==='Protected'">Type: Protégé</mat-card-subtitle>
+  <mat-card-subtitle *ngIf="drawing.type==='Public'">Type: Public</mat-card-subtitle>
+  <mat-card-subtitle *ngIf="drawing.type==='Private'">Type: Privé</mat-card-subtitle>
+  <mat-card-subtitle *ngIf="drawing.active_member_count!==NaN">Collaborateurs actifs: {{drawing.active_member_count}}</mat-card-subtitle>
   <mat-dialog-actions class="actions">
     <div>
       <button [disabled]="isLoading" (click)="onSubmit()" mat-raised-button cdkFocusInitial color="primary">

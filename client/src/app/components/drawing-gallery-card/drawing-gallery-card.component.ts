@@ -9,6 +9,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DrawingPreviewDialogComponent } from '../drawing-preview-dialog/drawing-preview-dialog.component';
 import { IGalleryEntry } from '../../model/IGalleryEntry.model';
 import { CollaborationPasswordFormDialogComponent } from '../collaboration-password-form-dialog/collaboration-password-form-dialog.component';
+import { FormMenuDialogDrawingComponent } from '../form-menu-dialog-drawing/form-menu-dialog-drawing.component';
 
 @Component({
   selector: 'app-drawing-gallery-card',
@@ -37,7 +38,8 @@ export class DrawingGalleryCardComponent {
   }
 
   openDialog(): void {
-    if (this.drawing.type !== "Protected") {
+    
+    if (this.drawing.type !== "Protected" || (this.drawing.type === "Protected" && this.drawing.is_member)) {
       this.dialogRef = this.dialog.open(DrawingPreviewDialogComponent,
         {
           data: this.drawing
@@ -58,5 +60,30 @@ export class DrawingGalleryCardComponent {
       this.drawingLoader.activeDrawingData = data;
       this.router.navigateByUrl(`drawing/${this.drawing.collaboration_id}`);
     }
+  }
+
+  openDelete(): void {
+    this.dialog.open(FormMenuDialogDrawingComponent, 
+      {
+      
+        data: {drawing:this.drawing, action: "Delete"}
+      
+    });
+  }
+  openLeave(): void {
+    this.dialog.open(FormMenuDialogDrawingComponent, 
+      {
+      
+        data: {drawing:this.drawing, action: "Leave"}
+      
+    });
+  }
+  openUpdate(): void {
+    this.dialog.open(FormMenuDialogDrawingComponent, 
+      {
+      
+        data: {drawing:this.drawing, action: 'Update'}
+      
+    });
   }
 }

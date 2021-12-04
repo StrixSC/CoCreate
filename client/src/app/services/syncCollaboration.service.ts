@@ -1,9 +1,7 @@
 import { AuthService } from './auth.service';
-import { ICollaborationJoinPayload, ICollaborationConnectPayload, ICollaborationCreatePayload, ICollaborationUpdatePayload, ICollaborationDeletePayload, ICollaborationDisconnectPayload } from './../model/ICollaboration.model';
-import {
-  IGalleryEntry, IConnectCollaboration, ICreateCollaboration
-} from "../model/IGalleryEntry.model";
-import { Observable, of, EMPTY } from "rxjs";
+import { ICollaborationJoinPayload, ICollaborationConnectPayload, ICollaborationCreatePayload, ICollaborationUpdatePayload, ICollaborationDeletePayload, ICollaborationDisconnectPayload, ICollaborationLeavePayload } from './../model/ICollaboration.model';
+import { ICreateCollaboration } from "../model/IGalleryEntry.model";
+import { Observable } from "rxjs";
 import { Injectable } from "@angular/core";
 import { SocketService } from "./chat/socket.service";
 
@@ -33,14 +31,13 @@ export class SyncCollaborationService {
       return;
     }
 
-    this.socketService.emit('collaboration:join', { ...data, userId: this.authService.activeUser.uid });
+    this.socketService.emit('collaboration:connect', { ...data, userId: this.authService.activeUser.uid });
   }
 
   sendCreateCollaboration(data: ICollaborationCreatePayload): void {
     if (!this.authService.activeUser) {
       return;
     }
-    //console.log(data)
     this.socketService.emit('collaboration:create', data);
   }
 
@@ -60,11 +57,11 @@ export class SyncCollaborationService {
     this.socketService.emit('collaboration:delete', { ...data, userId: this.authService.activeUser.uid });
   }
 
-  sendLeaveCollaboration(data: { userId: string, collaborationId: string }) {
+  sendLeaveCollaboration(data: ICollaborationLeavePayload) {
     if (!this.authService.activeUser) {
       return;
     }
-
+    console.log(data)
     this.socketService.emit('collaboration:leave', { ...data, userId: this.authService.activeUser.uid });
   }
 
