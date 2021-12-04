@@ -27,7 +27,6 @@ export class UserProfileSettingsComponent implements OnInit {
   constructor(private userService:UserService,public dialog: MatDialog,private httpClient:HttpClient,private auth:AuthService,private fb:FormBuilder) { 
 	this.activeUser=this.auth.activeUser;
 	if(this.activeUser!.displayName !=null)	this.username=this.activeUser!.displayName
-
   }
 
   ngOnInit() {
@@ -89,9 +88,9 @@ export class UserProfileSettingsComponent implements OnInit {
 			this.url = reader.result; 
 		
 	
-			// console.log(this.url)
-			// this.userService.updateUsernameAndAvatar(this.username,this.url).subscribe(res=>{
-			// });
+			console.log(this.url)
+			this.userService.updateUsernameAndAvatar(this.username,this.url).subscribe(res=>{
+			});
 		}
 			
 	}
