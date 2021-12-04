@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/screens/chat/chat.dart';
 
 class Chat {
@@ -5,6 +8,7 @@ class Chat {
   String? collaborationId, updatedAt;
   List<ChatMessage> messages;
   List onlineMembers = [];
+  Color color;
 
   Chat({
     required this.id,
@@ -16,6 +20,7 @@ class Chat {
     this.updatedAt = '',
     this.type = "",
     required this.onlineMembers,
+    this.color = kPrimaryColor,
   });
 
   @override

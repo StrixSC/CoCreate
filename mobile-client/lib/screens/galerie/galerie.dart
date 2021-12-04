@@ -9,6 +9,7 @@ import 'package:Colorimage/providers/messenger.dart';
 import 'package:Colorimage/screens/drawing/drawing.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/widgets/sidebar.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -22,7 +23,7 @@ import 'package:intl/intl.dart';
 import '../../app.dart';
 
 const _fontSize = 20.0;
-const padding = 30.0;
+const padding = 20.0;
 const TYPES = ["Available", "Joined"];
 final _formKey = GlobalKey<FormBuilderState>();
 
@@ -422,12 +423,7 @@ class GalerieState extends State<Galerie>
                   padding: EdgeInsets.all(10.0),
                   color: kContentColor,
                   child: Center(child: Text('Créer un dessin'))),
-              content: Column(children: [
-                Expanded(
-                    child: SizedBox(
-                        width: 1000,
-                        height: 700,
-                        child: ListView(
+              content: SingleChildScrollView( child: Container(width: 1000,child:ListView(
                             shrinkWrap: true,
                             padding: const EdgeInsets.only(
                                 left: 100.0, right: 100.0),
@@ -504,8 +500,7 @@ class GalerieState extends State<Galerie>
                                             'Veuillez entrez choisir un auteur',
                                             memberController),
                                   ]))
-                            ])))
-              ]),
+                            ]))),
               actions: <Widget>[
                 Padding(
                     padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
@@ -543,25 +538,31 @@ class GalerieState extends State<Galerie>
                                     .createCollaboration(
                                         authorId, title, type, null, color);
                               }
-                              Navigator.of(context).pop();
-                              showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      AlertDialog(
-                                        title: Text(
-                                            'Bravo! Votre dessin à été créer avec succès.'),
-                                        content: const Text('Amusez-vous! 😄'),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context, 'Ok');
-                                            },
-                                            child: const Text('Ok'),
-                                          ),
-                                        ],
-                                      ));
+                              Navigator.pop(context);
+                              AwesomeDialog(
+                                context:
+                                    navigatorKey.currentContext as BuildContext,
+                                width: 800,
+                                dismissOnTouchOutside: false,
+                                dialogType: DialogType.SUCCES,
+                                animType: AnimType.BOTTOMSLIDE,
+                                title: 'Succes!',
+                                desc:
+                                    'Bravo! Votre dessin à été créer avec succès. Amusez-vous! 😄',
+                                btnOkOnPress: () {},
+                              ).show();
                             } else {
-                              print("validation failed");
+                              AwesomeDialog(
+                                context: navigatorKey.currentContext as BuildContext,
+                                width: 800,
+                                btnOkColor: Colors.red,
+                                dismissOnTouchOutside: false,
+                                dialogType: DialogType.ERROR,
+                                animType: AnimType.BOTTOMSLIDE,
+                                title: 'Erreur!',
+                                desc: 'Il y a eu un probleme dans la validation...',
+                                btnOkOnPress: () {},
+                              ).show();
                             }
                           },
                           child: const Text('Créer'),
@@ -839,10 +840,11 @@ class _Drawing extends StatelessWidget {
                                     onPressed: () {
                                       Navigator.pop(context, 'Delete');
                                       alert(
-                                          context,
+                                          context.read<Collaborator>(),
                                           'supprimer',
                                           'Vous pourrez plus le ré-obtenir! 😧',
-                                          'Créez-en un autre! 😄');
+                                          'Créez-en un autre! 😄',
+                                          context);
                                     },
                                     child: const Text('Supprimer'),
                                   )))
@@ -858,10 +860,11 @@ class _Drawing extends StatelessWidget {
                                     onPressed: () {
                                       Navigator.pop(context, 'Quitter');
                                       alert(
-                                          context,
+                                          context.read<Collaborator>(),
                                           'quitter',
                                           'Il sera possible de le rejoindre plus tard si il est pas supprimer 😄',
-                                          'Aller joindre des dessins!');
+                                          'Aller joindre des dessins!',
+                                          context);
                                     },
                                     child: const Text('Quitter'),
                                   ))),
@@ -933,53 +936,41 @@ class _Drawing extends StatelessWidget {
                 ]));
   }
 
-  alert(context, type, consequence, result) {
-    return showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-              title: Text('Êtes-vous certain de vouloir ${type} ce dessin?.'),
-              content: Text(consequence),
-              actions: <Widget>[
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, 'Annuler');
-                  },
-                  child: const Text('Annuler'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, 'Oui');
-                    type == 'supprimer'
-                        ? context
-                            .read<Collaborator>()
-                            .collaborationSocket
-                            .deleteCollaboration(
-                                drawing.collaboration.collaborationId)
-                        : context
-                            .read<Collaborator>()
-                            .collaborationSocket
-                            .leaveCollaboration(
-                                drawing.collaboration.collaborationId);
-                    showDialog<String>(
-                        context: context,
-                        builder: (BuildContext context) => AlertDialog(
-                              title:
-                                  Text('Le dessin à été ${type} avec succès.'),
-                              content: Text(result),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context, 'Ok');
-                                  },
-                                  child: const Text('Ok'),
-                                ),
-                              ],
-                            ));
-                  },
-                  child: const Text('Oui'),
-                ),
-              ],
-            ));
+  alert(collab, type, consequence, result, context) {
+    return AwesomeDialog(
+      context: navigatorKey.currentContext as BuildContext,
+      width: 800,
+      dismissOnTouchOutside: false,
+      dialogType: DialogType.WARNING,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Attention!',
+      desc: 'Êtes-vous certain de vouloir ${type} ce dessin?.',
+      btnCancelOnPress: () {
+        Navigator.pop(context);
+      },
+      btnOkOnPress: () {
+        emitDeleteLeave(type, collab);
+        AwesomeDialog(
+          context: navigatorKey.currentContext as BuildContext,
+          width: 800,
+          dismissOnTouchOutside: false,
+          dialogType: DialogType.SUCCES,
+          animType: AnimType.BOTTOMSLIDE,
+          title: 'Succes!',
+          desc: 'Le dessin à été ${type} avec succès.',
+          btnOkOnPress: () {},
+        ).show();
+      },
+    ).show();
+  }
+
+  emitDeleteLeave(type, collab) {
+    type == 'supprimer'
+        ? collab.collaborationSocket
+            .deleteCollaboration(drawing.collaboration.collaborationId)
+        : collab.collaborationSocket
+            .leaveCollaboration(drawing.collaboration.collaborationId);
+    collab.refreshPages();
   }
 
   @override

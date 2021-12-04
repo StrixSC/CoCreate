@@ -21,9 +21,10 @@ import '../models/chat.dart';
 
 class Teammate extends ChangeNotifier {
   UserCredential? auth;
-  List teams = [];
+  List<Team> teams = [];
   late TeamSocket teamSocket;
   late PagingController pagingController;
+  bool isPartOfTeam = false;
 
   Teammate(this.auth);
 
@@ -62,6 +63,20 @@ class Teammate extends ChangeNotifier {
     return englishType;
   }
 
+  void isPartOfATeam() async {
+    isPartOfTeam = false;
+    RestApi rest = RestApi();
+    var response = await rest.team.fetchTeams(
+        null, 0, 100, null, false, true, false);
+    print(json.decode(response.body));
+    if (response.statusCode == 200) {
+      var jsonResponse = json.decode(response.body); //Map<String, dynamic>;
+      List resp = jsonResponse['teams'];
+      resp.isEmpty ? isPartOfTeam = false : isPartOfTeam = true;
+    }
+    notifyListeners();
+  }
+
   void updateUser(UserCredential updatedUser) {
     auth = updatedUser;
     notifyListeners();
@@ -71,8 +86,8 @@ class Teammate extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addTeams(List team) {
-    teams.add(team);
+  void addTeams(List<Team> team) {
+    teams.addAll(team);
     notifyListeners();
   }
 
@@ -81,6 +96,7 @@ class Teammate extends ChangeNotifier {
   }
 
   void teamCreated(Team team) {
+    pagingController.refresh();
     notifyListeners();
   }
 

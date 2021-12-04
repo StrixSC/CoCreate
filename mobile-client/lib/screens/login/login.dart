@@ -39,6 +39,11 @@ class _LoginState extends State<Login> {
   late UserCredential userCredential;
   bool _passwordVisible = false;
 
+  @override
+  void initState() {
+    super.initState();
+  }
+
   final logo = Hero(
     tag: 'hero',
     child: CircleAvatar(
@@ -70,24 +75,17 @@ class _LoginState extends State<Login> {
 
     var token = await FirebaseAuth.instance.currentUser!.getIdToken();
 
-    RestApi rest = RestApi();
-    var response = await rest.auth.login(token);
+    initializeSocketConnection(userCredential, token);
 
-    if (response.statusCode == 202) {
-      initializeSocketConnection(userCredential, token);
+    // Fetch initial user info
+    context.read<Messenger>().updateUser(userCredential);
+    context.read<Collaborator>().updateUser(userCredential);
+    context.read<Teammate>().updateUser(userCredential);
+    context.read<Messenger>().fetchChannels();
+    context.read<Messenger>().fetchAllChannels();
 
-      // Fetch initial user info
-      context.read<Messenger>().updateUser(userCredential);
-      context.read<Collaborator>().updateUser(userCredential);
-      context.read<Teammate>().updateUser(userCredential);
-      context.read<Messenger>().fetchChannels();
-      context.read<Messenger>().fetchAllChannels();
-
-      // Home Page
-      Navigator.pushNamed(context, homeRoute);
-    } else {
-      print('Login request failed with status: ${response.statusCode}.');
-    }
+    // Home Page
+    Navigator.pushNamed(context, homeRoute);
   }
 
   void initializeSocketConnection(auth, token) {

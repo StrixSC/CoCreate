@@ -1,7 +1,11 @@
 import 'package:Colorimage/models/team.dart';
 import 'package:Colorimage/utils/socket/socket_service.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+
+import '../../app.dart';
 
 class TeamSocket {
   User user;
@@ -10,15 +14,16 @@ class TeamSocket {
   TeamSocket({required this.user, required this.socket});
 
   data(Team team) {
-    return {
+     Map data = {
       'id': team.id,
       'teamName': team.name,
       'bio': team.bio,
       'maxMemberCount': team.maxMemberCount,
       'type': team.type,
       'mascot': team.mascot,
-      'password': team.password
     };
+     team.password == null ? data['password'] = team.password : '';
+    return data;
   }
 
   // Emits
@@ -117,17 +122,27 @@ class TeamSocket {
     socket.on('teams:created', (data) {
       print('Teams created');
       Team updatedTeam = Team(
-        id: data['teamId'],
-        authorUsername: data['authorUsername'],
-        authorAvatarUrl: data['authorAvatarUrl'],
-        name: data['teamName'],
-        bio: data['teamBio'],
-        maxMemberCount: data['maxMemberCount'],
-        type: data['type'],
-        mascot: data['mascot'],
+        // id: data['teamId'],
+        // name: data['teamName'],
+        // bio: data['teamBio'],
+        // maxMemberCount: data['maxMemberCount'],
+        // type: data['type'],
+        // mascot: data['mascot'],
         members: [],
       );
       callbackChannel('created', updatedTeam);
+      AwesomeDialog(
+        context:
+        navigatorKey.currentContext as BuildContext,
+        width: 800,
+        dismissOnTouchOutside: false,
+        dialogType: DialogType.SUCCES,
+        animType: AnimType.BOTTOMSLIDE,
+        title: 'Succes!',
+        desc:
+        'Bravo! Votre équipe à été créer avec succès. Amusez-vous! 😄',
+        btnOkOnPress: () {},
+      ).show();
     });
   }
 
@@ -139,8 +154,19 @@ class TeamSocket {
   }
 
   onCreateFinished() {
-    // TODO
     socket.on('teams:created:finished', (data) {
+      // AwesomeDialog(
+      //   context:
+      //   navigatorKey.currentContext as BuildContext,
+      //   width: 800,
+      //   dismissOnTouchOutside: false,
+      //   dialogType: DialogType.SUCCES,
+      //   animType: AnimType.BOTTOMSLIDE,
+      //   title: 'Succes!',
+      //   desc:
+      //   'Bravo! Votre équipe à été créer avec succès. Amusez-vous! 😄',
+      //   btnOkOnPress: () {},
+      // ).show();
       print('Teams created finished');
     });
   }

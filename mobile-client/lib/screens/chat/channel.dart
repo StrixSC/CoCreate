@@ -44,7 +44,7 @@ class _ChannelState extends State<Channel> {
                   "Joignez un dessin pour discuter avec vos amis! 😄"),
             ])
           : const SizedBox.shrink(),
-      context.read<Teammate>().teams.isNotEmpty
+      context.watch<Teammate>().isPartOfTeam
           ? Column(children: [
               section(channelType['Teams']),
               getChannelListWithType(channelType['Teams'],

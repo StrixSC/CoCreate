@@ -1,17 +1,16 @@
 import 'dart:convert';
 
-import 'package:Colorimage/models/user.dart';
-import 'package:Colorimage/screens/chat/chat.dart';
-import 'package:Colorimage/utils/rest/channels_api.dart';
-import 'package:Colorimage/utils/rest/rest_api.dart';
-import 'package:Colorimage/utils/rest/users_api.dart';
-import 'package:Colorimage/utils/socket/channel.dart';
+import 'dart:math';
+import 'package:Colorimage/models/chat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:Colorimage/screens/chat/chat.dart';
+import 'package:Colorimage/utils/rest/rest_api.dart';
+import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:socket_io_client/socket_io_client.dart';
 
 import '../models/chat.dart';
-
+import 'dart:math';
 class Messenger extends ChangeNotifier {
   UserCredential? auth;
   List<Chat> userChannels = [];
@@ -110,6 +109,7 @@ class Messenger extends ChangeNotifier {
           ownerUsername: channel['owner_username'],
           messages: [],
           onlineMembers: channel['online_members'],
+          color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
         ));
       }
       updateUserChannels(userChannels);

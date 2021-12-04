@@ -1,6 +1,7 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/collaborator.dart';
 import 'package:Colorimage/providers/messenger.dart';
+import 'package:Colorimage/providers/team.dart';
 import 'package:Colorimage/screens/galerie/galerie.dart';
 import 'package:Colorimage/screens/profile/profile.dart';
 import 'package:Colorimage/screens/teams/team.dart';
@@ -74,8 +75,7 @@ class _BottomNavBarScreenState extends State<BottomNavBar> {
   }
 
   openDrawer() {
-    print('chatcaht');
-    print(_scaffoldKey.currentState!.hasEndDrawer);
+    context.read<Teammate>().isPartOfATeam();
     _scaffoldKey.currentState!.openEndDrawer();
   }
 
