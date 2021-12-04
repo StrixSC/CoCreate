@@ -22,6 +22,7 @@ export class DrawingPageComponent {
   loadListener: Subscription;
   listener: Subscription;
   activeCollaborationId: string;
+  collaborationDeletedSubscription: Subscription;
   constructor(
     public dialog: MatDialog,
     private hotkeyService: HotkeysService,
@@ -62,6 +63,13 @@ export class DrawingPageComponent {
   }
 
   init(data?: ICollaborationLoadResponse): void {
+    this.collaborationDeletedSubscription = this.syncCollabService.onDeleteCollaboration().subscribe((c: { collaborationId: string }) => {
+      if (c.collaborationId === this.activeCollaborationId) {
+        this.snackbar.open('Le dessin actif fut supprimé...', "OK", { duration: 5000 });
+        this.router.navigateByUrl('gallery');
+      }
+    });
+
     if (!this.drawingLoader.isLoaded) {
       if (data) {
         this.drawingLoader.activeDrawingData = data;
@@ -95,6 +103,7 @@ export class DrawingPageComponent {
           }
         }
       });
+
     }
   }
 

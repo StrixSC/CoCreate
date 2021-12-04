@@ -20,9 +20,7 @@ export class AppComponent {
   }
 
   ngOnDestroy() {
-    if (this.socketService.socket) {
-      this.socketService.disconnect();
-    }
+    this.socketService.disconnect();
   }
 
 }

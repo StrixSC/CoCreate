@@ -7,28 +7,6 @@
         </div>
 
         <div class="chat-actions">
-            <div class="history-button-container">
-                <button (click)="fetchHistory()" [matTooltip]="'Chercher l\'historique de la chaîne'"
-                    matTooltipPosition="below" mat-icon-button class="action-button history-button">
-                    <mat-icon>history</mat-icon>
-                </button>
-            </div>
-            <div class="mute-button-container">
-                <button *ngIf="!activeChannel.muteNotification" (click)="toggleNotifications()" [matTooltip]="'Enlever la sonorité de notification.'" matTooltipPosition="below" mat-icon-button
-                    class="action-button mute-button">
-                    <mat-icon>notifications</mat-icon>
-                </button>
-                <button *ngIf="activeChannel.muteNotification" (click)="toggleNotifications()" [matTooltip]="'Allumer la sonorité de notification.'" matTooltipPosition="below" mat-icon-button
-                    class="action-button mute-button">
-                    <mat-icon>notifications_off</mat-icon>
-                </button>
-            </div>
-            <div class="mute-button-container">
-                <button [matTooltip]="'Ouvrir la messagerie sur une fenêtre séparée'" (click)="openInNewWindow()"
-                    matTooltipPosition="below" mat-icon-button class="action-button open-button">
-                    <mat-icon>open_in_new</mat-icon>
-                </button>
-            </div>
             <div class="mute-button-container">
                 <button [matMenuTriggerFor]="menu" [matTooltip]="'Membres connectés'" matTooltipPosition="below"
                     mat-icon-button class="action-button open-button">
@@ -65,76 +43,32 @@
                                 <img class="no-online-img" src="/assets/img/alone.png">
                             </div>
                         </div>
-                        <style>
-
-                            .no-online-container {
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                opacity: 0.5;
-                                max-width: 30px;
-                            }
-
-                            .no-online-img {
-                                max-width: 100%;
-                                max-height: 100%;
-                                object-fit: contain;
-                            }
-
-                            .member-wrapper-container {
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: center;
-                                gap: 1.25rem;
-                            }
-
-                            .member-info-container {
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                gap: 0.5rem;
-                            }
-
-                            .member-avatar-container {
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                max-width: 30px;
-                                max-height: 30px;
-                            }
-
-                            .member-avatar-img {
-                                max-width: 100%;
-                                min-width: 100%;
-                                object-fit: contain;
-                                border-radius: 100%
-                            }
-
-                            .member-username {
-                                color: white;
-                            }
-
-                            .status-icon {
-                                min-width: 10px;
-                                min-height: 10px;
-                                border-radius: 100%;
-                            }
-
-                            .online {
-                                background-color: lightgreen
-                            }
-
-                            .busy {
-                                background-color: orange
-                            }
-
-                            .disconnected {
-                                background-color: crimson
-                            }
-                        </style>
                     </div>
                 </mat-menu>
             </div>
+            <div class="history-button-container">
+                <button (click)="fetchHistory()" [matTooltip]="'Chercher l\'historique de la chaîne'"
+                    matTooltipPosition="below" mat-icon-button class="action-button history-button">
+                    <mat-icon>history</mat-icon>
+                </button>
+            </div>
+            <div class="mute-button-container">
+                <button *ngIf="!activeChannel.muteNotification" (click)="toggleNotifications()" [matTooltip]="'Enlever la sonorité de notification.'" matTooltipPosition="below" mat-icon-button
+                    class="action-button mute-button">
+                    <mat-icon>notifications</mat-icon>
+                </button>
+                <button *ngIf="activeChannel.muteNotification" (click)="toggleNotifications()" [matTooltip]="'Allumer la sonorité de notification.'" matTooltipPosition="below" mat-icon-button
+                    class="action-button mute-button">
+                    <mat-icon>notifications_off</mat-icon>
+                </button>
+            </div>
+            <div class="mute-button-container">
+                <button [matTooltip]="'Ouvrir la messagerie sur une fenêtre séparée'" (click)="openInNewWindow()"
+                    matTooltipPosition="below" mat-icon-button class="action-button open-button">
+                    <mat-icon>open_in_new</mat-icon>
+                </button>
+            </div>
+
         </div>
     </div>
 

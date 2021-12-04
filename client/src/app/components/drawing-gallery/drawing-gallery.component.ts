@@ -6,7 +6,7 @@ import { ICollaborationConnectResponse, ICollaborationDeleteResponse, ICollabora
 import { AuthService } from './../../services/auth.service';
 import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, Input, OnInit, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { MatDialog, MatPaginator, MatTableDataSource, PageEvent } from '@angular/material';
+import { MatDialog, MatPaginator, MatTabGroup, MatTableDataSource, PageEvent } from '@angular/material';
 import { BehaviorSubject, EMPTY, merge, of, Subscription } from 'rxjs';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { DrawingGalleryService } from 'src/app/services/drawing-gallery/drawing-gallery.service';
@@ -54,6 +54,7 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   lengthAll: number;
   pageSizeAll = 12;
   pageIndexAll = 0;
+  @ViewChild('tabGroup', { static: false }) tabs: MatTabGroup;
 
   isLoading: boolean = false;
 
@@ -225,8 +226,10 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   onCreate() {
-    if (this.dialogRef)
+    if (this.dialogRef) {
       this.dialogRef.close();
+      this.tabs.selectedIndex = 1;
+    }
     this.snackbar.open('Nouveau dessin créé avec succès!', '', { duration: 5000 });
     this.handlePageEvent(new PageEvent, false);
   }

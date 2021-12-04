@@ -1,5 +1,5 @@
 import { IGalleryEntry } from '../../model/IGalleryEntry.model';
-import {OnInit } from '@angular/core';
+import { OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 import { ICollaborationCreatePayload, ICollaborationDeletePayload, ICollaborationLeavePayload, ICollaborationUpdatePayload } from '../../model/ICollaboration.model';
@@ -24,8 +24,8 @@ export class FormMenuDialogDrawingComponent implements OnInit {
   isLoading: boolean;
   selectedUpdate: string = '';
   public updateOption =
-  ['Titre','Type','Auteur'
-  ];
+    ['Titre', 'Type', 'Auteur'
+    ];
   public visibilityTypes: { key: string, value: string }[] =
     [
       {
@@ -45,12 +45,12 @@ export class FormMenuDialogDrawingComponent implements OnInit {
 
   public authors: { key: string, value: string }[] = [];
 
-  
+
   public constructor(
     private syncCollaborationService: SyncCollaborationService,
     public dialogRef: MatDialogRef<FormMenuDialogDrawingComponent>,
     private snackbar: MatSnackBar,
-    
+
     private auth: AuthService,
     @Inject(MAT_DIALOG_DATA) public drawing: any,
     private fb: FormBuilder,
@@ -58,10 +58,10 @@ export class FormMenuDialogDrawingComponent implements OnInit {
   }
 
   ngOnInit(): void {
-      this.exceptionSubscription = this.syncCollaborationService.onCollaborationException().subscribe((message: any) => {
+    this.exceptionSubscription = this.syncCollaborationService.onCollaborationException().subscribe((message: any) => {
       this.snackbar.open(message.message, '', { duration: 5000 });
       this.isLoading = false;
-    } );
+    });
     this.authors = [
       {
         key: this.auth.activeUser!.uid,
@@ -69,7 +69,7 @@ export class FormMenuDialogDrawingComponent implements OnInit {
       }
       // TODO: Add fetch for teams.
     ];
-    
+
 
 
     this.updateForm = this.fb.group({
@@ -110,22 +110,22 @@ export class FormMenuDialogDrawingComponent implements OnInit {
   }
 
   sendDeleteCollaboration() {
-    if(this.drawing!==null && this.drawing['action']==="Delete"){
-    let data =  {
-    collaborationId: this.drawing['drawing'].collaboration_id
-    } as ICollaborationDeletePayload
-    this.syncCollaborationService.sendDeleteCollaboration(data)
-    this.dialogRef.close();
+    if (this.drawing !== null && this.drawing['action'] === "Delete") {
+      let data = {
+        collaborationId: this.drawing['drawing'].collaboration_id
+      } as ICollaborationDeletePayload
+      this.syncCollaborationService.sendDeleteCollaboration(data)
+      this.dialogRef.close();
     }
   }
 
   sendLeaveCollaboration() {
-    if(this.drawing!==null && this.drawing['action']==="Leave"){
-    let data =  {
-    collaborationId: this.drawing['drawing'].collaboration_id
-    } as ICollaborationLeavePayload
-    this.syncCollaborationService.sendLeaveCollaboration(data)
-    this.dialogRef.close();
+    if (this.drawing !== null && this.drawing['action'] === "Leave") {
+      let data = {
+        collaborationId: this.drawing['drawing'].collaboration_id
+      } as ICollaborationLeavePayload
+      this.syncCollaborationService.sendLeaveCollaboration(data)
+      this.dialogRef.close();
     }
   }
   onNoClick(): void {
@@ -139,8 +139,8 @@ export class FormMenuDialogDrawingComponent implements OnInit {
       const payload = {
 
 
-      collaborationId: this.drawing['drawing'].collaboration_id,
-   
+        collaborationId: this.drawing['drawing'].collaboration_id,
+
 
         userId: this.auth.activeUser.uid,
         title: this.title.value,

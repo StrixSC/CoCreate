@@ -69,7 +69,6 @@ export class ChatMenuComponent implements OnInit {
       this.allPublicChannels = d;
       this.filteredChannels = this.allPublicChannels.filter((c) => JSON.stringify(c).includes(this.filter.value));
       channelSub.unsubscribe();
-      console.log(d);
     });
   }
 

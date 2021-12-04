@@ -197,7 +197,6 @@ export class TeamPageComponent implements OnInit {
   }
 
   filterFullTeams(event: MatSlideToggleChange) {
-    // Add full=false
     if (event.checked) {
       this.searchParams.set('removeFull', 'false');
     } else {

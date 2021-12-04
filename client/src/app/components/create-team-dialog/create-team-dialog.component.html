@@ -11,7 +11,7 @@
                                    <mat-form-field required class="form-field clickable" appearance="outline">
                                           <mat-label>Nom d'équipe</mat-label>
                                           <input required matInput type="text" formControlName="teamName"
-                                                 placeholder="Les Piccassos des ténèbres" />
+                                                 placeholder="Les Picassos des ténèbres" />
                                           <mat-error *ngIf="teamName.hasError('required')">
                                                  Ce champ est obligatoire.
                                           </mat-error>
@@ -61,7 +61,7 @@
                                    <mat-form-field required class="form-field clickable" appearance="outline">
                                           <mat-label>Nombre de membre maximale</mat-label>
                                           <input min="1" max="30" required matInput type="number" formControlName="maxMemberCount"
-                                                 placeholder="Les Piccassos des ténèbres" />
+                                                 placeholder="4" />
                                           <mat-error *ngIf="maxMemberCount.hasError('required')">
                                                  Ce champ est obligatoire.
                                           </mat-error>

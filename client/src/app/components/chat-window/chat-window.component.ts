@@ -73,6 +73,8 @@ export class ChatWindowComponent implements OnInit {
     if (this.joinedSubscription) {
       this.messageSubscription.unsubscribe();
     }
+
+    this.socketService.disconnect();
   }
 
 }

@@ -9,7 +9,7 @@ import { ICollaborationCreatePayload } from './../../model/ICollaboration.model'
 import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { AuthService } from './../../services/auth.service';
 import { Component, Inject } from '@angular/core';
-import { Validators, FormGroup, FormBuilder } from '@angular/forms';
+import { Validators, FormGroup, FormBuilder, AbstractControl } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DrawingType } from 'src/app/model/drawing-visibility.model';
 import { ColorPickerService } from 'src/app/color-picker/color-picker.service';
@@ -96,24 +96,24 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
     this.dialogRef.close();
   }
 
-  get author(): any {
-    return this.newDrawingForm.get('author');
+  get author(): AbstractControl {
+    return this.newDrawingForm.get('author')!;
   }
 
-  get password(): any {
-    return this.newDrawingForm.get('password');
+  get password(): AbstractControl {
+    return this.newDrawingForm.get('password')!;
   }
 
-  get title(): any {
-    return this.newDrawingForm.get('title');
+  get title(): AbstractControl {
+    return this.newDrawingForm.get('title')!;
   }
 
-  get type(): any {
-    return this.newDrawingForm.get('type');
+  get type(): AbstractControl {
+    return this.newDrawingForm.get('type')!;
   }
 
-  get backgroundColor(): any {
-    return this.newDrawingForm.get('backgroundColor');
+  get backgroundColor(): AbstractControl {
+    return this.newDrawingForm.get('backgroundColor')!;
   }
 
   changeType(e: any) {
@@ -123,8 +123,10 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
         Validators.minLength(8),
         Validators.maxLength(256)
       ]);
+      this.password.updateValueAndValidity();
     } else {
-      this.password.setValidators([]);
+      this.password.clearValidators();
+      this.password.updateValueAndValidity();
     }
   }
 

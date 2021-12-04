@@ -44,7 +44,7 @@ export class TeamInfoComponent implements OnInit {
   deleteExceptionSubscription: Subscription;
   deleteFinishedSubscription: Subscription;
   connectionSubscription: Subscription;
-
+  selfDeleteSubscription: Subscription;
   displayedColumns = ['username', 'status', 'joinedOn', 'type'];
   drawingsColumns = ['title', 'memberCount', 'createdAt', 'updatedAt', 'actions']
   constructor(
@@ -71,12 +71,17 @@ export class TeamInfoComponent implements OnInit {
 
     this.connectionSubscription = merge(
       this.socketService.onConnected(),
+      this.socketService.onStatusChange(),
       this.socketService.onDisconnected(),
       this.syncCollabService.onCreateCollaboration(),
       this.syncCollabService.onUpdateCollaboration(),
       this.syncCollabService.onJoinCollaboration(),
+      this.syncCollabService.onLeaveCollaboration(),
       this.syncCollabService.onConnectCollaboration(),
       this.syncCollabService.onDisconnectCollaboration(),
+      this.teamService.onJoin(),
+      this.teamService.onLeave(),
+      this.teamService.onUpdate(),
     ).subscribe(() => {
       this.fetchTeamInfo();
     })
@@ -108,6 +113,11 @@ export class TeamInfoComponent implements OnInit {
       this.dialogRef.disableClose = false;
       this.fetchTeamInfo();
     });
+
+    this.selfDeleteSubscription = this.teamService.onDelete().subscribe(() => {
+      this.snackbar.open("L'équipe fut supprimée...", "OK", { duration: 5000 });
+      this.dialogRef.close();
+    })
 
   }
 
@@ -185,8 +195,10 @@ export class TeamInfoComponent implements OnInit {
         Validators.minLength(8),
         Validators.maxLength(256)
       ]);
+      this.password.updateValueAndValidity();
     } else {
-      this.password.setValidators([]);
+      this.password.clearValidators();
+      this.password.updateValueAndValidity();
     }
   }
 
@@ -258,5 +270,8 @@ export class TeamInfoComponent implements OnInit {
       this.deleteFinishedSubscription.unsubscribe();
     }
 
+    if (this.selfDeleteSubscription) {
+      this.selfDeleteSubscription.unsubscribe();
+    }
   }
 }
