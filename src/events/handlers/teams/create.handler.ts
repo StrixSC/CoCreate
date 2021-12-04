@@ -20,7 +20,11 @@ export const handleCreate = async (io: Server, socket: Socket, data: {
         const team = await createTeam(socket.data.user, teamName, bio, maxMemberCount, type, mascot, password);
         socket.join(team.teamId);
         socket.join(team.channel_id);
-        socket.emit('teams:channel:join');
+        socket.emit('channel:joined', {
+            channelId: team.channel_id,
+            channelName: team.channelName,
+            collaborationId: team.collaborationId
+        });
         socket.emit('teams:create:finished', team);
         io.emit('teams:created', team);
     } catch (e) {
@@ -66,7 +70,7 @@ const createTeam = async (userId: string, teamName: string, bio: string, maxMemb
             },
             channel: {
                 create: {
-                    name: `Canal de l'équipe ${teamName}`,
+                    name: teamName,
                     type: ChannelType.Team,
                     members: {
                         create: [
@@ -77,6 +81,7 @@ const createTeam = async (userId: string, teamName: string, bio: string, maxMemb
             }
         },
         include: {
+            channel: true,
             team_members: {
                 include: {
                     user: {
@@ -105,6 +110,8 @@ const createTeam = async (userId: string, teamName: string, bio: string, maxMemb
             bio: createdTeam.bio,
             type: createdTeam.type,
             channel_id: createdTeam.channel_id,
+            channelName: createdTeam.channel.name.replace,
+            collaborationId: null
         }
     }
 }

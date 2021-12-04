@@ -56,18 +56,21 @@ export const handleJoin = async (io: Server, socket: Socket, data: {
             userId: member.user_id,
             avatarUrl: member.user.profile!.avatar_url,
             status: socket.data.status,
-            roomId: team.team_id
+            roomId: team.team_id,
+            channelId: team.channel_id,
+            channelName: member.team.channel.name,
+            collaborationId: null,
         } as IConnectionEventData;
-
-        io.emit('teams:joined', connectionData);
-        io.emit('channels:joined', connectionData)
-
-        for (let collaboration of collaborations) {
-            io.to(collaboration).emit("collaboration:joined", { ...connectionData, roomId: collaboration });
-        }
 
         socket.join(team.team_id);
         socket.join(team.channel_id);
+
+        io.to(member.team.team_id).emit('teams:joined', connectionData);
+        io.to(member.team.channel_id).emit('channels:joined', connectionData)
+
+        for (let collaboration of collaborations) {
+            io.emit("collaboration:joined", { ...connectionData, roomId: collaboration });
+        }
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.Teams_Join);
     }

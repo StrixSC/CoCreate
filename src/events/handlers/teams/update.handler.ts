@@ -55,8 +55,14 @@ export const handleUpdate = async (io: Server, socket: Socket, data: { teamId: s
                 type: data.type,
                 password: data.password,
                 max_member_count: data.maxMemberCount,
+                channel: {
+                    update: {
+                        name: data.teamName
+                    }
+                }
             },
             include: {
+                channel: true,
                 team_members: {
                     include: {
                         user: {
@@ -75,6 +81,11 @@ export const handleUpdate = async (io: Server, socket: Socket, data: { teamId: s
         });
 
         const onlineMembers = getOnlineMembersInRoom(updated.team_id);
+        io.to(team.channel_id).emit('channel:updated', {
+            channelId: updated.channel_id,
+            channelName: updated.channel.name,
+            updatedAt: updated.channel.updated_at,
+        });
         io.to(team.team_id).emit('teams:updated', {
             teamId: updated.team_id,
             authorUsername: member.user.profile!.username,

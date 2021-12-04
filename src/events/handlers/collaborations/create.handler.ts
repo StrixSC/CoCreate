@@ -1,4 +1,6 @@
-import { ChannelType, CollaborationType, MemberType } from '.prisma/client';
+import { EventFinishedType } from './../../../models/Exceptions.enum';
+import { SocketEventError } from './../../../socket';
+import { Account, ChannelType, CollaborationType, MemberType, Profile, TeamMember, User } from '.prisma/client';
 import create from 'http-errors';
 import { Server, Socket } from 'socket.io';
 import { v4 } from 'uuid';
@@ -7,6 +9,13 @@ import { db } from '../../../db';
 import { ExceptionType } from '../../../models/Exceptions.enum';
 import { handleSocketError } from '../../../utils/errors';
 import { findTeamById } from '../teams/join.handler';
+
+export type ITeamMember = (TeamMember & {
+    user: User & {
+        profile: Profile | null;
+        account: Account | null;
+    };
+})[];
 
 export const handleCreate = async (io: Server, socket: Socket, payload: {
     userId: string,
@@ -27,26 +36,29 @@ export const handleCreate = async (io: Server, socket: Socket, payload: {
         );
 
         if (!isValid) {
-            throw new create.BadRequest("Title must be a non-empty alphanumeric value with a length between 8 and 256. The type must be either Public, Protected or Private");
+            throw new SocketEventError("On dirait que certaines informations fournies ne sont pas valides. Le titre doit être entre 8 et 256 caractère. Le type doit être soit 'public', 'protégé' ou 'privé'.", "E1532");
         }
+
+        let teamMembers = [] as ITeamMember;
 
         if (isTeam) {
             const team = await findTeamById(creatorId);
             if (!team) {
-                throw new create.BadRequest("There are no teams with this id...")
+                throw new SocketEventError("Hmm... nous n'avons pas réussi à trouver une équipe avec les informations fournies... Si c'est une erreur, veuillez reporter ça à un administrateur.", "E1538")
             }
 
             const member = team.team_members.find((tm) => tm.user_id === userId);
+            teamMembers = team.team_members;
             if (!member) {
-                throw new create.Unauthorized("This user cannot be found in the team...");
+                throw new SocketEventError("Vous n'êtes pas membre de l'équipe fournies. Si ceci est une erreur, veuillez contacter un administrateur.", "E4134")
             }
         }
 
         if (type === CollaborationType.Private) {
-            const data = await createCollaboration(userId, creatorId, isTeam, type, title, password);
+            const data = await createCollaboration(userId, creatorId, isTeam, type, title, teamMembers, password);
 
             if (!data.collaboration) {
-                throw new create.InternalServerError('Error while establishing author and collaboration');
+                throw new SocketEventError("Oups! Erreur lors du traitement de la requête...");
             }
 
             const response = {
@@ -62,18 +74,23 @@ export const handleCreate = async (io: Server, socket: Socket, payload: {
                 authorAvatarUrl: data.author_avatar_url,
             }
 
-            socket.emit("collaboration:created", response);
+            socket.emit(EventFinishedType.Collaboration_Create);
+            if (isTeam) {
+                io.to(creatorId).emit('collaboration:created', response);
+            } else {
+                socket.emit("collaboration:created", response);
+            }
         } else {
             if (
                 type === CollaborationType.Protected &&
                 (!password || (password && validator.isEmpty(password)))
             ) {
-                throw new create.BadRequest("Collaboration type protected was given but no password (or an empty password) was given with the request.");
+                throw new SocketEventError("Oups! On dirait que le type que vous avez donné est protégé, mais il n'y a aucun mot de passe d'entré...", "E4914");
             }
-            const data = await createCollaboration(userId, creatorId, isTeam, type, title, password);
+            const data = await createCollaboration(userId, creatorId, isTeam, type, title, teamMembers, password);
 
             if (!data || !data.collaboration) {
-                throw new create.InternalServerError("Could not create drawing/collaboration. Internal server error.");
+                throw new SocketEventError("Quelque chose vient de se produire lors du traitement de la requête...", "E5203");
             }
 
             io.emit("collaboration:created", {
@@ -89,21 +106,13 @@ export const handleCreate = async (io: Server, socket: Socket, payload: {
                 authorAvatarUrl: data.author_avatar_url,
             });
 
-            // io.to(data.collaboration.channel_id).emit('channel:created', {
-            //     collaborationId: data.collaboration.collaboration_id,
-            //     channelId: data.collaboration.channel_id,
-            //     channelName: data.collaboration.channel.name,
-            //     ownerUsername: data.author_username,
-            //     createdAt: data.collaboration.channel.created_at,
-            //     updatedAt: data.collaboration.channel.updated_at
-            // });
         }
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.Collaboration);
     }
 }
 
-const createCollaboration = async (user_id: string, creatorId: string, isTeam: boolean, type: CollaborationType, title: string, password?: string) => {
+const createCollaboration = async (user_id: string, creatorId: string, isTeam: boolean, type: CollaborationType, title: string, teamMembers: any[], password?: string) => {
     const collab_id = v4();
 
     const author = await db.author.create({
@@ -122,22 +131,14 @@ const createCollaboration = async (user_id: string, creatorId: string, isTeam: b
                         }
                     },
                     collaboration_members: {
-                        create: [
-                            {
-                                type: MemberType.Owner,
-                                user_id: user_id
-                            }
-                        ]
+                        create: isTeam
+                            ? teamMembers.map((tm) => ({ type: MemberType.Regular, user_id: tm.user_id })) :
+                            [{ type: MemberType.Owner, user_id: user_id }]
                     },
                     channel: {
                         create: {
-                            name: `Canal du dessin ${title}`,
+                            name: title,
                             type: ChannelType.Collaboration,
-                            members: {
-                                create: [
-                                    { user_id: user_id, type: MemberType.Owner }
-                                ]
-                            }
                         }
                     }
                 }]

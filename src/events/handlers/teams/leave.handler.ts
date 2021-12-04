@@ -42,10 +42,13 @@ export const handleLeave = async (io: Server, socket: Socket, data: { teamId: st
         if (!deletedMember || !deletedChannelMember) {
             throw new SocketEventError(`Oups... Quelque chose s'est produit lors du traitement de la requête, veuillez réessayez à nouveau SVP.`);
         } else {
+
+            socket.emit('teams:leave:finished', { teamName: team.team_name });
+            io.to(team.channel_id).emit('channel:left', {
+                channelId: team.channel_id
+            });
             socket.leave(team.team_id);
             socket.leave(team.channel_id);
-            socket.emit('teams:leave:finished', { teamName: team.team_name });
-            socket.emit('teams:channel:leave');
 
             const onlineMembers = getOnlineMembersInRoom(team.team_id);
 

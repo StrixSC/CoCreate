@@ -6,7 +6,6 @@ import { db } from '../../../db';
 import { ExceptionType } from '../../../models/Exceptions.enum';
 import { handleSocketError } from '../../../utils/errors';
 
-
 export const handleUpdate = async (io: Server, socket: Socket, payload: {
     userId: string,
     collaborationId: string,
@@ -60,6 +59,11 @@ export const handleUpdate = async (io: Server, socket: Socket, payload: {
                 drawing: {
                     update: {
                         title: title
+                    }
+                },
+                channel: {
+                    update: {
+                        name: title,
                     }
                 },
                 type: type,
