@@ -8,17 +8,12 @@ import { EllipseSyncCommand } from './sync/ellipse-sync-command';
 import { SyncDrawingService } from './syncdrawing.service';
 import { FreedrawSyncCommand } from './sync/freedraw-sync-command';
 import { ICollaborationLoadResponse } from 'src/app/model/ICollaboration.model';
-import { TranslateCommand } from './tools/selection-tool/translate-command/translate-command';
-import { FilledShape } from './tools/tool-rectangle/filed-shape.model';
-import { EllipseCommand } from './tools/tool-ellipse/ellipse-command';
-import { toRGBString, hexToRgb, fromAlpha } from './../utils/colors';
-import { Pencil } from './tools/pencil-tool/pencil.model';
-import { PencilCommand } from './tools/pencil-tool/pencil-command';
+import { hexToRgb } from './../utils/colors';
 import { ActionType, IDeleteAction, ShapeType } from 'src/app/model/IAction.model';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { IAction, IFreedrawUpLoadAction, IShapeAction, ITranslateAction, IFreedrawUpAction, DrawingState, IRotateAction, IResizeAction } from './../model/IAction.model';
 import { ToolFactoryService } from './tool-factory.service';
-import { Injectable, Renderer2 } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -100,9 +95,14 @@ export class DrawingLoadService {
         });
       }
 
-      this.isLoading = false;
-      this.isLoaded = true;
     }
+  }
+
+  unload(): void {
+    this.drawingService.deleteDrawing();
+    this.toolFactoryService.deleteAll();
+    this.isLoaded = false;
+    this.isLoading = false;
   }
 
   loadActions(): void {
@@ -115,6 +115,8 @@ export class DrawingLoadService {
         this.toolFactoryService.handleEvent(action);
       }
     }
+    this.isLoading = false;
+    this.isLoaded = true;
   }
 
 }

@@ -23,6 +23,12 @@ export class CollaborationService {
     this.actions = new Map<string, ActionData>();
   }
 
+  clearActionList(): void {
+    this.undos = [];
+    this.redos = [];
+    this.actions.clear();
+  }
+
   addUser(userId: string): boolean {
     if (this.userExists(userId)) {
       return false;

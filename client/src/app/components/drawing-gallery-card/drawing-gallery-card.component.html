@@ -1,67 +1,71 @@
-<mat-card  class="drawing-card" *ngIf="drawing">
-  <div align="end" *ngIf="drawing.is_member" class="clickable">
-    <button mat-icon-button [matMenuTriggerFor]="menu"
-    aria-label="Example icon button with a vertical three dot icon">
+<mat-card class="drawing-card" *ngIf="drawing">
+  <mat-card-header>
+    <img mat-card-avatar [src]="drawing.author_avatar" class="example-header-image">
+    <mat-card-title *ngIf="drawing.title.length >=15">{{ drawing.title | slice:0:15 }}...</mat-card-title>
+    <mat-card-title *ngIf="drawing.title.length < 15">{{drawing.title}}</mat-card-title>
+    <mat-card-subtitle>Dernière mise à jour: {{ drawing.updated_at | date:'short' }}
+    </mat-card-subtitle>
+    <div align="end" *ngIf="drawing.is_member" class="clickable">
+      <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon button with a vertical three dot icon">
         <mat-icon>more_vert</mat-icon>
         <mat-menu #menu="matMenu">
-            <button *ngIf="drawing.is_owner" (click)="openUpdate()" mat-menu-item>
-              <mat-icon>settings_icon</mat-icon>
-              <span>Mise à jour des infos</span>
-            </button>
-            <button *ngIf="!drawing.is_owner" (click)="openLeave()" mat-menu-item>
-                <mat-icon>logout</mat-icon>
-                <span>Quitter</span>
-            </button>
-            <hr *ngIf="drawing.is_owner">
-            <button *ngIf="drawing.is_owner" (click)="openDelete()" mat-menu-item>
-                <mat-icon>delete</mat-icon>
-                <span>Supprimer</span>
-            </button>
+          <button *ngIf="drawing.is_owner" (click)="openUpdate()" mat-menu-item>
+            <mat-icon>settings_icon</mat-icon>
+            <span>Mise à jour des infos</span>
+          </button>
+          <button *ngIf="!drawing.is_owner" (click)="openLeave()" mat-menu-item>
+            <mat-icon>logout</mat-icon>
+            <span>Quitter</span>
+          </button>
+          <mat-divider *ngIf="drawing.is_owner"></mat-divider>
+          <button *ngIf="drawing.is_owner" (click)="openDelete()" mat-menu-item>
+            <mat-icon>delete</mat-icon>
+            <span>Supprimer</span>
+          </button>
         </mat-menu>
-    </button>
-</div>
-  <mat-card-header>
-    <img mat-card-avatar src="{{drawing.author_avatar}}" class="example-header-image">
-
-      <mat-card-title *ngIf="drawing.title.length >=15">{{ drawing.title | slice:0:15 }}...</mat-card-title>
-
-      <mat-card-title *ngIf="drawing.title.length < 15">{{drawing.title}}</mat-card-title>
-
-    <mat-card-subtitle>Mise à jour le {{ drawing.updated_at | date:'short' }}
-    </mat-card-subtitle>
+      </button>
+    </div>
   </mat-card-header>
-  <img class="image-preview" *ngIf="drawing.is_member || (drawing.type !== 'Protected' && !drawing.is_member)" mat-card-image
-    src="../../../assets/default-image.png">
+  
+  <img class="image-preview" *ngIf="drawing.is_member || (drawing.type !== 'Protected' && !drawing.is_member)"
+    mat-card-image src="../../../assets/default-image.png">
   <img class="image-preview" *ngIf="drawing.type === 'Protected' && !drawing.is_member" mat-card-image
     src="../../../assets/img/white-blank-protected.png">
-  
+
 
   <mat-card-header class="actions-container">
-    <mat-card-subtitle>Auteur: {{drawing.author_username}}</mat-card-subtitle>
+    <mat-card-subtitle class="notice-indicator">Auteur: {{drawing.author_username}}</mat-card-subtitle>
     <mat-card-subtitle *ngIf="drawing.type==='Protected'">Type: Protégé</mat-card-subtitle>
     <mat-card-subtitle *ngIf="drawing.type==='Public'">Type: Public</mat-card-subtitle>
     <mat-card-subtitle *ngIf="drawing.type==='Private'">Type: Privé</mat-card-subtitle>
-    <mat-card-subtitle *ngIf="drawing.active_member_count!==NaN">Collaborateurs actifs: {{drawing.active_member_count}}</mat-card-subtitle>
+    <mat-card-subtitle>Collaborateurs actifs:
+      {{drawing.active_collaborator_count}}/{{ drawing.collaborator_count}}
+    </mat-card-subtitle>
   </mat-card-header>
   <mat-card-actions>
-    <button mat-raised-button class="lock" color="primary" (click)="openDialog()" *ngIf="drawing.type === 'Protected' && !drawing.is_member">
+    <button mat-raised-button class="lock" color="primary" (click)="openDialog()"
+      *ngIf="drawing.type === 'Protected' && !drawing.is_member">
       <mat-icon>lock</mat-icon>
     </button>
     <button class="btn" *ngIf="(drawing.type !== 'Protected' && !drawing.is_member)" mat-raised-button color="primary"
       (click)="openDialog()">Aperçu du dessin</button>
-    <button class="btn-mine" *ngIf="drawing.is_member" mat-raised-button color="primary"
-      (click)="openDialog()">Aperçu du dessin</button>
+    <button class="btn-mine" *ngIf="drawing.is_member" mat-raised-button color="primary" (click)="openDialog()">Aperçu
+      du dessin</button>
   </mat-card-actions>
 
 
-  <mat-card-actions class="actions-container" *ngIf="drawing.is_member && !drawing.is_owner">
-    <button disabled class="team-joined-container" mat-button>
-        Vous êtes collaborateur de ce dessin!
+  <mat-card-actions class="actions-container">
+    <button disabled *ngIf="drawing.is_member && !drawing.is_owner" class="notice-indicator team-joined-container"
+      mat-button>
+      Vous êtes collaborateur de ce dessin!
     </button>
-</mat-card-actions>
-<mat-card-actions class="actions-container" *ngIf="drawing.is_owner">
-    <button disabled class="team-owner-container" mat-button>
-        Vous êtes propriétaire de ce dessin!
+    <button *ngIf="drawing.is_owner && !drawing.is_team" disabled class="notice-indicator team-owner-container"
+      mat-button>
+      Vous êtes propriétaire de ce dessin!
     </button>
-</mat-card-actions>
+    <button disabled *ngIf="drawing.is_owner && drawing.is_team" class="notice-indicator drawing-team-container"
+      mat-button>
+      Une de vos équipes est propriétaire de ce dessin!
+    </button>
+  </mat-card-actions>
 </mat-card>

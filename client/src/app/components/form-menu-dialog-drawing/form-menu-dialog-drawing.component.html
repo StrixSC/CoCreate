@@ -1,21 +1,21 @@
 <div *ngIf="drawing['action']==='Delete'">
-<div>
-    <h2>Suppression du dessin</h2>
-</div>
-<br>
-<div>
-    Êtes-vous sûr de vouloir supprimer le dessin 
+    <div>
+        <h2>Suppression du dessin</h2>
+    </div>
     <br>
-</div>
-<div style="font-size: large; text-align: center;">
-    «{{drawing['drawing'].title}}»?
-    
-<br>
-</div>
-<div mat-dialog-actions>
-    <button (click)="sendDeleteCollaboration()" mat-raised-button color="primary">Supprimer</button>
-    <button (click)="onNoClick()" mat-raised-button>Annuler</button>
-</div>
+    <div>
+        Êtes-vous sûr de vouloir supprimer le dessin
+        <br>
+    </div>
+    <div style="font-size: large; text-align: center;">
+        «{{drawing['drawing'].title}}»?
+
+        <br>
+    </div>
+    <div mat-dialog-actions>
+        <button (click)="sendDeleteCollaboration()" mat-raised-button color="primary">Supprimer</button>
+        <button (click)="onNoClick()" mat-raised-button>Annuler</button>
+    </div>
 </div>
 
 <div *ngIf="drawing['action']==='Leave'">
@@ -24,13 +24,13 @@
     </div>
     <br>
     <div>
-        Êtes-vous sûr de vouloir quitter le dessin 
+        Êtes-vous sûr de vouloir quitter le dessin
         <br>
     </div>
     <div style="font-size: large; text-align: center;">
         «{{drawing['drawing'].title}}»?
-        
-    <br>
+
+        <br>
     </div>
     <div mat-dialog-actions>
         <button (click)="sendLeaveCollaboration()" mat-raised-button color="primary">Quitter</button>
@@ -45,51 +45,52 @@
     <div>
         <form class="form" [formGroup]="updateForm" (submit)="onSubmit()">
 
-                <mat-form-field appearance="outline">
-                    <mat-label>Attribut à modifier</mat-label>
-                    <mat-select formControlName='option' required>
-                        <mat-option *ngFor="let option of updateOption" [value]="option">
-                            {{option}}
-                        </mat-option>
-                    </mat-select>
-                    <mat-error *ngIf="option.hasError('required')">
-                        Ce champ est obligatoire.
-                    </mat-error>
-                </mat-form-field> 
-                
-                <mat-form-field *ngIf="option.value === 'Type'" appearance="outline">
-                    <mat-label>Choisir le nouveau type</mat-label>
-                    <mat-select formControlName='type'>
-                        <mat-option *ngFor="let visibility of visibilityTypes" [value]="visibility.key">
-                            {{ visibility.value }}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field> 
+            <mat-form-field appearance="outline">
+                <mat-label>Attribut à modifier</mat-label>
+                <mat-select formControlName='option' required>
+                    <mat-option *ngFor="let option of updateOption" [value]="option">
+                        {{option}}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="option.hasError('required')">
+                    Ce champ est obligatoire.
+                </mat-error>
+            </mat-form-field>
 
-                <mat-form-field *ngIf="option.value === 'Titre'" appearance="outline">
-                    <mat-label>Choisir le nouveau titre</mat-label>
-                    
-                        <input  matInput type="text" formControlName="title" placeholder="Le beau soleil" />
-                        <mat-error *ngIf="title.hasError('required')">
-                            Ce champ est obligatoire.
-                        </mat-error>
-                </mat-form-field>
-                
-                <mat-form-field *ngIf="option.value === 'Auteur'" appearance="outline">
-                        <mat-label>Auteur</mat-label>
-                        <mat-select formControlName='author'>
-                            <mat-option *ngFor="let author of authors" [value]="author.key">
-                                {{ author.value }}
-                            </mat-option>
-                        </mat-select>
-                        <mat-error *ngIf="author.hasError('required')">
-                            Ce champ est obligatoire.
-                        </mat-error>
-                </mat-form-field>
+            <mat-form-field *ngIf="option.value === 'Type'" appearance="outline">
+                <mat-label>Choisir le nouveau type</mat-label>
+                <mat-select (selectionChange)="changeType($event)" formControlName='type'>
+                    <mat-option *ngFor="let visibility of visibilityTypes" [value]="visibility.key">
+                        {{ visibility.value }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field *ngIf="option.value === 'Titre'" appearance="outline">
+                <mat-label>Choisir le nouveau titre</mat-label>
+
+                <input matInput type="text" formControlName="title" placeholder="Le beau soleil" />
+                <mat-error *ngIf="title.hasError('required')">
+                    Ce champ est obligatoire.
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field *ngIf="option.value === 'Auteur'" appearance="outline">
+                <mat-label>Auteur</mat-label>
+                <mat-select formControlName='author'>
+                    <mat-option *ngFor="let author of authors" [value]="author.key">
+                        {{ author.value }}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="author.hasError('required')">
+                    Ce champ est obligatoire.
+                </mat-error>
+            </mat-form-field>
+            <div class='action-buttons'>
                 <div>
                     <button type="submit" mat-raised-button color="primary" class="form-field">
-                        <div class="spinner" *ngIf="isLoading"  >
-                            <mat-spinner  [diameter]="35" color="accent" class="spinner"></mat-spinner>
+                        <div class="spinner" *ngIf="isLoading">
+                            <mat-spinner [diameter]="35" color="accent" class="spinner"></mat-spinner>
                         </div>
                         <ng-container *ngIf="!isLoading">Soumettre</ng-container>
                     </button>
@@ -99,37 +100,48 @@
                         Annuler
                     </button>
                 </div>
-            
+            </div>
+            <style>
+                .action-buttons {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 100%;
+                    gap: 0.5rem;
+                    flex-direction: column;
+                }
+            </style>
+
         </form>
 
     </div>
 
 </div>
-    <style>
-        h1 {
-            font-size: 2rem;
-        }
-    
-        .form-field {
-            width: 300px;
-        }
-    
-        .main-container-wrapper {
-            gap: 0rem;
-            align-items: center;
-            padding-top: 3rem;
-            justify-content: space-around;
-            display: flex;
-            flex-direction: row;
-        }
-    
-        .form {
-            display: flex;
-            flex-direction: column;
-        }
-    
-        .header {
-            font-weight: bolder;
-            font-size: 2rem;
-        }
-    </style>
+<style>
+    h1 {
+        font-size: 2rem;
+    }
+
+    .form-field {
+        width: 300px;
+    }
+
+    .main-container-wrapper {
+        gap: 0rem;
+        align-items: center;
+        padding-top: 3rem;
+        justify-content: space-around;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .header {
+        font-weight: bolder;
+        font-size: 2rem;
+    }
+</style>

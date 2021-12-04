@@ -1,5 +1,5 @@
 .drawing-card {
-  max-width: 250px;
+  width: 300px;
   display:inline-block;
   margin: 10px;
 }
@@ -11,6 +11,11 @@
   font-family: Roboto, "Helvetica Neue", sans-serif;
   font-size: 14px;
   font-weight: 500;
+}
+.notice-indicator {
+  line-height: 20px;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .actions-container {
@@ -55,7 +60,6 @@
   transform: translate(-50%, -50%);
   text-align: center;
 }
-
 
 .btn-mine {
   transition: .5s ease;

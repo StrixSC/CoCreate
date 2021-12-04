@@ -142,6 +142,7 @@ export class ChatChannelListComponent implements OnInit {
       if (!this.initSet) {
         this.selectPublicChat();
         this.initSet = true;
+        this.chatSidebarService.navOpen = false;
       }
 
       this.filterChannels();

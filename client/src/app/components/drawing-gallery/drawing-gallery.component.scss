@@ -17,8 +17,12 @@
 }
 
 .margin-center {
-  margin-left: 5%; 
-  margin-right: 5%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 90%;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .overlay {
