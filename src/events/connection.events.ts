@@ -69,6 +69,7 @@ const initUser = async (io: Server, socket: Socket) => {
                     s.leave(room);
                 }
                 s.emit('user:init:exception', { message: "(E4555) - Vous avez été désauthentifié, car ce compte est connecté sur un client en parallèle." });
+                s.disconnect();
             }
         })
 

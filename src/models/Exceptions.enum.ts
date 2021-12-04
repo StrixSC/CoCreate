@@ -19,9 +19,9 @@ export enum ExceptionType {
 
     Channel_Create = "channel:create:exception",
     Channel_Delete = "channel:delete:exception",
-    Channel_Leave = "channel:leave:exception",
     Channel_Join = "channel:join:exception",
     Channel_Update = "channel:update:exception",
+    Channel_Leave = "channel:leave:exception",
     Channels = "channel:exception",
     Channel_Send = "channel:send:exception",
 }

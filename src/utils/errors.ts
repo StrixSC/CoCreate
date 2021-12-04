@@ -53,7 +53,8 @@ export const handleSocketError = (socket: Socket, e: any, exceptionType?: Except
         return socket.emit(exceptionType, create(error));
     } else if (exceptionTypes) {
         exceptionTypes.forEach((e) => socket.emit(e, create(error)));
-    } {
+        return true;
+    } else {
         return socket.emit('exception', create(error));
     };
 

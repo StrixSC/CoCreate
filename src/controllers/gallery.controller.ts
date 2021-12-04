@@ -30,27 +30,30 @@ export const getGalleryController = async (req: Request, res: Response, next: Ne
             })
         }
         const returnArray = result.collaborations.map((c) => {
-            const author = c.collaboration_members.find((m: any) => m.type === MemberType.Owner);
-            if (!author) {
-                return
-            }
-
-            const isOwner = c.collaboration_members.find((m: any) => m.type === MemberType.Owner && m.user_id === req.userId);
+            const authorUsername = c.author.is_team ? c.author.team!.team_name : c.author.user!.profile!.username;
+            const authorAvatarUrl = c.author.is_team ? c.author.team!.avatar_url : c.author.user!.profile!.avatar_url;
+            const isOwner =
+                c.author.is_team
+                    ? c.author.team?.team_members.find((tm) => tm.user_id === req.userId) ? true : false
+                    : c.author.user_id === req.userId;
             const isMember = c.collaboration_members.find((m: any) => m.user_id === req.userId);
+            const isTeam = c.author.is_team ? true : false;
 
+            const onlineMembers = getOnlineMembersInRoom(c.collaboration_id);
             return {
                 collaboration_id: c.collaboration_id,
                 title: c.drawing!.title,
                 drawing_id: c.drawing!.drawing_id,
                 created_at: c.created_at,
                 updated_at: c.updated_at,
-                author_username: author.user.profile!.username,
-                author_avatar: author.user.profile!.avatar_url,
+                author_username: isTeam ? `Équipe ${authorUsername}` : authorUsername,
+                author_avatar: authorAvatarUrl,
                 type: c.type,
                 collaborator_count: c.collaboration_members.length,
-                max_collaborator_count: 30,
+                active_collaborator_count: onlineMembers.length,
                 is_member: isMember ? true : false,
-                is_owner: isOwner ? true : false
+                is_owner: isOwner ? true : false,
+                is_team: isTeam ? true : false,
             }
         })
         return res.status(StatusCodes.OK).json({ drawings: returnArray, total_drawing_count: result.total, offset: result.offset, limit: result.limit });
@@ -83,14 +86,15 @@ export const getMyGalleryController = async (req: Request, res: Response, next: 
         }
 
         const returnArray = result.collaborations.map((c) => {
-            const author = c.collaboration_members.find((m: any) => m.type === MemberType.Owner);
-            if (!author) {
-                return
-            }
-
-            const onlineMembers = getOnlineMembersInRoom(c.collaboration_id);
-            const isOwner = c.collaboration_members.find((m: any) => m.type === MemberType.Owner && m.user_id === req.userId);
+            const authorUsername = c.author.is_team ? c.author.team!.team_name : c.author.user!.profile!.username;
+            const authorAvatarUrl = c.author.is_team ? c.author.team!.avatar_url : c.author.user!.profile!.avatar_url;
+            const isOwner =
+                c.author.is_team
+                    ? c.author.team?.team_members.find((tm) => tm.user_id === req.userId) ? true : false
+                    : c.author.user_id === req.userId;
             const isMember = c.collaboration_members.find((m: any) => m.user_id === req.userId);
+            const isTeam = c.author.is_team ? true : false;
+            const onlineMembers = getOnlineMembersInRoom(c.collaboration_id);
 
             return {
                 collaboration_id: c.collaboration_id,
@@ -98,14 +102,14 @@ export const getMyGalleryController = async (req: Request, res: Response, next: 
                 drawing_id: c.drawing!.drawing_id,
                 created_at: c.created_at,
                 updated_at: c.updated_at,
-                author_username: author.user.profile!.username,
-                author_avatar: author.user.profile!.avatar_url,
+                author_username: isTeam ? `Équipe ${authorUsername}` : authorUsername,
+                author_avatar: authorAvatarUrl,
                 type: c.type,
                 collaborator_count: c.collaboration_members.length,
-                max_collaborator_count: 30,
-                active_member_count: onlineMembers.length,
+                active_collaborator_count: onlineMembers.length,
                 is_member: isMember ? true : false,
-                is_owner: isOwner ? true : false
+                is_owner: isOwner ? true : false,
+                is_team: isTeam ? true : false
             }
         })
         return res.status(StatusCodes.OK).json({ drawings: returnArray, total_drawing_count: result.total, offset: result.offset, limit: result.limit });

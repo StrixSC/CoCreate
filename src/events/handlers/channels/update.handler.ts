@@ -26,7 +26,7 @@ export const handleUpdate = async (io: Server, socket: Socket, data: { channelId
         if (!channelMember) {
             throw new SocketEventError(
                 'Could not update channel: User is not a member of this channel',
-                'E1010'
+                'E42384'
             );
         }
 

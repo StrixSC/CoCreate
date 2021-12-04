@@ -22,7 +22,33 @@ export const handleDelete = async (io: Server, socket: Socket, payload: {
             where: {
                 user_id: userId,
                 collaboration_id: collaborationId,
-                type: MemberType.Owner
+                OR: [
+                    { type: MemberType.Owner },
+                    {
+                        AND: [
+                            {
+                                collaboration: {
+                                    author: {
+                                        is_team: true
+                                    },
+                                },
+                            },
+                            {
+                                collaboration: {
+                                    author: {
+                                        team: {
+                                            team_members: {
+                                                some: {
+                                                    user_id: userId
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             include: {
                 collaboration: true,
@@ -30,7 +56,7 @@ export const handleDelete = async (io: Server, socket: Socket, payload: {
         });
 
         if (!member) {
-            throw new SocketEventError(`Hmm... On dirait que vous n'êtes pas le propriétaire du dessin...`, "E4023")
+            throw new SocketEventError(`Hmm... On dirait que vous n'êtes pas autorisé à supprimer ce dessin...`, "E4023")
         }
 
         const [deletedCollaboration, deletedChannel] = await db.$transaction([

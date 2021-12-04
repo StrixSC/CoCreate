@@ -1,11 +1,20 @@
 import { DEFAULT_DRAWING_OFFSET, DEFAULT_DRAWING_LIMIT } from './../utils/drawings';
 import create from 'http-errors';
-import { MemberType, CollaborationType, Drawing, Account, Collaboration, CollaborationMember, Profile, User } from '.prisma/client';
+import { CollaborationType, Drawing, Account, Collaboration, CollaborationMember, Profile, User, Author, Team, TeamMember } from '.prisma/client';
 import { db } from '../db';
 import moment from 'moment';
 
 export type ICollaboration = (Collaboration & {
     drawing: Drawing | null;
+    author: Author & {
+        team: (Team & {
+            team_members: TeamMember[];
+        }) | null;
+        user: (User & {
+            profile: Profile | null;
+            account: Account | null;
+        }) | null,
+    }
     collaboration_members: (CollaborationMember & {
         user: User & {
             profile: Profile | null;
@@ -28,7 +37,11 @@ export const getCollaborations = async (filter: string, offset: number, limit: n
             drawing: true,
             author: {
                 include: {
-                    team: true,
+                    team: {
+                        include: {
+                            team_members: true,
+                        }
+                    },
                     user: {
                         include: {
                             profile: true,
@@ -79,7 +92,11 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
             drawing: true,
             author: {
                 include: {
-                    team: true,
+                    team: {
+                        include: {
+                            team_members: true
+                        }
+                    },
                     user: {
                         include: {
                             profile: true,
@@ -121,15 +138,21 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
 
     for (let i = 0; i < allCollaborations.length; i++) {
         const collaboration = allCollaborations[i];
-        let author = collaboration.collaboration_members.find((c: any) => c.type === MemberType.Owner);
+        let authorUsername = "";
+        let allowSearching = false;
+        let mascot = "";
 
-        if (!author) {
-            continue;
+        try {
+            const author = collaboration.author;
+            authorUsername = author.is_team ? author.team!.team_name : author.user!.profile!.username;
+            mascot = author.is_team ? author.team!.mascot : "";
+            allowSearching = author.is_team ? true : author.user!.account!.allow_searching;
+        }
+        catch (e) {
         }
 
-        let allowSearching = author!.user.account!.allow_searching;
         const date = new Date(collaboration.created_at);
-        const localLocale = moment(date);
+        const localLocale = moment.utc(date);
         localLocale.locale('fr');
 
         filterMap.set(collaboration.collaboration_id, {
@@ -154,7 +177,9 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
                 // name of the day of the month created, (example: vendredi)
                 localLocale.format('dddd').toLowerCase(),
                 // Author username
-                author.user.profile!.username.toLowerCase(),
+                authorUsername,
+                // team mascot
+                mascot,
                 // Type
                 collaboration.type.toLowerCase()
                 // Type in french:
@@ -176,13 +201,13 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
             filterMap.get(collaboration.collaboration_id)!.data.push('publique');
         }
 
-        if (allowSearching) {
+        if (allowSearching && !collaboration.author.is_team) {
             // First name
-            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.account!.first_name.toLowerCase());
+            filterMap.get(collaboration.collaboration_id)!.data.push(collaboration.author.user!.account!.first_name.toLowerCase());
             // Last Name
-            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.account!.last_name.toLowerCase());
+            filterMap.get(collaboration.collaboration_id)!.data.push(collaboration.author.user!.account!.last_name.toLowerCase());
             // Email
-            filterMap.get(collaboration.collaboration_id)!.data.push(author.user.email.toLowerCase());
+            filterMap.get(collaboration.collaboration_id)!.data.push(collaboration.author.user!.email.toLowerCase());
         }
     };
 
