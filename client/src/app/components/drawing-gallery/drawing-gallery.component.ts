@@ -290,7 +290,6 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   fetchAllDrawings(): void {
-
     this.isLoading = true;
     this.drawingsSubscription = merge(
       this.drawingGalleryService.getAllDrawings().pipe(map((d: any) => ({ drawings: d.drawings, count: d.total_drawing_count }))),

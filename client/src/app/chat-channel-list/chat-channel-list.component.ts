@@ -39,18 +39,12 @@ export class ChatChannelListComponent implements OnInit {
       this.chatSocketService.onChannelUpdated(),
       this.chatSocketService.onChannelDelete(),
       this.chatSocketService.joinedChannel(),
-    ).subscribe(() => {
+      this.socketService.onStatusChange(),
+      this.socketService.onDisconnected(),
+      this.socketService.onConnected(),
+    ).subscribe((d) => {
       this.addOrUpdateChannels();
     });
-
-    this.connectionSubscription = merge(
-      this.socketService.onConnected().pipe((map(d => ({ ...d, type: ConnectionEventType.Connection })))),
-      this.socketService.onDisconnected().pipe((map(d => ({ ...d, type: ConnectionEventType.Disconnection }))))
-    ).subscribe((connection: (IConnectionEventData & IDisconnectionEventData) & { type: ConnectionEventType }) => {
-      if (connection && connection.userId !== this.auth.activeUser!.uid && connection.username !== this.auth.activeUser!.displayName) {
-        this.chatSidebarService.handleConnectionEvent(connection.type, connection);
-      }
-    })
 
     this.messageReceived = this.chatSocketService.receiveMessage().subscribe((d: IMessageResponse) => {
       this.chatSidebarService.handleIncomingMessage(d);
@@ -72,6 +66,7 @@ export class ChatChannelListComponent implements OnInit {
     if (this.chatSidebarService.navOpen && this.chatSidebarService.activeChannel.channel_id === channel.channel_id) {
       this.toggleChatMenu();
     } else {
+      this.chatSidebarService.navOpen = true;
       this.chatSidebarService.activeChannel = channel;
     }
     channel.notificationCount = 0;
@@ -133,14 +128,23 @@ export class ChatChannelListComponent implements OnInit {
 
       const updatedChannels = Array.from(newSnapshot).map((d) => d[1]);
       this.chatSidebarService.allChannels = updatedChannels;
+
+      if (this.chatSidebarService.activeChannel && this.initSet) {
+        const activeChannelId = this.chatSidebarService.activeChannel.channel_id;
+        const channel = newSnapshot.get(activeChannelId);
+        if (!channel) {
+          this.selectPublicChat();
+        } else {
+          this.chatSidebarService.activeChannel = channel;
+        }
+      }
+
       if (!this.initSet) {
         this.selectPublicChat();
         this.initSet = true;
-        this.toggleChatMenu();
       }
 
       this.filterChannels();
-      this.chatSidebarService.preventUnavailableActiveChat();
       fetchSubscription.unsubscribe();
     })
   }

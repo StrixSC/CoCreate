@@ -74,6 +74,10 @@ export class TopBarComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
+    if (this.socketService.socket) {
+      this.socketService.disconnect();
+    }
+
     this.auth.signOut().subscribe(() => {
       this.router.navigateByUrl('auth');
     })

@@ -76,6 +76,10 @@ export class ChatService {
     return this.socket.on('channel:update:exception');
   }
 
+  onConnect(): any {
+    return this.socket.on('channel:connected');
+  }
+
   onChannelDeleteFinish(): any {
     return this.socket.on('channel:delete:finished');
   }

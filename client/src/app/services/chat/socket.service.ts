@@ -92,6 +92,10 @@ export class SocketService {
     return this.on('user:connected');
   }
 
+  onStatusChange(): Observable<any> {
+    return this.on('status-change');
+  }
+
   sendInit(): void {
     this.emit('user:init', null);
   }

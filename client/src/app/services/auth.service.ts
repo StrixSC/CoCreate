@@ -1,3 +1,4 @@
+import { SocketService } from 'src/app/services/chat/socket.service';
 import { environment } from './../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
@@ -11,7 +12,7 @@ import * as firebase from 'firebase';
 export class AuthService {
 
   activeUser: firebase.User | null = null;
-  constructor(private af: AngularFireAuth, private http: HttpClient) { }
+  constructor(private af: AngularFireAuth, private http: HttpClient, private socketService: SocketService) { }
 
   signIn(user: { email: string, password: string }): Observable<firebase.auth.UserCredential> {
     return from(this.af.auth.signInWithEmailAndPassword(user.email, user.password));
@@ -30,6 +31,9 @@ export class AuthService {
   }
 
   signOut(): Observable<any> {
+    if (this.socketService.socket) {
+      this.socketService.disconnect();
+    }
     return from(this.af.auth.signOut());
   }
 

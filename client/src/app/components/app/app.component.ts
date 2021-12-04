@@ -13,13 +13,16 @@ import { Subscription } from 'rxjs';
 export class AppComponent {
   title = 'Colorimage';
   authSubscription: Subscription;
-  constructor(private af: AngularFireAuth) {
+  constructor(private af: AngularFireAuth, private socketService: SocketService) {
     if (environment.useEmulator) {
       this.af.auth.useEmulator(environment.authEmulator)
     }
   }
 
   ngOnDestroy() {
+    if (this.socketService.socket) {
+      this.socketService.disconnect();
+    }
   }
 
 }

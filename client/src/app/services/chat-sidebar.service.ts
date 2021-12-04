@@ -57,17 +57,17 @@ export class ChatSidebarService {
   }
 
   set activeChannel(channel: ISidebarChannel) {
-    this.navOpen = true;
     this._activeChannel = channel;
   }
 
   handleIncomingMessage(data: IMessageResponse) {
     const channel = this.allChannels.find((c) => c.channel_id === data.channelId);
     if (channel) {
-
       channel.messages.push(data);
-      console.log(data);
-      if (data.username !== this.auth.activeUser!.displayName && this.activeChannel.channel_id !== channel.channel_id || !this.navOpen) {
+      const notActiveUser = data.username !== this.auth.activeUser!.displayName
+      const notActiveChannel = channel.channel_id !== this.activeChannel.channel_id;
+      const chatboxNotOpen = !this.navOpen;
+      if (notActiveUser && (notActiveChannel || chatboxNotOpen)) {
         channel.notificationCount++;
         if (!channel.muteNotification) {
           this.notificationAudio.play();

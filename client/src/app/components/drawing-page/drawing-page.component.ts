@@ -109,6 +109,7 @@ export class DrawingPageComponent {
 
     this.syncCollabService.sendDisconnect({ collaborationId: this.activeCollaborationId });
 
+    this.activeCollaborationId = "";
     this.drawingLoader.activeDrawingData = null;
     this.drawingLoader.isLoaded = false;
     this.drawingLoader.isLoading = false;

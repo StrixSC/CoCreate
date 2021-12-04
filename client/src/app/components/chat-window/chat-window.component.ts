@@ -2,7 +2,7 @@ import { MatSnackBar } from '@angular/material';
 import { SocketService } from 'src/app/services/chat/socket.service';
 import { AuthService } from './../../services/auth.service';
 import { IMessageResponse } from './../../model/IChannel.model';
-import { Subscription } from 'rxjs';
+import { Subscription, merge } from 'rxjs';
 import { ChatService } from 'src/app/services/chat/chat.service';
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
@@ -45,9 +45,8 @@ export class ChatWindowComponent implements OnInit {
     const channelId: string = this.activeRoute.snapshot.params.id;
     if (channelId) {
       this.chatService.joinChannel(channelId);
-      this.joinedSubscription = this.chatService.joinedChannel().subscribe((c: IChannelJoinResponse) => {
+      this.joinedSubscription = merge(this.chatService.joinedChannel(), this.chatService.onConnect()).subscribe((c: IChannelJoinResponse) => {
         this.activeChannel = c;
-        console.log(c);
         this.isLoading = false;
       });
 
