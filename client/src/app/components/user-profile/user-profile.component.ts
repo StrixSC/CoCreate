@@ -5,8 +5,9 @@ import { ActivatedRoute } from '@angular/router';
 import { User } from 'firebase';
 import { LongDateFormatSpec } from 'moment';
 //import * as firebase from 'firebase';
-import { Observable, Subscription } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user.service';
 
 import { environment } from 'src/environments/environment';
@@ -63,23 +64,39 @@ export class UserProfileComponent  implements OnInit, OnDestroy{
   private editLogs: Log[] = [];
   private logsSubscription: Subscription;
   private loading: boolean = false;
-  constructor(private httpClient:HttpClient, private route:ActivatedRoute,private af: AngularFireAuth, private userService:UserService) {
+  private avatarUrl: any ;
+  constructor(private httpClient:HttpClient, private route:ActivatedRoute,private af: AngularFireAuth, private userService:UserService,private auth: AuthService) {
     
    }
 
   ngOnInit(): void  {
       this.loading = true;
       this.username = this.route.snapshot.params.id;
+      
       if(!this.username) {
         // redirect 404;
       }
-      this.userService.getLogs().subscribe((logs: Log[]) => {
-        console.log(logs)
-        this.logs = logs;
-        this.loading = false;
-        this.editLogs = logs.filter((l) => l.drawing_id);
-    });
-  
+     this.userService.getLogs()
+      .subscribe((logs)=>{
+        console.log(logs);
+        this.logs=logs
+        
+        
+        this.loading=false
+
+      })
+    //   this.userService.getLogs().subscribe((logs: Log[]) => {
+    //     console.log(logs)
+    //     this.logs = logs;
+    //     this.loading = false;
+    //     this.editLogs = logs.filter((l) => l.drawing_id);
+    // });
+    
+    this.httpClient.get(environment.serverURL+"/api/users/profile/"+this.username).subscribe((res:[])=>{
+      console.log(res)
+      this.avatarUrl=res['avatar_url']
+      this.loading = false;
+    })
 
   }
 

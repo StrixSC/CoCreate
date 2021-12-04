@@ -1,13 +1,16 @@
  <p class="form-title"><b>Veuiller entrer votre mot de passe afin d'enregistrer les changements</b></p>
- <form class="form" [formGroup]="updateUsernameForm" (submit)="register()">
+ <form class="form" id="verifyPassword"[formGroup]="verifyPasswordForm" (submit)="verify()">
     <mat-form-field class="pb-1 form-field clickable" appearance="outline">
     <mat-label>mot de passe</mat-label>
             <input
-            type="text"
-            formControlName="username"
+            formControlName="password"
             matInput
-            placeholder="Identificateur"
+            placeholder="********"
             />
     </mat-form-field>
 </form>
-<button mat-raised-button class="profile-settings-btn" (click)="submitUpdate()">Soummettre</button>
+<button mat-raised-button class="form-field"
+ id="verifyPassword"
+ type="submit"
+ (click)="close()"
+ form="verifyPasswordForm">Soummettre</button>

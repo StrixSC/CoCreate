@@ -10,12 +10,18 @@ import { first } from 'rxjs/operators';
   styleUrls: ['./menu-page.component.scss']
 })
 export class MenuPageComponent implements OnDestroy {
-
+  activeUser: firebase.User |null;
   authSubscription: Subscription
-  constructor(private auth: AuthService, private router: Router) { }
+  constructor(private auth: AuthService, private router: Router) {
+    this.activeUser=this.auth.activeUser;
+   }
 
   openDrawingGallery(): void {
     this.router.navigateByUrl("gallery")
+  }
+
+  openUserProfile():void {
+    this.router.navigateByUrl("profile/"+this.activeUser!.displayName)
   }
 
   ngOnDestroy(): void {
@@ -28,4 +34,5 @@ export class MenuPageComponent implements OnDestroy {
     await this.auth.signOut().toPromise();
     this.router.navigate(['auth']);
   }
+
 }

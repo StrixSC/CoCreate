@@ -5,7 +5,6 @@ import { MatDialog, MatDialogRef } from '@angular/material';
 import * as firebase from 'firebase';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user.service';
-import { environment } from 'src/environments/environment';
 import { AvatarDialogComponent } from '../avatar-dialog/avatar-dialog.component';
 import { UsernameUpdateDialogComponent } from '../username-update-dialog/username-update-dialog.component';
 
@@ -20,9 +19,11 @@ export class UserProfileSettingsComponent implements OnInit {
 	updateUsernameForm: FormGroup;
 	updatePasswordForm:FormGroup;
   	private username: string;
-  	private password: string |null;
 	loading=false;
 	activeUser: firebase.User |null
+	showPassword: boolean = false;
+	onChangeUsername:boolean = false;
+
   constructor(private userService:UserService,public dialog: MatDialog,private httpClient:HttpClient,private auth:AuthService,private fb:FormBuilder) { 
 	this.activeUser=this.auth.activeUser;
 	if(this.activeUser!.displayName !=null)	this.username=this.activeUser!.displayName
@@ -30,7 +31,8 @@ export class UserProfileSettingsComponent implements OnInit {
   }
 
   ngOnInit() {
-
+	//this.updateUsernameForm.enable;
+	this.onChangeUsername=false;
 	this.updateUsernameForm = this.fb.group({
 		username: ['', [
 				Validators.required,
@@ -38,10 +40,33 @@ export class UserProfileSettingsComponent implements OnInit {
 				Validators.maxLength(256)
 			  ]],
 			})
+	this.updatePasswordForm = this.fb.group({
+		currentPassword: ['', [
+			Validators.required
+		  ]],
+		newPassword: ['', [
+			Validators.required
+		  ]],
+		  newPasswordConfirm: ['', [
+			Validators.required
+		  ]],
+	})
 
 	this.url=this.activeUser!.photoURL
-
   }
+  getNewUsername():string {
+	return this.updateUsernameForm.get('username')!.value
+   }
+
+  getCurrentPassword():string {
+	return this.updatePasswordForm.get('currentPassword')!.value
+   }
+  getNewPassword():string {
+	  return this.updatePasswordForm.get('newPassword')!.value
+   }
+  getNewPasswordConfirm():string {
+	return this.updatePasswordForm.get('newPasswordConfirm')!.value
+   }
 
 	selectFile(event: any) { 
 		if(!event.target.files[0] || event.target.files[0].length == 0) {
@@ -62,7 +87,13 @@ export class UserProfileSettingsComponent implements OnInit {
 		reader.onload = (_event) => {
 			this.msg = "";
 			this.url = reader.result; 
+		
+	
+			// console.log(this.url)
+			// this.userService.updateUsernameAndAvatar(this.username,this.url).subscribe(res=>{
+			// });
 		}
+			
 	}
 	submitUpdate() {
 		if (this.isValid()) {
@@ -78,7 +109,12 @@ export class UserProfileSettingsComponent implements OnInit {
 			height: '500px',
 		  }).afterClosed().subscribe((data) => {
 			if (data) {
-			  this.url=data;
+				this.url=data
+				this.userService.updateUsernameAndAvatar(this.username,data).subscribe(res=>{
+				
+				});
+					
+				
 			}
 		  })
 	}
@@ -86,14 +122,34 @@ export class UserProfileSettingsComponent implements OnInit {
 		this.dialog.open(UsernameUpdateDialogComponent, {
 			width: '550px',
 			height: '300px',
+		}).afterClosed().subscribe((data) => {
+			if(data){
+				this.userService.updateUsernameAndAvatar(this.getNewUsername(),this.url).subscribe(res=>{
+					this.username = this.getNewUsername()
+					this.onChangeUsername = true;
+					this.updateUsernameForm.disabled;
+				})
+			}
 		})
 	}
 	isValid(): boolean {
 		return this.updateUsernameForm.valid;
 	  }
-	  register() {
+	updatePassword() {
+		if(this.activeUser!.email)		
+		this.activeUser!.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(this.activeUser!.email, this.getCurrentPassword())).then(
+			success => {
+				if(this.updatePasswordForm.valid && (this.getNewPassword() == this.getNewPasswordConfirm())){
+					this.userService.updatePassword({"password":this.updatePasswordForm.get('newPassword')!.value}).subscribe((password)=>{
+					})
+					console.log("passwordchanged")
+				}
+				else {
+					console.log("error")
+				}
+			})
 
-	  }
+	}
 }
 
 

@@ -2,9 +2,9 @@
     
     
     <img mat-card-avatar class="avatar" src={{url}}>
-    
+    <p>@{{username}}</p>
     <button mat-raised-button>
-    <input type="file" id="img" (change)="selectFile($event)" style="display:none;">
+    <input type="file" class="avatar" id="img" (change)="selectFile($event)" style="display:none;">
     <label  for="img">Téléverser un avatar</label>
     </button>
   <button mat-raised-button (click)="openAvatarDialog()">Choisir un avatar</button>
@@ -34,35 +34,50 @@
 <div class="boutton">
         <button mat-raised-button class="profile-settings-btn" (click)="openUsernameUpdateDialog()">Soummettre</button>
 </div>
+<p *ngIf="onChangeUsername">Votre nom d'utilisateur est changé avec succès</p>
 </mat-card>
 <!-- Password update-->
 <mat-card style="margin-top: 3%;">
  <p class="form-title"><b>Modification du mot de passe</b></p>
  <form class="form" [formGroup]="updatePasswordForm" (submit)="register()">
- <div>
- <mat-form-field class="pb-1 form-field clickable" appearance="outline">
- <mat-label>Mot de passe actuel</mat-label>
-        <input
-         type="text"
-         formControlName="updatePassword"
-          matInput
-          placeholder="Identificateur"
-        />
-        
-      </mat-form-field>
-  </div>
-<mat-form-field class="pb-1 form-field clickable" appearance="outline">
-<mat-label>Nouveau mot de passe</mat-label>
-      <input
-        type="text"
-        formControlName="username"
-        matInput
-        placeholder="Identificateur"
-      />
-     </mat-form-field>
-         </form>  
+      <div>
+      <mat-form-field class="pb-1 form-field clickable" appearance="outline">
+              <mat-label>Mot de passe actuel</mat-label>
+              <input
+              formControlName="currentPassword"
+              [type]="showPassword ? 'text' : 'password'"
+              matInput
+              placeholder="********"/>
+              <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">
+              {{ showPassword ? "visibility_off" : "visibility" }}
+              </mat-icon>
+            </mat-form-field>
+        </div>
+      <mat-form-field class="pb-1 form-field clickable" appearance="outline">
+            <mat-label>Nouveau mot de passe</mat-label>
+            <input
+              formControlName="newPassword"
+              [type]="showPassword ? 'text' : 'password'"
+              matInput
+              placeholder="********"/>
+                  <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">
+                  {{ showPassword ? "visibility_off" : "visibility" }}
+                  </mat-icon>
+          </mat-form-field>
+          <mat-form-field class="pb-1 form-field clickable" appearance="outline" style="left:2%">
+            <mat-label>Confirmez le mot de passe</mat-label>
+            <input
+              formControlName="newPasswordConfirm"
+              [type]="showPassword ? 'text' : 'password'"
+              matInput
+              placeholder="********"/>
+                  <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">
+                  {{ showPassword ? "visibility_off" : "visibility" }}
+                  </mat-icon>
+          </mat-form-field>
+  </form>  
 <div class="boutton">
-        <button mat-raised-button class="profile-settings-btn" (click)="submitUpdate()">Soummettre</button>
+        <button mat-raised-button class="profile-settings-btn" (click)="updatePassword()">Soummettre</button>
 </div>
 </mat-card>
 <!-- checkbox -->
