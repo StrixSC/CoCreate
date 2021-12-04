@@ -10,11 +10,9 @@ export const handleDelete = async (io: Server, socket: Socket, payload: {
     collaborationId: string,
 }): Promise<void> => {
     try {
-        const { userId, collaborationId } = payload;
 
-        if (!userId || userId !== socket.data.user) {
-            throw new SocketEventError('Oops, on dirait que cet utilisateur n`est pas autorisé à faire cet action...', "E5001", ExceptionType.Collaboration_Delete)
-        }
+        const userId = socket.data.user;
+        const collaborationId = payload.collaborationId;
 
         if (!collaborationId) {
             throw new SocketEventError("Hmm... On dirait que vous n'avez pas mentionné quel dessin vous voudriez supprimer.", "E5002", ExceptionType.Collaboration_Delete)
@@ -52,18 +50,14 @@ export const handleDelete = async (io: Server, socket: Socket, payload: {
             throw new SocketEventError("Oups! On dirait qu'il y a eu une erreur lors de la suppression du dessin...", "E5003", ExceptionType.Collaboration_Delete)
         }
 
-        const response = {
+        io.emit('collaboration:deleted', {
             collaborationId: deletedCollaboration.collaboration_id,
-            deletedAt: new Date().toISOString(),
-        };
+        });
 
-        if (deletedCollaboration.type === CollaborationType.Private) {
-            io.to(deletedCollaboration.collaboration_id).emit('collaboration:deleted', response);
-        } else {
-            io.emit('collaboration:deleted', response)
-        }
+        io.to(deletedChannel.channel_id).emit('channel:deleted', {
+            channelId: deletedChannel.channel_id
+        });
 
-        io.to(deletedChannel.channel_id).emit('collaboration:channel:leave');
         io.socketsLeave(deletedCollaboration.collaboration_id);
         io.socketsLeave(deletedChannel.channel_id);
     } catch (e) {

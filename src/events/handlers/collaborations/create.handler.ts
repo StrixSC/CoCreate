@@ -17,7 +17,8 @@ export const handleCreate = async (io: Server, socket: Socket, payload: {
     password?: string
 }): Promise<void> => {
     try {
-        const { userId, creatorId, isTeam, title, type, password } = payload;
+        const userId = socket.data.user
+        const { creatorId, isTeam, title, type, password } = payload;
 
         const isValid = (
             !validator.isEmpty(title) &&
@@ -87,12 +88,20 @@ export const handleCreate = async (io: Server, socket: Socket, payload: {
                 authorUsername: data.author_username,
                 authorAvatarUrl: data.author_avatar_url,
             });
+
+            // io.to(data.collaboration.channel_id).emit('channel:created', {
+            //     collaborationId: data.collaboration.collaboration_id,
+            //     channelId: data.collaboration.channel_id,
+            //     channelName: data.collaboration.channel.name,
+            //     ownerUsername: data.author_username,
+            //     createdAt: data.collaboration.channel.created_at,
+            //     updatedAt: data.collaboration.channel.updated_at
+            // });
         }
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.Collaboration);
     }
 }
-
 
 const createCollaboration = async (user_id: string, creatorId: string, isTeam: boolean, type: CollaborationType, title: string, password?: string) => {
     const collab_id = v4();
@@ -148,6 +157,7 @@ const createCollaboration = async (user_id: string, creatorId: string, isTeam: b
                 },
                 include: {
                     drawing: true,
+                    channel: true,
                     collaboration_members: true,
                 }
             }
@@ -169,7 +179,7 @@ const createCollaboration = async (user_id: string, creatorId: string, isTeam: b
         title: author.collaborations[0].drawing!.title,
         thumbnail_url: author.collaborations[0].drawing!.thumbnail_url,
         drawingId: author.collaborations[0].drawing!.drawing_id,
-        channelId: author.collaborations[0].channel_id
+        channelId: author.collaborations[0].channel_id,
     }
 
     return returnData;

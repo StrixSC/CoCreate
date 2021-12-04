@@ -14,11 +14,8 @@ export const handleJoin = async (io: Server, socket: Socket, payload: {
     password?: string,
 }): Promise<any> => {
     try {
-        const { userId, collaborationId, type, password } = payload;
-
-        if (userId !== socket.data.user) {
-            throw new create.Unauthorized("Provided user Id does not match the session user id.");
-        }
+        const userId = socket.data.user
+        const { collaborationId, type, password } = payload;
 
         if (type === CollaborationType.Protected && !password) {
             throw new create.Unauthorized("Provided type is protected but no password has been provided");
@@ -52,6 +49,7 @@ export const handleJoin = async (io: Server, socket: Socket, payload: {
                 },
                 collaboration: {
                     include: {
+                        channel: true,
                         drawing: true,
                         actions: {
                             where: {
@@ -116,6 +114,7 @@ export const handleJoin = async (io: Server, socket: Socket, payload: {
                         },
                         collaboration: {
                             include: {
+                                channel: true,
                                 drawing: true,
                                 actions: {
                                     where: {
@@ -151,27 +150,41 @@ export const handleJoin = async (io: Server, socket: Socket, payload: {
                 throw new create.InternalServerError("Could not create member relationship between user and collaboration/drawing.");
             }
 
-            // TODO: Might need to switch "socket" to "io"
-            if (collaboration.type !== CollaborationType.Private) {
-                io.to(member.collaboration_id).emit("collaboration:joined", {
-                    userId: userId,
-                    collaborationId: member.collaboration_id,
-                    username: member.user.profile!.username,
-                    avatarUrl: member.user.profile!.avatar_url,
-                    drawingId: member.collaboration.drawing!.drawing_id,
-                });
-            }
-
             triggerJoin(socket, member);
+
+            io.to(member.collaboration.channel_id).emit('channel:joined', {
+                collaborationId: member.collaboration_id,
+                channelId: member.collaboration.channel_id,
+                channelName: member.collaboration.channel.name
+            });
+
+            io.to(member.collaboration_id).emit("collaboration:joined", {
+                userId: userId,
+                collaborationId: member.collaboration_id,
+                username: member.user.profile!.username,
+                avatarUrl: member.user.profile!.avatar_url,
+                drawingId: member.collaboration.drawing!.drawing_id,
+                status: socket.data.status,
+                roomId: member.collaboration_id
+            });
+
         } else {
-            socket.broadcast.to(member.collaboration_id).emit("collaboration:connected", {
+            triggerJoin(socket, member);
+            io.to(member.collaboration_id).emit("collaboration:connected", {
                 userId: member.user.user_id,
                 username: member.user.profile!.username,
                 avatarUrl: member.user.profile!.avatar_url,
                 type: member.type,
                 drawingId: member.collaboration.drawing!.drawing_id,
+                roomId: member.collaboration_id,
+                status: socket.data.status
             });
-            triggerJoin(socket, member);
+
+            io.to(member.collaboration.channel_id).emit('channel:joined', {
+                collaborationId: member.collaboration_id,
+                channelId: member.collaboration.channel_id,
+                channelName: member.collaboration.channel.name
+            });
         }
 
     } catch (e) {

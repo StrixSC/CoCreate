@@ -19,12 +19,11 @@ type CollaborationMemberConnectionResponse = CollaborationMember & {
 }
 
 export const triggerJoin = (socket: Socket, member: any) => {
+    socket.data.status = UserStatusTypes.Busy;
     socket.join(member.collaboration.channel_id);
     socket.join(member.collaboration_id);
     const data = generateConnectedPayload(member);
     socket.emit("collaboration:load", data);
-    socket.emit('collaboration:channel:join');
-    socket.data.status = UserStatusTypes.Busy;
 }
 
 export const generateConnectedPayload = (member: CollaborationMemberConnectionResponse) => {

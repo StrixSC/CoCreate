@@ -7,9 +7,10 @@ import { db } from './../db';
 import { Socket, Server } from 'socket.io';
 import { UserStatusTypes } from '../models/IUser.model';
 export = (io: Server, socket: Socket) => {
-
     socket.on('disconnecting', () => {
+        console.log('disconnecting client', socket.data.username);
         socket.rooms.forEach((room) => {
+            console.log(room);
             const onlineMembers = getOnlineMembersInRoom(room);
             socket.data.status = UserStatusTypes.Offline,
                 io.to(room).emit("user:disconnected", {
@@ -41,8 +42,16 @@ const initUser = async (io: Server, socket: Socket) => {
                 user_id: socket.data.user
             },
             include: {
-                teams: true,
-                channels: true,
+                teams: {
+                    include: {
+                        team: true
+                    }
+                },
+                channels: {
+                    include: {
+                        channel: true
+                    }
+                },
                 profile: true,
             }
         });
@@ -51,22 +60,24 @@ const initUser = async (io: Server, socket: Socket) => {
             throw new SocketEventError("Oups! Il y a eu une erreur lors d'un traitement au Serveur, veuillez contacter un administrateur", "E0100");
         }
 
-        for (let team of user.teams) {
-            const members = getOnlineMembersInRoom(team.team_id);
-            if (!members.find((m) => m.userId === socket.data.user)) {
-                socket.join(team.team_id)
-            } else {
-                throw new SocketEventError(`Erreur: l'utilisateur est déjà connecté sur un autre client.`, 'E4518');
+        const allActiveSockets = io.sockets.sockets;
+        allActiveSockets.forEach((s) => {
+            if (s.data.user && s.data.user === user.user_id && s.id !== socket.id) {
+                console.log(s.data.user, s.rooms);
+                const rooms = s.rooms;
+                for (let room of rooms) {
+                    s.leave(room);
+                }
+                s.emit('user:init:exception', { message: "(E4555) - Vous avez été désauthentifié, car ce compte est connecté sur un client en parallèle." });
             }
-        }
+        })
 
         for (let channel of user.channels) {
-            const members = getOnlineMembersInRoom(channel.channel_id);
-            if (!members.find((m) => m.userId === socket.data.user)) {
-                socket.join(channel.channel_id)
-            } else {
-                throw new SocketEventError(`Erreur: l'utilisateur est déjà connecté sur un client.`, 'E4518');
-            }
+            socket.join(channel.channel_id)
+        }
+
+        for (let team of user.teams) {
+            socket.join(team.team_id)
         }
 
         socket.data.username = user.profile!.username;

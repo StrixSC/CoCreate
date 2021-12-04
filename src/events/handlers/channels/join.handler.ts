@@ -41,15 +41,22 @@ export const handleJoin = async (io: Server, socket: Socket, data: { channelId: 
                     'Oups! Nous avons eu une erreur interne lors du traitement de votre requête',
                     'E1005'
                 );
+
+            socket.join(channelId);
+            io.to(channelId).emit('channel:joined', {
+                channelId: channel.channel_id,
+                channelName: channel.name,
+                collaborationId: channel.collaboration_id
+            });
+        } else {
+            socket.join(channelId);
+            io.to(channelId).emit('channel:connected', {
+                channelId: channelId,
+                channelName: channel.name,
+                collaborationId: channel.collaboration_id
+            })
         }
 
-        socket.join(channel.channel_id);
-
-        return io.to(channelId).emit('channel:joined', {
-            channelId: channel.channel_id,
-            channelName: channel.name,
-            collaborationId: channel.collaboration_id
-        });
     } catch (e) {
         handleSocketError(socket, e, undefined, [ExceptionType.Channel_Join, ExceptionType.Channels]);
     }

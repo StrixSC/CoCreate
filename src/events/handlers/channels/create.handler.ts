@@ -53,9 +53,7 @@ export const handleCreate = async (io: Server, socket: Socket, data: { channelNa
         io.emit('channel:created', {
             channelId: channel.channel_id,
             channelName: channel.name,
-            ownerUsername:
-                channel.members.find((m) => m.type === MemberType.Owner)?.member.profile
-                    ?.username || 'admin',
+            ownerUsername: channel.members.find((m) => m.type === MemberType.Owner)?.member.profile?.username || 'admin',
             createdAt: channel.created_at,
             updatedAt: channel.updated_at,
             collaborationId: channel.collaboration_id || null

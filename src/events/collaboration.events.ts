@@ -8,11 +8,11 @@ import { handleCreate } from './handlers/collaborations/create.handler';
 import { handleDelete } from './handlers/collaborations/delete.handler';
 
 export = (io: Server, socket: Socket) => {
-    socket.on("collaboration:join", (io, socket, data: any) => handleJoin(io, socket, data));
-    socket.on("collaboration:create", (io, socket, data: any) => handleCreate(io, socket, data));
-    socket.on("collaboration:update", (io, socket, data: any) => handleUpdate(io, socket, data));
-    socket.on("collaboration:delete", (io, socket, data: any) => handleDelete(io, socket, data));
-    socket.on("collaboration:connect", (io, socket, data: any) => handleConnect(io, socket, data));
-    socket.on("collaboration:leave", (io, socket, data: any) => handleLeave(io, socket, data));
-    socket.on("collaboration:disconnect", (io, socket, data: any) => handleDisconnect(io, socket, data));
+    socket.on("collaboration:join", (data: any) => handleJoin(io, socket, data));
+    socket.on("collaboration:create", (data: any) => handleCreate(io, socket, data));
+    socket.on("collaboration:update", (data: any) => handleUpdate(io, socket, data));
+    socket.on("collaboration:delete", (data: any) => handleDelete(io, socket, data));
+    socket.on("collaboration:connect", (data: any) => handleConnect(io, socket, data));
+    socket.on("collaboration:leave", (data: any) => handleLeave(io, socket, data));
+    socket.on("collaboration:disconnect", (data: any) => handleDisconnect(io, socket, data));
 }

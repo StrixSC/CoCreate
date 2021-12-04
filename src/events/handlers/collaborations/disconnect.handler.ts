@@ -1,10 +1,9 @@
-import { UserStatusTypes } from './../../../models/IUser.model';
+import { UserStatusTypes, IConnectionEventData } from './../../../models/IUser.model';
 import { SocketEventError } from './../../../socket';
 import { Server, Socket } from 'socket.io';
 import { db } from '../../../db';
 import { ExceptionType } from '../../../models/Exceptions.enum';
 import { handleSocketError } from '../../../utils/errors';
-
 
 export const handleDisconnect = async (io: Server, socket: Socket, payload: {
     collaborationId: string;
@@ -13,6 +12,7 @@ export const handleDisconnect = async (io: Server, socket: Socket, payload: {
         const member = await db.collaborationMember.findFirst({
             where: {
                 user_id: socket.data.user,
+                collaboration_id: payload.collaborationId
             },
             include: {
                 user: {
@@ -36,7 +36,7 @@ export const handleDisconnect = async (io: Server, socket: Socket, payload: {
             where: {
                 channel_id: member.collaboration.channel_id,
                 user_id: member.user_id
-            }
+            },
         });
 
         if (!deletedChannelMember) {
@@ -52,8 +52,18 @@ export const handleDisconnect = async (io: Server, socket: Socket, payload: {
             status: socket.data.status,
         }
 
+        io.emit('status-change', {
+            userId: socket.data.user,
+            username: socket.data.username,
+            avatarUrl: socket.data.avatarUrl,
+            status: socket.data.status,
+            roomId: member.collaboration.collaboration_id,
+        } as IConnectionEventData);
+
         io.to(payload.collaborationId).emit("collaboration:disconnnected", disconnectionData);
-        io.to(member.collaboration.channel_id).emit('collaboration:channel:disconnected', disconnectionData);
+        io.to(member.collaboration.channel_id).emit('channel:left', {
+            channelId: member.collaboration.channel_id,
+        });
 
         socket.leave(payload.collaborationId);
         socket.leave(member.collaboration.channel_id);

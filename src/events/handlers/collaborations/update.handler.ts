@@ -15,7 +15,8 @@ export const handleUpdate = async (io: Server, socket: Socket, payload: {
     password?: string,
 }): Promise<void> => {
     try {
-        const { userId, title, type, password, collaborationId } = payload;
+        const userId = socket.data.user
+        const { title, type, password, collaborationId } = payload;
 
         if (!type || !title) {
             throw new create.BadRequest("Invalid or missing type or title.");
@@ -65,6 +66,7 @@ export const handleUpdate = async (io: Server, socket: Socket, payload: {
                 password: type === CollaborationType.Protected ? password : undefined
             },
             include: {
+                channel: true,
                 drawing: true,
                 collaboration_members: {
                     include: {
@@ -101,11 +103,13 @@ export const handleUpdate = async (io: Server, socket: Socket, payload: {
             authorAvatarUrl: author.user.profile!.avatar_url,
         }
 
-        if (updated.type === CollaborationType.Private && type === CollaborationType.Private) {
-            socket.emit("collaboration:updated", response);
-        } else {
-            io.emit('collaboration:updated', response);
-        }
+        io.to(response.collaborationId).emit("collaboration:updated", response);
+        io.to(updated.channel.channel_id).emit("channel:updated", {
+            channelId: updated.channel.channel_id,
+            channelName: updated.channel.name,
+            updatedAt: updated.channel.updated_at
+        });
+        io.emit("collaboration:updated", response);
 
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.Collaboration);
