@@ -1,11 +1,12 @@
 <mat-toolbar color="secondary">
     <mat-toolbar-row>
+        <button matTooltip="Retour au menu" routerLink="" mat-icon-button>
+            <mat-icon>arrow_back</mat-icon>
+        </button>
         <h1>Équipes</h1>
         <span class="example-spacer"></span>
         <button color="accent" mat-raised-button (click)="openCreateTeamDialog()">Créer une équipe</button>
-        <button matTooltip="Retour au menu" routerLink="" mat-icon-button>
-            <mat-icon>exit_to_app</mat-icon>
-        </button>
+
     </mat-toolbar-row>
 </mat-toolbar>
 

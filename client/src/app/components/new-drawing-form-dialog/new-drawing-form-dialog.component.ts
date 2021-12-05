@@ -24,6 +24,7 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
   newDrawingForm: FormGroup;
   showPassword: boolean;
   exceptionSubscription: Subscription;
+  finishSubscription: Subscription;
   isLoading: boolean;
   public visibilityTypes: { key: string, value: string }[] =
     [
@@ -73,6 +74,13 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
       ]],
       backgroundColor: this.colorService.colorForm
     });
+
+    this.finishSubscription = this.syncCollaborationService.onCreateFinish().subscribe((c) => {
+      this.isLoading = false;
+      this.dialogRef.disableClose = false;
+      this.snackbar.open('Dessin créé avec succès!', "OK", { duration: 5000 });
+      this.dialogRef.close();
+    })
 
     this.authors = []
 
@@ -139,6 +147,7 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
         creatorId: this.author.value,
         isTeam: this.auth.activeUser.uid !== this.author.value,
         title: this.title.value,
+        bgColor: this.backgroundColor.value.hex,
         type: this.type.value,
         password: this.password.value,
       } as ICollaborationCreatePayload
@@ -149,6 +158,10 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.exceptionSubscription) {
       this.exceptionSubscription.unsubscribe();
+    }
+
+    if (this.finishSubscription) {
+      this.finishSubscription.unsubscribe();
     }
   }
 }

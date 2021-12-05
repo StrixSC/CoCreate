@@ -1,6 +1,6 @@
 <mat-card class="drawing-card" *ngIf="drawing">
   <mat-card-header>
-    <img mat-card-avatar [src]="drawing.author_avatar" class="example-header-image">
+    <img mat-card-avatar [src]="drawing.author_avatar || '/assets/img/user.png'" class="example-header-image">
     <mat-card-title *ngIf="drawing.title.length >=15">{{ drawing.title | slice:0:15 }}...</mat-card-title>
     <mat-card-title *ngIf="drawing.title.length < 15">{{drawing.title}}</mat-card-title>
     <mat-card-subtitle>Dernière mise à jour: {{ drawing.updated_at | date:'short' }}
@@ -13,12 +13,12 @@
             <mat-icon>settings_icon</mat-icon>
             <span>Mise à jour des infos</span>
           </button>
-          <button *ngIf="!drawing.is_owner" (click)="openLeave()" mat-menu-item>
+          <button *ngIf="!drawing.is_owner" (click)="openLeaveDeleteDialog(false)" mat-menu-item>
             <mat-icon>logout</mat-icon>
             <span>Quitter</span>
           </button>
           <mat-divider *ngIf="drawing.is_owner"></mat-divider>
-          <button *ngIf="drawing.is_owner" (click)="openDelete()" mat-menu-item>
+          <button *ngIf="drawing.is_owner" (click)="openLeaveDeleteDialog(true)" mat-menu-item>
             <mat-icon>delete</mat-icon>
             <span>Supprimer</span>
           </button>

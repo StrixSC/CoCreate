@@ -1,15 +1,16 @@
+import { AuthService } from 'src/app/services/auth.service';
+import { DeleteConfirmationDialogComponent } from './../delete-confirmation-dialog/delete-confirmation-dialog.component';
+import { UpdateCollaborationFormDialogComponent } from './../update-collaboration-form-dialog/update-collaboration-form-dialog.component';
 import { DrawingLoadService } from './../../services/drawing-load.service';
 import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
-import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { ICollaborationLoadResponse } from './../../model/ICollaboration.model';
 import { Component, Input } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DrawingPreviewDialogComponent } from '../drawing-preview-dialog/drawing-preview-dialog.component';
 import { IGalleryEntry } from '../../model/IGalleryEntry.model';
 import { CollaborationPasswordFormDialogComponent } from '../collaboration-password-form-dialog/collaboration-password-form-dialog.component';
-import { FormMenuDialogDrawingComponent } from '../form-menu-dialog-drawing/form-menu-dialog-drawing.component';
 
 @Component({
   selector: 'app-drawing-gallery-card',
@@ -21,14 +22,20 @@ export class DrawingGalleryCardComponent {
   private loadSubscription: Subscription;
   dialogRef: MatDialogRef<DrawingPreviewDialogComponent | CollaborationPasswordFormDialogComponent>
   @Input() public drawing: IGalleryEntry;
-  constructor(private syncService: SyncCollaborationService, private router: Router, public dialog: MatDialog, private drawingLoader: DrawingLoadService) { }
+  constructor(
+    private syncService: SyncCollaborationService,
+    private router: Router,
+    public dialog: MatDialog,
+    private auth: AuthService,
+    private drawingLoader: DrawingLoadService
+  ) { }
 
   ngOnInit(): void {
     this.loadSubscription = this.syncService.onLoadCollaboration().subscribe((data) => {
       if (data) {
         this.onLoad(data)
       }
-    })
+    });
   }
 
   ngOnDestroy(): void {
@@ -38,7 +45,7 @@ export class DrawingGalleryCardComponent {
   }
 
   openDialog(): void {
-    
+
     if (this.drawing.type !== "Protected" || (this.drawing.type === "Protected" && this.drawing.is_member)) {
       this.dialogRef = this.dialog.open(DrawingPreviewDialogComponent,
         {
@@ -62,28 +69,26 @@ export class DrawingGalleryCardComponent {
     }
   }
 
-  openDelete(): void {
-    this.dialog.open(FormMenuDialogDrawingComponent, 
-      {
-      
-        data: {drawing:this.drawing, action: "Delete"}
-      
+  openLeaveDeleteDialog(isDelete: boolean): void {
+    this.dialog.open(DeleteConfirmationDialogComponent, {
+      width: '500px',
+      data: {
+        message: `Êtes vous sûr de vouloir ${isDelete ? 'supprimer' : 'quitter'} le dessin "${this.drawing.title}" ?`,
+        submessage: isDelete ? 'Cette action est irréversible...' : '',
+        buttonLabel: isDelete ? 'Supprimer' : 'Quitter'
+      }
+    }).afterClosed().subscribe((d) => {
+      if (d) {
+        if (isDelete) {
+          this.syncService.sendDeleteCollaboration({ collaborationId: this.drawing.collaboration_id!, userId: this.auth.activeUser!.uid });
+        } else {
+          this.syncService.sendLeaveCollaboration({ collaborationId: this.drawing.collaboration_id!, userId: this.auth.activeUser!.uid });
+        }
+      }
     });
   }
-  openLeave(): void {
-    this.dialog.open(FormMenuDialogDrawingComponent, 
-      {
-      
-        data: {drawing:this.drawing, action: "Leave"}
-      
-    });
-  }
+
   openUpdate(): void {
-    this.dialog.open(FormMenuDialogDrawingComponent, 
-      {
-      
-        data: {drawing:this.drawing, action: 'Update'}
-      
-    });
+    this.dialog.open(UpdateCollaborationFormDialogComponent, { data: this.drawing });
   }
 }

@@ -241,7 +241,7 @@ export class TeamInfoComponent implements OnInit {
     return infoChanged;
   }
 
-  ngOnDelete(): void {
+  ngOnDestroy(): void {
     if (this.updatedSubscription) {
       this.updatedSubscription.unsubscribe();
     }
