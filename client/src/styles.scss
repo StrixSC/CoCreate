@@ -23,7 +23,6 @@ $polydessin-theme-theme: mat-dark-theme($polydessin-theme-primary, $polydessin-t
 html,
 body {
   height: 100%;
-
 }
 
 body {
@@ -53,6 +52,12 @@ fa-icon {
   flex-direction: column;
   align-items: center;
   gap: 2rem;
+}
+
+.notice-indicator {
+  line-height: 20px;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .clickable {
@@ -204,4 +209,8 @@ fa-icon {
 .pv-4 {
   padding-top: 4rem;
   padding-bottom: 4rem;
+}
+
+.mat-tab-labels {
+  justify-content: center;
 }
