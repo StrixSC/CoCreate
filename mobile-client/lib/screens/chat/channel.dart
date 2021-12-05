@@ -275,7 +275,6 @@ class _ChannelState extends State<Channel> {
         prefixIcon: const Icon(Icons.search),
       ),
       onChange: (selected) {
-        print('bruh');
         setState(() {
             ex1 = selected;
             currentSelectedJoin = selected.id;

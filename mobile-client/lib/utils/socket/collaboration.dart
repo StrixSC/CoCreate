@@ -222,27 +222,22 @@ class CollaborationSocket {
   updated(callbackChannel) {
     socket.on('collaboration:updated', (data) {
       print('Collaboration Updated');
-      // Collaboration collaboration = Collaboration(
-      //     collaborationId: 'id',
-      //     actions: [],
-      //     backgroundColor: Colors.white,
-      //     actionsMap: {}, members: []);
-      // Drawing drawing = Drawing(
+      // Map drawing = Drawing(
       //     drawingId: data['drawingId'],
       //     thumbnailUrl: data['thumbnailUrl'],
       //     title: data['title'],
       //     authorUsername: data["authorUsername"],
       //     authorAvatar: data["authorAvatarUrl"],
       //     createdAt: data['createdAt'],
-      //     collaboration: collaboration,
       //     type: 'type'); // "Protected", "Public" or "Private"
-      callbackChannel('updated', '');
+      callbackChannel('updated', data);
     });
   }
 
   deleted(callbackChannel) {
     socket.on('collaboration:deleted', (data) {
       print('Collaboration deleted');
+      print(data);
       Map deleted = {
         "collaborationId": data["collaborationId"],
         "deletedAt": data["deletedAt"] ?? '',
@@ -265,19 +260,18 @@ class CollaborationSocket {
     });
   }
 
-  // TODO : collaborationId is null -> nawras
   disconnected(callbackChannel) {
     socket.on('collaboration:disconnected', (data) {
       print('Collaboration disconnected');
       print(data);
-      // Map disconnected = {
-      //   "drawingId": data["drawingId"],
-      //   "collaborationId": data["collaborationId"],
-      //   "userId": data["userId"],
-      //   "username": data["username"],
-      //   "avatarUrl": data["avatarUrl"],
-      // };
-      // callbackChannel('disconnect', disconnected);
+      Map disconnected = {
+        "drawingId": data["drawingId"],
+        "collaborationId": data["collaborationId"],
+        "userId": data["userId"],
+        "username": data["username"],
+        "avatarUrl": data["avatarUrl"],
+      };
+      callbackChannel('disconnect', disconnected);
     });
   }
 

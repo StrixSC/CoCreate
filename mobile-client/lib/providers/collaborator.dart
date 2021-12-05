@@ -166,20 +166,21 @@ class Collaborator extends ChangeNotifier {
 
   // TODO: If it is sent to everyone even when not in drawing, need to change this
   void memberConnected(Member member) {
-    int index = drawings[currentType][currentDrawingId]
-        .collaboration
-        .members
-        .indexWhere((element) => element.userId == member.userId);
-    if (index != -1) {
-      drawings[currentType][currentDrawingId]
-          .collaboration
-          .members[index]
-          .isActive = true;
-      notifyListeners();
-    } else {
-      throw ("Connected member user index not found.");
-    }
+
+    // int index = drawings[currentType][currentDrawingId]
+    //     .collaboration
+    //     .members
+    //     .indexWhere((element) => element.userId == member.userId);
+    // if (index != -1) {
+    //   drawings[currentType][currentDrawingId]
+    //       .collaboration
+    //       .members[index]
+    //       .isActive = true;
+    //   notifyListeners();
+    // }
+    // (drawings[currentType][currentDrawingId] as Drawing).collaboration.members.add(member);
     refreshPages();
+    notifyListeners();
   }
 
   void drawingCreated(Drawing drawing) {
@@ -200,12 +201,23 @@ class Collaborator extends ChangeNotifier {
   }
 
   void deletedDrawing(Map delete) {
-    String collaborationId = delete["collaborationId"];
-    String deletedAt = delete["deletedAt"];
-    var toRemove = getDrawingId(collaborationId);
-    for (var type in TYPES) {
-      (drawings[type] as Map<String, Drawing>)
-          .removeWhere((key, value) => toRemove == key);
+    // String collaborationId = delete["collaborationId"];
+    // String deletedAt = delete["deletedAt"];
+    // var toRemove = getDrawingId(collaborationId);
+    // for (var type in TYPES) {
+    //   (drawings[type] as Map<String, Drawing>)
+    //       .removeWhere((key, value) => toRemove == key);
+    // }
+    String collaborationId = delete['collaborationId'];
+    if(currentType == 'Joined') {
+      (drawings[currentType] as Map<String, Drawing>).forEach((key, value) {
+        if ((drawings[currentType][key] as Drawing).collaboration.collaborationId ==
+            collaborationId) {
+          if((drawings[currentType][key] as Drawing).authorUsername == auth!.user!.displayName) {
+            alert('Succès!', 'Vous avez supprimer le dessin! 😄');
+          }
+        }
+      });
     }
     pagingControllers[currentType].refresh();
     notifyListeners();
@@ -219,30 +231,30 @@ class Collaborator extends ChangeNotifier {
     String avatarUrl = left["avatarUrl"];
     String leftAt = left["leftAt"];
 
-    var drawingId = getDrawingId(collaborationId);
-    for (var type in TYPES) {
-      if (type == 'Available') {
-        (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
-          value.collaboration.members
-              .removeWhere((item) => item.userId == userId);
-          value.collaboration.memberCount--;
-          return value;
-        });
-      } else {
-        if (userId == auth!.user!.uid) {
-          (drawings[type] as Map<String, Drawing>)
-              .removeWhere((key, value) => drawingId == key);
-        } else {
-          (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
-            value.collaboration.members
-                .removeWhere((item) => item.userId == userId);
-            value.collaboration.memberCount--;
-            return value;
-          });
-        }
-      }
-    }
-    currentDrawingId = '';
+    // var drawingId = getDrawingId(collaborationId);
+    // for (var type in TYPES) {
+    //   if (type == 'Available') {
+    //     (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
+    //       value.collaboration.members
+    //           .removeWhere((item) => item.userId == userId);
+    //       value.collaboration.memberCount--;
+    //       return value;
+    //     });
+    //   } else {
+    //     if (userId == auth!.user!.uid) {
+    //       (drawings[type] as Map<String, Drawing>)
+    //           .removeWhere((key, value) => drawingId == key);
+    //     } else {
+    //       (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
+    //         value.collaboration.members
+    //             .removeWhere((item) => item.userId == userId);
+    //         value.collaboration.memberCount--;
+    //         return value;
+    //       });
+    //     }
+    //   }
+    // }
+    userId == auth!.user!.uid? currentDrawingId = '' : '';
     pagingControllers[currentType].refresh();
     notifyListeners();
   }
@@ -253,19 +265,22 @@ class Collaborator extends ChangeNotifier {
     String username = left["username"];
     String avatarUrl = left["avatarUrl"];
     String leftAt = left["leftAt"];
-
-    var drawingId = getDrawingId(collaborationId);
-    for (var type in TYPES) {
-      if (type == 'Available') {
-        (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
-          var index = value.collaboration.members
-              .indexWhere((item) => item.userId == userId);
-          value.collaboration.members[index].isActive = false;
-          return value;
-        });
-      }
-    }
+    //
+    // var drawingId = getDrawingId(collaborationId);
+    // for (var type in TYPES) {
+    //   if (type == 'Available') {
+    //     (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
+    //       var index = value.collaboration.members
+    //           .indexWhere((item) => item.userId == userId);
+    //       value.collaboration.members[index].isActive = false;
+    //       return value;
+    //     });
+    //   }
+    // }
+    // (drawings[currentType][currentDrawingId] as Drawing).collaboration.members.add(member);
+    userId == auth!.user!.uid? currentDrawingId = '' : '';
     pagingControllers[currentType].refresh();
+    refreshPages();
     notifyListeners();
   }
 
@@ -291,6 +306,8 @@ class Collaborator extends ChangeNotifier {
         drawingCreated(drawing);
         break;
       case 'updated':
+        var authorUsername = data['authorUsername'];
+        authorUsername == auth!.user!.displayName ?alert('Succès!', 'Bravo! Votre dessin à été mis a jour avec succès. Amusez-vous! 😄') : '';
         refreshPages();
         // Drawing drawing = data as Drawing;
         // updatedDrawing(drawing);
@@ -302,10 +319,12 @@ class Collaborator extends ChangeNotifier {
       case 'left':
         Map left = data as Map;
         leftDrawing(left);
+        left["userId"] == auth!.user!.uid ? alert('Succès!', 'Vous avez été quitter le dessin! 😄') : '';
         break;
       case 'disconnected':
         Map disc = data as Map;
         disconnectedDrawing(disc);
+        disc["userId"] == auth!.user!.uid ? alert('Succès!', 'Vous avez été déconnecté du dessin! 😄') : '';
         break;
       default:
         print("Invalid Collaboration socket event");
