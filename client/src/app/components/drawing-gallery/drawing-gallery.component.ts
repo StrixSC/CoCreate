@@ -107,11 +107,13 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
 
     Delete_Finished: (data: any) => {
       this.switchToPublicIfNoDrawings();
+      this.resetPaginationValues();
       this.showSnackbar("Dessin supprimé avec succès.");
     },
 
     Leave_Finished: (data: any) => {
       this.switchToPublicIfNoDrawings();
+      this.resetPaginationValues();
       this.showSnackbar("Succès! Dessin quitté!")
     },
 
@@ -266,4 +268,11 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
     this.activeOffset = (pageIndex * this.activeLimit);
     this.filter();
   }
+
+  resetPaginationValues(): void {
+    this.paginator.firstPage();
+    this.activeLimit = 12;
+    this.activeOffset = 0;
+  }
+
 }

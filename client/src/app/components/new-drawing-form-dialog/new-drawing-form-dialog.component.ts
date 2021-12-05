@@ -93,10 +93,11 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.exceptionSubscription = this.syncCollaborationService.onCollaborationException().subscribe((message: any) => {
+    this.exceptionSubscription = this.syncCollaborationService.onCreateCollaborationException().subscribe((message: any) => {
       this.snackbar.open(message.message, '', { duration: 5000 });
       this.newDrawingForm.enable();
       this.isLoading = false;
+      this.dialogRef.disableClose = false;
     });
   }
 
@@ -142,6 +143,7 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
     if (this.newDrawingForm.valid && this.auth.activeUser) {
       this.newDrawingForm.disable();
       this.isLoading = true;
+      this.dialogRef.disableClose = true;
       const payload = {
         userId: this.auth.activeUser.uid,
         creatorId: this.author.value,
