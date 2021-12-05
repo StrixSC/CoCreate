@@ -229,7 +229,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           ],
                         ));
               }),
-          messenger.userChannels[widget.channelIndex].name != "Canal Publique"
+          messenger.userChannels[widget.channelIndex].name != "Public"
               ? IconButton(
                   icon: const Icon(Icons.exit_to_app_rounded,
                       color: Colors.white, size: 30),

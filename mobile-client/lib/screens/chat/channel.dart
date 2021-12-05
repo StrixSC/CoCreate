@@ -2,8 +2,10 @@ import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/collaborator.dart';
 import 'package:Colorimage/providers/messenger.dart';
 import 'package:Colorimage/providers/team.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/src/provider.dart';
+import '../../app.dart';
 import '../../models/chat.dart';
 import 'chat.dart';
 import 'chat_card.dart';
@@ -23,6 +25,8 @@ class _ChannelState extends State<Channel> {
     'Teams': 'Teams',
     'Collaboration': 'Collaboration'
   };
+  String currentSelectedJoin = '';
+
   Widget channelListWidget() {
     return (Column(children: [
       Padding(
@@ -153,6 +157,7 @@ class _ChannelState extends State<Channel> {
           ElevatedButton(
               onPressed: () {
                 context.read<Messenger>().getAvailableChannels();
+                currentSelectedJoin = '';
                 joinChannelDialog(context.read<Messenger>().auth!.user);
               },
               child: const Text(
@@ -194,16 +199,23 @@ class _ChannelState extends State<Channel> {
     dynamic ex1;
     SelectDialog.showModal<Chat>(
       context,
-      searchHint: 'Cherchez un canal par son nom',
       label: "Liste des canaux disponibles",
       selectedValue: ex1,
+      multipleSelectedValues: ex1,
       items: context.read<Messenger>().availableChannel,
-      itemBuilder: (context, item, selected) => ChatCard(
+      itemBuilder: (context, item, isSelected) { return Container( margin: EdgeInsets.only(top:18.0), decoration: currentSelectedJoin == item.id ? BoxDecoration(
+          border: Border.all(
+              width: 3.5,
+              color:kPrimaryColor)): null,child:ChatCard(
           chat: item,
           user: user,
           press: () {
-            context.read<Messenger>().channelSocket.joinChannel(item.id);
-          }),
+            print('bruh');
+           setState(() {
+             currentSelectedJoin = item.id;
+           });
+            // context.read<Messenger>().channelSocket.joinChannel(item.id);
+          }));},
       emptyBuilder: (context) => Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -211,16 +223,63 @@ class _ChannelState extends State<Channel> {
             Text('Aucun canal disponible..',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500))
           ]),
+      onMultipleItemsChange: (List<Chat> selected) {
+        setState(() {
+          ex1 = selected;
+        });
+      },
       okButtonBuilder: (context, onPressed) {
         return Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton(
-              onPressed: () => {},
-              child: Icon(Icons.check, color: Colors.black),
-            ));
+          alignment: Alignment.centerRight,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children:[
+              ElevatedButton(
+                onPressed: () {Navigator.pop(context);},
+                child: Text('Annuler'),
+              ),
+              SizedBox(width: 25.0),
+              context.read<Messenger>().availableChannel.isNotEmpty? ElevatedButton(
+                onPressed: () {
+                  currentSelectedJoin == ''? AwesomeDialog(
+                    context:
+                    navigatorKey.currentContext as BuildContext,
+                    width: 800,
+                    btnOkColor: Colors.red,
+                    dismissOnTouchOutside: false,
+                    dialogType: DialogType.ERROR,
+                    animType: AnimType.BOTTOMSLIDE,
+                    title: 'Erreur!',
+                    desc: 'Veuillez choisir une chaine pour joindre!',
+                    btnOkOnPress: () {},
+                  ).show():
+                    context.read<Messenger>().channelSocket.joinChannel(currentSelectedJoin);
+                    Navigator.pop(context);
+                  }
+                ,
+                child: Text('Joindre'),
+              ) : SizedBox.shrink(),
+            ]
+          )
+        );
       },
+      searchBoxDecoration: InputDecoration(
+        errorStyle: const TextStyle(fontSize: 26),
+        hintText: "Cherchez un canal par son nom",
+        hintStyle: const TextStyle(
+          fontSize: 26,
+        ),
+        contentPadding: const EdgeInsets.all(15),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(0)),
+        prefixIcon: const Icon(Icons.search),
+      ),
       onChange: (selected) {
-        ex1 = selected;
+        print('bruh');
+        setState(() {
+            ex1 = selected;
+            currentSelectedJoin = selected.id;
+    });
       },
     );
   }
