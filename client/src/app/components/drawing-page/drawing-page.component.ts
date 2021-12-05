@@ -23,6 +23,7 @@ export class DrawingPageComponent {
   listener: Subscription;
   activeCollaborationId: string;
   collaborationDeletedSubscription: Subscription;
+  committedAction: boolean;
   constructor(
     public dialog: MatDialog,
     private hotkeyService: HotkeysService,
@@ -40,6 +41,7 @@ export class DrawingPageComponent {
   }
 
   ngAfterViewInit(): void {
+    this.committedAction = false;
     if (!this.drawingLoader.activeDrawingData) {
       const collaborationId = this.activeRoute.snapshot.params.id;
       if (collaborationId) {
@@ -97,6 +99,9 @@ export class DrawingPageComponent {
         if (data.eventType === EventTypes.Action) {
           console.log('Event received from user', data.username, 'with type', data.actionType, 'with actionId =', data.actionId, '\nIt is selecting', data.selectedActionId ? data.selectedActionId : 'Nothing');
           this.toolFactory.handleEvent(data);
+          if (this.toolFactory.isActiveUser(data)) {
+            this.committedAction = true;
+          }
         } else {
           if (data.eventType === EventTypes.Error) {
             this.onError();
@@ -117,7 +122,9 @@ export class DrawingPageComponent {
     }
 
     this.syncCollabService.sendDisconnect({ collaborationId: this.activeCollaborationId });
-
+    if (this.committedAction) {
+      this.syncCollabService.sendLogDrawingAction({ collaborationId: this.activeCollaborationId });
+    }
     this.activeCollaborationId = "";
     this.drawingLoader.unload();
     this.drawingLoader.activeDrawingData = null;

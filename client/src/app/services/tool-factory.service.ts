@@ -318,6 +318,10 @@ export class ToolFactoryService {
     this.collaborationService.clearActionList();
   }
 
+  isActiveUser(data: IAction): boolean {
+    return data.userId === this.syncService.defaultPayload!.userId;
+  }
+
   onSelect(payload: ISelectionAction, isActiveUser: boolean) {
     if (payload.isSelected && payload.selectedBy === this.syncService.defaultPayload!.userId) {
       this.selectionService.selectByActionId(payload.actionId, payload.username);

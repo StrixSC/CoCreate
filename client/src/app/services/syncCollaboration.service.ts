@@ -22,6 +22,10 @@ export class SyncCollaborationService {
     this.socketService.emit('collaboration:join', { ...data, userId: this.authService.activeUser.uid });
   }
 
+  sendLogDrawingAction(data: any) {
+    this.socketService.emit('log:drawing-action', data)
+  }
+
   sendDisconnect(data: ICollaborationDisconnectPayload) {
     this.socketService.emit('collaboration:disconnect', { ...data });
   }

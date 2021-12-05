@@ -1,93 +1,76 @@
- <div class="profile-header">
-    
-    
-    <img mat-card-avatar class="avatar" src={{url}}>
-    <p>@{{username}}</p>
-    <button mat-raised-button>
+<div class="profile-header">
+
+
+  <img mat-card-avatar class="avatar" src={{url}}>
+  <p>@{{username}}</p>
+  <button mat-raised-button>
     <input type="file" class="avatar" id="img" (change)="selectFile($event)" style="display:none;">
-    <label  for="img">Téléverser un avatar</label>
-    </button>
+    <label for="img">Téléverser un avatar</label>
+  </button>
   <button mat-raised-button (click)="openAvatarDialog()">Choisir un avatar</button>
 </div>
- <!-- username update-->
- <mat-card>
- <p class="form-title"><b>Modification du nom de l'utilisateur</b></p>
- <form class="form" [formGroup]="updateUsernameForm" (submit)="register()">
- <mat-form-field class="pb-1 form-field clickable" appearance="outline">
- <mat-label>Nom d'utilisateur</mat-label>
-        <input
-         type="text"
-         formControlName="username"
-          matInput
-          placeholder="Identificateur"
-        />
-        <mat-hint>Caractères alphanumériques seulement</mat-hint>
-            <mat-error *ngIf="updateUsernameForm.get('username').hasError('minlength')">
-                Le nom d'utilisateur doit être entre 4 et 256 caractères.
-            </mat-error>
-            <mat-error *ngIf="updateUsernameForm.get('username').hasError('maxlength')">
-                Le nom d'utilisateur doit être entre 4 et 256 caractères.
-            </mat-error>
-      </mat-form-field>
-     
-         </form>  
-<div class="boutton">
-        <button mat-raised-button class="profile-settings-btn" (click)="openUsernameUpdateDialog()">Soummettre</button>
-</div>
-<p *ngIf="onChangeUsername">Votre nom d'utilisateur est changé avec succès</p>
+<!-- username update-->
+<mat-card>
+  <p class="form-title"><b>Modification du nom de l'utilisateur</b></p>
+  <form class="form" [formGroup]="updateUsernameForm" (submit)="register()">
+    <mat-form-field class="pb-1 form-field clickable" appearance="outline">
+      <mat-label>Nom d'utilisateur</mat-label>
+      <input type="text" formControlName="username" matInput placeholder="Identificateur" />
+      <mat-hint>Caractères alphanumériques seulement</mat-hint>
+      <mat-error *ngIf="updateUsernameForm.get('username').hasError('minlength')">
+        Le nom d'utilisateur doit être entre 4 et 256 caractères.
+      </mat-error>
+      <mat-error *ngIf="updateUsernameForm.get('username').hasError('maxlength')">
+        Le nom d'utilisateur doit être entre 4 et 256 caractères.
+      </mat-error>
+    </mat-form-field>
+
+  </form>
+  <div class="boutton">
+    <button mat-raised-button class="profile-settings-btn" (click)="openUsernameUpdateDialog()">Soummettre</button>
+  </div>
+  <p *ngIf="onChangeUsername">Votre nom d'utilisateur est changé avec succès</p>
 </mat-card>
 <!-- Password update-->
 <mat-card style="margin-top: 3%;">
- <p class="form-title"><b>Modification du mot de passe</b></p>
- <form class="form" [formGroup]="updatePasswordForm" (submit)="register()">
-      <div>
+  <p class="form-title"><b>Modification du mot de passe</b></p>
+  <form class="form" [formGroup]="updatePasswordForm" (submit)="register()">
+    <div>
       <mat-form-field class="pb-1 form-field clickable" appearance="outline">
-              <mat-label>Mot de passe actuel</mat-label>
-              <input
-              formControlName="currentPassword"
-              [type]="showPassword ? 'text' : 'password'"
-              matInput
-              placeholder="********"/>
-              <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">
-              {{ showPassword ? "visibility_off" : "visibility" }}
-              </mat-icon>
-            </mat-form-field>
-        </div>
-      <mat-form-field class="pb-1 form-field clickable" appearance="outline">
-            <mat-label>Nouveau mot de passe</mat-label>
-            <input
-              formControlName="newPassword"
-              [type]="showPassword ? 'text' : 'password'"
-              matInput
-              placeholder="********"/>
-                  <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">
-                  {{ showPassword ? "visibility_off" : "visibility" }}
-                  </mat-icon>
-          </mat-form-field>
-          <mat-form-field class="pb-1 form-field clickable" appearance="outline" style="left:2%">
-            <mat-label>Confirmez le mot de passe</mat-label>
-            <input
-              formControlName="newPasswordConfirm"
-              [type]="showPassword ? 'text' : 'password'"
-              matInput
-              placeholder="********"/>
-                  <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">
-                  {{ showPassword ? "visibility_off" : "visibility" }}
-                  </mat-icon>
-          </mat-form-field>
-  </form>  
-<div class="boutton">
-        <button mat-raised-button class="profile-settings-btn" (click)="updatePassword()">Soummettre</button>
-</div>
+        <mat-label>Mot de passe actuel</mat-label>
+        <input formControlName="currentPassword" [type]="showPassword ? 'text' : 'password'" matInput
+          placeholder="********" />
+        <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">
+          {{ showPassword ? "visibility_off" : "visibility" }}
+        </mat-icon>
+      </mat-form-field>
+    </div>
+    <mat-form-field class="pb-1 form-field clickable" appearance="outline">
+      <mat-label>Nouveau mot de passe</mat-label>
+      <input formControlName="newPassword" [type]="showPassword ? 'text' : 'password'" matInput
+        placeholder="********" />
+      <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">
+        {{ showPassword ? "visibility_off" : "visibility" }}
+      </mat-icon>
+    </mat-form-field>
+    <mat-form-field class="pb-1 form-field clickable" appearance="outline" style="left:2%">
+      <mat-label>Confirmez le mot de passe</mat-label>
+      <input formControlName="newPasswordConfirm" [type]="showPassword ? 'text' : 'password'" matInput
+        placeholder="********" />
+      <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">
+        {{ showPassword ? "visibility_off" : "visibility" }}
+      </mat-icon>
+    </mat-form-field>
+  </form>
+  <div class="boutton">
+    <button mat-raised-button class="profile-settings-btn" (click)="updatePassword()">Soummettre</button>
+  </div>
 </mat-card>
 <!-- checkbox -->
 <div class="checkbox" style="margin-top: 3%;margin-left:20%">
-        <mat-checkbox class="example-margin"  >Authoriser la recherche de mon profil avec mon email</mat-checkbox>
-        <div>
-        <button mat-raised-button routerLink="/profile/demo" 
-        style=" left: 25%;">
-         Retour aux paramètres de profile</button>
-         </div>
+  <mat-checkbox class="example-margin">Authoriser la recherche de mon profil avec mon email</mat-checkbox>
+  <div>
+    <button mat-raised-button routerLink="/profile/demo" style=" left: 25%;">
+      Retour aux paramètres de profile</button>
   </div>
-
-
+</div>
