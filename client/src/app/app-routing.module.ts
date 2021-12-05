@@ -14,6 +14,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
+import { UserProfileSettingsComponent } from './components/user-profile-settings/user-profile-settings.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(["auth"]);
@@ -39,7 +40,8 @@ const routes: Routes = [
         path: "teams", component: TeamPageComponent,
       },
       { path: "workspace", component: SidenavComponent },
-      { path: "profile", component: UserProfileComponent },
+      { path: "profile-settings", component: UserProfileSettingsComponent },
+      { path: "profile/:id", component: UserProfileComponent },
       {
         path: "drawing/:id",
         component: DrawingPageComponent,

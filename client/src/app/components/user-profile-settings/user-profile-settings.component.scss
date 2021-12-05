@@ -1,0 +1,27 @@
+
+::ng-deep {
+    mat-card {
+        width: 50%;
+        margin-left: 20%;
+    }
+  }
+.profile-header{
+    .avatar {
+        height: 150px;
+        width:150px;
+    }
+    align-items: center;
+    width:40%;
+    margin-left: 40%;
+    margin-bottom: 5%;
+    margin-top: 5%;
+}
+.example-form {
+    min-width: 150px;
+    max-width: 500px;
+    width: 100%;
+  }
+  
+  .example-full-width {
+    width: 100%;
+  }

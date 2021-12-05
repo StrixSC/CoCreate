@@ -1,9 +1,9 @@
 import { Component, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material';
+import { Router } from '@angular/router';
 import { from, Subscription } from 'rxjs';
 import { CollaborationService } from 'src/app/services/collaboration.service';
 import { mergeMap, take } from 'rxjs/operators';
-import { Router } from '@angular/router';
 import { CommandInvokerService } from 'src/app/services/command-invoker/command-invoker.service';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { ExportDialogService } from 'src/app/services/export-dialog/export-dialog.service';
@@ -97,6 +97,10 @@ export class ControlMenuComponent implements OnDestroy {
   /// Redo
   redo(): void {
     this.commandInvoker.redo();
+  }
+
+  openProfile():void {
+    this.router.navigate(['/profile-settings'])
   }
 
   signOut(): void {

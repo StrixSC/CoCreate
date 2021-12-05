@@ -17,6 +17,8 @@
     "noImplicitThis": true,
     "noImplicitReturns": true,
     "noUnusedLocals": false,
+    "suppressImplicitAnyIndexErrors": true,
+    
     "target": "es2015",
     "typeRoots": [
       "node_modules/@types"

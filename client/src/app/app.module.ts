@@ -24,7 +24,7 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFireAuthGuardModule } from '@angular/fire/auth-guard';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatPaginatorIntl, MatSnackBarContainer } from '@angular/material';
+import { MatPaginatorIntl } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -51,6 +51,7 @@ import { WelcomeDialogModule } from './components/welcome-dialog/welcome-dialog.
 import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { StdHttpInterceptor } from './http/stdhttp.interceptor';
 import { SocketService } from './services/chat/socket.service';
+import { UserProfileSettingsComponent } from './components/user-profile-settings/user-profile-settings.component';
 import { ErrorMessageComponent } from './components/error-message/error-message.component';
 import { ToolParameterModule } from './components/tool-parameters/tool-parameter.module';
 import { AppRoutingModule } from './app-routing.module';
@@ -69,6 +70,7 @@ import { MenuPageComponent } from './components/menu-page/menu-page.component';
 import { NewDrawingFormDialogComponent } from './components/new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { CollaborationPasswordFormDialogComponent } from './components/collaboration-password-form-dialog/collaboration-password-form-dialog.component';
 import { TopBarComponent } from './components/top-bar/top-bar.component';
+import { UsernameUpdateDialogComponent } from './components/username-update-dialog/username-update-dialog.component';
 
 @NgModule({
   declarations: [
@@ -103,6 +105,7 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     UserProfileComponent,
     TeamPageComponent,
     ChangePasswordComponent,
+    UserProfileSettingsComponent,
     DrawingGalleryComponent,
     DeleteConfirmationDialogComponent,
     DrawingGalleryCardComponent,
@@ -122,6 +125,9 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     CreateChannelDialogComponent,
     TeamInfoComponent,
     TeamPasswordDialogComponent,
+    AvatarDialogComponent,
+    AuthWrapperComponent,
+    UsernameUpdateDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -144,9 +150,9 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     MatIconModule,
     MatButtonModule,
     AppRoutingModule,
+
   ],
-  exports: [AppRoutingModule,
-  ],
+  exports: [AppRoutingModule],
   entryComponents: [
     UpdateCollaborationFormDialogComponent,
     NewDrawingAlertComponent,
@@ -167,9 +173,10 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     ErrorMessageComponent,
     AlertMessageComponent,
     DrawingPreviewDialogComponent,
-    MatSnackBarContainer,
     CreateTeamDialogComponent,
+    AvatarDialogComponent,
     CollaborationPasswordFormDialogComponent,
+    UsernameUpdateDialogComponent
   ],
   providers: [
     FileReader,

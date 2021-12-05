@@ -1,0 +1,45 @@
+::ng-deep {
+  
+    mat-card {
+        width: 50%;
+        margin-left: 20%;
+        display: none;
+        
+    }
+  }
+
+.info-name {
+    color: white;
+}
+.info-value {
+    align-items: flex-start;
+    margin-left: 20%;
+    position: absolute;
+    color: white;
+}   
+.profile-header{
+    .avatar {
+        height: 150px;
+        width:150px;
+        border-radius: 50%;
+    }
+    .profile-settings-btn {
+        margin-left: inherit;
+        background-color: aliceblue;
+    }
+    align-items: center;
+    width:40%;
+    margin-left: 40%;
+    margin-bottom: 5%;
+    margin-top: 5%;
+    
+}
+table {
+    width: 100%;
+  }
+
+  .menu-btn{
+    left: 50%;
+    top: 10%;
+
+  }
