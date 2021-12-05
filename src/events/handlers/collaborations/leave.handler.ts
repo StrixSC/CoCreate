@@ -1,3 +1,4 @@
+import { EventFinishedType } from './../../../models/Exceptions.enum';
 import { CollaborationType, MemberType } from '.prisma/client';
 import create from 'http-errors';
 import { Server, Socket } from 'socket.io';
@@ -33,7 +34,7 @@ export const handleLeave = async (io: Server, socket: Socket, payload: {
         });
 
         if (!collaboration) {
-            throw new create.Unauthorized("No members with this id could be found in this collaboration. If the drawing is private, it must be deleted instead of left.");
+            throw new SocketEventError("Oups! On dirait que nous n'avons trouvé aucun dessin correspondant aux informations que vous avez envoyé...", "E3821")
         }
 
         const [deletedCollabMember, deletedChannelMember] = await db.$transaction([
@@ -58,10 +59,11 @@ export const handleLeave = async (io: Server, socket: Socket, payload: {
         ]);
 
         if (!deletedChannelMember || !deletedCollabMember) {
-            throw new create.InternalServerError("Could not remove the user from the collaboration")
+            throw new SocketEventError("Nooon! Nous n'avons pas réussi a vous enlever de la liste des collaborateurs... Veuillez réessayer plus tard!", "E3802")
         }
 
-        socket.to(collaboration.collaboration_id).emit("collaboration:left", {
+        socket.emit(EventFinishedType.Collaboration_Leave);
+        io.emit("collaboration:left", {
             userId: deletedCollabMember.user_id,
             avatarUrl: deletedCollabMember.user.profile!.avatar_url,
             username: deletedCollabMember.user.profile!.username,

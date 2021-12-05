@@ -11,6 +11,9 @@ export const handleLeave = async (io: Server, socket: Socket, data: { channelId:
     try {
         const { channelId } = data;
 
+        if (channelId === 'PUBLIC') {
+            throw new SocketEventError('Oups! Vous ne pouvez pas quitter la chaîne publique... Désolé! :(', "E1529");
+        }
         validateChannelId(channelId);
 
         const channelMember = await db.channelMember.findFirst({

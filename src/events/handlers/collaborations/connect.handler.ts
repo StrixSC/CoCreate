@@ -1,5 +1,4 @@
 import { IConnectionEventData } from './../../../models/IUser.model';
-import create from 'http-errors';
 import { Server, Socket } from 'socket.io';
 import { db } from '../../../db';
 import { ExceptionType } from '../../../models/Exceptions.enum';
@@ -16,7 +15,7 @@ export const handleConnect = async (io: Server, socket: Socket, payload: {
         const collaborationId = payload.collaborationId;
 
         if (!collaborationId) {
-            throw new create.BadRequest("Missing or invalid collaborationId or userId");
+            throw new SocketEventError("On dirait que l'identificateur du dessin n'a pas été fournie avec la requête...", "E1293");
         }
 
         const member = await db.collaborationMember.findFirst({
@@ -67,7 +66,7 @@ export const handleConnect = async (io: Server, socket: Socket, payload: {
         });
 
         if (!member) {
-            throw new create.Unauthorized("The user is not a member of the collaboration, or the collaboration does not exist. Try joining the collaboration first before connecting.");
+            throw new SocketEventError("Hmm... On dirait que vous n'êtes pas membre de la collaboration, peut être essayer de la rejoindre avant d'essayer de vous y connecter!", "E7193");
         }
 
         const channelMember = await db.channelMember.create({
@@ -124,7 +123,7 @@ export const handleConnect = async (io: Server, socket: Socket, payload: {
         });
 
     } catch (e) {
-        handleSocketError(socket, e, ExceptionType.Collaboration);
+        handleSocketError(socket, e, undefined, [ExceptionType.Collaboration, ExceptionType.Collaboration_Connect]);
     }
 
 }

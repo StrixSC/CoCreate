@@ -1,3 +1,4 @@
+import { SocketEventError } from './../../../socket';
 import { Socket, Server } from 'socket.io';
 import create from 'http-errors';
 import { CollaborationType, MemberType } from '.prisma/client';
@@ -18,7 +19,7 @@ export const handleJoin = async (io: Server, socket: Socket, payload: {
         const { collaborationId, type, password } = payload;
 
         if (type === CollaborationType.Protected && !password) {
-            throw new create.Unauthorized("Provided type is protected but no password has been provided");
+            throw new SocketEventError("Oups... On dirait que vous avec chosit de rejoindre un dessin protégé, mais vous n'avez pas fournit de mot de passe...", "E4293");
         }
 
         const collaboration = await db.collaboration.findFirst({
@@ -31,7 +32,7 @@ export const handleJoin = async (io: Server, socket: Socket, payload: {
         });
 
         if (!collaboration) {
-            throw new create.NotFound("There are no drawings with this drawing id/collaboration id.");
+            throw new SocketEventError("Oups! Quelque chose d'imprévu s'est passé lors du traitement de votre requête... veuillez re-éssayer plus tard!");
         }
 
         const member = await db.collaborationMember.findFirst({
@@ -78,24 +79,23 @@ export const handleJoin = async (io: Server, socket: Socket, payload: {
             const collaborationType = collaboration.type;
 
             if (collaborationType === CollaborationType.Private) {
-                throw new create.Unauthorized("This drawing is private and cannot be joined by a user that is not the owner.");
+                throw new SocketEventError("Oh non! Ce dessin est marqué comme étant privé. Il faut donc faire partie des membres de l'équipe ayant créé le dessin, ou bien en être le propriétaire... Désolé!", "E1823");
             }
 
             if (collaborationType === CollaborationType.Protected) {
                 if (password &&
                     !validator.isEmpty(password) &&
-                    validator.isAlphanumeric(password) &&
-                    validator.isLength(password, { max: 256, min: 4 })
+                    validator.isLength(password, { max: 256, min: 8 })
                 ) {
                     if (collaboration.password && collaboration.password === password) {
                         correctPassword = true;
                     }
                 } else {
-                    throw new create.BadRequest("The drawing is of type protected, but an empty or invalid password was provided");
+                    throw new SocketEventError("Le mot de passe que vous avez fournit n'est pas valide, il faut qu'il soit entre 8 et 256 caractères...", "E1502")
                 }
 
                 if (!correctPassword) {
-                    throw new create.Unauthorized("Invalid or incorrect password to drawing/collaboration.");
+                    throw new SocketEventError("On dirait que le mot de passe entré ne correspond pas au mot de passe associé au dessin...", "E4821");
                 }
             }
 
@@ -147,7 +147,7 @@ export const handleJoin = async (io: Server, socket: Socket, payload: {
             ]);
 
             if (!member) {
-                throw new create.InternalServerError("Could not create member relationship between user and collaboration/drawing.");
+                throw new SocketEventError("Oups! Une erreur imprévu s'est produit lors du traitement de la requête...", "E4271");
             }
 
             triggerJoin(socket, member);

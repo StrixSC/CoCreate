@@ -9,6 +9,7 @@ import { db } from '../../../db';
 import { ExceptionType } from '../../../models/Exceptions.enum';
 import { handleSocketError } from '../../../utils/errors';
 import { findTeamById } from '../teams/join.handler';
+import log from '../../../utils/logger';
 
 export type ITeamMember = (TeamMember & {
     user: User & {
@@ -22,12 +23,13 @@ export const handleCreate = async (io: Server, socket: Socket, payload: {
     creatorId: string,
     isTeam: boolean,
     title: string,
+    bgColor: string,
     type: CollaborationType,
     password?: string
 }): Promise<void> => {
     try {
         const userId = socket.data.user
-        const { creatorId, isTeam, title, type, password } = payload;
+        const { creatorId, isTeam, title, type, bgColor, password } = payload;
 
         const isValid = (
             !validator.isEmpty(title) &&
@@ -55,7 +57,7 @@ export const handleCreate = async (io: Server, socket: Socket, payload: {
         }
 
         if (type === CollaborationType.Private) {
-            const data = await createCollaboration(userId, creatorId, isTeam, type, title, teamMembers, password);
+            const data = await createCollaboration(userId, creatorId, isTeam, type, title, teamMembers, bgColor, password);
 
             if (!data.collaboration) {
                 throw new SocketEventError("Oups! Erreur lors du traitement de la requête...");
@@ -87,12 +89,14 @@ export const handleCreate = async (io: Server, socket: Socket, payload: {
             ) {
                 throw new SocketEventError("Oups! On dirait que le type que vous avez donné est protégé, mais il n'y a aucun mot de passe d'entré...", "E4914");
             }
-            const data = await createCollaboration(userId, creatorId, isTeam, type, title, teamMembers, password);
+
+            const data = await createCollaboration(userId, creatorId, isTeam, type, title, teamMembers, bgColor, password);
 
             if (!data || !data.collaboration) {
                 throw new SocketEventError("Quelque chose vient de se produire lors du traitement de la requête...", "E5203");
             }
 
+            socket.emit(EventFinishedType.Collaboration_Create);
             io.emit("collaboration:created", {
                 collaborationId: data.collaboration.collaboration_id,
                 title: data.title,
@@ -108,11 +112,11 @@ export const handleCreate = async (io: Server, socket: Socket, payload: {
 
         }
     } catch (e) {
-        handleSocketError(socket, e, ExceptionType.Collaboration);
+        handleSocketError(socket, e, undefined, [ExceptionType.Collaboration, ExceptionType.Collaboration_Create]);
     }
 }
 
-const createCollaboration = async (user_id: string, creatorId: string, isTeam: boolean, type: CollaborationType, title: string, teamMembers: any[], password?: string) => {
+const createCollaboration = async (user_id: string, creatorId: string, isTeam: boolean, type: CollaborationType, title: string, teamMembers: any[], bgColor: string, password?: string) => {
     const collab_id = v4();
 
     const author = await db.author.create({
@@ -127,6 +131,7 @@ const createCollaboration = async (user_id: string, creatorId: string, isTeam: b
                     password: password,
                     drawing: {
                         create: {
+                            background_color: bgColor,
                             title: title,
                         }
                     },
@@ -166,7 +171,7 @@ const createCollaboration = async (user_id: string, creatorId: string, isTeam: b
     });
 
     if (!author) {
-        throw new create.InternalServerError('Error while creating author and collaboration');
+        throw new SocketEventError("Oups! Il y a eu une erreur lors du traitement de la requête", "E4748");
     }
 
     const author_team_data = author.team;
@@ -181,6 +186,7 @@ const createCollaboration = async (user_id: string, creatorId: string, isTeam: b
         thumbnail_url: author.collaborations[0].drawing!.thumbnail_url,
         drawingId: author.collaborations[0].drawing!.drawing_id,
         channelId: author.collaborations[0].channel_id,
+        bgColor: author.collaborations[0].drawing!.background_color
     }
 
     return returnData;

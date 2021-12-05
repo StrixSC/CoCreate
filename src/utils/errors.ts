@@ -27,7 +27,7 @@ export const handleRequestError = (e: any, next: NextFunction) => {
     if (isPrismaError(e)) {
         if (e instanceof PrismaClientKnownRequestError) {
             const error = dbErrorRouters[e.code];
-            if (error) return next(create(error.statusCode, error.message));
+            if (error) return next(create(error));
         }
         return next(create(create.InternalServerError));
     }
@@ -35,7 +35,6 @@ export const handleRequestError = (e: any, next: NextFunction) => {
 };
 
 export const handleSocketError = (socket: Socket, e: any, exceptionType?: ExceptionType, exceptionTypes?: ExceptionType[]): boolean => {
-    log('DEBUG', e);
     let error = `(${e.code}) - ${e.message}`;
     if (e instanceof HttpError) {
         error = `[${e.status}]:${e.name} - ${e.message}`;
@@ -43,16 +42,17 @@ export const handleSocketError = (socket: Socket, e: any, exceptionType?: Except
 
     if (isPrismaError(e)) {
         if (e instanceof PrismaClientKnownRequestError) {
-            const error = dbErrorRouters[e.code];
-            if (error) return socket.emit('exception', create(error.statusCode, error.message));
+            const dbError = dbErrorRouters[e.code];
+            if (error) error = dbError;
         }
-        return socket.emit('exception', create(create.InternalServerError));
     }
 
     if (exceptionType) {
         return socket.emit(exceptionType, create(error));
     } else if (exceptionTypes) {
-        exceptionTypes.forEach((e) => socket.emit(e, create(error)));
+        exceptionTypes.forEach((e) => {
+            socket.emit(e, create(error))
+        });
         return true;
     } else {
         return socket.emit('exception', create(error));

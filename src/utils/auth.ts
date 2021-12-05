@@ -1,9 +1,8 @@
-import create, { HttpError } from 'http-errors';
 import { IRegistrationPayload } from '../models/IRegistrationModel';
 
-export const dbErrorRouters: { [key: string]: HttpError } = {
-    P2001: new create.Unauthorized(),
-    P2002: new create.Conflict()
+export const dbErrorRouters: { [key: string]: string } = {
+    P2001: "Hmm... On dirait que vous n'êtes pas autorisée d'effectuer cette requête...",
+    P2002: "Oups! Il y a eu un conflit. On dirait qu'une ou plusieurs informations que vous avez entrées sont déjà utilisées par un autre utilisateur. Veuillez revérifier les champs que vous avez entrez!"
 };
 
 const validateEmail = (email: string): boolean => {

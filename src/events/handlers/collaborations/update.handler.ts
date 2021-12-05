@@ -1,3 +1,5 @@
+import { SocketEventError } from './../../../socket';
+import { EventFinishedType } from './../../../models/Exceptions.enum';
 import { CollaborationType, MemberType } from '.prisma/client';
 import create from 'http-errors';
 import { Server, Socket } from 'socket.io';
@@ -18,7 +20,7 @@ export const handleUpdate = async (io: Server, socket: Socket, payload: {
         const { title, type, password, collaborationId } = payload;
 
         if (!type || !title) {
-            throw new create.BadRequest("Invalid or missing type or title.");
+            throw new SocketEventError("Hmm... on dirait que vous avez essayer de mettre à jour un dessin sans avoir envoye de nouvelles informations...", "E4273");
         }
 
         const isValid = (
@@ -28,16 +30,15 @@ export const handleUpdate = async (io: Server, socket: Socket, payload: {
         );
 
         if (!isValid) {
-            throw new create.BadRequest("Title must be a non-empty alphanumeric value with a length between 8 and 256. The type must be either Public, Protected or Private");
+            throw new SocketEventError("ERREUR: Le titre doit être entre 8 et 256 caractères, le type doit être soit Privé, protégé ou public...", "E4214");
         }
 
         if (type === CollaborationType.Protected) {
             if (!password ||
                 validator.isEmpty(password) ||
-                !validator.isAlphanumeric(password) ||
-                !validator.isLength(password, { max: 256, min: 4 })
+                !validator.isLength(password, { max: 256, min: 8 })
             ) {
-                throw new create.BadRequest("The drawing is of type protected, but an empty or invalid password was provided");
+                throw new SocketEventError("Hmm... On dirait que vous avez essayer de changer la visibilité du dessin à protégé, mais vous n'avez pas fournit un mot de passe valide...", "E8189");
             }
         }
 
@@ -48,7 +49,7 @@ export const handleUpdate = async (io: Server, socket: Socket, payload: {
         });
 
         if (!collaboration) {
-            throw new create.NotFound("There are no collaborations/drawings with this id.");
+            throw new SocketEventError("Oups! On dirait que vous n'avez pas mentionné quel dessin vous souhaitez mettre à jour...", "E1923")
         }
 
         const updated = await db.collaboration.update({
@@ -85,13 +86,13 @@ export const handleUpdate = async (io: Server, socket: Socket, payload: {
         });
 
         if (!updated) {
-            throw new create.InternalServerError("Could not update the drawing/collaboration: Internal Server Error");
+            throw new SocketEventError('Oops! Une erreur inconnue s\'est produite lors du traitement de la requête, veuillez essayez à nouveau SVP!', 'E49533');
         }
 
         const author = updated.collaboration_members.find((m) => m.type === MemberType.Owner);
 
         if (!author) {
-            throw new create.InternalServerError('Error while establishing author');
+            throw new SocketEventError('Oops! Une erreur inconnue s\'est produite lors du traitement de la requête, veuillez essayez à nouveau SVP!', 'E49534');
         }
 
         const response = {
@@ -107,6 +108,7 @@ export const handleUpdate = async (io: Server, socket: Socket, payload: {
             authorAvatarUrl: author.user.profile!.avatar_url,
         }
 
+        socket.emit(EventFinishedType.Collaboration_Update);
         io.to(response.collaborationId).emit("collaboration:updated", response);
         io.to(updated.channel.channel_id).emit("channel:updated", {
             channelId: updated.channel.channel_id,
@@ -116,6 +118,6 @@ export const handleUpdate = async (io: Server, socket: Socket, payload: {
         io.emit("collaboration:updated", response);
 
     } catch (e) {
-        handleSocketError(socket, e, ExceptionType.Collaboration);
+        handleSocketError(socket, e, undefined, [ExceptionType.Collaboration, ExceptionType.Collaboration_Update]);
     }
 }

@@ -1,3 +1,4 @@
+import { LogType } from '.prisma/client';
 import { IConnectionEventData } from './../models/IUser.model';
 import { getOnlineMembersInRoom } from './../utils/socket';
 import { ExceptionType } from './../models/Exceptions.enum';
@@ -7,10 +8,9 @@ import { db } from './../db';
 import { Socket, Server } from 'socket.io';
 import { UserStatusTypes } from '../models/IUser.model';
 export = (io: Server, socket: Socket) => {
-    socket.on('disconnecting', () => {
+    socket.on('disconnecting', async () => {
         console.log('disconnecting client', socket.data.username);
         socket.rooms.forEach((room) => {
-            console.log(room);
             const onlineMembers = getOnlineMembersInRoom(room);
             socket.data.status = UserStatusTypes.Offline,
                 io.to(room).emit("user:disconnected", {
@@ -21,7 +21,17 @@ export = (io: Server, socket: Socket) => {
                     status: socket.data.status,
                     onlineMemberCount: onlineMembers.length - 1,
                 } as IConnectionEventData)
-        })
+        });
+        try {
+            await db.log.create({
+                data: {
+                    type: LogType.Disconnection,
+                    user_id: socket.data.user_id
+                }
+            });
+        } catch (e) {
+            console.error('User log error', socket.data.user_id);
+        }
     })
 
     socket.on('disconnect', () => {
@@ -61,7 +71,7 @@ const initUser = async (io: Server, socket: Socket) => {
         }
 
         const allActiveSockets = io.sockets.sockets;
-        allActiveSockets.forEach((s) => {
+        allActiveSockets.forEach(async (s) => {
             if (s.data.user && s.data.user === user.user_id && s.id !== socket.id) {
                 console.log(s.data.user, s.rooms);
                 const rooms = s.rooms;
@@ -69,6 +79,16 @@ const initUser = async (io: Server, socket: Socket) => {
                     s.leave(room);
                 }
                 s.emit('user:init:exception', { message: "(E4555) - Vous avez été désauthentifié, car ce compte est connecté sur un client en parallèle." });
+                try {
+                    await db.log.create({
+                        data: {
+                            type: LogType.Disconnection,
+                            user_id: s.data.user_id
+                        }
+                    });
+                } catch (e) {
+                    console.error('User log error', user.user_id);
+                }
                 s.disconnect();
             }
         })
@@ -79,6 +99,17 @@ const initUser = async (io: Server, socket: Socket) => {
 
         for (let team of user.teams) {
             socket.join(team.team_id)
+        }
+
+        try {
+            await db.log.create({
+                data: {
+                    type: LogType.Connection,
+                    user_id: user.user_id
+                }
+            });
+        } catch (e) {
+            console.error('User log error', user.user_id);
         }
 
         socket.data.username = user.profile!.username;

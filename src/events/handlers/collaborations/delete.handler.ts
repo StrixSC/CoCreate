@@ -87,6 +87,6 @@ export const handleDelete = async (io: Server, socket: Socket, payload: {
         io.socketsLeave(deletedCollaboration.collaboration_id);
         io.socketsLeave(deletedChannel.channel_id);
     } catch (e) {
-        handleSocketError(socket, e, ExceptionType.Collaboration);
+        handleSocketError(socket, e, undefined, [ExceptionType.Collaboration, ExceptionType.Collaboration_Delete]);
     }
 }
