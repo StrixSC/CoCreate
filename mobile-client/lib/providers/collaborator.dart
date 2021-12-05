@@ -285,8 +285,9 @@ class Collaborator extends ChangeNotifier {
         drawingCreated(drawing);
         break;
       case 'updated':
-        Drawing drawing = data as Drawing;
-        updatedDrawing(drawing);
+        refreshPages();
+        // Drawing drawing = data as Drawing;
+        // updatedDrawing(drawing);
         break;
       case 'deleted':
         Map delete = data as Map;

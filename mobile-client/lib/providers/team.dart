@@ -16,6 +16,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:intl/intl.dart';
 
 import '../models/chat.dart';
 
@@ -25,6 +26,8 @@ class Teammate extends ChangeNotifier {
   late TeamSocket teamSocket;
   late PagingController pagingController;
   bool isPartOfTeam = false;
+  List<String> myTeams = [];
+  Map myTeamsMap = <String, String>{};
 
   Teammate(this.auth);
 
@@ -61,6 +64,44 @@ class Teammate extends ChangeNotifier {
         break;
     }
     return englishType;
+  }
+
+  Future<void> fetchMyTeams() async {
+    myTeams = ['Moi (${auth!.user!.displayName})'];
+    myTeamsMap = <String, String>{};
+
+    RestApi rest = RestApi();
+    String? type = 'Aucun';
+    String? filter = '';
+
+    if (type == 'Aucun') {
+      type = null;
+    }
+
+    if (filter.isEmpty) {
+      filter = null;
+    }
+    var response = await rest.team.fetchTeams(
+        filter, 0, 50, type, false, true, false);
+
+    if (response.statusCode == 200) {
+      var jsonResponse = json.decode(response.body); //Map<String, dynamic>;
+      var resp = jsonResponse['teams'];
+      for (var data in resp) {
+        if (data != null) {
+          myTeamsMap.putIfAbsent(data['teamName']  as String, () => data['teamId'] as String);
+          myTeams.add(data['teamName']);
+        }
+      }
+      print(myTeams);
+    } else if (response.statusCode == 204) {
+      // print(response.body);
+      // throw ("Theres was a problem in the fetching of teams...");
+      // TODO: alert
+    } else {
+
+    }
+    notifyListeners();
   }
 
   void isPartOfATeam() async {

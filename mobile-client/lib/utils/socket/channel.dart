@@ -101,20 +101,22 @@ class ChannelSocket {
 
   updatedChannel(callbackChannel) {
     socket.on('channel:updated', (data) {
-      Chat channel = Chat(
-        id: data['channelId'],
-        name: data['channelName'],
-        updatedAt: data['updatedAt'],
-        type: data['channel_type'],
-        messages: [],
-        onlineMembers: data['online_members'],
-      );
-      callbackChannel('updated', channel);
+      print(data);
+      // Chat channel = Chat(
+      //   id: data['channelId'],
+      //   name: data['channelName'],
+      //   updatedAt: data['updatedAt'],
+      //   type: data['channel_type'] ?? '',
+      //   messages: [],
+      //   onlineMembers: data['online_members'],
+      // );
+      callbackChannel('updated', 'channel');
     });
   }
 
   deletedChannel(callbackChannel) {
     socket.on('channel:deleted', (data) {
+      print(data);
       String channelId = data['channelId'];
       callbackChannel('deleted', channelId);
     });

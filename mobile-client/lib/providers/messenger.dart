@@ -212,6 +212,7 @@ class Messenger extends ChangeNotifier {
         break;
       case 'left':
         print('Left Chat');
+        alert('Succès!', 'La chaine a été quitter!');
         fetchChannels();
         // String channelId = data as String;
         // removeUserChannel(channelId);
@@ -223,13 +224,15 @@ class Messenger extends ChangeNotifier {
         // removeUserChannel(channelId);
         break;
       case 'updated':
-        Chat channel = data as Chat;
-        updateUserChannelName(
-            channel.name, channel.updatedAt as String, channel.id);
+        // Chat channel = data as Chat;
+        fetchChannels();
+        // updateUserChannelName(
+        //     channel.name, channel.updatedAt as String, channel.id);
         break;
       default:
         print("Invalid socket event");
     }
+    notifyListeners();
   }
 
   void alert(type, description) {

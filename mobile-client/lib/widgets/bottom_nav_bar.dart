@@ -40,8 +40,9 @@ class _BottomNavBarScreenState extends State<BottomNavBar> {
             width: MediaQuery.of(context).size.width * 0.45, child: Sidebar()),
         body: PersistentTabView(
           context,
+          key: const Key('Nav'),
           navBarHeight: 75,
-          stateManagement: false,
+          stateManagement: true,
           controller: this._controller,
           screens: _buildScreens(),
           items: _navBarsItems(),

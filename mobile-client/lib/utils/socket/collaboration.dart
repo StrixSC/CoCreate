@@ -222,24 +222,21 @@ class CollaborationSocket {
   updated(callbackChannel) {
     socket.on('collaboration:updated', (data) {
       print('Collaboration Updated');
-      Collaboration collaboration = Collaboration(
-          collaborationId: 'id',
-          actions: data["actions"],
-          backgroundColor: data["backgroundColor"],
-          memberCount: data["memberCount"],
-          width: data["width"],
-          height: data["height"],
-          members: data["members"], actionsMap: {});
-      Drawing drawing = Drawing(
-          drawingId: data['drawingId'],
-          thumbnailUrl: data['thumbnailUrl'],
-          title: data['title'],
-          authorUsername: data["authorUsername"],
-          authorAvatar: data["authorAvatarUrl"],
-          createdAt: data['createdAt'],
-          collaboration: collaboration,
-          type: 'type'); // "Protected", "Public" or "Private"
-      callbackChannel('updated', drawing);
+      // Collaboration collaboration = Collaboration(
+      //     collaborationId: 'id',
+      //     actions: [],
+      //     backgroundColor: Colors.white,
+      //     actionsMap: {}, members: []);
+      // Drawing drawing = Drawing(
+      //     drawingId: data['drawingId'],
+      //     thumbnailUrl: data['thumbnailUrl'],
+      //     title: data['title'],
+      //     authorUsername: data["authorUsername"],
+      //     authorAvatar: data["authorAvatarUrl"],
+      //     createdAt: data['createdAt'],
+      //     collaboration: collaboration,
+      //     type: 'type'); // "Protected", "Public" or "Private"
+      callbackChannel('updated', '');
     });
   }
 

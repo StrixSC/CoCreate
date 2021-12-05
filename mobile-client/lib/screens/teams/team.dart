@@ -863,7 +863,11 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
                 color: kContentColor,
                 border: Border.all(
                     width: 2.5,
-                    color: teammate.isMember(team)
+                    color: context
+                        .read<Teammate>()
+                        .auth!
+                        .user!
+                        .displayName == team.authorUsername
                         ? kPrimaryColor.withOpacity(0.45)
                         : Colors.white.withOpacity(0.15))),
             child: Row(children: <Widget>[
