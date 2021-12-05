@@ -8,6 +8,7 @@ export interface IGalleryEntry {
     title: string;
     created_at: string;
     updated_at?: string
+    thumbnail_url: string;
     owner?: string;
     author_username: string;
     author_avatar?: string;

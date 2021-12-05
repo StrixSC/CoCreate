@@ -83,6 +83,7 @@ export class DrawingLoadService {
   loadDrawing(): void {
     if (this.activeDrawingData) {
       const convertedHex = hexToRgb(this.activeDrawingData.backgroundColor);
+      console.log(convertedHex, this.activeDrawingData.backgroundColor);
       if (!convertedHex) {
         this.drawingService.newDrawing(1280, 752, {
           rgb: { r: 255, g: 255, b: 255 },

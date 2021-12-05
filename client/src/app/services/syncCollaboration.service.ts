@@ -26,6 +26,15 @@ export class SyncCollaborationService {
     this.socketService.emit('collaboration:disconnect', { ...data });
   }
 
+
+  onJoinException() {
+    return this.socketService.on('collaboration:join:exception');
+  }
+
+  onJoinFinished() {
+    return this.socketService.on('collaboration:join:finished');
+  }
+
   sendConnectCollaboration(data: ICollaborationConnectPayload) {
     if (!this.authService.activeUser) {
       return;
@@ -73,8 +82,8 @@ export class SyncCollaborationService {
     return this.socketService.on('collaboration:delete:exception');
   }
 
-  onDeleteFinished(): Observable<any> {
-    return this.socketService.on('collaboration:delete:finished');
+  onUpdateException(): Observable<any> {
+    return this.socketService.on('collaboration:update:exception');
   }
 
   onCreateCollaboration(): Observable<ICreateCollaboration> {
@@ -97,6 +106,30 @@ export class SyncCollaborationService {
     return this.socketService.on("collaboration:connected");
   }
 
+  onConnectCollaborationFinished() {
+    return this.socketService.on("collaboration:connect:finished");
+  }
+
+  onConnectCollaborationException() {
+    return this.socketService.on("collaboration:connect:exception");
+  }
+
+  onDisconnectCollaborationFinished() {
+    return this.socketService.on("collaboration:disconnect:finished");
+  }
+
+  onDisconnectCollaborationException() {
+    return this.socketService.on("collaboration:disconnect:exception");
+  }
+
+  onCreateCollaborationFinished() {
+    return this.socketService.on("collaboration:create:finished");
+  }
+
+  onCreateCollaborationException() {
+    return this.socketService.on("collaboration:create:exception");
+  }
+
   onDisconnectCollaboration(): Observable<any> {
     return this.socketService.on("collaboration:disconnected");
   }
@@ -107,6 +140,26 @@ export class SyncCollaborationService {
 
   onUpdateCollaboration(): Observable<any> {
     return this.socketService.on("collaboration:updated");
+  }
+
+  onCreateFinish() {
+    return this.socketService.on('collaboration:create:finished');
+  }
+
+  onUpdateFinished() {
+    return this.socketService.on('collaboration:update:finished');
+  }
+
+  onDeleteFinished() {
+    return this.socketService.on('collaboration:delete:finished');
+  }
+
+  onLeaveFinished() {
+    return this.socketService.on('collaboration:leave:finished');
+  }
+
+  onLeaveException() {
+    return this.socketService.on('collaboration:leave:exception');
   }
 
 }

@@ -1,3 +1,4 @@
+import { UpdateCollaborationFormDialogComponent } from './components/update-collaboration-form-dialog/update-collaboration-form-dialog.component';
 import { ServerErrorComponent } from './components/server-error/server-error.component';
 import { CreateChannelDialogComponent } from './components/create-channel-dialog/create-channel-dialog.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
@@ -68,7 +69,6 @@ import { MenuPageComponent } from './components/menu-page/menu-page.component';
 import { NewDrawingFormDialogComponent } from './components/new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { CollaborationPasswordFormDialogComponent } from './components/collaboration-password-form-dialog/collaboration-password-form-dialog.component';
 import { TopBarComponent } from './components/top-bar/top-bar.component';
-import { FormMenuDialogDrawingComponent } from './components/form-menu-dialog-drawing/form-menu-dialog-drawing.component';
 
 @NgModule({
   declarations: [
@@ -81,6 +81,7 @@ import { FormMenuDialogDrawingComponent } from './components/form-menu-dialog-dr
     NewDrawingFormComponent,
     NewDrawingAlertComponent,
     ToolsColorComponent,
+    UpdateCollaborationFormDialogComponent,
     ToolsColorPickerComponent,
     ParameterMenuComponent,
     AvatarDialogComponent,
@@ -121,7 +122,6 @@ import { FormMenuDialogDrawingComponent } from './components/form-menu-dialog-dr
     CreateChannelDialogComponent,
     TeamInfoComponent,
     TeamPasswordDialogComponent,
-    FormMenuDialogDrawingComponent
   ],
   imports: [
     BrowserModule,
@@ -148,6 +148,7 @@ import { FormMenuDialogDrawingComponent } from './components/form-menu-dialog-dr
   exports: [AppRoutingModule,
   ],
   entryComponents: [
+    UpdateCollaborationFormDialogComponent,
     NewDrawingAlertComponent,
     NewDrawingComponent,
     CreateChannelDialogComponent,
@@ -169,7 +170,6 @@ import { FormMenuDialogDrawingComponent } from './components/form-menu-dialog-dr
     MatSnackBarContainer,
     CreateTeamDialogComponent,
     CollaborationPasswordFormDialogComponent,
-    FormMenuDialogDrawingComponent
   ],
   providers: [
     FileReader,

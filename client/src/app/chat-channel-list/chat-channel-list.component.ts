@@ -109,7 +109,6 @@ export class ChatChannelListComponent implements OnInit {
             muteNotification: prevData.muteNotification,
             onlineMembers: channel.online_members,
           } as ISidebarChannel;
-
           newSnapshot.set(newData.channel_id, newData);
         } else {
           const bubbleColors = this.genBubbleColors();
