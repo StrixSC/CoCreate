@@ -470,7 +470,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                                 width: 380,
                                 child: formField(
                                     "Nom de l'équipe",
-                                    'Veuillez entrez le titre du dessin',
+                                    'Veuillez entrez le titre du équipe',
                                     titreController),
                               ),
                               // const SizedBox(width: 24.0),
@@ -514,7 +514,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                         ? const SizedBox(height: 48.0)
                         : const SizedBox.shrink(),
                     formField('Bio (Description)',
-                        'Veuillez entrez le titre du dessin', bioController),
+                        'Veuillez entrez le titre du équipe', bioController),
                   ]))
             ]));
   }
@@ -699,7 +699,8 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return context
+        .read<Teammate>().isMember(team) ? GestureDetector(
         onTap: () {
           setCurrentControllerValues();
           _fetchTeamById(team);
@@ -707,7 +708,7 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
           // teamInfoDialog(context);
           _onLoading(context);
         },
-        child: gridTile(context));
+        child: gridTile(context)) : Container(child: gridTile(context));
   }
 
   teamInfoDialog(context) async {
@@ -775,35 +776,34 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
                                       MaterialStateProperty.all(
                                           Colors.red)),
                                   onPressed: () {
-                                    _formKey.currentState!.save();
-                                    if (_formKey.currentState!.validate()) {
-                                      var type = context
-                                          .read<Teammate>()
-                                          .convertToEnglish(
-                                          dropDownControllerTypeCreate);
-                                      var mascot = mascotEnglish[
-                                      dropDownControllerMascot] ??
-                                          'cobra';
-                                      var password = type == 'Protected'
-                                          ? passController.value.text
-                                          : null;
-                                      Team team = Team(
-                                          name: titreController.text,
-                                          bio: bioController.text,
-                                          maxMemberCount: int.tryParse(
-                                              memberController.text) ??
-                                              4,
-                                          type: type,
-                                          password: password,
-                                          mascot: mascot,
-                                          members: []);
-                                      context
-                                          .read<Teammate>()
-                                          .teamSocket
-                                          .updateTeam(team);
-                                    }
+                                    AwesomeDialog(
+                                      context: navigatorKey.currentContext as BuildContext,
+                                      width: 800,
+                                      dismissOnTouchOutside: false,
+                                      dialogType: DialogType.WARNING,
+                                      animType: AnimType.BOTTOMSLIDE,
+                                      title: 'Attention!',
+                                      desc: 'Êtes-vous certain de vouloir ${team.authorUsername == context
+                                          .read<Teammate>().auth!.user!.displayName ? 'supprimer': 'quitter'} ce équipe?.',
+                                      btnCancelOnPress: () {
+                                        Navigator.pop(context);
+                                      },
+                                      btnOkOnPress: () {
+                                        Navigator.pop(context);
+                                        Navigator.pop(context);
+                                        team.authorUsername == context
+                                            .read<Teammate>().auth!.user!.displayName ? context
+                                            .read<Teammate>()
+                                            .teamSocket
+                                            .deleteTeam(team) : context
+                                            .read<Teammate>()
+                                            .teamSocket
+                                            .leaveTeam(team);
+                                      },
+                                    ).show();
                                   },
-                                  child: Text('Supprimer')))
+                                  child: team.authorUsername == context
+                                      .read<Teammate>().auth!.user!.displayName ? Text('Supprimer') : Text('Quitter')))
                               : SizedBox(),
                           _tabController.index == 2
                               ? Container(
@@ -886,14 +886,25 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
                         teammate.isMember(team)
                             ? const SizedBox.shrink()
                             : Container(
-                                width: 20,
                                 height: 40.0,
                                 child: IconButton(
                                   color: kPrimaryColor,
                                   iconSize: 38.0,
                                   icon: Icon(Icons.arrow_circle_up_outlined),
                                   onPressed: () {
-
+                                    AwesomeDialog(
+                                      context: navigatorKey.currentContext as BuildContext,
+                                      width: 800,
+                                      dismissOnTouchOutside: false,
+                                      dialogType: DialogType.WARNING,
+                                      animType: AnimType.BOTTOMSLIDE,
+                                      title: 'Attention!',
+                                      desc: 'Êtes-vous certain de vouloir joindre cette équipe?.',
+                                      btnCancelOnPress: () {},
+                                      btnOkOnPress: () {
+                                     context.read<Teammate>().teamSocket.joinTeam(team);
+                                      },
+                                    ).show();
                                   },
                                 ))
                       ]),
@@ -1128,7 +1139,7 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
                                 width: 380,
                                 child: formField(
                                     "Nom de l'équipe",
-                                    'Veuillez entrez le titre du dessin',
+                                    "Veuillez entrez le titre de l'équipe",
                                     titreController),
                               ),
                               // const SizedBox(width: 24.0),
@@ -1172,7 +1183,7 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
                         ? const SizedBox(height: 48.0)
                         : const SizedBox.shrink(),
                     formField('Bio (Description)',
-                        'Veuillez entrez le titre du dessin', bioController),
+                        'Veuillez entrez le titre du équipe', bioController),
                   ]))
             ]));
   }

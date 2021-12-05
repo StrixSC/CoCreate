@@ -38,6 +38,7 @@ class Galerie extends StatefulWidget {
 
 class GalerieState extends State<Galerie>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+
   Map pagingControllers = <String, PagingController<int, Drawing>>{};
   Map searchControllers = <String, TextEditingController>{};
   Map scrollControllers = <String, ScrollController>{};
@@ -45,9 +46,9 @@ class GalerieState extends State<Galerie>
   late TabController _tabController;
   static const _pageSize = 12;
 
-  static String dropDownValueTypeCreate = 'Public';
-  static String dropDownValueAuthor = 'Moi';
-  static String dropDownValueType = 'Aucun';
+  String dropDownValueTypeCreate = 'Public';
+  String dropDownValueAuthor = 'Moi';
+  String dropDownValueType = 'Aucun';
   Color color = Colors.white;
 
   GalerieState() {
@@ -569,6 +570,8 @@ class GalerieState extends State<Galerie>
             ));
   }
 
+
+
   colorPicker() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
@@ -733,28 +736,14 @@ class _GridTitleText extends StatelessWidget {
   }
 }
 
-enum WhyFarther { harder, smarter, selfStarter, tradingCharter }
 
 class _Drawing extends StatelessWidget {
-  const _Drawing({
+  _Drawing({
     required this.drawing,
   });
-
+  String dropDownValueType = 'Public';
+  String dropDownValueAuthor = 'Moi';
   final Drawing drawing;
-
-  popup() {
-    return PopupMenuButton(
-        itemBuilder: (context) => [
-              PopupMenuItem(
-                child: Text("First"),
-                value: 1,
-              ),
-              PopupMenuItem(
-                child: Text("Second"),
-                value: 2,
-              )
-            ]);
-  }
 
   joinDessinDialog(context) async {
     final Widget thumbnail = getThumbnail();
@@ -846,7 +835,8 @@ class _Drawing extends StatelessWidget {
                                     },
                                     child: const Text('Supprimer'),
                                   )))
-                          : Padding(
+                          : context
+                          .read<Collaborator>().currentType == 'Joined' ? Padding(
                               padding: EdgeInsets.fromLTRB(25.0, 0, 0, 20.0),
                               child: Container(
 
@@ -868,10 +858,29 @@ class _Drawing extends StatelessWidget {
                                           .refreshPages();
                                     },
                                     child: const Text('Quitter'),
-                                  ))),
+                                  ))) : const SizedBox.shrink(),
+        drawing.authorUsername ==
+            context
+                .read<Collaborator>()
+                .auth!
+                .user!
+                .displayName? Padding(
+            padding: EdgeInsets.fromLTRB(100.0, 0, 0, 10.0),
+            child: Container(
+                child: ElevatedButton(
+                  onPressed: () {
+                    // dropDownValueType = drawing.type;
+                    // dropDownValueAuthor = drawing.authorUsername == ?;
+                    update(context);
+                    context
+                        .read<Collaborator>()
+                        .refreshPages();
+                  },
+                  child: const Text('Mettre à jour'),
+                ))): const SizedBox.shrink(),
                       context.read<Collaborator>().currentType == 'Available'
                           ? Padding(
-                              padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
+                              padding: EdgeInsets.fromLTRB(0, 0, 455.0, 20.0),
                               child: Container(
 
                                   child: ElevatedButton(
@@ -951,16 +960,6 @@ class _Drawing extends StatelessWidget {
       },
       btnOkOnPress: () {
         emitDeleteLeave(type, collab);
-        AwesomeDialog(
-          context: navigatorKey.currentContext as BuildContext,
-          width: 800,
-          dismissOnTouchOutside: false,
-          dialogType: DialogType.SUCCES,
-          animType: AnimType.BOTTOMSLIDE,
-          title: 'Succes!',
-          desc: 'Le dessin à été ${type} avec succès.',
-          btnOkOnPress: () {},
-        ).show();
       },
     ).show();
   }
@@ -1122,4 +1121,180 @@ class _Drawing extends StatelessWidget {
           ),
         ));
   }
+
+  update(context) async {
+    showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          titlePadding: EdgeInsets.zero,
+          title: Container(
+              padding: EdgeInsets.all(10.0),
+              color: kContentColor,
+              child: Center(child: Text('Mettre à jour ${drawing.title}'))),
+          content: SingleChildScrollView( child: Container(width: 1000,child:ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.only(
+                  left: 100.0, right: 100.0),
+              children: <Widget>[
+                FormBuilder(
+                    key: _formKey,
+                    child: Column(children: <Widget>[
+                      const SizedBox(height: 28.0),
+                      SizedBox(
+                          width: 900,
+                          child: Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  width: 280,
+                                  child: dropDown([
+                                    'Public',
+                                    'Protégé',
+                                    'Privée'
+                                  ],
+                                      dropDownValueType,
+                                      'Choisir un type de dessins'),
+                                ),
+                                // const SizedBox(width: 24.0),
+                                SizedBox(
+                                    width: 280,
+                                    child: dropDown(
+                                        ['Moi', 'Équipe'],
+                                        dropDownValueAuthor,
+                                        'Choisir un auteur')),
+                              ])),
+                      const SizedBox(height: 48.0),
+                      dropDownValueType == 'Protégé'
+                          ? SizedBox(
+                          width: 900.0,
+                          child: Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment
+                                  .spaceBetween,
+                              children: [
+                                SizedBox(
+                                  width: 375,
+                                  child: formField(
+                                      'Titre',
+                                      'Veuillez entrez le titre du dessin',
+                                      titreController),
+                                ),
+                                // const SizedBox(width: 24.0),
+                                // SizedBox(
+                                //     width: 375,
+                                //     child: formField(
+                                //         'Nombre de membres maximum',
+                                //         'Veuillez entrez choisir un auteur',
+                                //         memberController))
+                              ]))
+                          : formField(
+                          'Titre',
+                          'Veuillez entrez le titre du dessin',
+                          titreController),
+                      const SizedBox(height: 48.0),
+                      dropDownValueType == 'Protégé'
+                          ? formField(
+                          'Mot de passe',
+                          'Veuillez entrez choisir un mot de passe',
+                          passController)
+                          : SizedBox.shrink()
+                    ]))
+              ]))),
+          actions: <Widget>[
+            Padding(
+                padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
+                child: Container(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _formKey.currentState!.save();
+                        if (_formKey.currentState!.validate()) {
+                          var type = context
+                              .read<Collaborator>()
+                              .convertToEnglish(dropDownValueType);
+                          // TODO: Change to take teams into consideration
+                          var authorId;
+                          dropDownValueAuthor == 'Moi'
+                              ? authorId = context
+                              .read<Collaborator>()
+                              .auth!
+                              .user!
+                              .uid
+                              : authorId = 123;
+                          var title = titreController.value.text;
+                          var password = passController.value.text;
+                          if (type == 'Protected') {
+                            context
+                                .read<Collaborator>()
+                                .collaborationSocket
+                                .createCollaboration(
+                                authorId, title, type, password, Colors.red);
+                          }
+                          {
+                            context
+                                .read<Collaborator>()
+                                .collaborationSocket
+                                .createCollaboration(
+                                authorId, title, type, null, Colors.red);
+                          }
+                          Navigator.pop(context);
+                          AwesomeDialog(
+                            context:
+                            navigatorKey.currentContext as BuildContext,
+                            width: 800,
+                            dismissOnTouchOutside: false,
+                            dialogType: DialogType.SUCCES,
+                            animType: AnimType.BOTTOMSLIDE,
+                            title: 'Succes!',
+                            desc:
+                            'Bravo! Votre dessin à été créer avec succès. Amusez-vous! 😄',
+                            btnOkOnPress: () {},
+                          ).show();
+                        } else {
+                          AwesomeDialog(
+                            context: navigatorKey.currentContext as BuildContext,
+                            width: 800,
+                            btnOkColor: Colors.red,
+                            dismissOnTouchOutside: false,
+                            dialogType: DialogType.ERROR,
+                            animType: AnimType.BOTTOMSLIDE,
+                            title: 'Erreur!',
+                            desc: 'Il y a eu un probleme dans la validation...',
+                            btnOkOnPress: () {},
+                          ).show();
+                        }
+                      },
+                      child: const Text('Créer'),
+                    ))),
+          ],
+        ));
+  }
+  dropDown(List<String> items, value, inputHint) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+      DropdownButtonFormField<String>(
+        value: value,
+        decoration: InputDecoration(
+          labelText: inputHint,
+          labelStyle: const TextStyle(fontSize: _fontSize),
+          border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.zero)),
+        ),
+        icon: const Align(
+            alignment: Alignment.topRight,
+            child: Icon(Icons.arrow_downward, size: 35.0)),
+        onChanged: (String? newValue) {
+
+        },
+        items: items.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        style:
+        const TextStyle(fontSize: _fontSize, fontWeight: FontWeight.w300),
+      )
+    ]);
+  }
+
 }

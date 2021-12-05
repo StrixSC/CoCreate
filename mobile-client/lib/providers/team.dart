@@ -133,26 +133,27 @@ class Teammate extends ChangeNotifier {
   }
 
   void callbackChannel(eventType, data) {
-    Team team = data as Team;
-    switch (eventType) {
-      case 'joined':
-        joinedTeam(team);
-        break;
-      case 'created':
-        createdTeam(team);
-        break;
-      case 'updated':
-        updateTeam(team);
-        break;
-      case 'deleted':
-        deletedTeam(team);
-        break;
-      case 'left':
-        leftTeam(team);
-        break;
-      default:
-        print("Invalid Team socket event");
-    }
-
+    // Team team = data as Team;
+    // switch (eventType) {
+    //   case 'joined':
+    //     joinedTeam(team);
+    //     break;
+    //   case 'created':
+    //     createdTeam(team);
+    //     break;
+    //   case 'updated':
+    //     updateTeam(team);
+    //     break;
+    //   case 'deleted':
+    //     deletedTeam(team);
+    //     break;
+    //   case 'left':
+    //     leftTeam(team);
+    //     break;
+    //   default:
+    //     print("Invalid Team socket event");
+    // }
+    pagingController.refresh();
+    notifyListeners();
   }
 }

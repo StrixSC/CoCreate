@@ -38,7 +38,7 @@ class TeamSocket {
   }
 
   updateTeam(Team team) {
-    print('Emit Update Collab');
+    print('Emit Update Team');
     socket.emit('teams:update', data(team));
   }
 
@@ -56,18 +56,18 @@ class TeamSocket {
   joined(callbackChannel) {
     socket.on('teams:joined', (data) {
       print('Teams joined');
-      Team updatedTeam = Team(
-        id: data['teamId'],
-        authorUsername: data['authorUsername'],
-        authorAvatarUrl: data['authorAvatarUrl'],
-        name: data['teamName'],
-        bio: data['teamBio'],
-        maxMemberCount: data['maxMemberCount'],
-        type: data['type'],
-        mascot: data['mascot'],
-        members: [],
-      );
-      callbackChannel('updated', updatedTeam);
+      // Team updatedTeam = Team(
+      //   id: data['teamId'],
+      //   authorUsername: data['authorUsername'],
+      //   authorAvatarUrl: data['authorAvatarUrl'],
+      //   name: data['teamName'],
+      //   bio: data['teamBio'],
+      //   maxMemberCount: data['maxMemberCount'],
+      //   type: data['type'],
+      //   mascot: data['mascot'],
+      //   members: [],
+      // );
+      callbackChannel('updated', 'joinedTeam');
     });
   }
 
@@ -88,18 +88,18 @@ class TeamSocket {
   left(callbackChannel) {
     socket.on('teams:left', (data) {
       print('Teams left');
-      Team updatedTeam = Team(
-        id: data['teamId'],
-        authorUsername: data['authorUsername'],
-        authorAvatarUrl: data['authorAvatarUrl'],
-        name: data['teamName'],
-        bio: data['teamBio'],
-        maxMemberCount: data['maxMemberCount'],
-        type: data['type'],
-        mascot: data['mascot'],
-        members: [],
-      );
-      callbackChannel('updated', updatedTeam);
+      // Team updatedTeam = Team(
+      //   id: data['teamId'],
+      //   authorUsername: data['authorUsername'],
+      //   authorAvatarUrl: data['authorAvatarUrl'],
+      //   name: data['teamName'],
+      //   bio: data['teamBio'],
+      //   maxMemberCount: data['maxMemberCount'],
+      //   type: data['type'],
+      //   mascot: data['mascot'],
+      //   members: [],
+      // );
+      callbackChannel('updated', 'leftTeam');
     });
   }
 
@@ -175,18 +175,18 @@ class TeamSocket {
   deleted(callbackChannel) {
     socket.on('teams:deleted', (data) {
       print('Teams deleted');
-      Team updatedTeam = Team(
-        id: data['teamId'],
-        authorUsername: data['authorUsername'],
-        authorAvatarUrl: data['authorAvatarUrl'],
-        name: data['teamName'],
-        bio: data['teamBio'],
-        maxMemberCount: data['maxMemberCount'],
-        type: data['type'],
-        mascot: data['mascot'],
-        members: [],
-      );
-      callbackChannel('deleted', updatedTeam);
+      // Team updatedTeam = Team(
+      //   id: data['teamId'],
+      //   authorUsername: data['authorUsername'],
+      //   authorAvatarUrl: data['authorAvatarUrl'],
+      //   name: data['teamName'],
+      //   bio: data['teamBio'],
+      //   maxMemberCount: data['maxMemberCount'],
+      //   type: data['type'],
+      //   mascot: data['mascot'],
+      //   members: [],
+      // );
+      callbackChannel('deleted', '');
     });
   }
 
@@ -208,18 +208,18 @@ class TeamSocket {
   updated(callbackChannel) {
     socket.on('teams:updated', (data) {
       print('Teams updated');
-      Team updatedTeam = Team(
-        id: data['teamId'],
-        authorUsername: data['authorUsername'],
-        authorAvatarUrl: data['authorAvatarUrl'],
-        name: data['teamName'],
-        bio: data['teamBio'],
-        maxMemberCount: data['maxMemberCount'],
-        type: data['type'],
-        mascot: data['mascot'],
-        members: [],
-      );
-      callbackChannel('updated', updatedTeam);
+      // Team updatedTeam = Team(
+      //   id: data['teamId'],
+      //   authorUsername: data['authorUsername'],
+      //   authorAvatarUrl: data['authorAvatarUrl'],
+      //   name: data['teamName'],
+      //   bio: data['teamBio'],
+      //   maxMemberCount: data['maxMemberCount'],
+      //   type: data['type'],
+      //   mascot: data['mascot'],
+      //   members: [],
+      // );
+      callbackChannel('updated', 'updatedTeam');
     });
   }
 
