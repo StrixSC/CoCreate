@@ -152,6 +152,11 @@ class Bounds {
         yTranslation = actionPath.getBounds().topLeft.dy;
         break;
     }
+    if (!isForSave) {
+      actionsMap[actionId].scale = Offset(xScale!, yScale!);
+      actionsMap[actionId].scaledTranslation =
+          Offset(xTranslation!, yTranslation!);
+    }
   }
 }
 
@@ -163,9 +168,11 @@ class ShapeAction {
   String actionType;
   int? layer;
   List<Offset>? shapesOffsets;
-  int? boundIndex;
+  int boundIndex = 0;
   Path? oldShape;
   Offset delta = Offset.zero;
+  Offset scale = Offset.zero;
+  Offset scaledTranslation = Offset.zero;
   TextPainter? text;
   String actionId;
   double angle = 0;
@@ -191,6 +198,10 @@ class ShapeAction {
     copy.translate = translate;
     copy.bodyColor = bodyColor;
     copy.shapesOffsets = shapesOffsets;
+    copy.delta = delta;
+    copy.boundIndex = boundIndex;
+    copy.scale = scale;
+    copy.scaledTranslation = scaledTranslation;
     return copy;
   }
 }
