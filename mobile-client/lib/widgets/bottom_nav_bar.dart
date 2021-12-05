@@ -36,8 +36,8 @@ class _BottomNavBarScreenState extends State<BottomNavBar> {
     return Scaffold(
         key: _scaffoldKey,
         backgroundColor: Colors.red,
-        endDrawer: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.45, child: Sidebar()),
+        endDrawer: Container(color: kContentColor,child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.45, child: Sidebar())),
         body: PersistentTabView(
           context,
           key: const Key('Nav'),
@@ -76,6 +76,7 @@ class _BottomNavBarScreenState extends State<BottomNavBar> {
   }
 
   openDrawer() {
+    context.read<Messenger>().fetchChannels();
     context.read<Teammate>().isPartOfATeam();
     _scaffoldKey.currentState!.openEndDrawer();
   }

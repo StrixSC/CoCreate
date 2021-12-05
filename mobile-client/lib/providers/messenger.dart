@@ -21,9 +21,10 @@ class Messenger extends ChangeNotifier {
   bool isChannelSelected = false;
   int currentSelectedChannelIndex = 0;
   late ChannelSocket channelSocket;
-
   late Function openDrawer;
 
+  late Function setIndex;
+  int tabIndex = 0;
   Messenger(this.auth, this.userChannels, this.allChannels);
 
   void setSocket(socket) {
@@ -111,7 +112,7 @@ class Messenger extends ChangeNotifier {
           type: channel['channel_type'],
           ownerUsername: channel['owner_username'],
           messages: [],
-          onlineMembers: channel['online_members'],
+          onlineMembers: channel['online_members'] ?? [],
           color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
         ));
       }

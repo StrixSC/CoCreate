@@ -118,7 +118,7 @@ class Teammate extends ChangeNotifier {
     RestApi rest = RestApi();
     var response = await rest.team.fetchTeams(
         null, 0, 100, null, false, true, false);
-    print(json.decode(response.body));
+    // print(json.decode(response.body));
     if (response.statusCode == 200) {
       var jsonResponse = json.decode(response.body); //Map<String, dynamic>;
       List resp = jsonResponse['teams'];

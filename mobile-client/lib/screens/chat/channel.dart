@@ -19,22 +19,67 @@ class Channel extends StatefulWidget {
   _ChannelState createState() => _ChannelState();
 }
 
-class _ChannelState extends State<Channel> {
+class _ChannelState extends State<Channel> with TickerProviderStateMixin {
   Map<String, String> channelType = {
     'Public': 'Public',
-    'Teams': 'Teams',
+    'Team': 'Team',
     'Collaboration': 'Collaboration'
   };
   String currentSelectedJoin = '';
 
-  Widget channelListWidget() {
+  late TabController _tabController;
+  TabBar get _tabBar => TabBar(
+        indicatorWeight: 5.0,
+        controller: _tabController,
+        onTap: (value) {
+          // setState(() {
+          //   dropDownValueType = 'Aucun';
+          //   searchControllers.update(
+          //       TYPES[value], (value) => TextEditingController());
+          //   pagingControllers[TYPES[value]].refresh();
+          // });
+          context.read<Messenger>().tabIndex = value;
+        },
+        tabs: [
+          Tab(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                SizedBox(width: 8),
+                Text('Canaux Généraux', style: TextStyle(fontSize: 18)),
+              ],
+            ),
+          ),
+          Tab(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                SizedBox(width: 8),
+                Text('Canaux des Équipes', style: TextStyle(fontSize: 18)),
+              ],
+            ),
+          ),
+        ],
+      );
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<Messenger>().setIndex = setIndex;
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  setIndex() {
+    setState(() {
+      _tabController.animateTo(  context.read<Messenger>().tabIndex);
+      _tabController.index = 0;
+      _tabController;
+
+    });
+  }
+
+  Widget channelListWidgetGeneral() {
     return (Column(children: [
-      Padding(
-          padding: const EdgeInsets.fromLTRB(0, 40, 0, 0),
-          child: Title(
-            color: Colors.black,
-            child: const Text('Canaux de Discussions', style: TextStyle()),
-          )),
       Column(children: [
         section(channelType['Public']),
         getChannelListWithType(channelType['Public'],
@@ -48,11 +93,21 @@ class _ChannelState extends State<Channel> {
                   "Joignez un dessin pour discuter avec vos amis! 😄"),
             ])
           : const SizedBox.shrink(),
-      context.watch<Teammate>().isPartOfTeam
+    ]));
+  }
+
+  Widget channelListWidgetTeam() {
+    return (Column(children: [
+      Column(children: [
+        section(channelType['Team']),
+        getChannelListWithType(channelType['Team'],
+            "Joignez une équipe pour discuter avec vos amis! 😄"),
+      ]),
+      isDrawing()
           ? Column(children: [
-              section(channelType['Teams']),
-              getChannelListWithType(channelType['Teams'],
-                  "Joignez une équipe pour discuter avec vos amis! 😄"),
+              section(channelType['Collaboration']),
+              getChannelListWithType(channelType['Collaboration'],
+                  "Joignez un dessin pour discuter avec vos amis! 😄"),
             ])
           : const SizedBox.shrink(),
     ]));
@@ -75,7 +130,7 @@ class _ChannelState extends State<Channel> {
             child: ConstrainedBox(
                 constraints: context.read<Messenger>().userChannels.isEmpty
                     ? const BoxConstraints(minHeight: 5.0, maxHeight: 75.0)
-                    : const BoxConstraints(minHeight: 45.0, maxHeight: 275.0),
+                    : const BoxConstraints(minHeight: 45.0, maxHeight: 420.0),
                 child: context.read<Messenger>().userChannels.isEmpty
                     ? Center(
                         child: Text(
@@ -203,19 +258,23 @@ class _ChannelState extends State<Channel> {
       selectedValue: ex1,
       multipleSelectedValues: ex1,
       items: context.read<Messenger>().availableChannel,
-      itemBuilder: (context, item, isSelected) { return Container( margin: EdgeInsets.only(top:18.0), decoration: currentSelectedJoin == item.id ? BoxDecoration(
-          border: Border.all(
-              width: 3.5,
-              color:kPrimaryColor)): null,child:ChatCard(
-          chat: item,
-          user: user,
-          press: () {
-            print('bruh');
-           setState(() {
-             currentSelectedJoin = item.id;
-           });
-            // context.read<Messenger>().channelSocket.joinChannel(item.id);
-          }));},
+      itemBuilder: (context, item, isSelected) {
+        return Container(
+            margin: EdgeInsets.only(top: 18.0),
+            decoration: currentSelectedJoin == item.id
+                ? BoxDecoration(
+                    border: Border.all(width: 3.5, color: kPrimaryColor))
+                : null,
+            child: ChatCard(
+                chat: item,
+                user: user,
+                press: () {
+                  setState(() {
+                    currentSelectedJoin = item.id;
+                  });
+                  // context.read<Messenger>().channelSocket.joinChannel(item.id);
+                }));
+      },
       emptyBuilder: (context) => Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -230,38 +289,44 @@ class _ChannelState extends State<Channel> {
       },
       okButtonBuilder: (context, onPressed) {
         return Align(
-          alignment: Alignment.centerRight,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children:[
-              ElevatedButton(
-                onPressed: () {Navigator.pop(context);},
-                child: Text('Annuler'),
-              ),
-              SizedBox(width: 25.0),
-              context.read<Messenger>().availableChannel.isNotEmpty? ElevatedButton(
-                onPressed: () {
-                  currentSelectedJoin == ''? AwesomeDialog(
-                    context:
-                    navigatorKey.currentContext as BuildContext,
-                    width: 800,
-                    btnOkColor: Colors.red,
-                    dismissOnTouchOutside: false,
-                    dialogType: DialogType.ERROR,
-                    animType: AnimType.BOTTOMSLIDE,
-                    title: 'Erreur!',
-                    desc: 'Veuillez choisir une chaine pour joindre!',
-                    btnOkOnPress: () {},
-                  ).show():
-                    context.read<Messenger>().channelSocket.joinChannel(currentSelectedJoin);
-                    Navigator.pop(context);
-                  }
-                ,
-                child: Text('Joindre'),
-              ) : SizedBox.shrink(),
-            ]
-          )
-        );
+            alignment: Alignment.centerRight,
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('Annuler'),
+                  ),
+                  SizedBox(width: 25.0),
+                  context.read<Messenger>().availableChannel.isNotEmpty
+                      ? ElevatedButton(
+                          onPressed: () {
+                            currentSelectedJoin == ''
+                                ? AwesomeDialog(
+                                    context: navigatorKey.currentContext
+                                        as BuildContext,
+                                    width: 800,
+                                    btnOkColor: Colors.red,
+                                    dismissOnTouchOutside: false,
+                                    dialogType: DialogType.ERROR,
+                                    animType: AnimType.BOTTOMSLIDE,
+                                    title: 'Erreur!',
+                                    desc:
+                                        'Veuillez choisir une chaine pour joindre!',
+                                    btnOkOnPress: () {},
+                                  ).show()
+                                : context
+                                    .read<Messenger>()
+                                    .channelSocket
+                                    .joinChannel(currentSelectedJoin);
+                            Navigator.pop(context);
+                          },
+                          child: Text('Joindre'),
+                        )
+                      : SizedBox.shrink(),
+                ]));
       },
       searchBoxDecoration: InputDecoration(
         errorStyle: const TextStyle(fontSize: 26),
@@ -270,15 +335,14 @@ class _ChannelState extends State<Channel> {
           fontSize: 26,
         ),
         contentPadding: const EdgeInsets.all(15),
-        border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(0)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(0)),
         prefixIcon: const Icon(Icons.search),
       ),
       onChange: (selected) {
         setState(() {
-            ex1 = selected;
-            currentSelectedJoin = selected.id;
-    });
+          ex1 = selected;
+          currentSelectedJoin = selected.id;
+        });
       },
     );
   }
@@ -290,13 +354,38 @@ class _ChannelState extends State<Channel> {
   @override
   Widget build(BuildContext context) {
     Messenger messenger = context.watch<Messenger>();
-    return Column(
-      key: const PageStorageKey("channels"),
-      children: [
-        messenger.isChannelSelected
-            ? Expanded(child: channelChatWidget())
-            : Expanded(child: SingleChildScrollView(child: channelListWidget()))
-      ],
-    );
+    return Scaffold(
+        appBar: !messenger.isChannelSelected
+            ? PreferredSize(
+            preferredSize: _tabBar.preferredSize,
+            child: Column(children: [
+              const SizedBox(height: 20.0),
+              ColoredBox(color: kContentColor, child: _tabBar)
+            ])): null,
+        body: Column(key: const PageStorageKey("channels"), children: [
+          messenger.isChannelSelected
+              ? Expanded(child: channelChatWidget())
+              : Expanded(
+                  child: TabBarView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  controller: _tabController,
+                  children: [
+                    SingleChildScrollView(
+                        child: Container(
+                            height: 800.0,
+                            child: Column(
+                              children: [
+                                channelListWidgetGeneral(),
+                              ],
+                            ))),
+                    SingleChildScrollView(
+                        child: Column(
+                      children: [
+                        channelListWidgetTeam(),
+                      ],
+                    )),
+                  ],
+                ))
+        ]));
   }
 }

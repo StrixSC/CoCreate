@@ -1,5 +1,6 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/collaborator.dart';
+import 'package:Colorimage/providers/messenger.dart';
 import 'package:Colorimage/screens/profile/historique.dart';
 import 'package:Colorimage/screens/profile/statistique.dart';
 import 'package:Colorimage/screens/profile/update_profile.dart';
@@ -44,19 +45,10 @@ class _ProfileScreenState extends State<Profile> {
           centerTitle: true,
           title: Text('Profile de ' + _user.displayName.toString()),
           automaticallyImplyLeading: false,
-          actions: const <Widget>[
-            // IconButton(
-            //     icon: const Icon(Icons.list_alt, color: Colors.white, size: 34),
-            //     onPressed: () {
-            //       openHistoryDialog();
-            //     }),
-            // const SizedBox(width: 20),
-            // IconButton(
-            //     icon: const Icon(Icons.settings, color: Colors.white, size: 34),
-            //     onPressed: () {
-            //       openSettingsDialog();
-            //     }),
-            // const SizedBox(width: 20)
+          actions: <Widget>[
+            IconButton(
+                icon: Icon(Icons.message),
+                onPressed: () => context.read<Messenger>().openDrawer()),
           ]),
       body: DefaultTabController(
         length: 2,

@@ -199,23 +199,23 @@ class _TeamsScreenState extends State<TeamsScreen> {
             centerTitle: true,
             automaticallyImplyLeading: false,
             leading: // Ensure Scaffold is in context
-                IconButton(
-                    icon: Icon(Icons.message),
-                    onPressed: () => context.read<Messenger>().openDrawer()),
+            IconButton(
+                icon: const Icon(CupertinoIcons.plus,
+                    color: Colors.white, size: 34),
+                onPressed: () {
+                  titreController.clear();
+                  passController.clear();
+                  memberController.clear();
+                  bioController.clear();
+                  dropDownControllerTypeCreate = 'Public';
+                  dropDownControllerMascot = 'Choisir pour moi!';
+                  createTeamsDialog();
+                }),
             title: const Text("Équipe de collaborations"),
             actions: <Widget>[
               IconButton(
-                  icon: const Icon(CupertinoIcons.plus,
-                      color: Colors.white, size: 34),
-                  onPressed: () {
-                    titreController.clear();
-                    passController.clear();
-                    memberController.clear();
-                    bioController.clear();
-                    dropDownControllerTypeCreate = 'Public';
-                    dropDownControllerMascot = 'Choisir pour moi!';
-                    createTeamsDialog();
-                  })
+                  icon: Icon(Icons.message),
+                  onPressed: () => context.read<Messenger>().openDrawer()),
             ]),
         body: Padding(
             padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
@@ -646,7 +646,6 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
     if (response.statusCode == 200) {
       var jsonResponse = json.decode(response.body);
       var respMembers = jsonResponse['members'];
-      print(jsonResponse);
       List<TeamMember> members = [];
       for (var data in respMembers) {
         if (data != null) {

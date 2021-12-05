@@ -13,7 +13,7 @@ class Sidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(key: const PageStorageKey('1'),
-            child: Container(color: kContentColor2, child: Column(
+            child: Container(color: kContentColor, child: Column(
               children: const [
                 Expanded(
                   child: Channel(),

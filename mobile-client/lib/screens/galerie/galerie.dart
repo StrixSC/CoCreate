@@ -265,22 +265,22 @@ class GalerieState extends State<Galerie>
             centerTitle: true,
             automaticallyImplyLeading: false,
             leading: // Ensure Scaffold is in context
-                IconButton(
-                    icon: Icon(Icons.message),
-                    onPressed: () => context.read<Messenger>().openDrawer()),
+            IconButton(
+                icon: const Icon(CupertinoIcons.plus,
+                    color: Colors.white, size: 34),
+                onPressed: () {
+                  titreController.clear();
+                  passController.clear();
+                  memberController.clear();
+                  color = Colors.white;
+                  context.read<Teammate>().fetchMyTeams();
+                  createDessinDialog();
+                }),
             title: const Text("Galerie de dessins"),
             actions: <Widget>[
               IconButton(
-                  icon: const Icon(CupertinoIcons.plus,
-                      color: Colors.white, size: 34),
-                  onPressed: () {
-                    titreController.clear();
-                    passController.clear();
-                    memberController.clear();
-                    color = Colors.white;
-                    context.read<Teammate>().fetchMyTeams();
-                    createDessinDialog();
-                  })
+                  icon: Icon(Icons.message),
+                  onPressed: () => context.read<Messenger>().openDrawer()),
             ],
             bottom: PreferredSize(
                 preferredSize: _tabBar.preferredSize,

@@ -187,6 +187,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 message: 'Se déconnecter',
                 child: Icon(Icons.arrow_back, color: Colors.white, size: 30)),
             onPressed: () {
+              context.read<Messenger>().setIndex();
               messenger.userChannels[widget.channelIndex].messages.isEmpty
                   ? ''
                   : messenger.setLastMessage(
