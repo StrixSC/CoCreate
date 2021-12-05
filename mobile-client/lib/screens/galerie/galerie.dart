@@ -279,7 +279,6 @@ class GalerieState extends State<Galerie>
                     memberController.clear();
                     color = Colors.white;
                     context.read<Teammate>().fetchMyTeams();
-                    print(context.read<Teammate>().myTeams);
                     createDessinDialog();
                   })
             ],
@@ -517,18 +516,6 @@ class GalerieState extends State<Galerie>
                                     authorId, title, type, null, color);
                           }
                           Navigator.pop(context);
-                          AwesomeDialog(
-                            context:
-                                navigatorKey.currentContext as BuildContext,
-                            width: 800,
-                            dismissOnTouchOutside: false,
-                            dialogType: DialogType.SUCCES,
-                            animType: AnimType.BOTTOMSLIDE,
-                            title: 'Succes!',
-                            desc:
-                                'Bravo! Votre dessin à été créer avec succès. Amusez-vous! 😄',
-                            btnOkOnPress: () {},
-                          ).show();
                         } else {
                           AwesomeDialog(
                             context:

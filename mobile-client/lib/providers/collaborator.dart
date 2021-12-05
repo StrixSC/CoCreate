@@ -10,10 +10,12 @@ import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/utils/rest/users_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:Colorimage/utils/socket/collaboration.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../app.dart';
 import '../models/chat.dart';
 
 class Collaborator extends ChangeNotifier {
@@ -177,6 +179,7 @@ class Collaborator extends ChangeNotifier {
     } else {
       throw ("Connected member user index not found.");
     }
+    refreshPages();
   }
 
   void drawingCreated(Drawing drawing) {
@@ -273,15 +276,18 @@ class Collaborator extends ChangeNotifier {
         loadDrawing(collaboration);
         break;
       case 'joined':
+        alert('Succès!', 'Bravo! Vous faites maintenant partie de la collaboration! Amusez-vous! 😄');
         Member member = data as Member;
         memberJoined(member);
         break;
-      case 'connected':
+      case 'connected': // can only be someone else, when you join or connect you receive load
         Member member = data as Member;
+        member.username == auth!.user!.displayName ? alert('Succès!', 'Vous avez été connecté au dessin! Amusez-vous! 😄') : '';
         memberConnected(member);
         break;
       case 'created':
         Drawing drawing = data as Drawing;
+        drawing.authorUsername == auth!.user!.displayName ? alert('Succès!', 'Bravo! Votre dessin à été créer avec succès. Amusez-vous! 😄') : '';
         drawingCreated(drawing);
         break;
       case 'updated':
@@ -304,5 +310,19 @@ class Collaborator extends ChangeNotifier {
       default:
         print("Invalid Collaboration socket event");
     }
+  }
+
+  void alert(type, description) {
+    AwesomeDialog(
+      context:
+      navigatorKey.currentContext as BuildContext,
+      width: 800,
+      dismissOnTouchOutside: false,
+      dialogType: DialogType.SUCCES,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Succès!',
+      desc: description,
+      btnOkOnPress: () {},
+    ).show();
   }
 }

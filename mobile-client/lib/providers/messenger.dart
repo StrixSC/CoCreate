@@ -198,6 +198,7 @@ class Messenger extends ChangeNotifier {
         break;
       case 'joined':
         print('Joined Chat');
+        alert('Succès!', 'La chaine a été joint!');
         fetchChannels();
         // Chat channel = data as Chat;
         // addUserChannel(channel);

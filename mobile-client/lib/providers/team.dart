@@ -12,12 +12,14 @@ import 'package:Colorimage/utils/rest/users_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:Colorimage/utils/socket/collaboration.dart';
 import 'package:Colorimage/utils/socket/team.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:intl/intl.dart';
 
+import '../app.dart';
 import '../models/chat.dart';
 
 class Teammate extends ChangeNotifier {
@@ -93,13 +95,20 @@ class Teammate extends ChangeNotifier {
           myTeams.add(data['teamName']);
         }
       }
-      print(myTeams);
-    } else if (response.statusCode == 204) {
+    } else {
       // print(response.body);
       // throw ("Theres was a problem in the fetching of teams...");
-      // TODO: alert
-    } else {
-
+      AwesomeDialog(
+        context: navigatorKey.currentContext as BuildContext,
+        width: 800,
+        btnOkColor: Colors.red,
+        dismissOnTouchOutside: false,
+        dialogType: DialogType.ERROR,
+        animType: AnimType.BOTTOMSLIDE,
+        title: 'Erreur!',
+        desc: 'Les équipes ont pas pu être retrouvées...',
+        btnOkOnPress: () {},
+      ).show();
     }
     notifyListeners();
   }
@@ -175,26 +184,43 @@ class Teammate extends ChangeNotifier {
 
   void callbackChannel(eventType, data) {
     // Team team = data as Team;
-    // switch (eventType) {
-    //   case 'joined':
-    //     joinedTeam(team);
-    //     break;
-    //   case 'created':
-    //     createdTeam(team);
-    //     break;
-    //   case 'updated':
-    //     updateTeam(team);
-    //     break;
-    //   case 'deleted':
-    //     deletedTeam(team);
-    //     break;
-    //   case 'left':
-    //     leftTeam(team);
-    //     break;
-    //   default:
-    //     print("Invalid Team socket event");
-    // }
+    switch (eventType) {
+      case 'joined':
+        // joinedTeam(team);
+        alert('Succès!', 'La chaine a été joint!');
+        break;
+      case 'created':
+        // createdTeam(team);
+        alert('Succès!', 'La chaine a été quitter!');
+        break;
+      case 'updated':
+        // updateTeam(team);
+        break;
+      case 'deleted':
+        // deletedTeam(team);
+        break;
+      case 'left':
+        // leftTeam(team);
+        alert('Succès!', 'La chaine a été quitter!');
+        break;
+      default:
+        print("Invalid Team socket event");
+    }
     pagingController.refresh();
     notifyListeners();
+  }
+
+  void alert(type, description) {
+    AwesomeDialog(
+      context:
+      navigatorKey.currentContext as BuildContext,
+      width: 800,
+      dismissOnTouchOutside: false,
+      dialogType: DialogType.SUCCES,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Succès!',
+      desc: description,
+      btnOkOnPress: () {},
+    ).show();
   }
 }
