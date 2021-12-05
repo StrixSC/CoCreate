@@ -31,6 +31,8 @@ class Teammate extends ChangeNotifier {
   List<String> myTeams = [];
   Map myTeamsMap = <String, String>{};
 
+  bool hasBeenInitialized = false;
+
   Teammate(this.auth);
 
   void setSocket(socket) {
@@ -148,7 +150,7 @@ class Teammate extends ChangeNotifier {
   }
 
   void updateTeams(List updatedTeams) {
-    pagingController.refresh();
+    if(hasBeenInitialized) { pagingController.refresh();}
     notifyListeners();
   }
 
@@ -158,27 +160,27 @@ class Teammate extends ChangeNotifier {
   }
 
   void joinedTeam(Team team) {
-    pagingController.refresh();
+    if(hasBeenInitialized) { pagingController.refresh();}
     notifyListeners();
   }
 
   void createdTeam(Team team) {
-    pagingController.refresh();
+    if(hasBeenInitialized) { pagingController.refresh();}
     notifyListeners();
   }
 
   void updatedTeam(Team team) {
-    pagingController.refresh();
+    if(hasBeenInitialized) { pagingController.refresh();}
     notifyListeners();
   }
 
   void deletedTeam(Team team) {
-    pagingController.refresh();
+    if(hasBeenInitialized) { pagingController.refresh();}
     notifyListeners();
   }
 
   void leftTeam(Team team) {
-    pagingController.refresh();
+    if(hasBeenInitialized) { pagingController.refresh();}
     notifyListeners();
   }
 
@@ -206,7 +208,7 @@ class Teammate extends ChangeNotifier {
       default:
         print("Invalid Team socket event");
     }
-    pagingController.refresh();
+    if(hasBeenInitialized) { pagingController.refresh();}
     notifyListeners();
   }
 

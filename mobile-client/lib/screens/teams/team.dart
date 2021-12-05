@@ -87,6 +87,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
   @override
   void initState() {
     super.initState();
+    context.read<Teammate>().hasBeenInitialized = true;
     context.read<Teammate>().pagingController = pagingController;
     pagingController.addPageRequestListener((pageKey) {
       _fetchTeams(pageKey);

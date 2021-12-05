@@ -199,8 +199,8 @@ class Messenger extends ChangeNotifier {
         break;
       case 'joined':
         print('Joined Chat');
-        alert('Succès!', 'La chaine a été joint!');
         fetchChannels();
+        alert('Succès!', 'La chaine a été joint!');
         // Chat channel = data as Chat;
         // addUserChannel(channel);
         break;
@@ -214,8 +214,8 @@ class Messenger extends ChangeNotifier {
         break;
       case 'left':
         print('Left Chat');
-        alert('Succès!', 'La chaine a été quitter!');
         fetchChannels();
+        alert('Succès!', 'La chaine a été quitter!');
         // String channelId = data as String;
         // removeUserChannel(channelId);
         break;

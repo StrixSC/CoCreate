@@ -100,7 +100,7 @@ class ChatCard extends StatelessWidget {
               ),
             ),
               notifIcon(),
-              if(chat.name != "Public" && user.displayName == chat.ownerUsername)
+              if(chat.name != "Public" && user.displayName == chat.ownerUsername && chat.type == 'Public')
                 IconButton(
                   iconSize: 28,
                   icon: const Icon(Icons.highlight_remove),

@@ -63,6 +63,7 @@ class GalerieState extends State<Galerie>
   @override
   void initState() {
     super.initState();
+    context.read<Collaborator>().hasBeenInitialized = true;
     dropDownValueAuthor = 'Moi (${context.read<Collaborator>().auth!.user!.displayName})';
     context.read<Collaborator>().pagingControllers = pagingControllers;
     context.read<Collaborator>().navigate = _onLoading;

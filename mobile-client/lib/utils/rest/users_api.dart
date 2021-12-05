@@ -16,8 +16,8 @@ class UsersAPI {
   UsersAPI(this.http);
 
   /// USERS
-  Future<http_dart.Response> fetchUser(user) async {
-    var url = Uri.http(_url!, '/api/users/${user.id}');
+  Future<http_dart.Response> fetchUserAccount(user) async {
+    var url = Uri.http(_url!, '/api/users/account');
     var response = await http.get(url);
     return response;
   }

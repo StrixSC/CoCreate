@@ -29,6 +29,7 @@ class Collaborator extends ChangeNotifier {
   late Map pagingControllers;
 
   late Function navigate;
+  bool hasBeenInitialized = false;
 
   Collaborator(this.auth) {
     drawings.putIfAbsent("Available", () => <String, Drawing>{});
@@ -111,8 +112,10 @@ class Collaborator extends ChangeNotifier {
   }
 
   void refreshPages() {
-    for (var type in TYPES) {
-      pagingControllers[type].refresh();
+    if(hasBeenInitialized) {
+      for (var type in TYPES) {
+        pagingControllers[type].refresh();
+      }
     }
   }
 
@@ -191,7 +194,7 @@ class Collaborator extends ChangeNotifier {
       (drawings['Available'] as Map<String, Drawing>)
           .putIfAbsent(drawing.drawingId, () => drawing);
     }
-    pagingControllers[currentType].refresh();
+    refreshPages();
     notifyListeners();
   }
 
@@ -219,7 +222,7 @@ class Collaborator extends ChangeNotifier {
         }
       });
     }
-    pagingControllers[currentType].refresh();
+    refreshPages();
     notifyListeners();
   }
 
@@ -255,7 +258,7 @@ class Collaborator extends ChangeNotifier {
     //   }
     // }
     userId == auth!.user!.uid? currentDrawingId = '' : '';
-    pagingControllers[currentType].refresh();
+    refreshPages();
     notifyListeners();
   }
 
@@ -279,7 +282,6 @@ class Collaborator extends ChangeNotifier {
     // }
     // (drawings[currentType][currentDrawingId] as Drawing).collaboration.members.add(member);
     userId == auth!.user!.uid? currentDrawingId = '' : '';
-    pagingControllers[currentType].refresh();
     refreshPages();
     notifyListeners();
   }
