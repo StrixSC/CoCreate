@@ -1,12 +1,6 @@
 <mat-sidenav-container class="container">
   <!-- <mat-sidenav mode="side" fixedInViewport=false fxFlexFill disableClose=true opened> -->
-  <mat-sidenav
-    mode="side"
-    fixedInViewport="false"
-    fxFlexFill
-    disableClose="true"
-    opened
-  >
+  <mat-sidenav mode="side" fixedInViewport="false" fxFlexFill disableClose="true" opened>
     <div class="iconsGroup menu-button">
       <button mat-icon-button matTooltip="Menu" (click)="openControlMenu()">
         <mat-icon>menu</mat-icon>
@@ -22,21 +16,11 @@
       </button>
     </div>
     <div>
-      <mat-button-toggle-group
-        class="iconsGroup"
-        #group="matButtonToggleGroup"
-        [value]="currentToolId"
-        [vertical]="true"
-      >
-        <mat-button-toggle
-          mat-icon-button
-          *ngFor="let tool of toolList | keyvalue"
-          [matTooltip]="tool.value.toolName"
-          [value]="tool.value.id"
-          (click)="open()"
-          (change)="selectionChanged($event)"
-        >
-          <fa-icon [icon]="tool.value.faIcon"></fa-icon>
+      <mat-button-toggle-group class="iconsGroup" #group="matButtonToggleGroup" [value]="currentToolId"
+        [vertical]="true">
+        <mat-button-toggle mat-icon-button *ngFor="let tool of toolList | keyvalue" [matTooltip]="tool.value.toolName"
+          [value]="tool.value.id" (click)="open()" (change)="selectionChanged($event)">
+          <fa-icon class="tool-icon" [icon]="tool.value.faIcon"></fa-icon>
         </mat-button-toggle>
       </mat-button-toggle-group>
     </div>
@@ -49,3 +33,10 @@
     <app-parameter-menu [selectId]="selectedParameter"></app-parameter-menu>
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+<style>
+  .tool-icon {
+    color: white;
+
+  }
+</style>

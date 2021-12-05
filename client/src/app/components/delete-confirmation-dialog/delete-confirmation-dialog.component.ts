@@ -10,7 +10,7 @@ import { CollaborationPasswordFormDialogComponent } from '../collaboration-passw
 export class DeleteConfirmationDialogComponent {
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { message: string, submessage: string },
+    @Inject(MAT_DIALOG_DATA) public data: { message: string, submessage: string, buttonLabel: string },
     public dialogRef: MatDialogRef<CollaborationPasswordFormDialogComponent>,
   ) { }
 

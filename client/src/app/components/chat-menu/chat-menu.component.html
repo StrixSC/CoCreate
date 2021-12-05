@@ -1,0 +1,130 @@
+<div class="main-channel-container-wrapper">
+    <div class="header">
+
+        <h1 mat-dialog-title class="header-title">
+            Menu Clavardage
+        </h1>
+        <div class="right-side">
+
+            <form [formGroup]="filterForm">
+                <mat-form-field class="filter-input">
+                    <mat-label>Recherche</mat-label>
+                    <input (input)="filterChannels()" formControlName="filter" matInput placeholder="Entrez un mot-clé">
+                    <button mat-button matPrefix mat-icon-button>
+                        <mat-icon>search</mat-icon>
+                    </button>
+                    <mat-hint>Le mot-clé doit être un attribut de la chaîne</mat-hint>
+                </mat-form-field>
+            </form>
+            <div class="create-button">
+                <button mat-raised-button color="primary" (click)="createChannel()">Créer une chaîne</button>
+            </div>
+        </div>
+    </div>
+    <div class="content-container">
+        <table mat-table [dataSource]="filteredChannels" class="channel-table">
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef> Nom de la chaîne </th>
+                <td class="" mat-cell *matCellDef="let element">
+                    <span *ngIf="element.name.length >= 30"> {{ element.name | slice:0:30 }}...</span>
+                    <span *ngIf="element.name.length < 30"> {{ element.name }}</span>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="lastActivity">
+                <th mat-header-cell *matHeaderCellDef> Dernière Activité </th>
+                <td class="" mat-cell *matCellDef="let element">
+                    {{ element.updated_at | date:'short' }}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="owner">
+                <th mat-header-cell *matHeaderCellDef> Créé par </th>
+                <td class="" mat-cell *matCellDef="let element">
+                    <span *ngIf="!element.isOwner">{{ element.owner_username }}</span>
+                    <span *ngIf="element.isOwner">{{element.owner_username }} (Vous) </span>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="memberCount">
+                <th mat-header-cell *matHeaderCellDef> Membres Actifs </th>
+                <td class="" mat-cell *matCellDef="let element">
+                    {{element.online_member_count}}/{{ element.member_count }}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef> </th>
+                <td class="" mat-cell *matCellDef="let element">
+                    <div *ngIf="element.channel_id !== 'PUBLIC'" class="clickable">
+                        <button mat-icon-button [matMenuTriggerFor]="menu">
+                            <mat-icon>more_vert</mat-icon>
+                            <mat-menu #menu="matMenu">
+                                <button *ngIf="!element.isMember" (click)="joinChannel(element)" mat-menu-item>
+                                    <mat-icon>textsms</mat-icon>
+                                    <span>Rejoindre la chaîne</span>
+                                </button>
+                                <button *ngIf="element.isMember && !element.isOwner" mat-menu-item
+                                    (click)="leaveChannel(element)">
+                                    <mat-icon>logout</mat-icon>
+                                    <span>Quitter la chaîne</span>
+                                </button>
+                                <button *ngIf="element.isOwner" mat-menu-item (click)="deleteChannel(element)">
+                                    <mat-icon>delete</mat-icon>
+                                    <span>Supprimer la chaîne</span>
+                                </button>
+                            </mat-menu>
+                        </button>
+                    </div>
+                </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+    </div>
+    <div class="actions" mat-dialog-actions>
+        <div>
+            <button [disabled]="isLoading" class="action-button" mat-raised-button mat-dialog-close
+                color="secondary">Retour</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .main-channel-container-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .content-container {
+        width: 100%;
+    }
+
+    .channel-table {
+        width: 100%;
+    }
+
+    .header {
+        width: 95%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3rem;
+    }
+
+    .header-title {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .right-side {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .filter-input {
+        font-size: 14px;
+    }
+</style>

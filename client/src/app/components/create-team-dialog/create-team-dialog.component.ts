@@ -81,9 +81,13 @@ export class CreateTeamDialogComponent implements OnInit {
         Validators.minLength(8),
         Validators.maxLength(256)
       ]);
+      this.password.updateValueAndValidity();
     } else {
-      this.password.setValidators([]);
+      this.password.clearValidators();
+      this.password.updateValueAndValidity();
     }
+
+    console.log(this.password.valid);
   }
 
   async onSubmit(): Promise<void> {

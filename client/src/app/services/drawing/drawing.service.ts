@@ -31,6 +31,14 @@ export class DrawingService {
     this.objectList = new Map<number, SVGElement>();
   }
 
+  deleteDrawing(): void {
+    this.numberOfStrates = 0;
+    this.objectList.clear()
+    this.isCreated = false;
+    const newSvg = this.renderer.createElement('svg', 'svg');
+    this.drawingEmit.emit(newSvg);
+  }
+
   get rgbColorString(): string {
     return 'rgb(' + this.color.r + ',' + this.color.g + ',' + this.color.b + ')';
   }

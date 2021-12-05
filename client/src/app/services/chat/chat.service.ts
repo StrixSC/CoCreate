@@ -1,17 +1,17 @@
+import { IMessageHttpResponse, IMessageResponse } from './../../model/IChannel.model';
+import { environment } from 'src/environments/environment';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { IChannel } from "../../model/IChannel.model";
-import { IReceiveMessagePayload } from "../../model/IReceiveMessagePayload.model";
 import { ISendMessagePayload } from "../../model/ISendMessagePayload.model";
 import { IUser } from "../../model/IUser.model";
 import { SocketService } from "./socket.service";
-// import { BrowserWindow } from 'electron';
 
 @Injectable({
   providedIn: "root",
 })
-export class ChatSocketService {
-  constructor(private socket: SocketService) {}
+export class ChatService {
+  constructor(private socket: SocketService, private http: HttpClient) { }
 
   sendMessage(channel_id: string, msg: string): void {
     this.socket.emit("channel:send", {
@@ -20,12 +20,16 @@ export class ChatSocketService {
     } as ISendMessagePayload);
   }
 
-  receiveMessage(): Observable<IReceiveMessagePayload> {
+  getChannelHistory(channelId: string): Observable<IMessageHttpResponse[]> {
+    return this.http.get<IMessageHttpResponse[]>(`${environment.serverURL}/api/channels/${channelId}/messages`);
+  }
+
+  receiveMessage(): Observable<IMessageResponse> {
     return this.socket.on("channel:sent");
   }
 
-  userConnection(): Observable<IReceiveMessagePayload> {
-    return this.socket.on("user-connection");
+  joinedChannel() {
+    return this.socket.on("channel:joined");
   }
 
   leaveChannel(channel_id: string): void {
@@ -34,24 +38,64 @@ export class ChatSocketService {
     });
   }
 
+  leftChannel() {
+    return this.socket.on("channel:left");
+  }
+
   deleteChannel(channel_id: string) {
     return this.socket.emit("channel:delete", {
       channelId: channel_id,
     });
   }
 
+  onChannelDelete(): any {
+    return this.socket.on('channel:deleted');
+  }
+
+  onChannelUpdated(): any {
+    return this.socket.on('channel:updated');
+  }
+
+  onChannelLeft(): any {
+    return this.socket.on('channel:left');
+  }
+
+  onChannelDeleteException(): any {
+    return this.socket.on('channel:delete:exception');
+  }
+
+  onChannelLeaveException(): any {
+    return this.socket.on('channel:leave:exception');
+  }
+
+  onChannelJoinException(): any {
+    return this.socket.on('channel:join:exception');
+  }
+
+  onChannelUpdateException(): any {
+    return this.socket.on('channel:update:exception');
+  }
+
+  onConnect(): any {
+    return this.socket.on('channel:connected');
+  }
+
+  onChannelDeleteFinish(): any {
+    return this.socket.on('channel:delete:finished');
+  }
+
+  onChannelUpdateFinish(): any {
+    return this.socket.on('channel:update:finished')
+  }
+
+  onChannelCreateException(): any {
+    return this.socket.on('channel:create:exception');
+  }
+
   joinChannel(channelId: string): void {
     this.socket.emit("channel:join", {
       channelId: channelId,
     });
-  }
-
-  getUsers(): Observable<IUser[]> {
-    return this.socket.on("get-users");
-  }
-
-  getChannels(): Observable<IChannel[]> {
-    return this.socket.on("get-channels");
   }
 
   createChannel(channelName: string): void {

@@ -2,10 +2,10 @@
     <span class="header">Nouveau Dessin</span>
 </div>
 <div class="main-container-wrapper">
-    <form class="form" [formGroup]="newDrawingForm" (submit)="onSubmit()">
+    <form class="form" [formGroup]="newDrawingForm">
         <mat-form-field required class="form-field clickable" appearance="outline">
             <mat-label>Titre</mat-label>
-            <input  matInput type="text" formControlName="title" placeholder="Le beau soleil" />
+            <input matInput type="text" formControlName="title" placeholder="Le beau soleil" />
             <mat-error *ngIf="title.hasError('required')">
                 Ce champ est obligatoire.
             </mat-error>
@@ -53,15 +53,17 @@
             </mat-error>
         </mat-form-field>
         <div>
-            <button type="submit" mat-raised-button color="primary" class="form-field">
-                <div class="spinner" *ngIf="isLoading"  >
-                    <mat-spinner  [diameter]="35" color="accent" class="spinner"></mat-spinner>
+            <button [disabled]="!newDrawingForm.valid" type="submit" mat-raised-button color="primary" class="form-field"
+                (click)="onSubmit()">
+                <div class="spinner" *ngIf="isLoading">
+                    <mat-spinner [diameter]="35" color="accent" class="spinner"></mat-spinner>
                 </div>
-                <ng-container *ngIf="!isLoading">Soumettre</ng-container>
+                <div *ngIf="!isLoading">Soumettre</div>
             </button>
         </div>
         <div class="pt-1">
-            <button (click)="dialogRef.close()" mat-raised-button color="secondary" class="form-field">
+            <button [disabled]="isLoading" (click)="dialogRef.close()" type="menu" mat-raised-button color="secondary"
+                class="form-field">
                 Annuler
             </button>
         </div>

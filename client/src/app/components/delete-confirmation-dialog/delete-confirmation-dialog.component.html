@@ -7,16 +7,14 @@
             Annuler
         </button>
         <button mat-raised-button (click)="confirm()" color="primary">
-            Supprimer
+            {{ data.buttonLabel }}
         </button>
     </div>
 </div>
 
 <style>
     .submessage {
-        opacity: 0.5;
         font-weight: normal;
-        color: black;
         font-size: 14px;
         padding-top: 1rem;
     }

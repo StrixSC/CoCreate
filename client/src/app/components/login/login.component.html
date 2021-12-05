@@ -1,5 +1,5 @@
 <div class="main-container-wrapper">
-    <h1>Connexion</h1>
+    <h1 style="color: white;">Connexion</h1>
 
     <form class="form" [formGroup]="loginForm" (submit)="login()">
         <div *ngIf="errorMessage" class="error-flash">
@@ -33,7 +33,7 @@
         </div>
 
         <div class="pt-2">
-            <span>
+            <span style="color: white">
                 Pas de compte?
                 <u class="link clickable" routerLink="/auth/register">Inscrivez-vous</u>
             </span>

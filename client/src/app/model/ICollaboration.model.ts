@@ -63,6 +63,10 @@ export interface ICollaborationJoinPayload {
     password?: string // Mandatory if the type is "Protected"
 }
 
+export interface ICollaborationDisconnectPayload {
+    collaborationId: string;
+}
+
 export interface ICollaborationConnectPayload {
     userId: string,
     collaborationId: string,

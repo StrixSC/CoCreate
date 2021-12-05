@@ -1,3 +1,10 @@
+import { UpdateCollaborationFormDialogComponent } from './components/update-collaboration-form-dialog/update-collaboration-form-dialog.component';
+import { ServerErrorComponent } from './components/server-error/server-error.component';
+import { CreateChannelDialogComponent } from './components/create-channel-dialog/create-channel-dialog.component';
+import { ChatWindowComponent } from './components/chat-window/chat-window.component';
+import { ChatComponent } from './components/chat/chat.component';
+import { ChatMenuComponent } from './components/chat-menu/chat-menu.component';
+import { ChatChannelListComponent } from './chat-channel-list/chat-channel-list.component';
 import { DeleteConfirmationDialogComponent } from './components/delete-confirmation-dialog/delete-confirmation-dialog.component';
 import { TeamInfoComponent } from './components/team-info/team-info.component';
 import { TeamPasswordDialogComponent } from './components/team-password-dialog/team-password-dialog.component';
@@ -62,10 +69,6 @@ import { MenuPageComponent } from './components/menu-page/menu-page.component';
 import { NewDrawingFormDialogComponent } from './components/new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { CollaborationPasswordFormDialogComponent } from './components/collaboration-password-form-dialog/collaboration-password-form-dialog.component';
 import { TopBarComponent } from './components/top-bar/top-bar.component';
-import { RightSidebarComponent } from "./components/right-sidebar/right-sidebar.component";
-import { ChatBoxComponent } from "./components/right-sidebar/chat-box/chat-box.component";
-import { ChatPopedOutComponent } from "./components/right-sidebar/chat-poped-out/chat-poped-out.component";
-import { AllChannelsComponent } from "./components/right-sidebar/all-channels/all-channels.component";
 
 @NgModule({
   declarations: [
@@ -78,12 +81,15 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     NewDrawingFormComponent,
     NewDrawingAlertComponent,
     ToolsColorComponent,
+    UpdateCollaborationFormDialogComponent,
     ToolsColorPickerComponent,
     ParameterMenuComponent,
     AvatarDialogComponent,
     WorkspaceComponent,
     SidenavComponent,
     CanvasComponent,
+    ChatChannelListComponent,
+    ChatMenuComponent,
     ControlMenuComponent,
     ParameterDirective,
     SaveDrawingComponent,
@@ -92,6 +98,7 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     AlertMessageComponent,
     CreateTeamDialogComponent,
     ExportDrawingComponent,
+    ChatComponent,
     DrawingPageComponent,
     UserProfileComponent,
     TeamPageComponent,
@@ -105,16 +112,14 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
     DrawingPreviewDialogComponent,
     CreateDrawingComponent,
     MenuPageComponent,
+    ServerErrorComponent,
     RegisterComponent,
     NewDrawingFormDialogComponent,
     CollaborationPasswordFormDialogComponent,
     TopBarComponent,
-    RightSidebarComponent,
-    ChatBoxComponent,
-    ChatPopedOutComponent,
-    AllChannelsComponent,
     AuthWrapperComponent,
-    AllChannelsComponent,
+    ChatWindowComponent,
+    CreateChannelDialogComponent,
     TeamInfoComponent,
     TeamPasswordDialogComponent,
   ],
@@ -143,14 +148,17 @@ import { AllChannelsComponent } from "./components/right-sidebar/all-channels/al
   exports: [AppRoutingModule,
   ],
   entryComponents: [
+    UpdateCollaborationFormDialogComponent,
     NewDrawingAlertComponent,
     NewDrawingComponent,
+    CreateChannelDialogComponent,
     TeamPasswordDialogComponent,
     DeleteConfirmationDialogComponent,
     TeamInfoComponent,
     ToolsColorPickerComponent,
     WorkspaceComponent,
     ControlMenuComponent,
+    ChatMenuComponent,
     AvatarDialogComponent,
     SaveDrawingComponent,
     NewDrawingFormDialogComponent,

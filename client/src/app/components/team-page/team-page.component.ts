@@ -1,3 +1,4 @@
+import { IConnectionEventData, IDisconnectionEventData } from './../../model/IChannel.model';
 import { DeleteConfirmationDialogComponent } from './../delete-confirmation-dialog/delete-confirmation-dialog.component';
 import { map } from 'rxjs/operators';
 import { SocketService } from 'src/app/services/chat/socket.service';
@@ -96,9 +97,9 @@ export class TeamPageComponent implements OnInit {
     });
 
     this.connectionSubscription = merge(
-      this.socketService.onDisconnect(),
-      this.socketService.onConnection(),
-    ).subscribe((d) => {
+      this.socketService.onDisconnected(),
+      this.socketService.onConnected(),
+    ).subscribe((d: IConnectionEventData | IDisconnectionEventData) => {
       if (d) {
         const index = this.teams.findIndex((t) => t.teamId === d.roomId);
         if (index > -1) {
@@ -171,9 +172,7 @@ export class TeamPageComponent implements OnInit {
   }
 
   openCreateTeamDialog(): void {
-    this.dialog.open(CreateTeamDialogComponent, this.dialogOptions).afterClosed().subscribe((d) => {
-      console.log(d);
-    })
+    this.dialog.open(CreateTeamDialogComponent, this.dialogOptions);
   }
 
   changeType(e: any) {
@@ -198,7 +197,6 @@ export class TeamPageComponent implements OnInit {
   }
 
   filterFullTeams(event: MatSlideToggleChange) {
-    // Add full=false
     if (event.checked) {
       this.searchParams.set('removeFull', 'false');
     } else {
@@ -244,7 +242,7 @@ export class TeamPageComponent implements OnInit {
       this.activeLimit = d.limit;
       this.teams = d.teams;
       teamSub.unsubscribe();
-    }, (error) => {
+    }, () => {
       this.snackBar.dismiss();
       teamSub.unsubscribe();
       this.snackBar.open("Une erreur s'est produite lors de la requête, veuillez essayez à nouveau...", 'OK', { duration: 5000 });

@@ -1,0 +1,158 @@
+<div *ngIf="!isLoading && activeChannel" class="main-content-wrapper">
+    <div class="top-section">
+        <div class="chat-header">
+            <h2 class="chat-header-content" *ngIf="activeChannel.name.length >= 30">{{ activeChannel.name |
+                slice:0:30}}...</h2>
+            <h2 class="chat-header-content" *ngIf="activeChannel.name.length < 30">{{ activeChannel.name }}</h2>
+        </div>
+
+        <div class="chat-actions">
+            <div class="mute-button-container">
+                <button [matMenuTriggerFor]="menu" [matTooltip]="'Membres connectés'" matTooltipPosition="below"
+                    mat-icon-button class="action-button open-button">
+                    <mat-icon>people_lat</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                    <div *ngIf="activeChannel.onlineMembers.length > 0">
+                        <div class="member-wrapper-container" mat-menu-item
+                            *ngFor="let member of activeChannel.onlineMembers">
+                            <div class="member-info-container">
+                                <div class="member-avatar-container">
+                                    <img class="member-avatar-img" [src]="member.avatarUrl">
+                                </div>
+                                <div *ngIf="member.username.length >= 10" class="member-username">
+                                    <small> {{ member.username | slice:0:8 }}...</small>
+                                </div>
+
+                                <div *ngIf="member.username.length < 10" class="member-username">
+                                    <small> {{ member.username }} </small>
+                                </div>
+                            </div>
+                            <div class="member-status">
+                                <div [matTooltip]="member.status" matTooltipPosition="below" class="status-icon online"
+                                    *ngIf="member.status === 'En ligne'"></div>
+                                <div [matTooltip]="member.status" matTooltipPosition="below" class="status-icon busy"
+                                    *ngIf="member.status === 'Occupé'"></div>
+                                <div [matTooltip]="'Déconnecté'" matTooltipPosition="below"
+                                    class="status-icon disconnected"
+                                    *ngIf="member.status !== 'Occupé' && member.status !== 'En ligne'"></div>
+                            </div>
+                        </div>
+                        <div *ngIf="activeChannel.onlineMembers.length <= 0">
+                            <div class="no-online-container">
+                                <img class="no-online-img" src="/assets/img/alone.png">
+                            </div>
+                        </div>
+                    </div>
+                </mat-menu>
+            </div>
+            <div class="history-button-container">
+                <button (click)="fetchHistory()" [matTooltip]="'Chercher l\'historique de la chaîne'"
+                    matTooltipPosition="below" mat-icon-button class="action-button history-button">
+                    <mat-icon>history</mat-icon>
+                </button>
+            </div>
+            <div class="mute-button-container">
+                <button *ngIf="!activeChannel.muteNotification" (click)="toggleNotifications()" [matTooltip]="'Enlever la sonorité de notification.'" matTooltipPosition="below" mat-icon-button
+                    class="action-button mute-button">
+                    <mat-icon>notifications</mat-icon>
+                </button>
+                <button *ngIf="activeChannel.muteNotification" (click)="toggleNotifications()" [matTooltip]="'Allumer la sonorité de notification.'" matTooltipPosition="below" mat-icon-button
+                    class="action-button mute-button">
+                    <mat-icon>notifications_off</mat-icon>
+                </button>
+            </div>
+            <div class="mute-button-container">
+                <button [matTooltip]="'Ouvrir la messagerie sur une fenêtre séparée'" (click)="openInNewWindow()"
+                    matTooltipPosition="below" mat-icon-button class="action-button open-button">
+                    <mat-icon>open_in_new</mat-icon>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="chat-box">
+        <div class="messages-container" #messageBox [scrollTop]="messageBox.scrollHeight">
+            <div class="message-wrapper" *ngFor="let message of activeChannel.messages"
+                [class.myMessage]="isActiveUser(message.username)">
+                <div class="avatar-container">
+                    <img class="avatar-img" [src]="message.avatarUrl">
+                </div>
+                <div class="message-content-wrapper">
+                    <small class="message-username">
+                        {{ message.username }}
+                    </small>
+                    <div class="message-content">
+                        {{ message.message }}
+                    </div>
+                    <small class="message-datetime">
+                        {{ message.createdAt }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="text-input">
+            <mat-form-field class="message-input" appearance="outline">
+                <mat-label>Message</mat-label>
+                <input matInput autocomplete="off" type="text" [(ngModel)]="message" placeholder="Aa"
+                    (keyup.enter)="onSubmit()">
+                <mat-hint align="end">{{message.length}} / 256</mat-hint>
+                <button *ngIf="message" matSuffix mat-icon-button type="submit" (click)="onSubmit()">
+                    <mat-icon>send</mat-icon>
+                </button>
+            </mat-form-field>
+        </div>
+    </div>
+</div>
+<div *ngIf="isLoading && !activeChannel" class="main-content-wrapper no-channel-container">
+    <div class="spinner">
+        <mat-spinner color="accent" [diameter]="35"></mat-spinner>
+    </div>
+</div>
+<style>
+    .messages-container {
+        text-overflow: ellipsis;
+        word-break: break-word;
+        padding: 1.5rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: 100%;
+        max-width: 85%;
+        min-width: 85%;
+        display: flex;
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .avatar-container {
+        max-width: 50px;
+        max-height: 50px;
+    }
+
+    .avatar-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 100%;
+    }
+
+    .message-wrapper {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        max-width: 300px;
+    }
+
+    .message-content-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .message-content {
+        padding: 1rem;
+        background-color: var(--bg-color);
+        border-radius: 10px;
+    }
+</style>

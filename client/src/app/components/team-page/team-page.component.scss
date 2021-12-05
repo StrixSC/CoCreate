@@ -47,7 +47,7 @@
 }
 
 .no-img {
-    background: url('/assets/img/default.png')
+    background: url("/assets/img/default.png");
 }
 
 .flip-switches-container {
@@ -79,6 +79,36 @@
     width: 100%;
 }
 
+.no-team-img {
+    max-width: 100%;
+    min-width: 100%;
+    object-fit: contain;
+}
+
+.no-team-image-container {
+    max-width: 200px;
+    max-height: 200px;
+    opacity: 0.5;
+}
+
+.no-team-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.no-group-message-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    h3 {
+        opacity: 0.5;
+    }
+}
+
 .member-count-container {
     display: flex;
     justify-content: center;
@@ -99,7 +129,7 @@
 }
 
 .team-owner-container {
-    color: var(--primary-color) !important;
+    $color: var(--primary-color) !important;
     cursor: default;
 }
 

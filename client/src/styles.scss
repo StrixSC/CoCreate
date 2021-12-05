@@ -1,16 +1,4 @@
-@import "~@angular/material/theming";
-
-@include mat-core();
-
-$polydessin-theme-primary: mat-palette($mat-grey, 800, 700, 900);
-$polydessin-theme-accent: mat-palette($mat-grey);
-$polydessin-theme-theme: mat-light-theme($polydessin-theme-primary, $polydessin-theme-accent);
-
-@include angular-material-theme($polydessin-theme-theme);
-
-html,
-body {
-  height: 100%;
+:root {
   --bg-color: rgb(55, 57, 63);
   --bg-accent-color: rgb(48, 49, 54);
   --primary-color: rgb(88, 101, 242);
@@ -21,6 +9,22 @@ body {
   --sidebar-color: rgb(30, 30, 30);
   --textbox-color: rgb(65, 65, 75);
 }
+
+@import "~@angular/material/theming";
+
+@include mat-core();
+
+$polydessin-theme-primary: mat-palette($mat-indigo, 300, 200, 400);
+$polydessin-theme-accent: mat-palette($mat-indigo);
+$polydessin-theme-theme: mat-dark-theme($polydessin-theme-primary, $polydessin-theme-accent);
+
+@include angular-material-theme($polydessin-theme-theme);
+
+html,
+body {
+  height: 100%;
+}
+
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
@@ -28,6 +32,10 @@ body {
 
 .mat-tooltip.tooltip {
   font-size: 16px;
+}
+
+mat-form-field {
+  color: white;
 }
 
 .thumbnail-wrapper {
@@ -44,6 +52,12 @@ fa-icon {
   flex-direction: column;
   align-items: center;
   gap: 2rem;
+}
+
+.notice-indicator {
+  line-height: 20px;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .clickable {
@@ -90,7 +104,7 @@ fa-icon {
 }
 
 .link {
-  color: purple;
+  color: white;
 }
 
 .pt-1 {
@@ -195,4 +209,8 @@ fa-icon {
 .pv-4 {
   padding-top: 4rem;
   padding-bottom: 4rem;
+}
+
+.mat-tab-labels {
+  justify-content: center;
 }

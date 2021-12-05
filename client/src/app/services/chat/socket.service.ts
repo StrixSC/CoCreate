@@ -76,12 +76,24 @@ export class SocketService {
     });
   }
 
-  onDisconnect(): Observable<any> {
-    return this.on('user:disconnection');
+  onDisconnected(): Observable<any> {
+    return this.on('user:disconnected');
   }
 
-  onConnection(): Observable<any> {
+  onDisconnectionComplete(): Observable<any> {
+    return this.on('disconnection:complete');
+  }
+
+  onConnectionComplete(): Observable<any> {
+    return this.on('connection:complete');
+  }
+
+  onConnected(): Observable<any> {
     return this.on('user:connected');
+  }
+
+  onStatusChange(): Observable<any> {
+    return this.on('status-change');
   }
 
   sendInit(): void {
@@ -90,5 +102,9 @@ export class SocketService {
 
   onInit(): Observable<void> {
     return this.on('user:initialized');
+  }
+
+  onInitException(): Observable<any> {
+    return this.on('user:init:exception');
   }
 }

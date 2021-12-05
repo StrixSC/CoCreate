@@ -1,7 +1,8 @@
+import { SocketService } from 'src/app/services/chat/socket.service';
 import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { Router } from '@angular/router';
 import { TeamType } from './../../model/team-response.model';
-import { Subscription } from 'rxjs';
+import { Subscription, merge } from 'rxjs';
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { MatDialogRef, MatSnackBar, MAT_DIALOG_DATA } from '@angular/material';
@@ -42,10 +43,12 @@ export class TeamInfoComponent implements OnInit {
   updateFinishedSubscription: Subscription;
   deleteExceptionSubscription: Subscription;
   deleteFinishedSubscription: Subscription;
-
+  connectionSubscription: Subscription;
+  selfDeleteSubscription: Subscription;
   displayedColumns = ['username', 'status', 'joinedOn', 'type'];
   drawingsColumns = ['title', 'memberCount', 'createdAt', 'updatedAt', 'actions']
   constructor(
+    private socketService: SocketService,
     private fb: FormBuilder,
     private auth: AuthService,
     private teamService: TeamService,
@@ -65,6 +68,23 @@ export class TeamInfoComponent implements OnInit {
       maxMemberCount: [this.team.maxMemberCount, [Validators.min(1), Validators.max(30)]],
       mascot: [this.team.mascot, []]
     });
+
+    this.connectionSubscription = merge(
+      this.socketService.onConnected(),
+      this.socketService.onStatusChange(),
+      this.socketService.onDisconnected(),
+      this.syncCollabService.onCreateCollaboration(),
+      this.syncCollabService.onUpdateCollaboration(),
+      this.syncCollabService.onJoinCollaboration(),
+      this.syncCollabService.onLeaveCollaboration(),
+      this.syncCollabService.onConnectCollaboration(),
+      this.syncCollabService.onDisconnectCollaboration(),
+      this.teamService.onJoin(),
+      this.teamService.onLeave(),
+      this.teamService.onUpdate(),
+    ).subscribe(() => {
+      this.fetchTeamInfo();
+    })
 
     this.fetchTeamInfo();
 
@@ -93,6 +113,11 @@ export class TeamInfoComponent implements OnInit {
       this.dialogRef.disableClose = false;
       this.fetchTeamInfo();
     });
+
+    this.selfDeleteSubscription = this.teamService.onDelete().subscribe(() => {
+      this.snackbar.open("L'équipe fut supprimée...", "OK", { duration: 5000 });
+      this.dialogRef.close();
+    })
 
   }
 
@@ -170,8 +195,10 @@ export class TeamInfoComponent implements OnInit {
         Validators.minLength(8),
         Validators.maxLength(256)
       ]);
+      this.password.updateValueAndValidity();
     } else {
-      this.password.setValidators([]);
+      this.password.clearValidators();
+      this.password.updateValueAndValidity();
     }
   }
 
@@ -214,9 +241,13 @@ export class TeamInfoComponent implements OnInit {
     return infoChanged;
   }
 
-  ngOnDelete(): void {
+  ngOnDestroy(): void {
     if (this.updatedSubscription) {
       this.updatedSubscription.unsubscribe();
+    }
+
+    if (this.connectionSubscription) {
+      this.connectionSubscription.unsubscribe();
     }
 
     if (this.teamSub) {
@@ -239,5 +270,8 @@ export class TeamInfoComponent implements OnInit {
       this.deleteFinishedSubscription.unsubscribe();
     }
 
+    if (this.selfDeleteSubscription) {
+      this.selfDeleteSubscription.unsubscribe();
+    }
   }
 }

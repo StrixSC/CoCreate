@@ -39,7 +39,9 @@ export class CanvasComponent implements AfterViewInit {
       }
       this.svg = el;
       this.renderer.appendChild(this.canvasDiv.nativeElement, this.svg);
-      this.drawingLoadService.loadActions();
+      if (!this.drawingLoadService.isLoaded) {
+        this.drawingLoadService.loadActions()
+      }
     });
   }
 

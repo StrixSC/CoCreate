@@ -21,7 +21,8 @@ import { MatSnackBar } from '@angular/material';
 export class DrawingPageComponent {
   loadListener: Subscription;
   listener: Subscription;
-
+  activeCollaborationId: string;
+  collaborationDeletedSubscription: Subscription;
   constructor(
     public dialog: MatDialog,
     private hotkeyService: HotkeysService,
@@ -32,7 +33,8 @@ export class DrawingPageComponent {
     private activeRoute: ActivatedRoute,
     private snackbar: MatSnackBar,
     private router: Router,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private syncCollabService: SyncCollaborationService,
   ) {
     this.hotkeyService.hotkeysListener();
   }
@@ -41,7 +43,7 @@ export class DrawingPageComponent {
     if (!this.drawingLoader.activeDrawingData) {
       const collaborationId = this.activeRoute.snapshot.params.id;
       if (collaborationId) {
-
+        this.activeCollaborationId = collaborationId;
         this.syncService.sendConnectCollaboration({
           userId: '',
           collaborationId
@@ -56,14 +58,24 @@ export class DrawingPageComponent {
         this.onError();
       }
     } else {
-      this.init();
+      this.init(this.drawingLoader.activeDrawingData);
     }
   }
 
   init(data?: ICollaborationLoadResponse): void {
+    this.collaborationDeletedSubscription = this.syncCollabService.onDeleteCollaboration().subscribe((c: { collaborationId: string }) => {
+      if (c.collaborationId === this.activeCollaborationId) {
+        this.snackbar.open('Le dessin actif fut supprimé...', "OK", { duration: 5000 });
+        this.router.navigateByUrl('gallery');
+      }
+    });
+
     if (!this.drawingLoader.isLoaded) {
       if (data) {
         this.drawingLoader.activeDrawingData = data;
+      }
+      if (this.drawingLoader.activeDrawingData) {
+        this.activeCollaborationId = this.drawingLoader.activeDrawingData.collaborationId;
       }
       this.drawingLoader.loadDrawing();
       this.syncDrawingService.updatedDefaultPayload(this.drawingLoader.activeDrawingData!.collaborationId);
@@ -91,6 +103,7 @@ export class DrawingPageComponent {
           }
         }
       });
+
     }
   }
 
@@ -99,6 +112,14 @@ export class DrawingPageComponent {
       this.loadListener.unsubscribe();
     }
 
+    if (this.listener) {
+      this.listener.unsubscribe();
+    }
+
+    this.syncCollabService.sendDisconnect({ collaborationId: this.activeCollaborationId });
+
+    this.activeCollaborationId = "";
+    this.drawingLoader.unload();
     this.drawingLoader.activeDrawingData = null;
     this.drawingLoader.isLoaded = false;
     this.drawingLoader.isLoading = false;

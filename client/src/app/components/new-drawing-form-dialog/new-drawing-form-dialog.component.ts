@@ -9,7 +9,7 @@ import { ICollaborationCreatePayload } from './../../model/ICollaboration.model'
 import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
 import { AuthService } from './../../services/auth.service';
 import { Component, Inject } from '@angular/core';
-import { Validators, FormGroup, FormBuilder } from '@angular/forms';
+import { Validators, FormGroup, FormBuilder, AbstractControl } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DrawingType } from 'src/app/model/drawing-visibility.model';
 import { ColorPickerService } from 'src/app/color-picker/color-picker.service';
@@ -24,6 +24,7 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
   newDrawingForm: FormGroup;
   showPassword: boolean;
   exceptionSubscription: Subscription;
+  finishSubscription: Subscription;
   isLoading: boolean;
   public visibilityTypes: { key: string, value: string }[] =
     [
@@ -74,17 +75,29 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
       backgroundColor: this.colorService.colorForm
     });
 
+    this.finishSubscription = this.syncCollaborationService.onCreateFinish().subscribe((c) => {
+      this.isLoading = false;
+      this.dialogRef.disableClose = false;
+      this.snackbar.open('Dessin créé avec succès!', "OK", { duration: 5000 });
+      this.dialogRef.close();
+    })
+
     this.authors = []
 
     this.teamService.getAllUserTeams().subscribe((d: { teams: { teamName: string, teamId: string }[] }) => {
       const me = [{ key: this.auth.activeUser!.uid, value: `${this.auth.activeUser!.displayName} (Moi)` }];
-      this.authors = me.concat((d.teams.map((t) => ({ key: t.teamId, value: t.teamName + ' (Équipe)' }))));
+      if (d && d.teams && d.teams.length >= 1) {
+        this.authors = me.concat((d.teams.map((t) => ({ key: t.teamId, value: t.teamName + ' (Équipe)' }))));
+      } else {
+        this.authors = me;
+      }
     });
 
-    this.exceptionSubscription = this.syncCollaborationService.onCollaborationException().subscribe((message: any) => {
+    this.exceptionSubscription = this.syncCollaborationService.onCreateCollaborationException().subscribe((message: any) => {
       this.snackbar.open(message.message, '', { duration: 5000 });
       this.newDrawingForm.enable();
       this.isLoading = false;
+      this.dialogRef.disableClose = false;
     });
   }
 
@@ -92,24 +105,24 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
     this.dialogRef.close();
   }
 
-  get author(): any {
-    return this.newDrawingForm.get('author');
+  get author(): AbstractControl {
+    return this.newDrawingForm.get('author')!;
   }
 
-  get password(): any {
-    return this.newDrawingForm.get('password');
+  get password(): AbstractControl {
+    return this.newDrawingForm.get('password')!;
   }
 
-  get title(): any {
-    return this.newDrawingForm.get('title');
+  get title(): AbstractControl {
+    return this.newDrawingForm.get('title')!;
   }
 
-  get type(): any {
-    return this.newDrawingForm.get('type');
+  get type(): AbstractControl {
+    return this.newDrawingForm.get('type')!;
   }
 
-  get backgroundColor(): any {
-    return this.newDrawingForm.get('backgroundColor');
+  get backgroundColor(): AbstractControl {
+    return this.newDrawingForm.get('backgroundColor')!;
   }
 
   changeType(e: any) {
@@ -119,8 +132,10 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
         Validators.minLength(8),
         Validators.maxLength(256)
       ]);
+      this.password.updateValueAndValidity();
     } else {
-      this.password.setValidators([]);
+      this.password.clearValidators();
+      this.password.updateValueAndValidity();
     }
   }
 
@@ -128,11 +143,13 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
     if (this.newDrawingForm.valid && this.auth.activeUser) {
       this.newDrawingForm.disable();
       this.isLoading = true;
+      this.dialogRef.disableClose = true;
       const payload = {
         userId: this.auth.activeUser.uid,
         creatorId: this.author.value,
         isTeam: this.auth.activeUser.uid !== this.author.value,
         title: this.title.value,
+        bgColor: this.backgroundColor.value.hex,
         type: this.type.value,
         password: this.password.value,
       } as ICollaborationCreatePayload
@@ -143,6 +160,10 @@ export class NewDrawingFormDialogComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.exceptionSubscription) {
       this.exceptionSubscription.unsubscribe();
+    }
+
+    if (this.finishSubscription) {
+      this.finishSubscription.unsubscribe();
     }
   }
 }
