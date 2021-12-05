@@ -65,9 +65,9 @@ class _BottomNavBarScreenState extends State<BottomNavBar> {
           ),
           screenTransitionAnimation: const ScreenTransitionAnimation(
             // Screen transition animation on change of selected tab.
-            animateTabTransition: false,
+            animateTabTransition: true,
             curve: Curves.ease,
-            duration: Duration(milliseconds: 300),
+            duration: Duration(milliseconds: 500),
           ),
           navBarStyle: NavBarStyle
               .style6, // Choose the nav bar style with this property.

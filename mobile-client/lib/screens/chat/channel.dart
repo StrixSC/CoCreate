@@ -71,7 +71,7 @@ class _ChannelState extends State<Channel> {
             child: ConstrainedBox(
                 constraints: context.read<Messenger>().userChannels.isEmpty
                     ? const BoxConstraints(minHeight: 5.0, maxHeight: 75.0)
-                    : const BoxConstraints(minHeight: 45.0, maxHeight: 175.0),
+                    : const BoxConstraints(minHeight: 45.0, maxHeight: 275.0),
                 child: context.read<Messenger>().userChannels.isEmpty
                     ? Center(
                         child: Text(

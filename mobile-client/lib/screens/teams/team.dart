@@ -1,6 +1,10 @@
 import 'dart:convert';
+import 'dart:core';
+import 'dart:core';
 
 import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/models/collaboration.dart';
+import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/models/team.dart';
 import 'package:Colorimage/models/team.dart';
 import 'package:Colorimage/providers/messenger.dart';
@@ -51,6 +55,14 @@ TextEditingController titreController = TextEditingController();
 TextEditingController passController = TextEditingController();
 TextEditingController memberController = TextEditingController();
 TextEditingController bioController = TextEditingController();
+PagingController pagingController =
+    PagingController<int, Team>(firstPageKey: 0);
+TextEditingController searchController = TextEditingController();
+ScrollController scrollController = ScrollController();
+String dropDownControllerType = 'Aucun';
+
+String dropDownControllerTypeCreate = 'Public';
+String dropDownControllerMascot = 'Choisir pour moi!';
 
 class TeamsScreen extends StatefulWidget {
   const TeamsScreen({Key? key}) : super(key: key);
@@ -60,14 +72,6 @@ class TeamsScreen extends StatefulWidget {
 }
 
 class _TeamsScreenState extends State<TeamsScreen> {
-  PagingController pagingController =
-      PagingController<int, Team>(firstPageKey: 0);
-  TextEditingController searchController = TextEditingController();
-  ScrollController scrollController = ScrollController();
-  String dropDownControllerType = 'Aucun';
-
-  String dropDownControllerTypeCreate = 'Public';
-  String dropDownControllerMascot = 'Choisir pour moi!';
   static const _pageSize = 12;
 
   bool amOwner = false;
@@ -134,7 +138,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
     }
     var response = await rest.team.fetchTeams(
         filter, pageKey, _pageSize, type, amOwner, amMember, removeFull);
-    print(json.decode(response.body));
+
     if (response.statusCode == 200) {
       var jsonResponse = json.decode(response.body); //Map<String, dynamic>;
       List<Team> teams = [];
@@ -198,7 +202,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                 IconButton(
                     icon: Icon(Icons.message),
                     onPressed: () => context.read<Messenger>().openDrawer()),
-            title: const Text("Galerie de dessins"),
+            title: const Text("Équipe de collaborations"),
             actions: <Widget>[
               IconButton(
                   icon: const Icon(CupertinoIcons.plus,
@@ -323,7 +327,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                       index % 2 == 0 ? left = padding : right = padding;
                       return Padding(
                           padding: EdgeInsets.fromLTRB(left, 0, right, 0),
-                          child: _Team(item));
+                          child: _Team(item, dropDown, formField));
                     },
                   )));
         }))
@@ -402,78 +406,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                   padding: EdgeInsets.all(10.0),
                   color: kContentColor,
                   child: const Center(child: Text('Créer une équipe'))),
-              content: SingleChildScrollView(
-                  child: Container(
-                      width: 1000,
-                      child: ListView(
-                          shrinkWrap: true,
-                          padding:
-                              const EdgeInsets.only(left: 100.0, right: 100.0),
-                          children: <Widget>[
-                            FormBuilder(
-                                key: _formKey,
-                                child: Column(children: <Widget>[
-                                  const SizedBox(height: 28.0),
-                                  SizedBox(
-                                      width: 900,
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            SizedBox(
-                                              width: 380,
-                                              child: formField(
-                                                  "Nom de l'équipe",
-                                                  'Veuillez entrez le titre du dessin',
-                                                  titreController),
-                                            ),
-                                            // const SizedBox(width: 24.0),
-                                            SizedBox(
-                                                width: 380,
-                                                child: formField(
-                                                    'Nombre de membres maximum',
-                                                    'Veuillez entrez choisir un auteur',
-                                                    memberController)),
-                                          ])),
-                                  const SizedBox(height: 48.0),
-                                  SizedBox(
-                                      width: 900,
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            SizedBox(
-                                              width: 380,
-                                              child: dropDown([
-                                                'Public',
-                                                'Protégé',
-                                              ], dropDownControllerTypeCreate,
-                                                  "Choisir la visibilité de l'équipe"),
-                                            ),
-                                            // const SizedBox(width: 24.0),
-                                            SizedBox(
-                                                width: 380,
-                                                child: dropDown(
-                                                    mascots,
-                                                    dropDownControllerMascot,
-                                                    'Choisir une mascot')),
-                                          ])),
-                                  const SizedBox(height: 48.0),
-                                  dropDownControllerTypeCreate == 'Protégé'
-                                      ? formField(
-                                          'Mot de passe',
-                                          'Veuillez entrez choisir un mot de passe',
-                                          passController)
-                                      : const SizedBox.shrink(),
-                                  dropDownControllerTypeCreate == 'Protégé'
-                                      ? const SizedBox(height: 48.0)
-                                      : const SizedBox.shrink(),
-                                  formField(
-                                      'Bio (Description)',
-                                      'Veuillez entrez le titre du dessin',
-                                      bioController),
-                                ]))
-                          ]))),
+              content: SingleChildScrollView(child: create()),
               actions: <Widget>[
                 Padding(
                     padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
@@ -508,25 +441,120 @@ class _TeamsScreenState extends State<TeamsScreen> {
                                   .createTeam(team);
                               Navigator.of(context).pop();
                             } else {
-                              AwesomeDialog(
-                                context:
-                                    navigatorKey.currentContext as BuildContext,
-                                width: 800,
-                                btnOkColor: Colors.red,
-                                dismissOnTouchOutside: false,
-                                dialogType: DialogType.ERROR,
-                                animType: AnimType.BOTTOMSLIDE,
-                                title: 'Erreur!',
-                                desc:
-                                    'Il y a eu un probleme dans la validation...',
-                                btnOkOnPress: () {},
-                              ).show();
+                              _onLoading(context);
                             }
                           },
                           child: const Text('Créer'),
                         ))),
               ],
             ));
+  }
+
+  create() {
+    return Container(
+        width: 1000,
+        child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.only(left: 100.0, right: 100.0),
+            children: <Widget>[
+              FormBuilder(
+                  key: _formKey,
+                  child: Column(children: <Widget>[
+                    const SizedBox(height: 28.0),
+                    SizedBox(
+                        width: 900,
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width: 380,
+                                child: formField(
+                                    "Nom de l'équipe",
+                                    'Veuillez entrez le titre du dessin',
+                                    titreController),
+                              ),
+                              // const SizedBox(width: 24.0),
+                              SizedBox(
+                                  width: 380,
+                                  child: formField(
+                                      'Nombre de membres maximum',
+                                      'Veuillez entrez choisir un auteur',
+                                      memberController)),
+                            ])),
+                    const SizedBox(height: 48.0),
+                    SizedBox(
+                        width: 900,
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width: 380,
+                                child: dropDown([
+                                  'Public',
+                                  'Protégé',
+                                ], dropDownControllerTypeCreate,
+                                    "Choisir la visibilité de l'équipe"),
+                              ),
+                              // const SizedBox(width: 24.0),
+                              SizedBox(
+                                  width: 380,
+                                  child: dropDown(
+                                      mascots,
+                                      dropDownControllerMascot,
+                                      'Choisir une mascot')),
+                            ])),
+                    const SizedBox(height: 48.0),
+                    dropDownControllerTypeCreate == 'Protégé'
+                        ? formField(
+                            'Mot de passe',
+                            'Veuillez entrez choisir un mot de passe',
+                            passController)
+                        : const SizedBox.shrink(),
+                    dropDownControllerTypeCreate == 'Protégé'
+                        ? const SizedBox(height: 48.0)
+                        : const SizedBox.shrink(),
+                    formField('Bio (Description)',
+                        'Veuillez entrez le titre du dessin', bioController),
+                  ]))
+            ]));
+  }
+
+  void _onLoading(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return SizedBox(
+            height: 150,
+            child: Dialog(
+              child: Padding(
+                  padding: const EdgeInsets.all(25.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      CircularProgressIndicator(),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text("Chargement..."),
+                    ],
+                  )),
+            ));
+      },
+    );
+    Future.delayed(const Duration(seconds: 3), () {
+      AwesomeDialog(
+        context: navigatorKey.currentContext as BuildContext,
+        width: 800,
+        btnOkColor: Colors.red,
+        dismissOnTouchOutside: false,
+        dialogType: DialogType.ERROR,
+        animType: AnimType.BOTTOMSLIDE,
+        title: 'Erreur!',
+        desc: 'Il y a eu un probleme dans la validation...',
+        btnOkOnPress: () {},
+      ).show();
+    });
   }
 
   formField(
@@ -588,53 +616,245 @@ class _TeamsScreenState extends State<TeamsScreen> {
 
 class _Team extends StatefulWidget {
   final Team team;
-  const _Team(this.team);
+  final Function dropDown;
+  final Function formField;
+
+  const _Team(this.team, this.dropDown, this.formField);
 
   @override
-  _TeamState createState() => _TeamState(team);
+  _TeamState createState() => _TeamState(team, dropDown, formField);
 }
 
 class _TeamState extends State<_Team> with TickerProviderStateMixin {
   final Team team;
+  final Function dropDown;
+  final Function formField;
   late TabController _tabController;
 
-  _TeamState(this.team);
+  _TeamState(this.team, this.dropDown, this.formField);
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  Future<void> _fetchTeamById(Team team) async {
+    RestApi rest = RestApi();
+    var response = await rest.team.fetchTeamById(team);
+
+    if (response.statusCode == 200) {
+      var jsonResponse = json.decode(response.body);
+      var respMembers = jsonResponse['members'];
+      print(jsonResponse);
+      List<TeamMember> members = [];
+      for (var data in respMembers) {
+        if (data != null) {
+          members.add(TeamMember(
+              username: data['username'],
+              avatarUrl: data['avatarUrl'],
+              type: data['type'],
+              status: data['status'],
+              joinedOn: DateFormat('yyyy-MM-dd kk:mm')
+                  .format(DateTime.parse(data['joinedOn']))));
+        }
+      }
+      var resDrawings = jsonResponse['drawings'];
+      List<Drawing> drawings = [];
+      for (var drawing in resDrawings) {
+        if (drawing != null) {
+          Collaboration collaboration = Collaboration(
+            collaborationId: drawing["collaborationId"],
+            memberCount: drawing["currentCollaboratorCount"],
+            activeMemberCount: drawing["activeCollaboratorCount"],
+            members: [],
+            actionsMap: {},
+            actions: [],
+          );
+          drawings.add(Drawing(
+              drawingId: drawing['drawingId'],
+              authorUsername: team.name,
+              authorAvatar: team.mascot,
+              title: drawing['title'],
+              createdAt: DateFormat('yyyy-MM-dd kk:mm')
+                  .format(DateTime.parse(drawing['createdAt'])),
+              updatedAt: DateFormat('yyyy-MM-dd kk:mm')
+                  .format(DateTime.parse(drawing['updatedAt'])),
+              collaboration: collaboration,
+              type: 'Public',
+              thumbnailUrl: drawing['thumbnailUrl']));
+        }
+      }
+      team.members = members;
+      team.drawings = drawings;
+      context.read<Teammate>().updateTeam(team);
+    } else if (response.statusCode == 204) {
+      // print(response.body);
+      throw ("Theres was a problem in the fetching of teams...");
+    } else {
+      team.members = [];
+      team.drawings = [];
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () {
+          setCurrentControllerValues();
+          _fetchTeamById(team);
           passController.clear();
-          teamInfoDialog(context);
+          // teamInfoDialog(context);
+          _onLoading(context);
         },
         child: gridTile(context));
   }
 
   teamInfoDialog(context) async {
     showDialog<String>(
+        barrierDismissible: false,
         context: context,
         builder: (BuildContext context) => AlertDialog(
-            titlePadding: EdgeInsets.zero,
-            title: Container(
-                padding: EdgeInsets.all(10.0),
-                color: kContentColor,
-                child: Center(child: Text(team.name))),
-            content:Container(height: 500, width:500,child:TabBarView(
-                physics: const NeverScrollableScrollPhysics(),
-                controller: _tabController,
-                children: [
-                  SingleChildScrollView(child: Column(children: [])),
-                  SingleChildScrollView(child: Column(children: []))
-                ]))));
+              titlePadding: EdgeInsets.zero,
+              title: Column(children: [
+                Container(
+                    padding: EdgeInsets.all(10.0),
+                    color: kContentColor,
+                    child: Center(child: Text(team.name))),
+                PreferredSize(
+                    preferredSize: _tabBar.preferredSize,
+                    child: ColoredBox(color: kContentColor, child: _tabBar))
+              ]),
+              content: Container(
+                  height: 500,
+                  width: 1000,
+                  child: TabBarView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      controller: _tabController,
+                      children: [
+                        SingleChildScrollView(
+                            child: Column(children: [
+                          Container(
+                              width: MediaQuery.of(context).size.width,
+                              child: Column(children: [
+                                titleRow('Utilisateur', 'Status',
+                                    'Date rejoint', 'Rôle'),
+                                Divider(),
+                                members(team),
+                              ]))
+                        ])),
+                        SingleChildScrollView(
+                            child: Column(children: [
+                          Container(
+                              width: MediaQuery.of(context).size.width,
+                              child: Column(children: [
+                                titleRow('Titre', 'Membres Actifs',
+                                    'Date de création', 'Dernière maj'),
+                                Divider(),
+                                const SizedBox(height: 20),
+                                drawings(team),
+                              ]))
+                        ])),
+                        SingleChildScrollView(
+                            child: Column(children: [update()])),
+                      ])),
+              actions: [
+                Container(
+                    padding: const EdgeInsets.only(
+                        left: 50.0, right: 50.0, bottom: 20.0),
+                    child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          _tabController.index == 2
+                              ?Container(
+                              padding: EdgeInsets.only(right: 150.0),
+                              child: ElevatedButton(
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                      MaterialStateProperty.all(
+                                          Colors.red)),
+                                  onPressed: () {
+                                    _formKey.currentState!.save();
+                                    if (_formKey.currentState!.validate()) {
+                                      var type = context
+                                          .read<Teammate>()
+                                          .convertToEnglish(
+                                          dropDownControllerTypeCreate);
+                                      var mascot = mascotEnglish[
+                                      dropDownControllerMascot] ??
+                                          'cobra';
+                                      var password = type == 'Protected'
+                                          ? passController.value.text
+                                          : null;
+                                      Team team = Team(
+                                          name: titreController.text,
+                                          bio: bioController.text,
+                                          maxMemberCount: int.tryParse(
+                                              memberController.text) ??
+                                              4,
+                                          type: type,
+                                          password: password,
+                                          mascot: mascot,
+                                          members: []);
+                                      context
+                                          .read<Teammate>()
+                                          .teamSocket
+                                          .updateTeam(team);
+                                    }
+                                  },
+                                  child: Text('Supprimer')))
+                              : SizedBox(),
+                          _tabController.index == 2
+                              ? Container(
+                                  padding: EdgeInsets.only(right: 220.0),
+                                  child: ElevatedButton(
+                                      onPressed: () {
+                                        _formKey.currentState!.save();
+                                        if (_formKey.currentState!.validate()) {
+                                          var type = context
+                                              .read<Teammate>()
+                                              .convertToEnglish(
+                                                  dropDownControllerTypeCreate);
+                                          var mascot = mascotEnglish[
+                                                  dropDownControllerMascot] ??
+                                              'cobra';
+                                          var password = type == 'Protected'
+                                              ? passController.value.text
+                                              : null;
+                                          Team team = Team(
+                                              name: titreController.text,
+                                              bio: bioController.text,
+                                              maxMemberCount: int.tryParse(
+                                                      memberController.text) ??
+                                                  4,
+                                              type: type,
+                                              password: password,
+                                              mascot: mascot,
+                                              members: []);
+                                          context
+                                              .read<Teammate>()
+                                              .teamSocket
+                                              .updateTeam(team);
+                                        }
+                                      },
+                                      child: Text('Mettre à jour')))
+                              : SizedBox(),
+                          ElevatedButton(
+                              onPressed: () {
+                                _tabController.index = 0;
+                                resetController();
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                              },
+                              child: Text('Retour')),
+                        ]))
+              ],
+            ));
   }
 
   Widget gridTile(BuildContext context) {
+    Teammate teammate = context.watch<Teammate>();
     var width = 380.0;
     return Card(
         elevation: 10,
@@ -642,7 +862,10 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
             decoration: BoxDecoration(
                 color: kContentColor,
                 border: Border.all(
-                    width: 2.5, color: Colors.white.withOpacity(0.15))),
+                    width: 2.5,
+                    color: teammate.isMember(team)
+                        ? kPrimaryColor.withOpacity(0.45)
+                        : Colors.white.withOpacity(0.15))),
             child: Row(children: <Widget>[
               getThumbnail(context),
               Container(
@@ -652,12 +875,28 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Container(
-                          child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: AlignmentDirectional.centerStart,
-                        child: Text(team.name),
-                      )),
+                      Row(children: [
+                        Container(
+                            width: 315.0,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: AlignmentDirectional.centerStart,
+                              child: Text(team.name),
+                            )),
+                        teammate.isMember(team)
+                            ? const SizedBox.shrink()
+                            : Container(
+                                width: 20,
+                                height: 40.0,
+                                child: IconButton(
+                                  color: kPrimaryColor,
+                                  iconSize: 38.0,
+                                  icon: Icon(Icons.arrow_circle_up_outlined),
+                                  onPressed: () {
+
+                                  },
+                                ))
+                      ]),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 5, 0, 2),
                         child: Container(
@@ -676,9 +915,11 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
                           child: Text(
                             team.bio.isEmpty
                                 ? ('Aucune biographie')
-                                : team.bio.length > 80
-                                    ? team.bio.substring(0, 80) + '...'
-                                    : team.bio,
+                                : ('\n'.allMatches(team.bio).length + 1) > 1
+                                    ? team.bio.replaceAll("\n", "")
+                                    : team.bio.length > 80
+                                        ? team.bio.substring(0, 80) + '...'
+                                        : team.bio,
                             style: const TextStyle(
                                 fontSize: 18, color: Colors.white),
                           ),
@@ -715,41 +956,321 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
             ])));
   }
 
-  TabBar get _tabBar => TabBar(
-    indicatorWeight: 5.0,
-    controller: _tabController,
-    onTap: (value) {
-      // setState(() {
-      //   dropDownValueType = 'Aucun';
-      //   searchControllers.update(
-      //       TYPES[value], (value) => TextEditingController());
-      //   pagingControllers[TYPES[value]].refresh();
-      // });
+  member(Team team, index) {
+    const fontSize = 24.0;
+    return Row(children: [
+      Container(
+        child: Row(children: [
+          Container(
+              width: 220,
+              child: Row(children: [
+                CircleAvatar(
+                    radius: 40,
+                    backgroundColor: kPrimaryColor,
+                    backgroundImage:
+                        NetworkImage(team.members[index].avatarUrl!)),
+                const SizedBox(width: 10),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(team.members[index].username!,
+                      style: TextStyle(fontSize: fontSize)),
+                )
+              ])),
+          Container(
+              width: 260,
+              child: Row(children: [
+                team.members[index].status! == 'En ligne'
+                    ? Row(children: [
+                        const Icon(
+                          Icons.circle,
+                          color: Colors.green,
+                          size: 15.0,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(team.members[index].status!,
+                            style: TextStyle(fontSize: fontSize))
+                      ])
+                    : Row(children: [
+                        const Icon(
+                          Icons.circle,
+                          color: Colors.red,
+                          size: 15.0,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(team.members[index].status!,
+                            style: TextStyle(fontSize: fontSize))
+                      ]),
+              ])),
+          Container(
+              width: 300,
+              child: Row(children: [
+                Text(team.members[index].joinedOn!,
+                    style: TextStyle(fontSize: fontSize))
+              ])),
+          Container(
+              width: 200,
+              child: Row(children: [
+                team.members[index].type! == 'Owner'
+                    ? Row(children: const [
+                        Text('Propriétaire',
+                            style: TextStyle(fontSize: fontSize)),
+                        Icon(Icons.star, color: Colors.yellow),
+                      ])
+                    : const Text('Membre', style: TextStyle(fontSize: fontSize))
+              ]))
+        ]),
+      )
+    ]);
+  }
 
-    },
-    tabs: [
-      Tab(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(Icons.public),
-            SizedBox(width: 8),
-            Text('Dessins Disponibles', style: TextStyle(fontSize: 18)),
-          ],
-        ),
-      ),
-      Tab(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(Icons.adb_sharp),
-            SizedBox(width: 8),
-            Text('Mes Dessins', style: TextStyle(fontSize: 18)),
-          ],
-        ),
-      ),
-    ],
-  );
+  members(Team team) {
+    const space = 60.0;
+    const fontSize = 24.0;
+    return ListView.separated(
+      shrinkWrap: true,
+      itemCount: team.members.length,
+      itemBuilder: (BuildContext context, int index) {
+        return member(team, index);
+      },
+      separatorBuilder: (BuildContext context, int index) => const Divider(),
+    );
+  }
+
+  drawing(Team team, index) {
+    const fontSize = 24.0;
+    return Row(children: [
+      Container(
+        child: Row(children: [
+          Container(
+              width: 220,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(team.drawings[index].title,
+                    style: TextStyle(fontSize: fontSize)),
+              )),
+          Container(
+              width: 260,
+              child: Text(
+                  "${team.drawings[index].collaboration.activeMemberCount}/${team.drawings[index].collaboration.memberCount}",
+                  style: TextStyle(fontSize: fontSize))),
+          Container(
+              width: 270,
+              child: Row(children: [
+                Text(team.drawings[index].createdAt,
+                    style: TextStyle(fontSize: fontSize))
+              ])),
+          Container(
+              width: 200,
+              child: Text(team.drawings[index].updatedAt!,
+                  style: TextStyle(fontSize: fontSize))),
+          Container(
+              width: 20,
+              child: PopupMenuButton(
+                  itemBuilder: (context) => [
+                        PopupMenuItem(
+                          child: const Text("Rejoindre",
+                              style: TextStyle(fontSize: fontSize)),
+                          value: 1,
+                          onTap: () {},
+                        ),
+                        PopupMenuItem(
+                          child: const Text("Supprimer",
+                              style: TextStyle(fontSize: fontSize)),
+                          value: 2,
+                          onTap: () {},
+                        )
+                      ]))
+        ]),
+      )
+    ]);
+  }
+
+  drawings(Team team) {
+    const space = 60.0;
+    const fontSize = 24.0;
+    return team.drawings.isNotEmpty
+        ? ListView.separated(
+            shrinkWrap: true,
+            itemCount: team.drawings.length,
+            itemBuilder: (BuildContext context, int index) {
+              return drawing(team, index);
+            },
+            separatorBuilder: (BuildContext context, int index) =>
+                const Divider(),
+          )
+        : Column(children: const [
+            Icon(Icons.image_not_supported_outlined, size: 280.0),
+            Text("Cette équipe n'est auteure d'aucun dessin..."),
+            Text("Aller dans la section Galérie pour en créer!")
+          ]);
+  }
+
+  update() {
+    return Container(
+        width: 1000,
+        child: ListView(
+            physics: NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            padding: const EdgeInsets.only(left: 100.0, right: 100.0),
+            children: <Widget>[
+              FormBuilder(
+                  key: _formKey,
+                  child: Column(children: <Widget>[
+                    const SizedBox(height: 28.0),
+                    SizedBox(
+                        width: 900,
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width: 380,
+                                child: formField(
+                                    "Nom de l'équipe",
+                                    'Veuillez entrez le titre du dessin',
+                                    titreController),
+                              ),
+                              // const SizedBox(width: 24.0),
+                              SizedBox(
+                                  width: 380,
+                                  child: formField(
+                                      'Nombre de membres maximum',
+                                      'Veuillez entrez choisir un auteur',
+                                      memberController)),
+                            ])),
+                    const SizedBox(height: 48.0),
+                    SizedBox(
+                        width: 900,
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width: 380,
+                                child: dropDown([
+                                  'Public',
+                                  'Protégé',
+                                ], dropDownControllerTypeCreate,
+                                    "Choisir la visibilité de l'équipe"),
+                              ),
+                              // const SizedBox(width: 24.0),
+                              SizedBox(
+                                  width: 380,
+                                  child: dropDown(
+                                      mascots,
+                                      dropDownControllerMascot,
+                                      'Choisir une mascot')),
+                            ])),
+                    const SizedBox(height: 48.0),
+                    dropDownControllerTypeCreate == 'Protégé'
+                        ? formField(
+                            'Mot de passe',
+                            'Veuillez entrez choisir un mot de passe',
+                            passController)
+                        : const SizedBox.shrink(),
+                    dropDownControllerTypeCreate == 'Protégé'
+                        ? const SizedBox(height: 48.0)
+                        : const SizedBox.shrink(),
+                    formField('Bio (Description)',
+                        'Veuillez entrez le titre du dessin', bioController),
+                  ]))
+            ]));
+  }
+
+  titleRow(col1, col2, col3, col4) {
+    const fontSize = 24.0;
+    return Row(children: [
+      Container(
+        child: Row(children: [
+          Container(
+              width: 220,
+              child: Row(children: [
+                Text(col1, style: TextStyle(fontSize: fontSize))
+              ])),
+          Container(
+              width: 260,
+              child: Row(children: [
+                Text(col2, style: TextStyle(fontSize: fontSize))
+              ])),
+          Container(
+              width: 300,
+              child: Row(children: [
+                Text(col3, style: TextStyle(fontSize: fontSize))
+              ])),
+          Container(
+              width: 150,
+              child: Row(children: [
+                Text(col4, style: TextStyle(fontSize: fontSize))
+              ])),
+        ]),
+      )
+    ]);
+  }
+
+  TabBar get _tabBar => TabBar(
+        indicatorWeight: 5.0,
+        controller: _tabController,
+        onTap: (value) {
+          // setState(() {
+          //   dropDownValueType = 'Aucun';
+          //   searchControllers.update(
+          //       TYPES[value], (value) => TextEditingController());
+          //   pagingControllers[TYPES[value]].refresh();
+          // });
+        },
+        tabs: [
+          Tab(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.group),
+                SizedBox(width: 8),
+                Text('Membres', style: TextStyle(fontSize: 18)),
+              ],
+            ),
+          ),
+          Tab(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.brush_sharp),
+                SizedBox(width: 8),
+                Text('Dessins', style: TextStyle(fontSize: 18)),
+              ],
+            ),
+          ),
+          Tab(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.settings),
+                SizedBox(width: 8),
+                Text('Mise a jour', style: TextStyle(fontSize: 18)),
+              ],
+            ),
+          ),
+        ],
+      );
+
+  resetController() {
+    titreController.clear();
+    passController.clear();
+    memberController.clear();
+    bioController.clear();
+    dropDownControllerTypeCreate = 'Public';
+    dropDownControllerMascot = 'Choisir pour moi!';
+  }
+
+  setCurrentControllerValues() {
+    titreController.text = team.name;
+    passController.text = team.password ?? '';
+    memberController.text = team.maxMemberCount.toString();
+    bioController.text = team.bio;
+    dropDownControllerTypeCreate = team.type;
+    dropDownControllerMascot = mascotEnglish.keys.firstWhere((element) {
+      return mascotEnglish[element] == team.mascot;
+    });
+  }
 
   getThumbnail(BuildContext context) {
     return Container(
@@ -761,5 +1282,33 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
           image: DecorationImage(
               fit: BoxFit.cover, image: NetworkImage(team.thumbnailUrl))),
     );
+  }
+
+  void _onLoading(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return SizedBox(
+            height: 150,
+            child: Dialog(
+              child: Padding(
+                  padding: const EdgeInsets.all(25.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      CircularProgressIndicator(),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text("Chargement..."),
+                    ],
+                  )),
+            ));
+      },
+    );
+    Future.delayed(const Duration(seconds: 3), () {
+      teamInfoDialog(context);
+    });
   }
 }

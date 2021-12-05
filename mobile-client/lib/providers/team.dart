@@ -77,12 +77,28 @@ class Teammate extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool isMember(Team team) {
+    for(var member in team.members) {
+      if(member.username == auth!.user!.displayName) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void updateTeam(Team team) {
+    var index = teams.indexWhere((element) => element.id == team.id);
+    teams[index] = team;
+    notifyListeners();
+  }
+
   void updateUser(UserCredential updatedUser) {
     auth = updatedUser;
     notifyListeners();
   }
 
-  void updateTeam(List updatedTeams) {
+  void updateTeams(List updatedTeams) {
+    pagingController.refresh();
     notifyListeners();
   }
 
@@ -91,24 +107,28 @@ class Teammate extends ChangeNotifier {
     notifyListeners();
   }
 
-  void memberJoined(Team team) {
-    notifyListeners();
-  }
-
-  void teamCreated(Team team) {
+  void joinedTeam(Team team) {
     pagingController.refresh();
     notifyListeners();
   }
 
-  void updatedDrawing(Team team) {
+  void createdTeam(Team team) {
+    pagingController.refresh();
     notifyListeners();
   }
 
-  void deletedDrawing(Team team) {
+  void updatedTeam(Team team) {
+    pagingController.refresh();
     notifyListeners();
   }
 
-  void leftDrawing(Team team) {
+  void deletedTeam(Team team) {
+    pagingController.refresh();
+    notifyListeners();
+  }
+
+  void leftTeam(Team team) {
+    pagingController.refresh();
     notifyListeners();
   }
 
@@ -116,22 +136,23 @@ class Teammate extends ChangeNotifier {
     Team team = data as Team;
     switch (eventType) {
       case 'joined':
-        memberJoined(team);
+        joinedTeam(team);
         break;
       case 'created':
-        teamCreated(team);
+        createdTeam(team);
         break;
       case 'updated':
-        updatedDrawing(team);
+        updateTeam(team);
         break;
       case 'deleted':
-        deletedDrawing(team);
+        deletedTeam(team);
         break;
       case 'left':
-        leftDrawing(team);
+        leftTeam(team);
         break;
       default:
         print("Invalid Team socket event");
     }
+
   }
 }

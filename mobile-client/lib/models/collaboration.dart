@@ -6,7 +6,7 @@ class Collaboration {
   List actions = [];
   Map actionsMap = <String, ShapeAction>{};
   Color backgroundColor;
-  int memberCount, maxMemberCount, width, height;
+  int memberCount, maxMemberCount, activeMemberCount, width, height;
   List<Member> members = [];
 
   Collaboration({
@@ -16,6 +16,7 @@ class Collaboration {
     this.backgroundColor = Colors.white,
     this.memberCount = 0,
     this.maxMemberCount = 0,
+    this.activeMemberCount = 0,
     this.width = 1280,
     this.height = 750,
     required this.members,

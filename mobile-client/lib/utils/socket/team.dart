@@ -15,7 +15,7 @@ class TeamSocket {
 
   data(Team team) {
      Map data = {
-      'id': team.id,
+      'teamId': team.id,
       'teamName': team.name,
       'bio': team.bio,
       'maxMemberCount': team.maxMemberCount,
@@ -37,18 +37,18 @@ class TeamSocket {
     socket.emit('teams:create', data(team));
   }
 
-  updateTeams(Team team) {
+  updateTeam(Team team) {
     print('Emit Update Collab');
     socket.emit('teams:update', data(team));
   }
 
-  deleteTeams(Team team) {
+  deleteTeam(Team team) {
     print('Emit Delete Team');
     socket.emit('teams:delete', data(team));
   }
 
-  leaveTeams(Team team) {
-    print('Emit Leave Collab');
+  leaveTeam(Team team) {
+    print('Emit Leave Team');
     socket.emit('teams:leave', data(team));
   }
 
@@ -247,7 +247,5 @@ class TeamSocket {
     deleted(callbackChannel);
 
     updated(callbackChannel);
-
-    print("initialized Teams socket events");
   }
 }

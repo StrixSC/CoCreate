@@ -133,7 +133,6 @@ class _LoginState extends State<Login> {
                             shrinkWrap: true,
                             padding: EdgeInsets.only(left: 100.0, right: 100.0),
                             children: <Widget>[
-                              SizedBox(height: 48.0),
                               errorMessage.isNotEmpty
                                   ? Padding(
                                       padding: const EdgeInsets.fromLTRB(

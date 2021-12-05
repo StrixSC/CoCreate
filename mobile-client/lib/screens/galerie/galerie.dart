@@ -179,11 +179,11 @@ class GalerieState extends State<Galerie>
           Collaboration collaboration = Collaboration(
             collaborationId: drawing["collaboration_id"],
             memberCount: drawing["collaborator_count"],
+            activeMemberCount: drawing["active_collaborator_count"],
             members: [],
             actionsMap: {},
             actions: [],
           );
-          // TODO: add updated_at
           drawings.add(Drawing(
             drawingId: drawing['drawing_id'],
             authorUsername: drawing["author_username"],
@@ -191,6 +191,8 @@ class GalerieState extends State<Galerie>
             title: drawing['title'],
             createdAt: DateFormat('yyyy-MM-dd kk:mm')
                 .format(DateTime.parse(drawing['created_at'])),
+            updatedAt: DateFormat('yyyy-MM-dd kk:mm')
+                .format(DateTime.parse(drawing['updated_at'])),
             collaboration: collaboration,
             type: drawing['type'],
             // thumbnailUrl: drawing['thumbnail_url']
@@ -495,17 +497,13 @@ class GalerieState extends State<Galerie>
                                             'Mot de passe',
                                             'Veuillez entrez choisir un mot de passe',
                                             passController)
-                                        : formField(
-                                            'Nombre de membres maximum',
-                                            'Veuillez entrez choisir un auteur',
-                                            memberController),
+                                        : SizedBox.shrink()
                                   ]))
                             ]))),
               actions: <Widget>[
                 Padding(
                     padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
                     child: Container(
-                        height: 50,
                         child: ElevatedButton(
                           onPressed: () {
                             _formKey.currentState!.save();
@@ -831,7 +829,7 @@ class _Drawing extends StatelessWidget {
                           ? Padding(
                               padding: EdgeInsets.fromLTRB(25.0, 0, 0, 20.0),
                               child: Container(
-                                  height: 50,
+
                                   child: ElevatedButton(
                                     style: ButtonStyle(
                                         backgroundColor:
@@ -851,7 +849,7 @@ class _Drawing extends StatelessWidget {
                           : Padding(
                               padding: EdgeInsets.fromLTRB(25.0, 0, 0, 20.0),
                               child: Container(
-                                  height: 50,
+
                                   child: ElevatedButton(
                                     style: ButtonStyle(
                                         backgroundColor:
@@ -865,6 +863,9 @@ class _Drawing extends StatelessWidget {
                                           'Il sera possible de le rejoindre plus tard si il est pas supprimer 😄',
                                           'Aller joindre des dessins!',
                                           context);
+                                      context
+                                          .read<Collaborator>()
+                                          .refreshPages();
                                     },
                                     child: const Text('Quitter'),
                                   ))),
@@ -872,7 +873,7 @@ class _Drawing extends StatelessWidget {
                           ? Padding(
                               padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
                               child: Container(
-                                  height: 50,
+
                                   child: ElevatedButton(
                                     onPressed: () {
                                       context
@@ -913,7 +914,7 @@ class _Drawing extends StatelessWidget {
                           : Padding(
                               padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
                               child: Container(
-                                  height: 50,
+
                                   child: ElevatedButton(
                                     onPressed: () {
                                       Navigator.pop(context, 'Se connecter');
@@ -970,7 +971,6 @@ class _Drawing extends StatelessWidget {
             .deleteCollaboration(drawing.collaboration.collaborationId)
         : collab.collaborationSocket
             .leaveCollaboration(drawing.collaboration.collaborationId);
-    collab.refreshPages();
   }
 
   @override
@@ -1060,7 +1060,7 @@ class _Drawing extends StatelessWidget {
                             const SizedBox(height: 10),
                             Text(
                                 "Collaborateurs actifs: " +
-                                    drawing.collaboration.memberCount
+                                    drawing.collaboration.activeMemberCount
                                         .toString(),
                                 style: TextStyle(fontSize: 20.0)),
                           ]))))));

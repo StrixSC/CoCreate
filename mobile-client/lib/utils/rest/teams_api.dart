@@ -1,3 +1,4 @@
+import 'package:Colorimage/models/team.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
 import 'package:http_interceptor/http/intercepted_http.dart';
@@ -46,8 +47,8 @@ class TeamsAPI {
     return response;
   }
 
-  Future<Response> fetchTeamById(String id) async {
-    var url = Uri.http(_url!, '/api/teams/$id');
+  Future<Response> fetchTeamById(Team team) async {
+    var url = Uri.http(_url!, '/api/teams/${team.id}');
     var response = await http.get(url);
     return response;
   }

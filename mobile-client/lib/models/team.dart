@@ -1,9 +1,12 @@
+import 'drawing.dart';
+
 class Team {
   String id, name, bio, type, mascot, thumbnailUrl, createdAt;
   String authorUsername, authorAvatarUrl;
   int memberCount, maxMemberCount, onlineMemberCount;
   String? password;
   List<TeamMember> members = [];
+  List<Drawing> drawings = [];
 
   Map types =
     { 'Protected': 'Protégé',
@@ -34,14 +37,17 @@ class TeamMember {
   String? avatarUrl = "";
   String? type = "";
   String? drawingId = "";
+  String? status = "";
+  String? joinedOn = "";
   bool? isActive = false;
-
 
   TeamMember({
     this.username,
     this.userId,
     this.avatarUrl,
+    this.status,
     this.type,
+    this.joinedOn,
     this.isActive,
     this.drawingId = "",
   });

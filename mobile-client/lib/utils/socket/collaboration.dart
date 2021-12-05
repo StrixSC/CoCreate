@@ -32,7 +32,6 @@ class CollaborationSocket {
 
   // Emits
   joinCollaboration(String collaborationId, String type, String? password) {
-    print("Join Collab: $collaborationId");
     if (type == "Protected") {
       socket.emit('collaboration:join', {
         'userId': user.uid,
@@ -301,7 +300,5 @@ class CollaborationSocket {
     left(callbackChannel);
 
     disconnected(callbackChannel);
-
-    print("initialized Collaboration socket events");
   }
 }
