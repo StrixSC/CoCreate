@@ -2,7 +2,6 @@ import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/models/tool.dart';
 import 'package:Colorimage/providers/collaborator.dart';
-import 'package:Colorimage/providers/messenger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -15,7 +14,9 @@ class Toolbar extends StatefulWidget {
   Function unselectBeforeLeave;
 
   Toolbar(this.changeTool, this.changeColor, this.changeWidth,
-      this.unselectBeforeLeave);
+      this.unselectBeforeLeave,
+      {Key? key})
+      : super(key: key);
 
   @override
   State<Toolbar> createState() => _ToolbarState(this.changeTool,
@@ -50,34 +51,44 @@ class _ToolbarState extends State<Toolbar> {
       this.unselectBeforeLeave);
 
   void selectBodyColor(Color color) {
-    currentBodyColor = color;
-    changeColor(color, "Body");
+    setState(() {
+      currentBodyColor = color;
+      changeColor(color, "Body");
+    });
   }
 
   void selectBorderColor(Color color) {
-    currentBorderColor = color;
-    changeColor(color, "Border");
+    setState(() {
+      currentBorderColor = color;
+      changeColor(color, "Border");
+    });
   }
 
   void selectBackgroundColor(Color color) {
-    currentBackgroundColor = color;
-    changeColor(color, "Background");
+    setState(() {
+      currentBackgroundColor = color;
+      changeColor(color, "Background");
+    });
   }
 
   void selectTool(String type, String fillType) {
-    currentTool = type;
-    changeTool(currentTool, fillType);
+    setState(() {
+      currentTool = type;
+      changeTool(currentTool, fillType);
+    });
   }
 
   void selectWidth(double width) {
-    currentWidth = width;
-    changeWidth(currentWidth);
+    setState(() {
+      currentWidth = width;
+      changeWidth(currentWidth);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body:Container(
-      child: ListView.builder(
+    return Scaffold(
+      body: ListView.builder(
         itemCount: tools.length,
         itemBuilder: (context, index) => index < 5
             ? Padding(
@@ -291,9 +302,13 @@ class _ToolbarState extends State<Toolbar> {
       child: IconButton(
         onPressed: () {
           unselectBeforeLeave();
-            String collaborationId = context.read<Collaborator>().getCollaborationId();
-            context.read<Collaborator>().collaborationSocket.disconnectCollaboration(collaborationId);
-            context.read<Collaborator>().currentDrawingId = '';
+          String collaborationId =
+              context.read<Collaborator>().getCollaborationId();
+          context
+              .read<Collaborator>()
+              .collaborationSocket
+              .disconnectCollaboration(collaborationId);
+          context.read<Collaborator>().currentDrawingId = '';
           Navigator.pop(context);
           Navigator.pop(context);
         },

@@ -200,18 +200,18 @@ class _TeamsScreenState extends State<TeamsScreen> {
             centerTitle: true,
             automaticallyImplyLeading: false,
             leading: // Ensure Scaffold is in context
-            IconButton(
-                icon: const Icon(CupertinoIcons.plus,
-                    color: Colors.white, size: 34),
-                onPressed: () {
-                  titreController.clear();
-                  passController.clear();
-                  memberController.clear();
-                  bioController.clear();
-                  dropDownControllerTypeCreate = 'Public';
-                  dropDownControllerMascot = 'Choisir pour moi!';
-                  createTeamsDialog();
-                }),
+                IconButton(
+                    icon: const Icon(CupertinoIcons.plus,
+                        color: Colors.white, size: 34),
+                    onPressed: () {
+                      titreController.clear();
+                      passController.clear();
+                      memberController.clear();
+                      bioController.clear();
+                      dropDownControllerTypeCreate = 'Public';
+                      dropDownControllerMascot = 'Choisir pour moi!';
+                      createTeamsDialog();
+                    }),
             title: const Text("Équipe de collaborations"),
             actions: <Widget>[
               IconButton(
@@ -670,6 +670,7 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
             members: [],
             actionsMap: {},
             actions: [],
+            selectedItems: {},
           );
           drawings.add(Drawing(
               drawingId: drawing['drawingId'],
@@ -699,16 +700,17 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return context
-        .read<Teammate>().isMember(team) ? GestureDetector(
-        onTap: () {
-          setCurrentControllerValues();
-          _fetchTeamById(team);
-          passController.clear();
-          // teamInfoDialog(context);
-          _onLoading(context);
-        },
-        child: gridTile(context)) : Container(child: gridTile(context));
+    return context.read<Teammate>().isMember(team)
+        ? GestureDetector(
+            onTap: () {
+              setCurrentControllerValues();
+              _fetchTeamById(team);
+              passController.clear();
+              // teamInfoDialog(context);
+              _onLoading(context);
+            },
+            child: gridTile(context))
+        : Container(child: gridTile(context));
   }
 
   teamInfoDialog(context) async {
@@ -768,42 +770,55 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
                           _tabController.index == 2
-                              ?Container(
-                              padding: EdgeInsets.only(right: 150.0),
-                              child: ElevatedButton(
-                                  style: ButtonStyle(
-                                      backgroundColor:
-                                      MaterialStateProperty.all(
-                                          Colors.red)),
-                                  onPressed: () {
-                                    AwesomeDialog(
-                                      context: navigatorKey.currentContext as BuildContext,
-                                      width: 800,
-                                      dismissOnTouchOutside: false,
-                                      dialogType: DialogType.WARNING,
-                                      animType: AnimType.BOTTOMSLIDE,
-                                      title: 'Attention!',
-                                      desc: 'Êtes-vous certain de vouloir ${team.authorUsername == context
-                                          .read<Teammate>().auth!.user!.displayName ? 'supprimer': 'quitter'} ce équipe?.',
-                                      btnCancelOnPress: () {
-                                        Navigator.pop(context);
+                              ? Container(
+                                  padding: EdgeInsets.only(right: 150.0),
+                                  child: ElevatedButton(
+                                      style: ButtonStyle(
+                                          backgroundColor:
+                                              MaterialStateProperty.all(
+                                                  Colors.red)),
+                                      onPressed: () {
+                                        AwesomeDialog(
+                                          context: navigatorKey.currentContext
+                                              as BuildContext,
+                                          width: 800,
+                                          dismissOnTouchOutside: false,
+                                          dialogType: DialogType.WARNING,
+                                          animType: AnimType.BOTTOMSLIDE,
+                                          title: 'Attention!',
+                                          desc:
+                                              'Êtes-vous certain de vouloir ${team.authorUsername == context.read<Teammate>().auth!.user!.displayName ? 'supprimer' : 'quitter'} ce équipe?.',
+                                          btnCancelOnPress: () {
+                                            Navigator.pop(context);
+                                          },
+                                          btnOkOnPress: () {
+                                            Navigator.pop(context);
+                                            Navigator.pop(context);
+                                            team.authorUsername ==
+                                                    context
+                                                        .read<Teammate>()
+                                                        .auth!
+                                                        .user!
+                                                        .displayName
+                                                ? context
+                                                    .read<Teammate>()
+                                                    .teamSocket
+                                                    .deleteTeam(team)
+                                                : context
+                                                    .read<Teammate>()
+                                                    .teamSocket
+                                                    .leaveTeam(team);
+                                          },
+                                        ).show();
                                       },
-                                      btnOkOnPress: () {
-                                        Navigator.pop(context);
-                                        Navigator.pop(context);
-                                        team.authorUsername == context
-                                            .read<Teammate>().auth!.user!.displayName ? context
-                                            .read<Teammate>()
-                                            .teamSocket
-                                            .deleteTeam(team) : context
-                                            .read<Teammate>()
-                                            .teamSocket
-                                            .leaveTeam(team);
-                                      },
-                                    ).show();
-                                  },
-                                  child: team.authorUsername == context
-                                      .read<Teammate>().auth!.user!.displayName ? Text('Supprimer') : Text('Quitter')))
+                                      child: team.authorUsername ==
+                                              context
+                                                  .read<Teammate>()
+                                                  .auth!
+                                                  .user!
+                                                  .displayName
+                                          ? Text('Supprimer')
+                                          : Text('Quitter')))
                               : SizedBox(),
                           _tabController.index == 2
                               ? Container(
@@ -863,11 +878,8 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
                 color: kContentColor,
                 border: Border.all(
                     width: 2.5,
-                    color: context
-                        .read<Teammate>()
-                        .auth!
-                        .user!
-                        .displayName == team.authorUsername
+                    color: context.read<Teammate>().auth!.user!.displayName ==
+                            team.authorUsername
                         ? kPrimaryColor.withOpacity(0.45)
                         : Colors.white.withOpacity(0.15))),
             child: Row(children: <Widget>[
@@ -897,16 +909,21 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
                                   icon: Icon(Icons.arrow_circle_up_outlined),
                                   onPressed: () {
                                     AwesomeDialog(
-                                      context: navigatorKey.currentContext as BuildContext,
+                                      context: navigatorKey.currentContext
+                                          as BuildContext,
                                       width: 800,
                                       dismissOnTouchOutside: false,
                                       dialogType: DialogType.WARNING,
                                       animType: AnimType.BOTTOMSLIDE,
                                       title: 'Attention!',
-                                      desc: 'Êtes-vous certain de vouloir joindre cette équipe?.',
+                                      desc:
+                                          'Êtes-vous certain de vouloir joindre cette équipe?.',
                                       btnCancelOnPress: () {},
                                       btnOkOnPress: () {
-                                     context.read<Teammate>().teamSocket.joinTeam(team);
+                                        context
+                                            .read<Teammate>()
+                                            .teamSocket
+                                            .joinTeam(team);
                                       },
                                     ).show();
                                   },

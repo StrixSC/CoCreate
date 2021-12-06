@@ -60,7 +60,7 @@ class CollaborationSocket {
     String title,
     String type,
     String? password,
-      Color color,
+    Color color,
   ) {
     print('Create Collab');
     String hexColor = '#${color.value.toRadixString(16)}';
@@ -71,7 +71,7 @@ class CollaborationSocket {
       'title': title,
       'type': type,
       'password': password,
-      'bgColor' : hexColor
+      'bgColor': hexColor
     });
   }
 
@@ -144,7 +144,6 @@ class CollaborationSocket {
         members.add(Member(
             username: element["username"], avatarUrl: element["avatarUrl"]));
       }
-      // TODO: Create new Action Map from actions list received to match our Action class
       Collaboration collaboration = Collaboration(
         collaborationId: 'id',
         actions: data["actions"],
@@ -154,9 +153,21 @@ class CollaborationSocket {
         height: data["height"],
         members: members,
         actionsMap: rebuildActionsMap(data["actions"]),
+        //todo: a tester si work
+        selectedItems: rebuildselectedItems(data["actions"]),
       );
       callbackMessage('load', collaboration);
     });
+  }
+
+  Map<String, String> rebuildselectedItems(var actions) {
+    Map<String, String> selectedItems = {};
+    actions.forEach((action) {
+      if(action.isSelected){
+        selectedItems.putIfAbsent(action.actionId, () => action.selectedBy);
+      }
+    });
+    return selectedItems;
   }
 
   Map<String, ShapeAction> rebuildActionsMap(var actions) {
@@ -172,6 +183,8 @@ class CollaborationSocket {
         translateLoad(actionsMap, action);
       } else if (action['actionType'] == "Resize") {
         resizeLoad(actionsMap, action);
+      } else if (action['actionType'] == "Delete") {
+        actionsMap.remove(action['actionId']);
       }
     });
     return actionsMap;
@@ -185,12 +198,10 @@ class CollaborationSocket {
         -action['xTranslation'].toDouble(),
         -action['yTranslation'].toDouble(),
         0);
-    Path scaledPath =
-        shapeAction!.path.transform(matrixTranslation.storage);
+    Path scaledPath = shapeAction!.path.transform(matrixTranslation.storage);
 
     Matrix4 matrixScale = Matrix4.identity();
-    matrixScale.scale(
-        action['xScale'].toDouble(), action['yScale'].toDouble());
+    matrixScale.scale(action['xScale'].toDouble(), action['yScale'].toDouble());
     scaledPath = scaledPath.transform(matrixScale.storage);
 
     // // Translate to match fix corner position
@@ -240,8 +251,8 @@ class CollaborationSocket {
       ..strokeWidth = action['width'].toDouble()
       ..style = PaintingStyle.stroke;
 
-    Rect rect = Rect.fromPoints(
-        Offset(action['x'], action['y']), Offset(action['x2'], action['y2']));
+    Rect rect = Rect.fromPoints(Offset(action['x'], action['y']),
+        Offset(action['x2'].toDouble(), action['y2'].toDouble()));
 
     Path path = Path();
     if (action['shapeType'] == DrawingType.ellipse) {
@@ -262,7 +273,11 @@ class CollaborationSocket {
         ..style = PaintingStyle.fill;
       shapeAction.bodyColor = paintFill;
     }
-
+    shapeAction.shapesOffsets = [
+      Offset(action['x'], action['y']),
+      Offset(action['x2'].toDouble(), action['y2'].toDouble())
+    ];
+    shapeAction.fillType = action['shapeStyle'];
     actionsMap.putIfAbsent(action['actionId'], () => shapeAction);
   }
 
@@ -346,7 +361,8 @@ class CollaborationSocket {
               isActive: false,
             )
           ],
-          actionsMap: {}); //data["maxMemberCount"],);
+          actionsMap: {},
+          selectedItems: {}); //data["maxMemberCount"],);
       Drawing drawing = Drawing(
           drawingId: data['drawingId'],
           thumbnailUrl: data['thumbnailUrl'],

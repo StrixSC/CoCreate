@@ -64,7 +64,8 @@ class GalerieState extends State<Galerie>
   void initState() {
     super.initState();
     context.read<Collaborator>().hasBeenInitialized = true;
-    dropDownValueAuthor = 'Moi (${context.read<Collaborator>().auth!.user!.displayName})';
+    dropDownValueAuthor =
+        'Moi (${context.read<Collaborator>().auth!.user!.displayName})';
     context.read<Collaborator>().pagingControllers = pagingControllers;
     context.read<Collaborator>().navigate = _onLoading;
     _tabController = TabController(length: 2, vsync: this);
@@ -149,8 +150,7 @@ class GalerieState extends State<Galerie>
     Future.delayed(const Duration(seconds: 2), () {
       navigateToDrawing();
       AwesomeDialog(
-        context:
-        navigatorKey.currentContext as BuildContext,
+        context: navigatorKey.currentContext as BuildContext,
         width: 800,
         dismissOnTouchOutside: false,
         dialogType: DialogType.SUCCES,
@@ -195,6 +195,7 @@ class GalerieState extends State<Galerie>
             members: [],
             actionsMap: {},
             actions: [],
+            selectedItems: {},
           );
           drawings.add(Drawing(
             drawingId: drawing['drawing_id'],
@@ -276,17 +277,17 @@ class GalerieState extends State<Galerie>
             centerTitle: true,
             automaticallyImplyLeading: false,
             leading: // Ensure Scaffold is in context
-            IconButton(
-                icon: const Icon(CupertinoIcons.plus,
-                    color: Colors.white, size: 34),
-                onPressed: () {
-                  titreController.clear();
-                  passController.clear();
-                  memberController.clear();
-                  color = Colors.white;
-                  context.read<Teammate>().fetchMyTeams();
-                  createDessinDialog();
-                }),
+                IconButton(
+                    icon: const Icon(CupertinoIcons.plus,
+                        color: Colors.white, size: 34),
+                    onPressed: () {
+                      titreController.clear();
+                      passController.clear();
+                      memberController.clear();
+                      color = Colors.white;
+                      context.read<Teammate>().fetchMyTeams();
+                      createDessinDialog();
+                    }),
             title: const Text("Galerie de dessins"),
             actions: <Widget>[
               IconButton(
@@ -471,7 +472,9 @@ class GalerieState extends State<Galerie>
                                             SizedBox(
                                                 width: 280,
                                                 child: dropDown(
-                                                    context.read<Teammate>().myTeams,
+                                                    context
+                                                        .read<Teammate>()
+                                                        .myTeams,
                                                     dropDownValueAuthor,
                                                     'Choisir un auteur',
                                                     'Auteur')),
@@ -481,16 +484,18 @@ class GalerieState extends State<Galerie>
                                           ])),
                                   const SizedBox(height: 48.0),
                                   formField(
-                                          'Titre',
-                                          'Veuillez entrez le titre du dessin',
-                                          titreController),
+                                      'Titre',
+                                      'Veuillez entrez le titre du dessin',
+                                      titreController),
                                   dropDownValueTypeCreate == 'Protégé'
-                                      ? const SizedBox(height: 48.0) : const SizedBox.shrink(),
-                                  dropDownValueTypeCreate == 'Protégé'? formField(
-                                      'Mot de passe',
-                                      'Veuillez entrez choisir un mot de passe',
-                                      passController) :
-                                  const SizedBox.shrink(),
+                                      ? const SizedBox(height: 48.0)
+                                      : const SizedBox.shrink(),
+                                  dropDownValueTypeCreate == 'Protégé'
+                                      ? formField(
+                                          'Mot de passe',
+                                          'Veuillez entrez choisir un mot de passe',
+                                          passController)
+                                      : const SizedBox.shrink(),
                                 ]))
                           ]))),
               actions: <Widget>[
@@ -505,11 +510,13 @@ class GalerieState extends State<Galerie>
                               .read<Collaborator>()
                               .convertToEnglish(dropDownValueTypeCreate);
                           var authorId;
-                          dropDownValueAuthor == 'Moi (${context
-                              .read<Collaborator>().auth!.user!.displayName})'
+                          dropDownValueAuthor ==
+                                  'Moi (${context.read<Collaborator>().auth!.user!.displayName})'
                               ? authorId =
                                   context.read<Collaborator>().auth!.user!.uid
-                              : authorId = context.read<Teammate>().myTeamsMap[dropDownValueAuthor];
+                              : authorId = context
+                                  .read<Teammate>()
+                                  .myTeamsMap[dropDownValueAuthor];
                           var title = titreController.value.text;
                           var password = passController.value.text;
                           if (type == 'Protected') {
@@ -723,6 +730,7 @@ class _Drawing extends StatefulWidget {
 
 class _DrawingState extends State<_Drawing> {
   _DrawingState(this.drawing);
+
   String dropDownValueType = 'Public';
   final Drawing drawing;
 
@@ -1155,7 +1163,8 @@ class _DrawingState extends State<_Drawing> {
                                         ),
                                       ])),
                                   dropDownValueType == 'Protégé'
-                                      ? const SizedBox(height: 48.0) : const SizedBox.shrink(),
+                                      ? const SizedBox(height: 48.0)
+                                      : const SizedBox.shrink(),
                                   dropDownValueType == 'Protégé'
                                       ? SizedBox(
                                           width: 900.0,

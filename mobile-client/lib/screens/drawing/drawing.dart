@@ -33,6 +33,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   Offset endPoint = const Offset(-1, -1);
   String drawType = DrawingType.freedraw;
   String? shapeID;
+  String? selectionActionId;
   String? lastShapeID;
   Map actionsMap;
   Map selectedItems = <String, String>{};
@@ -49,6 +50,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   bool floatButtonPressed = false;
   double translateLimit = 0;
   Offset firstPoint = Offset.zero;
+  bool hasOngoingMovement = false;
 
   List<ShapeAction> undoList = [];
   List<ShapeAction> redoList = [];
@@ -86,7 +88,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
               child: GestureDetector(
                 child: CustomPaint(
                   painter: Painter(drawType, actionsMap, selectedItems, _user,
-                      setSelectedBounds),
+                      setSelectedBounds, currentWidth),
                   size: Size(
                     MediaQuery.of(context).size.width,
                     MediaQuery.of(context).size.height,
@@ -308,12 +310,14 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   visible: selectedItems.containsValue(_user.uid),
                   child: FloatingActionButton(
                       onPressed: () {
-                        setState(() {
-                          drawType = "rotate";
-                          floatButtonPressed = true;
-                        });
+                        if (mounted) {
+                          setState(() {
+                            drawType = "rotate";
+                            floatButtonPressed = true;
+                          });
+                        }
                       },
-                      //todo: make color fit with toolbar by unslect them
+                      //todo: make color fit with toolbar: need provider
                       child: const Icon(Icons.rotate_left),
                       backgroundColor:
                           (floatButtonPressed) ? Colors.green : Colors.blue)),
@@ -327,9 +331,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
                 visible: undoList.isNotEmpty,
                 child: FloatingActionButton(
                     onPressed: () {
-                      setState(() {
-                        undoActionChooser();
-                      });
+                      if (mounted) {
+                        setState(() {
+                          undoActionChooser();
+                        });
+                      }
                     },
                     child: const Icon(Icons.undo)),
               ),
@@ -354,16 +360,16 @@ class _DrawingScreenState extends State<DrawingScreen> {
             child: Visibility(
               visible: selectedItems.isNotEmpty,
               child: FloatingActionButton(
-                onPressed: () => setState(() {
-                  // TODO: add this in undo
-                  var selectedItem = selectedItems.entries.firstWhere(
-                      (selectedItem) => selectedItem.value == _user.uid);
-                  var actionId = selectedItem.key;
-                  ShapeAction shapeAction = actionsMap[actionId].copy();
-                  shapeAction.isDeleted = true;
-                  undoList.add(shapeAction);
-                  socketDeleteEmission(actionId, false);
-                }),
+                onPressed: () {
+                  if (mounted) {
+                    setState(() {
+                      var selectedItem = selectedItems.entries.firstWhere(
+                          (selectedItem) => selectedItem.value == _user.uid);
+                      var actionId = selectedItem.key;
+                      socketDeleteEmission(actionId, false);
+                    });
+                  }
+                },
                 tooltip: 'Supression',
                 child: const Icon(CupertinoIcons.archivebox_fill),
                 backgroundColor: kErrorColor,
@@ -375,8 +381,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
     );
   }
 
-  //todo: doit undo un delete avec la bonne shape
-  //todo: doit retirer une sélection si jamais un selected item est delete
   void undoActionChooser() {
     ShapeAction undoAction = undoList.removeLast();
     redoList.add(undoAction);
@@ -390,16 +394,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
     } else if (undoAction.delta != Offset.zero) {
       socketResizeEmission(DrawingState.move, undoAction.actionId, undoAction,
           Offset.zero, true, false);
-    } else if (undoAction.isDeleted) {
-      if (undoAction.actionType == "Freedraw") {
-        socketFreedrawEmission(
-            undoAction, DrawingState.up, true, undoAction.actionId);
-      }
-      if (undoAction.actionType == "Rectangle") {
-        socketShapeEmission(undoAction, DrawingType.rectangle, DrawingState.up,
-            undoAction.actionId, true);
-      }
     } else {
+      socketSelectionEmission(undoAction.actionId, false);
       socketDeleteEmission(undoAction.actionId, true);
     }
   }
@@ -416,15 +412,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
     } else if (redoAction.delta != Offset.zero) {
       socketResizeEmission(DrawingState.move, redoAction.actionId, redoAction,
           Offset.zero, false, true);
-      // todo: ajouter pour les shapes aussi
-    } else if (redoAction.isDeleted) {
-      socketDeleteEmission(redoAction.actionId, true);
-    } else if (redoAction.actionType == "Freedraw") {
-      socketFreedrawEmission(
-          redoAction, DrawingState.up, true, redoAction.actionId);
-    } else if (redoAction.actionType == "") {
-      // socketShapeEmission(
-      //     redoAction,, DrawingState.up, true, redoAction.actionId);
     }
   }
 
@@ -459,19 +446,39 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void changeColor(Color color, String type) {
     switch (type) {
       case "Body":
-        setState(() => currentBodyColor = color);
+        if (mounted) {
+          setState(() {
+            currentBodyColor = color;
+            floatButtonPressed = false;
+          });
+        }
         break;
       case "Border":
-        setState(() => currentBorderColor = color);
+        if (mounted) {
+          setState(() {
+            currentBorderColor = color;
+            floatButtonPressed = false;
+          });
+        }
         break;
       case "Background":
-        setState(() => currentBackgroundColor = color);
+        if (mounted) {
+          setState(() {
+            currentBackgroundColor = color;
+            floatButtonPressed = false;
+          });
+        }
         break;
     }
   }
 
   void changeWidth(double width) {
-    setState(() => currentWidth = width);
+    if (mounted) {
+      setState(() {
+        currentWidth = width;
+        floatButtonPressed = false;
+      });
+    }
   }
 
   void unselectBeforeLeave() {
@@ -483,26 +490,30 @@ class _DrawingScreenState extends State<DrawingScreen> {
   }
 
   void changeTool(String type, String fillType) {
-    setState(() {
-      if (drawType == DrawingType.rectangle ||
-          drawType == DrawingType.ellipse) {
-        currentFillType = fillType;
-      }
-      drawType = type;
-    });
+    if (mounted) {
+      setState(() {
+        if (type == DrawingType.rectangle || type == DrawingType.ellipse) {
+          currentFillType = fillType;
+        }
+        drawType = type;
+        floatButtonPressed = false;
+      });
+    }
   }
 
   void socketSelectionReception() {
     _socket.on('selection:received', (data) {
-      setState(() {
-        if (data['isSelected']) {
-          selectedItems.putIfAbsent(
-              data['actionId'], () => data['selectedBy'] as String);
-          allowMove = true;
-        } else {
-          selectedItems.remove(data['actionId']);
-        }
-      });
+      if (mounted) {
+        setState(() {
+          if (data['isSelected']) {
+            selectedItems.putIfAbsent(
+                data['actionId'], () => data['selectedBy'] as String);
+            allowMove = true;
+          } else {
+            selectedItems.remove(data['actionId']);
+          }
+        });
+      }
     });
   }
 
@@ -514,23 +525,25 @@ class _DrawingScreenState extends State<DrawingScreen> {
       redoList.removeWhere((shapeAction) =>
           shapeAction.actionId == data['actionId'] &&
           data['userId'] != _user.uid);
-      setState(() {
-        if (data["state"] != DrawingState.up) {
-          actionsMap.forEach((actionId, shapeAction) {
-            if (actionId == data['actionId'] ||
-                actionId == data['selectedActionId']) {
-              Matrix4 matrix4 = Matrix4.translationValues(
-                  data['xTranslation'].toDouble(),
-                  data['yTranslation'].toDouble(),
-                  0);
-              shapeAction.path = shapeAction.path.transform(matrix4.storage);
+      if (mounted) {
+        setState(() {
+          if (data["state"] != DrawingState.up) {
+            actionsMap.forEach((actionId, shapeAction) {
+              if (actionId == data['actionId'] ||
+                  actionId == data['selectedActionId']) {
+                Matrix4 matrix4 = Matrix4.translationValues(
+                    data['xTranslation'].toDouble(),
+                    data['yTranslation'].toDouble(),
+                    0);
+                shapeAction.path = shapeAction.path.transform(matrix4.storage);
 
-              actionsMap.update(
-                  actionId, (value) => shapeAction as ShapeAction);
-            }
-          });
-        }
-      });
+                actionsMap.update(
+                    actionId, (value) => shapeAction as ShapeAction);
+              }
+            });
+          }
+        });
+      }
     });
   }
 
@@ -542,27 +555,30 @@ class _DrawingScreenState extends State<DrawingScreen> {
       redoList.removeWhere((shapeAction) =>
           shapeAction.actionId == data['actionId'] &&
           data['userId'] != _user.uid);
-      setState(() {
-        if (data['state'] == DrawingState.move) {
-          Path actionPath = actionsMap[data['selectedActionId']].path;
-          Offset center = actionPath.getBounds().center;
+      if (mounted) {
+        setState(() {
+          if (data['state'] == DrawingState.move) {
+            Path actionPath = actionsMap[data['selectedActionId']].path;
+            Offset center = actionPath.getBounds().center;
 
-          //transform path with matrix of rotation
-          Matrix4 matriceRotation = Matrix4.rotationZ(data['angle'].toDouble());
-          actionPath = actionPath.transform(matriceRotation.storage);
+            //transform path with matrix of rotation
+            Matrix4 matriceRotation =
+                Matrix4.rotationZ(data['angle'].toDouble());
+            actionPath = actionPath.transform(matriceRotation.storage);
 
-          //transform path with matrix of translation
-          Offset newCenter = actionPath.getBounds().center;
-          Matrix4 matriceTranslation = Matrix4.translationValues(
-              (center - newCenter).dx, (center - newCenter).dy, 0);
-          actionPath = actionPath.transform(matriceTranslation.storage);
+            //transform path with matrix of translation
+            Offset newCenter = actionPath.getBounds().center;
+            Matrix4 matriceTranslation = Matrix4.translationValues(
+                (center - newCenter).dx, (center - newCenter).dy, 0);
+            actionPath = actionPath.transform(matriceTranslation.storage);
 
-          //update map
-          ShapeAction shapeAction = actionsMap[data['selectedActionId']];
-          shapeAction.path = actionPath;
-          actionsMap.update(data['selectedActionId'], (value) => shapeAction);
-        }
-      });
+            //update map
+            ShapeAction shapeAction = actionsMap[data['selectedActionId']];
+            shapeAction.path = actionPath;
+            actionsMap.update(data['selectedActionId'], (value) => shapeAction);
+          }
+        });
+      }
     });
   }
 
@@ -580,7 +596,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
     return angleVariation;
   }
 
-  //todo: add delete in reload
   void socketResizeReception() {
     _socket.on('resize:received', (data) {
       undoList.removeWhere((shapeAction) =>
@@ -589,51 +604,53 @@ class _DrawingScreenState extends State<DrawingScreen> {
       redoList.removeWhere((shapeAction) =>
           shapeAction.actionId == data['actionId'] &&
           data['userId'] != _user.uid);
-      setState(() {
-        if (data['state'] == DrawingState.down) {
-          actionsMap[data['actionId']].oldShape =
-              actionsMap[data['actionId']].path;
-        } else if (data['state'] == DrawingState.move) {
-          Path actionPath = Path();
-          if (data['isUndoRedo']) {
-            actionPath = actionsMap[data['actionId']].path;
-          } else {
-            actionPath = actionsMap[data['actionId']].oldShape;
-          }
+      if (mounted) {
+        setState(() {
+          if (data['state'] == DrawingState.down) {
+            actionsMap[data['actionId']].oldShape =
+                actionsMap[data['actionId']].path;
+          } else if (data['state'] == DrawingState.move) {
+            Path actionPath = Path();
+            if (data['isUndoRedo']) {
+              actionPath = actionsMap[data['actionId']].path;
+            } else {
+              actionPath = actionsMap[data['actionId']].oldShape;
+            }
 
-          Matrix4 matrixTranslation;
-          matrixTranslation = Matrix4.translationValues(
-              -data['xTranslation'].toDouble(),
-              -data['yTranslation'].toDouble(),
-              0);
-          Path scaledPath = actionPath.transform(matrixTranslation.storage);
+            Matrix4 matrixTranslation;
+            matrixTranslation = Matrix4.translationValues(
+                -data['xTranslation'].toDouble(),
+                -data['yTranslation'].toDouble(),
+                0);
+            Path scaledPath = actionPath.transform(matrixTranslation.storage);
 
-          Matrix4 matrixScale = Matrix4.identity();
-          matrixScale.scale(
-              data['xScale'].toDouble(), data['yScale'].toDouble());
-          scaledPath = scaledPath.transform(matrixScale.storage);
+            Matrix4 matrixScale = Matrix4.identity();
+            matrixScale.scale(
+                data['xScale'].toDouble(), data['yScale'].toDouble());
+            scaledPath = scaledPath.transform(matrixScale.storage);
 
-          // // Translate to match fix corner position
-          Matrix4 matrixTranslation2;
-          matrixTranslation2 = Matrix4.translationValues(
-              data['xTranslation'].toDouble(),
-              data['yTranslation'].toDouble(),
-              0);
-          scaledPath = scaledPath.transform(matrixTranslation2.storage);
+            // // Translate to match fix corner position
+            Matrix4 matrixTranslation2;
+            matrixTranslation2 = Matrix4.translationValues(
+                data['xTranslation'].toDouble(),
+                data['yTranslation'].toDouble(),
+                0);
+            scaledPath = scaledPath.transform(matrixTranslation2.storage);
 
-          // Save the scaled path
-          ShapeAction shapeAction = actionsMap[data['actionId']];
-          shapeAction.path = scaledPath;
-          shapeAction.scale =
-              Offset(data['xScale'].toDouble(), data['yScale'].toDouble());
-          actionsMap.update(data['actionId'], (value) => shapeAction);
-          if (data['isUndoRedo']) {
+            // Save the scaled path
+            ShapeAction shapeAction = actionsMap[data['actionId']];
+            shapeAction.path = scaledPath;
+            shapeAction.scale =
+                Offset(data['xScale'].toDouble(), data['yScale'].toDouble());
+            actionsMap.update(data['actionId'], (value) => shapeAction);
+            if (data['isUndoRedo']) {
+              actionsMap[data['actionId']].delta = Offset.zero;
+            }
+          } else if (data['state'] == DrawingState.up) {
             actionsMap[data['actionId']].delta = Offset.zero;
           }
-        } else if (data['state'] == DrawingState.up) {
-          actionsMap[data['actionId']].delta = Offset.zero;
-        }
-      });
+        });
+      }
     });
   }
 
@@ -745,7 +762,11 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   ..style = PaintingStyle.fill;
                 shapeAction.bodyColor = paintFill;
               }
-
+              shapeAction.shapesOffsets = [
+                Offset(data['x'], data['y']),
+                Offset(data['x2'].toDouble(), data['y2'].toDouble())
+              ];
+              shapeAction.fillType = data['shapeStyle'];
               actionsMap.putIfAbsent(data['actionId'], () => shapeAction);
             }
           }
@@ -805,7 +826,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
               }
             }
             if (data['isUndoRedo']) {
-              Path path = Path();
+              Path path = redoList.last.path;
               List<Offset> realOffsets = [];
               for (var offset in (data['offsets'])) {
                 realOffsets.add(Offset(offset.values.first.toDouble(),
@@ -841,12 +862,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
   void socketDeleteReception() {
     _socket.on('delete:received', (data) {
-      undoList.removeWhere((shapeAction) =>
-          shapeAction.actionId == data['actionId'] &&
-          data['userId'] != _user.uid);
-      redoList.removeWhere((shapeAction) =>
-          shapeAction.actionId == data['actionId'] &&
-          data['userId'] != _user.uid);
+      undoList.removeWhere(
+          (shapeAction) => shapeAction.actionId == data['actionId']);
+      redoList.removeWhere(
+          (shapeAction) => shapeAction.actionId == data['actionId']);
       if (mounted) {
         setState(() {
           actionsMap.remove(data["selectedActionId"]);
@@ -890,13 +909,18 @@ class _DrawingScreenState extends State<DrawingScreen> {
   }
 
   void socketTranslationEmission(String selectItem, double xTranslation,
-      double yTranslation, String drawingState, bool isUndo) {
-    if (!isUndo) {
+      double yTranslation, String drawingState, bool isUndoRedo) {
+    if (!isUndoRedo) {
       actionsMap[selectItem].translate += Offset(xTranslation, yTranslation);
     }
-    //todo: change selectedActionId with it's own ID
+
+    if (!hasOngoingMovement || isUndoRedo) {
+      selectionActionId = const Uuid().v1();
+      hasOngoingMovement = true;
+    }
+
     _socket.emit("translation:emit", {
-      'actionId': selectItem,
+      'actionId': selectionActionId,
       'selectedActionId': selectItem,
       'username': _user.displayName,
       'userId': _user.uid,
@@ -905,14 +929,17 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'actionType': "Translate",
       'xTranslation': xTranslation,
       'yTranslation': yTranslation,
-      'isUndoRedo': isUndo
+      'isUndoRedo': isUndoRedo
     });
+
+    if (drawingState == DrawingState.up || isUndoRedo) {
+      hasOngoingMovement = false;
+    }
   }
 
-  //todo: adjust method with undoredo
   void socketDeleteEmission(String actionId, bool isUndoRedo) {
     _socket.emit('delete:emit', {
-      'actionId': actionId,
+      'actionId': const Uuid().v1(),
       'selectedActionId': actionId,
       'username': _user.displayName,
       'userId': _user.uid,
@@ -922,27 +949,33 @@ class _DrawingScreenState extends State<DrawingScreen> {
     });
   }
 
-  //todo: adjust method with undoredo and adjust selectedActionId for them all
   void socketRotationEmission(
-      var details, String drawingState, String actionId, bool isUndo) {
+      var details, String drawingState, String actionId, bool isUndoRedo) {
+    if (!hasOngoingMovement || isUndoRedo) {
+      selectionActionId = const Uuid().v1();
+      hasOngoingMovement = true;
+    }
+
     _socket.emit('rotation:emit', {
-      'actionId': actionId,
+      'actionId': selectionActionId,
       'selectedActionId': actionId,
       'actionType': "Rotate",
       'state': drawingState,
-      'angle': (isUndo || DrawingState.up == drawingState)
+      'angle': (isUndoRedo || DrawingState.up == drawingState)
           ? details
           : calculateAngleVariation(actionId,
               Offset(details.localPosition.dx, details.localPosition.dy)),
       'username': _user.displayName,
       'userId': _user.uid,
       'collaborationId': _collaborationId,
-      'isUndoRedo': false,
+      'isUndoRedo': isUndoRedo,
     });
+
+    if (drawingState == DrawingState.up || isUndoRedo) {
+      hasOngoingMovement = false;
+    }
   }
 
-  //todo: adjust method with undoredo
-  //todo: make bounding fit with the width
   void socketResizeEmission(String drawingState, String actionId,
       var currentPosition, Offset previousPosition, bool isUndo, bool isRedo) {
     Bounds bounds = Bounds();
@@ -967,8 +1000,13 @@ class _DrawingScreenState extends State<DrawingScreen> {
       bounds.yTranslation = currentPosition.scaledTranslation.dy;
     }
 
+    if (!hasOngoingMovement || isUndo || isRedo) {
+      selectionActionId = const Uuid().v1();
+      hasOngoingMovement = true;
+    }
+
     _socket.emit('resize:emit', {
-      'actionId': actionId,
+      'actionId': selectionActionId,
       'actionType': "Resize",
       'selectedActionId': actionId,
       'username': _user.displayName,
@@ -981,9 +1019,12 @@ class _DrawingScreenState extends State<DrawingScreen> {
       'state': drawingState,
       'isUndoRedo': (isUndo || isRedo) ? true : false,
     });
+
+    if (drawingState == DrawingState.up || isUndo || isRedo) {
+      hasOngoingMovement = false;
+    }
   }
 
-  //todo: adjust method with undoredo
   void socketShapeEmission(var details, String drawingType, String drawingState,
       String actionId, bool isRedo) {
     if (actionId != "") {
@@ -1124,13 +1165,14 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
 class Painter extends CustomPainter {
   Painter(this.drawType, this.actionsMap, this.selectedItems, this.user,
-      this.setCornersCallback);
+      this.setCornersCallback, this.currentWidth);
 
   String drawType;
   Map actionsMap;
   Map selectedItems;
   User user;
   Function setCornersCallback;
+  double currentWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1190,7 +1232,7 @@ class Painter extends CustomPainter {
         if (selectedItems.containsKey(actionId) &&
             selectedItems[actionId] == user.uid) {
           //if it's my selection we put borders
-          if (shapeAction.bodyColor != null) {
+          if (shapeAction.fillType != "border") {
             canvas.drawPath(shapeAction.path, shapeAction.bodyColor);
           }
           canvas.drawPath(shapeAction.path, shapeAction.borderColor);
@@ -1231,23 +1273,28 @@ class Painter extends CustomPainter {
     double height = (bounds.width == 1) ? 1.0 : 15;
 
     List<Offset> boundingRects = [
-      bounds.topLeft,
+      bounds.topLeft - Offset(currentWidth / 2, currentWidth / 2),
       Offset(bounds.topLeft.dx + (bounds.topRight.dx - bounds.topLeft.dx) / 2,
-          bounds.topLeft.dy),
-      bounds.topRight,
+              bounds.topLeft.dy) -
+          Offset(0, currentWidth / 2),
+      bounds.topRight + Offset(currentWidth / 2, -currentWidth / 2),
       Offset(
-          bounds.topRight.dx,
-          bounds.bottomRight.dy +
-              (bounds.topRight.dy - bounds.bottomRight.dy) / 2),
-      bounds.bottomRight,
+              bounds.topRight.dx,
+              bounds.bottomRight.dy +
+                  (bounds.topRight.dy - bounds.bottomRight.dy) / 2) +
+          Offset(currentWidth / 2, 0),
+      bounds.bottomRight + Offset(currentWidth / 2, currentWidth / 2),
       Offset(
-          bounds.bottomLeft.dx + (bounds.topRight.dx - bounds.topLeft.dx) / 2,
-          bounds.bottomRight.dy),
-      bounds.bottomLeft,
+              bounds.bottomLeft.dx +
+                  (bounds.topRight.dx - bounds.topLeft.dx) / 2,
+              bounds.bottomRight.dy) +
+          Offset(0, currentWidth / 2),
+      bounds.bottomLeft + Offset(-currentWidth / 2, currentWidth / 2),
       Offset(
-          bounds.bottomLeft.dx,
-          bounds.bottomLeft.dy +
-              (bounds.topLeft.dy - bounds.bottomLeft.dy) / 2),
+              bounds.bottomLeft.dx,
+              bounds.bottomLeft.dy +
+                  (bounds.topLeft.dy - bounds.bottomLeft.dy) / 2) +
+          Offset(-currentWidth / 2, 0),
     ];
 
     List<Rect> cornerRects = [];
@@ -1287,7 +1334,7 @@ class Painter extends CustomPainter {
         }
       }
     }
-// todo: mettre les objet select dans la liste lors du load
+
     if (selectedItems[actionId] == user.uid) {
       setCornersCallback(cornerRects);
     }
