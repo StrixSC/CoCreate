@@ -1,3 +1,4 @@
+import { EventFinishedType } from './../../../models/Exceptions.enum';
 import { MemberType } from "@prisma/client";
 import { db } from "../../../db";
 import { SocketEventError } from "../../../socket";
@@ -49,6 +50,7 @@ export const handleDelete = async (io: Server, socket: Socket, data: { channelId
             );
         }
 
+        socket.emit(EventFinishedType.Channel_Delete);
         io.to(channelId).emit('channel:deleted', {
             channelId: channel.channel_id
         });

@@ -1,3 +1,4 @@
+import { EventFinishedType } from './../../../models/Exceptions.enum';
 import { validateChannelName } from './../../../utils/channels';
 import { MemberType } from "@prisma/client";
 import { db } from "../../../db";
@@ -49,7 +50,7 @@ export const handleCreate = async (io: Server, socket: Socket, data: { channelNa
             );
 
         socket.join(channel.channel_id.toString());
-
+        socket.emit(EventFinishedType.Channel_Create);
         io.emit('channel:created', {
             channelId: channel.channel_id,
             channelName: channel.name,

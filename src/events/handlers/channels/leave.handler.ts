@@ -1,3 +1,4 @@
+import { EventFinishedType } from './../../../models/Exceptions.enum';
 import { MemberType } from "@prisma/client";
 import { io } from "../../../bin/www";
 import { Socket, Server } from 'socket.io';
@@ -54,6 +55,7 @@ export const handleLeave = async (io: Server, socket: Socket, data: { channelId:
             throw new SocketEventError(`Oups! Quelque chose s'est produit lors du traitement de la requête...`, 'E1060');
         }
 
+        socket.emit(EventFinishedType.Channel_Leave);
         io.to(channelId).emit('channel:left', {
             channelType: leftMember.channel.type,
             channelId: channelId,

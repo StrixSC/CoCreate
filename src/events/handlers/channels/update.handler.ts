@@ -1,3 +1,4 @@
+import { EventFinishedType } from './../../../models/Exceptions.enum';
 import { MemberType } from '.prisma/client';
 import { Server, Socket } from 'socket.io';
 import { db } from '../../../db';
@@ -67,6 +68,7 @@ export const handleUpdate = async (io: Server, socket: Socket, data: { channelId
             );
         }
 
+        socket.emit(EventFinishedType.Channel_Update);
         io.to(channelId).emit('channel:updated', {
             channelId: channel.channel_id,
             channelName: channel.name,

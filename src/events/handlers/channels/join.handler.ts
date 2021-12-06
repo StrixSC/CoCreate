@@ -1,3 +1,4 @@
+import { EventFinishedType } from './../../../models/Exceptions.enum';
 import { ChannelMember, MemberType } from "@prisma/client";
 import { Server, Socket } from "socket.io";
 import { db } from "../../../db";
@@ -42,7 +43,7 @@ export const handleJoin = async (io: Server, socket: Socket, data: { channelId: 
                     'E1005'
                 );
 
-            socket.join(channelId);
+            socket.emit(EventFinishedType.Channel_Join);
             io.to(channelId).emit('channel:joined', {
                 channelId: channel.channel_id,
                 channelName: channel.name,
