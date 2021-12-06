@@ -19,6 +19,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/src/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../app.dart';
 
@@ -64,7 +65,8 @@ class GalerieState extends State<Galerie>
   void initState() {
     super.initState();
     context.read<Collaborator>().hasBeenInitialized = true;
-    dropDownValueAuthor = 'Moi (${context.read<Collaborator>().auth!.user!.displayName})';
+    dropDownValueAuthor =
+        'Moi (${context.read<Collaborator>().auth!.user!.displayName})';
     context.read<Collaborator>().pagingControllers = pagingControllers;
     context.read<Collaborator>().navigate = _onLoading;
     _tabController = TabController(length: 2, vsync: this);
@@ -149,8 +151,7 @@ class GalerieState extends State<Galerie>
     Future.delayed(const Duration(seconds: 2), () {
       navigateToDrawing();
       AwesomeDialog(
-        context:
-        navigatorKey.currentContext as BuildContext,
+        context: navigatorKey.currentContext as BuildContext,
         width: 800,
         dismissOnTouchOutside: false,
         dialogType: DialogType.SUCCES,
@@ -188,6 +189,7 @@ class GalerieState extends State<Galerie>
       var resp = jsonResponse['drawings'];
       for (var drawing in resp) {
         if (drawing != null) {
+          print(drawing['thumbnail_url']);
           Collaboration collaboration = Collaboration(
             collaborationId: drawing["collaboration_id"],
             memberCount: drawing["collaborator_count"],
@@ -197,18 +199,17 @@ class GalerieState extends State<Galerie>
             actions: [],
           );
           drawings.add(Drawing(
-            drawingId: drawing['drawing_id'],
-            authorUsername: drawing["author_username"],
-            authorAvatar: drawing["author_avatar"],
-            title: drawing['title'],
-            createdAt: DateFormat('yyyy-MM-dd kk:mm')
-                .format(DateTime.parse(drawing['created_at'])),
-            updatedAt: DateFormat('yyyy-MM-dd kk:mm')
-                .format(DateTime.parse(drawing['updated_at'])),
-            collaboration: collaboration,
-            type: drawing['type'],
-            // thumbnailUrl: drawing['thumbnail_url']
-          ));
+              drawingId: drawing['drawing_id'],
+              authorUsername: drawing["author_username"],
+              authorAvatar: drawing["author_avatar"],
+              title: drawing['title'],
+              createdAt: DateFormat('yyyy-MM-dd kk:mm')
+                  .format(DateTime.parse(drawing['created_at'])),
+              updatedAt: DateFormat('yyyy-MM-dd kk:mm')
+                  .format(DateTime.parse(drawing['updated_at'])),
+              collaboration: collaboration,
+              type: drawing['type'],
+              thumbnailUrl: drawing['thumbnail_url'] ?? ''));
         }
       }
       final isLastPage = drawings.length < _pageSize;
@@ -276,17 +277,17 @@ class GalerieState extends State<Galerie>
             centerTitle: true,
             automaticallyImplyLeading: false,
             leading: // Ensure Scaffold is in context
-            IconButton(
-                icon: const Icon(CupertinoIcons.plus,
-                    color: Colors.white, size: 34),
-                onPressed: () {
-                  titreController.clear();
-                  passController.clear();
-                  memberController.clear();
-                  color = Colors.white;
-                  context.read<Teammate>().fetchMyTeams();
-                  createDessinDialog();
-                }),
+                IconButton(
+                    icon: const Icon(CupertinoIcons.plus,
+                        color: Colors.white, size: 34),
+                    onPressed: () {
+                      titreController.clear();
+                      passController.clear();
+                      memberController.clear();
+                      color = Colors.white;
+                      context.read<Teammate>().fetchMyTeams();
+                      createDessinDialog();
+                    }),
             title: const Text("Galerie de dessins"),
             actions: <Widget>[
               IconButton(
@@ -471,7 +472,9 @@ class GalerieState extends State<Galerie>
                                             SizedBox(
                                                 width: 280,
                                                 child: dropDown(
-                                                    context.read<Teammate>().myTeams,
+                                                    context
+                                                        .read<Teammate>()
+                                                        .myTeams,
                                                     dropDownValueAuthor,
                                                     'Choisir un auteur',
                                                     'Auteur')),
@@ -481,16 +484,18 @@ class GalerieState extends State<Galerie>
                                           ])),
                                   const SizedBox(height: 48.0),
                                   formField(
-                                          'Titre',
-                                          'Veuillez entrez le titre du dessin',
-                                          titreController),
+                                      'Titre',
+                                      'Veuillez entrez le titre du dessin',
+                                      titreController),
                                   dropDownValueTypeCreate == 'Protégé'
-                                      ? const SizedBox(height: 48.0) : const SizedBox.shrink(),
-                                  dropDownValueTypeCreate == 'Protégé'? formField(
-                                      'Mot de passe',
-                                      'Veuillez entrez choisir un mot de passe',
-                                      passController) :
-                                  const SizedBox.shrink(),
+                                      ? const SizedBox(height: 48.0)
+                                      : const SizedBox.shrink(),
+                                  dropDownValueTypeCreate == 'Protégé'
+                                      ? formField(
+                                          'Mot de passe',
+                                          'Veuillez entrez choisir un mot de passe',
+                                          passController)
+                                      : const SizedBox.shrink(),
                                 ]))
                           ]))),
               actions: <Widget>[
@@ -505,11 +510,13 @@ class GalerieState extends State<Galerie>
                               .read<Collaborator>()
                               .convertToEnglish(dropDownValueTypeCreate);
                           var authorId;
-                          dropDownValueAuthor == 'Moi (${context
-                              .read<Collaborator>().auth!.user!.displayName})'
+                          dropDownValueAuthor ==
+                                  'Moi (${context.read<Collaborator>().auth!.user!.displayName})'
                               ? authorId =
                                   context.read<Collaborator>().auth!.user!.uid
-                              : authorId = context.read<Teammate>().myTeamsMap[dropDownValueAuthor];
+                              : authorId = context
+                                  .read<Teammate>()
+                                  .myTeamsMap[dropDownValueAuthor];
                           var title = titreController.value.text;
                           var password = passController.value.text;
                           if (type == 'Protected') {
@@ -931,8 +938,7 @@ class _DrawingState extends State<_Drawing> {
       animType: AnimType.BOTTOMSLIDE,
       title: 'Attention!',
       desc: 'Êtes-vous certain de vouloir ${type} ce dessin?.',
-      btnCancelOnPress: () {
-      },
+      btnCancelOnPress: () {},
       btnOkOnPress: () {
         emitDeleteLeave(type, collab);
       },
@@ -1086,7 +1092,9 @@ class _DrawingState extends State<_Drawing> {
                       ),
                     ],
                   )
-                : Image.asset('assets/images/default_thumbnail.png')));
+                : drawing.thumbnailUrl != ''
+                    ? SvgPicture.network(drawing.thumbnailUrl)
+                    : Image.asset('assets/images/default_thumbnail.png')));
   }
 
   richTextWhitePurple(String text1, String text2) {
@@ -1154,7 +1162,8 @@ class _DrawingState extends State<_Drawing> {
                                         ),
                                       ])),
                                   dropDownValueType == 'Protégé'
-                                      ? const SizedBox(height: 48.0) : const SizedBox.shrink(),
+                                      ? const SizedBox(height: 48.0)
+                                      : const SizedBox.shrink(),
                                   dropDownValueType == 'Protégé'
                                       ? SizedBox(
                                           width: 900.0,

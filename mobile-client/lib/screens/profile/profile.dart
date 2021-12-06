@@ -27,17 +27,21 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<Profile> {
-  List<String> entries = <String>['A', 'B', 'C'];
-  List colorCodes = [kContentColor2, Colors.black, kContentColor3];
-  List<double> height = <double>[250.0, 2.0, 300.0];
+  List<String> entries = <String>['1', '2', '3', '4', '5'];
+  List colorCodes = [
+    kContentColor2,
+    Colors.black,
+    kContentColor2,
+    kContentColor2,
+    kContentColor3
+  ];
+  List<double> height = <double>[250.0, 2.0, 150.0, 150.0, 300.0];
   late List children;
   bool isAuthor = false;
   User _user;
   final List<int> numbers = [1, 2, 3, 5, 8, 13, 21, 34, 55];
   _ProfileScreenState(this._user);
   final translator = GoogleTranslator();
-
-
 
   @override
   void initState() {
@@ -47,8 +51,7 @@ class _ProfileScreenState extends State<Profile> {
 
   fetchUserInfo() async {
     RestApi rest = RestApi();
-    var response =
-        await rest.user.fetchUserAccount();
+    var response = await rest.user.fetchUserAccount();
     var jsonResponse = json.decode(response.body); //Map<String, dynamic>;
     print(jsonResponse);
 
@@ -96,46 +99,37 @@ class _ProfileScreenState extends State<Profile> {
                         Navigator.pop(context);
                       },
                       btnOkOnPress: () {
-                        context.read<Collaborator>().collaborationSocket.socket.dispose();
+                        context
+                            .read<Collaborator>()
+                            .collaborationSocket
+                            .socket
+                            .dispose();
                         signOut(navigatorKey.currentContext);
                       },
                     ).show();
-
                   }),
           actions: <Widget>[
             IconButton(
                 icon: Icon(Icons.message),
                 onPressed: () => context.read<Messenger>().openDrawer()),
           ]),
-      body: DefaultTabController(
-        length: 2,
-        child: NestedScrollView(
-          headerSliverBuilder: (context, _) {
-            return [
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [],
-                ),
-              ),
-            ];
-          },
-          body: Column(
-            children: <Widget>[
-              Expanded(
-                  child: ListView.builder(
-                      padding: const EdgeInsets.all(8),
-                      itemCount: entries.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return index != 1
-                            ? Container(
-                                height: height[index],
-                                color: colorCodes[index],
-                                child: Widgets(index))
-                            : Widgets(index);
-                      }))
-            ],
-          ),
-        ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+              child: ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.all(8),
+                  itemCount: entries.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return index != 1
+                        ? Container(
+                            height: height[index],
+                            color: colorCodes[index],
+                            child: Widgets(index))
+                        : Widgets(index);
+                  }))
+        ],
       ),
     );
   }
@@ -144,8 +138,7 @@ class _ProfileScreenState extends State<Profile> {
     try {
       await FirebaseAuth.instance.signOut().whenComplete(() {
         Navigator.pushReplacementNamed(context, loginRoute);
-      }
-      );
+      });
     } on FirebaseAuthException catch (e) {
       await translator
           .translate(e.message!, from: 'en', to: 'fr')
@@ -171,6 +164,10 @@ class _ProfileScreenState extends State<Profile> {
       case 1:
         return divider();
       case 2:
+        return forgotPass();
+      case 3:
+        return confident();
+      case 4:
         return postedDrawings();
       default:
         return Row(children: [Container()]);
@@ -178,45 +175,135 @@ class _ProfileScreenState extends State<Profile> {
   }
 
   profileRow() {
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      const SizedBox(width: 20),
-      Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        CircleAvatar(
-          backgroundColor: Colors.white,
-          radius: 85.0,
-          child: CircleAvatar(
-            backgroundImage: NetworkImage(_user.photoURL as String),
-            radius: 80.0,
-          ),
-        ),
-        // const SizedBox(height: 10),
-        // Text('@' + _user.displayName.toString(), style: TextStyle(fontWeight: FontWeight.bold))
-      ]),
-      isAuthor
-          ? Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-        Text('Informations personnelles', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 35.0)),
-            Row(children: [Text('Courriel: ', style: TextStyle(fontWeight: FontWeight.bold) ), Text(_user.email.toString(), )]),
-              Text('Nom: Patel'),
-              Text('Prenom: Pritam'),
-            ])
-          : const SizedBox.shrink(),
-      isAuthor
-          ? Column(crossAxisAlignment: CrossAxisAlignment.end,mainAxisAlignment: MainAxisAlignment.center, children: [
-              history(),
-              settings(),
-              statistics(),
-            ])
-          : const SizedBox.shrink(),
-      const SizedBox(width: 50),
-    ]);
+    return Container(
+        decoration: shadow(),
+        margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 15.0),
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          const SizedBox(width: 20),
+          Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            CircleAvatar(
+              backgroundColor: Colors.white,
+              radius: 85.0,
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(_user.photoURL as String),
+                radius: 80.0,
+              ),
+            ),
+            // const SizedBox(height: 10),
+            // Text('@' + _user.displayName.toString(), style: TextStyle(fontWeight: FontWeight.bold))
+          ]),
+          isAuthor
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                      Text('Informations personnelles',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 35.0)),
+                      Row(children: [
+                        Text('Courriel: ',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          _user.email.toString(),
+                        )
+                      ]),
+                      Row(children: [
+                        Text('Nom: ',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          _user.email.toString(),
+                        )
+                      ]),
+                      Row(children: [
+                        Text('Prenom: ',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          _user.email.toString(),
+                        )
+                      ]),
+                    ])
+              : const SizedBox.shrink(),
+          isAuthor
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                      history(),
+                      settings(),
+                      statistics(),
+                    ])
+              : const SizedBox.shrink(),
+          const SizedBox(width: 50),
+        ]));
   }
 
   divider() {
     return const Divider(
       color: Colors.black,
-      height: 3,
-      thickness: 1,
+      height: 0,
+      thickness: 0,
     );
+  }
+
+  forgotPass() {
+    return Container(
+        height: 100.0,
+        decoration: shadow(),
+        margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 15.0),
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Padding(
+              padding: EdgeInsets.only(left: 70.0),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Mot de passe',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 35.0)),
+                  ])),
+          Padding(
+              padding: EdgeInsets.only(right: 100.0),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    history(),
+                  ]))
+        ]));
+  }
+
+  confident() {
+    return Container(
+        height: 100.0,
+        decoration: shadow(),
+        margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 15.0),
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Padding(
+              padding: EdgeInsets.only(left: 70.0),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text('Niveau de confidentialité',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 35.0)),
+                    Text(
+                        "En activant ce réglage, vous permettez à tout les utilisateurs d'utiliser vos informations personneles, telles que votre prénom, votre nom",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 35.0)),
+                  ])),
+          Padding(
+              padding: EdgeInsets.only(right: 100.0),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    history(),
+                  ]))
+        ]));
   }
 
   postedDrawings() {
@@ -288,5 +375,11 @@ class _ProfileScreenState extends State<Profile> {
             const Text('Statistiques', style: TextStyle(color: Colors.white)),
         style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all(kPrimaryColor)));
+  }
+
+  shadow() {
+    return BoxDecoration(
+        color: kContentColor,
+        border: Border.all(width: 2.5, color: Colors.white.withOpacity(0.15)));
   }
 }

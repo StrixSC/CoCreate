@@ -43,8 +43,8 @@ class ChannelSocket {
   // Receives
   userInitialized(callbackMessage) {
     socket.on('user:initialized', (data) {
-      print('data');
-      print(data);
+      print('User initialized');
+      // print(data);
       // callbackMessage('sent', data);
     });
   }

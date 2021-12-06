@@ -37,7 +37,8 @@ class _RegisterState extends State<Register> {
   bool usernameTaken = false;
   bool usernameEmpty = false;
 
-  String currentAvatar = 'https://cdn-icons-png.flaticon.com/512/103/103410.png';
+  String currentAvatar =
+      'https://cdn-icons-png.flaticon.com/512/103/103410.png';
   bool isFromAvatarList = true;
   File? _image;
   bool isPicture = false;
@@ -60,6 +61,11 @@ class _RegisterState extends State<Register> {
   void initState() {
     super.initState();
     _passwordVisible = false;
+    emailController.clear();
+    passController.clear();
+    usernameController.clear();
+    firstNameController.clear();
+    lastNameController.clear();
   }
 
   textForm(hintText, controller) {
@@ -157,16 +163,20 @@ class _RegisterState extends State<Register> {
                                   "Nom d'utilisateur*", usernameController)),
                           Container(
                               width: width,
-                              child:        Column(children: [CircleAvatar(
-                                backgroundColor: Colors.white,
-                                radius: 85.0,
-                                child: CircleAvatar(
-                                  backgroundImage: isPicture ? Image.file(_image!).image : NetworkImage(currentAvatar),
-                                  radius: 80.0,
+                              child: Column(children: [
+                                CircleAvatar(
+                                  backgroundColor: Colors.white,
+                                  radius: 85.0,
+                                  child: CircleAvatar(
+                                    backgroundImage: isPicture
+                                        ? Image.file(_image!).image
+                                        : NetworkImage(currentAvatar),
+                                    radius: 80.0,
+                                  ),
                                 ),
-                              ),
-                            SizedBox(height: 10),
-                            openAvatarDialog()])),
+                                SizedBox(height: 10),
+                                openAvatarDialog()
+                              ])),
                         ])),
                     const SizedBox(height: 34.0),
                     Container(
@@ -179,7 +189,8 @@ class _RegisterState extends State<Register> {
                           ),
                           Container(
                               width: width,
-                              child: formField('Mot de Passe*', passController)),
+                              child:
+                                  formField('Mot de Passe*', passController)),
                         ])),
                     const SizedBox(height: 34.0),
                     Container(
@@ -195,58 +206,71 @@ class _RegisterState extends State<Register> {
                               child: formField('Prenom*', firstNameController)),
                         ])),
                     const SizedBox(height: 14.0),
-                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                      Row(children: [Text('Déjà un compte? ',
-                          style: new TextStyle(fontSize: 26.0)),
-                      TextButton(
-                        onPressed: () {
-                          // Validate will return true if the form is valid, or false if
-                          Navigator.pushNamed(context, loginRoute);
-                        },
-                        style: ElevatedButton.styleFrom(
-                            minimumSize: Size(80.0, 80.0)),
-                        child: Text('Connectez-vous',
-                            style: new TextStyle(fontSize: 26.0)),
-                      )]),
-                      Container(
-                        height: 50.0,
-                        width: 300.0,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Validate will return true if the form is valid, or false if
-                            // the form is invalid.
-                            if (_formKey.currentState!.validate()) {
-                              Map userInfo = {
-                                'email': emailController.text,
-                                'password': passController.text,
-                                'username': usernameController.text,
-                                'first_name': firstNameController.text,
-                                'last_name': lastNameController.text
-                              };
-                              AwesomeDialog(
-                                context: navigatorKey.currentContext as BuildContext,
-                                width: 800,
-                                dismissOnTouchOutside: false,
-                                dialogType: DialogType.WARNING,
-                                animType: AnimType.BOTTOMSLIDE,
-                                title: 'Attention!',
-                                desc: 'Êtes-vous certain de vouloir créer ce compte?.',
-                                btnCancelOnPress: () {
-                                  Navigator.pop(context);
-                                },
-                                btnOkOnPress: () {
-                                  registerNewUser(_image);
-                                },
-                              ).show();
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                              minimumSize: Size(80.0, 80.0)),
-                          child: Text('Créer le compte',
-                              style: new TextStyle(fontSize: 30.0)),
-                        ),
-                      ),
-                    ]),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(children: [
+                            Text('Déjà un compte? ',
+                                style: new TextStyle(fontSize: 26.0)),
+                            TextButton(
+                              onPressed: () {
+                                // Validate will return true if the form is valid, or false if
+                                Navigator.pushNamed(context, loginRoute);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  minimumSize: Size(80.0, 80.0)),
+                              child: Text('Connectez-vous',
+                                  style: new TextStyle(fontSize: 26.0)),
+                            )
+                          ]),
+                          Container(
+                            height: 50.0,
+                            width: 300.0,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // Validate will return true if the form is valid, or false if
+                                // the form is invalid.
+                                if (_formKey.currentState!.validate()) {
+                                  if (currentAvatar ==
+                                      'https://cdn-icons-png.flaticon.com/512/103/103410.png' && _image == null) {
+                                    AwesomeDialog(
+                                      context: navigatorKey.currentContext
+                                          as BuildContext,
+                                      width: 800,
+                                      btnOkColor: Colors.red,
+                                      dismissOnTouchOutside: false,
+                                      dialogType: DialogType.ERROR,
+                                      animType: AnimType.BOTTOMSLIDE,
+                                      title: 'Erreur!',
+                                      desc: 'Veuillez choisir un avatar svp',
+                                      btnOkOnPress: () {},
+                                    ).show();
+                                  } else {
+                                    AwesomeDialog(
+                                      context: navigatorKey.currentContext
+                                          as BuildContext,
+                                      width: 800,
+                                      dismissOnTouchOutside: false,
+                                      dialogType: DialogType.WARNING,
+                                      animType: AnimType.BOTTOMSLIDE,
+                                      title: 'Attention!',
+                                      desc:
+                                          'Êtes-vous certain de vouloir créer ce compte?.',
+                                      btnCancelOnPress: () {},
+                                      btnOkOnPress: () {
+                                        registerNewUser(_image);
+                                      },
+                                    ).show();
+                                  }
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  minimumSize: Size(80.0, 80.0)),
+                              child: Text('Créer le compte',
+                                  style: new TextStyle(fontSize: 30.0)),
+                            ),
+                          ),
+                        ]),
                   ],
                 )),
               ),
@@ -373,14 +397,19 @@ class _RegisterState extends State<Register> {
                 itemBuilder: (BuildContext context, int index) {
                   return GestureDetector(
                     child: Container(
-                        decoration: currentlySelectedIndex != null && currentlySelectedIndex == index? BoxDecoration(
-                            border: Border.all(width: 5, color: kPrimaryColor)) : BoxDecoration(
-                            border: Border.all(width: 0, color: Colors.black)) ,
+                        decoration: currentlySelectedIndex != null &&
+                                currentlySelectedIndex == index
+                            ? BoxDecoration(
+                                border:
+                                    Border.all(width: 5, color: kPrimaryColor))
+                            : BoxDecoration(
+                                border:
+                                    Border.all(width: 0, color: Colors.black)),
                         child: Card(
                           elevation: 10,
                           shape: const RoundedRectangleBorder(
                               borderRadius:
-                              BorderRadius.all(Radius.circular(30.0))),
+                                  BorderRadius.all(Radius.circular(30.0))),
                           color: kContentColor2,
                           child: FittedBox(
                               fit: BoxFit.fill,
@@ -402,7 +431,7 @@ class _RegisterState extends State<Register> {
           ElevatedButton(
               onPressed: () {
                 // TODO : set url here
-                if(currentlySelectedIndex != null){
+                if (currentlySelectedIndex != null) {
                   setState(() {
                     currentAvatar = avatars[currentlySelectedIndex as int];
                   });
@@ -422,8 +451,9 @@ class _RegisterState extends State<Register> {
           isFromAvatarList = false;
           isPicture = true;
           final ImagePicker _picker = ImagePicker();
-          final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
-          File file = File( photo!.path );
+          final XFile? photo =
+              await _picker.pickImage(source: ImageSource.camera);
+          File file = File(photo!.path);
           setState(() {
             _image = file;
           });
@@ -455,11 +485,11 @@ class _RegisterState extends State<Register> {
     dio.options.baseUrl = 'https://' + (dotenv.env['SERVER_URL'] ?? "");
     FormData formData = FormData();
 
-    if(file != null) {
+    if (file != null) {
       print('here');
       String fileName = file.path.split('/').last;
       formData = FormData.fromMap({
-        "avatar": await MultipartFile.fromFile(file.path, filename:fileName),
+        "avatar": await MultipartFile.fromFile(file.path, filename: fileName),
         "email": emailController.text,
         "password": passController.text,
         "username": usernameController.text,
@@ -480,10 +510,9 @@ class _RegisterState extends State<Register> {
 
     var response = await dio.post("/auth/register", data: formData);
     print(response.data);
-    if(response.statusCode == 201) {
+    if (response.statusCode == 201) {
       AwesomeDialog(
-        context:
-        navigatorKey.currentContext as BuildContext,
+        context: navigatorKey.currentContext as BuildContext,
         width: 800,
         dismissOnTouchOutside: false,
         dialogType: DialogType.SUCCES,
@@ -496,8 +525,7 @@ class _RegisterState extends State<Register> {
       ).show();
     } else {
       AwesomeDialog(
-        context:
-        navigatorKey.currentContext as BuildContext,
+        context: navigatorKey.currentContext as BuildContext,
         width: 800,
         btnOkColor: Colors.red,
         dismissOnTouchOutside: false,

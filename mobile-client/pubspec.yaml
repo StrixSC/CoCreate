@@ -64,6 +64,7 @@ dependencies:
   dio: ^4.0.4
   image_picker: ^0.8.4+4
   google_sign_in: ^5.2.1
+  flutter_svg: ^1.0.0
 
 dev_dependencies:
   flutter_test:
