@@ -1,6 +1,7 @@
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/screens/login/register.dart';
 import 'package:Colorimage/utils/general.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -34,7 +35,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
   void initState() {
     controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 5),
     )..addListener(() {
         setState(() {});
       });

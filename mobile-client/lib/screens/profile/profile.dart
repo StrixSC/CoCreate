@@ -4,11 +4,15 @@ import 'package:Colorimage/providers/messenger.dart';
 import 'package:Colorimage/screens/profile/historique.dart';
 import 'package:Colorimage/screens/profile/statistique.dart';
 import 'package:Colorimage/screens/profile/update_profile.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/src/provider.dart';
+import 'package:translator/translator.dart';
+
+import '../../app.dart';
 
 class Profile extends StatefulWidget {
   final User _user;
@@ -28,6 +32,7 @@ class _ProfileScreenState extends State<Profile> {
   User _user;
   final List<int> numbers = [1, 2, 3, 5, 8, 13, 21, 34, 55];
   _ProfileScreenState(this._user);
+  final translator = GoogleTranslator();
 
   @override
   void initState() {
@@ -43,8 +48,40 @@ class _ProfileScreenState extends State<Profile> {
       appBar: AppBar(
           backgroundColor: kPrimaryColor,
           centerTitle: true,
+          leadingWidth: 300.0,
           title: Text('Profile de ' + _user.displayName.toString()),
           automaticallyImplyLeading: false,
+          leading: // Ensure Scaffold is in context
+              ElevatedButton(
+                  child: Container(
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                        Icon(Icons.exit_to_app_outlined,
+                            color: Colors.white, size: 28),
+                        SizedBox(
+                          width: 10.0,
+                        ),
+                        Text('Se déconnecter', style: TextStyle(fontSize: 28.0))
+                      ])),
+                  onPressed: () {
+                    AwesomeDialog(
+                      context: navigatorKey.currentContext as BuildContext,
+                      width: 800,
+                      dismissOnTouchOutside: false,
+                      dialogType: DialogType.WARNING,
+                      animType: AnimType.BOTTOMSLIDE,
+                      title: 'Attention!',
+                      desc: 'Êtes-vous certain de vouloir vous déconnecter?.',
+                      btnCancelOnPress: () {
+                        Navigator.pop(context);
+                      },
+                      btnOkOnPress: () {
+                        signOut(navigatorKey.currentContext);
+                      },
+                    ).show();
+
+                  }),
           actions: <Widget>[
             IconButton(
                 icon: Icon(Icons.message),
@@ -81,6 +118,30 @@ class _ProfileScreenState extends State<Profile> {
         ),
       ),
     );
+  }
+
+  signOut(context) async {
+    try {
+      await FirebaseAuth.instance.signOut().whenComplete(() {
+        Navigator.pushReplacementNamed(context, loginRoute);
+      }
+      );
+    } on FirebaseAuthException catch (e) {
+      await translator
+          .translate(e.message!, from: 'en', to: 'fr')
+          .then((value) => AwesomeDialog(
+                context: navigatorKey.currentContext as BuildContext,
+                width: 800,
+                btnOkColor: Colors.red,
+                dismissOnTouchOutside: false,
+                dialogType: DialogType.ERROR,
+                animType: AnimType.BOTTOMSLIDE,
+                title: 'Erreur!',
+                desc: value.text,
+                btnOkOnPress: () {},
+              ).show());
+      return;
+    }
   }
 
   Widgets(index) {
@@ -122,7 +183,7 @@ class _ProfileScreenState extends State<Profile> {
           ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               history(),
               settings(),
-        statistics(),
+              statistics(),
             ])
           : const SizedBox.shrink(),
       const SizedBox(width: 50),

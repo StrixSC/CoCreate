@@ -223,7 +223,7 @@ class GalerieState extends State<Galerie>
       pagingControllers[section].itemsList = [];
       throw ("Theres was a problem in the fetching of drawings...");
     } else {
-      pagingControllers[section].itemsList = [];
+      // pagingControllers[section].itemsList = [];
     }
   }
 

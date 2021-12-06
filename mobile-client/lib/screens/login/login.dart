@@ -42,7 +42,14 @@ class _LoginState extends State<Login> {
   @override
   void initState() {
     super.initState();
+    // isAlreadySignedIn();
   }
+
+  // isAlreadySignedIn() async {
+  //   if (FirebaseAuth.instance.currentUser != null) {
+  //     Navigator.pushReplacementNamed(context, homeRoute);
+  //   }
+  // }
 
   final logo = Hero(
     tag: 'hero',
@@ -85,7 +92,7 @@ class _LoginState extends State<Login> {
     context.read<Messenger>().fetchAllChannels();
 
     // Home Page
-    Navigator.pushNamed(context, homeRoute);
+    Navigator.pushReplacementNamed(context, homeRoute);
   }
 
   void initializeSocketConnection(auth, token) {
