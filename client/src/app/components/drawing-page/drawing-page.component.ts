@@ -1,3 +1,4 @@
+import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
 import { SocketService } from 'src/app/services/chat/socket.service';
 import { ToolFactoryService } from './../../services/tool-factory.service';
 import { SyncDrawingService } from './../../services/syncdrawing.service';
@@ -35,6 +36,7 @@ export class DrawingPageComponent {
     private snackbar: MatSnackBar,
     private router: Router,
     private socketService: SocketService,
+    private selectionService: SelectionToolService,
     private syncCollabService: SyncCollaborationService,
   ) {
     this.hotkeyService.hotkeysListener();
@@ -123,6 +125,7 @@ export class DrawingPageComponent {
 
     this.syncCollabService.sendDisconnect({ collaborationId: this.activeCollaborationId });
     if (this.committedAction) {
+      this.selectionService.sendUnselect();
       this.syncCollabService.sendLogDrawingAction({ collaborationId: this.activeCollaborationId });
     }
     this.activeCollaborationId = "";

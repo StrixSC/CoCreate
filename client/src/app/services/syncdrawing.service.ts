@@ -303,7 +303,6 @@ export class SyncDrawingService {
     if (!actionId) return;
 
     if (state === DrawingState.down || isUndoRedo) {
-
       this.activeActionId = v4();
     }
 

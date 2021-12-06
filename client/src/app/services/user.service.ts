@@ -1,3 +1,4 @@
+import { AuthService } from 'src/app/services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth/auth';
@@ -9,30 +10,37 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class UserService {
-  private username:String
-  private userId:String
-  constructor(private httpClient:HttpClient) {
-   console.log(this.username)
+  constructor(private http: HttpClient, private auth: AuthService) { }
+
+  getLogs(): Observable<any> {
+    return this.http.get(environment.serverURL + "/api/users/logs");
   }
-  getLogs(): Observable<any> { 
-    return this.httpClient.get(environment.serverURL+"/api/users/logs");
-  }
-  updateUsernameAndAvatar(username:string,avatarUrl:string):Observable<any> {
+
+  updateUsernameAndAvatar(username: string, avatarUrl: string): Observable<any> {
     let updateBody = {
-      "username":username,
-      "avatarUrl":avatarUrl,
+      "username": username,
+      "avatarUrl": avatarUrl,
     }
-    return this.httpClient.put<any>(environment.serverURL+"/api/users/profile/",updateBody)
+    return this.http.put<any>(environment.serverURL + "/api/users/profile/", updateBody)
   }
-  getPublicProfile():Observable<any> {
-    return this.httpClient.get(environment.serverURL+"/api/users/profile/"+this.username)
+
+  getPublicProfile(username: string): Observable<any> {
+    return this.http.get(environment.serverURL + `/api/users/profile/${username}`);
   }
-  updatePassword(newPasswordBody:any):Observable<any> {
-    return this.httpClient.put<any>(environment.serverURL+"/auth/update/password",newPasswordBody)
+
+  toggleConfidentiality(data: any): Observable<any> {
+    return this.http.put(environment.serverURL + '/api/users/account/confidentiality', data);
   }
-  uploadAvatar(avatarUrl:string):Observable<any>{
-    let avatarUploadBody={"avatar":avatarUrl} 
-    return this.httpClient.post<any>(environment.serverURL+"/api/users/upload/avatar",avatarUploadBody);
+
+  updatePassword(data: any): Observable<any> {
+    return this.http.put<any>(environment.serverURL + "/auth/update/password", data)
   }
-  
+
+  uploadAvatar(formData: FormData): Observable<any> {
+    return this.http.post<any>(environment.serverURL + "/api/users/upload/avatar", formData);
+  }
+
+  fetchUserInformation() {
+    return this.http.get(environment.serverURL + "/api/users/account");
+  }
 }

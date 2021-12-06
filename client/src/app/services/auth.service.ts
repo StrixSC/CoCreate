@@ -44,4 +44,8 @@ export class AuthService {
   getPublicAvatars(): Observable<any> {
     return this.http.get(environment.serverURL + '/api/public/avatars');
   }
+
+  getUserAvatars(): Observable<any> {
+    return this.http.get(environment.serverURL + '/api/users/avatars');
+  }
 }

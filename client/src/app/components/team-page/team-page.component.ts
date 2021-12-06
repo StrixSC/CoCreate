@@ -287,7 +287,8 @@ export class TeamPageComponent implements OnInit {
       width: '500px',
       data: {
         message: `Êtes vous sûr de vouloir supprimer l'équipe "${team.teamName}" ?`,
-        submessage: `Cette action est irréversible et supprimera tous les dessins créés par l'équipe.`
+        submessage: `Cette action est irréversible et supprimera tous les dessins créés par l'équipe.`,
+        buttonLabel: 'Supprimer'
       }
     }).afterClosed().subscribe((d) => {
       if (d) {

@@ -13,13 +13,18 @@ import { mergeMap } from 'rxjs/operators';
 
 export class StdHttpInterceptor implements HttpInterceptor {
 
-    constructor(private auth: AngularFireAuth) {}
+    constructor(private auth: AngularFireAuth) { }
 
     intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         return this.auth.idToken.pipe(
             mergeMap((token: any) => {
                 if (token) {
-                    request = request.clone({ setHeaders: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } });
+                    let headers = {
+                        Authorization: `Bearer ${token}`
+                    } as any;
+
+                    request = request.clone({ setHeaders: headers });
+                    console.log(request.headers);
                 }
                 return next.handle(request);
             }));

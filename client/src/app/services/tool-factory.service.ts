@@ -89,13 +89,15 @@ export class ToolFactoryService {
 
       case DrawingState.move:
         command = this.pendingActions.get(payload.actionId) as FreedrawSyncCommand;
-        command!.update(payload);
+        if (command) {
+          command.update(payload);
+        }
         break;
 
       case DrawingState.up:
         command = this.pendingActions.get(payload.actionId) as FreedrawSyncCommand;
         if (command) {
-          const res = command!.update(payload);
+          const res = command.update(payload);
           if (res) {
             this.addOrUpdateCollaboration(res, addToUndos);
           }
@@ -138,7 +140,9 @@ export class ToolFactoryService {
 
       case DrawingState.move:
         command = this.pendingActions.get(payload.actionId) as EllipseSyncCommand | RectangleSyncCommand;
-        command!.update(payload);
+        if (command) {
+          command.update(payload);
+        }
         break;
 
       case DrawingState.up:
@@ -154,7 +158,7 @@ export class ToolFactoryService {
             this.addOrUpdateCollaboration(command, addToUndos);
           }
         } else {
-          const res = command!.update(payload);
+          const res = command.update(payload);
           if (res) {
             this.addOrUpdateCollaboration(res, addToUndos);
           }
@@ -188,7 +192,9 @@ export class ToolFactoryService {
             }
           } else {
             const command = this.pendingActions.get(payload.actionId);
-            command!.update(payload);
+            if (command) {
+              command.update(payload);
+            }
           }
         }
         break;
@@ -197,9 +203,11 @@ export class ToolFactoryService {
         hasOngoingMovement = this.pendingActions.has(payload.actionId);
         if (hasOngoingMovement) {
           const command = this.pendingActions.get(payload.actionId);
-          const res = command!.update(payload);
-          if (res) {
-            this.addOrUpdateCollaboration(res, addToUndos);
+          if (command) {
+            const res = command.update(payload);
+            if (res) {
+              this.addOrUpdateCollaboration(res, addToUndos);
+            }
           }
         }
         break;
@@ -237,7 +245,9 @@ export class ToolFactoryService {
             }
           } else {
             const command = this.pendingActions.get(payload.actionId);
-            command!.update(payload);
+            if (command) {
+              command.update(payload);
+            }
           }
         }
         break;
@@ -246,9 +256,11 @@ export class ToolFactoryService {
         hasOngoingMovement = this.pendingActions.has(payload.actionId);
         if (hasOngoingMovement) {
           const command = this.pendingActions.get(payload.actionId);
-          const res = command!.update(payload);
-          if (res) {
-            this.addOrUpdateCollaboration(res, addToUndos);
+          if (command) {
+            const res = command!.update(payload);
+            if (res) {
+              this.addOrUpdateCollaboration(res, addToUndos);
+            }
           }
         }
         break;
@@ -269,7 +281,7 @@ export class ToolFactoryService {
 
   onResize(payload: IResizeAction, isActiveUser: boolean) {
     let hasOngoingMovement: boolean = false;
-    const addToUndos = false;
+    const addToUndos = isActiveUser && !payload.isUndoRedo;
     const state = payload.state;
     switch (state) {
       case DrawingState.down:
@@ -281,22 +293,24 @@ export class ToolFactoryService {
         break;
 
       case DrawingState.move:
-        hasOngoingMovement = this.pendingActions.has(payload.actionId);
-        if (!hasOngoingMovement) {
+        if (payload.isUndoRedo) {
           const command = new ResizeSyncCommand(payload, this.rendererService.renderer, this.drawingService, this.syncService);
-          command.execute();
-          this.pendingActions.set(payload.actionId, command);
+          command.isFlatAction = true;
+          const res = command.execute();
+          if (res) {
+            this.addOrUpdateCollaboration(res, addToUndos);
+          }
         } else {
-          if (payload.isUndoRedo) {
+          hasOngoingMovement = this.pendingActions.has(payload.actionId);
+          if (!hasOngoingMovement) {
             const command = new ResizeSyncCommand(payload, this.rendererService.renderer, this.drawingService, this.syncService);
-            command.isFlatAction = true;
-            const res = command.execute();
-            if (res) {
-              this.addOrUpdateCollaboration(res, addToUndos);
-            }
+            command.execute();
+            this.pendingActions.set(payload.actionId, command);
           } else {
             const command = this.pendingActions.get(payload.actionId);
-            command!.update(payload);
+            if (command) {
+              command.update(payload);
+            }
           }
         }
         break;
@@ -305,9 +319,11 @@ export class ToolFactoryService {
         hasOngoingMovement = this.pendingActions.has(payload.actionId);
         if (hasOngoingMovement) {
           const command = this.pendingActions.get(payload.actionId);
-          const res = command!.update(payload);
-          if (res) {
-            this.addOrUpdateCollaboration(res, addToUndos);
+          if (command) {
+            const res = command.update(payload);
+            if (res) {
+              this.addOrUpdateCollaboration(res, addToUndos);
+            }
           }
         }
         break;

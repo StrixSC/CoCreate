@@ -1,3 +1,7 @@
+import { UpdatePasswordDialogComponent } from './components/update-password-dialog/update-password-dialog.component';
+import { UpdateProfileDialogComponent } from './components/update-profile-dialog/update-profile-dialog.component';
+import { ProfileComponent } from './components/profile/profile.component';
+import { AccountComponent } from './components/account/account.component';
 import { UpdateCollaborationFormDialogComponent } from './components/update-collaboration-form-dialog/update-collaboration-form-dialog.component';
 import { ServerErrorComponent } from './components/server-error/server-error.component';
 import { CreateChannelDialogComponent } from './components/create-channel-dialog/create-channel-dialog.component';
@@ -51,7 +55,6 @@ import { WelcomeDialogModule } from './components/welcome-dialog/welcome-dialog.
 import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { StdHttpInterceptor } from './http/stdhttp.interceptor';
 import { SocketService } from './services/chat/socket.service';
-import { UserProfileSettingsComponent } from './components/user-profile-settings/user-profile-settings.component';
 import { ErrorMessageComponent } from './components/error-message/error-message.component';
 import { ToolParameterModule } from './components/tool-parameters/tool-parameter.module';
 import { AppRoutingModule } from './app-routing.module';
@@ -60,7 +63,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
-import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
 import { DrawingGalleryComponent } from './components/drawing-gallery/drawing-gallery.component';
 import { DrawingGalleryCardComponent } from './components/drawing-gallery-card/drawing-gallery-card.component';
@@ -70,7 +72,6 @@ import { MenuPageComponent } from './components/menu-page/menu-page.component';
 import { NewDrawingFormDialogComponent } from './components/new-drawing-form-dialog/new-drawing-form-dialog.component';
 import { CollaborationPasswordFormDialogComponent } from './components/collaboration-password-form-dialog/collaboration-password-form-dialog.component';
 import { TopBarComponent } from './components/top-bar/top-bar.component';
-import { UsernameUpdateDialogComponent } from './components/username-update-dialog/username-update-dialog.component';
 
 @NgModule({
   declarations: [
@@ -102,19 +103,21 @@ import { UsernameUpdateDialogComponent } from './components/username-update-dial
     ExportDrawingComponent,
     ChatComponent,
     DrawingPageComponent,
-    UserProfileComponent,
     TeamPageComponent,
     ChangePasswordComponent,
-    UserProfileSettingsComponent,
     DrawingGalleryComponent,
     DeleteConfirmationDialogComponent,
     DrawingGalleryCardComponent,
     LoginComponent,
     ForgotPasswordComponent,
+    UpdateProfileDialogComponent,
     LandingPageComponent,
+    AccountComponent,
+    ProfileComponent,
     DrawingPreviewDialogComponent,
     CreateDrawingComponent,
     MenuPageComponent,
+    UpdatePasswordDialogComponent,
     ServerErrorComponent,
     RegisterComponent,
     NewDrawingFormDialogComponent,
@@ -127,7 +130,6 @@ import { UsernameUpdateDialogComponent } from './components/username-update-dial
     TeamPasswordDialogComponent,
     AvatarDialogComponent,
     AuthWrapperComponent,
-    UsernameUpdateDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -159,12 +161,14 @@ import { UsernameUpdateDialogComponent } from './components/username-update-dial
     NewDrawingComponent,
     CreateChannelDialogComponent,
     TeamPasswordDialogComponent,
+    UpdatePasswordDialogComponent,
     DeleteConfirmationDialogComponent,
     TeamInfoComponent,
     ToolsColorPickerComponent,
     WorkspaceComponent,
     ControlMenuComponent,
     ChatMenuComponent,
+    UpdateProfileDialogComponent,
     AvatarDialogComponent,
     SaveDrawingComponent,
     NewDrawingFormDialogComponent,
@@ -176,7 +180,6 @@ import { UsernameUpdateDialogComponent } from './components/username-update-dial
     CreateTeamDialogComponent,
     AvatarDialogComponent,
     CollaborationPasswordFormDialogComponent,
-    UsernameUpdateDialogComponent
   ],
   providers: [
     FileReader,

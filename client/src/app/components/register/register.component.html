@@ -59,7 +59,7 @@
                 </mat-form-field>
 
                 <mat-form-field class="form-field clickable pb-1" appearance="outline">
-                    <mat-label>Surnom</mat-label>
+                    <mat-label>Nom</mat-label>
                     <input required type="text" formControlName="lastName" matInput placeholder="Doe" />
                     <mat-error *ngIf="registerForm.get('lastName').hasError('required')">
                         Ce champ est obligatoire.
@@ -69,7 +69,7 @@
                 <div class="form-field avatar-section">
                     <div>
                         <div class="avatar-container">
-                            <label class="avatar-label clickable" for="avatar">Choisir un avatar</label>
+                            <label class="avatar-label clickable link" for="avatar">Choisir un avatar</label>
                             <input style="display: none" name="avatar" id="avatar" type="file"
                                 (change)="uploadFile($event)">
                         </div>
@@ -79,7 +79,7 @@
                     <div class="selected-avatar" *ngIf="selectedAvatarUrl">
                         <img class="selected-avatar-img" [src]="selectedAvatarUrl">
                     </div>
-                    <div class="selected-file-name" *ngIf="activeFile">
+                    <div class="selected-file-name link" *ngIf="activeFile">
                         <small>Fichier choisit:
                             <br>{{ activeFile.name | slice:0:12 }}...</small>
                     </div>

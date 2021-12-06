@@ -1,3 +1,5 @@
+import { ProfileComponent } from './components/profile/profile.component';
+import { AccountComponent } from './components/account/account.component';
 import { ServerErrorComponent } from './components/server-error/server-error.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { TeamPageComponent } from './components/team-page/team-page.component';
@@ -14,8 +16,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
-import { UserProfileSettingsComponent } from './components/user-profile-settings/user-profile-settings.component';
-import { UserProfileComponent } from './components/user-profile/user-profile.component';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(["auth"]);
 const redirectLoggedInToMenu = () => redirectLoggedInTo(["menu"]);
@@ -40,8 +40,8 @@ const routes: Routes = [
         path: "teams", component: TeamPageComponent,
       },
       { path: "workspace", component: SidenavComponent },
-      { path: "profile-settings", component: UserProfileSettingsComponent },
-      { path: "profile/:id", component: UserProfileComponent },
+      { path: "account", component: AccountComponent },
+      { path: "profile", component: ProfileComponent },
       {
         path: "drawing/:id",
         component: DrawingPageComponent,
