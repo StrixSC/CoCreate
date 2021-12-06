@@ -29,7 +29,6 @@ router.post('/register', upload,
         .withMessage('Invalid or missing email'),
     body("password")
         .notEmpty()
-        .isAlphanumeric()
         .isLength({ min: MIN_PASS_LENGTH, max: MAX_PASS_LENGTH })
         .withMessage('Invalid or missing password. Password must be alphanumeric and between 8 to 256 characters.'),
     body("first_name")
@@ -60,7 +59,6 @@ router.put(
     checkIfAuthenticated,
     body('password')
         .notEmpty()
-        .isAlphanumeric()
         .isLength({ min: MIN_PASS_LENGTH, max: MAX_PASS_LENGTH }),
     async (req, res, next) => await updateUserPasswordController(req, res, next));
 export default router;

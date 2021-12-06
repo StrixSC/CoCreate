@@ -25,6 +25,5 @@ const colors: { [key: string]: (message?: any, ...optionalParams: any[]) => any 
 };
 
 export default function log(type: DebugType, ...messages: any[]) {
-    debug(colors[type?.toString() || 'INFO'](`[${type || 'INFO'}]`, ...messages));
-    logger.info(`[${type || 'INFO'}]`, ...messages);
+    console.log(colors[type?.toString() || 'INFO'](`[${type || 'INFO'}]`, ...messages));
 }
