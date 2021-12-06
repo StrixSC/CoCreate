@@ -11,6 +11,7 @@ class Drawing {
   Drawing({
     required this.drawingId,
     this.thumbnailUrl = "",
+    this.updatedAt,
     required this.title,
     required this.authorUsername,
     required this.authorAvatar,

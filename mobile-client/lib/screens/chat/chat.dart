@@ -47,9 +47,9 @@ class ChatMessage extends StatelessWidget {
                             elevation: 0,
                             alignment: Alignment.topRight,
                             margin: EdgeInsets.only(top: 10),
-                            backGroundColor: Colors.indigo.shade400,
+                            backGroundColor: kPrimaryColor,
                             child: Container(
-                              color: Color(0xFF5D72CC),
+                              color: kPrimaryColor,
                               constraints: BoxConstraints(
                                 maxWidth:
                                     MediaQuery.of(context).size.width * 0.9,
@@ -181,21 +181,24 @@ class _ChatScreenState extends State<ChatScreen> {
     Messenger messenger = context.read<Messenger>();
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: kContentColor,
         leading: IconButton(
             icon: const Tooltip(
                 message: 'Se déconnecter',
                 child: Icon(Icons.arrow_back, color: Colors.white, size: 30)),
             onPressed: () {
-              var lastMessage = messenger
-                  .userChannels[widget.channelIndex].messages.first.text;
+              context.read<Messenger>().setIndex();
               messenger.userChannels[widget.channelIndex].messages.isEmpty
                   ? ''
-                  : messenger.setLastMessage(lastMessage, widget.channelIndex);
+                  : messenger.setLastMessage(
+                      messenger.userChannels[widget.channelIndex].messages.first
+                          .text,
+                      widget.channelIndex);
               context.read<Messenger>().toggleSelection();
             }),
-        title: const Text(
-          '',
-          style: TextStyle(fontSize: 25, color: Colors.blue),
+        title: Text(
+          context.read<Messenger>().userChannels[widget.channelIndex].name,
+          style: TextStyle(fontSize: 30, color: kPrimaryColor),
         ),
         actions: [
           IconButton(
@@ -227,7 +230,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           ],
                         ));
               }),
-          messenger.userChannels[widget.channelIndex].name != "Canal Publique"
+          messenger.userChannels[widget.channelIndex].name != "Public"
               ? IconButton(
                   icon: const Icon(Icons.exit_to_app_rounded,
                       color: Colors.white, size: 30),
@@ -285,12 +288,13 @@ class _ChatScreenState extends State<ChatScreen> {
             child: IconTheme(
               data: const IconThemeData(color: kPrimaryColor),
               child: Container(
+                color: kContentColor,
                 height: 75,
-                margin: const EdgeInsets.symmetric(horizontal: 8.0),
+
                 child: Row(
                   children: [
                     Expanded(
-                      child: TextFormField(
+                      child: TextField(
                         style: TextStyle(fontSize: 25),
                         controller: _textController,
                         // onChanged: _handleChange,
@@ -301,6 +305,13 @@ class _ChatScreenState extends State<ChatScreen> {
                               : null,
                         ),
                         focusNode: _focusNode,
+                        onSubmitted: (val) {
+                          setState(() {
+                            _handleSubmitted(_textController.text);
+                          });
+                          _textController.clear();
+                          _focusNode.requestFocus();
+                        },
                       ),
                     ),
                     Container(
@@ -308,7 +319,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: IconButton(
                           iconSize: 34,
                           icon: const Icon(Icons.send),
-                          color: Colors.indigo.shade400,
+                          color:kPrimaryColor,
                           onPressed: () {
                             _handleSubmitted(_textController.text);
                           }),

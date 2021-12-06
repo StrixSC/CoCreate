@@ -11,6 +11,8 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:vector_math/vector_math_64.dart';
 // import 'package:vector_math/vector_math.dart';
 
+import '../../app.dart';
+
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
     hexColor = hexColor.toUpperCase().replaceAll("#", "");
@@ -23,12 +25,14 @@ class HexColor extends Color {
   HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
 }
 
-class CollaborationSocket extends SocketService {
-  CollaborationSocket(User user, IO.Socket socket) : super(user, socket);
+class CollaborationSocket {
+  User user;
+  IO.Socket socket;
+
+  CollaborationSocket({required this.user, required this.socket});
 
   // Emits
   joinCollaboration(String collaborationId, String type, String? password) {
-    print("Join Collab: $collaborationId");
     if (type == "Protected") {
       socket.emit('collaboration:join', {
         'userId': user.uid,
@@ -56,15 +60,18 @@ class CollaborationSocket extends SocketService {
     String title,
     String type,
     String? password,
+      Color color,
   ) {
     print('Create Collab');
+    String hexColor = '#${color.value.toRadixString(16)}';
     socket.emit('collaboration:create', {
       'userId': user.uid,
       'creatorId': creatorId,
       'isTeam': user.uid != creatorId,
       'title': title,
       'type': type,
-      'password': password
+      'password': password,
+      'bgColor' : hexColor
     });
   }
 
@@ -356,34 +363,25 @@ class CollaborationSocket extends SocketService {
   updated(callbackChannel) {
     socket.on('collaboration:updated', (data) {
       print('Collaboration Updated');
-      Collaboration collaboration = Collaboration(
-          collaborationId: 'id',
-          actions: data["actions"],
-          backgroundColor: data["backgroundColor"],
-          memberCount: data["memberCount"],
-          width: data["width"],
-          height: data["height"],
-          members: data["members"],
-          actionsMap: {});
-      Drawing drawing = Drawing(
-          drawingId: data['drawingId'],
-          thumbnailUrl: data['thumbnailUrl'],
-          title: data['title'],
-          authorUsername: data["authorUsername"],
-          authorAvatar: data["authorAvatarUrl"],
-          createdAt: data['createdAt'],
-          collaboration: collaboration,
-          type: 'type'); // "Protected", "Public" or "Private"
-      callbackChannel('updated', drawing);
+      // Map drawing = Drawing(
+      //     drawingId: data['drawingId'],
+      //     thumbnailUrl: data['thumbnailUrl'],
+      //     title: data['title'],
+      //     authorUsername: data["authorUsername"],
+      //     authorAvatar: data["authorAvatarUrl"],
+      //     createdAt: data['createdAt'],
+      //     type: 'type'); // "Protected", "Public" or "Private"
+      callbackChannel('updated', data);
     });
   }
 
   deleted(callbackChannel) {
     socket.on('collaboration:deleted', (data) {
       print('Collaboration deleted');
+      print(data);
       Map deleted = {
         "collaborationId": data["collaborationId"],
-        "deletedAt": data["deletedAt"],
+        "deletedAt": data["deletedAt"] ?? '',
       };
       callbackChannel('deleted', deleted);
     });
@@ -403,17 +401,18 @@ class CollaborationSocket extends SocketService {
     });
   }
 
-  // TODO : collaborationId is null -> nawras
   disconnected(callbackChannel) {
     socket.on('collaboration:disconnected', (data) {
       print('Collaboration disconnected');
-      // Map disconnected = {
-      //   "collaborationId": data["collaborationId"],
-      //   "userId": data["userId"],
-      //   "username": data["username"],
-      //   "avatarUrl": data["avatarUrl"],
-      // };
-      // callbackChannel('disconnect', disconnected);
+      print(data);
+      Map disconnected = {
+        "drawingId": data["drawingId"],
+        "collaborationId": data["collaborationId"],
+        "userId": data["userId"],
+        "username": data["username"],
+        "avatarUrl": data["avatarUrl"],
+      };
+      callbackChannel('disconnect', disconnected);
     });
   }
 
@@ -433,7 +432,5 @@ class CollaborationSocket extends SocketService {
     left(callbackChannel);
 
     disconnected(callbackChannel);
-
-    print("initialized Collaboration socket events");
   }
 }

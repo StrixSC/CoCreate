@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:Colorimage/models/chat.dart';
 import 'package:Colorimage/providers/messenger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -47,9 +49,9 @@ class ChatCard extends StatelessWidget {
         child: Row(
           children: [
             Stack(
-              children: const [
+              children: [
                 CircleAvatar(
-                    radius: 24, backgroundColor: kPrimaryColor, child:
+                    radius: 24, backgroundColor: Colors.primaries[Random().nextInt(Colors.primaries.length)], child:
                       /*************************** ADD 'nMembers > 1? Group icon : Avatar of only member' ***********************/
                       Icon(Icons.group, color: Colors.black),
                 ),
@@ -98,7 +100,7 @@ class ChatCard extends StatelessWidget {
               ),
             ),
               notifIcon(),
-              if(chat.name != "Public" && user.displayName == chat.ownerUsername)
+              if(chat.name != "Public" && user.displayName == chat.ownerUsername && chat.type == 'Public')
                 IconButton(
                   iconSize: 28,
                   icon: const Icon(Icons.highlight_remove),

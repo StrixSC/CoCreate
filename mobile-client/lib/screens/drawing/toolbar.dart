@@ -2,6 +2,7 @@ import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/models/tool.dart';
 import 'package:Colorimage/providers/collaborator.dart';
+import 'package:Colorimage/providers/messenger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -75,7 +76,7 @@ class _ToolbarState extends State<Toolbar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Scaffold(body:Container(
       child: ListView.builder(
         itemCount: tools.length,
         itemBuilder: (context, index) => index < 5
@@ -273,7 +274,9 @@ class _ToolbarState extends State<Toolbar> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
       child: IconButton(
-        onPressed: () {},
+        onPressed: () {
+          Scaffold.of(context).openEndDrawer();
+        },
         icon: const Icon(
           Icons.message,
           size: 35,
@@ -287,13 +290,10 @@ class _ToolbarState extends State<Toolbar> {
       padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
       child: IconButton(
         onPressed: () {
-          // unselectBeforeLeave();
-          String collaborationId =
-              context.read<Collaborator>().getCollaborationId();
-          context
-              .read<Collaborator>()
-              .collaborationSocket
-              .disconnectCollaboration(collaborationId);
+          unselectBeforeLeave();
+            String collaborationId = context.read<Collaborator>().getCollaborationId();
+            context.read<Collaborator>().collaborationSocket.disconnectCollaboration(collaborationId);
+            context.read<Collaborator>().currentDrawingId = '';
           Navigator.pop(context);
           Navigator.pop(context);
         },

@@ -60,6 +60,9 @@ dependencies:
   form_builder_validators: ^7.2.0
   intl: ^0.17.0
   expandable: ^5.0.1
+  awesome_dialog: ^2.1.1
+  dio: ^4.0.4
+  image_picker: ^0.8.4+4
 
 dev_dependencies:
   flutter_test:
