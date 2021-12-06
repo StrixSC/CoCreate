@@ -28,14 +28,16 @@ export const handleShape = async (io: Server, socket: Socket, data: Action) => {
                 );
             }
 
-            socket.emit('action:saved', {
-                collaborationId: dbAction.collaborationId,
-                actionId: dbAction.actionId,
-                userId: dbAction.userId,
-                actionType: 'Save',
-                username: dbAction.username,
-                isUndoRedo: data.isUndoRedo
-            });
+            if (!data.isUndoRedo) {
+                socket.emit('action:saved', {
+                    collaborationId: dbAction.collaborationId,
+                    actionId: dbAction.actionId,
+                    userId: dbAction.userId,
+                    actionType: 'Save',
+                    username: dbAction.username,
+                    isUndoRedo: data.isUndoRedo
+                });
+            }
 
             io.emit('shape:received', {
                 ...data,
