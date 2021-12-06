@@ -114,7 +114,7 @@ class _ChannelState extends State<Channel> with TickerProviderStateMixin {
   }
 
   bool isDrawing() {
-    return context.watch<Collaborator>().currentDrawingId != '';
+    return context.read<Collaborator>().currentDrawingId != '';
   }
 
   getChannelListWithType(type, String message) {
@@ -372,7 +372,6 @@ class _ChannelState extends State<Channel> with TickerProviderStateMixin {
                   children: [
                     SingleChildScrollView(
                         child: Container(
-                            height: 800.0,
                             child: Column(
                               children: [
                                 channelListWidgetGeneral(),

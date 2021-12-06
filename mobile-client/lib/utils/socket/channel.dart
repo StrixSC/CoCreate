@@ -69,7 +69,7 @@ class ChannelSocket {
       Chat channel = Chat(
         id: data['channelId'] ?? '',
         name: data['channelName'] ?? '',
-        type: data['type'] ?? '',
+        type: data['channelType'] ?? '',
         messages: [],
         onlineMembers: data['online_members'] ?? [],
       );
@@ -86,6 +86,7 @@ class ChannelSocket {
           collaborationId: data['collaborationId'],
           updatedAt: data['updatedAt'],
           messages: [],
+          type: data['channelType'] ?? '',
           onlineMembers: []);
       callbackChannel('created', channel);
     });
@@ -95,8 +96,8 @@ class ChannelSocket {
     socket.on('channel:left', (data) {
       print(data);
       // String channelId = data['channelId'];
-      String channelId = '';
-      callbackChannel('left', channelId);
+      String channelType =  data['channelType'] ?? '';
+      callbackChannel('left', channelType);
     });
   }
 

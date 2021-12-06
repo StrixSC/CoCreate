@@ -299,7 +299,6 @@ class Collaborator extends ChangeNotifier {
         break;
       case 'connected': // can only be someone else, when you join or connect you receive load
         Member member = data as Member;
-        member.username == auth!.user!.displayName ? alert('Succès!', 'Vous avez été connecté au dessin! Amusez-vous! 😄') : '';
         memberConnected(member);
         break;
       case 'created':

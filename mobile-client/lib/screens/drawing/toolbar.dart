@@ -284,6 +284,7 @@ class _ToolbarState extends State<Toolbar> {
           onPressed: () {
             String collaborationId = context.read<Collaborator>().getCollaborationId();
             context.read<Collaborator>().collaborationSocket.disconnectCollaboration(collaborationId);
+            context.read<Collaborator>().currentDrawingId = '';
             Navigator.pop(context);
             Navigator.pop(context);
           },

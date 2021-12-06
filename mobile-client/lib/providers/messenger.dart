@@ -23,6 +23,7 @@ class Messenger extends ChangeNotifier {
   late ChannelSocket channelSocket;
   late Function openDrawer;
 
+  bool isDrawing = false;
   late Function setIndex;
   int tabIndex = 0;
   Messenger(this.auth, this.userChannels, this.allChannels);
@@ -198,9 +199,10 @@ class Messenger extends ChangeNotifier {
         addMessage(message.channelId, message);
         break;
       case 'joined':
-        print('Joined Chat');
-        fetchChannels();
-        alert('Succès!', 'La chaine a été joint!');
+        Chat channel = data as Chat;
+          fetchChannels();
+          fetchChannels();
+          if(channel.type != 'Collaboration'){alert('Succès!', 'La chaine a été joint!');}
         // Chat channel = data as Chat;
         // addUserChannel(channel);
         break;
@@ -209,13 +211,14 @@ class Messenger extends ChangeNotifier {
         channel.ownerUsername == auth!.user!.displayName
             ? fetchChannels()
             : getAvailableChannels();
-        channel.ownerUsername == auth!.user!.displayName ?
+        (channel.ownerUsername == auth!.user!.displayName && channel.type != 'Collaboration') ?
         alert('Succès!', 'La chaine a été créée!'): '';
         break;
       case 'left':
         print('Left Chat');
+        String channelType = data;
         fetchChannels();
-        alert('Succès!', 'La chaine a été quitter!');
+        if(channelType != 'Collaboration'){alert('Succès!', 'La chaine a été quitter!');};
         // String channelId = data as String;
         // removeUserChannel(channelId);
         break;

@@ -148,7 +148,17 @@ class GalerieState extends State<Galerie>
     );
     Future.delayed(const Duration(seconds: 2), () {
       navigateToDrawing();
-      // Navigator.pop(context);
+      AwesomeDialog(
+        context:
+        navigatorKey.currentContext as BuildContext,
+        width: 800,
+        dismissOnTouchOutside: false,
+        dialogType: DialogType.SUCCES,
+        animType: AnimType.BOTTOMSLIDE,
+        title: 'Succès!',
+        desc: 'Vous avez été connecté au dessin! Amusez-vous! 😄',
+        btnOkOnPress: () {},
+      ).show();
     });
   }
 
