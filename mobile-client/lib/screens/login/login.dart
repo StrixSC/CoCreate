@@ -11,6 +11,7 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/src/provider.dart';
 import 'package:translator/translator.dart';
 import '../../app.dart';
@@ -41,6 +42,13 @@ class _LoginState extends State<Login> {
   final translator = GoogleTranslator();
   late UserCredential userCredential;
   bool _passwordVisible = false;
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+      'https://www.googleapis.com/auth/contacts.readonly',
+    ],
+  );
 
   @override
   void initState() {
@@ -246,9 +254,7 @@ class _LoginState extends State<Login> {
                                   padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      // Validate will return true if the form is valid, or false if
-                                      Navigator.pushNamed(
-                                          context, registerRoute);
+                                      _handleGoogleSign();
                                     },
                                     style: ElevatedButton.styleFrom(
                                         minimumSize: Size(80.0, 80.0)),
@@ -387,5 +393,25 @@ class _LoginState extends State<Login> {
         return null;
       },
     );
+  }
+
+  Future<void> _handleGoogleSign() async {
+    try {
+      await _googleSignIn.signIn().whenComplete(() => Navigator.pushReplacementNamed(context, homeRoute));
+    } catch (error) {
+      AwesomeDialog(
+        context:
+        navigatorKey.currentContext as BuildContext,
+        width: 800,
+        btnOkColor: Colors.red,
+        dismissOnTouchOutside: false,
+        dialogType: DialogType.ERROR,
+        animType: AnimType.BOTTOMSLIDE,
+        title: 'Erreur!',
+        desc: error.toString(),
+        btnOkOnPress: () {},
+      ).show();
+      print(error);
+    }
   }
 }
