@@ -8,6 +8,8 @@ export enum ExceptionType {
     Collaboration_Delete = "collaboration:delete:exception",
     Collaboration_Connect = "collaboration:connect:exception",
 
+    Logs = "logs:exception",
+    Logs_Drawing = "logs:drawing-action:exception",
     Drawing = "drawing:exception",
 
     Teams = "teams:exception",

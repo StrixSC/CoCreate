@@ -60,18 +60,44 @@ export const getPublicUserController = async (req: Request, res: Response, next:
     }
 };
 
+export const updateUserConfidentialityController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const errors = validationResult(req).array();
+
+        if (errors.length > 0) {
+            res.status(StatusCodes.BAD_REQUEST).json({
+                message: errors
+            });
+        }
+
+        const data = matchedData(req, { locations: ['body'] });
+        const { value } = data;
+        const user = await db.account.update({
+            where: {
+                user_id: req.userId
+            },
+            data: {
+                allow_searching: value
+            }
+        });
+
+        if (!user) {
+            throw new create.InternalServerError("Oups! Une erreur s'est produite lors du traitement de la requête... veuillez réessayer à nouveau.")
+        }
+
+        return res.status(StatusCodes.OK).json();
+    } catch (e) {
+        handleRequestError(e, next);
+    }
+}
+
 export const getCompleteUserController = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
     try {
-        const id = req.params.id.toString() || req.userId;
-        if (!id) throw new create.BadRequest('Invalid or missing identifier');
-
-        if (id !== req.userId) throw new create.Unauthorized('Unauthorized');
-
-        const user = await getCompleteUser(id);
+        const user = await getCompleteUser(req.userId);
         if (!user)
             return res
                 .status(StatusCodes.NO_CONTENT)

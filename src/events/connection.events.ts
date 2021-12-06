@@ -26,11 +26,11 @@ export = (io: Server, socket: Socket) => {
             await db.log.create({
                 data: {
                     type: LogType.Disconnection,
-                    user_id: socket.data.user_id
+                    user_id: socket.data.user
                 }
             });
         } catch (e) {
-            console.error('User log error', socket.data.user_id);
+            console.error('User log error', socket.data.user);
         }
     })
 

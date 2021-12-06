@@ -11,6 +11,7 @@ import {
     getUserChannelsController,
     getUserLogsController,
     getUserTeamsController,
+    updateUserConfidentialityController,
     updateUserProfileController,
     uploadAndChangeUserAvatarController
 } from './../controllers/users.controller';
@@ -57,9 +58,16 @@ router.get('/logs', checkIfAuthenticated,
         .withMessage('Limit must be a numeric value')
         .toInt(),
     (req, res, next) =>
-        getUserLogsController(req, res, next))
+        getUserLogsController(req, res, next));
 
-router.get('/:id', checkIfAuthenticated, checkIfSelfRequest, (req, res, next) =>
+router.put('/account/confidentiality', checkIfAuthenticated,
+    body('value')
+        .notEmpty()
+        .isBoolean()
+        .withMessage('Hmm... On dirait que la valeur entrée n\'est pas valde...'),
+    (req, res, next) => updateUserConfidentialityController(req, res, next));
+
+router.get('/account', checkIfAuthenticated, (req, res, next) =>
     getCompleteUserController(req, res, next)
 );
 

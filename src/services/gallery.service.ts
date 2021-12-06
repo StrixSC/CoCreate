@@ -146,7 +146,9 @@ export const getCollaborationsWithFilter = async (filter: string, offset: number
             const author = collaboration.author;
             authorUsername = author.is_team ? author.team!.team_name : author.user!.profile!.username;
             mascot = author.is_team ? author.team!.mascot : "";
-            allowSearching = author.is_team ? true : author.user!.account!.allow_searching;
+            allowSearching = author.is_team || author.user_id === userId ? true : author.user!.account!.allow_searching;
+
+            console.log('NAME', authorUsername, allowSearching);
         }
         catch (e) {
         }

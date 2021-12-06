@@ -50,24 +50,24 @@ model Stats {
   stats_id                   String   @id @unique @default(uuid())
   user_id                    String   @unique
   user                       User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  collaboration_count        Int
-  author_count               Int
-  active_team_count          Int
-  average_collaboration_time Float
-  total_collaboration_time   Float
+  collaboration_count        Int      @default(0)
+  author_count               Int      @default(0)
+  active_team_count          Int      @default(0)
+  average_collaboration_time Float    @default(0)
+  total_collaboration_time   Float    @default(0)
   created_at                 DateTime @default(now())
   updated_at                 DateTime @updatedAt
 }
 
 model Log {
-  index      Int      @unique @default(autoincrement())
-  log_id     String   @id @unique @default(uuid())
-  user_id    String
-  user       User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  type       LogType
-  drawing_id String?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  index            Int      @unique @default(autoincrement())
+  log_id           String   @id @unique @default(uuid())
+  user_id          String
+  user             User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  type             LogType
+  collaboration_id String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 }
 
 model Channel {

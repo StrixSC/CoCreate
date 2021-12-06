@@ -93,13 +93,17 @@ export const getCompleteUser = async (id: string): Promise<any> => {
                 select: {
                     type: true,
                     created_at: true,
-                    drawing_id: true
+                    collaboration_id: true
+                },
+                orderBy: {
+                    created_at: 'desc'
                 }
             },
             account: {
                 select: {
                     first_name: true,
-                    last_name: true
+                    last_name: true,
+                    allow_searching: true,
                 }
             },
             stats: {
@@ -108,7 +112,8 @@ export const getCompleteUser = async (id: string): Promise<any> => {
                     author_count: true,
                     active_team_count: true,
                     average_collaboration_time: true,
-                    total_collaboration_time: true
+                    total_collaboration_time: true,
+                    updated_at: true,
                 }
             }
         },
