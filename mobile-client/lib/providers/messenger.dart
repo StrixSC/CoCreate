@@ -201,7 +201,6 @@ class Messenger extends ChangeNotifier {
       case 'joined':
         Chat channel = data as Chat;
           fetchChannels();
-          fetchChannels();
           if(channel.type != 'Collaboration'){alert('Succès!', 'La chaine a été joint!');}
         // Chat channel = data as Chat;
         // addUserChannel(channel);

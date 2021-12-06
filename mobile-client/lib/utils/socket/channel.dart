@@ -66,6 +66,8 @@ class ChannelSocket {
 
   joinedChannel(callbackChannel) {
     socket.on('channel:joined', (data) {
+      print('DATA:');
+      print(data);
       Chat channel = Chat(
         id: data['channelId'] ?? '',
         name: data['channelName'] ?? '',

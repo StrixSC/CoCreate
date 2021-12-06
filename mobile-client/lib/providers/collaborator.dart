@@ -148,21 +148,21 @@ class Collaborator extends ChangeNotifier {
   }
 
   void memberJoined(Member member) {
-    if (member.userId == auth!.user!.uid) {
-      drawings[currentType][currentDrawingId].collaboration.members.add(member);
-      drawings[currentType][currentDrawingId].collaboration.memberCount++;
-    } else {
-      (drawings['Available'] as Map<String, Drawing>).update(member.drawingId!,
-          (value) {
-        value.collaboration.members.add(member);
-        return value;
-      });
-      (drawings['Available'] as Map<String, Drawing>).update(member.drawingId!,
-          (value) {
-        value.collaboration.memberCount++;
-        return value;
-      });
-    }
+    // if (member.userId == auth!.user!.uid) {
+    //   drawings[currentType][currentDrawingId].collaboration.members.add(member);
+    //   drawings[currentType][currentDrawingId].collaboration.memberCount++;
+    // } else {
+    //   (drawings['Available'] as Map<String, Drawing>).update(member.drawingId!,
+    //       (value) {
+    //     value.collaboration.members.add(member);
+    //     return value;
+    //   });
+    //   (drawings['Available'] as Map<String, Drawing>).update(member.drawingId!,
+    //       (value) {
+    //     value.collaboration.memberCount++;
+    //     return value;
+    //   });
+    // }
     refreshPages();
     notifyListeners();
   }
