@@ -117,9 +117,10 @@ class GalerieState extends State<Galerie>
     var collaborationId = context.read<Collaborator>().getCollaborationId();
     // TODO : wait for load, then navigate to screen
     var actions = context.read<Collaborator>().getCurrentActionMap();
+    var backgroundColor = context.read<Collaborator>().getBackgroundColor();
     pushNewScreen(
       context,
-      screen: DrawingScreen(socket, user, collaborationId, actions),
+      screen: DrawingScreen(socket, user, collaborationId, actions, backgroundColor),
       withNavBar: false,
       pageTransitionAnimation: PageTransitionAnimation.cupertino,
     );

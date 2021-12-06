@@ -83,6 +83,13 @@ class Collaborator extends ChangeNotifier {
         .collaborationId;
   }
 
+  Color getBackgroundColor() {
+    return (drawings[currentType][currentDrawingId] as Drawing)
+        .collaboration
+        .backgroundColor;
+  }
+
+
   Map getCurrentActionMap() {
     return (drawings[currentType][currentDrawingId] as Drawing)
         .collaboration

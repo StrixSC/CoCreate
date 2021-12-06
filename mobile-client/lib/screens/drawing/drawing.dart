@@ -17,13 +17,14 @@ class DrawingScreen extends StatefulWidget {
   final User _user;
   final String _collaborationId;
   final Map _actions;
+  final Color _backgroundColor;
 
   const DrawingScreen(
-      this._socket, this._user, this._collaborationId, this._actions);
+      this._socket, this._user, this._collaborationId, this._actions, this._backgroundColor);
 
   @override
   State<DrawingScreen> createState() =>
-      _DrawingScreenState(_socket, _user, _collaborationId, _actions);
+      _DrawingScreenState(_socket, _user, _collaborationId, _actions, _backgroundColor);
 }
 
 class _DrawingScreenState extends State<DrawingScreen> {
@@ -40,7 +41,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   Offset? selectRef; // offset reference of selected item
   Color currentBodyColor = const Color(0xff443a49);
   Color currentBorderColor = const Color(0xff443a49);
-  Color currentBackgroundColor = Colors.blueGrey;
+  Color currentBackgroundColor;
   double currentWidth = 5;
   String currentFillType = "border";
   List<Rect>? selectedBounds;
@@ -52,7 +53,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   List<ShapeAction> redoList = [];
 
   _DrawingScreenState(
-      this._socket, this._user, this._collaborationId, this.actionsMap, this.backgroundColor);
+      this._socket, this._user, this._collaborationId, this.actionsMap, this.currentBackgroundColor);
 
   @override
   void initState() {
