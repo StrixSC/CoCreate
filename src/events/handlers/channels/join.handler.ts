@@ -46,12 +46,14 @@ export const handleJoin = async (io: Server, socket: Socket, data: { channelId: 
             io.to(channelId).emit('channel:joined', {
                 channelId: channel.channel_id,
                 channelName: channel.name,
+                channelType: channel.type,
                 collaborationId: channel.collaboration_id
             });
         } else {
             socket.join(channelId);
             io.to(channelId).emit('channel:connected', {
                 channelId: channelId,
+                channelType: channel.type,
                 channelName: channel.name,
                 collaborationId: channel.collaboration_id
             })

@@ -82,6 +82,7 @@ export const findTeamById = async (teamId: string) => {
             team_id: teamId,
         },
         include: {
+            channel: true,
             team_members: {
                 include: {
                     user: {

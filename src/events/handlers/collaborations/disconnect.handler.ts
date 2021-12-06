@@ -23,6 +23,7 @@ export const handleDisconnect = async (io: Server, socket: Socket, payload: {
                 collaboration: {
                     include: {
                         drawing: true,
+                        channel: true
                     }
                 }
             }
@@ -63,6 +64,7 @@ export const handleDisconnect = async (io: Server, socket: Socket, payload: {
         io.to(payload.collaborationId).emit("collaboration:disconnnected", disconnectionData);
         io.to(member.collaboration.channel_id).emit('channel:left', {
             channelId: member.collaboration.channel_id,
+            channelType: member.collaboration.channel.type,
         });
 
         socket.leave(payload.collaborationId);

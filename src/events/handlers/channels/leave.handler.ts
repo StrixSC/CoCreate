@@ -44,6 +44,9 @@ export const handleLeave = async (io: Server, socket: Socket, data: { channelId:
         const leftMember = await db.channelMember.delete({
             where: {
                 member_id: channelMember.member_id
+            },
+            include: {
+                channel: true
             }
         });
 
@@ -51,12 +54,11 @@ export const handleLeave = async (io: Server, socket: Socket, data: { channelId:
             throw new SocketEventError(`Oups! Quelque chose s'est produit lors du traitement de la requête...`, 'E1060');
         }
 
-        socket.leave(channelId);
-        socket.emit('channel:left');
-
         io.to(channelId).emit('channel:left', {
-            channelId: channelId
+            channelType: leftMember.channel.type,
+            channelId: channelId,
         });
+        socket.leave(channelId);
 
     } catch (e) {
         handleSocketError(socket, e, undefined, [ExceptionType.Channel_Leave, ExceptionType.Channels]);

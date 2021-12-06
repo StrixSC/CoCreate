@@ -55,6 +55,7 @@ export const handleCreate = async (io: Server, socket: Socket, data: { channelNa
             channelName: channel.name,
             ownerUsername: channel.members.find((m) => m.type === MemberType.Owner)?.member.profile?.username || 'admin',
             createdAt: channel.created_at,
+            channelType: channel.type,
             updatedAt: channel.updated_at,
             collaborationId: channel.collaboration_id || null
         });

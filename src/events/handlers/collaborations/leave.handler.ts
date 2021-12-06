@@ -43,6 +43,11 @@ export const handleLeave = async (io: Server, socket: Socket, payload: {
                     collaboration_member_id: collaboration.collaboration_member_id,
                 },
                 include: {
+                    collaboration: {
+                        include: {
+                            channel: true
+                        }
+                    },
                     user: {
                         include: {
                             profile: true
@@ -73,6 +78,7 @@ export const handleLeave = async (io: Server, socket: Socket, payload: {
         });
 
         socket.emit('channel:left', {
+            channelType: deletedCollabMember.collaboration.channel.type,
             channelId: collaboration.collaboration.channel_id,
         });
 

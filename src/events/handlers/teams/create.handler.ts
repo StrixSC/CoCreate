@@ -23,6 +23,7 @@ export const handleCreate = async (io: Server, socket: Socket, data: {
         socket.emit('channel:joined', {
             channelId: team.channel_id,
             channelName: team.channelName,
+            channelType: team.channelType,
             collaborationId: team.collaborationId
         });
         socket.emit('teams:create:finished', team);
@@ -111,7 +112,8 @@ const createTeam = async (userId: string, teamName: string, bio: string, maxMemb
             type: createdTeam.type,
             channel_id: createdTeam.channel_id,
             channelName: createdTeam.channel.name.replace,
-            collaborationId: null
+            collaborationId: null,
+            channelType: createdTeam.channel.type,
         }
     }
 }

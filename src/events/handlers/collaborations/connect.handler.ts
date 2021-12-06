@@ -112,6 +112,7 @@ export const handleConnect = async (io: Server, socket: Socket, payload: {
 
         socket.emit("channel:created", {
             collaborationId: member.collaboration.collaboration_id,
+            channelType: member.collaboration.channel.type,
             channelId: member.collaboration.channel_id,
             channelName: member.collaboration.channel.name,
             ownerUsername:

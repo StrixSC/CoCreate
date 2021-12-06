@@ -155,11 +155,13 @@ export const handleJoin = async (io: Server, socket: Socket, payload: {
             io.to(member.collaboration.channel_id).emit('channel:joined', {
                 collaborationId: member.collaboration_id,
                 channelId: member.collaboration.channel_id,
+                channelType: member.collaboration.channel.type,
                 channelName: member.collaboration.channel.name
             });
 
             io.to(member.collaboration_id).emit("collaboration:joined", {
                 userId: userId,
+                channelType: member.collaboration.channel.type,
                 collaborationId: member.collaboration_id,
                 username: member.user.profile!.username,
                 avatarUrl: member.user.profile!.avatar_url,
@@ -173,6 +175,7 @@ export const handleJoin = async (io: Server, socket: Socket, payload: {
             io.to(member.collaboration_id).emit("collaboration:connected", {
                 userId: member.user.user_id,
                 username: member.user.profile!.username,
+                channelType: member.collaboration.channel.type,
                 avatarUrl: member.user.profile!.avatar_url,
                 type: member.type,
                 drawingId: member.collaboration.drawing!.drawing_id,
@@ -181,6 +184,7 @@ export const handleJoin = async (io: Server, socket: Socket, payload: {
             });
 
             io.to(member.collaboration.channel_id).emit('channel:joined', {
+                channelType: member.collaboration.channel.type,
                 collaborationId: member.collaboration_id,
                 channelId: member.collaboration.channel_id,
                 channelName: member.collaboration.channel.name

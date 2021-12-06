@@ -43,12 +43,11 @@ export const handleLeave = async (io: Server, socket: Socket, data: { teamId: st
             throw new SocketEventError(`Oups... Quelque chose s'est produit lors du traitement de la requête, veuillez réessayez à nouveau SVP.`);
         } else {
 
-            socket.emit('teams:leave:finished', { teamName: team.team_name });
             io.to(team.channel_id).emit('channel:left', {
-                channelId: team.channel_id
+                channelId: team.channel_id,
+                channelType: team.channel.type,
             });
-            socket.leave(team.team_id);
-            socket.leave(team.channel_id);
+
 
             const onlineMembers = getOnlineMembersInRoom(team.team_id);
 
@@ -59,7 +58,10 @@ export const handleLeave = async (io: Server, socket: Socket, data: { teamId: st
                 currentMemberCount: team.team_members.length - 1,
                 maxMemberCount: team.max_member_count,
                 onlineMembersCount: onlineMembers.length
-            })
+            });
+
+            socket.leave(team.team_id);
+            socket.leave(team.channel_id);
         }
     } catch (e) {
         handleSocketError(socket, e, ExceptionType.Teams_Leave)
