@@ -97,6 +97,7 @@ export const handleConnect = async (io: Server, socket: Socket, payload: {
             status: socket.data.status,
             roomId: member.collaboration.channel_id,
             channelId: member.collaboration.channel_id,
+            channelType: member.collaboration.channel.type,
             channelName: member.collaboration.channel.name,
             avatarUrl: socket.data.avatarUrl,
             collaborationId: member.collaboration.collaboration_id
