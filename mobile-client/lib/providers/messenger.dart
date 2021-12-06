@@ -118,6 +118,8 @@ class Messenger extends ChangeNotifier {
           color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
         ));
       }
+
+      // todo: change to int i = 0.. if not working
       if(userChannels.isNotEmpty) {
         for(var newChannel in useChannels) {
           for(var oldChannel in userChannels) {

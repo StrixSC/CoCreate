@@ -77,6 +77,7 @@ class _ProfileScreenState extends State<Profile> {
                         Navigator.pop(context);
                       },
                       btnOkOnPress: () {
+                        context.read<Collaborator>().collaborationSocket.socket.dispose();
                         signOut(navigatorKey.currentContext);
                       },
                     ).show();
