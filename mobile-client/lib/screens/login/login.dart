@@ -7,6 +7,7 @@ import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:Colorimage/utils/socket/collaboration.dart';
 import 'package:Colorimage/utils/socket/socket_service.dart';
 import 'package:Colorimage/utils/socket/team.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,6 +19,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 TextEditingController userController = TextEditingController();
 TextEditingController passController = TextEditingController();
+TextEditingController emailController = TextEditingController();
 Color primaryColor =
     Color(int.parse(('#3FA3FF').substring(1, 7), radix: 16) + 0xFF000000);
 
@@ -33,6 +35,7 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyForgotPass = GlobalKey<FormState>();
 
   String errorMessage = "";
   final translator = GoogleTranslator();
@@ -213,7 +216,6 @@ class _LoginState extends State<Login> {
                                     autocorrect: false,
                                     autovalidate: true,
                                   )),
-
                               const SizedBox(height: 24.0),
                               ElevatedButton(
                                 onPressed: () {
@@ -254,35 +256,136 @@ class _LoginState extends State<Login> {
                                         style: new TextStyle(fontSize: 26.0)),
                                   )),
                               Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
-                                  child: Row(children: [Text('Pas de compte? ',style: new TextStyle(fontSize: 26.0)),TextButton(
-                                    onPressed: () {
-                                      // Validate will return true if the form is valid, or false if
-                                      Navigator.pushNamed(
-                                          context, registerRoute);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        minimumSize: Size(60.0, 60.0)),
-                                    child: Text('Inscrivez-vous',
+                                  padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
+                                  child: Row(children: [
+                                    Text('Pas de compte? ',
                                         style: new TextStyle(fontSize: 26.0)),
-                                  )])),
+                                    TextButton(
+                                      onPressed: () {
+                                        // Validate will return true if the form is valid, or false if
+                                        Navigator.pushNamed(
+                                            context, registerRoute);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                          minimumSize: Size(30.0, 30.0)),
+                                      child: Text('Inscrivez-vous',
+                                          style: new TextStyle(fontSize: 26.0)),
+                                    )
+                                  ])),
                               Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
-                                  child: Row(children: [Text('Pas de compte? ',style: new TextStyle(fontSize: 26.0)),TextButton(
-                                    onPressed: () {
-                                      // Validate will return true if the form is valid, or false if
-                                      Navigator.pushNamed(
-                                          context, registerRoute);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        minimumSize: Size(80.0, 80.0)),
-                                    child: Text('Inscrivez-vous',
+                                  padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                  child: Row(children: [
+                                    Text('Mot de passe oublié? ',
                                         style: new TextStyle(fontSize: 26.0)),
-                                  )])),
+                                    TextButton(
+                                      onPressed: () {
+                                        forgotDialog();
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                          minimumSize: Size(10.0, 10.0)),
+                                      child: Text('Récupérer',
+                                          style: new TextStyle(fontSize: 26.0)),
+                                    )
+                                  ])),
                             ],
                           ),
                         ),
                       )
                     ]))));
+  }
+
+  forgotDialog() async {
+    showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              titlePadding: EdgeInsets.zero,
+              title: Container(
+                  padding: EdgeInsets.all(10.0),
+                  color: kContentColor,
+                  child: const Center(child: Text('Récupération de mot de passe'))),
+              content: SingleChildScrollView(child: forgot()),
+              actions: <Widget>[
+                Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
+                    child: Container(
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await FirebaseAuth.instance
+                                .sendPasswordResetEmail(
+                                    email: emailController.text)
+                                .whenComplete(() => AwesomeDialog(
+                                      context: navigatorKey.currentContext
+                                          as BuildContext,
+                                      width: 800,
+                                      dismissOnTouchOutside: false,
+                                      dialogType: DialogType.SUCCES,
+                                      animType: AnimType.BOTTOMSLIDE,
+                                      title: 'Récupération envoyé!',
+                                      desc: 'Allez voir dans votre courriel! 😄',
+                                      btnOkOnPress: () {
+                                        Navigator.pushReplacementNamed(
+                                            context, loginRoute);
+                                      },
+                                    ).show());
+                          },
+                          child: const Text('Récupérer'),
+                        ))),
+              ],
+            ));
+  }
+
+  forgot() {
+    return Container(
+        width: 1000,
+        child: Form(
+            key: _formKeyForgotPass,
+            child: Column(children: <Widget>[
+              const SizedBox(height: 28.0),
+              SizedBox(
+                  width: 900,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          width: 800,
+                          child: formField("Courriel", emailController),
+                        ),
+                      ])),
+            ])));
+  }
+
+  formField(String hintText, TextEditingController textController) {
+    return TextFormField(
+      controller: textController,
+      style: const TextStyle(fontSize: _fontSize),
+      maxLines: 1,
+      autofocus: false,
+      decoration: InputDecoration(
+          errorStyle: const TextStyle(fontSize: _fontSize),
+          hintText: hintText,
+          helperText:
+              "Si votre courriel est valide, vous devrez recevoir un courriel \n pour changer de mot de passe",
+          helperStyle: TextStyle(fontSize: 15.0),
+          hintStyle: const TextStyle(
+            fontSize: _fontSize,
+          ),
+          contentPadding: const EdgeInsets.all(padding),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(3.0))),
+      validator: (value) {
+        RegExp regExp = RegExp(r'^[a-zA-Z0-9]+$');
+        if (textController == emailController) {
+          if (!RegExp(
+                  r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+              .hasMatch(value!)) {
+            return 'Le courriel est invalide';
+          }
+        } else if (value == null || value.isEmpty) {
+          return 'Veuillez entrez un courriel svp.';
+        }
+        _formKey.currentState!.save();
+        return null;
+      },
+    );
   }
 }
