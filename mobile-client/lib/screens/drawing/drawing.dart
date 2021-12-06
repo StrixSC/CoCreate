@@ -52,7 +52,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   List<ShapeAction> redoList = [];
 
   _DrawingScreenState(
-      this._socket, this._user, this._collaborationId, this.actionsMap);
+      this._socket, this._user, this._collaborationId, this.actionsMap, this.backgroundColor);
 
   @override
   void initState() {

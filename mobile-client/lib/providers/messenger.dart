@@ -13,6 +13,7 @@ import 'package:flutter/cupertino.dart';
 import '../app.dart';
 import '../models/chat.dart';
 import 'dart:math';
+
 class Messenger extends ChangeNotifier {
   UserCredential? auth;
   List<Chat> userChannels = [];
@@ -60,7 +61,6 @@ class Messenger extends ChangeNotifier {
     if (!userChannels.contains(channel)) {
       userChannels.add(channel);
       notifyListeners();
-      alert('Succès!', 'La chaine a été supprimer!');
     }
   }
 
@@ -74,7 +74,6 @@ class Messenger extends ChangeNotifier {
   void removeUserChannel(String channelId) {
     userChannels.removeWhere((userChannel) => userChannel.id == channelId);
     notifyListeners();
-    alert('Succès!', 'La chaine a été supprimer!');
   }
 
   void updateUserChannelName(String name, String updatedAt, String channelId) {
@@ -120,13 +119,13 @@ class Messenger extends ChangeNotifier {
       }
 
       // todo: change to int i = 0.. if not working
-      if(userChannels.isNotEmpty) {
-        for(var newChannel in useChannels) {
-          for(var oldChannel in userChannels) {
-              if(newChannel.id == oldChannel.id) {
-                newChannel.messages = oldChannel.messages;
-                newChannel.lastReadMessage = oldChannel.lastReadMessage;
-              }
+      if (userChannels.isNotEmpty) {
+        for (var newChannel in useChannels) {
+          for (var oldChannel in userChannels) {
+            if (newChannel.id == oldChannel.id) {
+              newChannel.messages = oldChannel.messages;
+              newChannel.lastReadMessage = oldChannel.lastReadMessage;
+            }
           }
         }
       }
@@ -213,24 +212,22 @@ class Messenger extends ChangeNotifier {
         break;
       case 'joined':
         Chat channel = data as Chat;
-          fetchChannels();
-          if(channel.type != 'Collaboration' && channel.type != 'Team'){alert('Succès!', 'La chaine a été joint!');}
+        print('joined');
+        fetchChannels();
         // Chat channel = data as Chat;
         // addUserChannel(channel);
         break;
       case 'created':
         Chat channel = data as Chat;
-        channel.ownerUsername == auth!.user!.displayName
-            ? fetchChannels()
-            : getAvailableChannels();
-        (channel.ownerUsername == auth!.user!.displayName && channel.type != 'Collaboration'  && channel.type != 'Team') ?
-        alert('Succès!', 'La chaine a été créée!'): '';
+        break;
+      case 'left:finished':
+        print('Left Chat Finished');
+        // String channelId = data as String;
+        // removeUserChannel(channelId);
         break;
       case 'left':
         print('Left Chat');
-        String channelType = data;
         fetchChannels();
-        if(channelType != 'Collaboration'  && channelType != 'Team'){alert('Succès!', 'La chaine a été quitter!');}
         // String channelId = data as String;
         // removeUserChannel(channelId);
         break;
@@ -254,8 +251,7 @@ class Messenger extends ChangeNotifier {
 
   void alert(type, description) {
     AwesomeDialog(
-      context:
-      navigatorKey.currentContext as BuildContext,
+      context: navigatorKey.currentContext as BuildContext,
       width: 800,
       dismissOnTouchOutside: false,
       dialogType: DialogType.SUCCES,

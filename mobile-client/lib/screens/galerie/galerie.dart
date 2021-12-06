@@ -1093,7 +1093,8 @@ class _DrawingState extends State<_Drawing> {
                     ],
                   )
                 : drawing.thumbnailUrl != ''
-                    ? SvgPicture.network(drawing.thumbnailUrl)
+                    ? SvgPicture.network(drawing.thumbnailUrl,
+                semanticsLabel: 'A red up arrow')
                     : Image.asset('assets/images/default_thumbnail.png')));
   }
 

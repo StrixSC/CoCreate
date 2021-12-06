@@ -2,6 +2,7 @@ import 'package:Colorimage/models/chat.dart';
 import 'package:Colorimage/screens/chat/chat.dart';
 import 'package:Colorimage/screens/login/kickout.dart';
 import 'package:Colorimage/utils/socket/socket_service.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -85,6 +86,12 @@ class ChannelSocket {
     });
   }
 
+  joinedChannelFinished(callbackChannel) {
+    socket.on('channel:left:finished', (data) {
+      alert('Succès!', 'La chaine a été joint!');
+    });
+  }
+
   createdChannel(callbackChannel) {
     socket.on('channel:created', (data) {
       Chat channel = Chat(
@@ -100,12 +107,24 @@ class ChannelSocket {
     });
   }
 
+  createdChannelFinished(callbackChannel) {
+    socket.on('channel:left:finished', (data) {
+      alert('Succès!', 'La chaine a été créé!');
+    });
+  }
+
   leftChannel(callbackChannel) {
     socket.on('channel:left', (data) {
       print(data);
       // String channelId = data['channelId'];
       String channelType =  data['channelType'] ?? '';
       callbackChannel('left', channelType);
+    });
+  }
+
+  leftChannelFinished(callbackChannel) {
+    socket.on('channel:left:finished', (data) {
+      alert('Succès!', 'La chaine a été quitté!');
     });
   }
 
@@ -132,6 +151,12 @@ class ChannelSocket {
     });
   }
 
+  deletedChannelFinished(callbackChannel) {
+    socket.on('channel:deleted:finished', (data) {
+      alert('Succès!', 'La chaine a été supprimé!');
+    });
+  }
+
   initializeChannelSocketEvents(callbackChannel) {
 
     userInitialized(callbackChannel);
@@ -141,13 +166,30 @@ class ChannelSocket {
     sentMessage(callbackChannel);
 
     joinedChannel(callbackChannel);
+    joinedChannelFinished(callbackChannel);
 
     createdChannel(callbackChannel);
+    createdChannelFinished(callbackChannel);
 
     leftChannel(callbackChannel);
+    leftChannelFinished(callbackChannel);
 
     updatedChannel(callbackChannel);
 
     deletedChannel(callbackChannel);
+    deletedChannelFinished(callbackChannel);
+  }
+
+  void alert(type, description) {
+    AwesomeDialog(
+      context: navigatorKey.currentContext as BuildContext,
+      width: 800,
+      dismissOnTouchOutside: false,
+      dialogType: DialogType.SUCCES,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Succès!',
+      desc: description,
+      btnOkOnPress: () {},
+    ).show();
   }
 }

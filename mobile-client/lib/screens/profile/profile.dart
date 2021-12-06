@@ -35,7 +35,7 @@ class _ProfileScreenState extends State<Profile> {
     kContentColor2,
     kContentColor3
   ];
-  List<double> height = <double>[250.0, 2.0, 150.0, 150.0, 300.0];
+  List<double> height = <double>[250.0, 2.0, 150.0, 180.0, 300.0];
   late List children;
   bool isAuthor = false;
   User _user;
@@ -291,9 +291,14 @@ class _ProfileScreenState extends State<Profile> {
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 35.0)),
                     Text(
-                        "En activant ce réglage, vous permettez à tout les utilisateurs d'utiliser vos informations personneles, telles que votre prénom, votre nom",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 35.0)),
+                        "En activant ce réglage, vous permettez à tout les utilisateurs d'utiliser",
+                        style: TextStyle(fontSize: 20.0)),
+                    Text(
+                        "vos informations personneles, telles que votre prénom, votre nom et votre courriel,",
+                        style: TextStyle(fontSize: 20.0)),
+                    Text(
+                        "comme mots-clés de filtrage supplémentaires..",
+                        style: TextStyle(fontSize: 20.0)),
                   ])),
           Padding(
               padding: EdgeInsets.only(right: 100.0),
