@@ -45,7 +45,7 @@ export const registerController = async (req: any, res: any, next: any) => {
         }
 
         let user = null;
-        if (req.files[0]) {
+        if (req.files && req.files[0]) {
             user = await registerWithFileUpload(payload, req.files[0]);
         } else if (avatar_url) {
             user = await register(payload, avatar_url)
