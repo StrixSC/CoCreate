@@ -9,7 +9,7 @@ import { Socket, Server } from 'socket.io';
 export const handleShape = async (io: Server, socket: Socket, data: Action) => {
     try {
         if (data.state === DrawingState.Down || data.state === DrawingState.Move) {
-            io.emit('shape:received', {
+            io.to(data.collaborationId).emit('shape:received', {
                 ...data,
                 isSelected: !!data.isSelected,
             });
@@ -39,7 +39,7 @@ export const handleShape = async (io: Server, socket: Socket, data: Action) => {
                 });
             }
 
-            io.emit('shape:received', {
+            io.to(data.collaborationId).emit('shape:received', {
                 ...data,
             });
         }

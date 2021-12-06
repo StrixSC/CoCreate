@@ -50,7 +50,7 @@ export const handleSelection = async (io: Server, socket: Socket, data: Action) 
             );
         }
 
-        io.emit('selection:received', {
+        io.to(data.collaborationId).emit('selection:received', {
             actionId: action.actionId,
             isSelected: userSelectionChoice,
             selectedBy: selectedByUser,

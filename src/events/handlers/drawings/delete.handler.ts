@@ -13,7 +13,7 @@ export const handleDelete = async (io: Server, socket: Socket, data: Action) => 
             }
         });
 
-        io.emit('delete:received', {
+        io.to(data.collaborationId).emit('delete:received', {
             ...data
         } as Action);
     } catch (e) {

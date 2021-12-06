@@ -35,11 +35,11 @@ export const handleFreedraw = async (io: Server, socket: Socket, data: Action) =
                 });
             }
 
-            return io.emit('freedraw:received', {
+            return io.to(data.collaborationId).emit('freedraw:received', {
                 ...data,
             });
         } else {
-            io.emit('freedraw:received', {
+            io.to(data.collaborationId).emit('freedraw:received', {
                 ...data,
             });
         }

@@ -11,7 +11,7 @@ export const handleTranslation = async (io: Server, socket: Socket, data: Action
     try {
         const state = data.state;
         if ((state === DrawingState.Move || state === DrawingState.Down) && !data.isUndoRedo) {
-            io.emit('translation:received', { ...data });
+            io.to(data.collaborationId).emit('translation:received', { ...data });
         } else {
             const savedAction = await db.action.create({
                 data: {
@@ -23,7 +23,7 @@ export const handleTranslation = async (io: Server, socket: Socket, data: Action
                 throw new SocketEventError('Could not save action: Unexpected error has occurred.', ExceptionType.Drawing);
             }
 
-            io.emit('translation:received', {
+            io.to(data.collaborationId).emit('translation:received', {
                 ...data
             });
         }
