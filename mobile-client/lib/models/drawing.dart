@@ -160,7 +160,6 @@ class Bounds {
   }
 }
 
-//todo: regroup undoRedo elements
 class ShapeAction {
   Path path;
   Paint? bodyColor;
@@ -177,6 +176,8 @@ class ShapeAction {
   String actionId;
   double angle = 0;
   Offset translate = Offset.zero;
+  bool isDeleted = false;
+  String fillType = "border";
 
   ShapeAction(this.path, this.actionType, this.borderColor, this.actionId);
 
@@ -202,6 +203,8 @@ class ShapeAction {
     copy.boundIndex = boundIndex;
     copy.scale = scale;
     copy.scaledTranslation = scaledTranslation;
+    copy.isDeleted = isDeleted;
+    copy.fillType = fillType;
     return copy;
   }
 }

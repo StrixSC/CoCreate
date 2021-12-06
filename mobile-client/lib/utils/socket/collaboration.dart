@@ -167,7 +167,6 @@ class CollaborationSocket extends SocketService {
         resizeLoad(actionsMap, action);
       }
     });
-
     return actionsMap;
   }
 

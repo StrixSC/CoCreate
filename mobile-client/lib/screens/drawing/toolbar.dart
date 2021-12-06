@@ -11,18 +11,21 @@ class Toolbar extends StatefulWidget {
   Function changeTool;
   Function changeColor;
   Function changeWidth;
+  Function unselectBeforeLeave;
 
-  Toolbar(this.changeTool, this.changeColor, this.changeWidth);
+  Toolbar(this.changeTool, this.changeColor, this.changeWidth,
+      this.unselectBeforeLeave);
 
   @override
-  State<Toolbar> createState() =>
-      _ToolbarState(this.changeTool, this.changeColor, this.changeWidth);
+  State<Toolbar> createState() => _ToolbarState(this.changeTool,
+      this.changeColor, this.changeWidth, this.unselectBeforeLeave);
 }
 
 class _ToolbarState extends State<Toolbar> {
   Function changeTool;
   Function changeColor;
   Function changeWidth;
+  Function unselectBeforeLeave;
 
   Color currentBodyColor = const Color(0xff443a49);
   Color currentBorderColor = const Color(0xff443a49);
@@ -42,7 +45,8 @@ class _ToolbarState extends State<Toolbar> {
     Tool("Colors", CupertinoIcons.bold),
   ];
 
-  _ToolbarState(this.changeTool, this.changeColor, this.changeWidth);
+  _ToolbarState(this.changeTool, this.changeColor, this.changeWidth,
+      this.unselectBeforeLeave);
 
   void selectBodyColor(Color color) {
     currentBodyColor = color;
@@ -169,7 +173,11 @@ class _ToolbarState extends State<Toolbar> {
                   ),
                 ),
               )
-            : Column(children: [drawingColorPicker(), openChatDrawer(), navigateToGallery()]),
+            : Column(children: [
+                drawingColorPicker(),
+                openChatDrawer(),
+                navigateToGallery()
+              ]),
       ),
     );
   }
@@ -265,9 +273,7 @@ class _ToolbarState extends State<Toolbar> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
       child: IconButton(
-        onPressed: () {
-
-        },
+        onPressed: () {},
         icon: const Icon(
           Icons.message,
           size: 35,
@@ -280,17 +286,22 @@ class _ToolbarState extends State<Toolbar> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
       child: IconButton(
-          onPressed: () {
-            String collaborationId = context.read<Collaborator>().getCollaborationId();
-            context.read<Collaborator>().collaborationSocket.disconnectCollaboration(collaborationId);
-            Navigator.pop(context);
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.door_back_door_outlined,
-            size: 35,
-          ),
+        onPressed: () {
+          // unselectBeforeLeave();
+          String collaborationId =
+              context.read<Collaborator>().getCollaborationId();
+          context
+              .read<Collaborator>()
+              .collaborationSocket
+              .disconnectCollaboration(collaborationId);
+          Navigator.pop(context);
+          Navigator.pop(context);
+        },
+        icon: const Icon(
+          Icons.door_back_door_outlined,
+          size: 35,
         ),
+      ),
     );
   }
 }
