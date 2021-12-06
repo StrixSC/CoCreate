@@ -350,9 +350,16 @@ class _LoginState extends State<Login> {
               const SizedBox(height: 28.0),
               SizedBox(
                   width: 900,
-                  child: Row(
+                  child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        SizedBox(
+                          width: 800,
+                          child: Text("Ne vous inquiétez pas! Vous pouvez le ré-obtenir 😎", style: TextStyle(fontSize: 25.0)),
+                        ),
+                        SizedBox(
+                          height: 30,
+                        ),
                         SizedBox(
                           width: 800,
                           child: formField("Courriel", emailController),

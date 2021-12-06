@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/collaborator.dart';
 import 'package:Colorimage/providers/messenger.dart';
 import 'package:Colorimage/screens/profile/historique.dart';
 import 'package:Colorimage/screens/profile/statistique.dart';
 import 'package:Colorimage/screens/profile/update_profile.dart';
+import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -34,10 +37,26 @@ class _ProfileScreenState extends State<Profile> {
   _ProfileScreenState(this._user);
   final translator = GoogleTranslator();
 
+
+
   @override
   void initState() {
     super.initState();
     isAuthor = context.read<Collaborator>().auth!.user!.uid == _user.uid;
+  }
+
+  fetchUserInfo() async {
+    RestApi rest = RestApi();
+    var response =
+        await rest.user.fetchUserAccount();
+    var jsonResponse = json.decode(response.body); //Map<String, dynamic>;
+    print(jsonResponse);
+
+    // for (var drawing in resp) {
+    //   if (drawing != null) {
+    //
+    //   }
+    // }
   }
 
   @override
@@ -160,14 +179,7 @@ class _ProfileScreenState extends State<Profile> {
 
   profileRow() {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      const SizedBox(width: 120),
-      isAuthor
-          ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text('Courriel: ' + _user.email.toString()),
-              Text('Nom: Patel'),
-              Text('Prenom: Pritam'),
-            ])
-          : const SizedBox.shrink(),
+      const SizedBox(width: 20),
       Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         CircleAvatar(
           backgroundColor: Colors.white,
@@ -177,11 +189,19 @@ class _ProfileScreenState extends State<Profile> {
             radius: 80.0,
           ),
         ),
-        const SizedBox(height: 10),
-        Text(_user.displayName.toString())
+        // const SizedBox(height: 10),
+        // Text('@' + _user.displayName.toString(), style: TextStyle(fontWeight: FontWeight.bold))
       ]),
       isAuthor
-          ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          ? Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
+        Text('Informations personnelles', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 35.0)),
+            Row(children: [Text('Courriel: ', style: TextStyle(fontWeight: FontWeight.bold) ), Text(_user.email.toString(), )]),
+              Text('Nom: Patel'),
+              Text('Prenom: Pritam'),
+            ])
+          : const SizedBox.shrink(),
+      isAuthor
+          ? Column(crossAxisAlignment: CrossAxisAlignment.end,mainAxisAlignment: MainAxisAlignment.center, children: [
               history(),
               settings(),
               statistics(),
