@@ -932,7 +932,6 @@ class _DrawingState extends State<_Drawing> {
       title: 'Attention!',
       desc: 'Êtes-vous certain de vouloir ${type} ce dessin?.',
       btnCancelOnPress: () {
-        Navigator.pop(context);
       },
       btnOkOnPress: () {
         emitDeleteLeave(type, collab);

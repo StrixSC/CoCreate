@@ -69,7 +69,7 @@ class _LoginState extends State<Login> {
       userCredential = await FirebaseAuth.instance
           // .signInWithEmailAndPassword(email: email, password: password);
           .signInWithEmailAndPassword(
-              email: "pri@pri.com", password: "pripri123");
+              email: "Pritam184@hotmail.com", password: "pripri123");
     } on FirebaseAuthException catch (e) {
       await translator
           .translate(e.message!, from: 'en', to: 'fr')
@@ -213,6 +213,7 @@ class _LoginState extends State<Login> {
                                     autocorrect: false,
                                     autovalidate: true,
                                   )),
+
                               const SizedBox(height: 24.0),
                               ElevatedButton(
                                 onPressed: () {
@@ -249,12 +250,25 @@ class _LoginState extends State<Login> {
                                     },
                                     style: ElevatedButton.styleFrom(
                                         minimumSize: Size(80.0, 80.0)),
-                                    child: Text('Créer un compte',
+                                    child: Text('Se connecter avec Google',
                                         style: new TextStyle(fontSize: 26.0)),
                                   )),
                               Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
-                                  child: ElevatedButton(
+                                  padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                                  child: Row(children: [Text('Pas de compte? ',style: new TextStyle(fontSize: 26.0)),TextButton(
+                                    onPressed: () {
+                                      // Validate will return true if the form is valid, or false if
+                                      Navigator.pushNamed(
+                                          context, registerRoute);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        minimumSize: Size(60.0, 60.0)),
+                                    child: Text('Inscrivez-vous',
+                                        style: new TextStyle(fontSize: 26.0)),
+                                  )])),
+                              Padding(
+                                  padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                                  child: Row(children: [Text('Pas de compte? ',style: new TextStyle(fontSize: 26.0)),TextButton(
                                     onPressed: () {
                                       // Validate will return true if the form is valid, or false if
                                       Navigator.pushNamed(
@@ -262,9 +276,9 @@ class _LoginState extends State<Login> {
                                     },
                                     style: ElevatedButton.styleFrom(
                                         minimumSize: Size(80.0, 80.0)),
-                                    child: Text('Créer un compte',
+                                    child: Text('Inscrivez-vous',
                                         style: new TextStyle(fontSize: 26.0)),
-                                  )),
+                                  )])),
                             ],
                           ),
                         ),
