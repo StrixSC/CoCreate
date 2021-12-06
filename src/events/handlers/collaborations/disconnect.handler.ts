@@ -4,6 +4,7 @@ import { Server, Socket } from 'socket.io';
 import { db } from '../../../db';
 import { ExceptionType } from '../../../models/Exceptions.enum';
 import { handleSocketError } from '../../../utils/errors';
+import { computeUserUpdatedStats } from '../../../utils/collaborations';
 
 export const handleDisconnect = async (io: Server, socket: Socket, payload: {
     collaborationId: string;
@@ -18,6 +19,7 @@ export const handleDisconnect = async (io: Server, socket: Socket, payload: {
                 user: {
                     include: {
                         profile: true,
+                        stats: true,
                     },
                 },
                 collaboration: {
@@ -33,14 +35,26 @@ export const handleDisconnect = async (io: Server, socket: Socket, payload: {
             throw new SocketEventError("Oups! La déconnexion ne peut être faite, car l'utilisateur ne fait pas partie de la collaboration.", 'E8801');
         }
 
-        const deletedChannelMember = await db.channelMember.deleteMany({
-            where: {
-                channel_id: member.collaboration.channel_id,
-                user_id: member.user_id
-            },
-        });
+        const { time, collabs } = computeUserUpdatedStats(socket, member.user.stats!);
+        const [updatedStats, deletedChannelMember] = await db.$transaction([
+            db.stats.update({
+                where: {
+                    user_id: member.user_id
+                },
+                data: {
+                    total_collaboration_sessions: collabs,
+                    total_collaboration_time: time
+                }
+            }),
+            db.channelMember.deleteMany({
+                where: {
+                    channel_id: member.collaboration.channel_id,
+                    user_id: member.user_id
+                },
+            }),
+        ]);
 
-        if (!deletedChannelMember) {
+        if (!updatedStats || !deletedChannelMember) {
             throw new SocketEventError("Oups! Quelque chose s'est produit lors du traitement de la requête...", "E4423")
         }
 

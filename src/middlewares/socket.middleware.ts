@@ -10,7 +10,7 @@ export const logEvent = (socket: Socket<DefaultEventsMap, DefaultEventsMap, Defa
             'Socket event triggered:',
             chalk.black.bgWhite(event[0]),
             'from Socket',
-            chalk.greenBright(socket.data.user || socket.id)
+            chalk.greenBright(socket.data.username || socket.id)
         );
         next();
     };

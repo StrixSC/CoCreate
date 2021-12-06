@@ -7,6 +7,7 @@ import { handleSelection } from "./handlers/drawings/selection.handler"
 import { handleRotation } from "./handlers/drawings/rotation.handler"
 import { handleResize } from "./handlers/drawings/resize.handler";
 import { handleDelete } from './handlers/drawings/delete.handler';
+import { handleThumbnail } from './handlers/drawings/thumbnail.handler';
 
 export = (io: Server, socket: Socket) => {
     const onFreedraw = async (data: Action) => handleFreedraw(io, socket, data);
@@ -15,6 +16,7 @@ export = (io: Server, socket: Socket) => {
     const onTranslation = async (data: Action) => handleTranslation(io, socket, data);
     const onRotation = async (data: Action) => handleRotation(io, socket, data);
     const onResize = async (data: Action) => handleResize(io, socket, data);
+    const onThumbnail = async (data: any) => handleThumbnail(io, socket, data);
     const onDelete = async (data: Action) => handleDelete(io, socket, data);
     const onUndo = async (data: Action) => {
         io.emit('undoredo:received', {
@@ -44,4 +46,5 @@ export = (io: Server, socket: Socket) => {
     socket.on('layer:emit', onLayer);
     socket.on('resize:emit', onResize);
     socket.on('text:emit', onText);
+    socket.on('drawing:thumbnail', onThumbnail);
 };

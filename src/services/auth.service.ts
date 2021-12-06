@@ -61,6 +61,12 @@ export const register = async (payload: IRegistrationPayload, avatar_url: string
                         last_name: last_name
                     }
                 },
+                stats: {
+                    create: {
+                        total_collaboration_sessions: 0,
+                        total_collaboration_time: 0,
+                    }
+                },
                 channels: {
                     create: [{ channel_id: 'PUBLIC', type: MemberType.Regular }]
                 },

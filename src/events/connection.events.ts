@@ -1,4 +1,5 @@
-import { LogType } from '.prisma/client';
+import { computeUserUpdatedStats } from './../utils/collaborations';
+import { LogType, User } from '.prisma/client';
 import { IConnectionEventData } from './../models/IUser.model';
 import { getOnlineMembersInRoom } from './../utils/socket';
 import { ExceptionType } from './../models/Exceptions.enum';
@@ -7,9 +8,42 @@ import { SocketEventError } from './../socket';
 import { db } from './../db';
 import { Socket, Server } from 'socket.io';
 import { UserStatusTypes } from '../models/IUser.model';
+import log from '../utils/logger';
 export = (io: Server, socket: Socket) => {
     socket.on('disconnecting', async () => {
-        console.log('disconnecting client', socket.data.username);
+        try {
+            if (socket.data.status === UserStatusTypes.Busy && socket.data.startTime) {
+                const stats = await db.stats.findFirst({
+                    where: {
+                        user_id: socket.data.user,
+                    }
+                });
+
+                if (stats) {
+                    const { time, collabs } = computeUserUpdatedStats(socket, stats);
+                    await db.$transaction([
+                        db.stats.update({
+                            where: {
+                                user_id: socket.data.user,
+                            },
+                            data: {
+                                total_collaboration_sessions: collabs,
+                                total_collaboration_time: time
+                            }
+                        }),
+                        db.channelMember.deleteMany({
+                            where: {
+                                user_id: socket.data.user,
+                                channel_id: socket.data.activeChannelId,
+                            }
+                        })
+                    ])
+                }
+            }
+        } catch (e) {
+            log('CRITICAL', e);
+        }
+
         socket.rooms.forEach((room) => {
             const onlineMembers = getOnlineMembersInRoom(room);
             socket.data.status = UserStatusTypes.Offline,

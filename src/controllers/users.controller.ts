@@ -6,6 +6,7 @@ import { getUserChannelsById, getUserLogs, updateUserProfile, getUserAvatars, ge
 import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { StatusCodes } from 'http-status-codes';
 import create from 'http-errors';
+import moment from 'moment';
 import { Request, Response, NextFunction } from 'express';
 import {
     getAllPublicProfiles,
@@ -103,11 +104,27 @@ export const getCompleteUserController = async (
                 .status(StatusCodes.NO_CONTENT)
                 .json({ message: 'Request was successful, but no content was found.' });
 
-        return res.status(StatusCodes.OK).json(user);
+        return res.status(StatusCodes.OK).json({
+            ...user,
+            stats: {
+                ...user.stats,
+                total_collaboration_time: moment.duration(user.stats?.total_collaboration_time).asMinutes().toFixed(2),
+                average_collaboration_time: moment.duration(user.stats!.total_collaboration_time / user.stats!.total_collaboration_sessions).asMinutes().toFixed(2),
+                authored_collaboration_count: user.authored_collaborations.length,
+                joined_collaboration_count: user.collaborations.length,
+                team_count: user.teams.length,
+            }
+        });
     } catch (e: any) {
         next(create(e.status, e.message));
     }
 };
+
+export const millisToMinutesAndSeconds = (millis: number) => {
+    let minutes = Math.floor(millis / 60000);
+    let seconds = ((millis % 60000) / 1000)
+    return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+}
 
 export const getUserChannelsController = async (
     req: Request,

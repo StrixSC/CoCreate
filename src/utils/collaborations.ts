@@ -1,6 +1,7 @@
+import moment from 'moment';
 import { UserStatusTypes } from './../models/IUser.model';
 import { Socket } from 'socket.io';
-import { Action, Collaboration, CollaborationMember, Drawing, MemberType, Profile, User } from "@prisma/client";
+import { Action, Stats, Collaboration, CollaborationMember, Drawing, MemberType, Profile, User } from "@prisma/client";
 import { getOnlineMembersInRoom } from "./socket";
 
 type CollaborationMemberConnectionResponse = CollaborationMember & {
@@ -20,10 +21,23 @@ type CollaborationMemberConnectionResponse = CollaborationMember & {
 
 export const triggerJoin = (socket: Socket, member: any) => {
     socket.data.status = UserStatusTypes.Busy;
+    socket.data.startTime = new Date();
+    socket.data.activeChannelId = member.collaboration.channel_id;
+    socket.data.activeCollaborationId = member.collaboration_id;
     socket.join(member.collaboration.channel_id);
     socket.join(member.collaboration_id);
     const data = generateConnectedPayload(member);
     socket.emit("collaboration:load", data);
+}
+
+export const computeUserUpdatedStats = (socket: Socket, stats: Stats) => {
+    const previousTotalTime = stats.total_collaboration_time;
+    const endTime = moment(new Date());
+    let startTime = moment((socket.data.startTime) as Date);
+    const totalTime = endTime.diff(startTime);
+    const newTotalTime = previousTotalTime + totalTime;
+    const newCollabSessionCount = stats.total_collaboration_sessions + 1;
+    return { time: newTotalTime, collabs: newCollabSessionCount };
 }
 
 export const generateConnectedPayload = (member: CollaborationMemberConnectionResponse) => {

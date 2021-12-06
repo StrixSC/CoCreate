@@ -78,11 +78,26 @@ export const getSinglePublicProfileById = async (
     return profile;
 };
 
-export const getCompleteUser = async (id: string): Promise<any> => {
+export const getCompleteUser = async (id: string) => {
     const user = await db.user.findFirst({
         select: {
             user_id: true,
             email: true,
+            authored_collaborations: {
+                select: {
+                    author_id: true,
+                }
+            },
+            collaborations: {
+                select: {
+                    collaboration_id: true,
+                }
+            },
+            teams: {
+                select: {
+                    team_id: true
+                }
+            },
             profile: {
                 select: {
                     username: true,
@@ -108,11 +123,8 @@ export const getCompleteUser = async (id: string): Promise<any> => {
             },
             stats: {
                 select: {
-                    collaboration_count: true,
-                    author_count: true,
-                    active_team_count: true,
-                    average_collaboration_time: true,
                     total_collaboration_time: true,
+                    total_collaboration_sessions: true,
                     updated_at: true,
                 }
             }
