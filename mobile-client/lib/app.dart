@@ -1,4 +1,5 @@
 import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/screens/login/kickout.dart';
 import 'package:Colorimage/screens/login/register.dart';
 import 'package:Colorimage/utils/general.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,6 +17,7 @@ const chatRoute = '/chat';
 const homeRoute = '/home';
 const drawingRoute = '/drawing';
 const registerRoute = '/register';
+const kickedOutRoute = '/kickout';
 const fontsize = TextStyle(fontSize: 25);
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -105,6 +107,9 @@ class _AppState extends State<App> with TickerProviderStateMixin {
     return (settings) {
       Widget screen;
       switch (settings.name) {
+        case kickedOutRoute:
+          screen = Kickout();
+          break;
         case loginRoute:
           screen = const Login();
           break;

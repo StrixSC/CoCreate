@@ -3,6 +3,7 @@ import 'package:Colorimage/providers/collaborator.dart';
 import 'package:Colorimage/providers/messenger.dart';
 import 'package:Colorimage/providers/team.dart';
 import 'package:Colorimage/screens/galerie/galerie.dart';
+import 'package:Colorimage/screens/login/kickout.dart';
 import 'package:Colorimage/screens/profile/profile.dart';
 import 'package:Colorimage/screens/teams/team.dart';
 import 'package:Colorimage/widgets/sidebar.dart';
@@ -84,7 +85,7 @@ class _BottomNavBarScreenState extends State<BottomNavBar> {
   List<Widget> _buildScreens() {
     return [
       Container(),
-      Container(),
+      Kickout(),
       Galerie(),
       TeamsScreen(),
       Profile(context.read<Collaborator>().auth!.user!),

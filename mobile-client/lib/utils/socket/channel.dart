@@ -1,8 +1,12 @@
 import 'package:Colorimage/models/chat.dart';
 import 'package:Colorimage/screens/chat/chat.dart';
+import 'package:Colorimage/screens/login/kickout.dart';
 import 'package:Colorimage/utils/socket/socket_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+
+import '../../app.dart';
 
 class ChannelSocket {
   User user;
@@ -47,6 +51,9 @@ class ChannelSocket {
   // TODO: brin to another page saying already logged in somewhere else
   userInitExeption(callbackMessage) {
     socket.on('user:init:exception', (data) {
+      navigatorKey.currentState!.pushReplacement(MaterialPageRoute (
+        builder: (BuildContext context) => Kickout(),
+      ));
       // callbackMessage('sent', data);
     });
   }
