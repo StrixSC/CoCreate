@@ -60,6 +60,7 @@ export const handleJoin = async (io: Server, socket: Socket, data: {
             channelId: team.channel_id,
             channelName: member.team.channel.name,
             collaborationId: null,
+            channelType: team.channel.type
         } as IConnectionEventData;
 
         socket.join(team.team_id);
