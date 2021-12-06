@@ -252,6 +252,19 @@ class _LoginState extends State<Login> {
                                     child: Text('Créer un compte',
                                         style: new TextStyle(fontSize: 26.0)),
                                   )),
+                              Padding(
+                                  padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      // Validate will return true if the form is valid, or false if
+                                      Navigator.pushNamed(
+                                          context, registerRoute);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        minimumSize: Size(80.0, 80.0)),
+                                    child: Text('Créer un compte',
+                                        style: new TextStyle(fontSize: 26.0)),
+                                  )),
                             ],
                           ),
                         ),

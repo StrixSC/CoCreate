@@ -16,6 +16,7 @@ import 'dart:math';
 class Messenger extends ChangeNotifier {
   UserCredential? auth;
   List<Chat> userChannels = [];
+  List<Chat> oldChannels = [];
   List<Chat> allChannels = [];
   List<Chat> availableChannel = [];
   bool isChannelSelected = false;
@@ -105,9 +106,9 @@ class Messenger extends ChangeNotifier {
     if (response.statusCode == 200) {
       var jsonResponse =
           json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
-      List<Chat> userChannels = [];
+      List<Chat> useChannels = [];
       for (var channel in jsonResponse) {
-        userChannels.add(Chat(
+        useChannels.add(Chat(
           name: channel['name'],
           id: channel['channel_id'],
           type: channel['channel_type'],
@@ -117,7 +118,17 @@ class Messenger extends ChangeNotifier {
           color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
         ));
       }
-      updateUserChannels(userChannels);
+      if(userChannels.isNotEmpty) {
+        for(var newChannel in useChannels) {
+          for(var oldChannel in userChannels) {
+              if(newChannel.id == oldChannel.id) {
+                newChannel.messages = oldChannel.messages;
+                newChannel.lastReadMessage = oldChannel.lastReadMessage;
+              }
+          }
+        }
+      }
+      updateUserChannels(useChannels);
     } else {
       print('Request failed with status: ${response.body}.');
       updateUserChannels([]);
