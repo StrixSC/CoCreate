@@ -293,7 +293,6 @@ class Collaborator extends ChangeNotifier {
         loadDrawing(collaboration);
         break;
       case 'joined':
-        alert('Succès!', 'Bravo! Vous faites maintenant partie de la collaboration! Amusez-vous! 😄');
         Member member = data as Member;
         memberJoined(member);
         break;

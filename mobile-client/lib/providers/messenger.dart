@@ -201,7 +201,7 @@ class Messenger extends ChangeNotifier {
       case 'joined':
         Chat channel = data as Chat;
           fetchChannels();
-          if(channel.type != 'Collaboration'){alert('Succès!', 'La chaine a été joint!');}
+          if(channel.type != 'Collaboration' && channel.type != 'Team'){alert('Succès!', 'La chaine a été joint!');}
         // Chat channel = data as Chat;
         // addUserChannel(channel);
         break;
@@ -210,14 +210,14 @@ class Messenger extends ChangeNotifier {
         channel.ownerUsername == auth!.user!.displayName
             ? fetchChannels()
             : getAvailableChannels();
-        (channel.ownerUsername == auth!.user!.displayName && channel.type != 'Collaboration') ?
+        (channel.ownerUsername == auth!.user!.displayName && channel.type != 'Collaboration'  && channel.type != 'Team') ?
         alert('Succès!', 'La chaine a été créée!'): '';
         break;
       case 'left':
         print('Left Chat');
         String channelType = data;
         fetchChannels();
-        if(channelType != 'Collaboration'){alert('Succès!', 'La chaine a été quitter!');};
+        if(channelType != 'Collaboration'  && channelType != 'Team'){alert('Succès!', 'La chaine a été quitter!');}
         // String channelId = data as String;
         // removeUserChannel(channelId);
         break;
