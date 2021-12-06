@@ -101,7 +101,7 @@ export const getMyGalleryController = async (req: Request, res: Response, next: 
                 collaboration_id: c.collaboration_id,
                 title: c.drawing!.title,
                 drawing_id: c.drawing!.drawing_id,
-                thumbnailUrl: c.drawing!.thumbnail_url,
+                thumbnail_url: c.drawing!.thumbnail_url,
                 created_at: c.created_at,
                 updated_at: c.updated_at,
                 author_username: isTeam ? `Équipe ${authorUsername}` : authorUsername,
