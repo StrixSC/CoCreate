@@ -38,7 +38,6 @@ export const registerController = async (req: any, res: any, next: any) => {
         const data = matchedData(req, { locations: ['body'] });
         const { username, email, password, first_name, last_name } = data;
         const payload = { username, email, password, first_name, last_name }
-        const file = req.files[0];
         const avatar_url = data.avatar_url;
 
         if (!username || !email || !password || !first_name || !last_name) {
@@ -46,8 +45,8 @@ export const registerController = async (req: any, res: any, next: any) => {
         }
 
         let user = null;
-        if (file) {
-            user = await registerWithFileUpload(payload, file);
+        if (req.files[0]) {
+            user = await registerWithFileUpload(payload, req.files[0]);
         } else if (avatar_url) {
             user = await register(payload, avatar_url)
         } else {
@@ -124,7 +123,7 @@ export const updateUserPasswordController = async (req: Request, res: Response, 
         const updatedUser = await updateUserPassword(req.userId, password);
 
         if (!updatedUser) {
-            throw new create.InternalServerError('Could not update user password');
+            throw new create.InternalServerError("Oups! Quelque chose s'est produit lors du traitement de la requête... Réessayez à nouveau!")
         }
 
         return res.status(StatusCodes.OK).json({ message: "OK" });
