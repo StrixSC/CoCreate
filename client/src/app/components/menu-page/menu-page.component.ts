@@ -2,7 +2,6 @@ import { Subscription } from 'rxjs';
 import { AuthService } from './../../services/auth.service';
 import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-menu-page',

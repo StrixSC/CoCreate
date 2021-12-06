@@ -12,13 +12,12 @@ import { Component, OnInit, ViewChild } from '@angular/core';
   styleUrls: ['./account.component.scss']
 })
 export class AccountComponent implements OnInit {
-
   isLoading: boolean;
   userInfo: UserResponse;
   logs: MatTableDataSource<Log>;
   @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
-
   historyDataColumns = ['entry', 'link', 'time'];
+  statsDataColumns = ['key', 'value'];
   updateUserForm: FormGroup;
   constructor(private snackBar: MatSnackBar, private userService: UserService, private dialog: MatDialog, private fb: FormBuilder) { }
 
@@ -53,7 +52,7 @@ export class AccountComponent implements OnInit {
   fetchUserAccount() {
     this.userService.fetchUserInformation().subscribe((c: UserResponse) => {
       this.userInfo = c;
-      console.log(this.userInfo.logs);
+      console.log(this.userInfo);
       this.logs = new MatTableDataSource(this.userInfo.logs);
       this.isLoading = false;
       setTimeout(

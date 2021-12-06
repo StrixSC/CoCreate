@@ -123,11 +123,13 @@ export class DrawingPageComponent {
       this.listener.unsubscribe();
     }
 
-    this.syncCollabService.sendDisconnect({ collaborationId: this.activeCollaborationId });
     if (this.committedAction) {
       this.selectionService.sendUnselect();
       this.syncCollabService.sendLogDrawingAction({ collaborationId: this.activeCollaborationId });
     }
+
+    this.syncCollabService.sendDisconnect({ collaborationId: this.activeCollaborationId });
+
     this.activeCollaborationId = "";
     this.drawingLoader.unload();
     this.drawingLoader.activeDrawingData = null;

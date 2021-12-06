@@ -1,47 +1,50 @@
-<div class="paint-background" style="text-align: center; font-family: Roboto;">
-    <h1>Bienvenue à Colorimage!</h1>
-    <br>
-    <div class="button-container  pv-1">
-        <button class="menu-button" routerLink="gallery" mat-raised-button>
-            <div class="menu-button-text">
-                <mat-icon>collections</mat-icon>
-                <div class="menu-button-text-header">Galerie de dessins</div>
-            </div>
-        </button>
+
+<div class="main-container">
+    <div class="content">
+        <h1>Bienvenue à Colorimage!</h1>
+        <br>
+        <div class="button-container  pv-1">
+            <button class="menu-button" routerLink="gallery" mat-raised-button>
+                <div class="menu-button-text">
+                    <mat-icon>collections</mat-icon>
+                    <div class="menu-button-text-header">Galerie de dessins</div>
+                </div>
+            </button>
+        </div>
+        <br>
+        <div class="button-container  pv-1">
+            <button routerLink="teams" class="menu-button" mat-raised-button>
+                <div class="menu-button-text">
+                    <mat-icon>groups</mat-icon>
+                    <div class="menu-button-text-header">Équipe de collaboration</div>
+                </div>
+            </button>
+        </div>
+        <br>
+        <div class="button-container  pv-1">
+            <button class="menu-button" mat-raised-button>
+                <div class="menu-button-text">
+                    <mat-icon>photo_camera</mat-icon>
+                    <div class="menu-button-text-header">InstaImage</div>
+                </div>
+            </button>
+        </div>
+        <br>
+        <div class="button-container  pv-1">
+            <button routerLink="account" class="menu-button" mat-raised-button>
+                <div class="menu-button-text">
+                    <mat-icon>account_box</mat-icon>
+                    <div class="menu-button-text-header">Paramètre du compte</div>
+                </div>
+            </button>
+        </div>
+        <div class="button-container  pv-1">
+            <button class="menu-button" mat-raised-button (click)="logout()">
+                Déconnexion
+            </button>
+        </div>
+        <br>
     </div>
-    <br>
-    <div class="button-container  pv-1">
-        <button routerLink="teams" class="menu-button" mat-raised-button>
-            <div class="menu-button-text">
-                <mat-icon>groups</mat-icon>
-                <div class="menu-button-text-header">Équipe de collaboration</div>
-            </div>
-        </button>
-    </div>
-    <br>
-    <div class="button-container  pv-1">
-        <button class="menu-button" mat-raised-button>
-            <div class="menu-button-text">
-                <mat-icon>photo_camera</mat-icon>
-                <div class="menu-button-text-header">InstaImage</div>
-            </div>
-        </button>
-    </div>
-    <br>
-    <div class="button-container  pv-1">
-        <button class="menu-button" mat-raised-button>
-            <div class="menu-button-text">
-                <mat-icon>account_box</mat-icon>
-                <div class="menu-button-text-header" routerLink="account">Paramètre du compte</div>
-            </div>
-        </button>
-    </div>
-    <div class="button-container  pv-1">
-        <button class="menu-button" mat-raised-button (click)="logout()">
-            Déconnexion
-        </button>
-    </div>
-    <br>
 </div>
 
 <style>

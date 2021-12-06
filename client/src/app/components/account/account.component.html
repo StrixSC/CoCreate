@@ -82,6 +82,32 @@
         </div>
         <div class="section stats-section">
             <h2>Statistiques</h2>
+
+            <div class="statistics-section">
+                <table class="mat-elevation-z8 mat-table stats-table">
+                    <tr class="mat-row">
+                        <td class="mat-cell"> Nombres d'équipes collaboratives </td>
+                        <td class="mat-cell"> {{ userInfo.stats.team_count }} </td>
+                    </tr>
+                    <tr class="mat-row">
+                        <td class="mat-cell"> Nombres de dessins collaborés </td>
+                        <td class="mat-cell"> {{ userInfo.stats.joined_collaboration_count }} </td>
+                    </tr>
+                    <tr class="mat-row">
+                        <td class="mat-cell"> Nombres de dessins créés </td>
+                        <td class="mat-cell"> {{ userInfo.stats.authored_collaboration_count }} </td>
+                    </tr>
+                    <tr class="mat-row">
+                        <td class="mat-cell"> Temps moyen de collaboration </td>
+                        <td class="mat-cell"> {{ userInfo.stats.average_collaboration_time}} minutes </td>
+                    </tr>
+                    <tr class="mat-row">
+                        <td class="mat-cell"> Temps total passé à collaborer </td>
+                        <td class="mat-cell"> {{ userInfo.stats.total_collaboration_time }} minutes </td>
+                    </tr>
+                </table>
+
+            </div>
         </div>
         <div class="section history-section">
             <h2>Historique</h2>
@@ -140,11 +166,13 @@
     }
 
     .mat-table,
+    .stats-table,
     .history-table {
         background: var(--bg-accent-color) !important;
 
     }
 
+    .stats-table,
     .history-table {
         width: 100%;
     }
@@ -243,12 +271,9 @@
         gap: 2rem;
     }
 
-    .stats-section {
-        padding: 1rem 2rem !important;
-    }
-
+    .stats-section,
     .history-section {
-        padding: 1rem 2rem !important;
+        padding: 1rem 2rem 2rem 2rem !important;
     }
 
     .header-container {
