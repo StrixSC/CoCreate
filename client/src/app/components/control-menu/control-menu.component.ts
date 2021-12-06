@@ -1,3 +1,6 @@
+import { v4 } from 'uuid';
+import { AngularFireStorage } from '@angular/fire/storage';
+import { ExportService } from 'src/app/services/export/export.service';
 import { SyncDrawingService } from './../../services/syncdrawing.service';
 import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
 import { Component, OnDestroy } from '@angular/core';
@@ -39,7 +42,10 @@ export class ControlMenuComponent implements OnDestroy {
     private collaborationService: CollaborationService,
     private selectionService: SelectionToolService,
     private syncService: SyncDrawingService,
-    private router: Router
+    private router: Router,
+    private syncDrawingService: SyncDrawingService,
+    private exportService: ExportService,
+    private storage: AngularFireStorage,
   ) {
   }
 
@@ -105,6 +111,7 @@ export class ControlMenuComponent implements OnDestroy {
       }
     }
   }
+
 
   /// Redo
   redo(): void {

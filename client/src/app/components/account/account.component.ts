@@ -52,7 +52,6 @@ export class AccountComponent implements OnInit {
   fetchUserAccount() {
     this.userService.fetchUserInformation().subscribe((c: UserResponse) => {
       this.userInfo = c;
-      console.log(this.userInfo);
       this.logs = new MatTableDataSource(this.userInfo.logs);
       this.isLoading = false;
       setTimeout(

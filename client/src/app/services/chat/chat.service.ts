@@ -121,7 +121,6 @@ export class ChatService {
         e.returnValue = "";
       });
       winRef.location.href = "chat";
-      console.log("hey");
     }
   }
 }

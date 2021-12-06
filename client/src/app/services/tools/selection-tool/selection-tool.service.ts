@@ -311,7 +311,6 @@ export class SelectionToolService implements Tools {
     if (this.isRotating) {
       this.activeActionType = SelectionActionTypes.Rotate;
       const side = event.deltaY > 0 ? CLOCKWISE : COUNTER_CLOCKWISE;
-      console.log(side);
       this.syncService.sendRotate(DrawingState.move, this.selectedActionId, (side * Math.PI / 180));
       event.preventDefault();
       event.stopPropagation();

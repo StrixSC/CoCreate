@@ -74,7 +74,6 @@ export class SyncCollaborationService {
     if (!this.authService.activeUser) {
       return;
     }
-    console.log(data)
     this.socketService.emit('collaboration:leave', { ...data, userId: this.authService.activeUser.uid });
   }
 

@@ -46,6 +46,10 @@ export class SyncDrawingService {
     this.defaultPayload = null;
   }
 
+  sendThumbnail(data: any) {
+    this.socketService.emit("drawing:thumbnail", data);
+  }
+
   updatedDefaultPayload(collaborationId: string): void {
     this.defaultPayload = {
       userId: this.auth.activeUser!.uid,
@@ -156,8 +160,6 @@ export class SyncDrawingService {
       this.activeActionId = actionId
     }
 
-    console.log(shape);
-    console.log(shapeStyle);
     let payload: IShapeAction = {
       ...this.defaultPayload,
       actionId: this.activeActionId,

@@ -48,7 +48,6 @@ export class ChatWindowComponent implements OnInit {
 
   toggleNotifications(): void {
     this.muteNotification = !this.muteNotification;
-    console.log(this.muteNotification);
   }
 
   fetchHistory(): void {
@@ -77,7 +76,6 @@ export class ChatWindowComponent implements OnInit {
       this.messageSubscription = this.chatService.receiveMessage().subscribe((c: IMessageResponse) => {
         this.messages.push(c);
         if (!this.muteNotification && c.username !== this.auth.activeUser!.displayName) {
-          console.log(this.muteNotification, c.username)
           this.audio.play();
         }
       })

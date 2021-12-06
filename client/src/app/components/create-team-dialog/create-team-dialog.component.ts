@@ -48,7 +48,6 @@ export class CreateTeamDialogComponent implements OnInit {
         this.dialogRef.close();
       }
     }, (error) => {
-      console.log(error);
       this.errorRoutine(error);
     });
 

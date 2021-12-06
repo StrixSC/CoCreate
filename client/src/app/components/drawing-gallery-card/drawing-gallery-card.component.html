@@ -27,8 +27,10 @@
     </div>
   </mat-card-header>
   
-  <img class="image-preview" *ngIf="drawing.is_member || (drawing.type !== 'Protected' && !drawing.is_member)"
-    mat-card-image src="../../../assets/default-image.png">
+  <div>
+    <img class="image-preview" *ngIf="drawing.is_member || (drawing.type !== 'Protected' && !drawing.is_member)"
+    mat-card-image [src]="drawing.thumbnailUrl ? drawing.thumbnailUrl : '../../../assets/default-image.png'">
+  </div>
   <img class="image-preview" *ngIf="drawing.type === 'Protected' && !drawing.is_member" mat-card-image
     src="../../../assets/img/white-blank-protected.png">
 

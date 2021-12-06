@@ -1,3 +1,7 @@
+import { DrawingService } from 'src/app/services/drawing/drawing.service';
+import { v4 } from 'uuid';
+import { AngularFireStorage } from '@angular/fire/storage';
+import { ExportService } from 'src/app/services/export/export.service';
 import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
 import { SocketService } from 'src/app/services/chat/socket.service';
 import { ToolFactoryService } from './../../services/tool-factory.service';
@@ -7,7 +11,7 @@ import { SyncCollaborationService } from 'src/app/services/syncCollaboration.ser
 import { ActivatedRoute, Router } from '@angular/router';
 import { Component } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { merge, Subscription } from "rxjs";
+import { merge, Subscription, timer } from "rxjs";
 import { HotkeysService } from "src/app/services/hotkeys/hotkeys.service";
 import { map } from 'rxjs/operators';
 import { ICollaborationLoadResponse } from 'src/app/model/ICollaboration.model';
@@ -21,12 +25,15 @@ import { MatSnackBar } from '@angular/material';
 })
 export class DrawingPageComponent {
   loadListener: Subscription;
+  initSet: boolean;
+  timer: Subscription;
   listener: Subscription;
   activeCollaborationId: string;
   collaborationDeletedSubscription: Subscription;
   committedAction: boolean;
   constructor(
     public dialog: MatDialog,
+    private storage: AngularFireStorage,
     private hotkeyService: HotkeysService,
     private drawingLoader: DrawingLoadService,
     private syncService: SyncCollaborationService,
@@ -34,11 +41,14 @@ export class DrawingPageComponent {
     private toolFactory: ToolFactoryService,
     private activeRoute: ActivatedRoute,
     private snackbar: MatSnackBar,
+    private drawingService: DrawingService,
     private router: Router,
     private socketService: SocketService,
+    private exportService: ExportService,
     private selectionService: SelectionToolService,
     private syncCollabService: SyncCollaborationService,
   ) {
+    this.initSet = false;
     this.hotkeyService.hotkeysListener();
   }
 
@@ -99,7 +109,6 @@ export class DrawingPageComponent {
         this.syncDrawingService.onActionSave().pipe(map((d) => ({ ...d, eventType: EventTypes.Action })))
       ).subscribe((data: any & { eventType: string }) => {
         if (data.eventType === EventTypes.Action) {
-          console.log('Event received from user', data.username, 'with type', data.actionType, 'with actionId =', data.actionId, '\nIt is selecting', data.selectedActionId ? data.selectedActionId : 'Nothing');
           this.toolFactory.handleEvent(data);
           if (this.toolFactory.isActiveUser(data)) {
             this.committedAction = true;
@@ -110,8 +119,11 @@ export class DrawingPageComponent {
           }
         }
       });
-
     }
+    const ONE_MINUTE = 1000 * 60;
+    this.timer = timer(ONE_MINUTE).subscribe((c) => {
+      this.drawingLoader.exportThumbnail();
+    })
   }
 
   ngOnDestroy(): void {

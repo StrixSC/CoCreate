@@ -1,3 +1,7 @@
+import { v4 } from 'uuid';
+import { AngularFireStorage } from '@angular/fire/storage';
+import { ExportService } from 'src/app/services/export/export.service';
+import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
 import { Point } from './../model/point.model';
 import { DeleteSyncCommand } from './sync/delete-sync-command';
 import { ResizeSyncCommand } from './sync/resize-sync-command';
@@ -77,7 +81,10 @@ export class DrawingLoadService {
   constructor(
     private toolFactoryService: ToolFactoryService,
     private drawingService: DrawingService,
-    private syncService: SyncDrawingService
+    private storage: AngularFireStorage,
+    private syncService: SyncDrawingService,
+    private exportService: ExportService,
+    private selectionService: SelectionToolService,
   ) { }
 
   loadDrawing(): void {
@@ -99,6 +106,7 @@ export class DrawingLoadService {
   }
 
   unload(): void {
+    this.exportThumbnail();
     this.drawingService.deleteDrawing();
     this.toolFactoryService.deleteAll();
     this.isLoaded = false;
@@ -114,9 +122,35 @@ export class DrawingLoadService {
       for (let action of this.pendingActions) {
         this.toolFactoryService.handleEvent(action);
       }
+
     }
     this.isLoading = false;
     this.isLoaded = true;
+    setTimeout(() => {
+      this.exportThumbnail();
+    })
+  }
+
+  async exportThumbnail(): Promise<void> {
+    if (!this.isLoaded || (!this.activeDrawingData && !this.activeDrawingData!.collaborationId) || !this.drawingService.isCreated) {
+      return;
+    }
+
+    try {
+      this.selectionService.hideSelection();
+      const data = this.exportService.exportToFormat("JPG");
+      this.selectionService.showSelection();
+      const ref = this.storage.ref('/public/' + v4() + '.svg');
+      ref.put(data, {
+        contentType: "image/svg+xml;charset=utf-8"
+      }).then(() => {
+        ref.getDownloadURL().toPromise().then((url) => {
+          this.syncService.sendThumbnail({ collaborationId: this.activeDrawingData!.collaborationId, url: url })
+        })
+      });
+    } catch (e) {
+      return;
+    }
   }
 
 }
