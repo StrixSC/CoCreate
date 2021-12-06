@@ -66,7 +66,7 @@ export const handleJoin = async (io: Server, socket: Socket, data: {
         socket.join(team.channel_id);
 
         io.to(member.team.team_id).emit('teams:joined', connectionData);
-        io.to(member.team.channel_id).emit('channels:joined', connectionData)
+        io.to(member.team.channel_id).emit('channel:joined', connectionData)
 
         for (let collaboration of collaborations) {
             io.emit("collaboration:joined", { ...connectionData, roomId: collaboration });
