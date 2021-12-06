@@ -47,7 +47,6 @@ class ChannelSocket {
   // TODO: brin to another page saying already logged in somewhere else
   userInitExeption(callbackMessage) {
     socket.on('user:init:exception', (data) {
-      print(data);
       // callbackMessage('sent', data);
     });
   }

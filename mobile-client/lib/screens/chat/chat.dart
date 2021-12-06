@@ -176,6 +176,70 @@ class _ChatScreenState extends State<ChatScreen> {
   //   }
   // }
 
+  member(List members, index) {
+    const fontSize = 24.0;
+    return Row(children: [
+      Container(
+        child: Row(children: [
+          Container(
+              width: 280,
+              child: Row(children: [
+                CircleAvatar(
+                    radius: 40,
+                    backgroundColor: kPrimaryColor,
+                    backgroundImage:
+                    NetworkImage(members[index]['avatarUrl']!)),
+                const SizedBox(width: 10),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(members[index]['username']!,
+                      style: TextStyle(fontSize: fontSize)),
+                )
+              ])),
+          Container(
+              width: 200,
+              child: Row(children: [
+                members[index]['status']! == 'En ligne'
+                    ? Row(children: [
+                  const Icon(
+                    Icons.circle,
+                    color: Colors.green,
+                    size: 15.0,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(members[index]['status']!,
+                      style: TextStyle(fontSize: fontSize))
+                ])
+                    : Row(children: [
+                  const Icon(
+                    Icons.circle,
+                    color: Colors.red,
+                    size: 15.0,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(members[index]['status']!,
+                      style: TextStyle(fontSize: fontSize))
+                ]),
+              ])),
+        ]),
+      )
+    ]);
+  }
+
+  members(Chat chat) {
+    const space = 60.0;
+    const fontSize = 24.0;
+    return ListView.separated(
+      shrinkWrap: true,
+      itemCount: chat.onlineMembers.length,
+      itemBuilder: (BuildContext context, int index) {
+        return member(chat.onlineMembers, index);
+      },
+      separatorBuilder: (BuildContext context, int index) => const Divider(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Messenger messenger = context.read<Messenger>();
@@ -229,6 +293,42 @@ class _ChatScreenState extends State<ChatScreen> {
                             ),
                           ],
                         ));
+              }),
+          IconButton(
+              icon: const Icon(Icons.group,
+                  color: Colors.white, size: 30),
+              onPressed: () {
+                showDialog<String>(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      titlePadding: EdgeInsets.zero,
+                      title: Container(
+                          padding: EdgeInsets.all(10.0),
+                          color: kContentColor,
+                          child: const Center(child: Text('Membres'))),
+                      content: Container(
+                        height: 500,
+                        width: 500, child: SingleChildScrollView(
+                          child: Column(children: [
+                            Container(
+                                width: MediaQuery.of(context).size.width,
+                                child: Column(children: [
+                                members(messenger.userChannels[widget.channelIndex]),
+                                ]))
+                          ]))),
+                      actions: <Widget>[
+                        Padding(
+                            padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
+                            child: Container(
+                                height: 50,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Retour'),
+                                ))),
+                      ],
+                    ));
               }),
           messenger.userChannels[widget.channelIndex].name != "Public"
               ? IconButton(
