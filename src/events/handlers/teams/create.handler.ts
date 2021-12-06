@@ -29,7 +29,7 @@ export const handleCreate = async (io: Server, socket: Socket, data: {
         socket.emit('teams:create:finished', team);
         io.emit('teams:created', team);
     } catch (e) {
-        handleSocketError(socket, e, ExceptionType.Teams_Create);
+        handleSocketError(socket, e, undefined, [ExceptionType.Teams, ExceptionType.Teams_Create]);
     }
 }
 

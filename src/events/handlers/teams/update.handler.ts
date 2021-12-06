@@ -101,6 +101,6 @@ export const handleUpdate = async (io: Server, socket: Socket, data: { teamId: s
 
         });
     } catch (e) {
-        handleSocketError(socket, e, ExceptionType.Teams_Delete)
+        handleSocketError(socket, e, undefined, [ExceptionType.Teams, ExceptionType.Teams_Update])
     }
 }

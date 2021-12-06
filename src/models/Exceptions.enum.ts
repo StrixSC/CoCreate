@@ -17,6 +17,7 @@ export enum ExceptionType {
     Teams_Join = "teams:join:exception",
     Teams_Leave = "teams:leave:exception",
     Teams_Delete = "teams:delete:exception",
+    Teams_Update = "teams:update:exception",
     User_Init = "user:init:exception",
 
     Channel_Create = "channel:create:exception",

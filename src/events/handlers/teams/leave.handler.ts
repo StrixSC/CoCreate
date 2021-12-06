@@ -63,6 +63,6 @@ export const handleLeave = async (io: Server, socket: Socket, data: { teamId: st
             socket.leave(team.channel_id);
         }
     } catch (e) {
-        handleSocketError(socket, e, ExceptionType.Teams_Leave)
+        handleSocketError(socket, e, undefined, [ExceptionType.Teams, ExceptionType.Teams_Leave]);
     }
 }

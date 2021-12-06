@@ -73,7 +73,7 @@ export const handleJoin = async (io: Server, socket: Socket, data: {
             io.emit("collaboration:joined", { ...connectionData, roomId: collaboration });
         }
     } catch (e) {
-        handleSocketError(socket, e, ExceptionType.Teams_Join);
+        handleSocketError(socket, e, undefined, [ExceptionType.Teams, ExceptionType.Teams_Join]);
     }
 }
 

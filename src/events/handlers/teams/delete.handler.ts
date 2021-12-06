@@ -75,6 +75,6 @@ export const handleDelete = async (io: Server, socket: Socket, data: { teamId: s
             io.socketsLeave(deletedTeam.team_id);
         }
     } catch (e) {
-        handleSocketError(socket, e, ExceptionType.Teams_Delete)
+        handleSocketError(socket, e, undefined, [ExceptionType.Teams, ExceptionType.Teams_Delete])
     }
 }
