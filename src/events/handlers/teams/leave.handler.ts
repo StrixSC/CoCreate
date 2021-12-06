@@ -48,7 +48,6 @@ export const handleLeave = async (io: Server, socket: Socket, data: { teamId: st
                 channelType: team.channel.type,
             });
 
-
             const onlineMembers = getOnlineMembersInRoom(team.team_id);
 
             io.to(team.team_id).emit('teams:left', {

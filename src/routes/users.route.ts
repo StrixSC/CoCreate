@@ -19,7 +19,7 @@ import { Router } from 'express';
 
 const router = Router();
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage, fileFilter: imageFilter }).single('avatar');
+const upload = multer({ storage: storage, fileFilter: imageFilter }).any()
 
 // Get public information of all users
 router.get('/profile', (req, res, next) => getPublicUsersController(req, res, next));

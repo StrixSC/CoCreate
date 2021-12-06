@@ -2,7 +2,7 @@ import { db } from './../db';
 import admin from 'firebase-admin';
 import { validationResult, matchedData } from 'express-validator';
 import { handleRequestError } from './../utils/errors';
-import { getUserChannelsById, getUserLogs, updateUserProfile, getUserAvatars, getUserTeams } from './../services/users.service';
+import { getUserChannelsById, getUserLogs, updateUserProfile, getUserAvatars, getUserTeams, uploadAndUpdateUserAvatar } from './../services/users.service';
 import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { StatusCodes } from 'http-status-codes';
 import create from 'http-errors';
@@ -197,7 +197,19 @@ export const updateUserProfileController = async (req: Request, res: Response, n
 
 export const uploadAndChangeUserAvatarController = async (req: any, res: any, next: any) => {
     try {
+        const file = req.files[0];
+        if (!file) {
+            throw new create.BadRequest("Hmm... On dirait que nous n'avons pas reçu une image valide...");
+        }
 
+        const updated = await uploadAndUpdateUserAvatar(req.userId, file);
+        if (!updated) {
+            throw new create.InternalServerError("Oops! Quelque chose s'est produit lors du changement de la photo de profile...");
+        }
+
+        res.status(StatusCodes.OK).json({
+            avatar_url: updated.avatar_url
+        });
     } catch (e) {
         handleRequestError(e, next);
     }

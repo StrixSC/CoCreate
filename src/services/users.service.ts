@@ -5,7 +5,7 @@ import { DEFAULT_LIMIT_COUNT, DEFAULT_OFFSET_COUNT } from './../utils/contants';
 import { IPublicUserProfile } from './../models/IUserPublicProfile';
 import { db } from '../db';
 import { MemberType, Log, Avatar, TeamMember } from '.prisma/client';
-import { admin, auth } from '../firebase';
+import { admin, auth, bucket } from '../firebase';
 import { uploadToBucket } from '../utils/users';
 
 export const getUserTeams = async (userId: string) => {
@@ -289,98 +289,23 @@ export const uploadAndUpdateUserAvatar = async (userId: string, file: Express.Mu
         throw new create.InternalServerError('An error has occurred while uploading avatar');
     }
 
-    const uploadedAvatar = await db.avatar.create({
-        data: {
-            user_id: userId,
-            isPublic: false,
-            avatar_url: url
-        }
-    });
-
-    if (!uploadedAvatar) {
-        bucketFile.delete({ ignoreNotFound: true }, (err) => {
-            if (err) {
-                throw new create.InternalServerError(err.message);
+    const [avatar, profile] = await db.$transaction([
+        db.avatar.create({
+            data: {
+                user_id: userId,
+                isPublic: false,
+                avatar_url: url
             }
-
-            throw new create.InternalServerError('An error occurred while uploading the file. Operation reverted.');
-        });
-    } else {
-        const previousProfile = await db.profile.findUnique({
-            where: { user_id: userId }
-        });
-
-        if (!previousProfile) {
-            await db.avatar.delete({
-                where: {
-                    avatar_id: uploadedAvatar.avatar_id
-                }
-            });
-
-            bucketFile.delete({ ignoreNotFound: true }, (err) => {
-                if (err) {
-                    throw new create.InternalServerError(err.message);
-                }
-
-                throw new create.InternalServerError('An error occurred while uploading the file. Operation reverted.');
-            });
-        }
-
-        const updatedProfile = await db.profile.update({
+        }),
+        db.profile.update({
             where: {
                 user_id: userId,
             },
             data: {
-                avatar_url: uploadedAvatar.avatar_url
+                avatar_url: url
             }
-        });
+        })
+    ]);
 
-        if (!updatedProfile) {
-            await db.avatar.delete({
-                where: {
-                    avatar_id: uploadedAvatar.avatar_id
-                }
-            });
-
-            bucketFile.delete({ ignoreNotFound: true }, (err) => {
-                if (err) {
-                    throw new create.InternalServerError(err.message);
-                }
-
-                throw new create.InternalServerError('An error occurred while uploading the file. Operation reverted.');
-            });
-        } else {
-            const updatedAuthProfile = await auth.updateUser(userId, {
-                photoURL: updatedProfile.avatar_url
-            });
-
-            if (!updatedAuthProfile) {
-                await db.avatar.delete({
-                    where: {
-                        avatar_id: uploadedAvatar.avatar_id
-                    }
-                });
-
-                await db.profile.update({
-                    where: {
-                        user_id: userId
-                    },
-                    data: {
-                        avatar_url: previousProfile!.avatar_url
-                    }
-                });
-
-                bucketFile.delete({ ignoreNotFound: true }, (err) => {
-                    if (err) {
-                        throw new create.InternalServerError(err.message);
-                    }
-
-                    throw new create.InternalServerError('An error occurred while uploading the file. Operation reverted.');
-                });
-            } else {
-                throw new create.InternalServerError('Avatar uploaded successfully and updated user avatar!');
-            }
-
-        }
-    }
+    return profile;
 }
