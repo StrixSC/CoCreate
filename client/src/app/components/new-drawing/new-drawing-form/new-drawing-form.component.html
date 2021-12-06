@@ -2,6 +2,13 @@
     <mat-form-field [style.width.%]="30">
         <mat-label>Nom du nouveau dessin</mat-label>
         <input matInput formControlName='title' type="string" placeholder="Entrez le nom du dessin" required>
+        <mat-error *ngIf="newDrawingForm.get('title').hasError('required')">
+            Ce champ est obligatoire.
+        </mat-error>
+        <mat-error
+            *ngIf="newDrawingForm.get('title').hasError('minlength') || newDrawingForm.get('title').hasError('maxlength')">
+            Le titre doit être entre 8 et 256 caractères de longueur.
+        </mat-error>
     </mat-form-field>
     <br>
     <mat-form-field [style.width.%]="15">
@@ -27,5 +34,11 @@
         <mat-label>Mot de passe</mat-label>
         <input matInput formControlName='password' type="string" placeholder="Entrez le mot de passe du dessin"
             required>
+        <mat-error *ngIf="newDrawingForm.get('password').hasError('required')">
+            Ce champ est obligatoire.
+        </mat-error>
+        <mat-error *ngIf="newDrawingForm.get('password').hasError('minlength') || newDrawingForm.get('password').hasError('maxlength')">
+            Le mot de passe doit être entre 8 et 256 caractères de longueur.
+        </mat-error>
     </mat-form-field>
 </div>

@@ -125,33 +125,39 @@ export class SyncDrawingService {
     let rgb = [0, 0, 0];
     let fillRgb = [0, 0, 0];
 
-    let alpha = 255;
-    let fillAlpha = 255;
+    let alpha = 0;
+    let fillAlpha = 0;
 
     if (state === DrawingState.down) {
       this.activeActionId = v4();
-    }
-
-    if (shape.stroke !== "none") {
-      rgb = fromRGB(shape.stroke);
     }
 
     if (shape.strokeOpacity !== "none") {
       alpha = fromOpacity(shape.strokeOpacity);
     }
 
-    if (shape.fill !== "none") {
-      fillRgb = fromRGB(shape.fill);
-    }
-
     if (shape.fillOpacity !== "none") {
       fillAlpha = fromOpacity(shape.fillOpacity);
+    }
+
+    if (shape.stroke !== "none") {
+      rgb = fromRGB(shape.stroke);
+    } else {
+      alpha = 0;
+    }
+
+    if (shape.fill !== "none") {
+      fillRgb = fromRGB(shape.fill);
+    } else {
+      fillAlpha = 0;
     }
 
     if (actionId) {
       this.activeActionId = actionId
     }
 
+    console.log(shape);
+    console.log(shapeStyle);
     let payload: IShapeAction = {
       ...this.defaultPayload,
       actionId: this.activeActionId,

@@ -4,8 +4,7 @@ import { EllipseStyle } from 'src/app/model/ellipse-style.model';
 import { ToolEllipseService } from 'src/app/services/tools/tool-ellipse/tool-ellipse.service';
 
 const FILL_ID = 0;
-const CENTER_ID = 1;
-const BORDER_ID = 2;
+const BORDER_ID = 1;
 
 @Component({
   selector: 'app-ellipse-tool-parameter',
@@ -25,11 +24,6 @@ export class EllipseToolParameterComponent implements OnInit {
       id: FILL_ID,
       type: 'fill',
       tooltip: 'Rempli',
-    },
-    {
-      id: CENTER_ID,
-      type: 'center',
-      tooltip: 'Centre',
     },
     {
       id: BORDER_ID,

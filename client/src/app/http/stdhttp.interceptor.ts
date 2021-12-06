@@ -24,7 +24,6 @@ export class StdHttpInterceptor implements HttpInterceptor {
                     } as any;
 
                     request = request.clone({ setHeaders: headers });
-                    console.log(request.headers);
                 }
                 return next.handle(request);
             }));

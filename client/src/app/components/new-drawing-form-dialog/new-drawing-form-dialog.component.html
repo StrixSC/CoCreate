@@ -9,6 +9,9 @@
             <mat-error *ngIf="title.hasError('required')">
                 Ce champ est obligatoire.
             </mat-error>
+            <mat-error *ngIf="title.hasError('minlength') || title.hasError('maxlength')">
+                Le titre doit être entre 8 et 256 caractères.
+            </mat-error>
         </mat-form-field>
 
         <mat-form-field class="pb-1 form-field clickable" appearance="outline">

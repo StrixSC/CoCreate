@@ -28,7 +28,6 @@ export class ToolsService {
     private rectangleTool: ToolRectangleService,
     private ellipseTool: ToolEllipseService,
     private selectionTool: SelectionToolService,
-    private textTool: TextToolService,
     private syncService: SyncDrawingService,
 
     private commandInvoker: CommandInvokerService,
@@ -43,7 +42,6 @@ export class ToolsService {
     this.tools.set(this.rectangleTool.id, this.rectangleTool);
     this.tools.set(this.ellipseTool.id, this.ellipseTool);
     this.tools.set(this.selectionTool.id, this.selectionTool);
-    this.tools.set(this.textTool.id, this.textTool);
   }
 
   /// Selectionner un outil avec son id

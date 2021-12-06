@@ -13,11 +13,3 @@
         <mat-icon>invert_colors</mat-icon>
     </button>
 </div>
-<div class="row">
-    <h4>Fond:</h4>
-    <svg [attr.width]="backgroundSize.width" [attr.height]="backgroundSize.height">
-        <rect [attr.x]="1" [attr.y]="1" [attr.width]="backgroundSize.width-2" [attr.height]="backgroundSize.height-2"
-            [attr.fill]="backgroundColor" [attr.fill-opacity]="backgroundAlpha" class="color-selector"
-            (click)="clickBackground($event)" matTooltip="Couleur de fond" />
-    </svg>
-</div>
