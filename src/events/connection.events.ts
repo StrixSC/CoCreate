@@ -21,15 +21,23 @@ export = (io: Server, socket: Socket) => {
 
                 if (stats) {
                     const { time, collabs } = computeUserUpdatedStats(socket, stats);
-                    await db.stats.update({
-                        where: {
-                            user_id: socket.data.user,
-                        },
-                        data: {
-                            total_collaboration_sessions: collabs,
-                            total_collaboration_time: time
-                        }
-                    });
+                    await db.$transaction([
+                        db.stats.update({
+                            where: {
+                                user_id: socket.data.user,
+                            },
+                            data: {
+                                total_collaboration_sessions: collabs,
+                                total_collaboration_time: time
+                            }
+                        }),
+                        db.channelMember.deleteMany({
+                            where: {
+                                user_id: socket.data.user,
+                                channel_id: socket.data.activeChannelId ? socket.data.activeChannelId : undefined,
+                            }
+                        })
+                    ]);
                 }
             }
         } catch (e) {

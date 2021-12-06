@@ -21,7 +21,7 @@ export class SocketEventError extends Error {
     status: string | null;
 
     constructor(
-        message = 'Internal Server Error',
+        message = 'Oups... Une erreur imprévu s\'',
         code = 'E0000',
         status: string | null = null
     ) {
