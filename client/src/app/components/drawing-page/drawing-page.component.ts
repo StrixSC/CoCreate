@@ -31,9 +31,9 @@ export class DrawingPageComponent {
   activeCollaborationId: string;
   collaborationDeletedSubscription: Subscription;
   committedAction: boolean;
+  deletedListener: Subscription;
   constructor(
     public dialog: MatDialog,
-    private storage: AngularFireStorage,
     private hotkeyService: HotkeysService,
     private drawingLoader: DrawingLoadService,
     private syncService: SyncCollaborationService,
@@ -41,10 +41,8 @@ export class DrawingPageComponent {
     private toolFactory: ToolFactoryService,
     private activeRoute: ActivatedRoute,
     private snackbar: MatSnackBar,
-    private drawingService: DrawingService,
     private router: Router,
     private socketService: SocketService,
-    private exportService: ExportService,
     private selectionService: SelectionToolService,
     private syncCollabService: SyncCollaborationService,
   ) {
@@ -77,19 +75,18 @@ export class DrawingPageComponent {
   }
 
   init(data?: ICollaborationLoadResponse): void {
-    this.collaborationDeletedSubscription = this.syncCollabService.onDeleteCollaboration().subscribe((c: { collaborationId: string }) => {
-      if (c.collaborationId === this.activeCollaborationId) {
-        this.snackbar.open('Le dessin actif fut supprimé...', "OK", { duration: 5000 });
-        this.router.navigateByUrl('gallery');
-      }
-    });
-
     if (!this.drawingLoader.isLoaded) {
       if (data) {
         this.drawingLoader.activeDrawingData = data;
       }
       if (this.drawingLoader.activeDrawingData) {
         this.activeCollaborationId = this.drawingLoader.activeDrawingData.collaborationId;
+        this.collaborationDeletedSubscription = this.syncCollabService.onDeleteCollaboration().subscribe((c: { collaborationId: string }) => {
+          if (c.collaborationId === this.activeCollaborationId) {
+            this.snackbar.open('Le dessin actif fut supprimé...', "OK", { duration: 5000 });
+            this.router.navigateByUrl('gallery');
+          }
+        });
       }
       this.drawingLoader.loadDrawing();
       this.syncDrawingService.updatedDefaultPayload(this.drawingLoader.activeDrawingData!.collaborationId);
@@ -116,6 +113,8 @@ export class DrawingPageComponent {
         } else {
           if (data.eventType === EventTypes.Error) {
             this.onError();
+          } else {
+            console.error(data);
           }
         }
       });
@@ -141,8 +140,8 @@ export class DrawingPageComponent {
     }
 
     this.syncCollabService.sendDisconnect({ collaborationId: this.activeCollaborationId });
-
     this.activeCollaborationId = "";
+    this.drawingLoader.unload();
   }
 
   onError(): void {

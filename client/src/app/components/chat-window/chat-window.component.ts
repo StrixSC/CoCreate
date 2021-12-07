@@ -30,7 +30,7 @@ export class ChatWindowComponent implements OnInit {
   activeChannel: IChannelJoinResponse;
   async ngOnInit() {
     this.audio = new Audio();
-    this.audio.src = '/assets/notification.mp3';
+    this.audio.src = 'assets/notification.mp3';
 
     this.auth.authState.subscribe(async (s) => {
       if (s) {

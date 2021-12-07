@@ -16,7 +16,6 @@ export class CreateDrawingComponent {
   public visibilityTypes: String[];
   public teamNames: String[];
   public constructor() {
-
     this.visibilityTypes = [DrawingType.Public, DrawingType.Protected, DrawingType.Private]
     this.teamNames = ['Moi-même', 'Équipe de collaboration']
   }

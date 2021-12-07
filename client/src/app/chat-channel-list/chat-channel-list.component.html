@@ -49,7 +49,7 @@
                     matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(channel)"
                     [matTooltip]="channel.name" matTooltipPosition="left"
                     *ngFor="let channel of filteredCollaborationChannels; index as i"
-                    class="clickable chat-channel-bubble" [ngStyle]="{'background-color': '#' + channel.bgColor}">
+                    class="clickable chat-channel-bubble" [ngStyle]="{'background-color': channel.bgColor}">
                     {{ channel.name[0] }}
                 </div>
             </div>
@@ -68,7 +68,7 @@
                     matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(channel)"
                     [matTooltip]="channel.name" matTooltipPosition="left"
                     *ngFor="let channel of filteredTeamChannels; index as i" class="clickable chat-channel-bubble"
-                    [ngStyle]="{'background-color': '#' + channel.bgColor}">
+                    [ngStyle]="{'background-color': channel.bgColor}">
                     {{ channel.name[0] }}
                 </div>
             </div>
@@ -84,7 +84,7 @@
                     matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(channel)"
                     [matTooltip]="channel.name" matTooltipPosition="left"
                     *ngFor="let channel of filteredPublicChannels; index as i" class="clickable chat-channel-bubble"
-                    [ngStyle]="{'background-color': '#' + channel.bgColor}">
+                    [ngStyle]="{'background-color': channel.bgColor}">
                     {{ channel.name[0] }}
                 </div>
             </div>

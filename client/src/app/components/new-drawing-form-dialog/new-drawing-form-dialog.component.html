@@ -44,7 +44,7 @@
                 placeholder="********" />
             <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">{{ showPassword ?
                 'visibility_off' : 'visibility' }} </mat-icon>
-            <mat-hint>Caractères alphanumériques seulement et doit être entre 8 et 256 caractères</mat-hint>
+            <mat-hint>Doit être entre 8 et 256 caractères</mat-hint>
             <mat-error *ngIf="password.hasError('required')">
                 Ce champ est obligatoire.
             </mat-error>

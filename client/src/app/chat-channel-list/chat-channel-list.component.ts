@@ -182,12 +182,18 @@ export class ChatChannelListComponent implements OnInit {
   }
 
   genBubbleColors(): { bgColor: string, textColor: string } {
-    const bgColor = this.getDarkColor();
+    const bgColor = this.getPastelColor();
     const textColor = (Number(`0x1${bgColor}`) ^ 0xFFFFFF).toString(16).substr(1).toUpperCase();
     return {
       bgColor,
       textColor
     }
+  }
+
+  getPastelColor() {
+    return "hsl(" + 360 * Math.random() + ',' +
+      (25 + 70 * Math.random()) + '%,' +
+      (50 + 10 * Math.random()) + '%)'
   }
 
   getDarkColor() {

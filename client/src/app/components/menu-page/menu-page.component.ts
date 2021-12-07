@@ -17,7 +17,7 @@ export class MenuPageComponent implements OnDestroy {
   constructor(private auth: AuthService, private router: Router) {
     this.activeUser = this.auth.activeUser;
     this.menuSound = new Audio();
-    this.menuSound.src = "/assets/bg.mp3"
+    this.menuSound.src = "assets/bg.mp3"
     this.menuSound.loop = true;
     this.menuSound.volume = 0.1;
     this.menuSound.play();

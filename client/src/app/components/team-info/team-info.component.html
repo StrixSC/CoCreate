@@ -95,7 +95,7 @@
 
                         <div class="no-drawing-container" *ngIf="teamInfo && teamInfo.drawings.length <= 0">
                             <div class="no-drawing-img-container">
-                                <img src="/assets/img/no-pictures.png" class="no-drawing-img">
+                                <img src="assets/img/no-pictures.png" class="no-drawing-img">
                             </div>
                             <h2 class="no-drawing-header">
                                 <div class="no-drawing-header-text">Cette équipe n'est auteur d'aucun dessins...</div>
@@ -149,7 +149,7 @@
                                                 showPassword
                                                 ?
                                                 'visibility_off' : 'visibility' }} </mat-icon>
-                                            <mat-hint>Caractères alphanumériques seulement et doit être entre 8 et 256
+                                            <mat-hint>Doit être entre 8 et 256
                                                 caractères
                                             </mat-hint>
                                             <mat-error *ngIf="password.hasError('required')">

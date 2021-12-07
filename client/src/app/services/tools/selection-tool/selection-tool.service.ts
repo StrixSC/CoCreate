@@ -85,7 +85,7 @@ export class SelectionToolService implements Tools {
       stroke: 'black',
       opacity: '0.25',
       opacityHover: '0.50',
-      iconSrc: '/assets/svg-icon/trash.svg',
+      iconSrc: 'assets/svg-icon/trash.svg',
       iconId: ActionButtonIds.Delete,
     } as SelectionActionButton,
     {
@@ -94,7 +94,7 @@ export class SelectionToolService implements Tools {
       stroke: 'black',
       opacity: '0.25',
       opacityHover: '0.50',
-      iconSrc: '/assets/svg-icon/arrow.svg',
+      iconSrc: 'assets/svg-icon/arrow.svg',
       iconId: ActionButtonIds.HoldRotation,
     } as SelectionActionButton
   ];

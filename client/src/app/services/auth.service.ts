@@ -37,6 +37,10 @@ export class AuthService {
     return from(this.af.auth.signOut());
   }
 
+  forgetPassword(email: string) {
+    return this.af.auth.sendPasswordResetEmail(email);
+  }
+
   logUserDisconnection() {
     return this.http.get(environment.serverURL + '/auth/logout');
   }
