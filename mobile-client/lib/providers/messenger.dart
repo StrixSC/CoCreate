@@ -1,26 +1,33 @@
 import 'dart:convert';
 
-import 'package:Colorimage/models/user.dart';
-import 'package:Colorimage/screens/chat/chat.dart';
-import 'package:Colorimage/utils/rest/channels_api.dart';
-import 'package:Colorimage/utils/rest/rest_api.dart';
-import 'package:Colorimage/utils/rest/users_api.dart';
-import 'package:Colorimage/utils/socket/channel.dart';
+import 'dart:math';
+import 'package:Colorimage/models/chat.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:Colorimage/screens/chat/chat.dart';
+import 'package:Colorimage/utils/rest/rest_api.dart';
+import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:socket_io_client/socket_io_client.dart';
 
+import '../app.dart';
 import '../models/chat.dart';
+import 'dart:math';
 
 class Messenger extends ChangeNotifier {
   UserCredential? auth;
   List<Chat> userChannels = [];
+  List<Chat> oldChannels = [];
   List<Chat> allChannels = [];
   List<Chat> availableChannel = [];
   bool isChannelSelected = false;
   int currentSelectedChannelIndex = 0;
   late ChannelSocket channelSocket;
+  late Function openDrawer;
 
+  bool isDrawing = false;
+  late Function setIndex;
+  int tabIndex = 0;
   Messenger(this.auth, this.userChannels, this.allChannels);
 
   void setSocket(socket) {
@@ -28,6 +35,7 @@ class Messenger extends ChangeNotifier {
     channelSocket.socket.on('connect', (_) {
       print("Channel socket events initialized");
       channelSocket.initializeChannelSocketEvents(callbackChannel);
+      channelSocket.socket.emit('user:init');
       joinAllUserChannels();
     });
 
@@ -36,6 +44,11 @@ class Messenger extends ChangeNotifier {
 
   void updateUser(UserCredential updatedUser) {
     auth = updatedUser;
+    notifyListeners();
+  }
+
+  void setLastMessage(lastMessage, index) {
+    userChannels[index].lastReadMessage = lastMessage;
     notifyListeners();
   }
 
@@ -81,9 +94,9 @@ class Messenger extends ChangeNotifier {
   }
 
   void joinAllUserChannels() {
-    userChannels.forEach((channel) {
+    for (var channel in userChannels) {
       channelSocket.joinChannel(channel.id);
-    });
+    }
   }
 
   Future<void> fetchChannels() async {
@@ -92,17 +105,31 @@ class Messenger extends ChangeNotifier {
     if (response.statusCode == 200) {
       var jsonResponse =
           json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
-      print('fetchChannels: ');
-      print(jsonResponse);
-      List<Chat> userChannels = [];
+      List<Chat> useChannels = [];
       for (var channel in jsonResponse) {
-        userChannels.add(Chat(
-            name: channel['name'],
-            id: channel['channel_id'],
-            ownerUsername: channel['owner_username'],
-            messages: []));
+        useChannels.add(Chat(
+          name: channel['name'],
+          id: channel['channel_id'],
+          type: channel['channel_type'],
+          ownerUsername: channel['owner_username'],
+          messages: [],
+          onlineMembers: channel['online_members'] ?? [],
+          color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
+        ));
       }
-      updateUserChannels(userChannels);
+
+      // todo: change to int i = 0.. if not working
+      if (userChannels.isNotEmpty) {
+        for (var newChannel in useChannels) {
+          for (var oldChannel in userChannels) {
+            if (newChannel.id == oldChannel.id) {
+              newChannel.messages = oldChannel.messages;
+              newChannel.lastReadMessage = oldChannel.lastReadMessage;
+            }
+          }
+        }
+      }
+      updateUserChannels(useChannels);
     } else {
       print('Request failed with status: ${response.body}.');
       updateUserChannels([]);
@@ -115,17 +142,17 @@ class Messenger extends ChangeNotifier {
     if (response.statusCode == 200) {
       var jsonResponse =
           json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
-      print('fetchAllChannels');
-      print(jsonResponse);
       List<Chat> allChannels = [];
       for (var channel in jsonResponse) {
         allChannels.add(Chat(
-            name: channel['name'],
-            id: channel['channel_id'],
-            type: channel['type'],
-            ownerUsername: channel['owner_username'],
-            updatedAt: channel['updated_at'],
-            messages: []));
+          name: channel['name'],
+          id: channel['channel_id'],
+          type: channel['channel_type'] ?? 'None',
+          ownerUsername: channel['owner_username'],
+          updatedAt: channel['updated_at'],
+          messages: [],
+          onlineMembers: channel['online_members'] ?? [],
+        ));
       }
       updateAllChannels(allChannels);
     } else {
@@ -141,8 +168,6 @@ class Messenger extends ChangeNotifier {
     if (response.statusCode == 200) {
       var jsonResponse =
           json.decode(response.body) as List<dynamic>; //Map<String, dynamic>;
-      print('fetchChannelHistory');
-      print(jsonResponse);
       List<ChatMessage> allMessages = [];
       for (var message in jsonResponse) {
         allMessages.add(ChatMessage(
@@ -187,30 +212,55 @@ class Messenger extends ChangeNotifier {
         break;
       case 'joined':
         Chat channel = data as Chat;
-        print("joined: " + channel.name);
-        addUserChannel(channel);
+        print('joined');
+        fetchChannels();
+        // Chat channel = data as Chat;
+        // addUserChannel(channel);
         break;
       case 'created':
         Chat channel = data as Chat;
-        channel.ownerUsername == auth!.user!.displayName
-            ? addUserChannel(channel)
-            : getAvailableChannels();
+        fetchChannels();
+        break;
+      case 'left:finished':
+        print('Left Chat Finished');
+        fetchChannels();
+        // String channelId = data as String;
+        // removeUserChannel(channelId);
         break;
       case 'left':
-        String channelId = data as String;
-        removeUserChannel(channelId);
+        print('Left Chat');
+        fetchChannels();
+        // String channelId = data as String;
+        // removeUserChannel(channelId);
         break;
       case 'deleted':
-        String channelId = data as String;
-        removeUserChannel(channelId);
+        print('Deleted Chat');
+        fetchChannels();
+        // String channelId = data as String;
+        // removeUserChannel(channelId);
         break;
       case 'updated':
-        Chat channel = data as Chat;
-        updateUserChannelName(
-            channel.name, channel.updatedAt as String, channel.id);
+        // Chat channel = data as Chat;
+        fetchChannels();
+        // updateUserChannelName(
+        //     channel.name, channel.updatedAt as String, channel.id);
         break;
       default:
         print("Invalid socket event");
     }
+    notifyListeners();
+  }
+
+  void alert(type, description) {
+    AwesomeDialog(
+      context: navigatorKey.currentContext as BuildContext,
+      width: 800,
+      dismissOnTouchOutside: false,
+      dialogType: DialogType.SUCCES,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Succès!',
+      desc: description,
+      btnOkOnPress: () {},
+    ).show();
   }
 }

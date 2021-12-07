@@ -5,15 +5,19 @@ import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/models/user.dart';
 import 'package:Colorimage/screens/chat/chat.dart';
 import 'package:Colorimage/screens/galerie/galerie.dart';
+import 'package:Colorimage/screens/home/home.dart';
 import 'package:Colorimage/utils/rest/channels_api.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/utils/rest/users_api.dart';
 import 'package:Colorimage/utils/socket/channel.dart';
 import 'package:Colorimage/utils/socket/collaboration.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
+import '../app.dart';
 import '../models/chat.dart';
 
 class Collaborator extends ChangeNotifier {
@@ -27,6 +31,7 @@ class Collaborator extends ChangeNotifier {
   late Map pagingControllers;
 
   late Function navigate;
+  bool hasBeenInitialized = false;
 
   Collaborator(this.auth) {
     drawings.putIfAbsent("Available", () => <String, Drawing>{});
@@ -40,6 +45,12 @@ class Collaborator extends ChangeNotifier {
       collaborationSocket.initializeChannelSocketEvents(callbackChannel);
     });
     notifyListeners();
+  }
+
+  Map getSelectedItems() {
+    return (drawings[currentType][currentDrawingId] as Drawing)
+        .collaboration
+        .selectedItems;
   }
 
   String convertToFrench(englishType) {
@@ -74,6 +85,38 @@ class Collaborator extends ChangeNotifier {
     return englishType;
   }
 
+  String getCollaborationId() {
+    return (drawings[currentType][currentDrawingId] as Drawing)
+        .collaboration
+        .collaborationId;
+  }
+
+  Color getBackgroundColor() {
+    return (drawings[currentType][currentDrawingId] as Drawing)
+        .collaboration
+        .backgroundColor;
+  }
+
+
+  Map getCurrentActionMap() {
+    return (drawings[currentType][currentDrawingId] as Drawing)
+        .collaboration
+        .actionsMap;
+  }
+
+  String getDrawingId(String collaborationId) {
+    String drawingId = '';
+    for (var type in TYPES) {
+      (drawings[type] as Map<String, Drawing>).forEach((key, value) {
+        if ((drawings[type][key] as Drawing).collaboration.collaborationId ==
+            collaborationId) {
+          drawingId = key;
+        }
+      });
+    }
+    return drawingId;
+  }
+
   void setCurrentType(type) {
     currentType = type;
     notifyListeners();
@@ -81,6 +124,14 @@ class Collaborator extends ChangeNotifier {
 
   bool isEmpty() {
     return drawings[currentType].isEmpty;
+  }
+
+  void refreshPages() {
+    if (hasBeenInitialized) {
+      for (var type in TYPES) {
+        pagingControllers[type].refresh();
+      }
+    }
   }
 
   void updateUser(UserCredential updatedUser) {
@@ -112,47 +163,53 @@ class Collaborator extends ChangeNotifier {
   }
 
   void memberJoined(Member member) {
-    if(member.userId == auth!.user!.uid) {
-
-    } else {
-
-    }
-    if (drawings[currentType].containsKey(member.drawingId)) {
-      drawings[currentType][currentDrawingId].collaboration.members.add(member);
-      drawings[currentType][currentDrawingId].collaboration.memberCount++;
-      notifyListeners();
-    }
-    for (var type in TYPES) {
-      pagingControllers[type].refresh();
-    }
-      notifyListeners();
+    // if (member.userId == auth!.user!.uid) {
+    //   drawings[currentType][currentDrawingId].collaboration.members.add(member);
+    //   drawings[currentType][currentDrawingId].collaboration.memberCount++;
+    // } else {
+    //   (drawings['Available'] as Map<String, Drawing>).update(member.drawingId!,
+    //       (value) {
+    //     value.collaboration.members.add(member);
+    //     return value;
+    //   });
+    //   (drawings['Available'] as Map<String, Drawing>).update(member.drawingId!,
+    //       (value) {
+    //     value.collaboration.memberCount++;
+    //     return value;
+    //   });
+    // }
+    refreshPages();
+    notifyListeners();
   }
 
+  // TODO: If it is sent to everyone even when not in drawing, need to change this
   void memberConnected(Member member) {
-    int index = drawings[currentType][currentDrawingId]
-        .collaboration
-        .members
-        .indexWhere((element) => element.userId == member.userId);
-    if (index != -1) {
-      drawings[currentType][currentDrawingId]
-          .collaboration
-          .members[index]
-          .isActive = true;
-      notifyListeners();
-    } else {
-      throw ("Connected member user index not found.");
-    }
+
+    // int index = drawings[currentType][currentDrawingId]
+    //     .collaboration
+    //     .members
+    //     .indexWhere((element) => element.userId == member.userId);
+    // if (index != -1) {
+    //   drawings[currentType][currentDrawingId]
+    //       .collaboration
+    //       .members[index]
+    //       .isActive = true;
+    //   notifyListeners();
+    // }
+    // (drawings[currentType][currentDrawingId] as Drawing).collaboration.members.add(member);
+    refreshPages();
+    notifyListeners();
   }
 
   void drawingCreated(Drawing drawing) {
-    if(drawing.authorUsername == auth!.user!.displayName) {
+    if (drawing.authorUsername == auth!.user!.displayName) {
       (drawings['Joined'] as Map<String, Drawing>)
           .putIfAbsent(drawing.drawingId, () => drawing);
     } else {
       (drawings['Available'] as Map<String, Drawing>)
           .putIfAbsent(drawing.drawingId, () => drawing);
     }
-    pagingControllers[currentType].refresh();
+    refreshPages();
     notifyListeners();
   }
 
@@ -162,22 +219,43 @@ class Collaborator extends ChangeNotifier {
   }
 
   void deletedDrawing(Map delete) {
-    String collaborationId = delete["collaborationId"];
-    String deletedAt = delete["deletedAt"];
-    var toRemove = [];
-    for (var type in TYPES) {
-      (drawings[type] as Map<String, Drawing>).forEach((key, value) {
-        if ((drawings[type][key] as Drawing).collaboration.collaborationId ==
-            collaborationId) {
-          toRemove.add(key);
-        }
-      });
+    // String collaborationId = delete["collaborationId"];
+    // String deletedAt = delete["deletedAt"];
+    // var toRemove = getDrawingId(collaborationId);
+    // for (var type in TYPES) {
+    //   (drawings[type] as Map<String, Drawing>)
+    //       .removeWhere((key, value) => toRemove == key);
+    // }
+    // String collaborationId = delete['collaborationId'];
+    // if(currentType == 'Joined') {
+    //   (drawings[currentType] as Map<String, Drawing>).forEach((key, value) {
+    //     if ((drawings[currentType][key] as Drawing).collaboration.collaborationId ==
+    //         collaborationId) {
+    //       if((drawings[currentType][key] as Drawing).authorUsername == auth!.user!.displayName) {
+    //         alert('Succès!', 'Vous avez supprimer le dessin! 😄');
+    //       }
+    //     }
+    //   });
+    // }
+    if(delete['drawingId'] == currentDrawingId) {
+      navigatorKey.currentState!.pushReplacement(MaterialPageRoute (
+        builder: (BuildContext context) => const Home(),
+      ));
+      refreshPages();
+      AwesomeDialog(
+        context: navigatorKey.currentContext as BuildContext,
+        width: 800,
+        btnOkColor: Colors.red,
+        dismissOnTouchOutside: false,
+        dialogType: DialogType.ERROR,
+        animType: AnimType.BOTTOMSLIDE,
+        title: 'Erreur!',
+        desc: 'Le dessin a été supprimer!',
+        btnOkOnPress: () {
+        },
+      ).show();
     }
-    for (var type in TYPES) {
-      (drawings[type] as Map<String, Drawing>)
-          .removeWhere((key, value) => toRemove.contains(key));
-    }
-    pagingControllers[currentType].refresh();
+    refreshPages();
     notifyListeners();
   }
 
@@ -189,54 +267,56 @@ class Collaborator extends ChangeNotifier {
     String avatarUrl = left["avatarUrl"];
     String leftAt = left["leftAt"];
 
-    var drawingId = '';
-    for (var type in TYPES) {
-      (drawings[type] as Map<String, Drawing>).forEach((key, value) {
-        if ((drawings[type][key] as Drawing).collaboration.collaborationId ==
-            collaborationId) {
-          drawingId = key;
-        }
-      });
-    }
-    for (var type in TYPES) {
-      if(type == 'Available') {
-        (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
-          value.collaboration.members.removeWhere((item) =>
-          item.userId == userId);
-          value.collaboration.memberCount--;
-          return value;
-        });
-
-      } else {
-        if(userId == auth!.user!.uid) {
-          (drawings[type] as Map<String, Drawing>)
-              .removeWhere((key, value) => drawingId == key);
-        } else {
-          (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
-            value.collaboration.members.removeWhere((item) =>
-            item.userId == userId);
-            value.collaboration.memberCount--;
-            return value;
-          });
-        }
-      }
-    }
-    print('Lefttttttttta');
-    pagingControllers[currentType].refresh();
+    // var drawingId = getDrawingId(collaborationId);
+    // for (var type in TYPES) {
+    //   if (type == 'Available') {
+    //     (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
+    //       value.collaboration.members
+    //           .removeWhere((item) => item.userId == userId);
+    //       value.collaboration.memberCount--;
+    //       return value;
+    //     });
+    //   } else {
+    //     if (userId == auth!.user!.uid) {
+    //       (drawings[type] as Map<String, Drawing>)
+    //           .removeWhere((key, value) => drawingId == key);
+    //     } else {
+    //       (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
+    //         value.collaboration.members
+    //             .removeWhere((item) => item.userId == userId);
+    //         value.collaboration.memberCount--;
+    //         return value;
+    //       });
+    //     }
+    //   }
+    // }
+    userId == auth!.user!.uid ? currentDrawingId = '' : '';
+    refreshPages();
     notifyListeners();
+  }
 
-    int index = drawings[currentType][currentDrawingId]
-        .collaboration
-        .members
-        .indexWhere((element) => element.userId == userId);
-    if (index != -1) {
-      drawings[currentType][currentDrawingId]
-          .collaboration
-          .members
-          .removeWhere((member) => member.userId == userId);
-      drawings[currentType][currentDrawingId].collaboration.memberCount--;
-      notifyListeners();
-    }
+  void disconnectedDrawing(Map left) {
+    String collaborationId = left["collaborationId"];
+    String userId = left["userId"];
+    String username = left["username"];
+    String avatarUrl = left["avatarUrl"];
+    String leftAt = left["leftAt"];
+    //
+    // var drawingId = getDrawingId(collaborationId);
+    // for (var type in TYPES) {
+    //   if (type == 'Available') {
+    //     (drawings[type] as Map<String, Drawing>).update(drawingId, (value) {
+    //       var index = value.collaboration.members
+    //           .indexWhere((item) => item.userId == userId);
+    //       value.collaboration.members[index].isActive = false;
+    //       return value;
+    //     });
+    //   }
+    // }
+    // (drawings[currentType][currentDrawingId] as Drawing).collaboration.members.add(member);
+    userId == auth!.user!.uid ? currentDrawingId = '' : '';
+    refreshPages();
+    notifyListeners();
   }
 
   void callbackChannel(eventType, data) {
@@ -249,17 +329,21 @@ class Collaborator extends ChangeNotifier {
         Member member = data as Member;
         memberJoined(member);
         break;
-      case 'connected':
+      case 'connected': // can only be someone else, when you join or connect you receive load
         Member member = data as Member;
         memberConnected(member);
         break;
       case 'created':
         Drawing drawing = data as Drawing;
+        drawing.authorUsername == auth!.user!.displayName ? alert('Succès!', 'Bravo! Votre dessin à été créer avec succès. Amusez-vous! 😄') : '';
         drawingCreated(drawing);
         break;
       case 'updated':
-        Drawing drawing = data as Drawing;
-        updatedDrawing(drawing);
+        var authorUsername = data['authorUsername'];
+        authorUsername == auth!.user!.displayName ?alert('Succès!', 'Bravo! Votre dessin à été mis a jour avec succès. Amusez-vous! 😄') : '';
+        refreshPages();
+        // Drawing drawing = data as Drawing;
+        // updatedDrawing(drawing);
         break;
       case 'deleted':
         Map delete = data as Map;
@@ -268,9 +352,29 @@ class Collaborator extends ChangeNotifier {
       case 'left':
         Map left = data as Map;
         leftDrawing(left);
+        left["userId"] == auth!.user!.uid ? alert('Succès!', 'Vous avez été quitter le dessin! 😄') : '';
+        break;
+      case 'disconnected':
+        Map disc = data as Map;
+        disconnectedDrawing(disc);
+        disc["userId"] == auth!.user!.uid ? alert('Succès!', 'Vous avez été déconnecté du dessin! 😄') : '';
         break;
       default:
         print("Invalid Collaboration socket event");
     }
+  }
+
+  void alert(type, description) {
+    AwesomeDialog(
+      context:
+      navigatorKey.currentContext as BuildContext,
+      width: 800,
+      dismissOnTouchOutside: false,
+      dialogType: DialogType.SUCCES,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Succès!',
+      desc: description,
+      btnOkOnPress: () {},
+    ).show();
   }
 }

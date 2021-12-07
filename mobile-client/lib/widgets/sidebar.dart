@@ -1,3 +1,4 @@
+import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/messenger.dart';
 import 'package:Colorimage/models/user.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,13 +13,13 @@ class Sidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(key: const PageStorageKey('1'),
-            child: Column(
+            child: Container(color: kContentColor, child: Column(
               children: const [
                 Expanded(
                   child: Channel(),
           )
         ],
-      )
+      ))
     );}
 }
 

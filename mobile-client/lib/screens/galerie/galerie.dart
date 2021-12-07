@@ -1,20 +1,30 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/models/collaboration.dart';
 import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/providers/collaborator.dart';
+import 'package:Colorimage/providers/messenger.dart';
+import 'package:Colorimage/providers/team.dart';
+import 'package:Colorimage/screens/drawing/drawing.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:http/src/response.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/src/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+import '../../app.dart';
 
 const _fontSize = 20.0;
-const padding = 30.0;
+const padding = 20.0;
 const TYPES = ["Available", "Joined"];
 final _formKey = GlobalKey<FormBuilderState>();
 
@@ -36,9 +46,10 @@ class GalerieState extends State<Galerie>
   late TabController _tabController;
   static const _pageSize = 12;
 
-  static String dropDownValueTypeCreate = 'Public';
-  static String dropDownValueAuthor = 'Moi';
-  static String dropDownValueType = 'Aucun';
+  String dropDownValueTypeCreate = 'Public';
+  String dropDownValueAuthor = 'Moi+';
+  String dropDownValueType = 'Aucun';
+  Color color = Colors.white;
 
   GalerieState() {
     for (var type in TYPES) {
@@ -53,8 +64,11 @@ class GalerieState extends State<Galerie>
   @override
   void initState() {
     super.initState();
+    context.read<Collaborator>().hasBeenInitialized = true;
+    dropDownValueAuthor =
+        'Moi (${context.read<Collaborator>().auth!.user!.displayName})';
     context.read<Collaborator>().pagingControllers = pagingControllers;
-    context.read<Collaborator>().navigate = navigateToDrawing;
+    context.read<Collaborator>().navigate = _onLoading;
     _tabController = TabController(length: 2, vsync: this);
     pagingControllers.forEach((key, value) {
       value.addPageRequestListener((pageKey) {
@@ -62,18 +76,18 @@ class GalerieState extends State<Galerie>
       });
       value.addStatusListener((status) {
         if (status == PagingStatus.completed) {
-          ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text(
-                "Il n'y a plus de dessins disponibles",
-              ),
-              action: SnackBarAction(
-                label: 'Ok',
-                onPressed: () {},
-              ),
-            ),
-          );
+          // ScaffoldMessenger.of(context).clearSnackBars();
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //     content: const Text(
+          //       "Il n'y a plus de dessins disponibles",
+          //     ),
+          //     action: SnackBarAction(
+          //       label: 'Ok',
+          //       onPressed: () {},
+          //     ),
+          //   ),
+          // );
         }
       });
     });
@@ -98,7 +112,58 @@ class GalerieState extends State<Galerie>
   }
 
   navigateToDrawing() {
-    print('should navigate to drawing');
+    var user = context.read<Collaborator>().auth!.user!;
+    var socket = context.read<Collaborator>().collaborationSocket.socket;
+    var collaborationId = context.read<Collaborator>().getCollaborationId();
+    // TODO : wait for load, then navigate to screen
+    var actions = context.read<Collaborator>().getCurrentActionMap();
+    var backgroundColor = context.read<Collaborator>().getBackgroundColor();
+    var selectedItems = context.read<Collaborator>().getSelectedItems();
+    pushNewScreen(
+      context,
+      screen: DrawingScreen(
+          socket, user, collaborationId, actions, backgroundColor, selectedItems),
+      withNavBar: false,
+      pageTransitionAnimation: PageTransitionAnimation.cupertino,
+    );
+  }
+
+  void _onLoading() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return SizedBox(
+            height: 150,
+            child: Dialog(
+              child: Padding(
+                  padding: const EdgeInsets.all(25.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      CircularProgressIndicator(),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text("Chargement..."),
+                    ],
+                  )),
+            ));
+      },
+    );
+    Future.delayed(const Duration(seconds: 2), () {
+      navigateToDrawing();
+      AwesomeDialog(
+        context: navigatorKey.currentContext as BuildContext,
+        width: 800,
+        dismissOnTouchOutside: false,
+        dialogType: DialogType.SUCCES,
+        animType: AnimType.BOTTOMSLIDE,
+        title: 'Succès!',
+        desc: 'Vous avez été connecté au dessin! Amusez-vous! 😄',
+        btnOkOnPress: () {},
+      ).show();
+    });
   }
 
   Future<void> _fetchDrawings(int pageKey, String section, String? type) async {
@@ -122,19 +187,20 @@ class GalerieState extends State<Galerie>
     }
 
     if (response.statusCode == 200) {
-      print(response.body);
       var jsonResponse = json.decode(response.body); //Map<String, dynamic>;
       List<Drawing> drawings = [];
       var resp = jsonResponse['drawings'];
       for (var drawing in resp) {
         if (drawing != null) {
+          print(drawing['thumbnail_url']);
           Collaboration collaboration = Collaboration(
-              collaborationId: drawing["collaboration_id"],
-              memberCount: drawing["collaborator_count"],
-              maxMemberCount: drawing["max_collaborator_count"],
-              members: [],
+            collaborationId: drawing["collaboration_id"],
+            memberCount: drawing["collaborator_count"],
+            activeMemberCount: drawing["active_collaborator_count"],
+            members: [],
+            actionsMap: {},
+            actions: [], selectedItems: {},
           );
-          // TODO: add updated_at && thumbnail url
           drawings.add(Drawing(
               drawingId: drawing['drawing_id'],
               authorUsername: drawing["author_username"],
@@ -142,8 +208,11 @@ class GalerieState extends State<Galerie>
               title: drawing['title'],
               createdAt: DateFormat('yyyy-MM-dd kk:mm')
                   .format(DateTime.parse(drawing['created_at'])),
+              updatedAt: DateFormat('yyyy-MM-dd kk:mm')
+                  .format(DateTime.parse(drawing['updated_at'])),
               collaboration: collaboration,
-              type: drawing['type']));
+              type: drawing['type'],
+              thumbnailUrl: drawing['thumbnail_url'] ?? ''));
         }
       }
       final isLastPage = drawings.length < _pageSize;
@@ -155,8 +224,10 @@ class GalerieState extends State<Galerie>
       }
       context.read<Collaborator>().addDrawings(drawings);
     } else if (response.statusCode == 204) {
-      print('bruh');
-      print(response.body);
+      pagingControllers[section].itemsList = [];
+      throw ("Theres was a problem in the fetching of drawings...");
+    } else {
+      // pagingControllers[section].itemsList = [];
     }
   }
 
@@ -171,6 +242,8 @@ class GalerieState extends State<Galerie>
           //   pagingControllers[TYPES[value]].refresh();
           // });
           scrollControllers[TYPES[value]] = ScrollController();
+          // TODO: uncomment this line if you want to reload on tab change
+          pagingControllers[TYPES[value]].refresh();
           context.read<Collaborator>().setCurrentType(TYPES[value]);
         },
         tabs: [
@@ -201,22 +274,28 @@ class GalerieState extends State<Galerie>
   Widget build(BuildContext context) {
     return Scaffold(
         key: const Key('Gallery'),
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
             backgroundColor: kPrimaryColor,
             centerTitle: true,
             automaticallyImplyLeading: false,
+            leading: // Ensure Scaffold is in context
+                IconButton(
+                    icon: const Icon(CupertinoIcons.plus,
+                        color: Colors.white, size: 34),
+                    onPressed: () {
+                      titreController.clear();
+                      passController.clear();
+                      memberController.clear();
+                      color = Colors.white;
+                      context.read<Teammate>().fetchMyTeams();
+                      createDessinDialog();
+                    }),
             title: const Text("Galerie de dessins"),
             actions: <Widget>[
               IconButton(
-                  icon: const Icon(CupertinoIcons.plus,
-                      color: Colors.white, size: 34),
-                  onPressed: () {
-                    titreController.clear();
-                    passController.clear();
-                    memberController.clear();
-                    createDessinDialog();
-                  })
+                  icon: Icon(Icons.message),
+                  onPressed: () => context.read<Messenger>().openDrawer()),
             ],
             bottom: PreferredSize(
                 preferredSize: _tabBar.preferredSize,
@@ -238,12 +317,13 @@ class GalerieState extends State<Galerie>
       return Column(children: <Widget>[
         const SizedBox(height: 40.0),
         SizedBox(
-            width: 1050.0,
+            width: MediaQuery.of(context).size.width -
+                MediaQuery.of(context).size.width / 4,
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SizedBox(
-                      width: 500,
+                      width: MediaQuery.of(context).size.width / 3,
                       child: TextField(
                         style: const TextStyle(fontSize: 25),
                         controller: searchController,
@@ -258,7 +338,7 @@ class GalerieState extends State<Galerie>
                         maxLines: 1,
                         decoration: InputDecoration(
                           errorStyle: const TextStyle(fontSize: 26),
-                          hintText: "Filtrer les dessins selon un attribut",
+                          hintText: "Filtrer selon un attribut",
                           hintStyle: const TextStyle(
                             fontSize: 26,
                           ),
@@ -273,7 +353,7 @@ class GalerieState extends State<Galerie>
                       )),
                   // const SizedBox(width: 24.0),
                   SizedBox(
-                      width: 500,
+                      width: MediaQuery.of(context).size.width / 3,
                       child: dropDown(
                           ['Aucun', 'Public', 'Protégé', 'Privée'],
                           dropDownControllers[
@@ -291,6 +371,7 @@ class GalerieState extends State<Galerie>
                     },
                   ),
               child: PagedGridView<int, Drawing>(
+                physics: AlwaysScrollableScrollPhysics(),
                 showNewPageProgressIndicatorAsGridChild: false,
                 showNewPageErrorIndicatorAsGridChild: false,
                 showNoMoreItemsIndicatorAsGridChild: false,
@@ -304,6 +385,9 @@ class GalerieState extends State<Galerie>
                   crossAxisSpacing: 5,
                 ),
                 builderDelegate: PagedChildBuilderDelegate<Drawing>(
+                  animateTransitions: true,
+                  // [transitionDuration] has a default value of 250 milliseconds.
+                  transitionDuration: const Duration(milliseconds: 500),
                   noItemsFoundIndicatorBuilder: (context) =>
                       context.watch<Collaborator>().currentType == 'Available'
                           ? Column(
@@ -329,7 +413,7 @@ class GalerieState extends State<Galerie>
                                           'Vous faites partie de aucun dessin.'))
                                 ]),
                   itemBuilder: (context, item, index) => _Drawing(
-                    drawing: item,
+                    item,
                   ),
                 ),
               ));
@@ -353,119 +437,179 @@ class GalerieState extends State<Galerie>
     showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-              title: const Center(
-                  child: Padding(
-                      padding: EdgeInsets.only(top: 20.0),
-                      child: Text('Créer un dessin'))),
-              content: Column(children: [
-                Expanded(
-                    child: SizedBox(
-                        width: 1000,
-                        child: ListView(
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.only(
-                                left: 100.0, right: 100.0),
-                            children: <Widget>[
-                              FormBuilder(
-                                  key: _formKey,
-                                  child: Column(children: <Widget>[
-                                    const SizedBox(height: 28.0),
-                                    dropDown(
-                                        ['Moi', 'Équipe'],
-                                        dropDownValueAuthor,
-                                        'Choisir un auteur',
-                                        'Auteur'),
-                                    // TODO: Add teams when ready
-                                    const SizedBox(height: 48.0),
-                                    formField(
-                                        'Titre',
-                                        'Veuillez entrez le titre du dessin',
-                                        titreController),
-                                    const SizedBox(height: 48.0),
-                                    formField(
-                                        'Nombre de membres maximum',
-                                        'Veuillez entrez choisir un auteur',
-                                        memberController),
-                                    const SizedBox(height: 48.0),
-                                    dropDown(
-                                        ['Public', 'Protégé', 'Privée'],
-                                        dropDownValueTypeCreate,
-                                        'Choisir un type de dessins',
-                                        'Type'),
-                                    const SizedBox(height: 48.0),
-                                    dropDownValueTypeCreate == 'Protégé'
-                                        ? formField(
-                                            'Mot de passe',
-                                            'Veuillez entrez choisir un mot de passe',
-                                            passController)
-                                        : const SizedBox.shrink(),
-                                  ]))
-                            ])))
-              ]),
+              titlePadding: EdgeInsets.zero,
+              title: Container(
+                  padding: EdgeInsets.all(10.0),
+                  color: kContentColor,
+                  child: Center(child: Text('Créer un dessin'))),
+              content: SingleChildScrollView(
+                  child: Container(
+                      width: 1000,
+                      child: ListView(
+                          shrinkWrap: true,
+                          padding:
+                              const EdgeInsets.only(left: 100.0, right: 100.0),
+                          children: <Widget>[
+                            FormBuilder(
+                                key: _formKey,
+                                child: Column(children: <Widget>[
+                                  const SizedBox(height: 28.0),
+                                  SizedBox(
+                                      width: 900,
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            SizedBox(
+                                              width: 280,
+                                              child: dropDown([
+                                                'Public',
+                                                'Protégé',
+                                                'Privée'
+                                              ],
+                                                  dropDownValueTypeCreate,
+                                                  'Choisir un type de dessins',
+                                                  'Type'),
+                                            ),
+                                            // const SizedBox(width: 24.0),
+                                            SizedBox(
+                                                width: 280,
+                                                child: dropDown(
+                                                    context
+                                                        .read<Teammate>()
+                                                        .myTeams,
+                                                    dropDownValueAuthor,
+                                                    'Choisir un auteur',
+                                                    'Auteur')),
+                                            SizedBox(
+                                                width: 180,
+                                                child: colorPicker())
+                                          ])),
+                                  const SizedBox(height: 48.0),
+                                  formField(
+                                      'Titre',
+                                      'Veuillez entrez le titre du dessin',
+                                      titreController),
+                                  dropDownValueTypeCreate == 'Protégé'
+                                      ? const SizedBox(height: 48.0)
+                                      : const SizedBox.shrink(),
+                                  dropDownValueTypeCreate == 'Protégé'
+                                      ? formField(
+                                          'Mot de passe',
+                                          'Veuillez entrez choisir un mot de passe',
+                                          passController)
+                                      : const SizedBox.shrink(),
+                                ]))
+                          ]))),
               actions: <Widget>[
                 Padding(
                     padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
                     child: Container(
-                        height: 50,
                         child: ElevatedButton(
-                          onPressed: () {
-                            _formKey.currentState!.save();
-                            if (_formKey.currentState!.validate()) {
-                              print(dropDownValueTypeCreate);
-                              print(dropDownValueAuthor);
-                              var type = context
-                                  .read<Collaborator>()
-                                  .convertToEnglish(dropDownValueTypeCreate);
-                              // TODO: Change to take teams into consideration
-                              var authorId;
-                              dropDownValueAuthor == 'Moi'
-                                  ? authorId = context
-                                      .read<Collaborator>()
-                                      .auth!
-                                      .user!
-                                      .uid
-                                  : authorId = 123;
-                              var title = titreController.value.text;
-                              var password = passController.value.text;
-                              if (type == 'Protected') {
-                                context
-                                    .read<Collaborator>()
-                                    .collaborationSocket
-                                    .createCollaboration(
-                                        authorId, title, type, password);
-                              }
-                              {
-                                context
-                                    .read<Collaborator>()
-                                    .collaborationSocket
-                                    .createCollaboration(
-                                        authorId, title, type, null);
-                              }
-                              Navigator.of(context).pop();
-                              showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      AlertDialog(
-                                        title: Text(
-                                            'Bravo! Votre dessin à été créer avec succès.'),
-                                        content: const Text('Amusez-vous! 😄'),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context, 'Ok');
-                                            },
-                                            child: const Text('Ok'),
-                                          ),
-                                        ],
-                                      ));
-                            } else {
-                              print("validation failed");
-                            }
-                          },
-                          child: const Text('Créer'),
-                        ))),
+                      onPressed: () {
+                        _formKey.currentState!.save();
+                        if (_formKey.currentState!.validate()) {
+                          var type = context
+                              .read<Collaborator>()
+                              .convertToEnglish(dropDownValueTypeCreate);
+                          var authorId;
+                          dropDownValueAuthor ==
+                                  'Moi (${context.read<Collaborator>().auth!.user!.displayName})'
+                              ? authorId =
+                                  context.read<Collaborator>().auth!.user!.uid
+                              : authorId = context
+                                  .read<Teammate>()
+                                  .myTeamsMap[dropDownValueAuthor];
+                          var title = titreController.value.text;
+                          var password = passController.value.text;
+                          if (type == 'Protected') {
+                            context
+                                .read<Collaborator>()
+                                .collaborationSocket
+                                .createCollaboration(
+                                    authorId, title, type, password, color);
+                          } else {
+                            context
+                                .read<Collaborator>()
+                                .collaborationSocket
+                                .createCollaboration(
+                                    authorId, title, type, null, color);
+                          }
+                          Navigator.pop(context);
+                        } else {
+                          AwesomeDialog(
+                            context:
+                                navigatorKey.currentContext as BuildContext,
+                            width: 800,
+                            btnOkColor: Colors.red,
+                            dismissOnTouchOutside: false,
+                            dialogType: DialogType.ERROR,
+                            animType: AnimType.BOTTOMSLIDE,
+                            title: 'Erreur!',
+                            desc: 'Il y a eu un probleme dans la validation...',
+                            btnOkOnPress: () {},
+                          ).show();
+                        }
+                      },
+                      child: const Text('Créer'),
+                    ))),
               ],
             ));
+  }
+
+  colorPicker() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
+      child: ElevatedButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: SingleChildScrollView(
+                  child: Column(children: [
+                    const Text('Choisir une couleur de fond',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 20.0),
+                    ColorPicker(
+                      pickerColor: color,
+                      onColorChanged: (pickerColor) {
+                        color = pickerColor;
+                      },
+                      showLabel: true,
+                      pickerAreaHeightPercent: 0.4,
+                      colorPickerWidth: 500,
+                      pickerAreaBorderRadius:
+                          const BorderRadius.all(Radius.circular(15.0)),
+                    ),
+                  ]),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context, 'Choisir');
+                    },
+                    child: const Text('Choisir'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: const Text(
+          'Couleur de fond',
+          style: TextStyle(fontSize: 15),
+          textAlign: TextAlign.center,
+        ),
+        style: ButtonStyle(
+          fixedSize: MaterialStateProperty.all(Size(80, 57)),
+          backgroundColor: MaterialStateProperty.all(color),
+          foregroundColor: MaterialStateProperty.all(useWhiteForeground(color)
+              ? const Color(0xffffffff)
+              : const Color(0xff000000)),
+        ),
+      ),
+    );
   }
 
   dropDown(List<String> items, value, inputHint, String location) {
@@ -577,19 +721,35 @@ class _GridTitleText extends StatelessWidget {
   }
 }
 
-class _Drawing extends StatelessWidget {
-  const _Drawing({
-    required this.drawing,
-  });
-
+class _Drawing extends StatefulWidget {
   final Drawing drawing;
+
+  _Drawing(this.drawing);
+
+  @override
+  _DrawingState createState() => _DrawingState(drawing);
+}
+
+class _DrawingState extends State<_Drawing> {
+  _DrawingState(this.drawing);
+  String dropDownValueType = 'Public';
+  final Drawing drawing;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   joinDessinDialog(context) async {
     final Widget thumbnail = getThumbnail();
     showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-                title: Center(child: Text(drawing.title)),
+                titlePadding: EdgeInsets.zero,
+                title: Container(
+                    padding: EdgeInsets.all(10.0),
+                    color: kContentColor,
+                    child: Center(child: Text(drawing.title))),
                 content: SingleChildScrollView(
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -597,9 +757,10 @@ class _Drawing extends StatelessWidget {
                       Row(children: <Widget>[
                         Expanded(
                             child: SizedBox(
-                                width: 680, child: gridTileJoin(thumbnail))),
+                                width: MediaQuery.of(context).size.width / 2,
+                                child: gridTileJoin(thumbnail))),
                         SizedBox(
-                            width: 300,
+                            width: MediaQuery.of(context).size.width / 4,
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -615,11 +776,6 @@ class _Drawing extends StatelessWidget {
                                   richTextWhitePurple(
                                       'Nombre de membres: ',
                                       drawing.collaboration.memberCount
-                                          .toString()),
-                                  const SizedBox(height: 48.0),
-                                  richTextWhitePurple(
-                                      'Nombre de membres max: ',
-                                      drawing.collaboration.maxMemberCount
                                           .toString()),
                                   const SizedBox(height: 48.0),
                                   richTextWhitePurple(
@@ -657,139 +813,146 @@ class _Drawing extends StatelessWidget {
                           ? Padding(
                               padding: EdgeInsets.fromLTRB(25.0, 0, 0, 20.0),
                               child: Container(
-                                  height: 50,
                                   child: ElevatedButton(
+                                style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all(Colors.red)),
+                                onPressed: () {
+                                  Navigator.pop(context, 'Delete');
+                                  alert(
+                                      context.read<Collaborator>(),
+                                      'supprimer',
+                                      'Vous pourrez plus le ré-obtenir! 😧',
+                                      'Créez-en un autre! 😄',
+                                      context);
+                                },
+                                child: const Text('Supprimer'),
+                              )))
+                          : context.read<Collaborator>().currentType == 'Joined'
+                              ? Padding(
+                                  padding:
+                                      EdgeInsets.fromLTRB(25.0, 0, 0, 20.0),
+                                  child: Container(
+                                      child: ElevatedButton(
                                     style: ButtonStyle(
                                         backgroundColor:
                                             MaterialStateProperty.all(
                                                 Colors.red)),
                                     onPressed: () {
-                                      Navigator.pop(context, 'Delete');
-                                      alert(context, 'supprimer', 'Vous pourrez plus le ré-obtenir! 😧', 'Créez-en un autre! 😄');
+                                      Navigator.pop(context, 'Quitter');
+                                      alert(
+                                          context.read<Collaborator>(),
+                                          'quitter',
+                                          'Il sera possible de le rejoindre plus tard si il est pas supprimer 😄',
+                                          'Aller joindre des dessins!',
+                                          context);
+                                      context
+                                          .read<Collaborator>()
+                                          .refreshPages();
                                     },
-                                    child: const Text('Supprimer'),
+                                    child: const Text('Quitter'),
                                   )))
+                              : const SizedBox.shrink(),
+                      drawing.authorUsername ==
+                              context
+                                  .read<Collaborator>()
+                                  .auth!
+                                  .user!
+                                  .displayName
+                          ? Padding(
+                              padding: EdgeInsets.fromLTRB(100.0, 0, 0, 10.0),
+                              child: Container(
+                                  child: ElevatedButton(
+                                onPressed: () {
+                                  update(context);
+                                },
+                                child: const Text('Mettre à jour'),
+                              )))
                           : const SizedBox.shrink(),
                       context.read<Collaborator>().currentType == 'Available'
                           ? Padding(
-                              padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
+                              padding: EdgeInsets.fromLTRB(0, 0, 455.0, 20.0),
                               child: Container(
-                                  height: 50,
                                   child: ElevatedButton(
-                                    onPressed: () {
+                                onPressed: () {
+                                  context
+                                      .read<Collaborator>()
+                                      .currentDrawingId = drawing.drawingId;
+                                  if (drawing.type == 'Protected') {
+                                    _formKey.currentState!.save();
+                                    if (_formKey.currentState!.validate()) {
                                       context
                                           .read<Collaborator>()
-                                          .currentDrawingId = drawing.drawingId;
-                                      if (drawing.type == 'Protected') {
-                                        _formKey.currentState!.save();
-                                        if (_formKey.currentState!.validate()) {
-                                          context
-                                              .read<Collaborator>()
-                                              .collaborationSocket
-                                              .joinCollaboration(
-                                                  drawing.collaboration
-                                                      .collaborationId,
-                                                  drawing.type,
-                                                  passController.value.text);
-                                        }
-                                      } else {
-                                        context
-                                            .read<Collaborator>()
-                                            .collaborationSocket
-                                            .joinCollaboration(
-                                            drawing.collaboration
-                                                .collaborationId,
+                                          .collaborationSocket
+                                          .joinCollaboration(
+                                              drawing.collaboration
+                                                  .collaborationId,
+                                              drawing.type,
+                                              passController.value.text);
+                                    }
+                                  } else {
+                                    context
+                                        .read<Collaborator>()
+                                        .collaborationSocket
+                                        .joinCollaboration(
+                                            drawing
+                                                .collaboration.collaborationId,
                                             drawing.type,
                                             null);
-                                      }
-                                      Navigator.pop(context, 'Joindre');
-                                    },
-                                    child: const Text('Joindre'),
-                                  )))
-                          : Padding(
-                              padding: EdgeInsets.fromLTRB(0, 0, 25.0, 0.0),
-                              child: Container(
-                                  height: 50,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pop(context, 'Quitter');
-                                      alert(context, 'quitter', 'Il sera possible de le rejoindre plus tard si il est pas supprimer 😄', 'Aller joindre des dessins!');
-                                    },
-                                    child: const Text('Quitter'),
-                                  ))),
+                                  }
+                                  context.read<Collaborator>().refreshPages();
+                                  Navigator.pop(context, 'Joindre');
+                                },
+                                child: const Text('Joindre'),
+                              )))
+                          : SizedBox.shrink(),
                       context.read<Collaborator>().currentType == 'Available'
                           ? SizedBox.shrink()
                           : Padding(
                               padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
                               child: Container(
-                                  height: 50,
                                   child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pop(context, 'Se connecter');
-                                      context
-                                          .read<Collaborator>()
-                                          .currentDrawingId = drawing.drawingId;
-                                      context
-                                          .read<Collaborator>()
-                                          .collaborationSocket
-                                          .connectCollaboration(
-                                          drawing.collaboration
-                                              .collaborationId);
-                                    },
-                                    child: const Text('Se connecter'),
-                                  ))),
+                                onPressed: () {
+                                  Navigator.pop(context, 'Se connecter');
+                                  context.read<Collaborator>().refreshPages();
+                                  context
+                                      .read<Collaborator>()
+                                      .currentDrawingId = drawing.drawingId;
+                                  context
+                                      .read<Collaborator>()
+                                      .collaborationSocket
+                                      .connectCollaboration(drawing
+                                          .collaboration.collaborationId);
+                                },
+                                child: const Text('Se connecter'),
+                              ))),
                     ],
                   )
                 ]));
   }
 
-  alert(context, type, consequence, result) {
-    return showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-              title: Text('Êtes-vous certain de vouloir ${type} ce dessin?.'),
-              content: Text(consequence),
-              actions: <Widget>[
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, 'Annuler');
-                  },
-                  child: const Text('Annuler'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, 'Oui');
-                    type == 'supprimer'
-                        ? context
-                            .read<Collaborator>()
-                            .collaborationSocket
-                            .deleteCollaboration(
-                                drawing.collaboration.collaborationId)
-                        : context
-                            .read<Collaborator>()
-                            .collaborationSocket
-                            .leaveCollaboration(
-                                drawing.collaboration.collaborationId);
-                    showDialog<String>(
-                        context: context,
-                        builder: (BuildContext context) => AlertDialog(
-                              title:
-                                  Text('Le dessin à été ${type} avec succès.'),
-                              content: Text(result),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context, 'Ok');
-                                  },
-                                  child: const Text('Ok'),
-                                ),
-                              ],
-                            ));
-                  },
-                  child: const Text('Oui'),
-                ),
-              ],
-            ));
+  alert(collab, type, consequence, result, context) {
+    return AwesomeDialog(
+      context: navigatorKey.currentContext as BuildContext,
+      width: 800,
+      dismissOnTouchOutside: false,
+      dialogType: DialogType.WARNING,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Attention!',
+      desc: 'Êtes-vous certain de vouloir ${type} ce dessin?.',
+      btnCancelOnPress: () {},
+      btnOkOnPress: () {
+        emitDeleteLeave(type, collab);
+      },
+    ).show();
+  }
+
+  emitDeleteLeave(type, collab) {
+    type == 'supprimer'
+        ? collab.collaborationSocket
+            .deleteCollaboration(drawing.collaboration.collaborationId)
+        : collab.collaborationSocket
+            .leaveCollaboration(drawing.collaboration.collaborationId);
   }
 
   @override
@@ -800,6 +963,9 @@ class _Drawing extends StatelessWidget {
     return GestureDetector(
         onTap: () {
           passController.clear();
+          titreController.text = drawing.title;
+          passController.text = drawing.type == "Protected" ? "" : "";
+          dropDownValueType = type;
           joinDessinDialog(context);
         },
         child: gridTile(thumbnail, type));
@@ -810,63 +976,92 @@ class _Drawing extends StatelessWidget {
       return Center(
           child: Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20.0),
-              child: Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          width: 2.5, color: Colors.grey.withOpacity(0.1))),
+              child: Material(
+                  elevation: 10,
                   child: Container(
-                      color: kContentColor,
-                      child: Column(children: <Widget>[
-                        Container(
-                            height: 80.0,
-                            child: Row(children: [
-                              Column(children: [
-                                Padding(
-                                    padding: EdgeInsets.all(15.0),
-                                    child: CircleAvatar(
-                                      radius: 24,
-                                      backgroundColor: kPrimaryColor,
-                                      backgroundImage:
-                                          NetworkImage(drawing.authorAvatar),
-                                    ))
-                              ]),
-                              Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Row(children: [
-                                      SizedBox(
-                                          width: 300,
-                                          child: Text(drawing.title,
-                                              style: TextStyle(
-                                                  fontSize: 20.0,
-                                                  fontWeight: FontWeight.bold)))
-                                    ]),
-                                    Row(children: [
-                                      SizedBox(
-                                          width: 300,
-                                          child: Text(drawing.createdAt,
-                                              style: TextStyle(fontSize: 20.0)))
-                                    ])
+                      height: 820,
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                              width: 2.5,
+                              color: drawing.authorUsername !=
+                                      context
+                                          .read<Collaborator>()
+                                          .auth!
+                                          .user!
+                                          .displayName
+                                  ? Colors.grey.withOpacity(0.15)
+                                  : kPrimaryColor.withOpacity(0.45))),
+                      child: Container(
+                          color: kContentColor,
+                          child: Column(children: <Widget>[
+                            Container(
+                                height: orientation == Orientation.portrait
+                                    ? 50.0
+                                    : MediaQuery.of(context).size.height / 9,
+                                child: Row(children: [
+                                  Column(children: [
+                                    Padding(
+                                        padding: EdgeInsets.all(15.0),
+                                        child: CircleAvatar(
+                                            radius: 24,
+                                            backgroundColor: kPrimaryColor,
+                                            backgroundImage: drawing
+                                                        .authorUsername !=
+                                                    'admin'
+                                                ? NetworkImage(
+                                                    drawing.authorAvatar)
+                                                : Image.asset(
+                                                        'assets/images/Boruto_Uzumaki_1.png')
+                                                    .image))
                                   ]),
-                            ])),
-                        Container(
-                            width: 400,
-                            height: 175,
-                            child: GridTile(
-                              child: thumbnail,
-                            )),
-                        const SizedBox(height: 10),
-                        Text('Auteur: ' + drawing.authorUsername,
-                            style: TextStyle(fontSize: 20.0)),
-                        const SizedBox(height: 10),
-                        Text(
-                            "Collaborateurs actifs: " +
-                                drawing.collaboration.memberCount.toString() +
-                                "/" +
-                                drawing.collaboration.maxMemberCount.toString(),
-                            style: TextStyle(fontSize: 20.0)),
-                      ])))));
+                                  Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Row(children: [
+                                          SizedBox(
+                                              width: 260,
+                                              child: _GridTitleText(
+                                                drawing.title,
+                                              ))
+                                        ]),
+                                        Row(children: [
+                                          SizedBox(
+                                              width: 260,
+                                              child: Text(drawing.createdAt,
+                                                  style: TextStyle(
+                                                      fontSize: 20.0)))
+                                        ]),
+                                      ]),
+                                  // Column(children: [
+                                  //   SizedBox(
+                                  //       width: 30,
+                                  //       child: popup())
+                                  // ])
+                                ])),
+                            Container(
+                                width: MediaQuery.of(context).size.width / 2,
+                                height: MediaQuery.of(context).size.width / 7,
+                                child: GridTile(
+                                  child: FittedBox(
+                                      fit: BoxFit.fill, child: thumbnail),
+                                )),
+                            const SizedBox(height: 10),
+                            Container(
+                                child: FittedBox(
+                                    fit: BoxFit.contain,
+                                    child: Text(
+                                        'Auteur: ' + drawing.authorUsername,
+                                        style: TextStyle(fontSize: 20.0)))),
+                            const SizedBox(height: 10),
+                            Text(
+                                "Collaborateurs actifs: " +
+                                    drawing.collaboration.activeMemberCount
+                                        .toString(),
+                                style: TextStyle(fontSize: 20.0)),
+                          ]))))));
     });
   }
 
@@ -878,6 +1073,7 @@ class _Drawing extends StatelessWidget {
         ));
   }
 
+  // TODO: Add real thumbnail when ready (drawing.thumbnail)
   getThumbnail() {
     return Material(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
@@ -885,13 +1081,28 @@ class _Drawing extends StatelessWidget {
         child: FittedBox(
             fit: BoxFit.fill,
             child: drawing.type == 'Protected'
-                ? ClipRRect(
-                    child: ImageFiltered(
-                      imageFilter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
-                      child: Image.asset('assets/images/default_thumbnail.png'),
-                    ),
+                ? Stack(
+                    children: <Widget>[
+                      ClipRRect(
+                        child: ImageFiltered(
+                          imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Image.asset(
+                              'assets/images/default_thumbnail.png', width: 100, height: 100,),
+                        ),
+                      ),
+                      const Positioned(
+                        bottom: 170,
+                        right:
+                            250, //give the values according to your requirement
+                        child:
+                            Icon(Icons.lock, color: Colors.black, size: 100.0),
+                      ),
+                    ],
                   )
-                : Image.asset('assets/images/default_thumbnail.png')));
+                : drawing.thumbnailUrl != ''
+                    ? SvgPicture.network(drawing.thumbnailUrl,
+                        semanticsLabel: 'A red up arrow', fit: BoxFit.cover, width: 100, height: 100,)
+                    : Image.asset('assets/images/default_thumbnail.png', width: 75, height: 50,)));
   }
 
   richTextWhitePurple(String text1, String text2) {
@@ -911,5 +1122,153 @@ class _Drawing extends StatelessWidget {
             ],
           ),
         ));
+  }
+
+  update(context) async {
+    showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              titlePadding: EdgeInsets.zero,
+              title: Container(
+                  padding: EdgeInsets.all(10.0),
+                  color: kContentColor,
+                  child: Center(child: Text('Mettre à jour ${drawing.title}'))),
+              content: SingleChildScrollView(
+                  child: Container(
+                      width: 1000,
+                      child: ListView(
+                          shrinkWrap: true,
+                          padding:
+                              const EdgeInsets.only(left: 100.0, right: 100.0),
+                          children: <Widget>[
+                            FormBuilder(
+                                key: _formKey,
+                                child: Column(children: <Widget>[
+                                  const SizedBox(height: 28.0),
+                                  SizedBox(
+                                      width: 900,
+                                      child: Row(children: [
+                                        SizedBox(
+                                          width: 280,
+                                          child: dropDown(
+                                              ['Public', 'Protégé', 'Privée'],
+                                              dropDownValueType,
+                                              'Choisir un type de dessins'),
+                                        ),
+                                        // const SizedBox(width: 24.0),
+                                      ])),
+                                  const SizedBox(height: 48.0),
+                                  SizedBox(
+                                      width: 900.0,
+                                      child: Row(children: [
+                                        SizedBox(
+                                          width: 800.0,
+                                          child: formField(
+                                              'Titre',
+                                              'Veuillez entrez le titre du dessin',
+                                              titreController),
+                                        ),
+                                      ])),
+                                  dropDownValueType == 'Protégé'
+                                      ? const SizedBox(height: 48.0)
+                                      : const SizedBox.shrink(),
+                                  dropDownValueType == 'Protégé'
+                                      ? SizedBox(
+                                          width: 900.0,
+                                          child: Row(children: [
+                                            SizedBox(
+                                              width: 800.0,
+                                              child: formField(
+                                                  'Mot de passe',
+                                                  'Veuillez entrez choisir un mot de passe',
+                                                  passController),
+                                            ),
+                                          ]))
+                                      : const SizedBox.shrink()
+                                ]))
+                          ]))),
+              actions: <Widget>[
+                Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
+                    child: Container(
+                        child: ElevatedButton(
+                      onPressed: () {
+                        _formKey.currentState!.save();
+                        if (_formKey.currentState!.validate()) {
+                          var type = context
+                              .read<Collaborator>()
+                              .convertToEnglish(dropDownValueType);
+                          var title = titreController.value.text;
+                          var password = passController.value.text;
+                          if (type == 'Protected') {
+                            context
+                                .read<Collaborator>()
+                                .collaborationSocket
+                                .updateCollaboration(
+                                    drawing.collaboration.collaborationId,
+                                    title,
+                                    type,
+                                    password);
+                          }
+                          {
+                            context
+                                .read<Collaborator>()
+                                .collaborationSocket
+                                .updateCollaboration(
+                                    drawing.collaboration.collaborationId,
+                                    title,
+                                    type,
+                                    null);
+                          }
+                          Navigator.pop(context);
+                          context.read<Collaborator>().refreshPages();
+                          Navigator.pop(context);
+                        } else {
+                          AwesomeDialog(
+                            context:
+                                navigatorKey.currentContext as BuildContext,
+                            width: 800,
+                            btnOkColor: Colors.red,
+                            dismissOnTouchOutside: false,
+                            dialogType: DialogType.ERROR,
+                            animType: AnimType.BOTTOMSLIDE,
+                            title: 'Erreur!',
+                            desc: 'Il y a eu un probleme dans la validation...',
+                            btnOkOnPress: () {},
+                          ).show();
+                        }
+                      },
+                      child: const Text('Mettre à jour'),
+                    ))),
+              ],
+            ));
+  }
+
+  dropDown(List<String> items, value, inputHint) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+      DropdownButtonFormField<String>(
+        value: value,
+        decoration: InputDecoration(
+          labelText: inputHint,
+          labelStyle: const TextStyle(fontSize: _fontSize),
+          border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.zero)),
+        ),
+        icon: const Align(
+            alignment: Alignment.topRight,
+            child: Icon(Icons.arrow_downward, size: 35.0)),
+        onChanged: (String? newValue) {
+          dropDownValueType = newValue ?? 'Public';
+        },
+        items: items.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        style:
+            const TextStyle(fontSize: _fontSize, fontWeight: FontWeight.w300),
+      )
+    ]);
   }
 }

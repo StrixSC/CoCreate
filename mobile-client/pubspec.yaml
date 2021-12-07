@@ -59,6 +59,13 @@ dependencies:
   flutter_form_builder: ^7.0.0
   form_builder_validators: ^7.2.0
   intl: ^0.17.0
+  expandable: ^5.0.1
+  awesome_dialog: ^2.1.1
+  dio: ^4.0.4
+  image_picker: ^0.8.4+4
+  google_sign_in: ^5.2.1
+  flutter_svg: ^1.0.0
+  audioplayers: ^0.20.1
 
 dev_dependencies:
   flutter_test:
@@ -86,6 +93,7 @@ flutter:
   assets:
     - assets/images/
     - .env
+    - assets/sound_alarm.mp3
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

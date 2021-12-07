@@ -1,6 +1,8 @@
 import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/screens/login/kickout.dart';
 import 'package:Colorimage/screens/login/register.dart';
 import 'package:Colorimage/utils/general.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,17 +11,20 @@ import 'package:provider/provider.dart';
 import 'screens/home/home.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'screens/drawing/drawing.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'style.dart';
 
 const loginRoute = '/';
 const chatRoute = '/chat';
 const homeRoute = '/home';
 const drawingRoute = '/drawing';
 const registerRoute = '/register';
+const kickedOutRoute = '/kickout';
 const fontsize = TextStyle(fontSize: 25);
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 class App extends StatefulWidget {
+  const App({Key? key}) : super(key: key);
+
   @override
   _AppState createState() => _AppState();
 }
@@ -32,7 +37,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
   void initState() {
     controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 5),
     )..addListener(() {
         setState(() {});
       });
@@ -84,14 +89,16 @@ class _AppState extends State<App> with TickerProviderStateMixin {
               inputDecorationTheme: const InputDecorationTheme(
                 filled: true,
                 fillColor: kContentColor4,
-                  labelStyle: TextStyle(color: kPrimaryColor),),
+                labelStyle: TextStyle(color: kPrimaryColor),
+              ),
               textTheme: GoogleFonts.ralewayTextTheme(
                   Theme.of(context).textTheme.apply(
-                    displayColor: Colors.white,
+                        displayColor: Colors.white,
                         bodyColor: Colors.white,
                         fontSizeFactor: 2.0,
                         fontSizeDelta: 2.0,
                       ))),
+          navigatorKey: navigatorKey,
         ), //_theme(),
       ),
     );
@@ -101,6 +108,9 @@ class _AppState extends State<App> with TickerProviderStateMixin {
     return (settings) {
       Widget screen;
       switch (settings.name) {
+        case kickedOutRoute:
+          screen = Kickout();
+          break;
         case loginRoute:
           screen = const Login();
           break;
@@ -112,7 +122,13 @@ class _AppState extends State<App> with TickerProviderStateMixin {
           break;
         case drawingRoute:
           final arguments = settings.arguments as Map<String, dynamic>;
-          screen = DrawingScreen(arguments['socket']);
+          screen = DrawingScreen(
+              arguments['socket'],
+              arguments['user'],
+              arguments['collaborationId'],
+              arguments['actions'],
+              arguments['backgroundColor'],
+              arguments['selectedItems']);
           break;
         default:
           return null;

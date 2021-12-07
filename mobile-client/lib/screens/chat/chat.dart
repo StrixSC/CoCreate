@@ -47,9 +47,9 @@ class ChatMessage extends StatelessWidget {
                             elevation: 0,
                             alignment: Alignment.topRight,
                             margin: EdgeInsets.only(top: 10),
-                            backGroundColor: Colors.indigo.shade400,
+                            backGroundColor: kPrimaryColor,
                             child: Container(
-                              color: Color(0xFF5D72CC),
+                              color: kPrimaryColor,
                               constraints: BoxConstraints(
                                 maxWidth:
                                     MediaQuery.of(context).size.width * 0.9,
@@ -137,7 +137,7 @@ class ChatMessage extends StatelessWidget {
 class ChatScreen extends StatefulWidget {
   int channelIndex;
 
-  ChatScreen(this.channelIndex, {Key? key}) : super(key: key);
+  ChatScreen(this.channelIndex);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -148,6 +148,12 @@ class _ChatScreenState extends State<ChatScreen> {
   final _textController = TextEditingController();
   bool _validate = false;
   final FocusNode _focusNode = FocusNode();
+
+  @override
+  void didUpdateWidget(dynamic oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _focusNode.requestFocus();
+  }
 
   void _handleSubmitted(String text) {
     print('submitted');
@@ -162,49 +168,75 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _handleChange(String text) {
-    if (_validate) {
-      setState(() {
-        _validate = _textController.text.isEmpty;
-      });
-    }
+  // void _handleChange(String text) {
+  //   if (_validate) {
+  //     setState(() {
+  //       _validate = _textController.text.isEmpty;
+  //     });
+  //   }
+  // }
+
+  member(List members, index) {
+    const fontSize = 24.0;
+    return Row(children: [
+      Container(
+        child: Row(children: [
+          Container(
+              width: 280,
+              child: Row(children: [
+                CircleAvatar(
+                    radius: 40,
+                    backgroundColor: kPrimaryColor,
+                    backgroundImage:
+                    NetworkImage(members[index]['avatarUrl']!)),
+                const SizedBox(width: 10),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(members[index]['username']!,
+                      style: TextStyle(fontSize: fontSize)),
+                )
+              ])),
+          Container(
+              width: 200,
+              child: Row(children: [
+                members[index]['status']! == 'En ligne'
+                    ? Row(children: [
+                  const Icon(
+                    Icons.circle,
+                    color: Colors.green,
+                    size: 15.0,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(members[index]['status']!,
+                      style: TextStyle(fontSize: fontSize))
+                ])
+                    : Row(children: [
+                  const Icon(
+                    Icons.circle,
+                    color: Colors.red,
+                    size: 15.0,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(members[index]['status']!,
+                      style: TextStyle(fontSize: fontSize))
+                ]),
+              ])),
+        ]),
+      )
+    ]);
   }
 
-  Widget _buildTextComposer() {
-    return IconTheme(
-      data: const IconThemeData(color: kPrimaryColor),
-      child: Container(
-        height: 75,
-        margin: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Row(
-          children: [
-            Flexible(
-              child: TextField(
-                style: TextStyle(fontSize: 25),
-                controller: _textController,
-                onSubmitted: _handleSubmitted,
-                onChanged: _handleChange,
-                decoration: InputDecoration(
-                  hintText: 'Envoyer un message',
-                  errorText:
-                      _validate ? 'Le message ne peut pas être vide' : null,
-                ),
-                focusNode: _focusNode,
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: IconButton(
-                  iconSize: 34,
-                  icon: const Icon(Icons.send),
-                  color: Colors.indigo.shade400,
-                  onPressed: () {
-                    _handleSubmitted(_textController.text);
-                  }),
-            )
-          ],
-        ),
-      ),
+  members(Chat chat) {
+    const space = 60.0;
+    const fontSize = 24.0;
+    return ListView.separated(
+      shrinkWrap: true,
+      itemCount: chat.onlineMembers.length,
+      itemBuilder: (BuildContext context, int index) {
+        return member(chat.onlineMembers, index);
+      },
+      separatorBuilder: (BuildContext context, int index) => const Divider(),
     );
   }
 
@@ -213,19 +245,24 @@ class _ChatScreenState extends State<ChatScreen> {
     Messenger messenger = context.read<Messenger>();
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: kContentColor,
         leading: IconButton(
             icon: const Tooltip(
                 message: 'Se déconnecter',
                 child: Icon(Icons.arrow_back, color: Colors.white, size: 30)),
             onPressed: () {
-              messenger.userChannels[widget.channelIndex].lastReadMessage =
-                  messenger
-                      .userChannels[widget.channelIndex].messages.last.text;
+              context.read<Messenger>().setIndex();
+              messenger.userChannels[widget.channelIndex].messages.isEmpty
+                  ? ''
+                  : messenger.setLastMessage(
+                      messenger.userChannels[widget.channelIndex].messages.first
+                          .text,
+                      widget.channelIndex);
               context.read<Messenger>().toggleSelection();
             }),
-        title: const Text(
-          '',
-          style: TextStyle(fontSize: 25, color: Colors.blue),
+        title: Text(
+          context.read<Messenger>().userChannels[widget.channelIndex].name,
+          style: TextStyle(fontSize: 30, color: kPrimaryColor),
         ),
         actions: [
           IconButton(
@@ -257,7 +294,43 @@ class _ChatScreenState extends State<ChatScreen> {
                           ],
                         ));
               }),
-          messenger.userChannels[widget.channelIndex].name != "Canal Publique"
+          IconButton(
+              icon: const Icon(Icons.group,
+                  color: Colors.white, size: 30),
+              onPressed: () {
+                showDialog<String>(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      titlePadding: EdgeInsets.zero,
+                      title: Container(
+                          padding: EdgeInsets.all(10.0),
+                          color: kContentColor,
+                          child: const Center(child: Text('Membres'))),
+                      content: Container(
+                        height: 500,
+                        width: 500, child: SingleChildScrollView(
+                          child: Column(children: [
+                            Container(
+                                width: MediaQuery.of(context).size.width,
+                                child: Column(children: [
+                                members(messenger.userChannels[widget.channelIndex]),
+                                ]))
+                          ]))),
+                      actions: <Widget>[
+                        Padding(
+                            padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
+                            child: Container(
+                                height: 50,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Retour'),
+                                ))),
+                      ],
+                    ));
+              }),
+          messenger.userChannels[widget.channelIndex].name != "Public"
               ? IconButton(
                   icon: const Icon(Icons.exit_to_app_rounded,
                       color: Colors.white, size: 30),
@@ -312,7 +385,49 @@ class _ChatScreenState extends State<ChatScreen> {
           const Divider(height: 1.0),
           Container(
             decoration: BoxDecoration(color: Theme.of(context).cardColor),
-            child: _buildTextComposer(),
+            child: IconTheme(
+              data: const IconThemeData(color: kPrimaryColor),
+              child: Container(
+                color: kContentColor,
+                height: 75,
+
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        style: TextStyle(fontSize: 25),
+                        controller: _textController,
+                        // onChanged: _handleChange,
+                        decoration: InputDecoration(
+                          hintText: 'Envoyer un message',
+                          errorText: _validate
+                              ? 'Le message ne peut pas être vide'
+                              : null,
+                        ),
+                        focusNode: _focusNode,
+                        onSubmitted: (val) {
+                          setState(() {
+                            _handleSubmitted(_textController.text);
+                          });
+                          _textController.clear();
+                          _focusNode.requestFocus();
+                        },
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: IconButton(
+                          iconSize: 34,
+                          icon: const Icon(Icons.send),
+                          color:kPrimaryColor,
+                          onPressed: () {
+                            _handleSubmitted(_textController.text);
+                          }),
+                    )
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
