@@ -84,8 +84,6 @@ class _BottomNavBarScreenState extends State<BottomNavBar> {
 
   List<Widget> _buildScreens() {
     return [
-      Container(),
-      Kickout(),
       Galerie(),
       TeamsScreen(),
       Profile(context.read<Collaborator>().auth!.user!),
@@ -94,11 +92,6 @@ class _BottomNavBarScreenState extends State<BottomNavBar> {
   }
 
   final bottomNavBarItems = [
-    {"title": "Accueil", "icon": const Icon(CupertinoIcons.home)},
-    {
-      "title": "Feed",
-      "icon": const Icon(CupertinoIcons.photo_fill_on_rectangle_fill)
-    },
     {
       "title": "Galerie",
       "icon": const Icon(CupertinoIcons.plus_rectangle_fill_on_rectangle_fill)

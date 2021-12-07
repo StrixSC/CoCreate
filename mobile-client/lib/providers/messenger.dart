@@ -219,9 +219,11 @@ class Messenger extends ChangeNotifier {
         break;
       case 'created':
         Chat channel = data as Chat;
+        fetchChannels();
         break;
       case 'left:finished':
         print('Left Chat Finished');
+        fetchChannels();
         // String channelId = data as String;
         // removeUserChannel(channelId);
         break;

@@ -3,13 +3,18 @@ import 'dart:convert';
 import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/providers/collaborator.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/src/provider.dart';
 import 'dart:io';
 import 'dart:async';
+
+import '../../app.dart';
 
 class UpdateProfile extends StatefulWidget {
   final User _user;
@@ -70,7 +75,8 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                update(_image, userController.text);
+                userController.clear();
               },
               child: const Text('Confirmer'),
             ),
@@ -94,6 +100,58 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
       ),
     );
   }
+
+  update(File? file, username) async {
+      Dio dio = Dio();
+      dio.options.headers['Content-Type'] = 'multipart/form-data';
+      dio.options.baseUrl = 'https://' + (dotenv.env['SERVER_URL'] ?? "");
+      FormData formData = FormData();
+
+      if (file != null) {
+        print('here');
+        String fileName = file.path.split('/').last;
+        formData = FormData.fromMap({
+          "avatar": await MultipartFile.fromFile(file.path, filename: fileName),
+          "username": userController.text,
+        });
+      } else {
+        print(currentAvatar);
+        formData = FormData.fromMap({
+          "avatar_url": currentAvatar,
+          "username": userController.text,
+
+        });
+      }
+      var response = await dio.post("/api/users/profile", data: formData);
+      print(response.data);
+      if (response.statusCode == 201) {
+        AwesomeDialog(
+          context: navigatorKey.currentContext as BuildContext,
+          width: 800,
+          dismissOnTouchOutside: false,
+          dialogType: DialogType.SUCCES,
+          animType: AnimType.BOTTOMSLIDE,
+          title: 'Succès!',
+          desc: 'Vous avez mis a jour! 😄',
+          btnOkOnPress: () {
+            Navigator.pop(context);
+          },
+        ).show();
+      } else {
+        AwesomeDialog(
+          context: navigatorKey.currentContext as BuildContext,
+          width: 800,
+          btnOkColor: Colors.red,
+          dismissOnTouchOutside: false,
+          dialogType: DialogType.ERROR,
+          animType: AnimType.BOTTOMSLIDE,
+          title: 'Erreur!',
+          desc: response.data['message'],
+          btnOkOnPress: () {},
+        ).show();
+      }
+    }
+
 
   profileRow() {
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -133,41 +191,6 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
               autovalidate: true,
             )),
         SizedBox(height: 20),
-        Container(
-            width: 500,
-            child: TextFormField(
-              style: const TextStyle(fontSize: _fontSize),
-              controller: passController,
-              maxLines: 1,
-              autofocus: false,
-              obscureText: !_passwordVisible,
-              decoration: InputDecoration(
-                  errorStyle: const TextStyle(fontSize: _fontSize),
-                  hintText: "Nouveau mot de passe",
-                  hintStyle: const TextStyle(
-                    fontSize: _fontSize,
-                  ),
-                  contentPadding: const EdgeInsets.all(padding),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(3.0)),
-                  suffixIcon: IconButton(
-                      icon: Icon(
-                        // Based on passwordVisible state choose the icon
-                        _passwordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                        color: Theme.of(context).primaryColorDark,
-                      ),
-                      onPressed: () {
-                        // Update the state i.e. toogle the state of passwordVisible variable
-                        setState(() {
-                          _passwordVisible = !_passwordVisible;
-                        });
-                      })),
-              enableSuggestions: false,
-              autocorrect: false,
-              autovalidate: true,
-            ))
       ]),
     ]);
   }

@@ -80,7 +80,7 @@ class _LoginState extends State<Login> {
       userCredential = await FirebaseAuth.instance
           // .signInWithEmailAndPassword(email: email, password: password);
           .signInWithEmailAndPassword(
-              email: "Pritam184@hotmail.com", password: "pripri123");
+              email: "Pritam184@hotmail.com", password: "pripri12345");
     } on FirebaseAuthException catch (e) {
       await translator
           .translate(e.message!, from: 'en', to: 'fr')
@@ -102,8 +102,6 @@ class _LoginState extends State<Login> {
     context.read<Messenger>().fetchChannels();
     context.read<Messenger>().fetchAllChannels();
 
-    // Home Page
-    Navigator.pushReplacementNamed(context, homeRoute);
   }
 
   void initializeSocketConnection(auth, token) {
@@ -125,6 +123,47 @@ class _LoginState extends State<Login> {
     context.read<Messenger>().setSocket(channelSocket);
     context.read<Teammate>().setSocket(teamSocket);
     context.read<Collaborator>().setSocket(collaborationSocket);
+
+    _onLoading();
+  }
+
+  void _onLoading() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return SizedBox(
+            height: 150,
+            child: Dialog(
+              child: Padding(
+                  padding: const EdgeInsets.all(25.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      CircularProgressIndicator(),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text("Chargement..."),
+                    ],
+                  )),
+            ));
+      },
+    );
+    Future.delayed(const Duration(seconds: 5), () {
+      // Home Page
+      Navigator.pushReplacementNamed(context, homeRoute);
+      AwesomeDialog(
+        context: navigatorKey.currentContext as BuildContext,
+        width: 800,
+        dismissOnTouchOutside: false,
+        dialogType: DialogType.SUCCES,
+        animType: AnimType.BOTTOMSLIDE,
+        title: 'Succès!',
+        desc: 'Vous avez été connecté! Amusez-vous! 😄',
+        btnOkOnPress: () {},
+      ).show();
+    });
   }
 
   @override
@@ -158,7 +197,7 @@ class _LoginState extends State<Login> {
                                       child: Text(errorMessage,
                                           style: const TextStyle(
                                               color: Colors.red,
-                                              fontSize: 25.0)))
+                                              fontSize: 20.0)))
                                   : const SizedBox.shrink(),
                               SizedBox(height: 24.0),
                               TextFormField(
@@ -250,17 +289,17 @@ class _LoginState extends State<Login> {
                                 child: Text('Se connecter',
                                     style: new TextStyle(fontSize: 26.0)),
                               ),
-                              Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      _handleGoogleSign();
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        minimumSize: Size(80.0, 80.0)),
-                                    child: Text('Se connecter avec Google',
-                                        style: new TextStyle(fontSize: 26.0)),
-                                  )),
+                              // Padding(
+                              //     padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
+                              //     child: ElevatedButton(
+                              //       onPressed: () {
+                              //         _handleGoogleSign();
+                              //       },
+                              //       style: ElevatedButton.styleFrom(
+                              //           minimumSize: Size(80.0, 80.0)),
+                              //       child: Text('Se connecter avec Google',
+                              //           style: new TextStyle(fontSize: 26.0)),
+                              //     )),
                               Padding(
                                   padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
                                   child: Row(children: [
@@ -308,7 +347,8 @@ class _LoginState extends State<Login> {
               title: Container(
                   padding: EdgeInsets.all(10.0),
                   color: kContentColor,
-                  child: const Center(child: Text('Récupération de mot de passe'))),
+                  child: const Center(
+                      child: Text('Récupération de mot de passe'))),
               content: SingleChildScrollView(child: forgot()),
               actions: <Widget>[
                 Padding(
@@ -328,7 +368,8 @@ class _LoginState extends State<Login> {
                                       dialogType: DialogType.SUCCES,
                                       animType: AnimType.BOTTOMSLIDE,
                                       title: 'Récupération envoyé!',
-                                      desc: 'Allez voir dans votre courriel! 😄',
+                                      desc:
+                                          'Allez voir dans votre courriel! 😄',
                                       btnOkOnPress: () {
                                         Navigator.pushReplacementNamed(
                                             context, loginRoute);
@@ -355,7 +396,9 @@ class _LoginState extends State<Login> {
                       children: [
                         SizedBox(
                           width: 800,
-                          child: Text("Ne vous inquiétez pas! Vous pouvez le ré-obtenir 😎", style: TextStyle(fontSize: 25.0)),
+                          child: Text(
+                              "Ne vous inquiétez pas! Vous pouvez le ré-obtenir 😎",
+                              style: TextStyle(fontSize: 25.0)),
                         ),
                         SizedBox(
                           height: 30,
@@ -404,11 +447,11 @@ class _LoginState extends State<Login> {
 
   Future<void> _handleGoogleSign() async {
     try {
-      await _googleSignIn.signIn().whenComplete(() => Navigator.pushReplacementNamed(context, homeRoute));
+      await _googleSignIn.signIn().whenComplete(
+          () => Navigator.pushReplacementNamed(context, homeRoute));
     } catch (error) {
       AwesomeDialog(
-        context:
-        navigatorKey.currentContext as BuildContext,
+        context: navigatorKey.currentContext as BuildContext,
         width: 800,
         btnOkColor: Colors.red,
         dismissOnTouchOutside: false,

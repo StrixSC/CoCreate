@@ -5,6 +5,7 @@ import 'package:Colorimage/models/drawing.dart';
 import 'package:Colorimage/models/user.dart';
 import 'package:Colorimage/screens/chat/chat.dart';
 import 'package:Colorimage/screens/galerie/galerie.dart';
+import 'package:Colorimage/screens/home/home.dart';
 import 'package:Colorimage/utils/rest/channels_api.dart';
 import 'package:Colorimage/utils/rest/rest_api.dart';
 import 'package:Colorimage/utils/rest/users_api.dart';
@@ -14,6 +15,7 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import '../app.dart';
 import '../models/chat.dart';
@@ -218,16 +220,34 @@ class Collaborator extends ChangeNotifier {
     //   (drawings[type] as Map<String, Drawing>)
     //       .removeWhere((key, value) => toRemove == key);
     // }
-    String collaborationId = delete['collaborationId'];
-    if(currentType == 'Joined') {
-      (drawings[currentType] as Map<String, Drawing>).forEach((key, value) {
-        if ((drawings[currentType][key] as Drawing).collaboration.collaborationId ==
-            collaborationId) {
-          if((drawings[currentType][key] as Drawing).authorUsername == auth!.user!.displayName) {
-            alert('Succès!', 'Vous avez supprimer le dessin! 😄');
-          }
-        }
-      });
+    // String collaborationId = delete['collaborationId'];
+    // if(currentType == 'Joined') {
+    //   (drawings[currentType] as Map<String, Drawing>).forEach((key, value) {
+    //     if ((drawings[currentType][key] as Drawing).collaboration.collaborationId ==
+    //         collaborationId) {
+    //       if((drawings[currentType][key] as Drawing).authorUsername == auth!.user!.displayName) {
+    //         alert('Succès!', 'Vous avez supprimer le dessin! 😄');
+    //       }
+    //     }
+    //   });
+    // }
+    if(delete['drawingId'] == currentDrawingId) {
+      navigatorKey.currentState!.pushReplacement(MaterialPageRoute (
+        builder: (BuildContext context) => const Home(),
+      ));
+      refreshPages();
+      AwesomeDialog(
+        context: navigatorKey.currentContext as BuildContext,
+        width: 800,
+        btnOkColor: Colors.red,
+        dismissOnTouchOutside: false,
+        dialogType: DialogType.ERROR,
+        animType: AnimType.BOTTOMSLIDE,
+        title: 'Erreur!',
+        desc: 'Le dessin a été supprimer!',
+        btnOkOnPress: () {
+        },
+      ).show();
     }
     refreshPages();
     notifyListeners();
@@ -309,12 +329,10 @@ class Collaborator extends ChangeNotifier {
         break;
       case 'created':
         Drawing drawing = data as Drawing;
-        drawing.authorUsername == auth!.user!.displayName ? alert('Succès!', 'Bravo! Votre dessin à été créer avec succès. Amusez-vous! 😄') : '';
         drawingCreated(drawing);
         break;
       case 'updated':
         var authorUsername = data['authorUsername'];
-        authorUsername == auth!.user!.displayName ?alert('Succès!', 'Bravo! Votre dessin à été mis a jour avec succès. Amusez-vous! 😄') : '';
         refreshPages();
         // Drawing drawing = data as Drawing;
         // updatedDrawing(drawing);
@@ -326,12 +344,10 @@ class Collaborator extends ChangeNotifier {
       case 'left':
         Map left = data as Map;
         leftDrawing(left);
-        left["userId"] == auth!.user!.uid ? alert('Succès!', 'Vous avez été quitter le dessin! 😄') : '';
         break;
       case 'disconnected':
         Map disc = data as Map;
         disconnectedDrawing(disc);
-        disc["userId"] == auth!.user!.uid ? alert('Succès!', 'Vous avez été déconnecté du dessin! 😄') : '';
         break;
       default:
         print("Invalid Collaboration socket event");

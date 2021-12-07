@@ -195,19 +195,10 @@ class Teammate extends ChangeNotifier {
         // createdTeam(team);
         alert('Succès!', 'La chaine a été quitter!');
         break;
-      case 'updated':
-        // updateTeam(team);
-        break;
-      case 'deleted':
-        // deletedTeam(team);
-        break;
-      case 'left':
-        // leftTeam(team);
-        alert('Succès!', 'La chaine a été quitter!');
-        break;
       default:
         print("Invalid Team socket event");
     }
+
     if(hasBeenInitialized) { pagingController.refresh();}
     notifyListeners();
   }

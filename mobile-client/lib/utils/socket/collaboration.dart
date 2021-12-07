@@ -62,7 +62,8 @@ class CollaborationSocket {
       Color color,
   ) {
     print('Create Collab');
-    String hexColor = '#${color.value.toRadixString(16)}';
+    print(password);
+    String hexColor = ('#${color.value.toRadixString(16)}').substring(1, 7);
     socket.emit('collaboration:create', {
       'userId': user.uid,
       'creatorId': creatorId,
@@ -172,6 +173,9 @@ class CollaborationSocket {
       );
       callbackChannel('joined', member);
     });
+    socket.on('collaboration:join:finished', (data) {
+      alert('Succès!', 'Bravo! Le dessin à été joint avec succès! 😄');
+    });
   }
 
   connected(callbackChannel) {
@@ -217,6 +221,9 @@ class CollaborationSocket {
           type: data['type']); // "Protected", "Public" or "Private"
       callbackChannel('created', drawing);
     });
+    socket.on('collaboration:create:finished', (data) {
+      alert('Succès!', 'Bravo! Votre dessin à été créé avec succès! 😄');
+    });
   }
 
   updated(callbackChannel) {
@@ -231,6 +238,9 @@ class CollaborationSocket {
       //     createdAt: data['createdAt'],
       //     type: 'type'); // "Protected", "Public" or "Private"
       callbackChannel('updated', data);
+      socket.on('collaboration:update:finished', (data) {
+        alert('Succès!', 'Bravo! Votre dessin à été mise à jour avec succès! 😄');
+      });
     });
   }
 
@@ -239,10 +249,15 @@ class CollaborationSocket {
       print('Collaboration deleted');
       print(data);
       Map deleted = {
+        "drawingId" : data["drawingId"],
         "collaborationId": data["collaborationId"],
         "deletedAt": data["deletedAt"] ?? '',
       };
       callbackChannel('deleted', deleted);
+    });
+
+    socket.on('collaboration:delete:finished', (data) {
+      alert('Succès!', 'Bravo! Votre dessin à été supprimé avec succès! 😄');
     });
   }
 
@@ -257,6 +272,10 @@ class CollaborationSocket {
         "leftAt": data["leftAt"], // ISO Format date
       };
       callbackChannel('left', left);
+    });
+
+    socket.on('collaboration:leave:finished', (data) {
+      alert('Succès!', 'Bravo! Votre dessin à été quitté avec succès. Amusez-vous! 😄');
     });
   }
 
@@ -273,8 +292,12 @@ class CollaborationSocket {
       };
       callbackChannel('disconnect', disconnected);
     });
-  }
 
+    // socket.on('collaboration:disconnect:finished', (data) {
+    //   alert('Succès!', 'Bravo! Votre dessin à été mis a jour avec succès. Amusez-vous! 😄');
+    // });
+  }
+  //alert('Succès!', 'Bravo! Votre dessin à été mis a jour avec succès. Amusez-vous! 😄')
   initializeChannelSocketEvents(callbackChannel) {
     load(callbackChannel);
 
@@ -291,5 +314,19 @@ class CollaborationSocket {
     left(callbackChannel);
 
     disconnected(callbackChannel);
+  }
+
+  void alert(type, description) {
+    AwesomeDialog(
+      context:
+      navigatorKey.currentContext as BuildContext,
+      width: 800,
+      dismissOnTouchOutside: false,
+      dialogType: DialogType.SUCCES,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Succès!',
+      desc: description,
+      btnOkOnPress: () {},
+    ).show();
   }
 }

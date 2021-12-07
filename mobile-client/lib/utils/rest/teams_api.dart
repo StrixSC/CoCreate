@@ -16,7 +16,7 @@ class TeamsAPI {
       'offset': offset.toString(),
       'limit': limit.toString(),
       'removeFull': removeFull.toString(),
-      'amMemner': filter.toString(),
+      'amMember': amMember.toString(),
       'amOwner': amOwner.toString(),
     };
     if (type != null) {

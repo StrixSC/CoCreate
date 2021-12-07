@@ -906,7 +906,12 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
                                       desc: 'Êtes-vous certain de vouloir joindre cette équipe?.',
                                       btnCancelOnPress: () {},
                                       btnOkOnPress: () {
-                                     context.read<Teammate>().teamSocket.joinTeam(team);
+                                          if(team.type == 'Protected') {
+                                            passController.clear();
+                                            joindreDessinDialog();
+                                          } else {
+                                            context.read<Teammate>().teamSocket.joinTeam(team);
+                                          }
                                       },
                                     ).show();
                                   },
@@ -971,6 +976,66 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
             ])));
   }
 
+  joindreDessinDialog() async {
+    showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          titlePadding: EdgeInsets.zero,
+          title: Container(
+              padding: EdgeInsets.all(10.0),
+              color: kContentColor,
+              child: Center(child: Text('Mot de passe'))),
+          content: SingleChildScrollView(
+              child: Container(
+                  width: 1000,
+                  child: ListView(
+                      shrinkWrap: true,
+                      padding:
+                      const EdgeInsets.only(left: 100.0, right: 100.0),
+                      children: <Widget>[
+                        FormBuilder(
+                            key: _formKey,
+                            child: Column(children: <Widget>[
+                              const SizedBox(height: 28.0),
+                              const SizedBox(height: 48.0),
+                              formField(
+                                  'Mot de passe',
+                                  'Veuillez entrez choisir un mot de passe',
+                                  passController),
+                            ]))
+                      ]))),
+          actions: <Widget>[
+            Padding(
+                padding: EdgeInsets.fromLTRB(0, 0, 25.0, 20.0),
+                child: Container(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _formKey.currentState!.save();
+                        if (_formKey.currentState!.validate()) {
+                          team.password = passController.text;
+                          context.read<Teammate>().teamSocket.joinTeam(team);
+                          Navigator.pop(context);
+                        } else {
+                          AwesomeDialog(
+                            context:
+                            navigatorKey.currentContext as BuildContext,
+                            width: 800,
+                            btnOkColor: Colors.red,
+                            dismissOnTouchOutside: false,
+                            dialogType: DialogType.ERROR,
+                            animType: AnimType.BOTTOMSLIDE,
+                            title: 'Erreur!',
+                            desc: 'Il y a eu un probleme dans la validation...',
+                            btnOkOnPress: () {},
+                          ).show();
+                        }
+                      },
+                      child: const Text('Joindre'),
+                    ))),
+          ],
+        ));
+  }
+
   member(Team team, index) {
     const fontSize = 24.0;
     return Row(children: [
@@ -985,12 +1050,12 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
                     backgroundImage:
                         NetworkImage(team.members[index].avatarUrl!)),
                 const SizedBox(width: 10),
-                FittedBox(
+                Container(width: 100, child: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: AlignmentDirectional.centerStart,
                   child: Text(team.members[index].username!,
                       style: TextStyle(fontSize: fontSize)),
-                )
+                ))
               ])),
           Container(
               width: 260,
@@ -1080,23 +1145,24 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
               width: 200,
               child: Text(team.drawings[index].updatedAt!,
                   style: TextStyle(fontSize: fontSize))),
-          Container(
-              width: 20,
-              child: PopupMenuButton(
-                  itemBuilder: (context) => [
-                        PopupMenuItem(
-                          child: const Text("Rejoindre",
-                              style: TextStyle(fontSize: fontSize)),
-                          value: 1,
-                          onTap: () {},
-                        ),
-                        PopupMenuItem(
-                          child: const Text("Supprimer",
-                              style: TextStyle(fontSize: fontSize)),
-                          value: 2,
-                          onTap: () {},
-                        )
-                      ]))
+          //todo
+          // Container(
+          //     width: 20,
+          //     child: PopupMenuButton(
+          //         itemBuilder: (context) => [
+          //               PopupMenuItem(
+          //                 child: const Text("Rejoindre",
+          //                     style: TextStyle(fontSize: fontSize)),
+          //                 value: 1,
+          //                 onTap: () {},
+          //               ),
+          //               PopupMenuItem(
+          //                 child: const Text("Supprimer",
+          //                     style: TextStyle(fontSize: fontSize)),
+          //                 value: 2,
+          //                 onTap: () {},
+          //               )
+          //             ]))
         ]),
       )
     ]);

@@ -87,7 +87,7 @@ class ChannelSocket {
   }
 
   joinedChannelFinished(callbackChannel) {
-    socket.on('channel:left:finished', (data) {
+    socket.on('channel:join:finished', (data) {
       alert('Succès!', 'La chaine a été joint!');
     });
   }
@@ -108,7 +108,7 @@ class ChannelSocket {
   }
 
   createdChannelFinished(callbackChannel) {
-    socket.on('channel:left:finished', (data) {
+    socket.on('channel:create:finished', (data) {
       alert('Succès!', 'La chaine a été créé!');
     });
   }
@@ -123,7 +123,7 @@ class ChannelSocket {
   }
 
   leftChannelFinished(callbackChannel) {
-    socket.on('channel:left:finished', (data) {
+    socket.on('channel:leave:finished', (data) {
       alert('Succès!', 'La chaine a été quitté!');
     });
   }
@@ -152,7 +152,7 @@ class ChannelSocket {
   }
 
   deletedChannelFinished(callbackChannel) {
-    socket.on('channel:deleted:finished', (data) {
+    socket.on('channel:delete:finished', (data) {
       alert('Succès!', 'La chaine a été supprimé!');
     });
   }

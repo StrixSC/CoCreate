@@ -120,7 +120,8 @@ class GalerieState extends State<Galerie>
     var backgroundColor = context.read<Collaborator>().getBackgroundColor();
     pushNewScreen(
       context,
-      screen: DrawingScreen(socket, user, collaborationId, actions, backgroundColor),
+      screen: DrawingScreen(
+          socket, user, collaborationId, actions, backgroundColor),
       withNavBar: false,
       pageTransitionAnimation: PageTransitionAnimation.cupertino,
     );
@@ -526,8 +527,7 @@ class GalerieState extends State<Galerie>
                                 .collaborationSocket
                                 .createCollaboration(
                                     authorId, title, type, password, color);
-                          }
-                          {
+                          } else {
                             context
                                 .read<Collaborator>()
                                 .collaborationSocket
@@ -1044,11 +1044,16 @@ class _DrawingState extends State<_Drawing> {
                                 width: MediaQuery.of(context).size.width / 2,
                                 height: MediaQuery.of(context).size.width / 7,
                                 child: GridTile(
-                                  child: thumbnail,
+                                  child: FittedBox(
+                                      fit: BoxFit.fill, child: thumbnail),
                                 )),
                             const SizedBox(height: 10),
-                            Text('Auteur: ' + drawing.authorUsername,
-                                style: TextStyle(fontSize: 20.0)),
+                            Container(
+                                child: FittedBox(
+                                    fit: BoxFit.contain,
+                                    child: Text(
+                                        'Auteur: ' + drawing.authorUsername,
+                                        style: TextStyle(fontSize: 20.0)))),
                             const SizedBox(height: 10),
                             Text(
                                 "Collaborateurs actifs: " +
@@ -1081,7 +1086,7 @@ class _DrawingState extends State<_Drawing> {
                         child: ImageFiltered(
                           imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                           child: Image.asset(
-                              'assets/images/default_thumbnail.png'),
+                              'assets/images/default_thumbnail.png', width: 100, height: 100,),
                         ),
                       ),
                       const Positioned(
@@ -1095,8 +1100,8 @@ class _DrawingState extends State<_Drawing> {
                   )
                 : drawing.thumbnailUrl != ''
                     ? SvgPicture.network(drawing.thumbnailUrl,
-                semanticsLabel: 'A red up arrow')
-                    : Image.asset('assets/images/default_thumbnail.png')));
+                        semanticsLabel: 'A red up arrow', fit: BoxFit.cover, width: 100, height: 100,)
+                    : Image.asset('assets/images/default_thumbnail.png', width: 75, height: 50,)));
   }
 
   richTextWhitePurple(String text1, String text2) {

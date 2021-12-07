@@ -22,6 +22,38 @@ class UsersAPI {
     return response;
   }
 
+  Future<http_dart.Response> updatePassword(value) async {
+    Map val = {'password': value};
+    var url = Uri.http(_url!, '/auth/update/password');
+    var body = json.encode(val);
+    var response = await http.put(url,
+        headers: {"Content-Type": "application/json"},
+        body: body);
+    return response;
+  }
+
+  Future<http_dart.Response> updatePasswordAvatar(value) async {
+    Map val = {'value': value};
+    var body = json.encode(val);
+    var url = Uri.http(_url!, '/api/users/account/confidentiality');
+    var response = await http.put(url,
+        headers: {"Content-Type": "application/json"},
+        body: body);
+    return response;
+  }
+
+  Future<http_dart.Response> changeUserConfidentiality(value) async {
+    Map val = {'value': value};
+    var body = json.encode(val);
+    var url = Uri.http(_url!, '/api/users/account/confidentiality');
+    var response = await http.put(url,
+        headers: {"Content-Type": "application/json"},
+        body: body);
+    return response;
+  }
+
+
+
   Future<http_dart.Response> fetchProfiles(user) async {
     var url = Uri.http(_url!, '/api/users/profile');
     var response = await http.get(url);
@@ -83,11 +115,7 @@ class UsersAPI {
     return response;
   }
 
-  Future<http_dart.Response> updatePassword(User user, String avatarUrl) async {
-    var url = Uri.http(_url!, '/auth/update/password');
-    var response = await http.put(url);
-    return response;
-  }
+
 
   Future<http_dart.Response> fetchUserProfile(User user) async {
     var url = Uri.http(_url!, '/api/users/profile/${user.displayName}');

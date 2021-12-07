@@ -22,7 +22,7 @@ class TeamSocket {
       'type': team.type,
       'mascot': team.mascot,
     };
-     team.password == null ? data['password'] = team.password : '';
+     team.password != null ? data['password'] = team.password : '';
     return data;
   }
 
@@ -80,8 +80,10 @@ class TeamSocket {
 
   onJoinFinished() {
     // TODO
-    socket.on('teams:joined:finished', (data) {
+    socket.on('teams:join:finished', (data) {
       print('Teams joined finished');
+      alert('Succès!', "L'équipe a été joint!");
+
     });
   }
 
@@ -105,15 +107,16 @@ class TeamSocket {
 
   onLeaveException() {
     // TODO
-    socket.on('teams:left:exception', (data) {
+    socket.on('teams:leave:exception', (data) {
       print('Teams left exception' + data.toString());
     });
   }
 
   onLeaveFinished() {
     // TODO
-    socket.on('teams:left:finished', (data) {
+    socket.on('teams:leave:finished', (data) {
       print('Teams left finished');
+      alert('Succès!', "L'équipe a été quitté!");
     });
   }
 
@@ -131,18 +134,6 @@ class TeamSocket {
         members: [],
       );
       callbackChannel('created', updatedTeam);
-      AwesomeDialog(
-        context:
-        navigatorKey.currentContext as BuildContext,
-        width: 800,
-        dismissOnTouchOutside: false,
-        dialogType: DialogType.SUCCES,
-        animType: AnimType.BOTTOMSLIDE,
-        title: 'Succes!',
-        desc:
-        'Bravo! Votre équipe à été créer avec succès. Amusez-vous! 😄',
-        btnOkOnPress: () {},
-      ).show();
     });
   }
 
@@ -154,7 +145,7 @@ class TeamSocket {
   }
 
   onCreateFinished() {
-    socket.on('teams:created:finished', (data) {
+    socket.on('teams:create:finished', (data) {
       // AwesomeDialog(
       //   context:
       //   navigatorKey.currentContext as BuildContext,
@@ -167,6 +158,7 @@ class TeamSocket {
       //   'Bravo! Votre équipe à été créer avec succès. Amusez-vous! 😄',
       //   btnOkOnPress: () {},
       // ).show();
+      alert('Succès!', "L'équipe a été créé!");
       print('Teams created finished');
     });
   }
@@ -199,8 +191,9 @@ class TeamSocket {
 
   onDeleteFinished() {
     // TODO
-    socket.on('teams:deleted:finished', (data) {
+    socket.on('teams:delete:finished', (data) {
       print('Teams deleted finished');
+      alert('Succès!', "L'équipe a été supprimer!");
     });
   }
 
@@ -232,20 +225,40 @@ class TeamSocket {
 
   onUpdateFinished() {
     // TODO
-    socket.on('teams:updated:finished', (data) {
+    socket.on('teams:update:finished', (data) {
       print('Teams updated finished');
+      alert('Succès!', "L'équipe a été mise à jour!");
     });
   }
 
   initializeChannelSocketEvents(callbackChannel) {
     joined(callbackChannel);
+    onJoinFinished();
 
     left(callbackChannel);
+    onLeaveFinished();
 
     created(callbackChannel);
+    onCreateFinished();
 
     deleted(callbackChannel);
+    onDeleteFinished();
 
     updated(callbackChannel);
+    onUpdateFinished();
+  }
+
+  void alert(type, description) {
+    AwesomeDialog(
+      context:
+      navigatorKey.currentContext as BuildContext,
+      width: 800,
+      dismissOnTouchOutside: false,
+      dialogType: DialogType.SUCCES,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Succès!',
+      desc: description,
+      btnOkOnPress: () {},
+    ).show();
   }
 }
