@@ -1,8 +1,20 @@
+import { ICollaborationLoadResponse } from './../../model/ICollaboration.model';
+import { SyncCollaborationService } from 'src/app/services/syncCollaboration.service';
+import { ActivatedRoute } from '@angular/router';
+import { DrawingLoadService } from './../../services/drawing-load.service';
+import { ToolFactoryService } from './../../services/tool-factory.service';
+import { SyncDrawingService } from './../../services/syncdrawing.service';
+import { Router } from '@angular/router';
 import { AfterViewInit, Component, ElementRef, Renderer2, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 
-/// S'occupe d'afficher le svg dans un component
+export enum EventTypes {
+  Exception = 'Exception',
+  Error = 'Error',
+  Action = 'Action'
+}
+
 @Component({
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
@@ -15,7 +27,7 @@ export class CanvasComponent implements AfterViewInit {
   svg: SVGElement;
   sub: Subscription;
 
-  constructor(private drawingService: DrawingService, public renderer: Renderer2) {
+  constructor(private drawingService: DrawingService, public renderer: Renderer2, private drawingLoadService: DrawingLoadService) {
     this.drawingService.renderer = this.renderer;
   }
 
@@ -27,6 +39,9 @@ export class CanvasComponent implements AfterViewInit {
       }
       this.svg = el;
       this.renderer.appendChild(this.canvasDiv.nativeElement, this.svg);
+      if (!this.drawingLoadService.isLoaded) {
+        this.drawingLoadService.loadActions()
+      }
     });
   }
 

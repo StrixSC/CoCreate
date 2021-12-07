@@ -1,5 +1,8 @@
 export interface IReceiveMessagePayload {
-    message: string,
-    username: string,
-    timestamp: string
+  avatarUrl: string;
+  channelId: string;
+  createdAt: string;
+  message: string;
+  messageId: string;
+  username: string;
 }

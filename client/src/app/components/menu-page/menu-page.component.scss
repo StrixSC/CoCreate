@@ -1,0 +1,26 @@
+.mat-icon {
+    height: 70px !important;
+    width: 70px !important;
+    font-size: 70px !important;
+    top: 0;
+    bottom: 0;
+}
+
+.audio-icon {
+    height: 30px !important;
+    width: 30px !important;
+    font-size: 30px !important;
+}
+
+.mat-button {
+    font-size: 20px;
+    text-align: center;
+}
+
+.main-container {
+    display: flex;
+    overflow: hidden;
+    margin-top: 3rem;
+    align-items: center;
+    flex-direction: column;
+}

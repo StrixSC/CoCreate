@@ -1,0 +1,17 @@
+mat-drawer-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+mat-drawer {
+    flex: 1 1 auto;
+}
+
+mat-drawer-content {
+    flex: 0 0 1;
+    width: 100%; // pour que le content occupe tout l'espace
+    height: 100%;
+}

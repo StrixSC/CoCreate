@@ -1,0 +1,182 @@
+.team-page-main-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem 0rem;
+}
+
+.actions-container {
+    display: flex;
+    justify-content: center;
+}
+
+.tooltip {
+    font-size: 14px;
+}
+
+.team-page-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    max-width: 75%;
+    flex-wrap: wrap;
+}
+
+.bio-content {
+    word-break: break-word;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.team-card-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.no-bio {
+    opacity: 0.5;
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    align-items: center;
+}
+
+.no-img {
+    background: url("/assets/img/default.png");
+}
+
+.flip-switches-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.example-spacer {
+    flex: 1 1 auto;
+}
+
+.bio-header {
+    font-weight: 200;
+}
+
+.parameters-section {
+    display: flex;
+    justify-content: flex-start;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-section {
+    display: flex;
+}
+
+.filter-input {
+    width: 100%;
+}
+
+.no-team-img {
+    max-width: 100%;
+    min-width: 100%;
+    object-fit: contain;
+}
+
+.no-team-image-container {
+    max-width: 200px;
+    max-height: 200px;
+    opacity: 0.5;
+}
+
+.no-team-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.no-group-message-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    h3 {
+        opacity: 0.5;
+    }
+}
+
+.paginator {
+    width: 100%;
+}
+
+.member-count-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.full-team-container {
+    color: var(--error-color) !important;
+    cursor: not-allowed !important;
+}
+
+.team-joined-container {
+    color: var(--secondary-color) !important;
+    cursor: default;
+}
+
+.team-owner-container {
+    color: rgb(120, 130, 243) !important;
+    cursor: default;
+}
+
+.team-card {
+    max-width: 300px;
+    min-width: 300px;
+}
+
+.team-card-img-container {
+    height: 200px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.team-card-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.search-form {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.bio {
+    min-height: 40px;
+    overflow-y: none;
+}
+
+.mat-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.mat-card-header {
+    flex-shrink: 0;
+}
+
+.mat-card-content {
+    flex-grow: 1;
+    overflow: auto;
+}

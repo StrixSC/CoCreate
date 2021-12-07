@@ -1,0 +1,37 @@
+<div class="main-container-wrapper">
+    <h3>{{ data.message }}
+        <div class="submessage">{{ data.submessage}}</div>
+    </h3>
+    <div class="actions">
+        <button mat-raised-button (click)="dialogRef.close()">
+            Annuler
+        </button>
+        <button mat-raised-button (click)="confirm()" color="primary">
+            {{ data.buttonLabel }}
+        </button>
+    </div>
+</div>
+
+<style>
+    .submessage {
+        font-weight: normal;
+        font-size: 14px;
+        padding-top: 1rem;
+    }
+
+    .actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        gap: 2rem;
+    }
+
+    .main-container-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+    }
+</style>

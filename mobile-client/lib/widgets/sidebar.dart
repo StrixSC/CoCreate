@@ -1,37 +1,26 @@
+import 'package:Colorimage/constants/general.dart';
+import 'package:Colorimage/providers/messenger.dart';
+import 'package:Colorimage/models/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:provider/provider.dart';
 import '../screens/chat/channel.dart';
 
 class Sidebar extends StatelessWidget {
-  final PersistentTabController _controller;
-  final String _username;
-  Sidebar(this._controller, this._username);
+  Sidebar();
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: Column(
-        children: [
-          // const DrawerHeader(
-          //   decoration: BoxDecoration(
-          //     color: Colors.blue,
-          //   ),
-          //   child: Text('Colorimage'),
-          // ),
-          // ListTile(
-          //   title: const Text('Groups'),
-          //   onTap: () {
-          //     this._controller.index = 3;
-          //     Navigator.pop(context);
-          //   },
-          // ),
-          Expanded(
-            child: ChannelScreen(_username)
+    return Drawer(key: const PageStorageKey('1'),
+            child: Container(color: kContentColor, child: Column(
+              children: const [
+                Expanded(
+                  child: Channel(),
           )
         ],
-      ));
-  }
+      ))
+    );}
 }
 
 

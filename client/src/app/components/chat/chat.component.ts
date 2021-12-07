@@ -1,112 +1,79 @@
-import { IReceiveMessagePayload } from '../../model/IReceiveMessagePayload.model';
-import { merge, Subscription } from 'rxjs';
-import { SocketService } from '../../services/chat/socket.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from './../../services/auth.service';
+import { IMessageResponse, IChannelResponse, ISidebarChannel } from './../../model/IChannel.model';
+import { Subscription } from 'rxjs';
 import { ChatService } from 'src/app/services/chat/chat.service';
+import { ChatSidebarService } from './../../services/chat-sidebar.service';
+import { Component, OnInit, ElementRef, ViewChild, isDevMode } from '@angular/core';
 
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss']
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent {
 
-  @ViewChild('messageContainer', { static: true }) messageContainer!: ElementRef;
-  @ViewChildren("messagesList") messagesList!: QueryList<ElementRef>
-  
-  messages: IReceiveMessagePayload[];
-  message: string;
-  errorListener: Subscription;
-  public readonly systemUsername = "Système"
-  messageListener: Subscription;
-  isVisible : boolean;
-  constructor(
-    private router: Router,
-    private chatService: ChatService,
-    private route: ActivatedRoute,
-    public socketService: SocketService
-  ) {
-    this.message = "";
-    this.messages = [];
-    this.isVisible = true;
-    this.errorListener = new Subscription();
-    this.messageListener = new Subscription();
-  }
+  @ViewChild("messageBox", { static: false })
+  messageBox: ElementRef<HTMLDivElement>;
 
-  ngOnInit(): void {
-    this.errorListener = this.socketService.onError().subscribe((err: any) => {
-      this.router.navigateByUrl("login");
+  constructor(private sidebarService: ChatSidebarService, private router: Router, private auth: AuthService, private chatService: ChatService) { }
 
-      // Clean this up for the implementation of the chat feature
-      if (err.message === 'xhr poll error') {
-        this.socketService.error = "Oups, nous n'avons pas pu vous connecter au serveur... Essayez à nouveau plus tard !"
-      } else this.socketService.error = err.message;
+  message: string = "";
 
-      this.socketService.disconnect();
-    });
+  openInNewWindow() {
+    const winRef: Window | null = window.open(
+      "/#/chatbox/" + this.activeChannel.channel_id,
+      "_blank",
+      "toolbar=no,scrollbars=yes,resizable=0,menubar=1,width=450,height=800"
+    );
 
-
-
-    this.messageListener = merge(
-      this.chatService.userConnection(),
-      this.chatService.userDisconnect(),
-      this.chatService.receiveMessage(),
-    ).subscribe((data: IReceiveMessagePayload) => {
-      this.messages.push(data);
-      this.scrollToBottom();
-    });
-    this.connectWithUsername();
-  }
-
-  ngAfterViewInit(): void {
-    this.messagesList.changes.subscribe((list: QueryList<ElementRef>) => {
-      this.scrollToBottom();
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.errorListener.unsubscribe();
-    this.messageListener.unsubscribe();
-  }
-
-  connectWithUsername() {
-    const username = this.route.snapshot.queryParamMap.get("username")
-
-    if (!username) {
-      this.socketService.error = "Nom d'utilisateur invalide",
-        this.router.navigateByUrl("login");
-      return;
+    if (winRef !== null && winRef.location.href === "about:blank") {
+      winRef.addEventListener("beforeunload", function (e) {
+        e.preventDefault();
+        e.returnValue = "";
+      });
+      winRef.location.href = "/#/chatbox/" + this.activeChannel.channel_id;
     }
 
-    this.socketService.username = username;
-    this.socketService.socket.auth = {
-      username: username,
-    }
-    this.socketService.connect();
-    this.chatService.joinChannel();
+    this.sidebarService.navOpen = false;
   }
 
-  sendMessage(): void {
-    this.chatService.sendMessage(this.message);
+  isActiveUser(username: string): boolean {
+    return this.auth.activeUser!.displayName! === username;
+  }
+
+  get isOpen(): boolean {
+    return this.sidebarService.navOpen;
+  }
+
+  get isLoading(): boolean {
+    return this.sidebarService.isLoading;
+  }
+
+  get activeChannel(): ISidebarChannel {
+    return this.sidebarService.activeChannel;
+  }
+
+  toggleNotifications(): void {
+    this.activeChannel.muteNotification = !this.activeChannel.muteNotification;
+  }
+
+  fetchHistory(): void {
+    const subscription = this.chatService.getChannelHistory(this.activeChannel.channel_id).subscribe((m) => {
+      this.activeChannel.messages = m.map((message) => ({
+        message: message.message_data,
+        avatarUrl: message.avatar_url,
+        channelId: this.activeChannel.channel_id,
+        createdAt: message.timestamp,
+        messageId: message.message_id,
+        username: message.username
+      } as IMessageResponse));
+      subscription.unsubscribe();
+    });
+  }
+
+  onSubmit(): any {
+    this.chatService.sendMessage(this.sidebarService.activeChannel.channel_id, this.message);
     this.message = "";
   }
-
-  disconnect(): void {
-    this.socketService.error = "";
-    this.socketService.disconnect();
-    this.router.navigateByUrl("login");
-  }
-  open(): void {
-    this.chatService.openChatWindow();
-    this.isVisible = false;
-
-    }
-  
-  scrollToBottom(): void {
-    try {
-      this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
-    } catch (err) { }
-  }
-
 }

@@ -1,4 +1,6 @@
+import { ICollaborationLoadResponse } from './../../model/ICollaboration.model';
 import { EventEmitter, Injectable, Output, Renderer2 } from '@angular/core';
+import { Router } from '@angular/router';
 import { DEFAULT_RGB_COLOR, RGB } from 'src/app/model/rgb.model';
 import { DEFAULT_ALPHA, RGBA } from 'src/app/model/rgba.model';
 
@@ -18,15 +20,25 @@ export class DrawingService {
   isCreated = false;
   color: RGB = DEFAULT_RGB_COLOR;
   alpha: number = DEFAULT_ALPHA;
-  width = 0;
-  height = 0;
+  width = 1000;
+  height = 1000;
   drawing: SVGElement;
+  numberOfStrates = 0;
 
   private objectList: Map<number, SVGElement>;
 
-  constructor() {
+  constructor(private router: Router) {
     this.objectList = new Map<number, SVGElement>();
   }
+
+  deleteDrawing(): void {
+    this.numberOfStrates = 0;
+    this.objectList.clear()
+    this.isCreated = false;
+    const newSvg = this.renderer.createElement('svg', 'svg');
+    this.drawingEmit.emit(newSvg);
+  }
+
   get rgbColorString(): string {
     return 'rgb(' + this.color.r + ',' + this.color.g + ',' + this.color.b + ')';
   }
@@ -47,6 +59,45 @@ export class DrawingService {
     return this.objectList;
   }
 
+  setObjectList(objList: Map<number, SVGElement>): void {
+    this.objectList = objList;
+  }
+
+  getLastObject(): any {
+    return this.getObjectList().get(this.lastObjectId);
+  }
+
+  addLayer(id: number): void {
+    if (this.renderer.nextSibling(this.objectList.get(id)).getAttribute('id') !== 'gridRect') {
+      let tempStrate: string;
+      let siblingStrate: string;
+      if (this.objectList.get(id) === undefined) {
+        return;
+      } else {
+        tempStrate = (this.objectList.get(id) as any).getAttribute('strate');
+        siblingStrate = this.renderer.nextSibling(this.objectList.get(id)).getAttribute('strate');
+        this.renderer.nextSibling(this.objectList.get(id)).setAttribute('strate', tempStrate);
+        (this.objectList.get(id) as any).setAttribute('strate', siblingStrate);
+      }
+      this.renderer.insertBefore(this.drawing, this.renderer.nextSibling(this.objectList.get(id)), this.objectList.get(id));
+    } else {
+      console.log('Stop');
+      return;
+    }
+  }
+
+  removeLayer(id: number): void {
+    let x: SVGElement;
+    this.drawing.childNodes.forEach((children: SVGElement) => {
+      if (children.getAttribute('id') === id.toString()) {
+        x = (children.previousElementSibling as SVGElement);
+        const previousId: string | null = x.getAttribute('id');
+        if (previousId === null) { return; }
+        this.addLayer(parseInt(previousId));
+      }
+    });
+  }
+
   /// Retrait d'un objet selon son ID
   removeObject(id: number): void {
     this.renderer.removeChild(this.drawing, this.objectList.get(id));
@@ -59,7 +110,9 @@ export class DrawingService {
     this.saved = false;
     if (!obj.id) {
       this.lastObjectId++;
+      this.numberOfStrates++;
       this.renderer.setProperty(obj, 'id', this.lastObjectId);
+      this.renderer.setAttribute(obj, 'strate', this.numberOfStrates.toString());
     }
     const id: number = Number(obj.id);
     this.objectList.set(id, obj);
@@ -72,12 +125,35 @@ export class DrawingService {
     return this.objectList.get(id);
   }
 
+  getObjectByActionId(actionId: string): SVGElement | null {
+    let tmp = null;
+
+    this.objectList.forEach((obj) => {
+      if (obj.outerHTML.includes(actionId)) {
+        tmp = obj;
+      }
+    })
+
+    return tmp;
+  }
+
+  renderSelectionIndicator(actionId: string, add: boolean): void {
+    const obj = this.getObjectByActionId(actionId);
+    if (!obj) return;
+
+    if (add) {
+      this.renderer.setStyle(obj, 'opacity', 0.25);
+    } else {
+      this.renderer.setStyle(obj, 'opacity', 1);
+    }
+  }
+
   /// Redéfinit la dimension du dessin
   setDimension(width: number, height: number) {
     this.width = width;
     this.height = height;
-    this.renderer.setAttribute(this.drawing, 'width', width.toString());
-    this.renderer.setAttribute(this.drawing, 'height', height.toString());
+    this.renderer.setAttribute(this.drawing, 'width', this.width.toString());
+    this.renderer.setAttribute(this.drawing, 'height', this.height.toString());
   }
 
   /// Change la couleur du fond d'écran
@@ -97,6 +173,7 @@ export class DrawingService {
     this.drawing = this.renderer.createElement('svg', 'svg');
     this.setDimension(width, height);
     this.setDrawingColor(rgba);
+    this.isCreated = true;
     this.drawingEmit.emit(this.drawing);
   }
 

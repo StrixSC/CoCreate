@@ -1,0 +1,159 @@
+<div class="chat-sidebar-wrapper">
+    <div class="action-section">
+        <div class="clickable section-button">
+            <button (click)="openChatDialog()" [matTooltip]="'Ouvrir le menu de clavardage'" matTooltipPosition="left"
+                mat-mini-fab color="accent">
+                <mat-icon>chat</mat-icon>
+            </button>
+        </div>
+        <div class='section-button'>
+            <button (click)="openCreateChannelDialog()" matTooltipPosition="left"
+                [matTooltip]="'Créer une nouvelle chaîne'" color="secondary" mat-mini-fab>
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
+        <div class="clickable section-button">
+            <button [matTooltip]="'Chercher pour une chaîne dans votre liste de chaîne'" matTooltipPosition="left"
+                [matMenuTriggerFor]="menu" mat-icon-button>
+                <mat-icon>search</mat-icon>
+                <mat-menu #menu="matMenu">
+                    <div mat-menu-item>
+                        <input autocomplete="off" (click)="stopPropagation($event)" (input)="filterChannels()" matInput
+                            placeholder="Recherche" [(ngModel)]="searchTerm">
+                    </div>
+                </mat-menu>
+            </button>
+        </div>
+        <div class="clickable section-button">
+            <button *ngIf="!isOpen" (click)="toggleChatMenu()" [matTooltip]="'Basculer le clavardage'"
+                matTooltipPosition="left" mat-icon-button>
+                <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button *ngIf="isOpen" (click)="toggleChatMenu()" [matTooltip]="'Basculer le clavardage'"
+                matTooltipPosition="left" mat-icon-button>
+                <mat-icon>chevron_right</mat-icon>
+            </button>
+        </div>
+        <mat-divider></mat-divider>
+    </div>
+
+    <div class="channels">
+        <div *ngIf="filteredCollaborationChannels.length > 0" class="top-section">
+            <div class="section-button" mat-icon-button matTooltipPosition="left"
+                [matTooltip]="'Canaux des séances de collaborations actifs'">
+                <mat-icon>palette</mat-icon>
+                <mat-divider></mat-divider>
+            </div>
+            <div class="chat-channels-list">
+                <div [matBadgeHidden]="!channel.notificationCount" [matBadge]="channel.notificationCount"
+                    matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(channel)"
+                    [matTooltip]="channel.name" matTooltipPosition="left"
+                    *ngFor="let channel of filteredCollaborationChannels; index as i"
+                    class="clickable chat-channel-bubble" [ngStyle]="{'background-color': channel.bgColor}">
+                    {{ channel.name[0] }}
+                </div>
+            </div>
+            <mat-divider></mat-divider>
+        </div>
+
+        <div *ngIf="filteredTeamChannels.length > 0" class="middle-section">
+            <div matTooltipPosition="left" [matTooltip]="'Canaux de vos équipes'" class="section-button"
+                mat-icon-button>
+                <mat-icon>groups</mat-icon>
+                <mat-divider></mat-divider>
+
+            </div>
+            <div class="chat-channels-list">
+                <div [matBadgeHidden]="!channel.notificationCount" [matBadge]="channel.notificationCount"
+                    matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(channel)"
+                    [matTooltip]="channel.name" matTooltipPosition="left"
+                    *ngFor="let channel of filteredTeamChannels; index as i" class="clickable chat-channel-bubble"
+                    [ngStyle]="{'background-color': channel.bgColor}">
+                    {{ channel.name[0] }}
+                </div>
+            </div>
+            <mat-divider></mat-divider>
+        </div>
+        <div *ngIf="filteredPublicChannels.length > 0" class="bottom-section">
+            <div class="section-button" mat-icon-button matTooltipPosition="left" [matTooltip]="'Canaux Publiques'">
+                <mat-icon>public</mat-icon>
+                <mat-divider></mat-divider>
+            </div>
+            <div class="chat-channels-list">
+                <div [matBadgeHidden]="!channel.notificationCount" [matBadge]="channel.notificationCount"
+                    matBadgeOverlap matBadgePosition="abovebefore" matBadgeColor="accent" (click)="onClick(channel)"
+                    [matTooltip]="channel.name" matTooltipPosition="left"
+                    *ngFor="let channel of filteredPublicChannels; index as i" class="clickable chat-channel-bubble"
+                    [ngStyle]="{'background-color': channel.bgColor}">
+                    {{ channel.name[0] }}
+                </div>
+            </div>
+        </div>
+        <mat-divider></mat-divider>
+    </div>
+    <div class="clear-filter-section">
+        <button *ngIf="searchTerm" mat-icon-button (click)="resetFilter()" [matTooltip]="'Enlever le filtre'"
+            matTooltipPosition="left" mat-icon-button>
+            <mat-icon>clear</mat-icon>
+        </button>
+    </div>
+</div>
+
+<style>
+    .section-button {
+        cursor: default !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .channels {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .bottom-section,
+    .middle-section,
+    .clear-filter-section,
+    .top-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .chat-sidebar-wrapper {
+        height: 100%;
+        background-color: var(--bg-color);
+        display: flex;
+        padding-top: 0.5rem;
+        min-width: 75px;
+        max-width: 75px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        color: white;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .chat-channels-list {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .action-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        justify-content: center;
+        width: 100%;
+    }
+</style>

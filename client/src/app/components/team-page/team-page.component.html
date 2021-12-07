@@ -1,0 +1,158 @@
+<mat-toolbar color="secondary">
+    <mat-toolbar-row>
+        <button matTooltip="Retour au menu" routerLink="" mat-icon-button>
+            <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h1>Équipes</h1>
+        <span class="example-spacer"></span>
+        <button color="accent" mat-raised-button (click)="openCreateTeamDialog()">Créer une équipe</button>
+
+    </mat-toolbar-row>
+</mat-toolbar>
+
+<div class="team-page-main-wrapper">
+    <form class="search-form" [formGroup]="searchForm">
+        <div class="filter-section">
+            <mat-form-field class="filter-input">
+                <mat-label>Recherche</mat-label>
+                <input (input)="filterDrawing()" formControlName="query" matInput placeholder="Entrez un mot-clé">
+                <button mat-button matPrefix mat-icon-button>
+                    <mat-icon>search</mat-icon>
+                </button>
+                <mat-hint>Le mot-clé doit être un attribut de l'equipe</mat-hint>
+            </mat-form-field>
+        </div>
+        <div class="parameters-section">
+            <div>
+                <mat-form-field class="pb-1 form-field clickable">
+                    <mat-label>Type</mat-label>
+                    <mat-select (selectionChange)="changeType($event)" formControlName='type'>
+                        <mat-option *ngFor="let type of types" [value]="type.key">
+                            {{ type.value }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div class="flip-switches-container">
+                <div>
+                    <mat-slide-toggle #fullTeamSwitch (change)="filterFullTeams($event)">Filtrer les équipes complètes
+                    </mat-slide-toggle>
+                </div>
+                <div>
+                    <mat-slide-toggle #myTeamSwitch (change)="filterMyTeams($event)">Afficher les équipes dont je suis
+                        membre</mat-slide-toggle>
+                </div>
+                <div>
+                    <mat-slide-toggle #myCreatedTeamSwitch (change)="filterMyCreatedTeams($event)">Afficher uniquement
+                        les équipes créées par moi</mat-slide-toggle>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <mat-paginator class="paginator" #paginator (page)="onPageChange($event)" [pageSize]="12" [length]="activeTotal"
+        aria-label="Choisir la page">
+    </mat-paginator>
+
+
+    <div *ngIf="!isLoading && teams && teams.length > 0" class="team-page-container">
+        <mat-card class="team-card" *ngFor="let team of teams; index as i">
+            <div class="team-card-header-container">
+                <h2 [matTooltip]="team.teamName" matTooltipPosition="above" matTooltipClass="tooltip" class="team-name">
+                    <span *ngIf="team.teamName.length >= 15">
+                        {{ team.teamName | slice:0:15 }}...
+                    </span>
+                    <span *ngIf="team.teamName.length < 15">
+                        {{ team.teamName }}
+                    </span>
+                </h2>
+                <div *ngIf="team.isMember" class="clickable">
+                    <button mat-icon-button [matMenuTriggerFor]="menu"
+                        aria-label="Example icon button with a vertical three dot icon">
+                        <mat-icon>more_vert</mat-icon>
+                        <mat-menu #menu="matMenu">
+                            <button (click)="openInfo(team)" mat-menu-item>
+                                <mat-icon>info</mat-icon>
+                                <span>Info</span>
+                            </button>
+                            <button (click)="leaveTeam(team)" *ngIf="!team.isOwner" mat-menu-item>
+                                <mat-icon>logout</mat-icon>
+                                <span>Quitter</span>
+                            </button>
+                            <hr *ngIf="team.isOwner">
+                            <button *ngIf="team.isOwner" (click)="deleteTeam(team)" mat-menu-item>
+                                <mat-icon>delete</mat-icon>
+                                <span>Supprimer</span>
+                            </button>
+                        </mat-menu>
+                    </button>
+                </div>
+            </div>
+            <mat-card-subtitle> Créé le {{ team.createdAt | date:'short' }}</mat-card-subtitle>
+            <div mat-card-image *ngIf="team.avatarUrl" [style.background-image]="'url(' + team.avatarUrl + ')'"
+                class="team-card-img-container"></div>
+            <div mat-card-image *ngIf="!team.avatarUrl" class="team-card-img-container no-img">
+            </div>
+            <mat-card-content>
+                <div *ngIf="team.bio" class="bio">
+                    <h2 class="bio-header">Biographie</h2>
+                    <p class="bio-content">
+                        {{ team.bio }}
+                    </p>
+                </div>
+                <div *ngIf="!team.bio" class="no-bio">
+                    <p>
+                        <i>Aucune biographie...</i>
+                    </p>
+                </div>
+            </mat-card-content>
+
+            <div *ngIf="team.isMember" class="member-count-container">
+                Nombre de membre en ligne: {{ team.onlineMemberCount }}/{{ team.maxMemberCount }}
+            </div>
+            <div *ngIf="team.currentMemberCount <= team.maxMemberCount" class="member-count-container">
+                Nombre de membre total: {{ team.currentMemberCount }}/{{team.maxMemberCount}}
+            </div>
+            <mat-card-actions class="actions-container" *ngIf="!team.isMember && !team.isOwner">
+                <button [disabled]="i === currentLoadingIndex" (click)="onJoin(team, i)"
+                    *ngIf="team.currentMemberCount < team.maxMemberCount" mat-stroked-button>
+                    <div class="spinner" *ngIf="i === currentLoadingIndex">
+                        <mat-spinner [diameter]="25" color="accent" class="spinner"></mat-spinner>
+                    </div>
+                    <div *ngIf="i !== currentLoadingIndex">
+                        Rejoindre
+                    </div>
+                </button>
+                <button disabled color="warn" class="full-team-container"
+                    *ngIf="team.currentMemberCount >= team.maxMemberCount" mat-button>
+                    Équipe Complète
+                </button>
+            </mat-card-actions>
+            <mat-card-actions class="actions-container" *ngIf="team.isMember && !team.isOwner">
+                <button disabled color="secondary" class="team-joined-container" mat-button>
+                    Vous êtes membre de cette équipe!
+                </button>
+            </mat-card-actions>
+            <mat-card-actions class="actions-container" *ngIf="team.isOwner">
+                <button disabled color="primary" class="team-owner-container" mat-button>
+                    Vous êtes propriétaire de cette équipe!
+                </button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+    <div class="no-team-container" *ngIf="!isLoading && (!teams || teams.length <= 0)">
+        <div class="no-team-image-container">
+            <img class="no-team-img" src="assets/img/no-group.png">
+        </div>
+        <div class="no-group-message-container">
+            <h3>Il n'y a aucune équipe de disponible...</h3>
+            <button color="accent" mat-raised-button (click)="openCreateTeamDialog()">Créer une équipe</button>
+        </div>
+    </div>
+</div>
+<div class="spinner-container" *ngIf="isLoading">
+    <div class="spinner">
+        <mat-spinner [diameter]="35" color="accent"></mat-spinner>
+    </div>
+</div>
+    

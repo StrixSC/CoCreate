@@ -1,10 +1,22 @@
+:root {
+  --bg-color: rgb(50, 52, 58);
+  --bg-accent-color: rgb(48, 49, 54);
+  --primary-color: rgb(88, 101, 242);
+  --accent-color: rgb(64, 78, 237);
+  --secondary-color: rgb(76, 175, 80);
+  --warn-color: rgb(76, 175, 80);
+  --error-color: rgb(240, 55, 56);
+  --sidebar-color: rgb(30, 30, 30);
+  --textbox-color: rgb(65, 65, 75);
+}
+
 @import "~@angular/material/theming";
 
 @include mat-core();
 
-$polydessin-theme-primary: mat-palette($mat-indigo);
-$polydessin-theme-accent: mat-palette($mat-blue-grey);
-$polydessin-theme-theme: mat-light-theme($polydessin-theme-primary, $polydessin-theme-accent);
+$polydessin-theme-primary: mat-palette($mat-indigo, 300, 200, 400);
+$polydessin-theme-accent: mat-palette($mat-indigo);
+$polydessin-theme-theme: mat-dark-theme($polydessin-theme-primary, $polydessin-theme-accent);
 
 @include angular-material-theme($polydessin-theme-theme);
 
@@ -12,9 +24,18 @@ html,
 body {
   height: 100%;
 }
+
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.mat-tooltip.tooltip {
+  font-size: 16px;
+}
+
+mat-form-field {
+  color: white;
 }
 
 .thumbnail-wrapper {
@@ -24,4 +45,172 @@ body {
 }
 fa-icon {
   color: rgba(black, 0.54);
+}
+
+.main-container-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.notice-indicator {
+  line-height: 20px;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0.25rem;
+}
+
+.accent {
+  background-color: blue;
+  color: white;
+}
+
+.error-flash {
+  display: flex;
+  max-width: 300px;
+  padding: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 14px;
+  background-color: #fac2c2;
+  border: 1px solid #da6262;
+  margin-bottom: 1rem;
+  width: 100%;
+  color: #a21919;
+  min-height: fit-content;
+  height: 40px;
+  border-radius: 5px;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none;
+}
+
+.link {
+  color: white;
+}
+
+.pt-1 {
+  padding-top: 1rem;
+}
+
+.pt-2 {
+  padding-top: 2rem;
+}
+
+.pt-3 {
+  padding-top: 3rem;
+}
+
+.pt-4 {
+  padding-top: 4rem;
+}
+
+.pb-1 {
+  padding-bottom: 1rem;
+}
+
+.pb-2 {
+  padding-bottom: 2rem;
+}
+
+.pb-3 {
+  padding-bottom: 3rem;
+}
+
+.pb-4 {
+  padding-bottom: 4rem;
+}
+
+.pl-1 {
+  padding-left: 1rem;
+}
+
+.pl-2 {
+  padding-left: 2rem;
+}
+
+.pl-3 {
+  padding-left: 3rem;
+}
+
+.pl-4 {
+  padding-left: 4rem;
+}
+
+.pr-1 {
+  padding-right: 1rem;
+}
+
+.pr-2 {
+  padding-right: 2rem;
+}
+
+.pr-3 {
+  padding-right: 3rem;
+}
+
+.pr-4 {
+  padding-right: 4rem;
+}
+
+.ph-1 {
+  padding-right: 1rem;
+  padding-left: 1rem;
+}
+
+.ph-2 {
+  padding-right: 2rem;
+  padding-left: 2rem;
+}
+
+.ph-3 {
+  padding-right: 3rem;
+  padding-left: 3rem;
+}
+
+.ph-4 {
+  padding-right: 4rem;
+  padding-left: 4rem;
+}
+
+.pv-1 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.pv-2 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.pv-3 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.pv-4 {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.mat-tab-labels {
+  justify-content: center;
 }

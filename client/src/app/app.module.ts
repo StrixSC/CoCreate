@@ -1,14 +1,42 @@
-import { HttpClientModule } from '@angular/common/http';
+import { UpdatePasswordDialogComponent } from './components/update-password-dialog/update-password-dialog.component';
+import { UpdateProfileDialogComponent } from './components/update-profile-dialog/update-profile-dialog.component';
+import { ProfileComponent } from './components/profile/profile.component';
+import { AccountComponent } from './components/account/account.component';
+import { UpdateCollaborationFormDialogComponent } from './components/update-collaboration-form-dialog/update-collaboration-form-dialog.component';
+import { ServerErrorComponent } from './components/server-error/server-error.component';
+import { CreateChannelDialogComponent } from './components/create-channel-dialog/create-channel-dialog.component';
+import { ChatWindowComponent } from './components/chat-window/chat-window.component';
+import { ChatComponent } from './components/chat/chat.component';
+import { ChatMenuComponent } from './components/chat-menu/chat-menu.component';
+import { ChatChannelListComponent } from './chat-channel-list/chat-channel-list.component';
+import { DeleteConfirmationDialogComponent } from './components/delete-confirmation-dialog/delete-confirmation-dialog.component';
+import { TeamInfoComponent } from './components/team-info/team-info.component';
+import { TeamPasswordDialogComponent } from './components/team-password-dialog/team-password-dialog.component';
+import { AngularFireStorageModule } from '@angular/fire/storage';
+import { CreateTeamDialogComponent } from './components/create-team-dialog/create-team-dialog.component';
+import { TeamPageComponent } from './components/team-page/team-page.component';
+import { AvatarDialogComponent } from './components/avatar-dialog/avatar-dialog.component';
+import { RegisterComponent } from './components/register/register.component';
+import { AuthWrapperComponent } from './components/auth-wrapper/auth-wrapper.component';
+import { LandingPageComponent } from './components/landing-page/landing-page.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { LoginComponent } from './components/login/login.component';
+import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFireAuthModule } from '@angular/fire/auth';
+import { AngularFireAuthGuardModule } from '@angular/fire/auth-guard';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBarContainer } from '@angular/material';
+import { MatPaginatorIntl } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MomentModule } from 'ngx-moment';
-import { AlertMessageComponent } from './components/alert-message/alert-message.component';
+import { environment } from 'src/environments/environment';
 import { MaterialModules } from './app-material.module';
 import { ColorPickerModule } from './color-picker/color-picker.module';
+import { AlertMessageComponent } from './components/alert-message/alert-message.component';
 import { AppComponent } from './components/app/app.component';
 import { CanvasComponent } from './components/canvas/canvas.component';
 import { ControlMenuComponent } from './components/control-menu/control-menu.component';
@@ -25,20 +53,25 @@ import { ToolsColorPickerComponent } from './components/tools-color-picker/tools
 import { ToolsColorComponent } from './components/tools-color/tools-color.component';
 import { WelcomeDialogModule } from './components/welcome-dialog/welcome-dialog.module';
 import { WorkspaceComponent } from './components/workspace/workspace.component';
+import { StdHttpInterceptor } from './http/stdhttp.interceptor';
+import { SocketService } from './services/chat/socket.service';
 import { ErrorMessageComponent } from './components/error-message/error-message.component';
 import { ToolParameterModule } from './components/tool-parameters/tool-parameter.module';
 import { AppRoutingModule } from './app-routing.module';
-import { LoginPageComponent } from './components/login/login-page/login-page.component';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { ChatComponent } from './components/chat/chat.component';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
-import { WelcomePageComponent } from './components/login/welcome-page/welcome-page.component';
-import { SignUpPageComponent } from './components/login/sign-up-page/sign-up-page.component';
-import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
+import { DrawingGalleryComponent } from './components/drawing-gallery/drawing-gallery.component';
+import { DrawingGalleryCardComponent } from './components/drawing-gallery-card/drawing-gallery-card.component';
+import { DrawingPreviewDialogComponent } from './components/drawing-preview-dialog/drawing-preview-dialog.component';
+import { CreateDrawingComponent } from './components/create-drawing/create-drawing.component';
+import { MenuPageComponent } from './components/menu-page/menu-page.component';
+import { NewDrawingFormDialogComponent } from './components/new-drawing-form-dialog/new-drawing-form-dialog.component';
+import { CollaborationPasswordFormDialogComponent } from './components/collaboration-password-form-dialog/collaboration-password-form-dialog.component';
+import { TopBarComponent } from './components/top-bar/top-bar.component';
 
 @NgModule({
   declarations: [
@@ -51,25 +84,52 @@ import { ChangePasswordComponent } from './components/login/change-password/chan
     NewDrawingFormComponent,
     NewDrawingAlertComponent,
     ToolsColorComponent,
+    UpdateCollaborationFormDialogComponent,
     ToolsColorPickerComponent,
     ParameterMenuComponent,
+    AvatarDialogComponent,
     WorkspaceComponent,
     SidenavComponent,
     CanvasComponent,
+    ChatChannelListComponent,
+    ChatMenuComponent,
     ControlMenuComponent,
     ParameterDirective,
     SaveDrawingComponent,
     OpenDrawingComponent,
     ErrorMessageComponent,
     AlertMessageComponent,
+    CreateTeamDialogComponent,
     ExportDrawingComponent,
-    LoginPageComponent,
     ChatComponent,
     DrawingPageComponent,
-    WelcomePageComponent,
-    SignUpPageComponent,
-    UserProfileComponent,
+    TeamPageComponent,
     ChangePasswordComponent,
+    DrawingGalleryComponent,
+    DeleteConfirmationDialogComponent,
+    DrawingGalleryCardComponent,
+    LoginComponent,
+    ForgotPasswordComponent,
+    UpdateProfileDialogComponent,
+    LandingPageComponent,
+    AccountComponent,
+    ProfileComponent,
+    DrawingPreviewDialogComponent,
+    CreateDrawingComponent,
+    MenuPageComponent,
+    UpdatePasswordDialogComponent,
+    ServerErrorComponent,
+    RegisterComponent,
+    NewDrawingFormDialogComponent,
+    CollaborationPasswordFormDialogComponent,
+    TopBarComponent,
+    AuthWrapperComponent,
+    ChatWindowComponent,
+    CreateChannelDialogComponent,
+    TeamInfoComponent,
+    TeamPasswordDialogComponent,
+    AvatarDialogComponent,
+    AuthWrapperComponent,
   ],
   imports: [
     BrowserModule,
@@ -78,6 +138,10 @@ import { ChangePasswordComponent } from './components/login/change-password/chan
     HttpClientModule,
     ReactiveFormsModule,
     MaterialModules,
+    AngularFireModule.initializeApp(environment.firebaseConfig),
+    AngularFireAuthModule,
+    AngularFireStorageModule,
+    AngularFireAuthGuardModule,
     WelcomeDialogModule,
     ColorPickerModule,
     FontAwesomeModule,
@@ -87,27 +151,46 @@ import { ChangePasswordComponent } from './components/login/change-password/chan
     MatInputModule,
     MatIconModule,
     MatButtonModule,
-    AppRoutingModule
+    AppRoutingModule,
+
   ],
-  exports: [AppRoutingModule,
-  ],
+  exports: [AppRoutingModule],
   entryComponents: [
+    UpdateCollaborationFormDialogComponent,
     NewDrawingAlertComponent,
     NewDrawingComponent,
+    CreateChannelDialogComponent,
+    TeamPasswordDialogComponent,
+    UpdatePasswordDialogComponent,
+    DeleteConfirmationDialogComponent,
+    TeamInfoComponent,
     ToolsColorPickerComponent,
     WorkspaceComponent,
     ControlMenuComponent,
+    ChatMenuComponent,
+    UpdateProfileDialogComponent,
+    AvatarDialogComponent,
     SaveDrawingComponent,
+    NewDrawingFormDialogComponent,
     ExportDrawingComponent,
     OpenDrawingComponent,
     ErrorMessageComponent,
     AlertMessageComponent,
-    MatSnackBarContainer,
+    DrawingPreviewDialogComponent,
+    CreateTeamDialogComponent,
+    AvatarDialogComponent,
+    CollaborationPasswordFormDialogComponent,
   ],
   providers: [
     FileReader,
+    SocketService,
+    { provide: HTTP_INTERCEPTORS, useClass: StdHttpInterceptor, multi: true },
+    {
+      provide: LocationStrategy,
+      useClass: HashLocationStrategy
+    },
+    MatPaginatorIntl
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {
-}
+export class AppModule { }

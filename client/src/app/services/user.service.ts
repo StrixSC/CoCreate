@@ -1,55 +1,46 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import axios from "axios";
-import { environment } from "src/environments/environment";
-//import { Observable } from 'rxjs';
+import { AuthService } from 'src/app/services/auth.service';
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { AngularFireAuth } from '@angular/fire/auth/auth';
+
+import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root'
 })
 export class UserService {
-  URL: String = "";
+  constructor(private http: HttpClient, private auth: AuthService) { }
 
-  constructor(private http: HttpClient) {
-    this.URL = environment.local;
+  getLogs(): Observable<any> {
+    return this.http.get(environment.serverURL + "/api/users/logs");
   }
 
-  registerUser(userInfo: string) {
-    console.log(userInfo);
-    return this.http.post(
-      "https://colorimage-109-3900.herokuapp.com/auth/register",
-      JSON.parse(userInfo),
-      { withCredentials: true }
-    );
-  }
-
-  async loginUser(user: any) {
-    console.log(user);
-
-    const PAYLOAD = {
-      email: user.email,
-      password: user.password,
-    };
-    const headers = {
-      "Content-Type": "application/json",
-    };
-    try {
-      const res = await axios.post(URL + "auth/login", PAYLOAD, {
-        headers: headers,
-      });
-      console.log(res);
-    } catch (error) {
-      console.error(error);
-      throw error;
+  updateUsernameAndAvatar(username: string, avatarUrl: string): Observable<any> {
+    let updateBody = {
+      "username": username,
+      "avatarUrl": avatarUrl,
     }
+    return this.http.put<any>(environment.serverURL + "/api/users/profile/", updateBody)
   }
 
-  // loginUser(userInfo: string) {
-  //   console.log(userInfo);
-  //   return this.http.post(
-  //     "https://colorimage-109-3900.herokuapp.com/auth/login",
-  //     JSON.parse(userInfo),
-  //     { withCredentials: true }
-  //   );
-  // }
+  getPublicProfile(username: string): Observable<any> {
+    return this.http.get(environment.serverURL + `/api/users/profile/${username}`);
+  }
+
+  toggleConfidentiality(data: any): Observable<any> {
+    return this.http.put(environment.serverURL + '/api/users/account/confidentiality', data);
+  }
+
+  updatePassword(data: any): Observable<any> {
+    return this.http.put<any>(environment.serverURL + "/auth/update/password", data)
+  }
+
+  uploadAvatar(formData: FormData): Observable<any> {
+    return this.http.post<any>(environment.serverURL + "/api/users/upload/avatar", formData);
+  }
+
+  fetchUserInformation() {
+    return this.http.get(environment.serverURL + "/api/users/account");
+  }
 }

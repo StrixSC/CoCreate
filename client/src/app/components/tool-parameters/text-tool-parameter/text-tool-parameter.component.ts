@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { RectangleStyle } from 'src/app/model/rectangle-style.model';
-import { TextToolService } from '../../../services/tools/text-tool/text-tool.service';
 import { Polices } from '../../../model/polices.model';
+import { TextToolService } from '../../../services/tools/text-tool/text-tool.service';
 
 const START = 0;
 const MIDDLE = 1;

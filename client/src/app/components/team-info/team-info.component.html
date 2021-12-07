@@ -1,0 +1,391 @@
+<div class="main-info-container">
+    <div class="top-section">
+        <h1 class="team-name" mat-dialog-title><u>{{ team.teamName }}</u></h1>
+
+        <mat-dialog-content>
+            <mat-tab-group mat-align-tabs="center" class="tabs">
+                <mat-tab class="tab" label="Membres" dynamicHeight>
+                    <div class=" custom-tab">
+
+                        <table mat-table *ngIf="teamInfo" [dataSource]="teamInfo.members" class="members-table">
+                            <ng-container matColumnDef="username">
+                                <th mat-header-cell *matHeaderCellDef> Utilisateur </th>
+                                <td class="user-column clickable" mat-cell *matCellDef="let element">
+                                    <div class="user-avatar">
+                                        <img class="user-avatar-img" [src]="element.avatarUrl">
+                                    </div>
+                                    <div class="user-username">{{element.username}}</div>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef> Statut </th>
+                                <td mat-cell *matCellDef="let element"> {{element.status}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="joinedOn">
+                                <th mat-header-cell *matHeaderCellDef> Date rejoint </th>
+                                <td mat-cell *matCellDef="let element"> {{element.joinedOn | date:'short'}} </td>
+                            </ng-container>
+                            <ng-container matColumnDef="type">
+                                <th mat-header-cell *matHeaderCellDef> Rôle </th>
+                                <td mat-cell *matCellDef="let element">
+                                    <span class="member-column" *ngIf="element.type === 'Owner'">Propriétaire
+                                        <mat-icon>star</mat-icon>
+                                    </span>
+                                    <span class="member-column" *ngIf="element.type !== 'Owner'">Membre
+                                    </span>
+                                </td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                        </table>
+                    </div>
+                </mat-tab>
+                <mat-tab label="Dessins" dynamicHeight>
+                    <div class="drawings-tab custom-tab">
+
+                        <table mat-table *ngIf="teamInfo && teamInfo.drawings.length > 0"
+                            [dataSource]="teamInfo.drawings" class="drawings-table">
+                            <ng-container matColumnDef="title">
+                                <th mat-header-cell *matHeaderCellDef> Titre du dessin </th>
+                                <td class="" mat-cell *matCellDef="let element">
+                                    {{ element.title }}
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="memberCount">
+                                <th mat-header-cell *matHeaderCellDef> Membres Actifs </th>
+                                <td class="" mat-cell *matCellDef="let element">
+                                    {{ element.activeCollaboratorCount }} / {{ element.currentCollaboratorCount }}
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="createdAt">
+                                <th mat-header-cell *matHeaderCellDef> Créé le </th>
+                                <td class="" mat-cell *matCellDef="let element">
+                                    {{ element.createdAt | date:'short' }}
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="updatedAt">
+                                <th mat-header-cell *matHeaderCellDef> Dernière mise à jour </th>
+                                <td class="" mat-cell *matCellDef="let element">
+                                    {{ element.updatedAt | date:'short' }}
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="actions">
+                                <th mat-header-cell *matHeaderCellDef> </th>
+                                <td class="" mat-cell *matCellDef="let element">
+                                    <div class="clickable">
+                                        <button mat-icon-button [matMenuTriggerFor]="menu">
+                                            <mat-icon>more_vert</mat-icon>
+                                            <mat-menu #menu="matMenu">
+                                                <button (click)="joinDrawing(element.collaborationId)" mat-menu-item>
+                                                    <mat-icon>draw</mat-icon>
+                                                    <span>Rejoindre le dessin</span>
+                                                </button>
+                                                <button (click)="deleteDrawing(element.collaborationId)" mat-menu-item>
+                                                    <mat-icon>delete</mat-icon>
+                                                    <span>Supprimer</span>
+                                                </button>
+                                            </mat-menu>
+                                        </button>
+                                    </div>
+                                </td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="drawingsColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: drawingsColumns;"></tr>
+                        </table>
+
+                        <div class="no-drawing-container" *ngIf="teamInfo && teamInfo.drawings.length <= 0">
+                            <div class="no-drawing-img-container">
+                                <img src="assets/img/no-pictures.png" class="no-drawing-img">
+                            </div>
+                            <h2 class="no-drawing-header">
+                                <div class="no-drawing-header-text">Cette équipe n'est auteur d'aucun dessins...</div>
+                            </h2>
+                        </div>
+
+                        <button mat-raised-button color="primary" class="create-drawing-button"
+                            (click)="createDrawing()">
+                            Créer un dessin!
+                        </button>
+                    </div>
+
+                </mat-tab>
+                <mat-tab *ngIf="team.isOwner" label="Mise à jour">
+                    <div class="main-container-wrapper">
+                        <h1>
+                            Mise à jour de l'équipe
+                        </h1>
+                        <form class="form" [formGroup]="updateForm" (submit)="onUpdateSubmit()">
+                            <div class="main-form-container">
+
+                                <div class="form-section">
+                                    <div>
+
+                                        <mat-form-field required class="form-field clickable" appearance="outline">
+                                            <mat-label>Nom d'équipe</mat-label>
+                                            <input required matInput type="text" formControlName="teamName"
+                                                placeholder="Les Picassos des ténèbres" />
+                                        </mat-form-field>
+                                    </div>
+                                    <div>
+                                        <mat-form-field class="pb-1 form-field clickable" appearance="outline">
+                                            <mat-label>Visibilité</mat-label>
+                                            <mat-select (selectionChange)="changeType($event)" formControlName='type'
+                                                required>
+                                                <mat-option *ngFor="let type of types" [value]="type.key">
+                                                    {{ type.value }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                    <div>
+                                        <mat-form-field class="pb-1 form-field clickable"
+                                            *ngIf="type.value === 'Protected'" appearance="outline">
+                                            <mat-label>Mot de passe</mat-label>
+                                            <input formControlName="password"
+                                                [type]="showPassword ? 'text' : 'password'" matInput
+                                                placeholder="********" />
+                                            <mat-icon class="noselect" matSuffix (click)="showPassword = !showPassword">
+                                                {{
+                                                showPassword
+                                                ?
+                                                'visibility_off' : 'visibility' }} </mat-icon>
+                                            <mat-hint>Doit être entre 8 et 256
+                                                caractères
+                                            </mat-hint>
+                                            <mat-error *ngIf="password.hasError('required')">
+                                                Ce champ est obligatoire.
+                                            </mat-error>
+                                            <mat-error *ngIf="password.hasError('minlength')">
+                                                Le mot de passe doit être entre 8 et 256 caractères.
+                                            </mat-error>
+                                            <mat-error *ngIf="password.hasError('maxlength')">
+                                                Le mot de passe doit être entre 8 et 256 caractères.
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                                <div class="form-section">
+                                    <div>
+                                        <mat-form-field required class="form-field clickable" appearance="outline">
+                                            <mat-label>Nombre de membre maximale</mat-label>
+                                            <input min="1" max="30" required matInput type="number"
+                                                formControlName="maxMemberCount"
+                                                placeholder="4" />
+                                        </mat-form-field>
+                                    </div>
+                                    <div>
+                                        <mat-form-field class="pb-1 form-field clickable" appearance="outline">
+                                            <mat-label>Choisissez votre mascotte</mat-label>
+                                            <mat-select formControlName='mascot'>
+                                                <mat-option *ngFor="let mascot of mascots" [value]="mascot.key">
+                                                    {{ mascot.value }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="form-bio">
+                                <mat-form-field class="pb-1 form-bio-field clickable" appearance="outline">
+                                    <mat-label>Bio (Description)</mat-label>
+                                    <textarea placeholder="La meilleur équipe!" matInput
+                                        formControlName='bio'></textarea>
+                                </mat-form-field>
+                            </div>
+                            <div>
+                                <button [disabled]="isLoading || !valid()" type="submit" mat-raised-button
+                                    color="primary" class="form-field">
+                                    <div class="spinner" *ngIf="isLoading">
+                                        <mat-spinner [diameter]="35" color="accent" class="spinner"></mat-spinner>
+                                    </div>
+                                    <ng-container *ngIf="!isLoading">Soumettre</ng-container>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+        </mat-dialog-content>
+    </div>
+    <mat-dialog-actions align="end">
+        <button [disabled]="isLoading" (click)="dialogRef.close(returnVar)" mat-raised-button color="secondary">
+            <div class="spinner" *ngIf="isLoading">
+                <mat-spinner [diameter]="25" color="accent" class="spinner"></mat-spinner>
+            </div>
+            <ng-container *ngIf="!isLoading">Retour</ng-container>
+        </button>
+    </mat-dialog-actions>
+</div>
+
+<style>
+    .no-drawing-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .no-drawing-header {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .no-drawing-header-text {
+        opacity: 0.5
+    }
+
+    .create-drawing-button {}
+
+    .no-drawing-img-container {
+        max-width: 30%;
+        max-height: 30%;
+        opacity: 0.5;
+    }
+
+    .no-drawing-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .team-name {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .main-info-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .form-field {
+        width: 300px;
+    }
+
+    .main-image-container {
+        width: 100%;
+        display: flex;
+        margin-top: 3rem;
+        justify-content: center;
+    }
+
+    .main-container-wrapper {
+        gap: 3rem;
+        align-items: center;
+        padding-top: 3rem;
+        justify-content: space-around;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .form {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        justify-content: center;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .member-column {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .header {
+        font-weight: bolder;
+        font-size: 2rem;
+    }
+
+    .form-bio {
+        width: 90%;
+    }
+
+    .main-form-container {
+        display: flex;
+        justify-content: space-evenly;
+        width: 100%;
+        flex-wrap: wrap;
+
+    }
+
+    .tab {
+        width: 100%;
+        height: 100%;
+        min-height: 500px;
+    }
+
+    .image-container {
+        max-width: 150px;
+        max-height: 150px;
+    }
+
+    .user-avatar {
+        max-width: 50px;
+        max-height: 50px;
+        border-radius: 100%;
+    }
+
+    .user-username:hover {
+        text-decoration: underline;
+    }
+
+    .user-avatar-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 100%;
+    }
+
+    .user-column {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0rem;
+    }
+
+    .team-image {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .form-bio-field {
+        width: 100%
+    }
+
+    .drawings-table,
+    .members-table {
+        width: 100%;
+    }
+
+    .custom-tab {
+        min-height: 90%;
+        width: 100%;
+    }
+
+    .drawings-tab {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 3rem;
+    }
+</style>

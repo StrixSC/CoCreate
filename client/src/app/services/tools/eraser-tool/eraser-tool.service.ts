@@ -4,11 +4,10 @@ import { IconDefinition } from '@fortawesome/fontawesome-common-types';
 import { faEraser } from '@fortawesome/free-solid-svg-icons';
 import { ICommand } from 'src/app/interfaces/command.interface';
 import { Point } from 'src/app/model/point.model';
-import { CommandInvokerService } from '../../command-invoker/command-invoker.service';
+import { Tools } from '../../../interfaces/tools.interface';
 import { DrawingService } from '../../drawing/drawing.service';
 import { OffsetManagerService } from '../../offset-manager/offset-manager.service';
 import { RendererProviderService } from '../../renderer-provider/renderer-provider.service';
-import { Tools } from '../../../interfaces/tools.interface';
 import { ToolIdConstants } from '../tool-id-constants';
 import { LEFT_CLICK, RIGHT_CLICK } from '../tools-constants';
 import { EraserCommand } from './eraser-command';
@@ -37,7 +36,6 @@ export class EraserToolService implements Tools {
     private drawingService: DrawingService,
     private offsetManager: OffsetManagerService,
     private rendererService: RendererProviderService,
-    private commandInvoker: CommandInvokerService,
   ) {
     this.eraserSize = new FormControl(1, [Validators.min(1), Validators.required]);
     this.parameters = new FormGroup({ eraserSize: this.eraserSize, });
@@ -46,12 +44,6 @@ export class EraserToolService implements Tools {
       this.rendererService.renderer.setAttribute(this.eraser, 'width', `${this.eraserSize.value}px`);
       this.rendererService.renderer.setAttribute(this.eraser, 'height', `${this.eraserSize.value}px`);
       this.moveEraser(this.lastOffsetRegistered);
-    });
-    this.commandInvoker.commandCallEmitter.subscribe(() => {
-      if (this.isEraserActive) {
-        this.reset();
-        this.processElementInEraser();
-      }
     });
   }
 

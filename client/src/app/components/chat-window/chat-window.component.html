@@ -1,0 +1,67 @@
+<div *ngIf="!isLoading && activeChannel" class="main-content-wrapper">
+    <div class="chat-header">
+        <h2 *ngIf="activeChannel.channelName.length < 30" class="channel-header">
+            {{ activeChannel.channelName }}
+        </h2>
+        <h2 *ngIf="activeChannel.channelName.length >= 30" class="channel-header">
+            {{ activeChannel.channelName | slice:0:30 }}...
+        </h2>
+        <div class="header-actions">
+            <div class="history-button-container">
+                <button (click)="fetchHistory()" [matTooltip]="'Chercher l\'historique de la chaîne'" matTooltipPosition="below" mat-icon-button
+                    class="action-button history-button">
+                    <mat-icon>history</mat-icon>
+                </button>
+            </div>
+            <div class="mute-button-container">
+                <button *ngIf="!muteNotification" (click)="toggleNotifications()"
+                    [matTooltip]="'Enlever la sonorité de notification.'" matTooltipPosition="below" mat-icon-button
+                    class="action-button mute-button">
+                    <mat-icon>notifications</mat-icon>
+                </button>
+                <button *ngIf="muteNotification" (click)="toggleNotifications()"
+                    [matTooltip]="'Allumer la sonorité de notification.'" matTooltipPosition="below" mat-icon-button
+                    class="action-button mute-button">
+                    <mat-icon>notifications_off</mat-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="chat-box">
+        <div class="messages-container" #messageBox [scrollTop]="messageBox.scrollHeight">
+            <div class="message-wrapper" *ngFor="let message of messages"
+                [class.myMessage]="isActiveUser(message.username)">
+                <div class="avatar-container">
+                    <img class="avatar-img" [src]="message.avatarUrl">
+                </div>
+                <div class="message-content-wrapper">
+                    <small class="message-username">
+                        {{ message.username }}
+                    </small>
+                    <div class="message-content">
+                        {{ message.message }}
+                    </div>
+                    <small class="message-datetime">
+                        {{ message.createdAt }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="text-input">
+            <mat-form-field class="message-input" appearance="outline">
+                <mat-label>Message</mat-label>
+                <input matInput autocomplete="off" type="text" [(ngModel)]="message" placeholder="Aa"
+                    (keyup.enter)="onSubmit()">
+                <mat-hint align="end">{{message.length}} / 256</mat-hint>
+                <button *ngIf="message" matSuffix mat-icon-button type="submit" (click)="onSubmit()">
+                    <mat-icon>send</mat-icon>
+                </button>
+            </mat-form-field>
+        </div>
+    </div>
+</div>
+<div *ngIf="isLoading && !activeChannel" class="main-content-wrapper no-channel-container">
+    <div class="spinner">
+        <mat-spinner color="accent" [diameter]="35"></mat-spinner>
+    </div>
+</div>

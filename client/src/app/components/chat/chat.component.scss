@@ -1,110 +1,172 @@
-.main-chat-container {
-	border: 1px solid #c8c8c8;
-	width: 80%;
-	height: 700px;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	padding: 1rem;
-	border-radius: 10px;
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 300px;
+    .chat-header-content {
+        color: white;
+        word-break: break-all;
+    }
 }
 
-.chat-footer-container {
-	display: flex;
-	justify-content: space-around;
-	gap: 0.5rem;
-	margin-top: 1rem;
+.top-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+    color: white;
 }
 
-.primary-input {
-	width: 100%;
+.chat-header {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    
 }
 
-.button-primary {
-	max-width: 300px;
+.chat-actions {
+    display: flex;
+    width: 100%;
+    justify-content: space-evenly;
+    align-items: center;
 }
 
-.flex-container {
-	margin-top: 3rem;
+.chat-box {
+    margin-bottom: 1rem;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    align-items: flex-end;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    width: 100%;
+    min-height: 80%;
+    max-height: 80%;
+    
+    .text-input {
+        width: 100%;
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+
+        .message-input {
+            width: 90%;
+        }
+    }
+
+}
+.main-content-wrapper {
+    display: flex;
+    gap: 2rem;
+    flex-direction: column;
+    padding: 0rem 1rem;
+    background: var(--bg-accent-color);
+    align-items: center;
+    min-width: 350px;
+    justify-content: space-around;
+    max-width: 450px;
+    height: 100%;
+    overflow: hidden;
 }
 
-.system-message-container {
-	text-align: center;
-	font-family: "Roboto";
-	font-size: 16px;
+.no-online-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.5;
+    max-width: 30px;
 }
 
-.messages-container {
-	display: flex;
-	height: 100%;
-	justify-content: flex-start;
-	flex-direction: column;
-	padding: 1rem;
-	gap: 1rem;
-	overflow-y: scroll;
+.no-online-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
-.my-message {
-	display: flex;
-	flex-direction: column;
-	padding: 0.25rem;
-	align-items: flex-end;
+.member-wrapper-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.25rem;
 }
 
-.message-wrapper {
-	display: inline-block;
-	background-color: #e9e9eb;
-	padding: 1rem 1.5rem;
-	border-radius: 10px;
-	font-size: 24px;	
+.member-info-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.username {
-	padding: 0 0.25rem;
-	font-family: Roboto;
+.member-avatar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 30px;
+    max-height: 30px;
 }
 
-.my-username {
-	display: none;
+.member-avatar-img {
+    max-width: 100%;
+    min-width: 100%;
+    object-fit: contain;
+    border-radius: 100%
 }
 
-.timestamp {
-	font-size: 16px;
-	font-family: "Roboto";
-	padding: 0.25rem;
-	text-align: left;
+.member-username {
+    color: white;
 }
 
-.message-content-container {
-	display: flex;
-	align-items: center;
-	max-width: 150px;
-	gap: 0.5rem;
+.status-icon {
+    min-width: 10px;
+    min-height: 10px;
+    border-radius: 100%;
 }
 
-.user-avatar {
-	background-color: #4e71ce;
-	min-width: 50px;
-	min-height: 50px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	font-size: 24px;
-	border-radius: 100%;
-	color: white;
+.online {
+    background-color: lightgreen
 }
 
-.my-message-content-container {
-	.user-avatar {
-		display: none;
-	}
+.busy {
+    background-color: orange
+}
 
-	.timestamp {
-		text-align: right;
-	}
+.disconnected {
+    background-color: crimson
+}
 
-	.message-wrapper {
-		background-color: #4e71ce;
-		color: white;
-	}
+.action-button {
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all;
+}
+
+.myMessage {
+    display: flex;
+    justify-content: flex-end;
+
+    .avatar-container {
+        order: 2;
+        display: none;
+    }
+
+    .message-content-wrapper {
+        display: flex;
+        flex-direction: column;
+        text-align: right;
+        gap: 0.25rem;
+
+        .message-username {
+            display: none;
+        }
+
+        .message-content {
+            background-color: var(--accent-color);
+        }
+    }
 }
