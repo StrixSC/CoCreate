@@ -87,10 +87,11 @@ class _AppState extends State<App> with TickerProviderStateMixin {
               inputDecorationTheme: const InputDecorationTheme(
                 filled: true,
                 fillColor: kContentColor4,
-                  labelStyle: TextStyle(color: kPrimaryColor),),
+                labelStyle: TextStyle(color: kPrimaryColor),
+              ),
               textTheme: GoogleFonts.ralewayTextTheme(
                   Theme.of(context).textTheme.apply(
-                    displayColor: Colors.white,
+                        displayColor: Colors.white,
                         bodyColor: Colors.white,
                         fontSizeFactor: 2.0,
                         fontSizeDelta: 2.0,
@@ -116,7 +117,12 @@ class _AppState extends State<App> with TickerProviderStateMixin {
           break;
         case drawingRoute:
           final arguments = settings.arguments as Map<String, dynamic>;
-          screen = DrawingScreen(arguments['socket'] , arguments['user'], arguments['collaborationId'], arguments['actions']);
+          screen = DrawingScreen(
+              arguments['socket'],
+              arguments['user'],
+              arguments['collaborationId'],
+              arguments['actions'],
+              arguments['selectedItems']);
           break;
         default:
           return null;

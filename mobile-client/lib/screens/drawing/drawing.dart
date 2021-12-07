@@ -17,13 +17,14 @@ class DrawingScreen extends StatefulWidget {
   final User _user;
   final String _collaborationId;
   final Map _actions;
+  final Map _selectedItems;
 
-  const DrawingScreen(
-      this._socket, this._user, this._collaborationId, this._actions);
+  const DrawingScreen(this._socket, this._user, this._collaborationId,
+      this._actions, this._selectedItems);
 
   @override
-  State<DrawingScreen> createState() =>
-      _DrawingScreenState(_socket, _user, _collaborationId, _actions);
+  State<DrawingScreen> createState() => _DrawingScreenState(
+      _socket, _user, _collaborationId, _actions, _selectedItems);
 }
 
 class _DrawingScreenState extends State<DrawingScreen> {
@@ -36,7 +37,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
   String? selectionActionId;
   String? lastShapeID;
   Map actionsMap;
-  Map selectedItems = <String, String>{};
+  Map selectedItems;
   bool allowMove = false;
   Offset? selectRef; // offset reference of selected item
   Color currentBodyColor = const Color(0xff443a49);
@@ -55,8 +56,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
   List<ShapeAction> undoList = [];
   List<ShapeAction> redoList = [];
 
-  _DrawingScreenState(
-      this._socket, this._user, this._collaborationId, this.actionsMap);
+  _DrawingScreenState(this._socket, this._user, this._collaborationId,
+      this.actionsMap, this.selectedItems);
 
   @override
   void initState() {
@@ -358,7 +359,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
           Align(
             alignment: Alignment.bottomRight,
             child: Visibility(
-              visible: selectedItems.isNotEmpty,
+              visible: selectedItems.containsValue(_user.uid),
               child: FloatingActionButton(
                 onPressed: () {
                   if (mounted) {
@@ -412,6 +413,13 @@ class _DrawingScreenState extends State<DrawingScreen> {
     } else if (redoAction.delta != Offset.zero) {
       socketResizeEmission(DrawingState.move, redoAction.actionId, redoAction,
           Offset.zero, false, true);
+    } else if (redoAction.actionType == "Freedraw") {
+      socketFreedrawEmission(
+          redoAction, DrawingState.up, true, redoAction.actionId);
+    } else if (redoAction.actionType == "Rectangle" ||
+        redoAction.actionType == "Ellipse") {
+      socketShapeEmission(redoAction, redoAction.actionType, DrawingState.up,
+          redoAction.actionId, true);
     }
   }
 
@@ -520,16 +528,16 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void socketTranslationReception() {
     _socket.on('translation:received', (data) {
       undoList.removeWhere((shapeAction) =>
-          shapeAction.actionId == data['actionId'] &&
+          shapeAction.actionId == data['selectedActionId'] &&
           data['userId'] != _user.uid);
       redoList.removeWhere((shapeAction) =>
-          shapeAction.actionId == data['actionId'] &&
+          shapeAction.actionId == data['selectedActionId'] &&
           data['userId'] != _user.uid);
       if (mounted) {
         setState(() {
           if (data["state"] != DrawingState.up) {
             actionsMap.forEach((actionId, shapeAction) {
-              if (actionId == data['actionId'] ||
+              if (actionId == data['selectedActionId'] ||
                   actionId == data['selectedActionId']) {
                 Matrix4 matrix4 = Matrix4.translationValues(
                     data['xTranslation'].toDouble(),
@@ -550,10 +558,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void socketRotationReception() {
     _socket.on('rotation:received', (data) {
       undoList.removeWhere((shapeAction) =>
-          shapeAction.actionId == data['actionId'] &&
+          shapeAction.actionId == data['selectedActionId'] &&
           data['userId'] != _user.uid);
       redoList.removeWhere((shapeAction) =>
-          shapeAction.actionId == data['actionId'] &&
+          shapeAction.actionId == data['selectedActionId'] &&
           data['userId'] != _user.uid);
       if (mounted) {
         setState(() {
@@ -599,22 +607,22 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void socketResizeReception() {
     _socket.on('resize:received', (data) {
       undoList.removeWhere((shapeAction) =>
-          shapeAction.actionId == data['actionId'] &&
+          shapeAction.actionId == data['selectedActionId'] &&
           data['userId'] != _user.uid);
       redoList.removeWhere((shapeAction) =>
-          shapeAction.actionId == data['actionId'] &&
+          shapeAction.actionId == data['selectedActionId'] &&
           data['userId'] != _user.uid);
       if (mounted) {
         setState(() {
           if (data['state'] == DrawingState.down) {
-            actionsMap[data['actionId']].oldShape =
-                actionsMap[data['actionId']].path;
+            actionsMap[data['selectedActionId']].oldShape =
+                actionsMap[data['selectedActionId']].path;
           } else if (data['state'] == DrawingState.move) {
             Path actionPath = Path();
             if (data['isUndoRedo']) {
-              actionPath = actionsMap[data['actionId']].path;
+              actionPath = actionsMap[data['selectedActionId']].path;
             } else {
-              actionPath = actionsMap[data['actionId']].oldShape;
+              actionPath = actionsMap[data['selectedActionId']].oldShape;
             }
 
             Matrix4 matrixTranslation;
@@ -638,16 +646,16 @@ class _DrawingScreenState extends State<DrawingScreen> {
             scaledPath = scaledPath.transform(matrixTranslation2.storage);
 
             // Save the scaled path
-            ShapeAction shapeAction = actionsMap[data['actionId']];
+            ShapeAction shapeAction = actionsMap[data['selectedActionId']];
             shapeAction.path = scaledPath;
             shapeAction.scale =
                 Offset(data['xScale'].toDouble(), data['yScale'].toDouble());
-            actionsMap.update(data['actionId'], (value) => shapeAction);
+            actionsMap.update(data['selectedActionId'], (value) => shapeAction);
             if (data['isUndoRedo']) {
-              actionsMap[data['actionId']].delta = Offset.zero;
+              actionsMap[data['selectedActionId']].delta = Offset.zero;
             }
           } else if (data['state'] == DrawingState.up) {
-            actionsMap[data['actionId']].delta = Offset.zero;
+            actionsMap[data['selectedActionId']].delta = Offset.zero;
           }
         });
       }
@@ -737,7 +745,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
                 ..strokeWidth = data['width'].toDouble()
                 ..style = PaintingStyle.stroke;
 
-              Rect rect = Rect.fromPoints(Offset(data['x'], data['y']),
+              Rect rect = Rect.fromPoints(
+                  Offset(data['x'].toDouble(), data['y'].toDouble()),
                   Offset(data['x2'].toDouble(), data['y2'].toDouble()));
 
               Path path = Path();
@@ -826,7 +835,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
               }
             }
             if (data['isUndoRedo']) {
-              Path path = redoList.last.path;
+              Path path = Path();
               List<Offset> realOffsets = [];
               for (var offset in (data['offsets'])) {
                 realOffsets.add(Offset(offset.values.first.toDouble(),
@@ -863,9 +872,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
   void socketDeleteReception() {
     _socket.on('delete:received', (data) {
       undoList.removeWhere(
-          (shapeAction) => shapeAction.actionId == data['actionId']);
-      redoList.removeWhere(
-          (shapeAction) => shapeAction.actionId == data['actionId']);
+          (shapeAction) => shapeAction.actionId == data['selectedActionId']);
+      redoList.removeWhere((shapeAction) =>
+          shapeAction.actionId == data['selectedActionId'] &&
+          data['userId'] != _user.uid);
       if (mounted) {
         setState(() {
           actionsMap.remove(data["selectedActionId"]);
@@ -877,16 +887,14 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
   void socketSaveConfirmation() {
     _socket.on('action:saved', (data) {
-      if (!data['isUndoRedo']) {
-        _socket.emit("selection:emit", {
-          'actionId': data['actionId'],
-          'username': _user.displayName,
-          'userId': _user.uid,
-          'collaborationId': _collaborationId,
-          'actionType': "Select",
-          'isSelected': true,
-        });
-      }
+      _socket.emit("selection:emit", {
+        'actionId': data['actionId'],
+        'username': _user.displayName,
+        'userId': _user.uid,
+        'collaborationId': _collaborationId,
+        'actionType': "Select",
+        'isSelected': true,
+      });
     });
   }
 
@@ -1073,7 +1081,9 @@ class _DrawingScreenState extends State<DrawingScreen> {
           : currentBodyColor.blue,
       'aFill': (isRedo && details.fillType == "fill")
           ? details.bodyColor.color.alpha
-          : currentBodyColor.alpha,
+          : (currentFillType == "fill")
+              ? currentBodyColor.alpha
+              : 0,
       'width': (isRedo) ? details.borderColor.strokeWidth : currentWidth,
       'shapeType': (isRedo) ? details.actionType : drawType,
       'shapeStyle': (isRedo) ? details.fillType : currentFillType,
@@ -1125,7 +1135,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
           ? (details as ShapeAction).borderColor.strokeWidth
           : currentWidth,
       'offsets': testList,
-      'isSelected': (drawingState == DrawingState.up && !isRedo) ? false : true,
+      'isSelected': (drawingState == DrawingState.up || isRedo) ? false : true,
       'isUndoRedo': isRedo,
       'actionId': (drawingState == DrawingState.down && !isRedo)
           ? shapeID = const Uuid().v1()

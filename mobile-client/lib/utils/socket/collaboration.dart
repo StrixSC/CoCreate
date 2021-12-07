@@ -1,17 +1,11 @@
 import 'dart:convert';
 import 'dart:ui';
 
-import 'package:Colorimage/models/chat.dart';
 import 'package:Colorimage/models/collaboration.dart';
 import 'package:Colorimage/models/drawing.dart';
-import 'package:Colorimage/screens/chat/chat.dart';
-import 'package:Colorimage/utils/socket/socket_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:vector_math/vector_math_64.dart';
-// import 'package:vector_math/vector_math.dart';
-
-import '../../app.dart';
 
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
@@ -55,13 +49,11 @@ class CollaborationSocket {
         {'userId': user.uid, 'collaborationId': collaborationId});
   }
 
-  createCollaboration(
-    String creatorId,
-    String title,
-    String type,
-    String? password,
-    Color color,
-  ) {
+  createCollaboration(String creatorId,
+      String title,
+      String type,
+      String? password,
+      Color color,) {
     print('Create Collab');
     String hexColor = '#${color.value.toRadixString(16)}';
     socket.emit('collaboration:create', {
@@ -75,8 +67,8 @@ class CollaborationSocket {
     });
   }
 
-  updateCollaboration(
-      String collaborationId, String title, String type, String? password) {
+  updateCollaboration(String collaborationId, String title, String type,
+      String? password) {
     print('Update Collab');
     if (type == "Protected") {
       socket.emit('collaboration:update', {
@@ -153,7 +145,6 @@ class CollaborationSocket {
         height: data["height"],
         members: members,
         actionsMap: rebuildActionsMap(data["actions"]),
-        //todo: a tester si work
         selectedItems: rebuildselectedItems(data["actions"]),
       );
       callbackMessage('load', collaboration);
@@ -163,8 +154,23 @@ class CollaborationSocket {
   Map<String, String> rebuildselectedItems(var actions) {
     Map<String, String> selectedItems = {};
     actions.forEach((action) {
-      if(action.isSelected){
-        selectedItems.putIfAbsent(action.actionId, () => action.selectedBy);
+      if (action['isSelected'] == true && !action['isUndoRedo']) {
+        if (selectedItems.containsValue(action['selectedBy'])) {
+          selectedItems.removeWhere(
+                  (actionId, selectedBy) => selectedBy == action['selectedBy']);
+        }
+        selectedItems.putIfAbsent(
+            action['actionId'], () => action['selectedBy']);
+      } else if (action['isSelected'] == false &&
+          !action['isUndoRedo'] &&
+          action["actionType"] != "Delete") {
+        selectedItems.removeWhere(
+                (actionId, selectedBy) => selectedBy == action['selectedBy']);
+      }
+      if (action["actionType"] == "Delete" && !action['isUndoRedo']) {
+        selectedItems.removeWhere(
+                (actionId, selectedBy) =>
+            actionId == action['selectedActionId']);
       }
     });
     return selectedItems;
@@ -184,14 +190,17 @@ class CollaborationSocket {
       } else if (action['actionType'] == "Resize") {
         resizeLoad(actionsMap, action);
       } else if (action['actionType'] == "Delete") {
-        actionsMap.remove(action['actionId']);
+        actionsMap.remove(action["selectedActionId"]);
       }
     });
     return actionsMap;
   }
 
   void resizeLoad(Map<String, ShapeAction> actionsMap, action) {
-    ShapeAction? shapeAction = actionsMap[action['actionId']];
+    if (actionsMap[action['selectedActionId']] == null) {
+      return;
+    }
+    ShapeAction? shapeAction = actionsMap[action['selectedActionId']];
 
     Matrix4 matrixTranslation;
     matrixTranslation = Matrix4.translationValues(
@@ -214,28 +223,38 @@ class CollaborationSocket {
 
     // Save the scaled path
     shapeAction.path = scaledPath;
-    actionsMap.update(action['actionId'], (value) => shapeAction);
+    actionsMap.update(action['selectedActionId'], (value) => shapeAction);
   }
 
   void translateLoad(Map<String, ShapeAction> actionsMap, action) {
-    ShapeAction? shapeAction = actionsMap[action['actionId']];
+    if (actionsMap[action['selectedActionId']] == null) {
+      return;
+    }
+    ShapeAction? shapeAction = actionsMap[action['selectedActionId']];
     Matrix4 matrix4 = Matrix4.translationValues(
         action['xTranslation'].toDouble(),
         action['yTranslation'].toDouble(),
         0);
     shapeAction!.path = shapeAction.path.transform(matrix4.storage);
 
-    actionsMap.update(action['actionId'], (value) => shapeAction);
+    actionsMap.update(action['selectedActionId'], (value) => shapeAction);
   }
 
   void rotateLoad(Map<String, ShapeAction> actionsMap, action) {
+    if (actionsMap[action['selectedActionId']] == null) {
+      return;
+    }
     Path actionPath = actionsMap[action['selectedActionId']]!.path;
-    Offset center = actionPath.getBounds().center;
+    Offset center = actionPath
+        .getBounds()
+        .center;
 
     Matrix4 matriceRotation = Matrix4.rotationZ(action['angle'].toDouble());
     actionPath = actionPath.transform(matriceRotation.storage);
 
-    Offset newCenter = actionPath.getBounds().center;
+    Offset newCenter = actionPath
+        .getBounds()
+        .center;
     Matrix4 matriceTranslation = Matrix4.translationValues(
         (center - newCenter).dx, (center - newCenter).dy, 0);
     actionPath = actionPath.transform(matriceTranslation.storage);
@@ -251,7 +270,8 @@ class CollaborationSocket {
       ..strokeWidth = action['width'].toDouble()
       ..style = PaintingStyle.stroke;
 
-    Rect rect = Rect.fromPoints(Offset(action['x'], action['y']),
+    Rect rect = Rect.fromPoints(
+        Offset(action['x'].toDouble(), action['y'].toDouble()),
         Offset(action['x2'].toDouble(), action['y2'].toDouble()));
 
     Path path = Path();
@@ -262,7 +282,7 @@ class CollaborationSocket {
     }
 
     ShapeAction shapeAction =
-        ShapeAction(path, action['shapeType'], paintBorder, action['actionId']);
+    ShapeAction(path, action['shapeType'], paintBorder, action['actionId']);
 
     if (action['shapeStyle'] == "fill") {
       final paintFill = Paint()
@@ -274,7 +294,7 @@ class CollaborationSocket {
       shapeAction.bodyColor = paintFill;
     }
     shapeAction.shapesOffsets = [
-      Offset(action['x'], action['y']),
+      Offset(action['x'].toDouble(), action['y'].toDouble()),
       Offset(action['x2'].toDouble(), action['y2'].toDouble())
     ];
     shapeAction.fillType = action['shapeStyle'];
@@ -308,7 +328,7 @@ class CollaborationSocket {
       ..style = PaintingStyle.stroke;
 
     ShapeAction shapeAction =
-        ShapeAction(path, action['actionType'], paint, action['actionId']);
+    ShapeAction(path, action['actionType'], paint, action['actionId']);
     shapeAction.shapesOffsets = realOffsets;
 
     actionsMap.putIfAbsent(action['actionId'], () => shapeAction);

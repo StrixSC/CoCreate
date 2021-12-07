@@ -63,6 +63,7 @@ dependencies:
   awesome_dialog: ^2.1.1
   dio: ^4.0.4
   image_picker: ^0.8.4+4
+  audioplayers: ^0.20.1
 
 dev_dependencies:
   flutter_test:
@@ -90,6 +91,7 @@ flutter:
   assets:
     - assets/images/
     - .env
+    - assets/sound_alarm.mp3
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

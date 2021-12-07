@@ -47,6 +47,11 @@ class _ToolbarState extends State<Toolbar> {
     Tool("Colors", CupertinoIcons.bold),
   ];
 
+  @override
+  void initState() {
+    currentTool = DrawingType.freedraw;
+  }
+
   _ToolbarState(this.changeTool, this.changeColor, this.changeWidth,
       this.unselectBeforeLeave);
 

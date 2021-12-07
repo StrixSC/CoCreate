@@ -112,13 +112,15 @@ class GalerieState extends State<Galerie>
 
   navigateToDrawing() {
     var user = context.read<Collaborator>().auth!.user!;
+    var selectedItems = context.read<Collaborator>().getSelectedItems();
     var socket = context.read<Collaborator>().collaborationSocket.socket;
     var collaborationId = context.read<Collaborator>().getCollaborationId();
     // TODO : wait for load, then navigate to screen
     var actions = context.read<Collaborator>().getCurrentActionMap();
     pushNewScreen(
       context,
-      screen: DrawingScreen(socket, user, collaborationId, actions),
+      screen:
+          DrawingScreen(socket, user, collaborationId, actions, selectedItems),
       withNavBar: false,
       pageTransitionAnimation: PageTransitionAnimation.cupertino,
     );
