@@ -21,7 +21,7 @@ export class CreateTeamDialogComponent implements OnInit {
   exceptionSubscription: Subscription;
   createSubscription: Subscription;
   activeUrlBlob: Blob | null = null;
-  readonly defaultImage = "/assets/img/default.png"
+  readonly defaultImage = "assets/img/default.png"
 
   get types(): any {
     return this.teamService.types;
@@ -48,7 +48,6 @@ export class CreateTeamDialogComponent implements OnInit {
         this.dialogRef.close();
       }
     }, (error) => {
-      console.log(error);
       this.errorRoutine(error);
     });
 

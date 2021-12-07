@@ -21,12 +21,17 @@ export class ChatWindowComponent implements OnInit {
 
   constructor(private snackbar: MatSnackBar, private activeRoute: ActivatedRoute, private socketService: SocketService, private auth: AuthService, private chatService: ChatService) { }
   messageSubscription: Subscription;
+  muteNotification: boolean = false;
   joinedSubscription: Subscription;
   message: string = "";
+  audio: HTMLAudioElement;
   messages = [] as IMessageResponse[];
   isLoading: boolean = true;
   activeChannel: IChannelJoinResponse;
   async ngOnInit() {
+    this.audio = new Audio();
+    this.audio.src = 'assets/notification.mp3';
+
     this.auth.authState.subscribe(async (s) => {
       if (s) {
         try {
@@ -41,6 +46,24 @@ export class ChatWindowComponent implements OnInit {
 
   }
 
+  toggleNotifications(): void {
+    this.muteNotification = !this.muteNotification;
+  }
+
+  fetchHistory(): void {
+    const subscription = this.chatService.getChannelHistory(this.activeChannel.channelId).subscribe((m) => {
+      this.messages = m.map((message) => ({
+        message: message.message_data,
+        avatarUrl: message.avatar_url,
+        channelId: this.activeChannel.channelId,
+        createdAt: message.timestamp,
+        messageId: message.message_id,
+        username: message.username
+      } as IMessageResponse));
+      subscription.unsubscribe();
+    });
+  }
+
   init(): void {
     const channelId: string = this.activeRoute.snapshot.params.id;
     if (channelId) {
@@ -52,6 +75,9 @@ export class ChatWindowComponent implements OnInit {
 
       this.messageSubscription = this.chatService.receiveMessage().subscribe((c: IMessageResponse) => {
         this.messages.push(c);
+        if (!this.muteNotification && c.username !== this.auth.activeUser!.displayName) {
+          this.audio.play();
+        }
       })
     }
   }
@@ -75,6 +101,10 @@ export class ChatWindowComponent implements OnInit {
     }
 
     this.socketService.disconnect();
+  }
+
+  onMuteNotification(): void {
+    this.muteNotification = true;
   }
 
 }

@@ -36,6 +36,9 @@ export class SyncDrawingService {
   private currentYScale = 0;
   private totalAngle = 0;
 
+  private firstPointX = 0;
+  private firstPointY = 0;
+
   public activeActionId: string = "";
   private hasStartedMovement: boolean = false;
 
@@ -44,6 +47,10 @@ export class SyncDrawingService {
     private socketService: SocketService
   ) {
     this.defaultPayload = null;
+  }
+
+  sendThumbnail(data: any) {
+    this.socketService.emit("drawing:thumbnail", data);
   }
 
   updatedDefaultPayload(collaborationId: string): void {
@@ -111,6 +118,7 @@ export class SyncDrawingService {
   }
 
   sendShape(
+    offset: { x: number, y: number },
     state: DrawingState,
     shapeStyle: ShapeStyle,
     shapeType: ShapeType,
@@ -125,40 +133,46 @@ export class SyncDrawingService {
     let rgb = [0, 0, 0];
     let fillRgb = [0, 0, 0];
 
-    let alpha = 255;
-    let fillAlpha = 255;
+    let alpha = 0;
+    let fillAlpha = 0;
 
     if (state === DrawingState.down) {
       this.activeActionId = v4();
-    }
-
-    if (shape.stroke !== "none") {
-      rgb = fromRGB(shape.stroke);
+      this.firstPointX = offset.x;
+      this.firstPointY = offset.y;
     }
 
     if (shape.strokeOpacity !== "none") {
       alpha = fromOpacity(shape.strokeOpacity);
     }
 
-    if (shape.fill !== "none") {
-      fillRgb = fromRGB(shape.fill);
-    }
-
     if (shape.fillOpacity !== "none") {
       fillAlpha = fromOpacity(shape.fillOpacity);
     }
 
+    if (shape.stroke !== "none") {
+      rgb = fromRGB(shape.stroke);
+    } else {
+      alpha = 0;
+    }
+
+    if (shape.fill !== "none") {
+      fillRgb = fromRGB(shape.fill);
+    } else {
+      fillAlpha = 0;
+    }
+
     if (actionId) {
-      this.activeActionId = actionId
+      this.activeActionId = actionId;
     }
 
     let payload: IShapeAction = {
       ...this.defaultPayload,
       actionId: this.activeActionId,
-      x: shape.x,
-      y: shape.y,
-      x2: shape.x + shape.width,
-      y2: shape.y + shape.height,
+      x: this.firstPointX,
+      y: this.firstPointY,
+      x2: offset.x,
+      y2: offset.y,
       r: rgb[0],
       g: rgb[1],
       b: rgb[2],
@@ -296,6 +310,7 @@ export class SyncDrawingService {
       isUndoRedo: !!isUndoRedo,
     }
 
+    this.sendSelect(actionId, false, !!isUndoRedo);
     this.socketService.emit('delete:emit', payload);
   }
 
@@ -303,7 +318,6 @@ export class SyncDrawingService {
     if (!actionId) return;
 
     if (state === DrawingState.down || isUndoRedo) {
-
       this.activeActionId = v4();
     }
 

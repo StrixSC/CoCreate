@@ -35,6 +35,7 @@ export class CollaborationPasswordFormDialogComponent implements OnInit {
     this.exceptionSubscription = this.syncCollaborationService.onCollaborationException().subscribe((message: any) => {
       this.snackbar.open(message.message, '', { duration: 5000 });
       this.isLoading = false;
+      this.passwordForm.enable();
     });
   }
 

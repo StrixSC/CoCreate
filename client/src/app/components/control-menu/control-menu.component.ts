@@ -1,9 +1,14 @@
+import { v4 } from 'uuid';
+import { AngularFireStorage } from '@angular/fire/storage';
+import { ExportService } from 'src/app/services/export/export.service';
+import { SyncDrawingService } from './../../services/syncdrawing.service';
+import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
 import { Component, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material';
+import { Router } from '@angular/router';
 import { from, Subscription } from 'rxjs';
 import { CollaborationService } from 'src/app/services/collaboration.service';
 import { mergeMap, take } from 'rxjs/operators';
-import { Router } from '@angular/router';
 import { CommandInvokerService } from 'src/app/services/command-invoker/command-invoker.service';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
 import { ExportDialogService } from 'src/app/services/export-dialog/export-dialog.service';
@@ -13,7 +18,8 @@ import { NewDrawingComponent } from '../../components/new-drawing/new-drawing.co
 import { HelpDialogComponent } from '../welcome-dialog/help-dialog/help-dialog.component';
 import { DIALOG_PROPERTIES, WelcomeDialogComponent } from '../welcome-dialog/welcome-dialog/welcome-dialog.component';
 import { AuthService } from './../../services/auth.service';
-
+import { HotkeysEmitterService } from 'src/app/services/hotkeys/hotkeys-emitter/hotkeys-emitter.service';
+import { EmitReturn } from '../../services/hotkeys/hotkeys-constants';
 /// Component pour afficher les options fichiers
 @Component({
   selector: 'app-control-menu',
@@ -26,6 +32,7 @@ export class ControlMenuComponent implements OnDestroy {
 
   constructor(
     private dialog: MatDialog,
+    private hotkeysService: HotkeysEmitterService,
     private drawingService: DrawingService,
     private saveDrawingDialogService: SaveDrawingDialogService,
     private commandInvoker: CommandInvokerService,
@@ -33,7 +40,12 @@ export class ControlMenuComponent implements OnDestroy {
     private openDrawingService: OpenDrawingDialogService,
     private authService: AuthService,
     private collaborationService: CollaborationService,
-    private router: Router
+    private selectionService: SelectionToolService,
+    private syncService: SyncDrawingService,
+    private router: Router,
+    private syncDrawingService: SyncDrawingService,
+    private exportService: ExportService,
+    private storage: AngularFireStorage,
   ) {
   }
 
@@ -83,20 +95,37 @@ export class ControlMenuComponent implements OnDestroy {
   }
 
   get canUndo(): boolean {
-    return this.commandInvoker.canUndo;
+    return this.collaborationService.canUndo();
   }
 
   get canRedo(): boolean {
-    return this.commandInvoker.canRedo;
+    return this.collaborationService.canRedo();
   }
   /// Undo
   undo(): void {
-    this.commandInvoker.undo();
+    if (this.canUndo) {
+      this.selectionService.sendUnselect();
+      let undoAction = this.collaborationService.undoUserAction();
+      if (undoAction && undoAction.isSelected && undoAction.selectedBy === this.syncService.defaultPayload!.userId) {
+        this.selectionService.sendUnselect(undoAction.command.actionId);
+      }
+    }
   }
+
 
   /// Redo
   redo(): void {
-    this.commandInvoker.redo();
+    if (this.canRedo) {
+      this.selectionService.sendUnselect();
+      let redoAction = this.collaborationService.redoUserAction();
+      if (redoAction && redoAction.isSelected && redoAction.selectedBy === this.syncService.defaultPayload!.userId) {
+        this.selectionService.sendUnselect(redoAction.command.actionId);
+      }
+    }
+  }
+
+  openProfile(): void {
+    this.router.navigate(['/profile-settings'])
   }
 
   signOut(): void {

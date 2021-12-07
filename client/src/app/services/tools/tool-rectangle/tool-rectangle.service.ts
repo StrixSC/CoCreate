@@ -96,7 +96,7 @@ export class ToolRectangleService implements Tools {
           this.rectStyle.value
         );
       }
-      this.syncService.sendShape(DrawingState.down, this.rectStyle.value, ShapeType.Rectangle, this.rectangle);
+      this.syncService.sendShape({ x: offset.x, y: offset.y }, DrawingState.down, this.rectStyle.value, ShapeType.Rectangle, this.rectangle);
     }
   }
 
@@ -106,15 +106,15 @@ export class ToolRectangleService implements Tools {
     if (this.rectangle && this.isDrawing) {
       const recCommand = new RectangleCommand(this.rendererService.renderer, this.rectangle, this.drawingService);
       this.setSize(recCommand, this.rectangle, offset.x, offset.y);
-      this.syncService.sendShape(DrawingState.move, this.rectStyle.value, ShapeType.Rectangle, this.rectangle);
+      this.syncService.sendShape(offset, DrawingState.move, this.rectStyle.value, ShapeType.Rectangle, this.rectangle);
     }
   }
 
   /// Quand le bouton de la sourie est relaché, l'objet courrant de l'outil est mis a null.
-  onRelease(): void {
+  onRelease(event: MouseEvent): void {
     this.isSquare = false;
     if (this.rectangle && this.isDrawing) {
-      this.syncService.sendShape(DrawingState.up, this.rectStyle.value, ShapeType.Rectangle, this.rectangle!);
+      this.syncService.sendShape({ x: event.offsetX, y: event.offsetY }, DrawingState.up, this.rectStyle.value, ShapeType.Rectangle, this.rectangle!);
       this.isDrawing = false;
       this.rectangle = null;
     }

@@ -4,8 +4,7 @@ import { RectangleStyle } from 'src/app/model/rectangle-style.model';
 import { ToolRectangleService } from 'src/app/services/tools/tool-rectangle/tool-rectangle.service';
 
 const FILL_ID = 0;
-const CENTER_ID = 1;
-const BORDER_ID = 2;
+const BORDER_ID = 1;
 
 @Component({
   selector: 'app-rectangle-tool-parameter',
@@ -24,17 +23,12 @@ export class RectangleToolParameterComponent implements OnInit {
     {
       id: FILL_ID,
       type: 'fill',
-      tooltip: 'Rempli',
-    },
-    {
-      id: CENTER_ID,
-      type: 'center',
-      tooltip: 'Centre',
+      tooltip: 'Rempli avec bordure',
     },
     {
       id: BORDER_ID,
       type: 'border',
-      tooltip: 'Bordure',
+      tooltip: 'Bordure seulement',
     },
   ];
 

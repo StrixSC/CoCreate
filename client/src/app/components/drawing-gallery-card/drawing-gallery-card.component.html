@@ -1,6 +1,6 @@
 <mat-card class="drawing-card" *ngIf="drawing">
   <mat-card-header>
-    <img mat-card-avatar [src]="drawing.author_avatar || '/assets/img/user.png'" class="example-header-image">
+    <img mat-card-avatar [src]="drawing.author_avatar || 'assets/img/user.png'" class="example-header-image">
     <mat-card-title *ngIf="drawing.title.length >=15">{{ drawing.title | slice:0:15 }}...</mat-card-title>
     <mat-card-title *ngIf="drawing.title.length < 15">{{drawing.title}}</mat-card-title>
     <mat-card-subtitle>Dernière mise à jour: {{ drawing.updated_at | date:'short' }}
@@ -27,10 +27,12 @@
     </div>
   </mat-card-header>
   
-  <img class="image-preview" *ngIf="drawing.is_member || (drawing.type !== 'Protected' && !drawing.is_member)"
-    mat-card-image src="../../../assets/default-image.png">
+  <div>
+    <img class="image-preview" *ngIf="drawing.is_member || (drawing.type !== 'Protected' && !drawing.is_member)"
+    mat-card-image [src]="drawing.thumbnail_url ? drawing.thumbnail_url : 'assets/default-image.png'">
+  </div>
   <img class="image-preview" *ngIf="drawing.type === 'Protected' && !drawing.is_member" mat-card-image
-    src="../../../assets/img/white-blank-protected.png">
+    src="assets/img/white-blank-protected.png">
 
 
   <mat-card-header class="actions-container">

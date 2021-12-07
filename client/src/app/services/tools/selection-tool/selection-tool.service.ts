@@ -85,7 +85,7 @@ export class SelectionToolService implements Tools {
       stroke: 'black',
       opacity: '0.25',
       opacityHover: '0.50',
-      iconSrc: '/assets/svg-icon/trash.svg',
+      iconSrc: 'assets/svg-icon/trash.svg',
       iconId: ActionButtonIds.Delete,
     } as SelectionActionButton,
     {
@@ -94,7 +94,7 @@ export class SelectionToolService implements Tools {
       stroke: 'black',
       opacity: '0.25',
       opacityHover: '0.50',
-      iconSrc: '/assets/svg-icon/arrow.svg',
+      iconSrc: 'assets/svg-icon/arrow.svg',
       iconId: ActionButtonIds.HoldRotation,
     } as SelectionActionButton
   ];
@@ -147,7 +147,6 @@ export class SelectionToolService implements Tools {
             this.removeSelection();
           } else if (button.iconId === ActionButtonIds.HoldRotation) {
             this.isRotating = true;
-            // this.setMouseWheelEvent();
             this.setSelection();
           }
           return;
@@ -222,6 +221,7 @@ export class SelectionToolService implements Tools {
   /// et on recherche les objets a l'interieur. Avec le droit, on termine la zone d'inversement et on inverse
   /// la selection des objets se situant a l'interieur.
   onRelease(event: MouseEvent): ICommand | void {
+
     if (this.isRotating) {
       this.isRotating = false;
       this.syncService.sendRotate(DrawingState.up, this.selectedActionId, 0);
@@ -263,8 +263,9 @@ export class SelectionToolService implements Tools {
   }
 
   onMove(event: MouseEvent): void {
+
     const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
-    if (this.isRotating) {
+    if (this.isRotating || !this.allowMove || !this.hasSelection()) {
       return;
     }
 
@@ -311,7 +312,6 @@ export class SelectionToolService implements Tools {
     if (this.isRotating) {
       this.activeActionType = SelectionActionTypes.Rotate;
       const side = event.deltaY > 0 ? CLOCKWISE : COUNTER_CLOCKWISE;
-      console.log(side);
       this.syncService.sendRotate(DrawingState.move, this.selectedActionId, (side * Math.PI / 180));
       event.preventDefault();
       event.stopPropagation();

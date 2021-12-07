@@ -20,19 +20,21 @@
         </mat-form-field>
         <div>
             <button color="primary" class="form-field" type="submit" mat-raised-button>
-                <div class="spinner"  *ngIf="isLoading" >
+                <div class="spinner" *ngIf="isLoading">
                     <mat-spinner [diameter]="35" color="accent" class="spinner"></mat-spinner>
                 </div>
                 <ng-container *ngIf="!isLoading">Connexion</ng-container>
             </button>
         </div>
-        <div class="pt-1">
-            <button color="cancel" class="form-field" mat-raised-button routerLink="/auth/menu">
-                Retour
-            </button>
+
+        <div class="pt-2 forget-password-container">
+            <span style="color: white">
+                Mot de passe oublié? <u class="link clickable" (click)="forgetPassword()">Récuperer</u>
+            </span>
         </div>
 
         <div class="pt-2">
+
             <span style="color: white">
                 Pas de compte?
                 <u class="link clickable" routerLink="/auth/register">Inscrivez-vous</u>

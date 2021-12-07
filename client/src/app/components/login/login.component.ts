@@ -1,4 +1,5 @@
-import { MatSnackBar, MatSnackBarConfig } from '@angular/material';
+import { ForgotPasswordComponent } from './../forgot-password/forgot-password.component';
+import { MatSnackBar, MatSnackBarConfig, MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -18,7 +19,7 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   errorMessage: string | null = null;
   showPassword: boolean = false;
-  constructor(private snackbar: MatSnackBar, private router: Router, private auth: AuthService, private fb: FormBuilder) { }
+  constructor(private matDialog: MatDialog, private snackbar: MatSnackBar, private router: Router, private auth: AuthService, private fb: FormBuilder) { }
 
   ngOnInit() {
     this.loginForm = this.fb.group({
@@ -29,6 +30,10 @@ export class LoginComponent implements OnInit {
         Validators.required
       ]],
     });
+  }
+
+  forgetPassword(): void {
+    this.matDialog.open(ForgotPasswordComponent, { width: '500px' });
   }
 
   get email(): string {

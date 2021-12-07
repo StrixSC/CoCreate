@@ -15,5 +15,5 @@ export const firebaseAuthErrorHandler: Record<string, string> = {
     "auth/account-exists-with-different-credential": "On dirait que ce courriel est déjà utilisez sous une autre méthode de connexion (par exemple sous une connexion par Google). Si ce n'est pas le cas, veuillez contacter un administrateur.",
     "auth/user-not-found": "Il n'y a aucun compte avec ces informations dans nos registres. Veuillez validez vos informations et essayer à nouveau.",
     "auth/invalid-email": "Le courriel entré n'est pas un courriel valide.",
-    "auht/wrong-password": "Le mot de passe entré ne correspond pas au mot de passe associé à ce courriel."
+    "auth/wrong-password": "Le mot de passe entré ne correspond pas au mot de passe associé à ce courriel."
 }

@@ -1,3 +1,7 @@
+import { UpdatePasswordDialogComponent } from './components/update-password-dialog/update-password-dialog.component';
+import { UpdateProfileDialogComponent } from './components/update-profile-dialog/update-profile-dialog.component';
+import { ProfileComponent } from './components/profile/profile.component';
+import { AccountComponent } from './components/account/account.component';
 import { UpdateCollaborationFormDialogComponent } from './components/update-collaboration-form-dialog/update-collaboration-form-dialog.component';
 import { ServerErrorComponent } from './components/server-error/server-error.component';
 import { CreateChannelDialogComponent } from './components/create-channel-dialog/create-channel-dialog.component';
@@ -24,7 +28,7 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFireAuthGuardModule } from '@angular/fire/auth-guard';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatPaginatorIntl, MatSnackBarContainer } from '@angular/material';
+import { MatPaginatorIntl } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -59,7 +63,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { DrawingPageComponent } from './components/drawing-page/drawing-page.component';
-import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { ChangePasswordComponent } from './components/login/change-password/change-password.component';
 import { DrawingGalleryComponent } from './components/drawing-gallery/drawing-gallery.component';
 import { DrawingGalleryCardComponent } from './components/drawing-gallery-card/drawing-gallery-card.component';
@@ -100,7 +103,6 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     ExportDrawingComponent,
     ChatComponent,
     DrawingPageComponent,
-    UserProfileComponent,
     TeamPageComponent,
     ChangePasswordComponent,
     DrawingGalleryComponent,
@@ -108,10 +110,14 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     DrawingGalleryCardComponent,
     LoginComponent,
     ForgotPasswordComponent,
+    UpdateProfileDialogComponent,
     LandingPageComponent,
+    AccountComponent,
+    ProfileComponent,
     DrawingPreviewDialogComponent,
     CreateDrawingComponent,
     MenuPageComponent,
+    UpdatePasswordDialogComponent,
     ServerErrorComponent,
     RegisterComponent,
     NewDrawingFormDialogComponent,
@@ -122,6 +128,8 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     CreateChannelDialogComponent,
     TeamInfoComponent,
     TeamPasswordDialogComponent,
+    AvatarDialogComponent,
+    AuthWrapperComponent,
   ],
   imports: [
     BrowserModule,
@@ -144,21 +152,23 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     MatIconModule,
     MatButtonModule,
     AppRoutingModule,
+
   ],
-  exports: [AppRoutingModule,
-  ],
+  exports: [AppRoutingModule],
   entryComponents: [
     UpdateCollaborationFormDialogComponent,
     NewDrawingAlertComponent,
     NewDrawingComponent,
     CreateChannelDialogComponent,
     TeamPasswordDialogComponent,
+    UpdatePasswordDialogComponent,
     DeleteConfirmationDialogComponent,
     TeamInfoComponent,
     ToolsColorPickerComponent,
     WorkspaceComponent,
     ControlMenuComponent,
     ChatMenuComponent,
+    UpdateProfileDialogComponent,
     AvatarDialogComponent,
     SaveDrawingComponent,
     NewDrawingFormDialogComponent,
@@ -167,8 +177,8 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
     ErrorMessageComponent,
     AlertMessageComponent,
     DrawingPreviewDialogComponent,
-    MatSnackBarContainer,
     CreateTeamDialogComponent,
+    AvatarDialogComponent,
     CollaborationPasswordFormDialogComponent,
   ],
   providers: [

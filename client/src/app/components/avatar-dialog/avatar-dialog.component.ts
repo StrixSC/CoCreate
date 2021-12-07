@@ -1,7 +1,7 @@
-import { MatSnackBar, MatDialogRef } from '@angular/material';
+import { MatSnackBar, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { Subscription } from 'rxjs';
 import { AuthService } from './../../services/auth.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 
 @Component({
   selector: 'app-avatar-dialog',
@@ -14,18 +14,32 @@ export class AvatarDialogComponent implements OnInit {
   selectedIndex: number = 0;
   avatarSub: Subscription;
   avatars: string[];
-  constructor(private dialogRef: MatDialogRef<AvatarDialogComponent>, private auth: AuthService, private snackBar: MatSnackBar) { }
+  constructor(private dialogRef: MatDialogRef<AvatarDialogComponent>, private auth: AuthService, private snackBar: MatSnackBar, @Inject(MAT_DIALOG_DATA) private data: {
+    getUserHistory: boolean;
+  }) { }
 
   ngOnInit() {
     this.isLoading = true;
-    this.avatarSub = this.auth.getPublicAvatars().subscribe((d: { avatars: string[] }) => {
-      this.avatars = d.avatars;
-      this.isLoading = false;
-    }, (error) => {
-      this.snackBar.open('Une erreur a survenu lors de la demande des avatars, essayez à nouveau plus tard...', '', {
-        duration: 5000
+    if (this.data && this.data.getUserHistory) {
+      this.avatarSub = this.auth.getUserAvatars().subscribe((d: { avatars: string[] }) => {
+        this.avatars = d.avatars;
+        this.isLoading = false;
+      }, (error: Error) => {
+        this.snackBar.open('Une erreur a survenu lors de la demande des avatars, essayez à nouveau plus tard...', '', {
+          duration: 5000
+        })
+      });
+    } else {
+
+      this.avatarSub = this.auth.getPublicAvatars().subscribe((d: { avatars: string[] }) => {
+        this.avatars = d.avatars;
+        this.isLoading = false;
+      }, (error: Error) => {
+        this.snackBar.open('Une erreur a survenu lors de la demande des avatars, essayez à nouveau plus tard...', '', {
+          duration: 5000
+        })
       })
-    })
+    }
   }
 
   ngOnDestroy(): void {
@@ -39,7 +53,7 @@ export class AvatarDialogComponent implements OnInit {
   }
 
   close(index?: number): void {
-    if (index) {
+    if (index !== undefined && index !== null) {
       this.dialogRef.close(this.avatars[index]);
     } else {
       this.dialogRef.close();

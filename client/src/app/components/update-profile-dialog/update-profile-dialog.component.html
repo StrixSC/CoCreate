@@ -1,0 +1,154 @@
+<h1 style="color: white">Modification de profile</h1>
+<div class="main-container-wrapper">
+    <form class="form" [formGroup]="updateProfileForm" (submit)="onSubmit()">
+        <div class="form-field avatar-section">
+            <div class="avatar-picture-section">
+                <label class="avatar-container selected-avatar clickable" for="avatar">
+                    <img [src]="selectedAvatarUrl" class="selected-avatar-img" alt="Avatar de l'utilisateur">
+                    <mat-icon class="picture-icon">
+                        add_photo_alternate
+                    </mat-icon>
+                </label>
+                <input #fileInput style="display: none" name="avatar" id="avatar" type="file"
+                    (change)="uploadFile($event)">
+            </div>
+            <div class="avatar-buttons-container">
+                <button class="avatar-buttons" color="accent" (click)="fileInput.click()" mat-flat-button>Téléverser une image</button>
+                <button class="avatar-buttons" color="accent" (click)="triggerAvatarDialog()" mat-flat-button>Voir votre historique d'image</button>
+            </div>
+        </div>
+        <mat-form-field class="pb-1 form-field clickable" appearance="outline">
+            <mat-label>Nom d'utilisateur</mat-label>
+            <input required type="text" formControlName="username" matInput />
+        </mat-form-field>
+    </form>
+    <div class="buttons-container">
+        <div>
+            <button (click)="onSubmit()" [disabled]="!isValid()" color="accent" class="form-field" type="submit" mat-raised-button>
+                <div class="spinner" *ngIf="isLoading">
+                    <mat-spinner [diameter]="35" color="primary" class="spinner">
+                    </mat-spinner>
+                </div>
+                <ng-container *ngIf="!isLoading">Soumettre</ng-container>
+            </button>
+        </div>
+        <div class="pt-1">
+            <button color="cancel" class="form-field" mat-raised-button (click)="dialogRef.close(true)">Retour</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-buttons-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .avatar-buttons {
+        min-width: 100%;
+    }
+
+    .hidden {
+        visibility: hidden;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .form-field {
+        min-width: 400px;
+    }
+
+    .main-container-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .selected-avatar {
+        max-width: 100px;
+        max-height: 100px;
+        display: block;
+        position: relative;
+    }
+
+    .avatar-section {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .selected-avatar-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        display: block;
+        border-radius: 100%;
+    }
+
+    .selected-avatar:after:hover {
+        opacity: 1;
+    }
+
+    .selected-avatar:after {
+        content: 'Changer votre avatar';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.6);
+        opacity: 0;
+        transition: all 1s;
+        -webkit-transition: all 1s;
+    }
+
+    .form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3rem;
+        padding-top: 1rem;
+    }
+
+    .picture-icon {
+        position: relative;
+        bottom: 30px;
+        left: 75%;
+        font-size: 40px;
+    }
+
+    .buttons-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .first-section {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .second-section {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .inner-section {
+        display: flex;
+        justify-content: center;
+        flex-direction: row;
+        gap: 3rem;
+    }
+</style>

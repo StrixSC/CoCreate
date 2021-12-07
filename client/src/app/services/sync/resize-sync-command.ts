@@ -53,11 +53,11 @@ export class ResizeSyncCommand extends SyncCommand {
     }
 
     undo(): void {
-        this.syncService.sendResize(DrawingState.move, this.payload.selectedActionId, 1 / this.totalXScale, 1 / this.totalYScale, -1 * this.totalXTranslation, -1 * this.totalYTranslation, true);
+        this.syncService.sendResize(DrawingState.move, this.payload.selectedActionId, 1 / this.totalXScale, 1 / this.totalYScale, this.totalXTranslation, this.totalYTranslation, true);
     }
 
     redo(): void {
-        this.syncService.sendResize(DrawingState.move, this.payload.selectedActionId, this.totalXScale, this.totalYScale, this.totalXTranslation, this.totalYTranslation)
+        this.syncService.sendResize(DrawingState.move, this.payload.selectedActionId, this.totalXScale, this.totalYScale, this.totalXTranslation, this.totalYTranslation, true)
     }
 
     update(payload: IResizeAction): SyncCommand | void {

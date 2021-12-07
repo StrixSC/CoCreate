@@ -35,10 +35,15 @@ export class RectangleSyncCommand extends SyncCommand {
                 break;
 
             case DrawingState.move:
-                this.command.setX(this.payload.x);
-                this.command.setY(this.payload.y);
-                this.command.setWidth(Math.abs(this.payload.x2 - this.payload.x));
-                this.command.setHeight(Math.abs(this.payload.y2 - this.payload.y));
+                const newX1 = Math.min(this.payload.x, this.payload.x2);
+                const newY1 = Math.min(this.payload.y, this.payload.y2);
+                const newX2 = Math.max(this.payload.x, this.payload.x2);
+                const newY2 = Math.max(this.payload.y, this.payload.y2);
+
+                this.command.setX(newX1);
+                this.command.setY(newY1);
+                this.command.setWidth(Math.abs(newX2 - newX1));
+                this.command.setHeight(Math.abs(newY2 - newY1));
                 break;
 
             case DrawingState.up:
@@ -63,7 +68,7 @@ export class RectangleSyncCommand extends SyncCommand {
         this.syncService.activeActionId = v4();
         this.command.actionId = this.syncService.activeActionId;
         this.payload.actionId = this.syncService.activeActionId;
-        this.syncService.sendShape(DrawingState.up, this.payload.shapeStyle, this.payload.shapeType, this.shape, true);
+        this.syncService.sendShape({ x: this.payload.x2, y: this.payload.y2 }, DrawingState.up, this.payload.shapeStyle, this.payload.shapeType, this.shape, true);
     }
 
     update(payload: IShapeAction): SyncCommand | void {

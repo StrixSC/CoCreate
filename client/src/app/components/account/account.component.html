@@ -1,0 +1,298 @@
+<mat-toolbar>
+    <mat-toolbar-row>
+        <button matTooltip="Retour au menu" routerLink="" mat-icon-button>
+            <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h1>Compte Personnel</h1>
+    </mat-toolbar-row>
+</mat-toolbar>
+
+<div *ngIf="!isLoading" class="main-container-wrapper">
+    <div class="main-profile-container">
+        <div class="profile-section section">
+            <div class="first-section">
+                <div class="user-profile-container">
+                    <div class="user-avatar-container">
+                        <img class="user-avatar-img"
+                            [src]="userInfo.profile.avatar_url ? userInfo.profile.avatar_url : 'assets/img/user.png'">
+                    </div>
+                    <div class="header-container">
+                        @{{ userInfo.profile.username }}
+                    </div>
+                </div>
+                <div class="edit-button-container">
+                    <button mat-flat-button color="accent" (click)="openUpdateProfileDialog()">
+                        Modifier votre profile public
+                    </button>
+                </div>
+            </div>
+            <div class="personal-info-section">
+                <div class="personal-info-header">
+                    <h2>Informations personnelles</h2>
+                    <!-- <div class="edit-button-container">
+                        <button mat-flat-button color="accent">
+                            Modifier
+                        </button>
+                    </div> -->
+                </div>
+                <div class="info-section">
+                    <div class="personal-info-container">
+                        <label class="personal-info-label">COURRIEL</label>
+                        <div class="notice-identifier email-container">
+                            {{ userInfo.email }}
+                        </div>
+                    </div>
+                    <div class="personal-info-container">
+                        <label class="personal-info-label">PRÉNOM</label>
+                        <div class="notice-identifier email-container">
+                            {{ userInfo.account.first_name }}
+                        </div>
+                    </div>
+                    <div class="personal-info-container">
+                        <label class="personal-info-label">NOM</label>
+                        <div class="notice-identifier email-container">
+                            {{ userInfo.account.last_name}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section password-section">
+            <h2>Mot de passe</h2>
+            <div class="edit-button-container">
+                <button (click)="openPasswordDialog()" mat-flat-button color="accent">
+                    Modifier
+                </button>
+            </div>
+        </div>
+
+        <div class="section filter-section">
+            <div>
+                <h2>Niveau de confidentialité</h2>
+                <p class="notice-identifier">
+                    En activant ce réglage, vous permettez à tout les utilisateurs d'utiliser vos informations
+                    personnelles, telles que votre prénom, votre nom et votre adresse électronique, comme mots-clés de
+                    filtrage supplémentaires. </p>
+            </div>
+            <div>
+                <mat-slide-toggle (change)="onConfidentialityChange($event)" #switch color="accent"
+                    [checked]="userInfo.account.allow_searching"></mat-slide-toggle>
+            </div>
+        </div>
+        <div class="section stats-section">
+            <h2>Statistiques</h2>
+
+            <div class="statistics-section">
+                <table class="mat-elevation-z8 mat-table stats-table">
+                    <tr class="mat-row">
+                        <td class="mat-cell"> Nombres d'équipes collaboratives </td>
+                        <td class="mat-cell"> {{ userInfo.stats.team_count }} </td>
+                    </tr>
+                    <tr class="mat-row">
+                        <td class="mat-cell"> Nombres de dessins collaborés </td>
+                        <td class="mat-cell"> {{ userInfo.stats.joined_collaboration_count }} </td>
+                    </tr>
+                    <tr class="mat-row">
+                        <td class="mat-cell"> Nombres de dessins créés </td>
+                        <td class="mat-cell"> {{ userInfo.stats.authored_collaboration_count }} </td>
+                    </tr>
+                    <tr class="mat-row">
+                        <td class="mat-cell"> Temps moyen de collaboration </td>
+                        <td class="mat-cell"> {{ userInfo.stats.average_collaboration_time}} minutes </td>
+                    </tr>
+                    <tr class="mat-row">
+                        <td class="mat-cell"> Temps total passé à collaborer </td>
+                        <td class="mat-cell"> {{ userInfo.stats.total_collaboration_time }} minutes </td>
+                    </tr>
+                </table>
+
+            </div>
+        </div>
+        <div class="section history-section">
+            <h2>Historique</h2>
+
+            <div class="history-data-section">
+                <table mat-table [dataSource]="logs" class="mat-elevation-z8 history-table">
+                    <ng-container matColumnDef="entry">
+                        <th mat-header-cell *matHeaderCellDef> Entrée </th>
+                        <td mat-cell *matCellDef="let element">
+                            <span *ngIf="element.type === 'DrawingUpdate'">Activité de dessin</span>
+                            <span *ngIf="element.type === 'Connection'">Connexion</span>
+                            <span *ngIf="element.type === 'Disconnection'">Déconnexion</span>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="link">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let element">
+                            <a class="link" *ngIf="element.collaboration_id"
+                                [routerLink]="'/drawing/' + element.collaboration_id">
+                                Rejoindre le dessin <mat-icon [inline]="true">
+                                    launch
+                                </mat-icon>
+                            </a>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="time">
+                        <th mat-header-cell *matHeaderCellDef> Date </th>
+                        <td mat-cell *matCellDef="let element"> {{element.created_at | date:'short'}} </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="historyDataColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: historyDataColumns;"></tr>
+                </table>
+                <mat-paginator #paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
+                </mat-paginator>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="isLoading" class="spinner">
+    <mat-spinner [diameter]="35"></mat-spinner>
+</div>
+
+<style>
+    .profile-section {
+        flex-direction: column;
+        display: flex;
+        gap: 2rem;
+    }
+
+    .info-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .mat-table,
+    .stats-table,
+    .history-table {
+        background: var(--bg-accent-color) !important;
+
+    }
+
+    .stats-table,
+    .history-table {
+        width: 100%;
+    }
+
+    mat-paginator {
+        background: var(--bg-accent-color) !important;
+    }
+
+    .personal-info-container {
+        display: flex;
+        flex-direction: column;
+        overflow-wrap: break-word;
+        gap: 0.25rem;
+    }
+
+    .personal-info-header {
+        padding-right: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .personal-info-label {
+        font-size: small;
+        font-weight: bold;
+    }
+
+    .personal-info-section {
+        background-color: var(--bg-accent-color);
+        padding: 1rem;
+        border-radius: 10px;
+        min-height: 200px;
+    }
+
+    .password-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 2rem !important;
+        justify-content: space-between;
+    }
+
+    .user-info-section {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .filter-section {
+        padding: 1rem 2rem !important;
+        display: flex;
+        gap: 2rem;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .user-account-container {
+        display: flex;
+    }
+
+    .user-profile-container {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        align-items: center;
+        color: white;
+        font-size: x-large;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+
+    .section {
+        background-color: var(--bg-color);
+        width: 100%;
+        border-radius: 10px;
+        padding: 3rem 2rem;
+        box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+    }
+
+    .first-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .second-section {
+        padding: 1rem 3rem 3rem 3rem;
+    }
+
+    .main-profile-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 50%;
+        gap: 2rem;
+    }
+
+    .stats-section,
+    .history-section {
+        padding: 1rem 2rem 2rem 2rem !important;
+    }
+
+    .header-container {
+        word-break: break-word;
+    }
+
+    .main-container-wrapper {
+        margin: 3rem 0rem;
+    }
+
+    .user-avatar-container {
+        width: 120px;
+        height: 120px;
+    }
+
+    .user-avatar-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 100%;
+    }
+</style>

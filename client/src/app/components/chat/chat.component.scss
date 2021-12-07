@@ -44,8 +44,9 @@
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 10px;
     width: 100%;
-    height: 100%;
-
+    min-height: 80%;
+    max-height: 80%;
+    
     .text-input {
         width: 100%;
         display: flex;
@@ -71,7 +72,6 @@
     height: 100%;
     overflow: hidden;
 }
-
 
 .no-online-container {
     display: flex;

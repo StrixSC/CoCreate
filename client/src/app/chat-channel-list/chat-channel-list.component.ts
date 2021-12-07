@@ -5,7 +5,7 @@ import { SocketService } from 'src/app/services/chat/socket.service';
 import { CreateChannelDialogComponent } from './../components/create-channel-dialog/create-channel-dialog.component';
 import { ChatMenuComponent } from './../components/chat-menu/chat-menu.component';
 import { MatDialog } from '@angular/material';
-import { IChannelResponse, ISidebarChannel, ChannelType, IMessageResponse, IConnectionEventData, ConnectionEventType, IDisconnectionEventData } from './../model/IChannel.model';
+import { IChannelResponse, ISidebarChannel, ChannelType, IMessageResponse, IConnectionEventData, ConnectionEventType, IDisconnectionEventData, IOnlineChannelMember } from './../model/IChannel.model';
 import { Subscription, merge } from 'rxjs';
 import { AuthService } from './../services/auth.service';
 import { ChatSidebarService } from './../services/chat-sidebar.service';
@@ -98,6 +98,7 @@ export class ChatChannelListComponent implements OnInit {
     const fetchSubscription = this.chatSidebarService.fetchUserChannels(this.auth.activeUser!.uid).subscribe((c: IChannelResponse[]) => {
       const newSnapshot = new Map<string, ISidebarChannel>();
       for (let channel of c) {
+        const onlineMembers = this.removeDupes(channel.online_members);
         const prevData = snapshot.get(channel.channel_id);
         if (prevData) {
           const newData = {
@@ -107,7 +108,7 @@ export class ChatChannelListComponent implements OnInit {
             textColor: prevData.textColor,
             messages: prevData.messages,
             muteNotification: prevData.muteNotification,
-            onlineMembers: channel.online_members,
+            onlineMembers: onlineMembers
           } as ISidebarChannel;
           newSnapshot.set(newData.channel_id, newData);
         } else {
@@ -119,7 +120,7 @@ export class ChatChannelListComponent implements OnInit {
               bgColor: bubbleColors.bgColor,
               textColor: bubbleColors.textColor,
               muteNotification: false,
-              onlineMembers: channel.online_members,
+              onlineMembers: onlineMembers,
               messages: [],
             });
         }
@@ -181,12 +182,18 @@ export class ChatChannelListComponent implements OnInit {
   }
 
   genBubbleColors(): { bgColor: string, textColor: string } {
-    const bgColor = this.getDarkColor();
+    const bgColor = this.getPastelColor();
     const textColor = (Number(`0x1${bgColor}`) ^ 0xFFFFFF).toString(16).substr(1).toUpperCase();
     return {
       bgColor,
       textColor
     }
+  }
+
+  getPastelColor() {
+    return "hsl(" + 360 * Math.random() + ',' +
+      (25 + 70 * Math.random()) + '%,' +
+      (50 + 10 * Math.random()) + '%)'
   }
 
   getDarkColor() {
@@ -195,6 +202,10 @@ export class ChatChannelListComponent implements OnInit {
       color += Math.floor(Math.random() * 10);
     }
     return color;
+  }
+
+  removeDupes(arr: IOnlineChannelMember[]): IOnlineChannelMember[] {
+    return arr.filter((v, i, a) => a.findIndex(t => (t.userId === v.userId)) === i)
   }
 
 }

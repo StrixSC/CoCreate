@@ -1,3 +1,8 @@
+import { DrawingService } from 'src/app/services/drawing/drawing.service';
+import { v4 } from 'uuid';
+import { AngularFireStorage } from '@angular/fire/storage';
+import { ExportService } from 'src/app/services/export/export.service';
+import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
 import { SocketService } from 'src/app/services/chat/socket.service';
 import { ToolFactoryService } from './../../services/tool-factory.service';
 import { SyncDrawingService } from './../../services/syncdrawing.service';
@@ -6,7 +11,7 @@ import { SyncCollaborationService } from 'src/app/services/syncCollaboration.ser
 import { ActivatedRoute, Router } from '@angular/router';
 import { Component } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { merge, Subscription } from "rxjs";
+import { merge, Subscription, timer } from "rxjs";
 import { HotkeysService } from "src/app/services/hotkeys/hotkeys.service";
 import { map } from 'rxjs/operators';
 import { ICollaborationLoadResponse } from 'src/app/model/ICollaboration.model';
@@ -20,9 +25,13 @@ import { MatSnackBar } from '@angular/material';
 })
 export class DrawingPageComponent {
   loadListener: Subscription;
+  initSet: boolean;
+  timer: Subscription;
   listener: Subscription;
   activeCollaborationId: string;
   collaborationDeletedSubscription: Subscription;
+  committedAction: boolean;
+  deletedListener: Subscription;
   constructor(
     public dialog: MatDialog,
     private hotkeyService: HotkeysService,
@@ -34,12 +43,15 @@ export class DrawingPageComponent {
     private snackbar: MatSnackBar,
     private router: Router,
     private socketService: SocketService,
+    private selectionService: SelectionToolService,
     private syncCollabService: SyncCollaborationService,
   ) {
+    this.initSet = false;
     this.hotkeyService.hotkeysListener();
   }
 
   ngAfterViewInit(): void {
+    this.committedAction = false;
     if (!this.drawingLoader.activeDrawingData) {
       const collaborationId = this.activeRoute.snapshot.params.id;
       if (collaborationId) {
@@ -63,19 +75,18 @@ export class DrawingPageComponent {
   }
 
   init(data?: ICollaborationLoadResponse): void {
-    this.collaborationDeletedSubscription = this.syncCollabService.onDeleteCollaboration().subscribe((c: { collaborationId: string }) => {
-      if (c.collaborationId === this.activeCollaborationId) {
-        this.snackbar.open('Le dessin actif fut supprimé...', "OK", { duration: 5000 });
-        this.router.navigateByUrl('gallery');
-      }
-    });
-
     if (!this.drawingLoader.isLoaded) {
       if (data) {
         this.drawingLoader.activeDrawingData = data;
       }
       if (this.drawingLoader.activeDrawingData) {
         this.activeCollaborationId = this.drawingLoader.activeDrawingData.collaborationId;
+        this.collaborationDeletedSubscription = this.syncCollabService.onDeleteCollaboration().subscribe((c: { collaborationId: string }) => {
+          if (c.collaborationId === this.activeCollaborationId) {
+            this.snackbar.open('Le dessin actif fut supprimé...', "OK", { duration: 5000 });
+            this.router.navigateByUrl('gallery');
+          }
+        });
       }
       this.drawingLoader.loadDrawing();
       this.syncDrawingService.updatedDefaultPayload(this.drawingLoader.activeDrawingData!.collaborationId);
@@ -95,16 +106,23 @@ export class DrawingPageComponent {
         this.syncDrawingService.onActionSave().pipe(map((d) => ({ ...d, eventType: EventTypes.Action })))
       ).subscribe((data: any & { eventType: string }) => {
         if (data.eventType === EventTypes.Action) {
-          console.log('Event received from user', data.username, 'with type', data.actionType, 'with actionId =', data.actionId, '\nIt is selecting', data.selectedActionId ? data.selectedActionId : 'Nothing');
           this.toolFactory.handleEvent(data);
+          if (this.toolFactory.isActiveUser(data)) {
+            this.committedAction = true;
+          }
         } else {
           if (data.eventType === EventTypes.Error) {
             this.onError();
+          } else {
+            console.error(data);
           }
         }
       });
-
     }
+    const ONE_MINUTE = 1000 * 60;
+    this.timer = timer(ONE_MINUTE).subscribe((c) => {
+      this.drawingLoader.exportThumbnail();
+    })
   }
 
   ngOnDestroy(): void {
@@ -116,18 +134,18 @@ export class DrawingPageComponent {
       this.listener.unsubscribe();
     }
 
-    this.syncCollabService.sendDisconnect({ collaborationId: this.activeCollaborationId });
+    if (this.committedAction) {
+      this.selectionService.sendUnselect();
+      this.syncCollabService.sendLogDrawingAction({ collaborationId: this.activeCollaborationId });
+    }
 
+    this.syncCollabService.sendDisconnect({ collaborationId: this.activeCollaborationId });
     this.activeCollaborationId = "";
     this.drawingLoader.unload();
-    this.drawingLoader.activeDrawingData = null;
-    this.drawingLoader.isLoaded = false;
-    this.drawingLoader.isLoading = false;
   }
 
   onError(): void {
-    this.ngOnDestroy();
-    this.snackbar.open(`Oups, quelque chose s'est produit lors de la génération du dessin. SVP Essayez à nouveau!`);
+    this.snackbar.open(`Oups, quelque chose d'inattendu s'est produit lors de la communication avec le serveur...!`, "OK", { duration: 5000 });
     this.router.navigateByUrl('');
   }
 }

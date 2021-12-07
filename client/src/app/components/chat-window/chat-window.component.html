@@ -8,15 +8,21 @@
         </h2>
         <div class="header-actions">
             <div class="history-button-container">
-                <button [matTooltip]="'Chercher l\'historique de la chaîne'" matTooltipPosition="below" mat-icon-button
+                <button (click)="fetchHistory()" [matTooltip]="'Chercher l\'historique de la chaîne'" matTooltipPosition="below" mat-icon-button
                     class="action-button history-button">
                     <mat-icon>history</mat-icon>
                 </button>
             </div>
             <div class="mute-button-container">
-                <button [matTooltip]="'Enlever la sonorité de notification.'" matTooltipPosition="below" mat-icon-button
+                <button *ngIf="!muteNotification" (click)="toggleNotifications()"
+                    [matTooltip]="'Enlever la sonorité de notification.'" matTooltipPosition="below" mat-icon-button
                     class="action-button mute-button">
-                    <mat-icon>volume_off</mat-icon>
+                    <mat-icon>notifications</mat-icon>
+                </button>
+                <button *ngIf="muteNotification" (click)="toggleNotifications()"
+                    [matTooltip]="'Allumer la sonorité de notification.'" matTooltipPosition="below" mat-icon-button
+                    class="action-button mute-button">
+                    <mat-icon>notifications_off</mat-icon>
                 </button>
             </div>
         </div>

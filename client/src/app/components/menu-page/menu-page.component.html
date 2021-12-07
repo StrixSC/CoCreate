@@ -1,52 +1,97 @@
-<div class="paint-background" style="text-align: center; font-family: Roboto;">
-    <h1>Bienvenue à Colorimage!</h1>
-    <br>
-    <div class="button-container  pv-1">
-        <button class="menu-button" (click)="openDrawingGallery()" mat-raised-button>
-            <div class="menu-button-text">
-                <mat-icon>collections</mat-icon>
-                <div class="menu-button-text-header">Galerie de dessins</div>
+<div class="bg">
+    <div class="header">
+        <div class="volume-bar">
+            <mat-icon class="audio-icon" [inline]="true" style="font-size: 14px">volume_up</mat-icon>
+            <mat-slider color="accent" class="menu-volume-bar" [value]="menuSound.volume * 100"
+                (input)="menuSound.volume = ($event.value / 100)">
+            </mat-slider>
+            <div class="volume-number">
+                {{ menuSound.volume * 100 | number:'3.0' }}
             </div>
-        </button>
+        </div>
     </div>
-    <br>
-    <div class="button-container  pv-1">
-        <button routerLink="teams" class="menu-button" mat-raised-button>
-            <div class="menu-button-text">
-                <mat-icon>groups</mat-icon>
-                <div class="menu-button-text-header">Équipe de collaboration</div>
+    <div class="main-container">
+        <h1>Bienvenue à Colorimage!</h1>
+        <div class="content">
+            <div class="button-container  pv-1">
+                <button class="menu-button" routerLink="gallery" mat-raised-button>
+                    <div class="menu-button-text">
+                        <mat-icon>collections</mat-icon>
+                        <div class="menu-button-text-header">Galerie de dessins</div>
+                    </div>
+                </button>
             </div>
-        </button>
-    </div>
-    <br>
-    <div class="button-container  pv-1">
-        <button class="menu-button" mat-raised-button>
-            <div class="menu-button-text">
-                <mat-icon>photo_camera</mat-icon>
-                <div class="menu-button-text-header">InstaImage</div>
+            <div class="button-container  pv-1">
+                <button routerLink="teams" class="menu-button" mat-raised-button>
+                    <div class="menu-button-text">
+                        <mat-icon>groups</mat-icon>
+                        <div class="menu-button-text-header">Équipes de collaboration</div>
+                    </div>
+                </button>
             </div>
-        </button>
-    </div>
-    <br>
-    <div class="button-container  pv-1">
-        <button class="menu-button" mat-raised-button>
-            <div class="menu-button-text">
-                <mat-icon>account_box</mat-icon>
-                <div class="menu-button-text-header">Paramètre du compte</div>
+            <div class="button-container  pv-1">
+                <button routerLink="account" class="menu-button" mat-raised-button>
+                    <div class="menu-button-text">
+                        <mat-icon>account_box</mat-icon>
+                        <div class="menu-button-text-header">Paramètre du compte</div>
+                    </div>
+                </button>
             </div>
-        </button>
+            <div class="button-container pv-1">
+                <button class="menu-button" mat-raised-button (click)="logout()">
+                    Déconnexion
+                </button>
+            </div>
+
+        </div>
     </div>
-    <div class="button-container  pv-1">
-        <button class="menu-button" mat-raised-button (click)="logout()">
-            Déconnexion
-        </button>
-    </div>
-    <br>
 </div>
 
 <style>
+
+    .bg {
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-image: url('assets/bg.svg');
+    }
+
+    .exam .menu-button {
+        min-width: 300px;
+    }
+
+    .header {
+        width: 100%;
+        padding: 1rem;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .volume-bar {
+        display: flex;
+        margin-right: 3rem;
+        min-width: 300px;
+        justify-content: center;
+        gap: 1rem;
+        align-items: center;
+    }
+
     .menu-button {
         min-width: 300px;
+        text-align: center;
+    }
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .menu-volume-bar {
+        width: 100%;
     }
 
     .menu-button-text {

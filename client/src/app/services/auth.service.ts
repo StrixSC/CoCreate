@@ -37,11 +37,19 @@ export class AuthService {
     return from(this.af.auth.signOut());
   }
 
+  forgetPassword(email: string) {
+    return this.af.auth.sendPasswordResetEmail(email);
+  }
+
   logUserDisconnection() {
     return this.http.get(environment.serverURL + '/auth/logout');
   }
 
   getPublicAvatars(): Observable<any> {
     return this.http.get(environment.serverURL + '/api/public/avatars');
+  }
+
+  getUserAvatars(): Observable<any> {
+    return this.http.get(environment.serverURL + '/api/users/avatars');
   }
 }

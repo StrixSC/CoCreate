@@ -21,7 +21,7 @@ export class ChatSidebarService {
   notificationAudio: HTMLAudioElement;
   constructor(private auth: AuthService, private http: HttpClient) {
     this.notificationAudio = new Audio();
-    this.notificationAudio.src = "/assets/notification.wav";
+    this.notificationAudio.src = "assets/notification.mp3";
     this.notificationAudio.load();
   }
 
