@@ -106,14 +106,14 @@ export class ToolEllipseService implements Tools {
           this.ellipseStyle.value
         );
       }
-      this.syncService.sendShape(DrawingState.down, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse);
+      this.syncService.sendShape({ x: event.offsetX, y: event.offsetY }, DrawingState.down, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse);
     }
   }
 
   /// Quand le bouton de la sourie est relaché, l'objet courrant de l'outil est mis a null.
-  onRelease(): void {
+  onRelease(event: MouseEvent): void {
     if (this.ellipse && this.isDrawing) {
-      this.syncService.sendShape(DrawingState.up, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse!);
+      this.syncService.sendShape({ x: event.offsetX, y: event.offsetY }, DrawingState.up, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse!);
       this.ellipse = null;
       this.isDrawing = false;
     }
@@ -126,7 +126,7 @@ export class ToolEllipseService implements Tools {
     if (this.isDrawing && this.ellipse) {
       const command = new EllipseCommand(this.rendererService.renderer, this.ellipse, this.drawingService);
       this.setSize(command, offset.x, offset.y);
-      this.syncService.sendShape(DrawingState.move, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse!);
+      this.syncService.sendShape({ x: event.offsetX, y: event.offsetY }, DrawingState.move, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse!);
     }
   }
 

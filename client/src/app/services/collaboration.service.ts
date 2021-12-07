@@ -1,7 +1,7 @@
 import { ResizeSyncCommand } from './sync/resize-sync-command';
 import { RotateSyncCommand } from './sync/rotate-sync-command';
 import { TranslateSyncCommand } from './sync/translate-sync-command';
-import { IAction, ISelectionAction, ITranslateAction, IRotateAction, IResizeAction } from './../model/IAction.model';
+import { Action, IAction, ISelectionAction, ITranslateAction, IRotateAction, IResizeAction } from './../model/IAction.model';
 import { ICommand } from 'src/app/interfaces/command.interface';
 import { Injectable } from '@angular/core';
 import { SyncCommand } from './sync/sync-command';
@@ -9,6 +9,8 @@ import { SyncCommand } from './sync/sync-command';
 export interface ActionData {
   commands: SyncCommand[],
 }
+
+export type SelectionAction = ITranslateAction & IRotateAction & IResizeAction;
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +23,39 @@ export class CollaborationService {
 
   constructor() {
     this.actions = new Map<string, ActionData>();
+  }
+
+  removeFromUndoRedosIfExists(incomingSelectedActionId: string) {
+    const undoIndexes = [];
+    const redoIndexes = [];
+
+    for (let i = 0; i < this.undos.length; i++) {
+      const action = this.undos[i];
+      const selectedActionId = (action.payload as SelectionAction).selectedActionId;
+      if (selectedActionId && selectedActionId === incomingSelectedActionId) {
+        undoIndexes.push(i)
+      } else if (action.payload.actionId === incomingSelectedActionId) {
+        redoIndexes.push(i);
+      }
+    }
+
+    for (let i = 0; i < this.redos.length; i++) {
+      const action = this.redos[i];
+      const selectedActionId = (action.payload as SelectionAction).selectedActionId;
+      if (selectedActionId && selectedActionId === incomingSelectedActionId) {
+        redoIndexes.push(i)
+      } else if (action.payload.actionId === incomingSelectedActionId) {
+        redoIndexes.push(i);
+      }
+    }
+
+    for (let index of undoIndexes) {
+      this.undos.splice(index, 1);
+    }
+
+    for (let index of redoIndexes) {
+      this.redos.splice(index, 1);
+    }
   }
 
   clearActionList(): void {

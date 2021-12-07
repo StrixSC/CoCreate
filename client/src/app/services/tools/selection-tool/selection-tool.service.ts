@@ -147,7 +147,6 @@ export class SelectionToolService implements Tools {
             this.removeSelection();
           } else if (button.iconId === ActionButtonIds.HoldRotation) {
             this.isRotating = true;
-            // this.setMouseWheelEvent();
             this.setSelection();
           }
           return;
@@ -222,6 +221,7 @@ export class SelectionToolService implements Tools {
   /// et on recherche les objets a l'interieur. Avec le droit, on termine la zone d'inversement et on inverse
   /// la selection des objets se situant a l'interieur.
   onRelease(event: MouseEvent): ICommand | void {
+
     if (this.isRotating) {
       this.isRotating = false;
       this.syncService.sendRotate(DrawingState.up, this.selectedActionId, 0);
@@ -263,8 +263,9 @@ export class SelectionToolService implements Tools {
   }
 
   onMove(event: MouseEvent): void {
+
     const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
-    if (this.isRotating) {
+    if (this.isRotating || !this.allowMove || !this.hasSelection()) {
       return;
     }
 

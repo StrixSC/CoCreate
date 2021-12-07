@@ -2,7 +2,7 @@ export interface IGalleryEntry {
     is_member: string;
     is_owner: string;
     drawing_id: string;
-    thumbnailUrl: string;
+    thumbnail_url: string;
     collaboration_id?: string;
     userId?: string
     type: string;

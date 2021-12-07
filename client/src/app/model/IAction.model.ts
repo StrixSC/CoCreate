@@ -1,5 +1,43 @@
 import { Point } from 'src/app/model/point.model';
 
+export type Action = {
+    index: number
+    dbActionId: string
+    createdAt: Date
+    updatedAt: Date
+    actionId: string
+    username: string
+    userId: string
+    collaborationId: string
+    actionType: ActionType
+    x: number | null
+    y: number | null
+    r: number | null
+    g: number | null
+    b: number | null
+    a: number | null
+    width: number | null
+    offsets: string | null
+    x2: number | null
+    y2: number | null
+    rFill: number | null
+    gFill: number | null
+    bFill: number | null
+    aFill: number | null
+    shapeType: ShapeType | null
+    shapeStyle: ShapeStyle | null
+    selectedActionId: string
+    xTranslation: number | null
+    yTranslation: number | null
+    xScale: number | null
+    yScale: number | null
+    angle: number | null
+    state: DrawingState | null
+    isSelected: boolean | null
+    selectedBy: string
+    isUndoRedo: boolean | null
+}
+
 export enum DrawingState {
     move = 'move',
     up = 'up',
@@ -137,3 +175,4 @@ export type ISaveAction = IDefaultActionPayload &
     actionType: string,
     isUndoRedo: boolean
 }
+export type ISelectionBasedAction = IDeleteAction & ITranslateAction & IRotateAction & IResizeAction;

@@ -3,8 +3,8 @@
     <!-- <button mat-flat-button id='help' matTooltip="Aide" (click)="exportThumbnail()"> EXPORTER</button> -->
     <!-- <mat-divider></mat-divider> -->
     <button></button>
-    <button mat-flat-button color="accent" id='undo' matTooltip="Retour à l'arrière (CTRL+Z)" (click)="undo()"
-        [disabled]='!canUndo'>Retour à l'arrière</button>
-    <button mat-flat-button color="accent" id='redo' matTooltip="Retour à l'avant (CTRL+SHIFT+Z)" (click)="redo()"
-        [disabled]='!canRedo'>Retour à l'avant</button>
+    <button mat-flat-button color="accent" id='undo' matTooltip="Undo (CTRL+Z)" (click)="undo()"
+        [disabled]='!canUndo'>Empiler (undo) </button>
+    <button mat-flat-button color="accent" id='redo' matTooltip="Redo (CTRL+SHIFT+Z)" (click)="redo()"
+        [disabled]='!canRedo'>Desempiler (redo) </button>
 </div>

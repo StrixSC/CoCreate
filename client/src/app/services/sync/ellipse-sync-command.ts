@@ -30,15 +30,16 @@ export class EllipseSyncCommand extends SyncCommand {
                 this.command.userId = this.payload.userId;
                 this.command.actionId = this.payload.actionId;
                 this.command.isSyncAction = true;
-
                 this.command.execute();
                 break;
 
             case DrawingState.move:
-                this.command.setCX(this.payload.x);
-                this.command.setCY(this.payload.y);
-                this.command.setWidth(Math.abs(this.payload.x2 - this.payload.x));
-                this.command.setHeight(Math.abs(this.payload.y2 - this.payload.y));
+                const newX1 = Math.min(this.payload.x, this.payload.x2);
+                const newY1 = Math.min(this.payload.y, this.payload.y2);
+                const newX2 = Math.max(this.payload.x, this.payload.x2);
+                const newY2 = Math.max(this.payload.y, this.payload.y2);
+                this.command.setWidth(Math.abs(newX2 - newX1));
+                this.command.setHeight(Math.abs(newY2 - newY1));
                 break;
 
             case DrawingState.up:
@@ -63,7 +64,7 @@ export class EllipseSyncCommand extends SyncCommand {
         this.syncService.activeActionId = v4();
         this.command.actionId = this.syncService.activeActionId;
         this.payload.actionId = this.syncService.activeActionId;
-        this.syncService.sendShape(DrawingState.up, this.payload.shapeStyle, this.payload.shapeType, this.shape, true);
+        this.syncService.sendShape({ x: this.payload.x2, y: this.payload.y2 }, DrawingState.up, this.payload.shapeStyle, this.payload.shapeType, this.shape, true);
     }
 
     update(payload: IShapeAction): SyncCommand | void {
@@ -73,10 +74,12 @@ export class EllipseSyncCommand extends SyncCommand {
 
     setupShape(): void {
         this.shape = {} as FilledShape;
-        this.shape.x = this.payload.x;
-        this.shape.y = this.payload.y;
-        this.shape.width = this.payload.x2 - this.payload.x;
-        this.shape.height = this.payload.y2 - this.payload.y;
+        const newX1 = Math.min(this.payload.x, this.payload.x2);
+        const newY1 = Math.min(this.payload.y, this.payload.y2);
+        this.shape.x = newX1 - (Math.abs(this.payload.x2 - this.payload.x) / 2);
+        this.shape.y = newY1 - (Math.abs(this.payload.y2 - this.payload.y) / 2);
+        this.shape.width = Math.abs(this.payload.x2 - this.payload.x);
+        this.shape.height = Math.abs(this.payload.y2 - this.payload.y);
         this.shape.fill = toRGBString([this.payload.rFill, this.payload.gFill, this.payload.bFill]);
         this.shape.fillOpacity = fromAlpha(this.payload.aFill);
         this.shape.stroke = toRGBString([this.payload.r, this.payload.g, this.payload.b]);

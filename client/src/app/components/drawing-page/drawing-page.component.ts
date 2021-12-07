@@ -150,8 +150,7 @@ export class DrawingPageComponent {
   }
 
   onError(): void {
-    this.ngOnDestroy();
-    this.snackbar.open(`Oups, quelque chose s'est produit lors de la génération du dessin. SVP Essayez à nouveau!`);
+    this.snackbar.open(`Oups, quelque chose d'inattendu s'est produit lors de la communication avec le serveur...!`, "OK", { duration: 5000 });
     this.router.navigateByUrl('');
   }
 }

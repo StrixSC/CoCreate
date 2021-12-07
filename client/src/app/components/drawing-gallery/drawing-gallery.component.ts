@@ -229,8 +229,8 @@ export class DrawingGalleryComponent implements OnInit, OnDestroy, AfterViewInit
       .subscribe((d: { drawings: IGalleryEntry[]; total_drawing_count: number; offset: number; limit: number; }) => {
         if (d) {
           for (let drawing of d.drawings) {
-            if (drawing.thumbnailUrl) {
-              new Image().src = drawing.thumbnailUrl;
+            if (drawing.thumbnail_url) {
+              new Image().src = drawing.thumbnail_url;
             }
           }
           this.isLoading = false;

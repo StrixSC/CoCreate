@@ -1,21 +1,13 @@
+import { CollaborationService } from 'src/app/services/collaboration.service';
 import { v4 } from 'uuid';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { ExportService } from 'src/app/services/export/export.service';
 import { SelectionToolService } from 'src/app/services/tools/selection-tool/selection-tool.service';
-import { Point } from './../model/point.model';
-import { DeleteSyncCommand } from './sync/delete-sync-command';
-import { ResizeSyncCommand } from './sync/resize-sync-command';
-import { RotateSyncCommand } from './sync/rotate-sync-command';
-import { RectangleSyncCommand } from './sync/rectangle-sync-command';
-import { TranslateSyncCommand } from './sync/translate-sync-command';
-import { EllipseSyncCommand } from './sync/ellipse-sync-command';
 import { SyncDrawingService } from './syncdrawing.service';
-import { FreedrawSyncCommand } from './sync/freedraw-sync-command';
 import { ICollaborationLoadResponse } from 'src/app/model/ICollaboration.model';
 import { hexToRgb } from './../utils/colors';
-import { ActionType, IDeleteAction, ShapeType } from 'src/app/model/IAction.model';
 import { DrawingService } from 'src/app/services/drawing/drawing.service';
-import { IAction, IFreedrawUpLoadAction, IShapeAction, ITranslateAction, IFreedrawUpAction, DrawingState, IRotateAction, IResizeAction } from './../model/IAction.model';
+import { IAction } from './../model/IAction.model';
 import { ToolFactoryService } from './tool-factory.service';
 import { Injectable } from '@angular/core';
 
@@ -23,57 +15,6 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class DrawingLoadService {
-  private callbacks: Record<ActionType, (payload: IAction) => any> = {
-    Freedraw: (payload: IFreedrawUpAction & IFreedrawUpLoadAction) => {
-      try {
-        payload.offsets = JSON.parse(payload.offsets);
-      } catch (e) {
-        return;
-      }
-      const command = new FreedrawSyncCommand(payload, this.drawingService.renderer, this.drawingService, this.syncService);
-      command.isFlatAction = true;
-      command.execute();
-    },
-    Shape: (payload: IShapeAction) => {
-      if (payload.shapeType === ShapeType.Ellipse) {
-        const command = new EllipseSyncCommand(payload, this.drawingService.renderer, this.drawingService, this.syncService);
-        command.isFlatAction = true;
-        command.execute();
-      } else if (payload.shapeType === ShapeType.Rectangle) {
-        const command = new RectangleSyncCommand(payload, this.drawingService.renderer, this.drawingService, this.syncService);
-        command.isFlatAction = true;
-        command.execute();
-      }
-    },
-    Select: () => { },
-    Translate: (payload: ITranslateAction) => {
-      payload.state = DrawingState.move;
-      const command = new TranslateSyncCommand(payload, this.drawingService.renderer, this.drawingService, this.syncService);
-      command.isFlatAction = true;
-      command.execute();
-    },
-    Rotate: (payload: IRotateAction) => {
-      payload.state = DrawingState.move;
-      payload.angle = payload.angle * 180 / Math.PI
-      const command = new RotateSyncCommand(payload, this.drawingService.renderer, this.drawingService, this.syncService);
-      command.isFlatAction = true;
-      command.execute();
-    },
-    Delete: (payload: IDeleteAction) => {
-      const command = new DeleteSyncCommand(payload, this.drawingService, null);
-      command.execute();
-    },
-    Resize: (payload: IResizeAction) => {
-      payload.state = DrawingState.move;
-      const command = new ResizeSyncCommand(payload, this.drawingService.renderer, this.drawingService, this.syncService);
-      command.isFlatAction = true;
-      command.execute();
-    },
-    Text: () => { },
-    Layer: () => { },
-    UndoRedo: () => { },
-  }
-
   public activeDrawingData: ICollaborationLoadResponse | null = null;
   public pendingActions: IAction[] = [];
   public isLoading: boolean = false;
@@ -83,6 +24,7 @@ export class DrawingLoadService {
     private drawingService: DrawingService,
     private storage: AngularFireStorage,
     private syncService: SyncDrawingService,
+    private collaborationService: CollaborationService,
     private exportService: ExportService,
     private selectionService: SelectionToolService,
   ) { }
@@ -116,8 +58,10 @@ export class DrawingLoadService {
   loadActions(): void {
     if (this.drawingService.isCreated && this.activeDrawingData) {
       for (let action of this.activeDrawingData.actions) {
-        this.callbacks[action.actionType](action);
+        this.toolFactoryService.create(action, true);
       }
+
+      console.log(this.collaborationService['actions']);
 
       for (let action of this.pendingActions) {
         this.toolFactoryService.handleEvent(action);
