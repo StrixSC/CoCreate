@@ -65,6 +65,7 @@ dependencies:
   image_picker: ^0.8.4+4
   google_sign_in: ^5.2.1
   flutter_svg: ^1.0.0
+  audioplayers: ^0.20.1
 
 dev_dependencies:
   flutter_test:
@@ -92,6 +93,7 @@ flutter:
   assets:
     - assets/images/
     - .env
+    - assets/sound_alarm.mp3
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

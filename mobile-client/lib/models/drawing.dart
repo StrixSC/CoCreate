@@ -48,10 +48,11 @@ class Bounds {
   double? xTranslation;
   double? yTranslation;
 
-  void setResizeData(
-      Map actionsMap, String actionId, int boundIndex, Offset varDelta) {
-    actionsMap[actionId].delta += Offset(varDelta.dx, varDelta.dy);
-
+  void setResizeData(Map actionsMap, String actionId, int boundIndex,
+      Offset varDelta, bool isForSave) {
+    if (!isForSave) {
+      actionsMap[actionId].delta += Offset(varDelta.dx, varDelta.dy);
+    }
     switch (boundIndex) {
       case 0:
         double xDelta = actionsMap[actionId].oldShape.getBounds().width -
@@ -152,10 +153,14 @@ class Bounds {
         yTranslation = actionPath.getBounds().topLeft.dy;
         break;
     }
+    if (!isForSave) {
+      actionsMap[actionId].scale = Offset(xScale!, yScale!);
+      actionsMap[actionId].scaledTranslation =
+          Offset(xTranslation!, yTranslation!);
+    }
   }
 }
 
-//todo: regroup undoRedo elements
 class ShapeAction {
   Path path;
   Paint? bodyColor;
@@ -163,13 +168,17 @@ class ShapeAction {
   String actionType;
   int? layer;
   List<Offset>? shapesOffsets;
-  int? boundIndex;
+  int boundIndex = 0;
   Path? oldShape;
   Offset delta = Offset.zero;
+  Offset scale = Offset.zero;
+  Offset scaledTranslation = Offset.zero;
   TextPainter? text;
   String actionId;
   double angle = 0;
   Offset translate = Offset.zero;
+  bool isDeleted = false;
+  String fillType = "border";
 
   ShapeAction(this.path, this.actionType, this.borderColor, this.actionId);
 
@@ -191,6 +200,12 @@ class ShapeAction {
     copy.translate = translate;
     copy.bodyColor = bodyColor;
     copy.shapesOffsets = shapesOffsets;
+    copy.delta = delta;
+    copy.boundIndex = boundIndex;
+    copy.scale = scale;
+    copy.scaledTranslation = scaledTranslation;
+    copy.isDeleted = isDeleted;
+    copy.fillType = fillType;
     return copy;
   }
 }

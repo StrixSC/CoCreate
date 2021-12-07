@@ -127,7 +127,8 @@ class _AppState extends State<App> with TickerProviderStateMixin {
               arguments['user'],
               arguments['collaborationId'],
               arguments['actions'],
-              arguments['backgroundColor']);
+              arguments['backgroundColor'],
+              arguments['selectedItems']);
           break;
         default:
           return null;

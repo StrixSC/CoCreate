@@ -47,6 +47,12 @@ class Collaborator extends ChangeNotifier {
     notifyListeners();
   }
 
+  Map getSelectedItems() {
+    return (drawings[currentType][currentDrawingId] as Drawing)
+        .collaboration
+        .selectedItems;
+  }
+
   String convertToFrench(englishType) {
     String frenchType = 'Aucun';
     switch (englishType) {
@@ -121,7 +127,7 @@ class Collaborator extends ChangeNotifier {
   }
 
   void refreshPages() {
-    if(hasBeenInitialized) {
+    if (hasBeenInitialized) {
       for (var type in TYPES) {
         pagingControllers[type].refresh();
       }
@@ -284,7 +290,7 @@ class Collaborator extends ChangeNotifier {
     //     }
     //   }
     // }
-    userId == auth!.user!.uid? currentDrawingId = '' : '';
+    userId == auth!.user!.uid ? currentDrawingId = '' : '';
     refreshPages();
     notifyListeners();
   }
@@ -308,7 +314,7 @@ class Collaborator extends ChangeNotifier {
     //   }
     // }
     // (drawings[currentType][currentDrawingId] as Drawing).collaboration.members.add(member);
-    userId == auth!.user!.uid? currentDrawingId = '' : '';
+    userId == auth!.user!.uid ? currentDrawingId = '' : '';
     refreshPages();
     notifyListeners();
   }
@@ -329,10 +335,12 @@ class Collaborator extends ChangeNotifier {
         break;
       case 'created':
         Drawing drawing = data as Drawing;
+        drawing.authorUsername == auth!.user!.displayName ? alert('Succès!', 'Bravo! Votre dessin à été créer avec succès. Amusez-vous! 😄') : '';
         drawingCreated(drawing);
         break;
       case 'updated':
         var authorUsername = data['authorUsername'];
+        authorUsername == auth!.user!.displayName ?alert('Succès!', 'Bravo! Votre dessin à été mis a jour avec succès. Amusez-vous! 😄') : '';
         refreshPages();
         // Drawing drawing = data as Drawing;
         // updatedDrawing(drawing);
@@ -344,10 +352,12 @@ class Collaborator extends ChangeNotifier {
       case 'left':
         Map left = data as Map;
         leftDrawing(left);
+        left["userId"] == auth!.user!.uid ? alert('Succès!', 'Vous avez été quitter le dessin! 😄') : '';
         break;
       case 'disconnected':
         Map disc = data as Map;
         disconnectedDrawing(disc);
+        disc["userId"] == auth!.user!.uid ? alert('Succès!', 'Vous avez été déconnecté du dessin! 😄') : '';
         break;
       default:
         print("Invalid Collaboration socket event");
