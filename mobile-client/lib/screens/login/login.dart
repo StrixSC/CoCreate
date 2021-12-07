@@ -78,9 +78,7 @@ class _LoginState extends State<Login> {
     try {
       // TODO : Don't forget to uncomment controllers at the end
       userCredential = await FirebaseAuth.instance
-          // .signInWithEmailAndPassword(email: email, password: password);
-          .signInWithEmailAndPassword(
-              email: "Pritam184@hotmail.com", password: "pripri12345");
+          .signInWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (e) {
       await translator
           .translate(e.message!, from: 'en', to: 'fr')
@@ -270,18 +268,18 @@ class _LoginState extends State<Login> {
                                   // the form is invalid.
                                   // TODO: Uncomment this
                                   if (_formKey.currentState!.validate()) {
-                                    // if(userController.text.isEmpty) {
-                                    //   setState(() {
-                                    //     errorMessage = "Veuillez saisir un courriel.";
-                                    //   });
-                                    // } else if(passController.text.isEmpty) {
-                                    //   setState(() {
-                                    //     errorMessage = "Veuillez saisir un mot de passe.";
-                                    //   });
-                                    // } else {
+                                    if(userController.text.isEmpty) {
+                                      setState(() {
+                                        errorMessage = "Veuillez saisir un courriel.";
+                                      });
+                                    } else if(passController.text.isEmpty) {
+                                      setState(() {
+                                        errorMessage = "Veuillez saisir un mot de passe.";
+                                      });
+                                    } else {
                                     login(userController.text,
                                         passController.text);
-                                    // }
+                                    }
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
