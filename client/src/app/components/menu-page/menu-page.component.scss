@@ -6,17 +6,21 @@
     bottom: 0;
 }
 
+.audio-icon {
+    height: 30px !important;
+    width: 30px !important;
+    font-size: 30px !important;
+}
+
 .mat-button {
     font-size: 20px;
     text-align: center;
 }
 
 .main-container {
-    height: 100%;
-    width: 100%;
     display: flex;
     overflow: hidden;
-    justify-content: center;
+    margin-top: 3rem;
     align-items: center;
     flex-direction: column;
 }

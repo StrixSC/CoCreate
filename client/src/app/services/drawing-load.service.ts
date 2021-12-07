@@ -48,7 +48,6 @@ export class DrawingLoadService {
   }
 
   unload(): void {
-    this.exportThumbnail();
     this.drawingService.deleteDrawing();
     this.toolFactoryService.deleteAll();
     this.isLoaded = false;
@@ -58,10 +57,12 @@ export class DrawingLoadService {
   loadActions(): void {
     if (this.drawingService.isCreated && this.activeDrawingData) {
       for (let action of this.activeDrawingData.actions) {
-        this.toolFactoryService.create(action, true);
+        try {
+          this.toolFactoryService.create(action, true);
+        } catch (e) {
+          continue;
+        }
       }
-
-      console.log(this.collaborationService['actions']);
 
       for (let action of this.pendingActions) {
         this.toolFactoryService.handleEvent(action);
@@ -76,7 +77,7 @@ export class DrawingLoadService {
   }
 
   async exportThumbnail(): Promise<void> {
-    if (!this.isLoaded || (!this.activeDrawingData && !this.activeDrawingData!.collaborationId) || !this.drawingService.isCreated) {
+    if (!this.isLoaded || !this.activeDrawingData || !this.activeDrawingData!.collaborationId || !this.drawingService.isCreated) {
       return;
     }
 
@@ -89,7 +90,9 @@ export class DrawingLoadService {
         contentType: "image/svg+xml;charset=utf-8"
       }).then(() => {
         ref.getDownloadURL().toPromise().then((url) => {
-          this.syncService.sendThumbnail({ collaborationId: this.activeDrawingData!.collaborationId, url: url })
+          if (this.activeDrawingData) {
+            this.syncService.sendThumbnail({ collaborationId: this.activeDrawingData!.collaborationId, url: url });
+          }
         })
       });
     } catch (e) {
