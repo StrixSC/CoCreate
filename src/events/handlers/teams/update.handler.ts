@@ -86,7 +86,7 @@ export const handleUpdate = async (io: Server, socket: Socket, data: { teamId: s
             channelName: updated.channel.name,
             updatedAt: updated.channel.updated_at,
         });
-        io.to(team.team_id).emit('teams:updated', {
+        io.emit('teams:updated', {
             teamId: updated.team_id,
             authorUsername: member.user.profile!.username,
             authorAvatarUrl: member.user.profile!.avatar_url,

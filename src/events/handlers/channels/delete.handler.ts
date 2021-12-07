@@ -25,14 +25,14 @@ export const handleDelete = async (io: Server, socket: Socket, data: { channelId
 
         if (!member) {
             throw new SocketEventError(
-                'Could not delete channel: Channel could not be found or member is not a part of this channel.',
+                `Hmm... On dirait que vous n'êtes pas membre de la chaîne...`,
                 'E1015'
             );
         }
 
         if (member.type !== MemberType.Owner) {
             throw new SocketEventError(
-                'Could not delete channel: User is not the owner of this channel',
+                "Oups! Il semblerait que vous n'êtes pas le propriétaire de la chaîne...",
                 'E1016'
             );
         }
@@ -45,7 +45,7 @@ export const handleDelete = async (io: Server, socket: Socket, data: { channelId
 
         if (!channel) {
             throw new SocketEventError(
-                'Could not delete channel: Internal Socket Server Error',
+                'Oups! Erreur imprévue lors du traitement de la requête...',
                 'E1017'
             );
         }

@@ -27,6 +27,6 @@ export const validateMessage = (message: string) => {
             max: 256
         })
     ) {
-        throw new SocketEventError('Message length must be between 1 and 256', 'E1018');
+        throw new SocketEventError('On dirait que le message est trop long...', 'E1018');
     }
 };

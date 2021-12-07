@@ -50,7 +50,7 @@ export const handleLeave = async (io: Server, socket: Socket, data: { teamId: st
 
             const onlineMembers = getOnlineMembersInRoom(team.team_id);
 
-            io.to(team.team_id).emit('teams:left', {
+            io.emit('teams:left', {
                 userId: member.user_id,
                 username: member.user.profile!.username,
                 avatarUrl: member.user.profile!.avatar_url,

@@ -56,7 +56,7 @@ export const handleDelete = async (io: Server, socket: Socket, data: { teamId: s
         } else {
             socket.emit('teams:delete:finished');
 
-            io.to(deletedTeam.team_id).emit('teams:deleted', {
+            io.emit('teams:deleted', {
                 teamId: deletedTeam.team_id
             });
 

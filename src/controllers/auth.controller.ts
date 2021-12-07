@@ -113,7 +113,7 @@ export const updateUserPasswordController = async (req: Request, res: Response, 
         const errors = validationResult(req).array();
 
         if (errors.length > 0) {
-            res.status(StatusCodes.BAD_REQUEST).json({
+            return res.status(StatusCodes.BAD_REQUEST).json({
                 message: errors
             });
         }
