@@ -3,9 +3,13 @@ import 'dart:ui';
 
 import 'package:Colorimage/models/collaboration.dart';
 import 'package:Colorimage/models/drawing.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:vector_math/vector_math_64.dart';
+
+import '../../app.dart';
 
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {

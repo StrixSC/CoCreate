@@ -669,7 +669,7 @@ class _TeamState extends State<_Team> with TickerProviderStateMixin {
             activeMemberCount: drawing["activeCollaboratorCount"],
             members: [],
             actionsMap: {},
-            actions: [],
+            actions: [], selectedItems: {},
           );
           drawings.add(Drawing(
               drawingId: drawing['drawingId'],

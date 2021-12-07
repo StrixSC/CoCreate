@@ -118,10 +118,11 @@ class GalerieState extends State<Galerie>
     // TODO : wait for load, then navigate to screen
     var actions = context.read<Collaborator>().getCurrentActionMap();
     var backgroundColor = context.read<Collaborator>().getBackgroundColor();
+    var selectedItems = context.read<Collaborator>().getSelectedItems();
     pushNewScreen(
       context,
       screen: DrawingScreen(
-          socket, user, collaborationId, actions, backgroundColor),
+          socket, user, collaborationId, actions, backgroundColor, selectedItems),
       withNavBar: false,
       pageTransitionAnimation: PageTransitionAnimation.cupertino,
     );
@@ -198,7 +199,7 @@ class GalerieState extends State<Galerie>
             activeMemberCount: drawing["active_collaborator_count"],
             members: [],
             actionsMap: {},
-            actions: [],
+            actions: [], selectedItems: {},
           );
           drawings.add(Drawing(
               drawingId: drawing['drawing_id'],
