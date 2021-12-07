@@ -83,10 +83,7 @@ export const handleCreate = async (io: Server, socket: Socket, payload: {
                 socket.emit("collaboration:created", response);
             }
         } else {
-            if (
-                type === CollaborationType.Protected &&
-                (!password || (password && validator.isEmpty(password)))
-            ) {
+            if (type === CollaborationType.Protected && !password) {
                 throw new SocketEventError("Oups! On dirait que le type que vous avez donné est protégé, mais il n'y a aucun mot de passe d'entré...", "E4914");
             }
 

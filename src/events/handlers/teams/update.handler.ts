@@ -98,7 +98,6 @@ export const handleUpdate = async (io: Server, socket: Socket, data: { teamId: s
             bio: updated.bio,
             type: updated.type,
             mascot: updated.mascot,
-
         });
     } catch (e) {
         handleSocketError(socket, e, undefined, [ExceptionType.Teams, ExceptionType.Teams_Update])
