@@ -22,7 +22,7 @@ function createWindow() {
 
 	mainWindow.webContents.on("did-fail-load", function () {
 		console.log("did-fail-load");
-		mainWindow.loadUrl('file://' + __dirname + '/dist/index.html#');
+		mainWindow.loadURL('file://' + __dirname + '/dist/index.html#');
 	});
 
 	mainWindow.on('closed', function () {
