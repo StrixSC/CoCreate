@@ -63,6 +63,9 @@ export const handleDelete = async (io: Server, socket: Socket, payload: {
             db.collaboration.delete({
                 where: {
                     collaboration_id: member.collaboration.collaboration_id
+                },
+                include: {
+                    drawing: true,
                 }
             }),
             db.channel.delete({
@@ -70,7 +73,7 @@ export const handleDelete = async (io: Server, socket: Socket, payload: {
                     channel_id: member.collaboration.channel_id
                 }
             })
-        ])
+        ]);
 
         if (!deletedCollaboration || !deletedChannel) {
             throw new SocketEventError("Oups! On dirait qu'il y a eu une erreur lors de la suppression du dessin...", "E5003", ExceptionType.Collaboration_Delete)
@@ -78,6 +81,7 @@ export const handleDelete = async (io: Server, socket: Socket, payload: {
 
         io.emit('collaboration:deleted', {
             collaborationId: deletedCollaboration.collaboration_id,
+            drawingId: deletedCollaboration.drawing!.drawing_id,
         });
 
         io.to(deletedChannel.channel_id).emit('channel:deleted', {
