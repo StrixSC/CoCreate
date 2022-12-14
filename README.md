@@ -1,51 +1,30 @@
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-
-<!-- PROJECT LOGO -->
 <br />
 <p align="center">
-
-  <h3 align="center">PolyDessin LOG2990  - Projet de logiciel d’application Web</h3>
+  <h3 align="center">Colorimage</h3>
 
   <p align="center">
-    Le projet consiste à créer une application Web de dessin vectoriel avec le MEAN stack. 
+    Collaborative drawing web and mobile app, with built-in features for teaming up, chatting and viewing all of the drawings!
   </p>
-    <p align="center">
-      À noter: Lorsqu'on efface, il y a un stroke-rouge et un fill-bleu. Il échoue sur firefox.  
-    </p>
 </p>
 
 ## &nbsp;
 
 <!-- TABLE OF CONTENTS -->
 
-## table des matières
+## Table of Contents
 
-- [Description du projet](#description-projet)
-  - [Technologies utilisées](#technologies-utilisees)
-- [Démarrer le projet](#demarrer-le-projet)
-  - [Prérequis](#prerequis)
-  - [Installation](#installation)
-- [Utilisation](#usage)
-- [Dépendances](#dependences)
+- [Project Description](#Description)
+  - [Used Technologies](#Tech)
+- [Setup](#Setup)
+  - [Prerequisites](#Prerequisites)
+  - [Installation](#Installation)
+- [Utilisation](#Usage)
+- [Dépendances](#Dependences)
 
 <!-- ABOUT THE PROJECT -->
 
-## description-projet
+## Description
 
-Le rendu visuel de reference de l'application pourrait etre similaire a celui de Sketch pad.
-
-- Crayon: L'outil de base du logiciel de dessin. Il permet de faire un trait de contour ronde. Si appuyé et relaché aussitôt, c'est bien un point qui apparaît.
-- Pinceau : L'outil differe seulement du crayon par la texture du trait.
-- Plume: L'outil de tracage qui differe du crayon par la forme mince de sa pointe.
-- Stylo: L'outil differe du crayon par le fait que la surface de dessin s'amincit en fonction de la vitesse de deplacement de la souris
-- Formes: Les outils de création de formes sont: Rectangle,Ellipse,Polygone,Ligne. Ces dernieres sont apposes sur la zone de dessin en faisant un glisser-deposer.
-- Texte:
-- Aerosol: L'outil simule un effet de peinture en aerosol
-- Sceau de peinture: L'outil qui change la couleur d'une certaine region pointé par la souris.
-- Efface: L'outil permet de supprimer des objets de la surface du dessin.
 
 ### technologies-utilisees
 
