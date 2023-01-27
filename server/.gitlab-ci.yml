@@ -1,0 +1,12 @@
+image: node:latest
+
+stages:
+  - migrate
+
+prisma:
+  stage: migrate
+  script:
+    - npm install -g prisma
+    - DATABASE_URL="${DATABASE_URL}" prisma migrate deploy
+  only:
+    - main

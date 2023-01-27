@@ -1,0 +1,1809 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Colorimage API",
+        "description": "Official documentation of the Colorimage API.",
+        "version": "1.0.1"
+    },
+    "servers": [
+        {
+            "url": "https://colorimage-109-3900.herokuapp.com/"
+        },
+        {
+            "url": "http://localhost:3000"
+        }
+    ],
+    "paths": {
+        "/auth/login": {
+            "get": {
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Log the user's connection to the database.",
+                "operationId": "login",
+                "description": "Logs the user's connection to the database.",
+                "responses": {
+                    "201": {
+                        "description": "Created. User's connection was logged successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "User created successfully."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized, the provided token does not match any tokens in our database.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected internal server error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "get": {
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Log the user's disconnection to the database.",
+                "operationId": "logout",
+                "responses": {
+                    "200": {
+                        "description": "Success. User's disconnection was successfully logged into the database.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "OK"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Invalid token provided with authorization header.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Registers the user using the provided information",
+                "operationId": "register",
+                "description": "Registers the user using the provided information, if the email or username are not in use.",
+                "requestBody": {
+                    "description": "Requires the email and the password of the user.",
+                    "content": {
+                        "multipart/formdata": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IRegistrationPayload"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created. User was created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "User created successfully."
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request. Invalid or missing information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid format of email or password"
+                                }
+                            }
+                        }
+                    },
+                    "406": {
+                        "description": "User is already authentified. Logout must be done first ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "User is already authentified. To logout, use /auth/logout"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict. Username or email already in use.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Username or email already in use"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected internal server error. This could be due to a problem during JWT token generation.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/update/password": {
+            "put": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Updates the user's password",
+                "operationId": "updatepassword",
+                "description": "Updates the user's password.",
+                "requestBody": {
+                    "description": "Requires the email and the password of the user.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "password": {}
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Created. Password was updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "OK"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request. Invalid or missing information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing password"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected internal server error. This could be due to a problem during JWT token generation.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/:id": {
+            "get": {
+                "parameters": [
+                    {
+                        "required": true,
+                        "name": "user_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Fetch all information of the user with the given id",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "operationId": "complete user",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns a JSON with the user's complete information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IUserComplete"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content. Request was successful, but no content was found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Request was successful, but no content was found."
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/:id/channels": {
+            "get": {
+                "parameters": [
+                    {
+                        "required": true,
+                        "name": "user_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Fetch all channels of a given user.",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "operationId": "user channels",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns an array with all of the user's channels.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "$ref": "#/components/schemas/IUserChannel"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content. Request was successful, but no content was found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IUserChannel"
+                                },
+                                "example": []
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/logs": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "description": "Amount of records to skip. Use this for pagination. Defauls to 0",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "description": "Amount of records to take. Use this for pagination. Defaults to 50.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Fetch all logs for the requesting authorized user.",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "operationId": "user logs",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns an array with all of the user's logs.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "$ref": "#/components/schemas/IUserLog"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content. Request was successful, but no content was found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IUserChannel"
+                                },
+                                "example": []
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/upload/avatar": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Upload and update a user avatar by file",
+                "operationId": "upload-update-avatar",
+                "description": "Uploads the avatar to firebase and updates the user ",
+                "requestBody": {
+                    "description": "Requires the file uploaded with the keyword 'avatar'",
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "avatar": {
+                                        "description": "The new avatar to upload and attribute to the requesting user."
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Avatar uploaded and updated successfully!",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request. Invalid or missing information. The filetype must be a valid image and have a valid extension and a valid name.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected internal server error. This could either be a failed upload to the storage, failed update on the database or failed update on the firebase user. Eitherway, the operation has been reverted.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/avatars": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Fetch all available user avatars",
+                "operationId": "users",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns an array of all user's available avatars.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "avatars": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "description": "Url of the avatar"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. Either the user is not logged in, or the JWT token is expired. In case of the latter, refreshing your browser should regenerate a valid token.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/profile": {
+            "get": {
+                "parameters": [
+                    {
+                        "required": false,
+                        "name": "offset",
+                        "description": "The amount of indexes to skip. Default: 0",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "required": false,
+                        "name": "limit",
+                        "description": "The maximum length of the returned array. Default: 50",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Fetch all public profiles",
+                "operationId": "users",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns an array of all public users information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IUserPublicProfile"
+                                },
+                                "example": [
+                                    {
+                                        "index": 1,
+                                        "username": "demoUser1",
+                                        "avatar_url": "http://storage.googleapis.com/f0c9aac4-1d2a-5e41-88a8-8c2e0174d392.jpg"
+                                    },
+                                    {
+                                        "index": 2,
+                                        "username": "demoUser2",
+                                        "avatar_url": "http://storage.googleapis.com/d6831468-3247-5085-ac77-17830b9ca857.jpg"
+                                    },
+                                    {
+                                        "index": 3,
+                                        "username": "demoUser3",
+                                        "avatar_url": "http://storage.googleapis.com/46f15fdd-2a5c-59fa-9489-ae07b9e3aab2.jpg"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid format of offset and/or limit.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid format of offset and/or limit."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "requestBody": {
+                    "content": {
+                        "properties": {
+                            "schema": {
+                                "properties": {
+                                    "username": {},
+                                    "avatarUrl": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Fetch all public profiles",
+                "operationId": "updateprofile",
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "username": {},
+                                        "avatarUrl": {}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing username or avatar url.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/profile/:username": {
+            "get": {
+                "parameters": [
+                    {
+                        "required": true,
+                        "name": "username",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Fetch public profile of a specific user",
+                "operationId": "single user",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns a JSON with the user's public information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IUserPublicProfile"
+                                },
+                                "example": {
+                                    "username": "demoUser1",
+                                    "avatar_url": "http://storage.googleapis.com/f0c9aac4-1d2a-5e41-88a8-8c2e0174d392.jpg"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content. Request was successful, but no content was found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Request was successful, but no content was found."
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/channels/": {
+            "get": {
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Fetch all channels",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "operationId": "get all channels",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns a list of channels",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IChannel"
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content. Request was successful, but no content was found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": []
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/channels/create": {
+            "post": {
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Create new channel",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "operationId": "Create new channel",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns a list of channels",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Success! Channel Demo was created successfully."
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/channels/:id": {
+            "get": {
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Fetch all relevant information pertaining to that channel. The request must be from a user that has access to the channel.",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ID of the channel"
+                    }
+                ],
+                "operationId": "Fetch channel information by id",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns a JSON containing all of the messages by all of the members of the channels.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ICompleteChannelData"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/channels/:id/messages": {
+            "get": {
+                "tags": [
+                    "Channels"
+                ],
+                "summary": "Fetch all messages in a channel",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ID of the channel"
+                    }
+                ],
+                "operationId": "Fetch channel messages by id",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns an array of all the messages.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IChannelMessage"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing identifier format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/gallery": {
+            "get": {
+                "tags": [
+                    "Gallery"
+                ],
+                "summary": "Fetch all gallery drawings",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "required": false,
+                        "name": "filter",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter to apply"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "description": "Amount of records to skip. Use this for pagination. Defauls to 0",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "description": "Amount of records to take. Use this for pagination. Defaults to 50.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "description": "Private, Public or Protected. Gets drawings of any type if not mentionned",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "operationId": "Fetch channel messages by id",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns an array of all the drawings/collaborations.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_drawing_count": {
+                                            "type": "integer"
+                                        },
+                                        "offset": {
+                                            "type": "number"
+                                        },
+                                        "limit": {
+                                            "type": "number"
+                                        },
+                                        "drawings": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/IGalleryEntry"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing query parameter format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/gallery/mine": {
+            "get": {
+                "tags": [
+                    "Gallery"
+                ],
+                "summary": "Fetch all gallery drawings for which the requesting user is a member of.",
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "required": false,
+                        "name": "filter",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter to apply"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "description": "Amount of records to skip. Use this for pagination. Defauls to 0",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "description": "Amount of records to take. Use this for pagination. Defaults to 50.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "description": "Private, Public or Protected. Gets drawings of any type if not mentionned",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "operationId": "Fetch user gallery drawings",
+                "responses": {
+                    "200": {
+                        "description": "Success. Returns an array of all the drawings/collaborations.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_drawing_count": {
+                                            "type": "integer"
+                                        },
+                                        "offset": {
+                                            "type": "number"
+                                        },
+                                        "limit": {
+                                            "type": "number"
+                                        },
+                                        "drawings": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/IGalleryEntry"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid or missing query parameter format.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Invalid or missing identifier format."
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized. The provided authentication token does not meet the necessary criterias to complete the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Unauthorized."
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IMessage"
+                                },
+                                "example": {
+                                    "message": "Internal Server Error."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "Authorization": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Bearer"
+            }
+        },
+        "schemas": {
+            "IAuthPayload": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                }
+            },
+            "IRegistrationPayload": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "example": "email@provider.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "Password must be at least 8 characters, have at least one digit, at least one UPPERCASE character, at least one lowercase character, at least one special character."
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "The username of the registering user. The username must be unique"
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "description": "The first name of the registering user."
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "description": "The last name of the registering user."
+                    },
+                    "avatar_url": {
+                        "type": "string",
+                        "description": "Optional. Use this field if the user selected an avatar from a publicly available list of avatars"
+                    },
+                    "avatar": {
+                        "type": "object",
+                        "description": "Use this field for the uploaded File. The file must be of type JPEG or PNG."
+                    }
+                }
+            },
+            "IUser": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "description": "Username (Pseudonyme) of the user"
+                    },
+                    "avatar_url": {
+                        "type": "string",
+                        "description": "URL pointing to the location of the avatar of the user."
+                    },
+                    "email": {
+                        "type": "string",
+                        "description": "Email of the requesting user"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "description": "User id of the requesting user"
+                    }
+                }
+            },
+            "IUserComplete": {
+                "type": "object",
+                "properties": {
+                    "profile": {
+                        "type": "object",
+                        "description": "Username (Pseudonyme) of the user",
+                        "properties": {
+                            "username": {
+                                "type": "string",
+                                "example": "AlejandroGordon123"
+                            },
+                            "avatar_url": {
+                                "type": "string",
+                                "description": "URL pointing to the location of the avatar of the user.",
+                                "example": "https://storage.googleapis.com/efb5f957-bd28-5f61-beb4-a82c6dce4fe5.jpg"
+                            }
+                        }
+                    },
+                    "account": {
+                        "type": "object",
+                        "properties": {
+                            "first_name": {
+                                "type": "string",
+                                "example": "Alejandro"
+                            },
+                            "last_name": {
+                                "type": "string",
+                                "example": "Gordon"
+                            }
+                        }
+                    },
+                    "stats": {
+                        "type": "object",
+                        "properties": {
+                            "collaboration_count": {
+                                "type": "string",
+                                "description": "Number of collaborations the user has been a part of."
+                            },
+                            "authorCount": {
+                                "type": "integer",
+                                "description": "Number of authored drawings."
+                            },
+                            "active_team_count": {
+                                "type": "string",
+                                "description": "Total team count of the user."
+                            },
+                            "average_collaboration_time": {
+                                "type": "string",
+                                "description": "Average drawing collaboration time of the user."
+                            },
+                            "total_collaboration_time": {
+                                "type": "string",
+                                "description": "Total drawing collaboration time of the user."
+                            }
+                        }
+                    },
+                    "logs": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "description": "Type of the log.\n\nPossible values:\n\n- Connection\n\n- Disconnection\n\n- DrawingUpdate"
+                                },
+                                "created_at": {
+                                    "type": "string",
+                                    "description": "Timestamp of the log"
+                                },
+                                "drawing_id": {
+                                    "type": "string",
+                                    "description": "[OPTIONAL] If the log type is 'DrawingUpdate', then a drawing id will be present, this can be used to redirect the user to the updated drawing."
+                                }
+                            }
+                        }
+                    },
+                    "email": {
+                        "type": "string",
+                        "description": "Requesting user's email."
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "description": "Requesting user's id."
+                    }
+                }
+            },
+            "IUserPublicProfile": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "description": "Username (Pseudonyme) of the user"
+                    },
+                    "avatar_url": {
+                        "type": "string",
+                        "description": "URL pointing to the location of the avatar of the user."
+                    },
+                    "index": {
+                        "type": "number",
+                        "description": "Index of the user's profile in the list of profiles. This is used for identification and cursor pagination."
+                    }
+                }
+            },
+            "IUserChannel": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Username (Pseudonyme) of the user"
+                    },
+                    "channel_id": {
+                        "type": "string",
+                        "description": "ID of the channel."
+                    },
+                    "index": {
+                        "type": "number",
+                        "description": ""
+                    },
+                    "is_owner": {
+                        "type": "boolean"
+                    },
+                    "owner_username": {
+                        "type": "string"
+                    }
+                }
+            },
+            "IChannel": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Type of the channel.\n\nPossible values:\n\n- Public\n\n- Private"
+                    },
+                    "channel_id": {
+                        "type": "string"
+                    },
+                    "collaboration_id": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "example": "2021-10-25T02:17:36.301Z"
+                    },
+                    "owner_username": {
+                        "type": "string"
+                    },
+                    "member_count": {
+                        "type": "integer"
+                    },
+                    "online_member_count": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "ICompleteChannelData": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "collaboration_id": {
+                        "type": "string",
+                        "description": "ID of the collaboration the channel belongs to. This value could be null."
+                    },
+                    "updated_at": {
+                        "type": "string"
+                    },
+                    "channel_id": {
+                        "type": "string"
+                    },
+                    "members": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "member": {
+                                    "type": "object",
+                                    "properties": {
+                                        "profile": {
+                                            "type": "object",
+                                            "properties": {
+                                                "username": {
+                                                    "type": "string"
+                                                },
+                                                "avatar_url": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "messages": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "message_data": {
+                                                "type": "string",
+                                                "description": "Content of the message."
+                                            },
+                                            "created_at": {
+                                                "type": "string",
+                                                "description": "ISO Date string of the time the message was created."
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "IChannelMessage": {
+                "type": "object",
+                "properties": {
+                    "message_data": {
+                        "type": "string",
+                        "description": "Content of the message."
+                    },
+                    "avatar_url": {
+                        "type": "string",
+                        "description": "URL pointing to the location of the avatar of the user."
+                    },
+                    "message_id": {
+                        "type": "string",
+                        "description": "ID of the message."
+                    },
+                    "sender_profile_id": {
+                        "type": "string",
+                        "description": "ID of the sender's profile."
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "description": "Timestamp in HH:mm:ss format of the time the message was created."
+                    },
+                    "username": {
+                        "type": "string"
+                    }
+                }
+            },
+            "IMessage": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "IUserLog": {
+                "type": "object",
+                "properties": {
+                    "index": {
+                        "type": "integer"
+                    },
+                    "log_id": {
+                        "type": "string"
+                    },
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "drawing_id": {
+                        "type": "string",
+                        "description": "Use this id to redirect to the drawing if the type is DrawingUpdate"
+                    },
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string"
+                    }
+                }
+            },
+            "IGalleryEntry": {
+                "type": "object",
+                "properties": {
+                    "collaboration_id": {
+                        "type": "string"
+                    },
+                    "drawing_id": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "author_username": {
+                        "type": "string"
+                    },
+                    "author_avatar": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "collaborator_count": {
+                        "type": "number"
+                    },
+                    "max_collaborator_count": {
+                        "type": "number"
+                    }
+                }
+            }
+        }
+    }
+}

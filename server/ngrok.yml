@@ -1,0 +1,9 @@
+tunnels:
+  auth:
+    addr: 9099
+    proto: http
+    host_header: "localhost:9099"
+  server:
+    addr: 3000
+    proto: http
+    host_header: "localhost:3000"

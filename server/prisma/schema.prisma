@@ -1,0 +1,307 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  index                   Int                   @unique @default(autoincrement())
+  user_id                 String                @id @unique @default(uuid())
+  email                   String                @unique
+  profile                 Profile?
+  stats                   Stats?
+  account                 Account?
+  logs                    Log[]
+  channels                ChannelMember[]
+  actions                 Action[]
+  collaborations          CollaborationMember[]
+  avatars                 Avatar[]
+  authored_collaborations Author[]
+  teams                   TeamMember[]
+}
+
+model Profile {
+  index      Int      @unique @default(autoincrement())
+  profile_id String   @id @unique @default(uuid())
+  username   String   @unique
+  avatar_url String
+  user       User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_id    String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Account {
+  account_id      String   @id @unique @default(uuid())
+  user            User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user_id         String   @unique
+  first_name      String
+  last_name       String
+  allow_searching Boolean  @default(true)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+}
+
+model Stats {
+  index                        Int      @unique @default(autoincrement())
+  stats_id                     String   @id @unique @default(uuid())
+  user_id                      String   @unique
+  user                         User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  created_at                   DateTime @default(now())
+  updated_at                   DateTime @updatedAt
+  total_collaboration_time     Float    @default(0)
+  total_collaboration_sessions Int      @default(0)
+}
+
+model Log {
+  index            Int      @unique @default(autoincrement())
+  log_id           String   @id @unique @default(uuid())
+  user_id          String
+  user             User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  type             LogType
+  collaboration_id String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
+
+model Channel {
+  index            Int             @unique @default(autoincrement())
+  name             String          @unique
+  channel_id       String          @id @unique @default(uuid())
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  team             Team?
+  team_id          String?         @default("")
+  collaboration_id String?         @default("")
+  collaboration    Collaboration?
+  members          ChannelMember[]
+  type             ChannelType     @default(Public)
+}
+
+model ChannelMember {
+  index      Int        @unique @default(autoincrement())
+  channel_id String
+  member_id  String     @id @unique @default(uuid())
+  user_id    String
+  type       MemberType
+  messages   Message[]
+  member     User       @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  channel    Channel    @relation(fields: [channel_id], references: [channel_id], onDelete: Cascade)
+}
+
+model Message {
+  index        Int           @unique @default(autoincrement())
+  message_id   String        @id @unique @default(uuid())
+  member_id    String
+  sender       ChannelMember @relation(fields: [member_id], references: [member_id], onDelete: Cascade)
+  message_data String
+  created_at   DateTime      @default(now())
+}
+
+model Drawing {
+  title            String
+  index            Int           @unique @default(autoincrement())
+  drawing_id       String        @id @unique @default(uuid())
+  thumbnail_url    String        @default("")
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+  collaboration_id String        @unique
+  collaboration    Collaboration @relation(fields: [collaboration_id], references: [collaboration_id], onDelete: Cascade)
+  background_color String        @default("#FFFFFF")
+  width            Int           @default(1280)
+  height           Int           @default(752)
+}
+
+model Avatar {
+  index      Int     @unique @default(autoincrement())
+  avatar_id  String  @id @unique @default(uuid())
+  isPublic   Boolean @default(false)
+  user_id    String
+  user       User    @relation(fields: [user_id], references: [user_id])
+  avatar_url String
+}
+
+model Action {
+  index         Int           @unique @default(autoincrement())
+  dbActionId    String        @id @unique @default(uuid())
+  user          User          @relation(fields: [userId], references: [user_id])
+  collaboration Collaboration @relation(fields: [collaborationId], references: [collaboration_id], onDelete: Cascade)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Mandatory:
+  actionId        String
+  username        String
+  userId          String
+  collaborationId String
+  actionType      ActionType
+
+  // Freedraw:
+  x       Float?
+  y       Float?
+  r       Int?
+  g       Int?
+  b       Int?
+  a       Int?
+  width   Float?
+  offsets String?
+
+  // Shapes
+  x2         Float?
+  y2         Float?
+  rFill      Int?
+  gFill      Int?
+  bFill      Int?
+  aFill      Int?
+  shapeType  ShapeType?  @default(Null)
+  shapeStyle ShapeStyle? @default(border)
+
+  // Selection Actions (Translate, Rotate, Resize, Delete)
+  selectedActionId String @default("")
+  xTranslation     Float? @default(0)
+  yTranslation     Float? @default(0)
+  xScale           Float? @default(1)
+  yScale           Float? @default(1)
+  angle            Float? @default(0)
+
+  // Shared:
+  state      ActionState?
+  isSelected Boolean?
+  selectedBy String       @default("")
+  isUndoRedo Boolean?     @default(false)
+}
+
+model CollaborationMember {
+  collaboration_member_id String        @id @unique @default(uuid())
+  index                   Int           @unique @default(autoincrement())
+  type                    MemberType
+  collaboration_id        String
+  user_id                 String
+  created_at              DateTime      @default(now())
+  updated_at              DateTime      @updatedAt
+  user                    User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  collaboration           Collaboration @relation(fields: [collaboration_id], references: [collaboration_id], onDelete: Cascade)
+}
+
+model Collaboration {
+  index                 Int                   @unique @default(autoincrement())
+  collaboration_id      String                @id @unique @default(uuid())
+  created_at            DateTime              @default(now())
+  updated_at            DateTime              @updatedAt
+  collaboration_members CollaborationMember[]
+  channel               Channel               @relation(fields: [channel_id], references: [channel_id])
+  channel_id            String                @unique
+  drawing               Drawing?
+  actions               Action[]
+  type                  CollaborationType
+  password              String?
+  author                Author                @relation(fields: [author_id], references: [author_id], onDelete: Cascade)
+  author_id             String
+}
+
+model Team {
+  index             Int          @unique @default(autoincrement())
+  team_id           String       @id @unique @default(uuid())
+  team_members      TeamMember[]
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  team_name         String       @unique
+  bio               String       @default("")
+  max_member_count  Int          @default(4)
+  type              TeamType
+  authored_drawings Author[]
+  channel           Channel      @relation(fields: [channel_id], references: [channel_id])
+  channel_id        String       @unique
+  password          String?      @default("")
+  mascot            String       @default("")
+  mascot_url        String       @default("")
+  avatar_url        String       @default("")
+}
+
+model TeamMember {
+  index          Int        @unique @default(autoincrement())
+  team_member_id String     @id @unique @default(uuid())
+  user_id        String
+  team_id        String
+  user           User       @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  team           Team       @relation(fields: [team_id], references: [team_id], onDelete: Cascade)
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @updatedAt
+  type           MemberType @default(Regular)
+}
+
+model Author {
+  index          Int             @unique @default(autoincrement())
+  author_id      String          @id @unique @default(uuid())
+  is_team        Boolean
+  team_id        String?
+  user_id        String?
+  user           User?           @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  team           Team?           @relation(fields: [team_id], references: [team_id], onDelete: Cascade)
+  collaborations Collaboration[]
+}
+
+// Enums
+enum LogType {
+  Connection
+  Disconnection
+  DrawingUpdate
+}
+
+enum MemberType {
+  Owner
+  Regular
+}
+
+enum ActionState {
+  move
+  up
+  down
+}
+
+enum ChannelType {
+  Collaboration
+  Team
+  Public
+}
+
+enum ShapeType {
+  Rectangle
+  Ellipse
+  Null
+}
+
+enum ShapeStyle {
+  center
+  border
+  fill
+}
+
+enum ActionType {
+  Freedraw
+  Shape
+  Select
+  Translate
+  Rotate
+  Delete
+  Resize
+  Text
+  Layer
+  UndoRedo
+}
+
+enum CollaborationType {
+  Private
+  Public
+  Protected
+}
+
+enum TeamType {
+  Protected
+  Public
+}
