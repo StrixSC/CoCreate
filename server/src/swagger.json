@@ -1,8 +1,8 @@
 {
     "openapi": "3.0.1",
     "info": {
-        "title": "Colorimage API",
-        "description": "Official documentation of the Colorimage API.",
+        "title": "CoCreate API",
+        "description": "Official documentation of the CoCreate API.",
         "version": "1.0.1"
     },
     "servers": [
