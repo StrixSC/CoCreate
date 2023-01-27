@@ -25,7 +25,7 @@ const corsOptions = {
         'X-User-Id'
     ],
     exposedHeaders: 'Location',
-    origin: CORS_URLS || ['*']
+    origin: '*'
 };
 
 export default corsOptions;
