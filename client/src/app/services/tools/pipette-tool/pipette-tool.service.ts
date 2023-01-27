@@ -21,12 +21,12 @@ const A_OFFSET = 3;
 /// Outil pour assigner la couleur d'un objet a la couleur primaire et secondaire,
 /// clique gauche change la couleur primaire et clique droit la couleur secondaire
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class PipetteToolService implements Tools {
   readonly id = ToolIdConstants.PIPETTE_ID;
-  readonly faIcon: IconDefinition = faEyeDropper;
-  readonly toolName = 'Outil Pipette';
+  readonly faIcon: any = faEyeDropper;
+  readonly toolName = "Outil Pipette";
   private xmlSerializer: XMLSerializer;
   parameters: FormGroup;
   object: SVGAElement | undefined;
@@ -34,7 +34,7 @@ export class PipetteToolService implements Tools {
   constructor(
     private toolsColorService: ToolsColorService,
     private drawingService: DrawingService,
-    private offsetManager: OffsetManagerService,
+    private offsetManager: OffsetManagerService
   ) {
     this.xmlSerializer = new XMLSerializer();
   }
@@ -45,27 +45,36 @@ export class PipetteToolService implements Tools {
       const offset: Point = this.offsetManager.offsetFromMouseEvent(event);
       if (this.isInDrawing(offset)) {
         return new Promise<void>((resolve) => {
-          const canvas: HTMLCanvasElement = document.createElement('canvas');
-          canvas.setAttribute('crossorigin', 'anonymous');
-          const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+          const canvas: HTMLCanvasElement = document.createElement("canvas");
+          canvas.setAttribute("crossorigin", "anonymous");
+          const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
           ctx.canvas.width = this.drawingService.width;
           ctx.canvas.height = this.drawingService.height;
-          const stringSVG: string = this.xmlSerializer.serializeToString(this.drawingService.drawing);
+          const stringSVG: string = this.xmlSerializer.serializeToString(
+            this.drawingService.drawing
+          );
           const domURL = window.URL;
           const img: HTMLImageElement = new Image();
-          const svgBlob: Blob = new Blob([stringSVG], { type: 'image/svg+xml;charset=utf-8' });
+          const svgBlob: Blob = new Blob([stringSVG], {
+            type: "image/svg+xml;charset=utf-8",
+          });
           const url: string = domURL.createObjectURL(svgBlob);
-          img.onload = (() => {
+          img.onload = () => {
             ctx.drawImage(img, 0, 0);
-            const imageData: ImageData = ctx.getImageData(offset.x, offset.y, 1, 1);
+            const imageData: ImageData = ctx.getImageData(
+              offset.x,
+              offset.y,
+              1,
+              1
+            );
             const rgba: RGBA = this.getPixelColor(imageData, { x: 0, y: 0 });
             domURL.revokeObjectURL(url);
-            event.button === LEFT_CLICK ?
-              this.toolsColorService.setPrimaryColor(rgba.rgb, rgba.a) : this.toolsColorService.setSecondaryColor(rgba.rgb, rgba.a);
+            event.button === LEFT_CLICK
+              ? this.toolsColorService.setPrimaryColor(rgba.rgb, rgba.a)
+              : this.toolsColorService.setSecondaryColor(rgba.rgb, rgba.a);
             resolve();
-          });
+          };
           img.src = url;
-
         });
       }
     }
@@ -73,17 +82,27 @@ export class PipetteToolService implements Tools {
   }
 
   private isInDrawing(point: Point): boolean {
-    return point.x >= 0 && point.x <= this.drawingService.width && point.y >= 0 && point.y <= this.drawingService.height;
+    return (
+      point.x >= 0 &&
+      point.x <= this.drawingService.width &&
+      point.y >= 0 &&
+      point.y <= this.drawingService.height
+    );
   }
 
   private getPixelColor(imageData: ImageData, point: Point): RGBA {
-    const offsetImage: number = (point.y * imageData.width + point.x) * IMAGE_DATA_POSITION_OFFSET;
+    const offsetImage: number =
+      (point.y * imageData.width + point.x) * IMAGE_DATA_POSITION_OFFSET;
     return {
       rgb: {
         r: imageData.data[offsetImage + R_OFFSET],
         g: imageData.data[offsetImage + G_OFFSET],
         b: imageData.data[offsetImage + B_OFFSET],
-      }, a: Math.round(imageData.data[offsetImage + A_OFFSET] / RGB_MAX_VALUE * 100) / 100,
+      },
+      a:
+        Math.round(
+          (imageData.data[offsetImage + A_OFFSET] / RGB_MAX_VALUE) * 100
+        ) / 100,
     };
   }
 

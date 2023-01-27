@@ -122,8 +122,8 @@ describe('SidenavService', () => {
 
 class MockItool implements Tools {
   readonly id: 5;
-  readonly faIcon: IconDefinition;
-  readonly toolName: 'brush';
+  readonly faIcon: any;
+  readonly toolName: "brush";
   parameters: FormGroup;
   onPressed(event: MouseEvent) {
     if (event.button === LEFT_CLICK) {
@@ -132,17 +132,13 @@ class MockItool implements Tools {
     return;
   }
   // tslint:disable-next-line: no-empty
-  onRelease(event: MouseEvent): void {
-  }
+  onRelease(event: MouseEvent): void {}
   // tslint:disable-next-line: no-empty
-  onMove(event: MouseEvent): void {
-  }
+  onMove(event: MouseEvent): void {}
   // tslint:disable-next-line: no-empty
-  onKeyDown(event: KeyboardEvent): void {
-  }
+  onKeyDown(event: KeyboardEvent): void {}
   // tslint:disable-next-line: no-empty
-  onKeyUp(event: KeyboardEvent): void {
-  }
+  onKeyUp(event: KeyboardEvent): void {}
   pickupTool(): void {
     return;
   }

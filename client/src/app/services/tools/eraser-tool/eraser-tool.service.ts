@@ -16,12 +16,12 @@ const TARGET_STROKE_WIDTH = 5;
 
 /// Service de gestion de l'outil efface
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class EraserToolService implements Tools {
   readonly id: number = ToolIdConstants.ERASER_ID;
-  readonly faIcon: IconDefinition = faEraser;
-  readonly toolName = 'Outil Efface';
+  readonly faIcon: any = faEraser;
+  readonly toolName = "Outil Efface";
   parameters: FormGroup;
   private eraserSize: FormControl;
   eraser: SVGRectElement;
@@ -35,38 +35,73 @@ export class EraserToolService implements Tools {
   constructor(
     private drawingService: DrawingService,
     private offsetManager: OffsetManagerService,
-    private rendererService: RendererProviderService,
+    private rendererService: RendererProviderService
   ) {
-    this.eraserSize = new FormControl(1, [Validators.min(1), Validators.required]);
-    this.parameters = new FormGroup({ eraserSize: this.eraserSize, });
+    this.eraserSize = new FormControl(1, [
+      Validators.min(1),
+      Validators.required,
+    ]);
+    this.parameters = new FormGroup({ eraserSize: this.eraserSize });
     this.createEraser();
     this.eraserSize.valueChanges.subscribe((value) => {
-      this.rendererService.renderer.setAttribute(this.eraser, 'width', `${this.eraserSize.value}px`);
-      this.rendererService.renderer.setAttribute(this.eraser, 'height', `${this.eraserSize.value}px`);
+      this.rendererService.renderer.setAttribute(
+        this.eraser,
+        "width",
+        `${this.eraserSize.value}px`
+      );
+      this.rendererService.renderer.setAttribute(
+        this.eraser,
+        "height",
+        `${this.eraserSize.value}px`
+      );
       this.moveEraser(this.lastOffsetRegistered);
     });
   }
 
   /// Construit l'efface qui sera utiliser par la suite
   private createEraser() {
-    this.eraser = this.rendererService.renderer.createElement('rect', 'svg');
-    this.rendererService.renderer.setAttribute(this.eraser, 'name', `eraser`);
-    this.rendererService.renderer.setAttribute(this.eraser, 'width', `${this.eraserSize.value}px`);
-    this.rendererService.renderer.setAttribute(this.eraser, 'height', `${this.eraserSize.value}px`);
-    this.rendererService.renderer.setStyle(this.eraser, 'fill', 'rgb(255,255,255)');
-    this.rendererService.renderer.setStyle(this.eraser, 'fill-opacity', '0.8');
-    this.rendererService.renderer.setStyle(this.eraser, 'stroke-width', '1px');
-    this.rendererService.renderer.setStyle(this.eraser, 'stroke', 'rgb(0,0,0)');
-    this.rendererService.renderer.setStyle(this.eraser, 'cursor', 'none');
-    this.rendererService.renderer.setAttribute(this.eraser, 'pointer-events', 'none');
+    this.eraser = this.rendererService.renderer.createElement("rect", "svg");
+    this.rendererService.renderer.setAttribute(this.eraser, "name", `eraser`);
+    this.rendererService.renderer.setAttribute(
+      this.eraser,
+      "width",
+      `${this.eraserSize.value}px`
+    );
+    this.rendererService.renderer.setAttribute(
+      this.eraser,
+      "height",
+      `${this.eraserSize.value}px`
+    );
+    this.rendererService.renderer.setStyle(
+      this.eraser,
+      "fill",
+      "rgb(255,255,255)"
+    );
+    this.rendererService.renderer.setStyle(this.eraser, "fill-opacity", "0.8");
+    this.rendererService.renderer.setStyle(this.eraser, "stroke-width", "1px");
+    this.rendererService.renderer.setStyle(this.eraser, "stroke", "rgb(0,0,0)");
+    this.rendererService.renderer.setStyle(this.eraser, "cursor", "none");
+    this.rendererService.renderer.setAttribute(
+      this.eraser,
+      "pointer-events",
+      "none"
+    );
     this.moveEraser(this.lastOffsetRegistered);
   }
 
   /// Deplace l'efface
   private moveEraser(offset: Point) {
     this.lastOffsetRegistered = offset;
-    this.rendererService.renderer.setAttribute(this.eraser, 'x', `${offset.x - this.eraserSize.value / 2}px`);
-    this.rendererService.renderer.setAttribute(this.eraser, 'y', `${offset.y - this.eraserSize.value / 2}px`);
+    this.rendererService.renderer.setAttribute(
+      this.eraser,
+      "x",
+      `${offset.x - this.eraserSize.value / 2}px`
+    );
+    this.rendererService.renderer.setAttribute(
+      this.eraser,
+      "y",
+      `${offset.y - this.eraserSize.value / 2}px`
+    );
   }
 
   /// Gere l'ajout de liste d'element a supprimer
@@ -84,7 +119,10 @@ export class EraserToolService implements Tools {
   /// Si il y a des element de selectionner une commande est generer
   onRelease(event: MouseEvent): void | ICommand {
     if (this.isPressed && this.isEraserActive && this.itemToDelete.size > 0) {
-      const eraserCommand = new EraserCommand(this.itemToDelete, this.drawingService);
+      const eraserCommand = new EraserCommand(
+        this.itemToDelete,
+        this.drawingService
+      );
       eraserCommand.execute();
       this.reset();
       this.processElementInEraser();
@@ -103,12 +141,18 @@ export class EraserToolService implements Tools {
       } else {
         const elementInEraser: SVGElement[] = this.getElementsInContact();
         this.deleteMarkList.forEach((el) => {
-          this.rendererService.renderer.removeChild(this.drawingService.drawing, el);
+          this.rendererService.renderer.removeChild(
+            this.drawingService.drawing,
+            el
+          );
         });
         this.deleteMarkList = [];
         elementInEraser.forEach((el) => {
           const elDeleteMark = this.createDeleteMarkElement(el);
-          this.rendererService.renderer.appendChild(this.drawingService.drawing, elDeleteMark);
+          this.rendererService.renderer.appendChild(
+            this.drawingService.drawing,
+            elDeleteMark
+          );
           this.deleteMarkList.push(elDeleteMark);
         });
       }
@@ -130,7 +174,10 @@ export class EraserToolService implements Tools {
   /// Ajout l'éfface et active les fontion de l'outil
   pickupTool(): void {
     this.isEraserActive = true;
-    this.rendererService.renderer.appendChild(this.drawingService.drawing, this.eraser);
+    this.rendererService.renderer.appendChild(
+      this.drawingService.drawing,
+      this.eraser
+    );
     this.isPressed = false;
     this.updateDeleteableList();
   }
@@ -138,7 +185,10 @@ export class EraserToolService implements Tools {
   /// Retire l'éfface et désactive les fonctions de l'outil
   dropTool(): void {
     this.isEraserActive = false;
-    this.rendererService.renderer.removeChild(this.drawingService.drawing, this.eraser);
+    this.rendererService.renderer.removeChild(
+      this.drawingService.drawing,
+      this.eraser
+    );
     this.reset();
     this.isPressed = false;
   }
@@ -147,7 +197,10 @@ export class EraserToolService implements Tools {
   reset(): void {
     this.isPressed = false;
     this.deleteMarkList.forEach((el) => {
-      this.rendererService.renderer.removeChild(this.drawingService.drawing, el);
+      this.rendererService.renderer.removeChild(
+        this.drawingService.drawing,
+        el
+      );
     });
     this.deleteMarkList = [];
     this.itemToDelete.clear();
@@ -161,7 +214,10 @@ export class EraserToolService implements Tools {
       if (!this.itemToDelete.get(el.id)) {
         this.itemToDelete.set(el.id, el);
         const elDeleteMark = this.createDeleteMarkElement(el);
-        this.rendererService.renderer.appendChild(this.drawingService.drawing, elDeleteMark);
+        this.rendererService.renderer.appendChild(
+          this.drawingService.drawing,
+          elDeleteMark
+        );
         this.deleteMarkList.push(elDeleteMark);
       }
     });
@@ -173,7 +229,13 @@ export class EraserToolService implements Tools {
     const eraserBox = this.eraser.getBoundingClientRect();
     this.deleteableList.forEach((el) => {
       const elementBox = el.getBoundingClientRect();
-      if (this.isElementInContact(eraserBox, elementBox, this.strToNum(el.style.strokeWidth))) {
+      if (
+        this.isElementInContact(
+          eraserBox,
+          elementBox,
+          this.strToNum(el.style.strokeWidth)
+        )
+      ) {
         elementInContact.push(el);
       }
     });
@@ -182,24 +244,52 @@ export class EraserToolService implements Tools {
 
   /// Constructeur d'élément indicateur de sélection
   private createDeleteMarkElement(el: SVGElement): SVGElement {
-
     let deleteMark: SVGElement;
-    if (el.tagName === 'g' || el.tagName === 'text' || el.tagName === 'image') {
+    if (el.tagName === "g" || el.tagName === "text" || el.tagName === "image") {
       const elBox = el.getBoundingClientRect();
-      deleteMark = this.rendererService.renderer.createElement('rect', 'svg');
-      this.rendererService.renderer.setAttribute(deleteMark, 'width', `${elBox.width}px`);
-      this.rendererService.renderer.setAttribute(deleteMark, 'height', `${elBox.height}px`);
-      this.rendererService.renderer.setAttribute(deleteMark, 'x',
-        `${elBox.left - this.drawingService.drawing.getBoundingClientRect().left}px`);
-      this.rendererService.renderer.setAttribute(deleteMark, 'y', `${elBox.top}px`);
+      deleteMark = this.rendererService.renderer.createElement("rect", "svg");
+      this.rendererService.renderer.setAttribute(
+        deleteMark,
+        "width",
+        `${elBox.width}px`
+      );
+      this.rendererService.renderer.setAttribute(
+        deleteMark,
+        "height",
+        `${elBox.height}px`
+      );
+      this.rendererService.renderer.setAttribute(
+        deleteMark,
+        "x",
+        `${
+          elBox.left - this.drawingService.drawing.getBoundingClientRect().left
+        }px`
+      );
+      this.rendererService.renderer.setAttribute(
+        deleteMark,
+        "y",
+        `${elBox.top}px`
+      );
     } else {
       deleteMark = el.cloneNode() as SVGElement;
     }
-    this.rendererService.renderer.setAttribute(deleteMark, 'id', `${el.id}-delete`);
-    this.rendererService.renderer.setStyle(deleteMark, 'strokeWidth', `${this.strToNum(el.style.strokeWidth) + TARGET_STROKE_WIDTH}`);
-    this.rendererService.renderer.setStyle(deleteMark, 'fill', 'none');
-    this.rendererService.renderer.setStyle(deleteMark, 'stroke', 'red');
-    this.rendererService.renderer.setAttribute(deleteMark, 'pointer-events', 'none');
+    this.rendererService.renderer.setAttribute(
+      deleteMark,
+      "id",
+      `${el.id}-delete`
+    );
+    this.rendererService.renderer.setStyle(
+      deleteMark,
+      "strokeWidth",
+      `${this.strToNum(el.style.strokeWidth) + TARGET_STROKE_WIDTH}`
+    );
+    this.rendererService.renderer.setStyle(deleteMark, "fill", "none");
+    this.rendererService.renderer.setStyle(deleteMark, "stroke", "red");
+    this.rendererService.renderer.setAttribute(
+      deleteMark,
+      "pointer-events",
+      "none"
+    );
     return deleteMark;
   }
 
@@ -213,10 +303,14 @@ export class EraserToolService implements Tools {
       const lowerElBoundingBox = lowerEl.getBoundingClientRect();
       for (const pairHigherEl of this.drawingService.getObjectList()) {
         if (pairHigherEl[0] > lowerId) {
-          if (this.isElementCompletelyUnder(
-            pairHigherEl[1].getBoundingClientRect(), this.strToNum(pairHigherEl[1].style.strokeWidth),
-            lowerElBoundingBox, lowerElStrokeWidth,
-          )) {
+          if (
+            this.isElementCompletelyUnder(
+              pairHigherEl[1].getBoundingClientRect(),
+              this.strToNum(pairHigherEl[1].style.strokeWidth),
+              lowerElBoundingBox,
+              lowerElStrokeWidth
+            )
+          ) {
             isCovered = true;
           }
         }
@@ -229,25 +323,39 @@ export class EraserToolService implements Tools {
 
   /// Vérifie si un item est contenu dans un autre
   private isElementCompletelyUnder(
-    rect1: ClientRect | DOMRect, rect1StrokeWidth: number, rect2: ClientRect | DOMRect, rect2StrokeWidth: number,
+    rect1: ClientRect | DOMRect,
+    rect1StrokeWidth: number,
+    rect2: ClientRect | DOMRect,
+    rect2StrokeWidth: number
   ): boolean {
-    return rect1.left - rect1StrokeWidth < rect2.left + rect2StrokeWidth
-      && rect1.right + rect1StrokeWidth > rect2.right - rect2StrokeWidth
-      && rect1.top - rect1StrokeWidth < rect2.top + rect2StrokeWidth
-      && rect1.bottom + rect1StrokeWidth > rect2.bottom - rect2StrokeWidth;
+    return (
+      rect1.left - rect1StrokeWidth < rect2.left + rect2StrokeWidth &&
+      rect1.right + rect1StrokeWidth > rect2.right - rect2StrokeWidth &&
+      rect1.top - rect1StrokeWidth < rect2.top + rect2StrokeWidth &&
+      rect1.bottom + rect1StrokeWidth > rect2.bottom - rect2StrokeWidth
+    );
   }
 
   /// Vérifie si un élément est en catact avec un autre
-  private isElementInContact(rect1: ClientRect | DOMRect, rect2: ClientRect | DOMRect, rect2StrokeWidth: number): boolean {
+  private isElementInContact(
+    rect1: ClientRect | DOMRect,
+    rect2: ClientRect | DOMRect,
+    rect2StrokeWidth: number
+  ): boolean {
     return !(
-      rect1.left > rect2.right + rect2StrokeWidth
-      || rect1.right < rect2.left - rect2StrokeWidth
-      || rect1.top > rect2.bottom + rect2StrokeWidth
-      || rect1.bottom < rect2.top - rect2StrokeWidth
+      rect1.left > rect2.right + rect2StrokeWidth ||
+      rect1.right < rect2.left - rect2StrokeWidth ||
+      rect1.top > rect2.bottom + rect2StrokeWidth ||
+      rect1.bottom < rect2.top - rect2StrokeWidth
     );
   }
 
   private strToNum(str: string | null) {
-    return str ? +str.replace(/[^-?\d]+/g, ',').split(',').filter((el) => el !== '') : 0;
+    return str
+      ? +str
+          .replace(/[^-?\d]+/g, ",")
+          .split(",")
+          .filter((el) => el !== "")
+      : 0;
   }
 }

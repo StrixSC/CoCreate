@@ -19,11 +19,11 @@ import { DrawingState, ShapeType } from 'src/app/model/IAction.model';
 /// Outil pour créer des ellipse, click suivis de bouge suivis de relache crée l'ellipse
 /// et avec shift créer un cercle
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class ToolEllipseService implements Tools {
-  readonly faIcon: IconDefinition = faCircle;
-  readonly toolName = 'Outil Ellipse';
+  readonly faIcon: any = faCircle;
+  readonly toolName = "Outil Ellipse";
   readonly id = ToolIdConstants.ELLIPSE_ID;
 
   private ellipse: FilledShape | null;
@@ -46,10 +46,10 @@ export class ToolEllipseService implements Tools {
     private colorTool: ToolsColorService,
     private drawingService: DrawingService,
     private rendererService: RendererProviderService,
-    private syncService: SyncDrawingService,
+    private syncService: SyncDrawingService
   ) {
     this.strokeWidth = new FormControl(1, Validators.min(1));
-    this.ellipseStyle = new FormControl('fill');
+    this.ellipseStyle = new FormControl("fill");
     this.parameters = new FormGroup({
       strokeWidth: this.strokeWidth,
       ellipseStyle: this.ellipseStyle,
@@ -65,26 +65,40 @@ export class ToolEllipseService implements Tools {
 
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
       this.isDrawing = true;
-      this.contour = this.rendererService.renderer.createElement('rect', 'svg');
-      this.rendererService.renderer.setStyle(this.contour, 'stroke', `rgba(0, 0, 0, 1)`);
-      this.rendererService.renderer.setStyle(this.contour, 'stroke-width', `1`);
-      this.rendererService.renderer.setStyle(this.contour, 'stroke-dasharray', `10,10`);
-      this.rendererService.renderer.setStyle(this.contour, 'd', `M5 40 l215 0`);
-      this.rendererService.renderer.setStyle(this.contour, 'fill', `none`);
+      this.contour = this.rendererService.renderer.createElement("rect", "svg");
+      this.rendererService.renderer.setStyle(
+        this.contour,
+        "stroke",
+        `rgba(0, 0, 0, 1)`
+      );
+      this.rendererService.renderer.setStyle(this.contour, "stroke-width", `1`);
+      this.rendererService.renderer.setStyle(
+        this.contour,
+        "stroke-dasharray",
+        `10,10`
+      );
+      this.rendererService.renderer.setStyle(this.contour, "d", `M5 40 l215 0`);
+      this.rendererService.renderer.setStyle(this.contour, "fill", `none`);
       if (this.contour) {
         this.contourId = this.drawingService.addObject(this.contour);
       }
 
-      const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
+      const offset: { x: number; y: number } =
+        this.offsetManager.offsetFromMouseEvent(event);
 
       this.x = offset.x;
       this.y = offset.y;
 
       this.ellipse = {
-        x: this.x, y: this.y,
-        width: 0, height: 0,
+        x: this.x,
+        y: this.y,
+        width: 0,
+        height: 0,
         strokeWidth: this.strokeWidth.value as number,
-        fill: 'none', stroke: 'none', fillOpacity: 'none', strokeOpacity: 'none',
+        fill: "none",
+        stroke: "none",
+        fillOpacity: "none",
+        strokeOpacity: "none",
       };
 
       if (event.button === LEFT_CLICK) {
@@ -106,14 +120,26 @@ export class ToolEllipseService implements Tools {
           this.ellipseStyle.value
         );
       }
-      this.syncService.sendShape({ x: event.offsetX, y: event.offsetY }, DrawingState.down, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse);
+      this.syncService.sendShape(
+        { x: event.offsetX, y: event.offsetY },
+        DrawingState.down,
+        this.ellipseStyle.value,
+        ShapeType.Ellipse,
+        this.ellipse
+      );
     }
   }
 
   /// Quand le bouton de la sourie est relaché, l'objet courrant de l'outil est mis a null.
   onRelease(event: MouseEvent): void {
     if (this.ellipse && this.isDrawing) {
-      this.syncService.sendShape({ x: event.offsetX, y: event.offsetY }, DrawingState.up, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse!);
+      this.syncService.sendShape(
+        { x: event.offsetX, y: event.offsetY },
+        DrawingState.up,
+        this.ellipseStyle.value,
+        ShapeType.Ellipse,
+        this.ellipse!
+      );
       this.ellipse = null;
       this.isDrawing = false;
     }
@@ -122,21 +148,30 @@ export class ToolEllipseService implements Tools {
 
   /// Quand le bouton de la sourie est apuyé et on bouge celle-ci, l'objet courrant subit des modifications.
   onMove(event: MouseEvent): void {
-    const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
+    const offset: { x: number; y: number } =
+      this.offsetManager.offsetFromMouseEvent(event);
     if (this.isDrawing && this.ellipse) {
-      const command = new EllipseCommand(this.rendererService.renderer, this.ellipse, this.drawingService);
+      const command = new EllipseCommand(
+        this.rendererService.renderer,
+        this.ellipse,
+        this.drawingService
+      );
       this.setSize(command, offset.x, offset.y);
-      this.syncService.sendShape({ x: event.offsetX, y: event.offsetY }, DrawingState.move, this.ellipseStyle.value, ShapeType.Ellipse, this.ellipse!);
+      this.syncService.sendShape(
+        { x: event.offsetX, y: event.offsetY },
+        DrawingState.move,
+        this.ellipseStyle.value,
+        ShapeType.Ellipse,
+        this.ellipse!
+      );
     }
   }
 
   /// Verification de la touche shift
-  onKeyDown(event: KeyboardEvent): void {
-  }
+  onKeyDown(event: KeyboardEvent): void {}
 
   /// Verification de la touche shift
-  onKeyUp(event: KeyboardEvent): void {
-  }
+  onKeyUp(event: KeyboardEvent): void {}
 
   pickupTool(): void {
     return;
@@ -146,12 +181,16 @@ export class ToolEllipseService implements Tools {
   }
 
   /// Transforme le size de l'objet courrant avec un x et un y en entrée
-  private setSize(command: EllipseCommand, mouseX: number, mouseY: number): void {
+  private setSize(
+    command: EllipseCommand,
+    mouseX: number,
+    mouseY: number
+  ): void {
     if (!this.ellipse) {
       return;
     }
     let strokeFactor = 0;
-    if (this.ellipse.stroke !== 'none') {
+    if (this.ellipse.stroke !== "none") {
       strokeFactor = this.strokeWidth.value;
     }
 
@@ -172,7 +211,7 @@ export class ToolEllipseService implements Tools {
 
     command.setCX(xValue);
     command.setCY(yValue);
-    command.setHeight((height - strokeFactor) <= 0 ? 1 : (height - strokeFactor));
-    command.setWidth((width - strokeFactor) <= 0 ? 1 : (width - strokeFactor));
+    command.setHeight(height - strokeFactor <= 0 ? 1 : height - strokeFactor);
+    command.setWidth(width - strokeFactor <= 0 ? 1 : width - strokeFactor);
   }
 }

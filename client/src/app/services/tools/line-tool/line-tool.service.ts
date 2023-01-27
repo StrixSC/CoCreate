@@ -17,11 +17,11 @@ import { Line } from './line.model';
 /// Service de l'outil ligne, permet de créer des polyline en svg
 /// Il est possible d'ajuster le stroke width dans le form
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class LineToolService implements Tools {
-  readonly toolName = 'Outil Ligne';
-  readonly faIcon: IconDefinition = faProjectDiagram;
+  readonly toolName = "Outil Ligne";
+  readonly faIcon: any = faProjectDiagram;
   readonly id = ToolIdConstants.LINE_ID;
 
   private currentMouseLocation: Point;
@@ -42,12 +42,12 @@ export class LineToolService implements Tools {
     private offsetManager: OffsetManagerService,
     private colorTool: ToolsColorService,
     private drawingService: DrawingService,
-    private rendererService: RendererProviderService,
+    private rendererService: RendererProviderService
   ) {
     this.strokeWidth = new FormControl(INITIAL_WIDTH);
     this.diameter = new FormControl(3 * INITIAL_WIDTH);
-    this.rectStyleMotif = new FormControl('line');
-    this.rectStyleJonction = new FormControl('round');
+    this.rectStyleMotif = new FormControl("line");
+    this.rectStyleJonction = new FormControl("round");
     this.parameters = new FormGroup({
       strokeWidth: this.strokeWidth,
       diameter: this.diameter,
@@ -59,7 +59,8 @@ export class LineToolService implements Tools {
   /// Création d'un polyline selon la position de l'evenement de souris, choisi les bonnes couleurs selon le clique de souris
   onPressed(event: MouseEvent): void {
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
-      const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
+      const offset: { x: number; y: number } =
+        this.offsetManager.offsetFromMouseEvent(event);
       this.currentMouseLocation = offset;
       if (this.verifyDoubleClick()) {
         this.onDoublePressed();
@@ -71,10 +72,14 @@ export class LineToolService implements Tools {
           markerId: this.markerId,
           pointsList: [offset],
           strokeWidth: this.strokeWidth.value,
-          fill: 'none', stroke: 'none',
-          fillOpacity: 'none', strokeOpacity: 'none',
-          strokeLinecap: 'none', strokeLinejoin: 'none', strokeDasharray: 'none',
-          markerVisibility: 'hidden',
+          fill: "none",
+          stroke: "none",
+          fillOpacity: "none",
+          strokeOpacity: "none",
+          strokeLinecap: "none",
+          strokeLinejoin: "none",
+          strokeDasharray: "none",
+          markerVisibility: "hidden",
         };
         this.markerId++;
         this.selectStyleJonction();
@@ -86,14 +91,17 @@ export class LineToolService implements Tools {
           this.line.stroke = this.colorTool.secondaryColorString;
           this.line.strokeOpacity = this.colorTool.secondaryAlpha.toString();
         }
-        this.lineCommand = new LineCommand(this.rendererService.renderer, this.line, this.drawingService);
+        this.lineCommand = new LineCommand(
+          this.rendererService.renderer,
+          this.line,
+          this.drawingService
+        );
         this.lineCommand.execute();
       }
       if (this.lineCommand) {
         this.lineCommand.addPoint(offset);
       }
     }
-
   }
 
   /// Réinitialisation de l'outil après avoir laisser le clique de la souris
@@ -109,7 +117,8 @@ export class LineToolService implements Tools {
   /// Ajout d'un point seulon le déplacement de la souris
   onMove(event: MouseEvent): void {
     if (this.lineCommand && !this.returnCommand) {
-      this.currentMouseLocation = this.offsetManager.offsetFromMouseEvent(event);
+      this.currentMouseLocation =
+        this.offsetManager.offsetFromMouseEvent(event);
       this.lineCommand.updatePoint(this.currentMouseLocation);
     }
   }
@@ -124,7 +133,11 @@ export class LineToolService implements Tools {
   /// Verification de la touche appuyer pour effectuer le comportement voulu
   onKeyDown(event: KeyboardEvent): void {
     if (this.lineCommand) {
-      if (event.code === KeyCodes.esc || (event.code === KeyCodes.backSpace && this.lineCommand.pointsLength <= 2)) {
+      if (
+        event.code === KeyCodes.esc ||
+        (event.code === KeyCodes.backSpace &&
+          this.lineCommand.pointsLength <= 2)
+      ) {
         this.lineCommand.undo();
         this.lineCommand = null;
       } else if (event.code === KeyCodes.backSpace) {
@@ -144,7 +157,9 @@ export class LineToolService implements Tools {
     /// verification apres un delai
     if (this.clickNumber === 1) {
       /// apres 200ms seconde on remet le nombre d'evement a zero
-      setTimeout(() => { this.clickNumber = 0; }, 200);
+      setTimeout(() => {
+        this.clickNumber = 0;
+      }, 200);
     }
     if (this.clickNumber >= 2) {
       this.clickNumber = 0;
@@ -173,16 +188,16 @@ export class LineToolService implements Tools {
   selectStyleJonction(): void {
     if (this.line) {
       switch (this.rectStyleJonction.value) {
-        case 'round':
-          this.line.strokeLinecap = 'round';
-          this.line.strokeLinejoin = 'round';
+        case "round":
+          this.line.strokeLinecap = "round";
+          this.line.strokeLinejoin = "round";
           break;
-        case 'angle':
-          this.line.strokeLinecap = 'square';
-          this.line.strokeLinejoin = 'miter';
+        case "angle":
+          this.line.strokeLinecap = "square";
+          this.line.strokeLinejoin = "miter";
           break;
-        case 'marker':
-          this.line.markerVisibility = 'visible';
+        case "marker":
+          this.line.markerVisibility = "visible";
           break;
       }
     }
@@ -192,10 +207,10 @@ export class LineToolService implements Tools {
   selectStyleMotif(): void {
     if (this.line) {
       switch (this.rectStyleMotif.value) {
-        case 'largeDasharray':
+        case "largeDasharray":
           this.line.strokeDasharray = `${this.strokeWidth.value * 2}`;
           break;
-        case 'smallDasharray':
+        case "smallDasharray":
           this.line.strokeDasharray = `${1}px ${this.strokeWidth.value * 1.5}`;
           break;
       }

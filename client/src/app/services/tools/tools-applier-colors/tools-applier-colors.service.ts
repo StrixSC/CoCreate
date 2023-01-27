@@ -13,40 +13,42 @@ import { ColorApplierCommand } from './color-applier-command';
 
 /// Outil pour changer la couleur d'un objet, clique gauche change la couleur primaire et clique droit la couleur secondaire
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class ToolsApplierColorsService implements Tools {
   readonly id = ToolIdConstants.APPLIER_ID;
-  readonly faIcon: IconDefinition = faTint;
-  readonly toolName = 'Outil Applicateur de couleur';
+  readonly faIcon: any = faTint;
+  readonly toolName = "Outil Applicateur de couleur";
   private colorApplierCommand: ColorApplierCommand | null;
   parameters: FormGroup;
 
   constructor(
     private toolsColorService: ToolsColorService,
     private rendererService: RendererProviderService,
-    private commandInvokerService: CommandInvokerService,
-  ) { }
+    private commandInvokerService: CommandInvokerService
+  ) {}
 
   // Changer la couleur de fond d'un trait sélectionné
   changeColor(target1: SVGElement[]): void | ICommand {
     let target = target1[0];
-    if (target.tagName === 'tspan') {
+    if (target.tagName === "tspan") {
       target = target.parentNode as SVGElement;
     }
-    const colorAttributeString = 'primaryColor';
-    const alphaAttributeString = 'primaryOpacity';
+    const colorAttributeString = "primaryColor";
+    const alphaAttributeString = "primaryOpacity";
 
     this.colorApplierCommand = new ColorApplierCommand(
       this.rendererService.renderer,
       target,
       this.toolsColorService.primaryColorString,
       this.toolsColorService.primaryAlpha,
-      colorAttributeString, alphaAttributeString,
+      colorAttributeString,
+      alphaAttributeString
     );
     if (this.colorApplierCommand) {
       this.colorApplierCommand.execute();
-      const tempColorApplierCommand: ColorApplierCommand = this.colorApplierCommand;
+      const tempColorApplierCommand: ColorApplierCommand =
+        this.colorApplierCommand;
       this.colorApplierCommand = null;
       this.commandInvokerService.executeCommand(tempColorApplierCommand);
       return tempColorApplierCommand;
@@ -57,26 +59,31 @@ export class ToolsApplierColorsService implements Tools {
   /// À l'appuis d'un clique de souris, on récupère l'objet cliqué et on modifie sa couleur
   onPressed(event: MouseEvent): void {
     let target = event.target as SVGElement;
-    if (target.getAttribute('name') === 'pen' || target.tagName === 'tspan' || target.getAttribute('name') === 'feather' ||
-      target.getAttribute('name') === 'spray') {
+    if (
+      target.getAttribute("name") === "pen" ||
+      target.tagName === "tspan" ||
+      target.getAttribute("name") === "feather" ||
+      target.getAttribute("name") === "spray"
+    ) {
       target = target.parentNode as SVGElement;
     }
     let colorAttributeString: string;
     let alphaAttributeString: string;
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
       if (event.button === LEFT_CLICK) {
-        colorAttributeString = 'primaryColor';
-        alphaAttributeString = 'primaryOpacity';
+        colorAttributeString = "primaryColor";
+        alphaAttributeString = "primaryOpacity";
       } else {
-        colorAttributeString = 'secondaryColor';
-        alphaAttributeString = 'secondaryOpacity';
+        colorAttributeString = "secondaryColor";
+        alphaAttributeString = "secondaryOpacity";
       }
       this.colorApplierCommand = new ColorApplierCommand(
         this.rendererService.renderer,
         target,
         this.toolsColorService.primaryColorString,
         this.toolsColorService.primaryAlpha,
-        colorAttributeString, alphaAttributeString,
+        colorAttributeString,
+        alphaAttributeString
       );
     }
   }
@@ -85,7 +92,8 @@ export class ToolsApplierColorsService implements Tools {
   onRelease(event: MouseEvent): void | ICommand {
     if (this.colorApplierCommand) {
       this.colorApplierCommand.execute();
-      const tempColorApplierCommand: ColorApplierCommand = this.colorApplierCommand;
+      const tempColorApplierCommand: ColorApplierCommand =
+        this.colorApplierCommand;
       this.colorApplierCommand = null;
       return tempColorApplierCommand;
     }

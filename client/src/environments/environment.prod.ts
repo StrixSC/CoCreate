@@ -3,7 +3,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  serverURL: 'https://colorimage-109-3900.herokuapp.com/',
+  serverURL: "https://cocreate-server.onrender.com",
 };
 
 /*

@@ -19,11 +19,11 @@ import { setStyle } from 'src/app/utils/colors';
 /// Outil pour créer des rectangle, click suivis de bouge suivis de relache crée le rectangle
 /// et avec shift créer un carrée
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class ToolRectangleService implements Tools {
-  readonly faIcon: IconDefinition = faSquareFull;
-  readonly toolName = 'Outil Rectangle';
+  readonly faIcon: any = faSquareFull;
+  readonly toolName = "Outil Rectangle";
   readonly id = ToolIdConstants.RECTANGLE_ID;
 
   private rectangle: FilledShape | null = null;
@@ -50,7 +50,7 @@ export class ToolRectangleService implements Tools {
     private syncService: SyncDrawingService
   ) {
     this.strokeWidth = new FormControl(1, Validators.min(1));
-    this.rectStyle = new FormControl('fill');
+    this.rectStyle = new FormControl("fill");
     this.parameters = new FormGroup({
       strokeWidth: this.strokeWidth,
       rectStyle: this.rectStyle,
@@ -66,16 +66,22 @@ export class ToolRectangleService implements Tools {
 
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
       this.isDrawing = true;
-      const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
+      const offset: { x: number; y: number } =
+        this.offsetManager.offsetFromMouseEvent(event);
       this.x = offset.x;
       this.y = offset.y;
       this.oldX = offset.x;
       this.oldY = offset.y;
       this.rectangle = {
-        x: this.x, y: this.y,
-        width: 0, height: 0,
+        x: this.x,
+        y: this.y,
+        width: 0,
+        height: 0,
         strokeWidth: this.strokeWidth.value as number,
-        fill: 'none', stroke: 'none', fillOpacity: 'none', strokeOpacity: 'none',
+        fill: "none",
+        stroke: "none",
+        fillOpacity: "none",
+        strokeOpacity: "none",
       };
       if (event.button === LEFT_CLICK) {
         setStyle(
@@ -96,17 +102,34 @@ export class ToolRectangleService implements Tools {
           this.rectStyle.value
         );
       }
-      this.syncService.sendShape({ x: offset.x, y: offset.y }, DrawingState.down, this.rectStyle.value, ShapeType.Rectangle, this.rectangle);
+      this.syncService.sendShape(
+        { x: offset.x, y: offset.y },
+        DrawingState.down,
+        this.rectStyle.value,
+        ShapeType.Rectangle,
+        this.rectangle
+      );
     }
   }
 
   /// Quand le bouton de la sourie est apuyé et on bouge celle-ci, l'objet courrant subit des modifications.
   onMove(event: MouseEvent): void {
-    const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
+    const offset: { x: number; y: number } =
+      this.offsetManager.offsetFromMouseEvent(event);
     if (this.rectangle && this.isDrawing) {
-      const recCommand = new RectangleCommand(this.rendererService.renderer, this.rectangle, this.drawingService);
+      const recCommand = new RectangleCommand(
+        this.rendererService.renderer,
+        this.rectangle,
+        this.drawingService
+      );
       this.setSize(recCommand, this.rectangle, offset.x, offset.y);
-      this.syncService.sendShape(offset, DrawingState.move, this.rectStyle.value, ShapeType.Rectangle, this.rectangle);
+      this.syncService.sendShape(
+        offset,
+        DrawingState.move,
+        this.rectStyle.value,
+        ShapeType.Rectangle,
+        this.rectangle
+      );
     }
   }
 
@@ -114,7 +137,13 @@ export class ToolRectangleService implements Tools {
   onRelease(event: MouseEvent): void {
     this.isSquare = false;
     if (this.rectangle && this.isDrawing) {
-      this.syncService.sendShape({ x: event.offsetX, y: event.offsetY }, DrawingState.up, this.rectStyle.value, ShapeType.Rectangle, this.rectangle!);
+      this.syncService.sendShape(
+        { x: event.offsetX, y: event.offsetY },
+        DrawingState.up,
+        this.rectStyle.value,
+        ShapeType.Rectangle,
+        this.rectangle!
+      );
       this.isDrawing = false;
       this.rectangle = null;
     }
@@ -125,7 +154,12 @@ export class ToolRectangleService implements Tools {
     if (event.shiftKey) {
       this.isSquare = true;
       if (this.rectangleCommand && this.rectangle) {
-        this.setSize(this.rectangleCommand, this.rectangle, this.oldX, this.oldY);
+        this.setSize(
+          this.rectangleCommand,
+          this.rectangle,
+          this.oldX,
+          this.oldY
+        );
       }
     }
   }
@@ -135,7 +169,12 @@ export class ToolRectangleService implements Tools {
     if (!event.shiftKey) {
       this.isSquare = false;
       if (this.rectangleCommand && this.rectangle) {
-        this.setSize(this.rectangleCommand, this.rectangle, this.oldX, this.oldY);
+        this.setSize(
+          this.rectangleCommand,
+          this.rectangle,
+          this.oldX,
+          this.oldY
+        );
       }
     }
   }
@@ -149,12 +188,17 @@ export class ToolRectangleService implements Tools {
   }
 
   /// Transforme le size de l'objet courrant avec un x et un y en entrée
-  setSize(rectangleCommand: RectangleCommand, rectangle: FilledShape, mouseX: number, mouseY: number): void {
+  setSize(
+    rectangleCommand: RectangleCommand,
+    rectangle: FilledShape,
+    mouseX: number,
+    mouseY: number
+  ): void {
     if (!rectangleCommand || !rectangle) {
       return;
     }
     let strokeFactor = 0;
-    if (rectangle.stroke !== 'none') {
+    if (rectangle.stroke !== "none") {
       strokeFactor = this.strokeWidth.value;
     }
 
@@ -176,23 +220,32 @@ export class ToolRectangleService implements Tools {
     if (this.isSquare) {
       const minSide = Math.min(width, height);
       if (mouseX < this.x) {
-        xValue += (width - minSide);
+        xValue += width - minSide;
       }
       if (mouseY < this.y) {
-        yValue += (height - minSide);
+        yValue += height - minSide;
       }
       width = minSide;
       height = minSide;
     }
 
     rectangleCommand.setX(
-      (width - strokeFactor) <= 0 ? xValue + strokeFactor / 2 + (width - strokeFactor) : xValue + strokeFactor / 2);
+      width - strokeFactor <= 0
+        ? xValue + strokeFactor / 2 + (width - strokeFactor)
+        : xValue + strokeFactor / 2
+    );
     rectangleCommand.setY(
-      (height - strokeFactor) <= 0 ? yValue + strokeFactor / 2 + (height - strokeFactor) : yValue + strokeFactor / 2);
-    rectangleCommand.setHeight((height - strokeFactor) <= 0 ? 1 : (height - strokeFactor));
-    rectangleCommand.setWidth((width - strokeFactor) <= 0 ? 1 : (width - strokeFactor));
+      height - strokeFactor <= 0
+        ? yValue + strokeFactor / 2 + (height - strokeFactor)
+        : yValue + strokeFactor / 2
+    );
+    rectangleCommand.setHeight(
+      height - strokeFactor <= 0 ? 1 : height - strokeFactor
+    );
+    rectangleCommand.setWidth(
+      width - strokeFactor <= 0 ? 1 : width - strokeFactor
+    );
   }
 
   /// Pour definir le style du rectangle (complet, contour, centre)
-
 }

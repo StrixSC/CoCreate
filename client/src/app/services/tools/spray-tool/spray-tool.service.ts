@@ -18,11 +18,11 @@ const VALIDATOR_EMISSION = 1;
 const DELAY = 10; // le delai est en millisecondes
 /// Service pour generer des commandes spray et ajuster les parametre de cette dernière
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class SprayToolService implements Tools {
-  readonly toolName = 'Outil Aérosol';
-  readonly faIcon: IconDefinition = faSprayCan;
+  readonly toolName = "Outil Aérosol";
+  readonly faIcon: any = faSprayCan;
   readonly id = ToolIdConstants.SPRAY_ID;
   private diameter: FormControl;
   private emissionPerSecond: FormControl;
@@ -36,10 +36,20 @@ export class SprayToolService implements Tools {
     private offsetManager: OffsetManagerService,
     private colorTool: ToolsColorService,
     private drawingService: DrawingService,
-    private rendererService: RendererProviderService) {
-    this.diameter = new FormControl(INITIAL_DIAMETER, Validators.min(VALIDATOR_DIAMETER));
-    this.emissionPerSecond = new FormControl(INITIAL_EMISSION, Validators.min(VALIDATOR_EMISSION));
-    this.circleRadius = new FormControl(INITIAL_CIRCLERADIUS, Validators.min(VALIDATOR_DIAMETER));
+    private rendererService: RendererProviderService
+  ) {
+    this.diameter = new FormControl(
+      INITIAL_DIAMETER,
+      Validators.min(VALIDATOR_DIAMETER)
+    );
+    this.emissionPerSecond = new FormControl(
+      INITIAL_EMISSION,
+      Validators.min(VALIDATOR_EMISSION)
+    );
+    this.circleRadius = new FormControl(
+      INITIAL_CIRCLERADIUS,
+      Validators.min(VALIDATOR_DIAMETER)
+    );
     this.parameters = new FormGroup({
       diameter: this.diameter,
       emissionPerSecond: this.emissionPerSecond,
@@ -54,29 +64,37 @@ export class SprayToolService implements Tools {
         this.spray = {
           pointsList: [],
           radius: this.circleRadius.value,
-          fill: 'none',
-          stroke: 'none',
-          fillOpacity: 'none',
-          strokeOpacity: 'none',
+          fill: "none",
+          stroke: "none",
+          fillOpacity: "none",
+          strokeOpacity: "none",
         };
         if (event.button === LEFT_CLICK) {
           this.spray.fill = this.colorTool.primaryColorString;
           this.spray.strokeOpacity = this.colorTool.primaryAlpha.toString();
         } else {
-
           this.spray.fill = this.colorTool.secondaryColorString;
           this.spray.strokeOpacity = this.colorTool.secondaryAlpha.toString();
         }
-        this.sprayCommand = new SprayCommand(this.rendererService.renderer, this.spray, this.drawingService);
+        this.sprayCommand = new SprayCommand(
+          this.rendererService.renderer,
+          this.spray,
+          this.drawingService
+        );
         this.sprayCommand.execute();
         this.offset = this.offsetManager.offsetFromMouseEvent(event);
-        this.intervalTime = window.setInterval((sprayCommandRef: SprayCommand, spray: Spray) => {
-          /// Mettre a jour la table des points
+        this.intervalTime = window.setInterval(
+          (sprayCommandRef: SprayCommand, spray: Spray) => {
+            /// Mettre a jour la table des points
 
-          this.updatePoints(spray, this.offset);
-          /// Faire afficher les points
-          sprayCommandRef.updatePoint();
-        }, DELAY, this.sprayCommand, this.spray);
+            this.updatePoints(spray, this.offset);
+            /// Faire afficher les points
+            sprayCommandRef.updatePoint();
+          },
+          DELAY,
+          this.sprayCommand,
+          this.spray
+        );
       }
     }
   }
@@ -120,9 +138,12 @@ export class SprayToolService implements Tools {
       // determiner l'angle aleatoire compris entre 0 et 2pi
       const angle = Math.random() * 2 * Math.PI;
       // determiner le rayon aleatoire compris entre 0 et le rayon max
-      const radius = Math.random() * this.diameter.value / 2;
+      const radius = (Math.random() * this.diameter.value) / 2;
       // calculer la position en  fonction de l'angle et du rayon
-      const newPoint = ({ x: radius * Math.cos(angle) + offset.x, y: radius * Math.sin(angle) + offset.y });
+      const newPoint = {
+        x: radius * Math.cos(angle) + offset.x,
+        y: radius * Math.sin(angle) + offset.y,
+      };
       // ajouter le point au tableau de point de l'objet
       tablePoint.push(newPoint);
     }

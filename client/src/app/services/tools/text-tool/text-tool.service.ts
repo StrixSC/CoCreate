@@ -16,11 +16,11 @@ import { Text } from './text.model';
 /// Service de l'outil texte, permet d'ecrire du en svg
 /// Il est possible d'ajuster le stroke width dans le form
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class TextToolService implements Tools {
-  readonly toolName = 'Outil Texte';
-  readonly faIcon: IconDefinition = faHeading;
+  readonly toolName = "Outil Texte";
+  readonly faIcon: any = faHeading;
   readonly id = ToolIdConstants.TEXT_ID;
 
   private x: number;
@@ -41,12 +41,11 @@ export class TextToolService implements Tools {
     private drawingService: DrawingService,
     private rendererService: RendererProviderService,
     private commandInvoker: CommandInvokerService,
-    private hotkeysEnabler: HotkeysEnablerService,
+    private hotkeysEnabler: HotkeysEnablerService
   ) {
-
     this.fontSize = new FormControl(INITIAL_TEXT_SIZE);
-    this.textAlignment = new FormControl('start');
-    this.textStyle = new FormControl('normal');
+    this.textAlignment = new FormControl("start");
+    this.textStyle = new FormControl("normal");
     this.fontFamily = new FormControl('"Times New Roman", Times, serif');
     this.parameters = new FormGroup({
       fontSize: this.fontSize,
@@ -58,10 +57,11 @@ export class TextToolService implements Tools {
       if (this.textArea) {
         this.rendererService.renderer.setStyle(
           this.textArea,
-          'color',
+          "color",
           // Disable puisqu'il s'agit d'un string a injecter dans le DOM
           // tslint:disable-next-line: max-line-length
-          `rgba(${this.colorTool.primaryColor.r},${this.colorTool.primaryColor.g},${this.colorTool.primaryColor.b},${this.colorTool.primaryAlpha})`);
+          `rgba(${this.colorTool.primaryColor.r},${this.colorTool.primaryColor.g},${this.colorTool.primaryColor.b},${this.colorTool.primaryAlpha})`
+        );
       }
     });
     this.parameters.valueChanges.subscribe(() => {
@@ -73,53 +73,131 @@ export class TextToolService implements Tools {
     });
   }
 
-  getTextArea(): HTMLTextAreaElement | null { return this.textArea; }
+  getTextArea(): HTMLTextAreaElement | null {
+    return this.textArea;
+  }
 
   /// Création d'un polyline selon la position de l'evenement de souris, choisi les bonnes couleurs selon le clique de souris
   onPressed(event: MouseEvent): void {
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
       if (this.fontSize.value > 0) {
-        const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
+        const offset: { x: number; y: number } =
+          this.offsetManager.offsetFromMouseEvent(event);
         if (!this.foreignObject) {
           this.x = offset.x;
           this.y = offset.y;
-          this.foreignObject = this.rendererService.renderer.createElement('foreignObject', 'svg');
+          this.foreignObject = this.rendererService.renderer.createElement(
+            "foreignObject",
+            "svg"
+          );
 
-          this.rendererService.renderer.setAttribute(this.foreignObject, 'x', '0px');
-          this.rendererService.renderer.setAttribute(this.foreignObject, 'y', '0px');
-          this.rendererService.renderer.setAttribute(this.foreignObject, 'width', '100%');
-          this.rendererService.renderer.setAttribute(this.foreignObject, 'height', '100%');
+          this.rendererService.renderer.setAttribute(
+            this.foreignObject,
+            "x",
+            "0px"
+          );
+          this.rendererService.renderer.setAttribute(
+            this.foreignObject,
+            "y",
+            "0px"
+          );
+          this.rendererService.renderer.setAttribute(
+            this.foreignObject,
+            "width",
+            "100%"
+          );
+          this.rendererService.renderer.setAttribute(
+            this.foreignObject,
+            "height",
+            "100%"
+          );
 
-          this.textArea = this.rendererService.renderer.createElement('textarea');
-          this.rendererService.renderer.setStyle(this.textArea, 'font-size', this.fontSize.value.toString() + 'px');
+          this.textArea =
+            this.rendererService.renderer.createElement("textarea");
           this.rendererService.renderer.setStyle(
             this.textArea,
-            'color',
+            "font-size",
+            this.fontSize.value.toString() + "px"
+          );
+          this.rendererService.renderer.setStyle(
+            this.textArea,
+            "color",
             // Disable puisqu'il s'agit d'un string a injecter dans le DOM
             // tslint:disable-next-line: max-line-length
-            `rgba(${this.colorTool.primaryColor.r},${this.colorTool.primaryColor.g},${this.colorTool.primaryColor.b},${this.colorTool.primaryAlpha})`);
-          this.rendererService.renderer.setStyle(this.textArea, 'position', 'relative');
-          this.rendererService.renderer.setStyle(this.textArea, 'left', this.x.toString() + 'px');
-          this.rendererService.renderer.setStyle(this.textArea, 'top', this.y.toString() + 'px');
-          this.rendererService.renderer.setStyle(this.textArea, 'height', this.fontSize.value.toString() + 'px');
-          this.rendererService.renderer.setStyle(this.textArea, 'width', this.fontSize.value.toString() + 'px');
-          this.rendererService.renderer.setStyle(this.textArea, 'border', 'border: 2px dashed');
-          this.rendererService.renderer.setStyle(this.textArea, 'resize', 'none');
-          this.rendererService.renderer.setStyle(this.textArea, 'background', 'transparent');
-          this.rendererService.renderer.setAttribute(this.textArea, 'autofocus', 'true');
-          this.rendererService.renderer.setAttribute(this.textArea, 'wrap', 'off');
-          this.rendererService.renderer.setProperty(this.textArea, 'id', 'input-text-tool');
-          this.rendererService.renderer.appendChild(this.foreignObject, this.textArea);
+            `rgba(${this.colorTool.primaryColor.r},${this.colorTool.primaryColor.g},${this.colorTool.primaryColor.b},${this.colorTool.primaryAlpha})`
+          );
+          this.rendererService.renderer.setStyle(
+            this.textArea,
+            "position",
+            "relative"
+          );
+          this.rendererService.renderer.setStyle(
+            this.textArea,
+            "left",
+            this.x.toString() + "px"
+          );
+          this.rendererService.renderer.setStyle(
+            this.textArea,
+            "top",
+            this.y.toString() + "px"
+          );
+          this.rendererService.renderer.setStyle(
+            this.textArea,
+            "height",
+            this.fontSize.value.toString() + "px"
+          );
+          this.rendererService.renderer.setStyle(
+            this.textArea,
+            "width",
+            this.fontSize.value.toString() + "px"
+          );
+          this.rendererService.renderer.setStyle(
+            this.textArea,
+            "border",
+            "border: 2px dashed"
+          );
+          this.rendererService.renderer.setStyle(
+            this.textArea,
+            "resize",
+            "none"
+          );
+          this.rendererService.renderer.setStyle(
+            this.textArea,
+            "background",
+            "transparent"
+          );
+          this.rendererService.renderer.setAttribute(
+            this.textArea,
+            "autofocus",
+            "true"
+          );
+          this.rendererService.renderer.setAttribute(
+            this.textArea,
+            "wrap",
+            "off"
+          );
+          this.rendererService.renderer.setProperty(
+            this.textArea,
+            "id",
+            "input-text-tool"
+          );
+          this.rendererService.renderer.appendChild(
+            this.foreignObject,
+            this.textArea
+          );
           this.setStyle(this.textArea as HTMLTextAreaElement);
           this.setAlignTextArea(this.textArea as HTMLTextAreaElement);
 
-          this.drawingService.addObject(this.foreignObject as SVGForeignObjectElement);
+          this.drawingService.addObject(
+            this.foreignObject as SVGForeignObjectElement
+          );
 
-          this.rendererService.renderer.listen(this.textArea, 'keydown', () => this.computeTextSize());
-          this.rendererService.renderer.listen(this.textArea, 'focus', () => {
+          this.rendererService.renderer.listen(this.textArea, "keydown", () =>
+            this.computeTextSize()
+          );
+          this.rendererService.renderer.listen(this.textArea, "focus", () => {
             this.hotkeysEnabler.disableHotkeys();
           });
-
         } else if (event.target && this.textArea) {
           const target: HTMLElement = event.target as HTMLElement;
           if (target.tagName !== this.textArea.tagName) {
@@ -169,28 +247,32 @@ export class TextToolService implements Tools {
         fontSize: this.fontSize.value,
         textAnchor: this.textAlignment.value,
         fontFamily: this.fontFamily.value,
-        fontStyle: '',
-        fontWeight: '',
-        fill: 'none',
+        fontStyle: "",
+        fontWeight: "",
+        fill: "none",
         fillOpacity: 0,
       };
       switch (this.textStyle.value) {
-        case 'normal':
-          text.fontStyle = 'normal';
-          text.fontWeight = 'normal';
+        case "normal":
+          text.fontStyle = "normal";
+          text.fontWeight = "normal";
           break;
-        case 'bold':
-          text.fontStyle = 'normal';
-          text.fontWeight = 'bold';
+        case "bold":
+          text.fontStyle = "normal";
+          text.fontWeight = "bold";
           break;
-        case 'italic':
-          text.fontStyle = 'italic';
-          text.fontWeight = 'normal';
+        case "italic":
+          text.fontStyle = "italic";
+          text.fontWeight = "normal";
           break;
       }
       text.fill = this.colorTool.primaryColorString;
       text.fillOpacity = this.colorTool.primaryAlpha;
-      const command = new TextCommand(this.rendererService.renderer, text, this.drawingService);
+      const command = new TextCommand(
+        this.rendererService.renderer,
+        text,
+        this.drawingService
+      );
       this.commandInvoker.executeCommand(command);
       this.drawingService.removeObject(Number(this.foreignObject.id));
       this.foreignObject = null;
@@ -201,30 +283,46 @@ export class TextToolService implements Tools {
   /// Ajustement de la taille du textArea
   private computeTextSize(): void {
     if (this.textArea) {
-      this.textArea.style.height = '1px';
-      this.textArea.style.width = '1px';
+      this.textArea.style.height = "1px";
+      this.textArea.style.width = "1px";
       const width: number = this.textArea.scrollWidth + this.fontSize.value;
       switch (this.textAlignment.value) {
-        case 'start':
-          this.rendererService.renderer.setStyle(this.textArea, 'left', this.x + 'px');
+        case "start":
+          this.rendererService.renderer.setStyle(
+            this.textArea,
+            "left",
+            this.x + "px"
+          );
 
           break;
-        case 'middle':
-          this.rendererService.renderer.setStyle(this.textArea, 'left', (this.x - width / 2) + 'px');
+        case "middle":
+          this.rendererService.renderer.setStyle(
+            this.textArea,
+            "left",
+            this.x - width / 2 + "px"
+          );
           break;
-        case 'end':
-          this.rendererService.renderer.setStyle(this.textArea, 'left', (this.x - width) + 'px');
+        case "end":
+          this.rendererService.renderer.setStyle(
+            this.textArea,
+            "left",
+            this.x - width + "px"
+          );
           break;
       }
-      this.textArea.style.height = (this.textArea.scrollHeight + this.fontSize.value) + 'px';
-      this.textArea.style.width = width + 'px';
-
+      this.textArea.style.height =
+        this.textArea.scrollHeight + this.fontSize.value + "px";
+      this.textArea.style.width = width + "px";
     }
   }
 
   /// Ajustement du format de la police
   private setFontSize(el: Element): void {
-    this.rendererService.renderer.setStyle(el, 'font-size', this.fontSize.value.toString() + 'px');
+    this.rendererService.renderer.setStyle(
+      el,
+      "font-size",
+      this.fontSize.value.toString() + "px"
+    );
   }
 
   /// Ajustement du style du text area
@@ -238,33 +336,37 @@ export class TextToolService implements Tools {
   /// Ajustement de l'alignement du text
   private setAlignTextArea(el: Element): void {
     switch (this.textAlignment.value) {
-      case 'start':
-        this.rendererService.renderer.setStyle(el, 'text-align-last', 'start');
+      case "start":
+        this.rendererService.renderer.setStyle(el, "text-align-last", "start");
         break;
-      case 'middle':
-        this.rendererService.renderer.setStyle(el, 'text-align-last', 'center');
+      case "middle":
+        this.rendererService.renderer.setStyle(el, "text-align-last", "center");
         break;
-      case 'end':
-        this.rendererService.renderer.setStyle(el, 'text-align-last', 'end');
+      case "end":
+        this.rendererService.renderer.setStyle(el, "text-align-last", "end");
         break;
     }
   }
 
   /// Ajustement de la famille de police
   private setFontFamily(el: Element): void {
-    this.rendererService.renderer.setStyle(el, 'font-family', this.fontFamily.value);
+    this.rendererService.renderer.setStyle(
+      el,
+      "font-family",
+      this.fontFamily.value
+    );
   }
 
   /// Ajustement des modificateur de police
   private setFontType(el: Element): void {
     switch (this.textStyle.value) {
-      case 'normal':
+      case "normal":
         this.setNormal(el);
         break;
-      case 'bold':
+      case "bold":
         this.setBold(el);
         break;
-      case 'italic':
+      case "italic":
         this.setItalique(el);
         break;
     }
@@ -272,26 +374,33 @@ export class TextToolService implements Tools {
 
   /// Mise en italique du texte
   private setItalique(el: Element): void {
-    this.rendererService.renderer.setStyle(el, 'font-style', 'italic');
-    this.rendererService.renderer.setStyle(el, 'font-weight', 'normal');
+    this.rendererService.renderer.setStyle(el, "font-style", "italic");
+    this.rendererService.renderer.setStyle(el, "font-weight", "normal");
   }
 
   /// Mise a la normal du texte
   private setNormal(el: Element): void {
-    this.rendererService.renderer.setStyle(el, 'font-style', 'normal');
-    this.rendererService.renderer.setStyle(el, 'font-weight', 'normal');
+    this.rendererService.renderer.setStyle(el, "font-style", "normal");
+    this.rendererService.renderer.setStyle(el, "font-weight", "normal");
   }
 
   /// Mise au gras du texte
   private setBold(el: Element): void {
-    this.rendererService.renderer.setStyle(el, 'font-style', 'normal');
-    this.rendererService.renderer.setStyle(el, 'font-weight', 'bold');
+    this.rendererService.renderer.setStyle(el, "font-style", "normal");
+    this.rendererService.renderer.setStyle(el, "font-weight", "bold");
   }
 
   /// Ajustement de la couleur du text
   private setColor(el: Element) {
-    this.rendererService.renderer.setStyle(el, 'fill', this.colorTool.primaryColorString);
-    this.rendererService.renderer.setStyle(el, 'fillOpacity', this.colorTool.primaryAlpha.toString());
+    this.rendererService.renderer.setStyle(
+      el,
+      "fill",
+      this.colorTool.primaryColorString
+    );
+    this.rendererService.renderer.setStyle(
+      el,
+      "fillOpacity",
+      this.colorTool.primaryAlpha.toString()
+    );
   }
-
 }

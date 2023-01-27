@@ -23,7 +23,7 @@ import { Pencil } from "./pencil.model";
 })
 export class PencilToolService implements Tools {
   readonly toolName = "Outil Crayon";
-  readonly faIcon: IconDefinition = faPencilAlt;
+  readonly faIcon: any = faPencilAlt;
   readonly id = ToolIdConstants.PENCIL_ID;
   private strokeWidth: FormControl;
   private pencil: Pencil | null;
@@ -34,7 +34,7 @@ export class PencilToolService implements Tools {
 
   constructor(
     private colorTool: ToolsColorService,
-    private syncDrawingService: SyncDrawingService,
+    private syncDrawingService: SyncDrawingService
   ) {
     this.strokeWidth = new FormControl(INITIAL_WIDTH);
     this.parameters = new FormGroup({

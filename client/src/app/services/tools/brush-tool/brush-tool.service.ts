@@ -16,12 +16,12 @@ import { BrushCommand } from './brush-command';
 /// Service de l'outil pinceau, permet de créer des polyline en svg
 /// Il est possible d'ajuster le stroke width et la texture
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class BrushToolService implements Tools {
   readonly id = ToolIdConstants.BRUSH_ID;
-  readonly faIcon: IconDefinition = faPaintBrush;
-  readonly toolName = 'Outil Pinceau';
+  readonly faIcon: any = faPaintBrush;
+  readonly toolName = "Outil Pinceau";
   parameters: FormGroup;
   private strokeWidth: FormControl;
   texture: FormControl;
@@ -33,7 +33,7 @@ export class BrushToolService implements Tools {
     private offsetManager: OffsetManagerService,
     private colorTool: ToolsColorService,
     private drawingService: DrawingService,
-    private rendererService: RendererProviderService,
+    private rendererService: RendererProviderService
   ) {
     this.strokeWidth = new FormControl(INITIAL_WIDTH);
     this.texture = new FormControl(this.texturesService.firstTexture.value);
@@ -47,35 +47,49 @@ export class BrushToolService implements Tools {
   onPressed(event: MouseEvent): void {
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
       if (this.strokeWidth.valid) {
-        const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
+        const offset: { x: number; y: number } =
+          this.offsetManager.offsetFromMouseEvent(event);
         this.brush = {
           pointsList: [offset],
           strokeWidth: this.strokeWidth.value,
-          fill: 'none',
-          stroke: 'none',
-          fillOpacity: 'none',
-          strokeOpacity: 'none',
+          fill: "none",
+          stroke: "none",
+          fillOpacity: "none",
+          strokeOpacity: "none",
         };
         let textureDefs: SVGDefsElement | null;
         if (event.button === LEFT_CLICK) {
           textureDefs = this.texturesService.getTextureElement(
             this.texture.value,
-            { rgb: this.colorTool.primaryColor, a: this.colorTool.primaryAlpha },
-            offset.x, offset.y,
-            this.rendererService.renderer,
+            {
+              rgb: this.colorTool.primaryColor,
+              a: this.colorTool.primaryAlpha,
+            },
+            offset.x,
+            offset.y,
+            this.rendererService.renderer
           );
         } else {
           textureDefs = this.texturesService.getTextureElement(
             this.texture.value,
-            { rgb: this.colorTool.secondaryColor, a: this.colorTool.secondaryAlpha },
-            offset.x, offset.y,
-            this.rendererService.renderer,
+            {
+              rgb: this.colorTool.secondaryColor,
+              a: this.colorTool.secondaryAlpha,
+            },
+            offset.x,
+            offset.y,
+            this.rendererService.renderer
           );
         }
         if (!textureDefs) {
           return;
         }
-        this.brushCommand = new BrushCommand(this.rendererService.renderer, this.brush, this.drawingService, textureDefs);
+        this.brushCommand = new BrushCommand(
+          this.rendererService.renderer,
+          this.brush,
+          this.drawingService,
+          textureDefs
+        );
         this.brushCommand.execute();
       }
     }
@@ -95,7 +109,9 @@ export class BrushToolService implements Tools {
   /// Ajout d'un point seulon le déplacement de la souris
   onMove(event: MouseEvent): void {
     if (this.brushCommand) {
-      this.brushCommand.addPoint(this.offsetManager.offsetFromMouseEvent(event));
+      this.brushCommand.addPoint(
+        this.offsetManager.offsetFromMouseEvent(event)
+      );
     }
   }
 
@@ -111,5 +127,4 @@ export class BrushToolService implements Tools {
   dropTool(): void {
     return;
   }
-
 }

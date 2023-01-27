@@ -48,13 +48,12 @@ export enum ActionButtonIds {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class SelectionToolService implements Tools {
-
   readonly id: number = ToolIdConstants.SELECTION_ID;
-  readonly faIcon: IconDefinition = faMousePointer;
-  readonly toolName = 'Sélection';
+  readonly faIcon: any = faMousePointer;
+  readonly toolName = "Sélection";
   readonly DEFAULT_ACTION_BUTTON_WIDTH = 12.5;
   readonly DEFAULT_ACTION_BUTTON_WIDTH_OFFSET = 30;
   readonly DEFAULT_ACTION_BUTTON_HEIGHT_OFFSET = 30;
@@ -68,8 +67,14 @@ export class SelectionToolService implements Tools {
 
   private pointsSideLength = 10;
   private pointsList: Point[] = [
-    { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 },
-    { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
   ];
 
   private activeActionType = SelectionActionTypes.None;
@@ -82,21 +87,21 @@ export class SelectionToolService implements Tools {
     {
       buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
       iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 10,
-      stroke: 'black',
-      opacity: '0.25',
-      opacityHover: '0.50',
-      iconSrc: 'assets/svg-icon/trash.svg',
+      stroke: "black",
+      opacity: "0.25",
+      opacityHover: "0.50",
+      iconSrc: "assets/svg-icon/trash.svg",
       iconId: ActionButtonIds.Delete,
     } as SelectionActionButton,
     {
       buttonWidth: this.DEFAULT_ACTION_BUTTON_WIDTH,
       iconSize: this.DEFAULT_ACTION_BUTTON_WIDTH + 2.5,
-      stroke: 'black',
-      opacity: '0.25',
-      opacityHover: '0.50',
-      iconSrc: 'assets/svg-icon/arrow.svg',
+      stroke: "black",
+      opacity: "0.25",
+      opacityHover: "0.50",
+      iconSrc: "assets/svg-icon/arrow.svg",
       iconId: ActionButtonIds.HoldRotation,
-    } as SelectionActionButton
+    } as SelectionActionButton,
   ];
   private actionButtonGroup: SVGGElement;
   private rectInversement: SVGRectElement;
@@ -118,7 +123,7 @@ export class SelectionToolService implements Tools {
     private rendererService: RendererProviderService,
     private selectionTransformService: SelectionTransformService,
     private syncService: SyncDrawingService,
-    private collaborationService: CollaborationService,
+    private collaborationService: CollaborationService
   ) {
     this.setRectInversement();
     this.setRectSelection();
@@ -132,14 +137,16 @@ export class SelectionToolService implements Tools {
   /// Avec le bouton droit, on debute une zone d'inversion.
   onPressed(event: MouseEvent): void {
     if (this.hasSelection()) {
-      const id = (event.target as SVGElement).getAttribute('iconId');
+      const id = (event.target as SVGElement).getAttribute("iconId");
       if (id) {
         const button = this.actionButtons.find((b) => b.iconId === id);
         if (button) {
           if (button.iconId === ActionButtonIds.ClockwiseRotation) {
             this.rotateClockwiseIncrementally();
             this.setSelection();
-          } else if (button.iconId === ActionButtonIds.CounterClockwiseRotation) {
+          } else if (
+            button.iconId === ActionButtonIds.CounterClockwiseRotation
+          ) {
             this.rotateCounterClockwiseIncrementally();
             this.setSelection();
           } else if (button.iconId === ActionButtonIds.Delete) {
@@ -154,42 +161,68 @@ export class SelectionToolService implements Tools {
       }
     }
 
-    if ((event.button === RIGHT_CLICK || event.button === LEFT_CLICK) && this.drawingService.drawing) {
-      const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
+    if (
+      (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) &&
+      this.drawingService.drawing
+    ) {
+      const offset: { x: number; y: number } =
+        this.offsetManager.offsetFromMouseEvent(event);
       let target = event.target as SVGElement;
 
       if (this.ctrlPoints.includes(target as SVGRectElement)) {
         this.selectionTransformService.createCommand(
-          SelectionCommandConstants.RESIZE, this.rectSelection, this.objects, offset, target as SVGRectElement,
+          SelectionCommandConstants.RESIZE,
+          this.rectSelection,
+          this.objects,
+          offset,
+          target as SVGRectElement
         );
-        this.syncService.sendResize(DrawingState.down, this.selectedActionId, 1, 1, 0, 0);
+        this.syncService.sendResize(
+          DrawingState.down,
+          this.selectedActionId,
+          1,
+          1,
+          0,
+          0
+        );
         this.allowMove = true;
         this.activeActionType = SelectionActionTypes.Resize;
         return;
       }
 
-      const actionId = target.getAttribute('actionId');
+      const actionId = target.getAttribute("actionId");
       if (event.button === LEFT_CLICK) {
         if (actionId) {
           const obj = this.drawingService.getObjectByActionId(actionId);
           if (obj) {
-            const userId = obj.getAttribute('userId');
+            const userId = obj.getAttribute("userId");
             if (userId) {
-              const isSelected = this.collaborationService.getSelectionStatus(userId, actionId);
-              const isSelectedByMe = this.collaborationService.isSelectedByUser(userId, actionId, this.syncService.defaultPayload!.userId);
+              const isSelected = this.collaborationService.getSelectionStatus(
+                userId,
+                actionId
+              );
+              const isSelectedByMe = this.collaborationService.isSelectedByUser(
+                userId,
+                actionId,
+                this.syncService.defaultPayload!.userId
+              );
               if (!isSelected || isSelectedByMe) {
                 this.objects = [];
                 this.allowMove = true;
                 this.objects.push(obj);
                 if (this.selectedActionId !== actionId) {
                   this.syncService.sendSelect(this.selectedActionId, false);
-                  this.selectedActionId = actionId
+                  this.selectedActionId = actionId;
                 }
                 this.syncService.sendSelect(this.selectedActionId, true);
                 this.setSelection();
                 this.isIn = true;
               } else {
-                this.snackBar.open('Cet élement est déjà sélectionné par un autre utilisateur.', '', { duration: 1000 });
+                this.snackBar.open(
+                  "Cet élement est déjà sélectionné par un autre utilisateur.",
+                  "",
+                  { duration: 1000 }
+                );
               }
             }
           }
@@ -207,10 +240,15 @@ export class SelectionToolService implements Tools {
         if (this.isInside(offset.x, offset.y)) {
           this.isIn = true;
           if (!this.selectionTransformService.hasCommand()) {
-            this.selectionTransformService.setCommandType(SelectionCommandConstants.NONE);
+            this.selectionTransformService.setCommandType(
+              SelectionCommandConstants.NONE
+            );
           }
         } else {
-          this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectInversement);
+          this.rendererService.renderer.appendChild(
+            this.drawingService.drawing,
+            this.rectInversement
+          );
           this.wasMoved = true;
         }
       }
@@ -221,7 +259,6 @@ export class SelectionToolService implements Tools {
   /// et on recherche les objets a l'interieur. Avec le droit, on termine la zone d'inversement et on inverse
   /// la selection des objets se situant a l'interieur.
   onRelease(event: MouseEvent): ICommand | void {
-
     if (this.isRotating) {
       this.isRotating = false;
       this.syncService.sendRotate(DrawingState.up, this.selectedActionId, 0);
@@ -232,7 +269,10 @@ export class SelectionToolService implements Tools {
 
     if (!this.allowMove) return;
 
-    if ((event.button === RIGHT_CLICK || event.button === LEFT_CLICK) && this.drawingService.drawing) {
+    if (
+      (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) &&
+      this.drawingService.drawing
+    ) {
       if (this.objects.length > 0) {
         this.syncService.sendSelect(this.selectedActionId, true);
         this.allowMove = false;
@@ -242,9 +282,23 @@ export class SelectionToolService implements Tools {
       this.shiftChanged = false;
       this.wasMoved = false;
       if (this.activeActionType === SelectionActionTypes.Translate) {
-        this.syncService.sendTranslate(DrawingState.up, this.selectedActionId, 0, 0, false);
+        this.syncService.sendTranslate(
+          DrawingState.up,
+          this.selectedActionId,
+          0,
+          0,
+          false
+        );
       } else if (this.activeActionType === SelectionActionTypes.Resize) {
-        this.syncService.sendResize(DrawingState.up, this.selectedActionId, 1, 1, 0, 0, false);
+        this.syncService.sendResize(
+          DrawingState.up,
+          this.selectedActionId,
+          1,
+          1,
+          0,
+          0,
+          false
+        );
       }
 
       this.selectionTransformService.endCommand();
@@ -253,18 +307,18 @@ export class SelectionToolService implements Tools {
 
   hoverActionButton(id: string) {
     const button = this.actionButtons.find((button) => button.iconId === id);
-    button!.buttonCircle.setAttribute('opacity', button!.opacityHover);
+    button!.buttonCircle.setAttribute("opacity", button!.opacityHover);
   }
 
   unhoverActionButton() {
     for (let button of this.actionButtons) {
-      button.buttonCircle.setAttribute('opacity', button.opacity);
+      button.buttonCircle.setAttribute("opacity", button.opacity);
     }
   }
 
   onMove(event: MouseEvent): void {
-
-    const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
+    const offset: { x: number; y: number } =
+      this.offsetManager.offsetFromMouseEvent(event);
     if (this.isRotating || !this.allowMove || !this.hasSelection()) {
       return;
     }
@@ -272,12 +326,25 @@ export class SelectionToolService implements Tools {
     if (this.drawingService.drawing) {
       if (event.buttons === 1) {
         this.wasMoved = true;
-        if (this.selectionTransformService.getCommandType() === SelectionCommandConstants.RESIZE) {
-          this.selectionTransformService.resize(event.movementX, event.movementY, offset);
+        if (
+          this.selectionTransformService.getCommandType() ===
+          SelectionCommandConstants.RESIZE
+        ) {
+          this.selectionTransformService.resize(
+            event.movementX,
+            event.movementY,
+            offset
+          );
           this.setSelection();
           return;
         } else if (this.isIn) {
-          this.syncService.sendTranslate(DrawingState.move, this.selectedActionId, event.movementX, event.movementY, false);
+          this.syncService.sendTranslate(
+            DrawingState.move,
+            this.selectedActionId,
+            event.movementX,
+            event.movementY,
+            false
+          );
           this.activeActionType = SelectionActionTypes.Translate;
           this.setSelection();
         }
@@ -301,18 +368,30 @@ export class SelectionToolService implements Tools {
   }
 
   rotateClockwiseIncrementally(): void {
-    this.syncService.sendRotate(DrawingState.down, this.selectedActionId, this.DEFAULT_ANGLE_SHIFT);
+    this.syncService.sendRotate(
+      DrawingState.down,
+      this.selectedActionId,
+      this.DEFAULT_ANGLE_SHIFT
+    );
   }
 
   rotateCounterClockwiseIncrementally(): void {
-    this.syncService.sendRotate(DrawingState.down, this.selectedActionId, -this.DEFAULT_ANGLE_SHIFT);
+    this.syncService.sendRotate(
+      DrawingState.down,
+      this.selectedActionId,
+      -this.DEFAULT_ANGLE_SHIFT
+    );
   }
 
   rotate(event: WheelEvent): void {
     if (this.isRotating) {
       this.activeActionType = SelectionActionTypes.Rotate;
       const side = event.deltaY > 0 ? CLOCKWISE : COUNTER_CLOCKWISE;
-      this.syncService.sendRotate(DrawingState.move, this.selectedActionId, (side * Math.PI / 180));
+      this.syncService.sendRotate(
+        DrawingState.move,
+        this.selectedActionId,
+        (side * Math.PI) / 180
+      );
       event.preventDefault();
       event.stopPropagation();
     }
@@ -322,11 +401,19 @@ export class SelectionToolService implements Tools {
   public setSelection(): void {
     if (this.hasSelection()) {
       if (this.objects[0] !== undefined) {
-        this.rendererService.renderer.setProperty(this.objects[0], 'isSelected', true);
+        this.rendererService.renderer.setProperty(
+          this.objects[0],
+          "isSelected",
+          true
+        );
       }
-      this.rendererService.renderer.setAttribute(this.rectSelection, 'transform', ``);
+      this.rendererService.renderer.setAttribute(
+        this.rectSelection,
+        "transform",
+        ``
+      );
       this.ctrlPoints.forEach((point) => {
-        this.rendererService.renderer.setAttribute(point, 'transform', '');
+        this.rendererService.renderer.setAttribute(point, "transform", "");
       });
 
       let boundingRect = this.objects[0].getBoundingClientRect();
@@ -337,12 +424,13 @@ export class SelectionToolService implements Tools {
       let height = 0;
 
       let objStrokeWidth = 0;
-      if (this.objects[0].style.stroke !== 'none') {
+      if (this.objects[0].style.stroke !== "none") {
         objStrokeWidth = this.strToNum(this.objects[0].style.strokeWidth);
       }
-      let markerID: string | null = this.objects[0].getAttribute('marker-start');
+      let markerID: string | null =
+        this.objects[0].getAttribute("marker-start");
       if (markerID) {
-        objStrokeWidth = Number(markerID.substring(5, markerID.indexOf('-')));
+        objStrokeWidth = Number(markerID.substring(5, markerID.indexOf("-")));
       }
 
       if (this.objects.length === 1 || !this.wasMoved) {
@@ -362,12 +450,14 @@ export class SelectionToolService implements Tools {
           boundingRect = elm.getBoundingClientRect();
 
           objStrokeWidth = 0;
-          if (elm.style.stroke !== 'none') {
+          if (elm.style.stroke !== "none") {
             objStrokeWidth = this.strToNum(elm.style.strokeWidth);
           }
-          markerID = elm.getAttribute('marker-start');
+          markerID = elm.getAttribute("marker-start");
           if (markerID) {
-            objStrokeWidth = Number(markerID.substring(5, markerID.indexOf('-')));
+            objStrokeWidth = Number(
+              markerID.substring(5, markerID.indexOf("-"))
+            );
           }
 
           value = boundingRect.left - objStrokeWidth / 2;
@@ -397,84 +487,180 @@ export class SelectionToolService implements Tools {
         height = yB - yT;
       }
 
-      this.pointsList[0].x = x; this.pointsList[0].y = y;
-      this.pointsList[1].x = x + width / 2; this.pointsList[1].y = y;
-      this.pointsList[2].x = x + width; this.pointsList[2].y = y;
-      this.pointsList[3].x = x + width; this.pointsList[3].y = y + height / 2;
-      this.pointsList[4].x = x + width; this.pointsList[4].y = y + height;
-      this.pointsList[5].x = x + width / 2; this.pointsList[5].y = y + height;
-      this.pointsList[6].x = x; this.pointsList[6].y = y + height;
-      this.pointsList[7].x = x; this.pointsList[7].y = y + height / 2;
+      this.pointsList[0].x = x;
+      this.pointsList[0].y = y;
+      this.pointsList[1].x = x + width / 2;
+      this.pointsList[1].y = y;
+      this.pointsList[2].x = x + width;
+      this.pointsList[2].y = y;
+      this.pointsList[3].x = x + width;
+      this.pointsList[3].y = y + height / 2;
+      this.pointsList[4].x = x + width;
+      this.pointsList[4].y = y + height;
+      this.pointsList[5].x = x + width / 2;
+      this.pointsList[5].y = y + height;
+      this.pointsList[6].x = x;
+      this.pointsList[6].y = y + height;
+      this.pointsList[7].x = x;
+      this.pointsList[7].y = y + height / 2;
 
       this.updateButtons(this.pointsList[1].x, this.pointsList[1].y);
-      this.rendererService.renderer.setAttribute(this.rectSelection, 'points', this.pointsToString());
+      this.rendererService.renderer.setAttribute(
+        this.rectSelection,
+        "points",
+        this.pointsToString()
+      );
       for (let i = 0; i < 8; i++) {
-        this.rendererService.renderer.setAttribute(this.ctrlPoints[i], 'x', `${this.pointsList[i].x + 0.5 - this.pointsSideLength / 2}`);
-        this.rendererService.renderer.setAttribute(this.ctrlPoints[i], 'y', `${this.pointsList[i].y + 0.5 - this.pointsSideLength / 2}`);
+        this.rendererService.renderer.setAttribute(
+          this.ctrlPoints[i],
+          "x",
+          `${this.pointsList[i].x + 0.5 - this.pointsSideLength / 2}`
+        );
+        this.rendererService.renderer.setAttribute(
+          this.ctrlPoints[i],
+          "y",
+          `${this.pointsList[i].y + 0.5 - this.pointsSideLength / 2}`
+        );
       }
-
-    } else { return; }
+    } else {
+      return;
+    }
   }
 
   removeSelection(): void {
     if (this.objects[0] !== undefined) {
-      this.rendererService.renderer.setProperty(this.objects[0], 'isSelected', false);
+      this.rendererService.renderer.setProperty(
+        this.objects[0],
+        "isSelected",
+        false
+      );
     }
     this.objects = [];
 
-    this.rendererService.renderer.removeChild(this.drawingService.drawing, this.rectSelection);
-    this.rendererService.renderer.removeChild(this.drawingService.drawing, this.ctrlG);
+    this.rendererService.renderer.removeChild(
+      this.drawingService.drawing,
+      this.rectSelection
+    );
+    this.rendererService.renderer.removeChild(
+      this.drawingService.drawing,
+      this.ctrlG
+    );
 
-    this.rendererService.renderer.setAttribute(this.rectSelection, 'points', '');
+    this.rendererService.renderer.setAttribute(
+      this.rectSelection,
+      "points",
+      ""
+    );
   }
 
   /// Methode pour cacher la selection en gardant en memoire les element
   hideSelection(): void {
-    this.rendererService.renderer.setAttribute(this.ctrlG, 'visibility', 'hidden');
-    this.rendererService.renderer.setAttribute(this.rectSelection, 'visibility', 'hidden');
+    this.rendererService.renderer.setAttribute(
+      this.ctrlG,
+      "visibility",
+      "hidden"
+    );
+    this.rendererService.renderer.setAttribute(
+      this.rectSelection,
+      "visibility",
+      "hidden"
+    );
   }
 
   // Rendre la selection visible
   showSelection(): void {
-    this.rendererService.renderer.setAttribute(this.ctrlG, 'visibility', 'visible');
-    this.rendererService.renderer.setAttribute(this.rectSelection, 'visibility', 'visible');
-
+    this.rendererService.renderer.setAttribute(
+      this.ctrlG,
+      "visibility",
+      "visible"
+    );
+    this.rendererService.renderer.setAttribute(
+      this.rectSelection,
+      "visibility",
+      "visible"
+    );
   }
 
   /// Methode qui suprime le rectangle de selection du dessin.
   private removeInversement(): void {
-    this.rendererService.renderer.removeChild(this.drawingService.drawing, this.rectInversement);
+    this.rendererService.renderer.removeChild(
+      this.drawingService.drawing,
+      this.rectInversement
+    );
 
-    this.rendererService.renderer.setAttribute(this.rectInversement, 'x', '0');
-    this.rendererService.renderer.setAttribute(this.rectInversement, 'y', '0');
-    this.rendererService.renderer.setAttribute(this.rectInversement, 'width', '0');
-    this.rendererService.renderer.setAttribute(this.rectInversement, 'height', '0');
+    this.rendererService.renderer.setAttribute(this.rectInversement, "x", "0");
+    this.rendererService.renderer.setAttribute(this.rectInversement, "y", "0");
+    this.rendererService.renderer.setAttribute(
+      this.rectInversement,
+      "width",
+      "0"
+    );
+    this.rendererService.renderer.setAttribute(
+      this.rectInversement,
+      "height",
+      "0"
+    );
   }
 
   /// Initialise le rectangle de selection.
   private setRectSelection(): void {
-    this.rectSelection = this.rendererService.renderer.createElement('polygon', 'svg');
-    this.rendererService.renderer.setStyle(this.rectSelection, 'stroke', `rgba(0, 0, 200, 1)`);
-    this.rendererService.renderer.setStyle(this.rectSelection, 'stroke-width', `${this.recStrokeWidth}`);
-    this.rendererService.renderer.setStyle(this.rectSelection, 'stroke-dasharray', `10,10`);
-    this.rendererService.renderer.setStyle(this.rectSelection, 'd', `M5 40 l215 0`);
-    this.rendererService.renderer.setStyle(this.rectSelection, 'fill', `none`);
-    this.rendererService.renderer.setAttribute(this.rectSelection, 'points', '');
-    this.rendererService.renderer.setAttribute(this.rectSelection, 'pointer-events', 'none');
+    this.rectSelection = this.rendererService.renderer.createElement(
+      "polygon",
+      "svg"
+    );
+    this.rendererService.renderer.setStyle(
+      this.rectSelection,
+      "stroke",
+      `rgba(0, 0, 200, 1)`
+    );
+    this.rendererService.renderer.setStyle(
+      this.rectSelection,
+      "stroke-width",
+      `${this.recStrokeWidth}`
+    );
+    this.rendererService.renderer.setStyle(
+      this.rectSelection,
+      "stroke-dasharray",
+      `10,10`
+    );
+    this.rendererService.renderer.setStyle(
+      this.rectSelection,
+      "d",
+      `M5 40 l215 0`
+    );
+    this.rendererService.renderer.setStyle(this.rectSelection, "fill", `none`);
+    this.rendererService.renderer.setAttribute(
+      this.rectSelection,
+      "points",
+      ""
+    );
+    this.rendererService.renderer.setAttribute(
+      this.rectSelection,
+      "pointer-events",
+      "none"
+    );
   }
 
   /// Initialise les points de controle.
   private setCtrlPoints(): void {
-    this.ctrlG = this.rendererService.renderer.createElement('g', 'svg');
+    this.ctrlG = this.rendererService.renderer.createElement("g", "svg");
 
     for (let i = 0; i < 8; i++) {
-      const point = this.rendererService.renderer.createElement('rect', 'svg');
-      this.rendererService.renderer.setStyle(point, 'stroke', `black`);
-      this.rendererService.renderer.setStyle(point, 'stroke-width', `1`);
-      this.rendererService.renderer.setStyle(point, 'fill', `white`);
+      const point = this.rendererService.renderer.createElement("rect", "svg");
+      this.rendererService.renderer.setStyle(point, "stroke", `black`);
+      this.rendererService.renderer.setStyle(point, "stroke-width", `1`);
+      this.rendererService.renderer.setStyle(point, "fill", `white`);
 
-      this.rendererService.renderer.setAttribute(point, 'width', `${this.pointsSideLength}`);
-      this.rendererService.renderer.setAttribute(point, 'height', `${this.pointsSideLength}`);
+      this.rendererService.renderer.setAttribute(
+        point,
+        "width",
+        `${this.pointsSideLength}`
+      );
+      this.rendererService.renderer.setAttribute(
+        point,
+        "height",
+        `${this.pointsSideLength}`
+      );
 
       this.ctrlPoints.push(point);
 
@@ -486,42 +672,118 @@ export class SelectionToolService implements Tools {
   }
 
   private setActionButtons() {
-    this.actionButtonGroup = this.rendererService.renderer.createElement('g', 'svg');
+    this.actionButtonGroup = this.rendererService.renderer.createElement(
+      "g",
+      "svg"
+    );
     let width = 0;
     let height = 0;
     for (let button of this.actionButtons) {
       this.createButton(button);
       width += button.buttonWidth;
       height += button.buttonWidth;
-      this.rendererService.renderer.appendChild(this.actionButtonGroup, button.buttonGroup);
+      this.rendererService.renderer.appendChild(
+        this.actionButtonGroup,
+        button.buttonGroup
+      );
     }
 
-    this.rendererService.renderer.setAttribute(this.actionButtonGroup, 'width', width.toString());
-    this.rendererService.renderer.setAttribute(this.actionButtonGroup, 'height', height.toString());
-    this.rendererService.renderer.appendChild(this.ctrlG, this.actionButtonGroup);
+    this.rendererService.renderer.setAttribute(
+      this.actionButtonGroup,
+      "width",
+      width.toString()
+    );
+    this.rendererService.renderer.setAttribute(
+      this.actionButtonGroup,
+      "height",
+      height.toString()
+    );
+    this.rendererService.renderer.appendChild(
+      this.ctrlG,
+      this.actionButtonGroup
+    );
   }
 
   private createButton(button: SelectionActionButton) {
-    button.buttonGroup = this.rendererService.renderer.createElement('g', 'svg');
-    this.rendererService.renderer.setAttribute(button.buttonGroup, 'width', button.buttonWidth.toString());
-    this.rendererService.renderer.setAttribute(button.buttonGroup, 'height', button.buttonWidth.toString());
-    this.rendererService.renderer.setAttribute(button.buttonGroup, 'iconId', button.iconId);
+    button.buttonGroup = this.rendererService.renderer.createElement(
+      "g",
+      "svg"
+    );
+    this.rendererService.renderer.setAttribute(
+      button.buttonGroup,
+      "width",
+      button.buttonWidth.toString()
+    );
+    this.rendererService.renderer.setAttribute(
+      button.buttonGroup,
+      "height",
+      button.buttonWidth.toString()
+    );
+    this.rendererService.renderer.setAttribute(
+      button.buttonGroup,
+      "iconId",
+      button.iconId
+    );
 
-    button.buttonCircle = this.rendererService.renderer.createElement('circle', 'svg');
-    this.rendererService.renderer.setAttribute(button.buttonCircle, 'r', button.buttonWidth.toString());
-    this.rendererService.renderer.setAttribute(button.buttonCircle, 'stroke', button.stroke.toString());
-    this.rendererService.renderer.setAttribute(button.buttonCircle, 'opacity', button.opacity.toString());
-    this.rendererService.renderer.setAttribute(button.buttonCircle, 'iconId', button.iconId);
+    button.buttonCircle = this.rendererService.renderer.createElement(
+      "circle",
+      "svg"
+    );
+    this.rendererService.renderer.setAttribute(
+      button.buttonCircle,
+      "r",
+      button.buttonWidth.toString()
+    );
+    this.rendererService.renderer.setAttribute(
+      button.buttonCircle,
+      "stroke",
+      button.stroke.toString()
+    );
+    this.rendererService.renderer.setAttribute(
+      button.buttonCircle,
+      "opacity",
+      button.opacity.toString()
+    );
+    this.rendererService.renderer.setAttribute(
+      button.buttonCircle,
+      "iconId",
+      button.iconId
+    );
 
-    button.buttonIcon = this.rendererService.renderer.createElement('image', 'svg');
-    this.rendererService.renderer.setAttribute(button.buttonIcon, 'href', button.iconSrc);
-    this.rendererService.renderer.setAttribute(button.buttonIcon, 'width', button.iconSize.toString());
-    this.rendererService.renderer.setAttribute(button.buttonIcon, 'height', button.iconSize.toString());
-    this.rendererService.renderer.setAttribute(button.buttonIcon, 'iconId', button.iconId);
+    button.buttonIcon = this.rendererService.renderer.createElement(
+      "image",
+      "svg"
+    );
+    this.rendererService.renderer.setAttribute(
+      button.buttonIcon,
+      "href",
+      button.iconSrc
+    );
+    this.rendererService.renderer.setAttribute(
+      button.buttonIcon,
+      "width",
+      button.iconSize.toString()
+    );
+    this.rendererService.renderer.setAttribute(
+      button.buttonIcon,
+      "height",
+      button.iconSize.toString()
+    );
+    this.rendererService.renderer.setAttribute(
+      button.buttonIcon,
+      "iconId",
+      button.iconId
+    );
 
-    this.rendererService.renderer.appendChild(button.buttonGroup, button.buttonCircle);
-    this.rendererService.renderer.appendChild(button.buttonGroup, button.buttonIcon);
-    this.rendererService.renderer.appendChild(this.ctrlG, button.buttonGroup)
+    this.rendererService.renderer.appendChild(
+      button.buttonGroup,
+      button.buttonCircle
+    );
+    this.rendererService.renderer.appendChild(
+      button.buttonGroup,
+      button.buttonIcon
+    );
+    this.rendererService.renderer.appendChild(this.ctrlG, button.buttonGroup);
   }
 
   private updateButtons(x: number, y: number) {
@@ -537,47 +799,112 @@ export class SelectionToolService implements Tools {
       if (index === half) {
         xPos = x;
       } else if (index < half) {
-        xPos = x - ((half - index) * buttonWidth);
+        xPos = x - (half - index) * buttonWidth;
       } else {
-        xPos = x + ((index - half) * buttonWidth);
+        xPos = x + (index - half) * buttonWidth;
       }
 
       if (buttonCount % 2 === 0) {
         xPos -= buttonWidth / 2;
       }
 
-      this.rendererService.renderer.setAttribute(button.buttonGroup, 'x', xPos.toString());
-      this.rendererService.renderer.setAttribute(button.buttonGroup, 'y', yPos.toString());
-      this.rendererService.renderer.setAttribute(button.buttonCircle, 'cx', xPos.toString());
-      this.rendererService.renderer.setAttribute(button.buttonCircle, 'cy', yPos.toString());
-      this.rendererService.renderer.setAttribute(button.buttonIcon, 'x', `${xPos - button.iconSize / 2}`);
-      this.rendererService.renderer.setAttribute(button.buttonIcon, 'y', `${yPos - button.iconSize / 2}`);
+      this.rendererService.renderer.setAttribute(
+        button.buttonGroup,
+        "x",
+        xPos.toString()
+      );
+      this.rendererService.renderer.setAttribute(
+        button.buttonGroup,
+        "y",
+        yPos.toString()
+      );
+      this.rendererService.renderer.setAttribute(
+        button.buttonCircle,
+        "cx",
+        xPos.toString()
+      );
+      this.rendererService.renderer.setAttribute(
+        button.buttonCircle,
+        "cy",
+        yPos.toString()
+      );
+      this.rendererService.renderer.setAttribute(
+        button.buttonIcon,
+        "x",
+        `${xPos - button.iconSize / 2}`
+      );
+      this.rendererService.renderer.setAttribute(
+        button.buttonIcon,
+        "y",
+        `${yPos - button.iconSize / 2}`
+      );
     }
   }
 
   /// Initialise le rectangle d'inversement.
   private setRectInversement(): void {
-    this.rectInversement = this.rendererService.renderer.createElement('rect', 'svg');
-    this.rendererService.renderer.setStyle(this.rectInversement, 'stroke', `rgba(200, 0, 0, 1)`);
-    this.rendererService.renderer.setStyle(this.rectInversement, 'stroke-width', `${this.recStrokeWidth}`);
-    this.rendererService.renderer.setStyle(this.rectInversement, 'stroke-dasharray', `10,10`);
-    this.rendererService.renderer.setStyle(this.rectInversement, 'd', `M5 40 l215 0`);
-    this.rendererService.renderer.setStyle(this.rectInversement, 'fill', `none`);
-    this.rendererService.renderer.setAttribute(this.rectInversement, 'x', '0');
-    this.rendererService.renderer.setAttribute(this.rectInversement, 'y', '0');
-    this.rendererService.renderer.setAttribute(this.rectInversement, 'pointer-events', 'none');
+    this.rectInversement = this.rendererService.renderer.createElement(
+      "rect",
+      "svg"
+    );
+    this.rendererService.renderer.setStyle(
+      this.rectInversement,
+      "stroke",
+      `rgba(200, 0, 0, 1)`
+    );
+    this.rendererService.renderer.setStyle(
+      this.rectInversement,
+      "stroke-width",
+      `${this.recStrokeWidth}`
+    );
+    this.rendererService.renderer.setStyle(
+      this.rectInversement,
+      "stroke-dasharray",
+      `10,10`
+    );
+    this.rendererService.renderer.setStyle(
+      this.rectInversement,
+      "d",
+      `M5 40 l215 0`
+    );
+    this.rendererService.renderer.setStyle(
+      this.rectInversement,
+      "fill",
+      `none`
+    );
+    this.rendererService.renderer.setAttribute(this.rectInversement, "x", "0");
+    this.rendererService.renderer.setAttribute(this.rectInversement, "y", "0");
+    this.rendererService.renderer.setAttribute(
+      this.rectInversement,
+      "pointer-events",
+      "none"
+    );
   }
 
   private rotationAction(event: WheelEvent): void {
-    if (this.selectionTransformService.getCommandType() !== SelectionCommandConstants.ROTATE || this.shiftChanged) {
-      this.selectionTransformService.createCommand(SelectionCommandConstants.ROTATE, this.rectSelection, this.objects);
+    if (
+      this.selectionTransformService.getCommandType() !==
+        SelectionCommandConstants.ROTATE ||
+      this.shiftChanged
+    ) {
+      this.selectionTransformService.createCommand(
+        SelectionCommandConstants.ROTATE,
+        this.rectSelection,
+        this.objects
+      );
       this.shiftChanged = false;
     }
-    if (this.selectionTransformService.getCommandType() === SelectionCommandConstants.ROTATE) {
+    if (
+      this.selectionTransformService.getCommandType() ===
+      SelectionCommandConstants.ROTATE
+    ) {
       event.preventDefault();
       this.wasMoved = true;
 
-      this.selectionTransformService.rotate(event.deltaY > 0 ? 1 : -1, this.rectSelection);
+      this.selectionTransformService.rotate(
+        event.deltaY > 0 ? 1 : -1,
+        this.rectSelection
+      );
 
       if (this.isShift) {
         this.setSelection();
@@ -586,7 +913,7 @@ export class SelectionToolService implements Tools {
   }
 
   private removeMouseWheelEvent(): void {
-    window.removeEventListener('wheel', this.rotationAction);
+    window.removeEventListener("wheel", this.rotationAction);
   }
 
   /// Retourne la liste d'objets selectionne.
@@ -608,14 +935,20 @@ export class SelectionToolService implements Tools {
   selectAll(): void {
     this.removeSelection();
     this.drawingService.getObjectList().forEach((value) => {
-      if (value.tagName.toLowerCase() !== 'defs') {
+      if (value.tagName.toLowerCase() !== "defs") {
         this.objects.push(value);
       }
     });
     if (this.objects.length > 0) {
       this.wasMoved = true;
-      this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectSelection);
-      this.rendererService.renderer.appendChild(this.drawingService.drawing, this.ctrlG);
+      this.rendererService.renderer.appendChild(
+        this.drawingService.drawing,
+        this.rectSelection
+      );
+      this.rendererService.renderer.appendChild(
+        this.drawingService.drawing,
+        this.ctrlG
+      );
       this.setSelection();
     }
   }
@@ -623,7 +956,7 @@ export class SelectionToolService implements Tools {
   selectByActionId(actionId: string, username: string) {
     const obj = this.drawingService.getObjectByActionId(actionId);
     if (!obj) return;
-    this.selectedActionId = obj.getAttribute('actionId')!;
+    this.selectedActionId = obj.getAttribute("actionId")!;
     this.setNewSelection([obj]);
   }
 
@@ -631,20 +964,26 @@ export class SelectionToolService implements Tools {
   setNewSelection(newSelectionList: SVGElement[]): void {
     this.removeSelection();
     newSelectionList.forEach((value) => {
-      if (value.tagName.toLowerCase() !== 'defs') {
+      if (value.tagName.toLowerCase() !== "defs") {
         this.objects.push(value);
       }
     });
     if (this.objects.length > 0) {
       this.wasMoved = true;
-      this.rendererService.renderer.appendChild(this.drawingService.drawing, this.rectSelection);
-      this.rendererService.renderer.appendChild(this.drawingService.drawing, this.ctrlG);
+      this.rendererService.renderer.appendChild(
+        this.drawingService.drawing,
+        this.rectSelection
+      );
+      this.rendererService.renderer.appendChild(
+        this.drawingService.drawing,
+        this.ctrlG
+      );
       this.setSelection();
     }
   }
 
   setSelectionWidth(): void {
-    this.objects[0].style.strokeWidth = '100px';
+    this.objects[0].style.strokeWidth = "100px";
     this.setNewSelection(this.objects);
   }
 
@@ -661,17 +1000,27 @@ export class SelectionToolService implements Tools {
   /// Verifie si le curseur se situe a l'interieur de la selection.
   private isInside(x: number, y: number): boolean {
     const rectBox = this.rectSelection.getBoundingClientRect();
-    return x >= rectBox.left - this.xFactor() && x <= rectBox.right - this.xFactor() && y >= rectBox.top && y <= rectBox.bottom;
+    return (
+      x >= rectBox.left - this.xFactor() &&
+      x <= rectBox.right - this.xFactor() &&
+      y >= rectBox.top &&
+      y <= rectBox.bottom
+    );
   }
 
   /// Transforme les chiffre en string suivie de 'px' en number.
   private strToNum(str: string | null): number {
-    return str ? +str.replace(/[^-?\d]+/g, ',').split(',').filter((el) => el !== '') : 0;
+    return str
+      ? +str
+          .replace(/[^-?\d]+/g, ",")
+          .split(",")
+          .filter((el) => el !== "")
+      : 0;
   }
 
   /// Transforme la liste de points de controle en un string.
   private pointsToString(): string {
-    let pointsStr = '';
+    let pointsStr = "";
     this.pointsList.forEach((point) => {
       pointsStr += `${point.x},${point.y} `;
     });
@@ -680,6 +1029,8 @@ export class SelectionToolService implements Tools {
 
   /// Retourne le deplacement de la barre de menu.
   private xFactor(): number {
-    return (this.drawingService.drawing as SVGSVGElement).getBoundingClientRect().left;
+    return (
+      this.drawingService.drawing as SVGSVGElement
+    ).getBoundingClientRect().left;
   }
 }

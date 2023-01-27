@@ -18,11 +18,11 @@ const INITIAL_ANGLE = 270;
 
 /// Service permettant la creation de polygon selon des parametre
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class PolygonToolService implements Tools {
-  readonly faIcon: IconDefinition = faDrawPolygon;
-  readonly toolName = 'Outil Polygone';
+  readonly faIcon: any = faDrawPolygon;
+  readonly toolName = "Outil Polygone";
   readonly id = ToolIdConstants.POLYGON_ID;
 
   private border: SVGRectElement | null;
@@ -46,10 +46,10 @@ export class PolygonToolService implements Tools {
     private offsetManager: OffsetManagerService,
     private colorTool: ToolsColorService,
     private drawingService: DrawingService,
-    private rendererService: RendererProviderService,
+    private rendererService: RendererProviderService
   ) {
     this.strokeWidth = new FormControl(1, Validators.min(1));
-    this.polygonStyle = new FormControl('fill');
+    this.polygonStyle = new FormControl("fill");
     this.vertexNumber = new FormControl(3, Validators.min(3));
     this.parameters = new FormGroup({
       strokeWidth: this.strokeWidth,
@@ -62,42 +62,64 @@ export class PolygonToolService implements Tools {
   /// On le retourne en sortie et il est inséré dans l'objet courant de l'outil.
   onPressed(event: MouseEvent): void {
     if (event.button === RIGHT_CLICK || event.button === LEFT_CLICK) {
-      this.border = this.rendererService.renderer.createElement('rect', 'svg');
-      this.rendererService.renderer.setStyle(this.border, 'stroke', `rgba(0, 0, 0, 1)`);
-      this.rendererService.renderer.setStyle(this.border, 'stroke-width', `1px`);
-      this.rendererService.renderer.setStyle(this.border, 'stroke-dasharray', `10,10`);
-      this.rendererService.renderer.setStyle(this.border, 'd', `M5 40 l215 0`);
-      this.rendererService.renderer.setStyle(this.border, 'fill', `none`);
+      this.border = this.rendererService.renderer.createElement("rect", "svg");
+      this.rendererService.renderer.setStyle(
+        this.border,
+        "stroke",
+        `rgba(0, 0, 0, 1)`
+      );
+      this.rendererService.renderer.setStyle(
+        this.border,
+        "stroke-width",
+        `1px`
+      );
+      this.rendererService.renderer.setStyle(
+        this.border,
+        "stroke-dasharray",
+        `10,10`
+      );
+      this.rendererService.renderer.setStyle(this.border, "d", `M5 40 l215 0`);
+      this.rendererService.renderer.setStyle(this.border, "fill", `none`);
       if (this.border) {
         this.borderId = this.drawingService.addObject(this.border);
       }
 
-      const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
+      const offset: { x: number; y: number } =
+        this.offsetManager.offsetFromMouseEvent(event);
       this.x = offset.x;
       this.y = offset.y;
       this.polygon = {
         pointsList: [offset],
-        x: this.x, y: this.y,
-        width: 0, height: 0,
+        x: this.x,
+        y: this.y,
+        width: 0,
+        height: 0,
         strokeWidth: this.strokeWidth.value as number,
-        fill: 'none', stroke: 'none', fillOpacity: 'none', strokeOpacity: 'none',
+        fill: "none",
+        stroke: "none",
+        fillOpacity: "none",
+        strokeOpacity: "none",
       };
       if (event.button === LEFT_CLICK) {
         this.setStyle(
           this.colorTool.primaryColorString,
           this.colorTool.primaryAlpha.toString(),
           this.colorTool.secondaryColorString,
-          this.colorTool.secondaryAlpha.toString(),
+          this.colorTool.secondaryAlpha.toString()
         );
       } else {
         this.setStyle(
           this.colorTool.secondaryColorString,
           this.colorTool.secondaryAlpha.toString(),
           this.colorTool.primaryColorString,
-          this.colorTool.primaryAlpha.toString(),
+          this.colorTool.primaryAlpha.toString()
         );
       }
-      this.polygonCommand = new PolygonCommand(this.rendererService.renderer, this.polygon, this.drawingService);
+      this.polygonCommand = new PolygonCommand(
+        this.rendererService.renderer,
+        this.polygon,
+        this.drawingService
+      );
       this.polygonCommand.execute();
     }
   }
@@ -121,7 +143,8 @@ export class PolygonToolService implements Tools {
   /// Transforme le size de l'objet courant avec un x et un y en entrée
   onMove(event: MouseEvent): void {
     if (this.polygonCommand) {
-      const offset: { x: number, y: number } = this.offsetManager.offsetFromMouseEvent(event);
+      const offset: { x: number; y: number } =
+        this.offsetManager.offsetFromMouseEvent(event);
       this.setSize(offset.x, offset.y);
     }
   }
@@ -149,7 +172,7 @@ export class PolygonToolService implements Tools {
       return;
     }
     let scaleFactor = 0;
-    if (this.polygon.stroke !== 'none') {
+    if (this.polygon.stroke !== "none") {
       scaleFactor = this.strokeWidth.value;
     }
 
@@ -167,21 +190,29 @@ export class PolygonToolService implements Tools {
 
     const minSide = Math.min(width, height);
     if (mouseX < this.x) {
-      xValue += (width - minSide);
+      xValue += width - minSide;
     }
     if (mouseY < this.y) {
-      yValue += (height - minSide);
+      yValue += height - minSide;
     }
     width = minSide;
     height = minSide;
 
     this.center = { x: xValue + minSide / 2, y: yValue + minSide / 2 };
 
-    this.rendererService.renderer.setAttribute(this.border, 'x', xValue + 'px');
-    this.rendererService.renderer.setAttribute(this.border, 'y', yValue + 'px');
+    this.rendererService.renderer.setAttribute(this.border, "x", xValue + "px");
+    this.rendererService.renderer.setAttribute(this.border, "y", yValue + "px");
 
-    this.rendererService.renderer.setAttribute(this.border, 'width', minSide + 'px');
-    this.rendererService.renderer.setAttribute(this.border, 'height', minSide + 'px');
+    this.rendererService.renderer.setAttribute(
+      this.border,
+      "width",
+      minSide + "px"
+    );
+    this.rendererService.renderer.setAttribute(
+      this.border,
+      "height",
+      minSide + "px"
+    );
     this.sideLength = minSide - scaleFactor / 2;
     this.points = this.calculatePolygon(minSide);
 
@@ -191,26 +222,31 @@ export class PolygonToolService implements Tools {
   }
 
   /// Ajustement du style du polygon
-  private setStyle(primaryColor: string, primaryAlphas: string, secondaryColor: string, secondaryAlpha: string): void {
+  private setStyle(
+    primaryColor: string,
+    primaryAlphas: string,
+    secondaryColor: string,
+    secondaryAlpha: string
+  ): void {
     if (!this.polygon) {
       return;
     }
     switch (this.polygonStyle.value) {
-      case 'center':
+      case "center":
         this.polygon.fill = primaryColor;
         this.polygon.fillOpacity = primaryAlphas;
-        this.polygon.stroke = 'none';
-        this.polygon.strokeOpacity = 'none';
+        this.polygon.stroke = "none";
+        this.polygon.strokeOpacity = "none";
         break;
 
-      case 'border':
-        this.polygon.fill = 'none';
-        this.polygon.fillOpacity = 'none';
+      case "border":
+        this.polygon.fill = "none";
+        this.polygon.fillOpacity = "none";
         this.polygon.stroke = secondaryColor;
         this.polygon.strokeOpacity = secondaryAlpha;
         break;
 
-      case 'fill':
+      case "fill":
         this.polygon.fill = primaryColor;
         this.polygon.fillOpacity = primaryAlphas;
         this.polygon.stroke = secondaryColor;
@@ -221,8 +257,10 @@ export class PolygonToolService implements Tools {
 
   /// Centrer le polygon selon ses points
   private reCenterPolygon(polygon: Point[]): void {
-    let minXPolygon = Infinity; let minYPolygon = Infinity;
-    let maxXPolygon = -Infinity; let maxYPolygon = -Infinity;
+    let minXPolygon = Infinity;
+    let minYPolygon = Infinity;
+    let maxXPolygon = -Infinity;
+    let maxYPolygon = -Infinity;
     for (const p of this.points) {
       minXPolygon = Math.min(minXPolygon, p.x);
       minYPolygon = Math.min(minYPolygon, p.y);
@@ -230,7 +268,10 @@ export class PolygonToolService implements Tools {
       maxYPolygon = Math.max(maxYPolygon, p.y);
     }
 
-    const polyCenter: Point = { x: (minXPolygon + maxXPolygon) / 2, y: (minYPolygon + maxYPolygon) / 2 };
+    const polyCenter: Point = {
+      x: (minXPolygon + maxXPolygon) / 2,
+      y: (minYPolygon + maxYPolygon) / 2,
+    };
     const rectCenter: Point = this.center;
 
     const difY = rectCenter.y - polyCenter.y;
@@ -244,8 +285,10 @@ export class PolygonToolService implements Tools {
 
   /// Redimensionnement du polygone pour qu'il prenne toute l'espace
   private scalePolygon(): void {
-    let minXPolygon = Infinity; let minYPolygon = Infinity;
-    let maxXPolygon = -Infinity; let maxYPolygon = -Infinity;
+    let minXPolygon = Infinity;
+    let minYPolygon = Infinity;
+    let maxXPolygon = -Infinity;
+    let maxYPolygon = -Infinity;
     for (const p of this.points) {
       minXPolygon = Math.min(minXPolygon, p.x);
       minYPolygon = Math.min(minYPolygon, p.y);
@@ -260,7 +303,10 @@ export class PolygonToolService implements Tools {
       right: this.x + this.sideLength - maxXPolygon,
     };
 
-    this.points = this.calculatePolygon((this.sideLength + Math.min((diffs.right + diffs.left), (diffs.bot + diffs.top))));
+    this.points = this.calculatePolygon(
+      this.sideLength +
+        Math.min(diffs.right + diffs.left, diffs.bot + diffs.top)
+    );
     this.reCenterPolygon(this.points);
   }
 
@@ -278,21 +324,37 @@ export class PolygonToolService implements Tools {
     let angleToAdd = 0;
     for (let i = 1; i < this.vertexNumber.value; i++) {
       angleToAdd += angle;
-      polygonPoints.push(this.calculatePoint(this.radius, angleToAdd, this.center));
+      polygonPoints.push(
+        this.calculatePoint(this.radius, angleToAdd, this.center)
+      );
     }
     return polygonPoints;
   }
 
   /// Calculer la position d'un point selon un rayon, centre et angle
-  private calculatePoint(radius: number, angleToAdd: number, center: Point): Point {
+  private calculatePoint(
+    radius: number,
+    angleToAdd: number,
+    center: Point
+  ): Point {
     const point = {} as Point;
-    point.x = center.x + radius * Math.cos(this.angleToRAD((INITIAL_ANGLE + angleToAdd) % COMPLETE_ANGLE));
-    point.y = center.y + radius * Math.sin(this.angleToRAD((INITIAL_ANGLE + angleToAdd) % COMPLETE_ANGLE));
+    point.x =
+      center.x +
+      radius *
+        Math.cos(
+          this.angleToRAD((INITIAL_ANGLE + angleToAdd) % COMPLETE_ANGLE)
+        );
+    point.y =
+      center.y +
+      radius *
+        Math.sin(
+          this.angleToRAD((INITIAL_ANGLE + angleToAdd) % COMPLETE_ANGLE)
+        );
     return point;
   }
 
   /// Transformation d'un angle en radient
   private angleToRAD(angle: number): number {
-    return angle * Math.PI / (COMPLETE_ANGLE / 2);
+    return (angle * Math.PI) / (COMPLETE_ANGLE / 2);
   }
 }
