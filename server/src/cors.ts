@@ -23,7 +23,7 @@ const corsOptions = {
         'X-User-Id'
     ],
     exposedHeaders: 'Location',
-    origin: [ 'http://localhost:4200' ]
+    origin: [ 'http://localhost:4200', 'https://cocreate-server.onrender.com']
 };
 
 export default corsOptions;
