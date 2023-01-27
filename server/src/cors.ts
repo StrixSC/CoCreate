@@ -1,3 +1,5 @@
+const CORS_URLS = JSON.parse(JSON.stringify(process.env.CORS!));
+
 const corsOptions = {
     optionsSuccessStatus: 200,
     methods: [
@@ -23,7 +25,7 @@ const corsOptions = {
         'X-User-Id'
     ],
     exposedHeaders: 'Location',
-    origin: [ 'http://localhost:4200', 'https://cocreate-server.onrender.com']
+    origin: CORS_URLS || ['*']
 };
 
 export default corsOptions;
