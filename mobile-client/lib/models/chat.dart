@@ -4,7 +4,8 @@ import 'package:Colorimage/constants/general.dart';
 import 'package:Colorimage/screens/chat/chat.dart';
 
 class Chat {
-  String name, id, type, ownerUsername, lastReadMessage;
+  String name, id, type, ownerUsername, lastReadMessage, image, time;
+  final bool isActive;
   String? collaborationId, updatedAt;
   List<ChatMessage> messages;
   List onlineMembers = [];
@@ -14,6 +15,9 @@ class Chat {
     required this.id,
     required this.name,
     required this.messages,
+    this.isActive = false,
+    this.time = "",
+    this.image = "",
     this.lastReadMessage = "",
     this.ownerUsername = "",
     this.collaborationId = '',

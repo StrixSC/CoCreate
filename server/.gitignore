@@ -16,6 +16,7 @@ svg/
 # logs:
 *.log
 logs/
+admin.json
 
 # Exclusion des fichiers Javascripts
 out/

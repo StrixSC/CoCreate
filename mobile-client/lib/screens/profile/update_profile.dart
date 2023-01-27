@@ -102,56 +102,54 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
   }
 
   update(File? file, username) async {
-      Dio dio = Dio();
-      dio.options.headers['Content-Type'] = 'multipart/form-data';
-      dio.options.baseUrl = 'https://' + (dotenv.env['SERVER_URL'] ?? "");
-      FormData formData = FormData();
+    Dio dio = Dio();
+    dio.options.headers['Content-Type'] = 'multipart/form-data';
+    dio.options.baseUrl = 'https://' + (dotenv.env['SERVER_URL'] ?? "");
+    FormData formData = FormData();
 
-      if (file != null) {
-        print('here');
-        String fileName = file.path.split('/').last;
-        formData = FormData.fromMap({
-          "avatar": await MultipartFile.fromFile(file.path, filename: fileName),
-          "username": userController.text,
-        });
-      } else {
-        print(currentAvatar);
-        formData = FormData.fromMap({
-          "avatar_url": currentAvatar,
-          "username": userController.text,
-
-        });
-      }
-      var response = await dio.post("/api/users/profile", data: formData);
-      print(response.data);
-      if (response.statusCode == 201) {
-        AwesomeDialog(
-          context: navigatorKey.currentContext as BuildContext,
-          width: 800,
-          dismissOnTouchOutside: false,
-          dialogType: DialogType.SUCCES,
-          animType: AnimType.BOTTOMSLIDE,
-          title: 'Succès!',
-          desc: 'Vous avez mis a jour! 😄',
-          btnOkOnPress: () {
-            Navigator.pop(context);
-          },
-        ).show();
-      } else {
-        AwesomeDialog(
-          context: navigatorKey.currentContext as BuildContext,
-          width: 800,
-          btnOkColor: Colors.red,
-          dismissOnTouchOutside: false,
-          dialogType: DialogType.ERROR,
-          animType: AnimType.BOTTOMSLIDE,
-          title: 'Erreur!',
-          desc: response.data['message'],
-          btnOkOnPress: () {},
-        ).show();
-      }
+    if (file != null) {
+      print('here');
+      String fileName = file.path.split('/').last;
+      formData = FormData.fromMap({
+        "avatar": await MultipartFile.fromFile(file.path, filename: fileName),
+        "username": userController.text,
+      });
+    } else {
+      print(currentAvatar);
+      formData = FormData.fromMap({
+        "avatar_url": currentAvatar,
+        "username": userController.text,
+      });
     }
-
+    var response = await dio.post("/api/users/profile", data: formData);
+    print(response.data);
+    if (response.statusCode == 201) {
+      AwesomeDialog(
+        context: navigatorKey.currentContext as BuildContext,
+        width: 800,
+        dismissOnTouchOutside: false,
+        dialogType: DialogType.SUCCES,
+        animType: AnimType.BOTTOMSLIDE,
+        title: 'Succès!',
+        desc: 'Vous avez mis a jour! 😄',
+        btnOkOnPress: () {
+          Navigator.pop(context);
+        },
+      ).show();
+    } else {
+      AwesomeDialog(
+        context: navigatorKey.currentContext as BuildContext,
+        width: 800,
+        btnOkColor: Colors.red,
+        dismissOnTouchOutside: false,
+        dialogType: DialogType.ERROR,
+        animType: AnimType.BOTTOMSLIDE,
+        title: 'Erreur!',
+        desc: response.data['message'],
+        btnOkOnPress: () {},
+      ).show();
+    }
+  }
 
   profileRow() {
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -160,13 +158,15 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
           backgroundColor: Colors.white,
           radius: 85.0,
           child: CircleAvatar(
-            backgroundImage: isPicture ? Image.file(_image!).image : NetworkImage(currentAvatar),
+            backgroundImage: isPicture
+                ? Image.file(_image!).image
+                : NetworkImage(currentAvatar),
             radius: 80.0,
           ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         openAvatarDialog(),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Container(
             width: 500,
             child: TextFormField(
@@ -176,7 +176,7 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
               autofocus: false,
               decoration: InputDecoration(
                 labelText: 'Pseudonyme',
-                labelStyle: TextStyle(
+                labelStyle: const TextStyle(
                   fontSize: 25.0,
                 ),
                 errorStyle: const TextStyle(fontSize: _fontSize),
@@ -188,9 +188,9 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(3.0)),
               ),
-              autovalidate: true,
+              autovalidateMode: AutovalidateMode.always,
             )),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
       ]),
     ]);
   }
@@ -258,9 +258,14 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
                 itemBuilder: (BuildContext context, int index) {
                   return GestureDetector(
                     child: Container(
-                        decoration: currentlySelectedIndex != null && currentlySelectedIndex == index? BoxDecoration(
-                            border: Border.all(width: 5, color: kPrimaryColor)) : BoxDecoration(
-                            border: Border.all(width: 0, color: Colors.black)) ,
+                        decoration: currentlySelectedIndex != null &&
+                                currentlySelectedIndex == index
+                            ? BoxDecoration(
+                                border:
+                                    Border.all(width: 5, color: kPrimaryColor))
+                            : BoxDecoration(
+                                border:
+                                    Border.all(width: 0, color: Colors.black)),
                         child: Card(
                           elevation: 10,
                           shape: const RoundedRectangleBorder(
@@ -287,7 +292,7 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
           ElevatedButton(
               onPressed: () {
                 // TODO : set url here
-                if(currentlySelectedIndex != null){
+                if (currentlySelectedIndex != null) {
                   setState(() {
                     currentAvatar = avatars[currentlySelectedIndex as int];
                   });
@@ -307,8 +312,9 @@ class _UpdateProfileScreenState extends State<UpdateProfile> {
           isFromAvatarList = false;
           isPicture = true;
           final ImagePicker _picker = ImagePicker();
-          final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
-          File file = File( photo!.path );
+          final XFile? photo =
+              await _picker.pickImage(source: ImageSource.camera);
+          File file = File(photo!.path);
           setState(() {
             _image = file;
           });

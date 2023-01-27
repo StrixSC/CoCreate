@@ -6,6 +6,7 @@ import {
 import admin from 'firebase-admin';
 
 declare global {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Express {
         interface Request {
             authToken: string | null;
@@ -15,15 +16,11 @@ declare global {
 }
 
 admin.initializeApp({
-    projectId: "colorimage-f380e",
-    storageBucket: "colorimage-f380e.appspot.com",
+    projectId: 'colorimage-f380e',
+    storageBucket: 'colorimage-f380e.appspot.com',
     credential: admin.credential.cert(
-        JSON.parse(
-            Buffer.from(
-                process.env.FIREBASE_CERT!,
-                'base64'
-            ).toString('ascii')
-        )
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        require('../admin.json')
     )
 });
 

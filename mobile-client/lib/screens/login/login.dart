@@ -99,7 +99,6 @@ class _LoginState extends State<Login> {
     context.read<Teammate>().updateUser(userCredential);
     context.read<Messenger>().fetchChannels();
     context.read<Messenger>().fetchAllChannels();
-
   }
 
   void initializeSocketConnection(auth, token) {
@@ -214,7 +213,7 @@ class _LoginState extends State<Login> {
                                   border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(3.0)),
                                 ),
-                                autovalidate: true,
+                                autovalidateMode: AutovalidateMode.always,
                                 // onFieldSubmitted: (value) {
                                 //   if (_formKey.currentState!.validate()) {
                                 //     _onSubmitTap(context, userController.text);
@@ -259,7 +258,7 @@ class _LoginState extends State<Login> {
                                             })),
                                     enableSuggestions: false,
                                     autocorrect: false,
-                                    autovalidate: true,
+                                    autovalidateMode: AutovalidateMode.always,
                                   )),
                               const SizedBox(height: 24.0),
                               ElevatedButton(
@@ -268,17 +267,19 @@ class _LoginState extends State<Login> {
                                   // the form is invalid.
                                   // TODO: Uncomment this
                                   if (_formKey.currentState!.validate()) {
-                                    if(userController.text.isEmpty) {
+                                    if (userController.text.isEmpty) {
                                       setState(() {
-                                        errorMessage = "Veuillez saisir un courriel.";
+                                        errorMessage =
+                                            "Veuillez saisir un courriel.";
                                       });
-                                    } else if(passController.text.isEmpty) {
+                                    } else if (passController.text.isEmpty) {
                                       setState(() {
-                                        errorMessage = "Veuillez saisir un mot de passe.";
+                                        errorMessage =
+                                            "Veuillez saisir un mot de passe.";
                                       });
                                     } else {
-                                    login(userController.text,
-                                        passController.text);
+                                      login(userController.text,
+                                          passController.text);
                                     }
                                   }
                                 },

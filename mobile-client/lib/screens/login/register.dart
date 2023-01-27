@@ -85,7 +85,7 @@ class _RegisterState extends State<Register> {
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
             ),
-            autovalidate: true,
+            autovalidateMode: AutovalidateMode.always,
             onFieldSubmitted: (value) {
               if (_formKey.currentState!.validate()) {
                 // Map userInfo = {
@@ -117,7 +117,7 @@ class _RegisterState extends State<Register> {
             obscureText: true,
             enableSuggestions: false,
             autocorrect: false,
-            autovalidate: true,
+            autovalidateMode: AutovalidateMode.always,
             onFieldSubmitted: (value) {
               if (_formKey.currentState!.validate()) {
                 Map userInfo = {
@@ -232,7 +232,8 @@ class _RegisterState extends State<Register> {
                                 // the form is invalid.
                                 if (_formKey.currentState!.validate()) {
                                   if (currentAvatar ==
-                                      'https://cdn-icons-png.flaticon.com/512/103/103410.png' && _image == null) {
+                                          'https://cdn-icons-png.flaticon.com/512/103/103410.png' &&
+                                      _image == null) {
                                     AwesomeDialog(
                                       context: navigatorKey.currentContext
                                           as BuildContext,
