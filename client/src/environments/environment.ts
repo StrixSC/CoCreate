@@ -3,7 +3,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  serverURL: "https://colorimage-109-3900.herokuapp.com",
+  serverURL: "https://cocreate-server.onrender.com",
   // serverURL: "http://localhost:3000",
   // serverURL: "http://ecff-142-184-100-80.ngrok.io",
   authEmulator: "http://localhost:9099",
