@@ -27,6 +27,10 @@
     ·
     <a href="https://github.com/strixsc/cocreate/issues">Request Feature</a>
   </p>
+  
+  <p>
+  Give the demo some time to load after logging in, because of server cold boots.
+  </p>
 </div>
 
 
