@@ -1,11 +1,5 @@
 <!-- PROJECT SHIELDS -->
-<!--
-  *** I'm using markdown "reference style" links for readability.
-  *** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-  *** See the bottom of this document for the declaration of the reference variables
-  *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-  *** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
+
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
@@ -81,13 +75,7 @@
 - Supabase database (Server) 
 - Flutter (With Dart SDK)
 
-<!-- USAGE EXAMPLES -->
-## Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
 See the [open issues](https://github.com/strixsc/cocreate/issues) for a full list of proposed features (and known issues).
-
 
 ## Contributing
 
@@ -96,7 +84,6 @@ See the [open issues](https://github.com/strixsc/cocreate/issues) for a full lis
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
 
 ## License
 
