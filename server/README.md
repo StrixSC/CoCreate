@@ -121,4 +121,4 @@ What this allows us to do:
 On pushes to the main branch, the pipeline will automatically build and push the latest docker image to the heroku registry. This will prompt the deployment.
 The prisma migrations will also deploy to the database defined in the `DATABASE_URL` env. variable.
 
-Currently live [here!](https://colorimage-109-3900.herokuapp.com/)
+Currently live [here!](https://cocreate-server.onrender.com/docs/)
