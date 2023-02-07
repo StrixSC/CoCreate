@@ -1,4 +1,4 @@
-<!-- PROJECT SHIELDS -->
+ee<!-- PROJECT SHIELDS -->
 
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
@@ -91,7 +91,7 @@ See the [open issues](https://github.com/strixsc/cocreate/issues) for a full lis
 
 ## License
 
-See `LICENSE.txt` for more information.
+See [LICENSE.txt](https://github.com/StrixSC/CoCreate/blob/master/LICENSE.txt)` for more information.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
